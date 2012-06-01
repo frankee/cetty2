@@ -1,0 +1,167 @@
+#+TITLE: cetty概要
+
+* 整体说明
+  整体框架来自Netty的C++改写，框架socket的实现采用Boost asio，满足稳定性、高效及跨平台特性。
+
+  服务器端：
+  ServerChannel  -----   ChannelSink
+    +
+    + -- Channel ChannelPipeline
+
+  ServerChannelFactory创建ServerChannel，通常情况下可以使用同一个ServerChannelFactory创建多个ServerChannel（含有独立的ChannelSink），在ASIO的实现下，使用同一个IO线程池，可以建立多个具有不同业务处理流程的TCP Server，绑定不同的端口。
+通常的使用例子是，使用同一份IO线程池，建立一个业务TCP/HTTP服务器，并同时开一个HTTP的监控服务，以面向运维。
+    
+更高级的实现可以让不同的ServerChannel通过不同的策略来使用IO线程池，同时ServerChannel创建连接Channel时，也可以指定某种策略。
+
+Bootstrap只能针对某一种处理业务（Channelpipeline）的工具类。
+
+AsioServerSocketChannelFactoryPtr factory = new AsioServerSocketChannelFactory();
+ServerBootstrap httpBiz(factory);
+httpBiz.setChannelPipeline();
+httpBiz.bind(20001);
+
+ServerBootstrap tcpBiz(factory);
+
+ServerBootstrap watchdog(factory);
+
+* 例子
+** echo
+** discard
+
+* 模块说明
+** buffer
+** channel
+** pipeline
+** event
+** future
+** handler
+** bootstrap
+** config
+** logging
+** timer
+** SSL/TSL
+
+* 框架运行流程说明
+** 服务器端启动流程
+** 服务器端退出流程
+** 数据的接收处理
+** 数据的异常处理
+** 数据的发送
+** 客户端连接流程
+** 客户端退出流程
+
+* 配置系统
+* 基于Google Protobuf的Service栈
+  支持Protobuf RPC，REST，SOAP1.1
+** 简要说明
+** Protobuf RPC
+*** 服务器端
+*** 客户端
+    其他语言的实现Java、Ruby、Python
+** REST
+*** request输入方式
+    1. route模板
+    2. GET query string输入
+    3. GET query string的
+    4. POST
+** SOAP1.1
+** Service框架代码的自动生成
+** Service的开发示例
+
+* 框架运维
+** 单个服务实例的监控
+** 日志
+
+* 框架安全
+** 连接数的限制
+** 空闲连接的处理
+** DDOS的防范
+
+* 服务群集管理
+** 服务的查找 NameService （Zookeeper）
+
+* 框架高级使用模式
+** 多种服务器（TCP、HTTP）共用asio线程池
+** 异步handler的使用
+*** 异步handler使用方式
+*** 异步handler在数据库方面的使用方式
+
+** 数据库连接池模式
+** 内部服务器RPC依赖的处理
+** cetty client如何与channel共用同一线程
+
+
+* NoSql数据库的使用
+** cetty与redis
+** cetty与mongodb
+
+* 基于Google Protobuf的Sql数据库的OR映射
+** SOCI说明
+*** sqlite
+*** mysql
+*** oracle
+
+** cetty与SOCI
+** 单个表单的操作
+** 多个表单的操作
+** 存储过程的使用
+** 数据库连接池的使用
+** redis/memcached数据库读取缓存的使用
+
+* 基于cetty的应用
+** 基于cetty的消息队列
+** 基于cetty及gearman的任务分发系统
+   - Tile Map静态渲染处理
+   - Tile Map循环渲染处理
+   - Tile Map动态实时渲染处理
+     1. 客户端发送task请求 --> gearman存入队列
+   - Tile Map混合渲染处理（部分静态、部分动态）
+     
+   
+** 基于cetty及levelDB的noSql分布式数据库
+
+* 安全
+** 认证
+*** HTTP认证
+*** OAuth
+** 鉴权
+
+** session管理
+
+* 基础架构
+** 负载均衡（全局负责均衡，DNS）
+** 接入层
+*** 反向代理
+*** web cache
+*** 安全控制
+** 应用层
+
+** 数据层
+*** nosql
+*** mysql、oracle
+*** 数据缓存
+*** 分布式文件系统
+
+** 基础层
+*** nodejs前端
+*** c++ full service stack
+*** message queue
+*** 分布式任务分发系统（gearman）
+
+*** 消息总线
+
+** 运维层
+*** 日志
+**** 分布式日志处理系统
+*** 监控
+**** 系统监控
+**** 通用应用进程监控
+**** cetty的监控
+**** 进程的控制
+**** 根据日志的监控
+**** 相关报警处理
+*** 配置
+**** 自动化安装系统
+**** 自动化配置系统
+**** 系统更新
+**** 开发、测试、上线版本的管理
