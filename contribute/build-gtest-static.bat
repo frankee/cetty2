@@ -10,7 +10,7 @@ echo compile
 devenv gtest-1.6.0\msvc\gtest-md.sln /rebuild "Debug|Win32"
 devenv gtest-1.6.0\msvc\gtest-md.sln /rebuild "Release|Win32"
 
-xcopy gtest-1.6.0\msvc\gtest-md\Debug\gtestd.lib ..\lib\
-xcopy gtest-1.6.0\msvc\gtest-md\Debug\gtest_main-mdd.lib ..\lib\
-xcopy gtest-1.6.0\msvc\gtest-md\Release\gtest.lib ..\lib\
-xcopy gtest-1.6.0\msvc\gtest-md\Release\gtest_main-md.lib ..\lib\
+xcopy gtest-1.6.0\msvc\gtest-md\Debug\gtestd.lib .\_lib\
+xcopy gtest-1.6.0\msvc\gtest-md\Debug\gtest_main-mdd.lib .\_lib\
+xcopy gtest-1.6.0\msvc\gtest-md\Release\gtest.lib .\_lib\
+xcopy gtest-1.6.0\msvc\gtest-md\Release\gtest_main-md.lib .\_lib\
