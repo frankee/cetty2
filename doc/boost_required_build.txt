@@ -1,0 +1,1 @@
+bjam.exe --with-system --with-date_time --with-thread --with-regex --toolset=msvc-8.0 --link=static --threading=multi --runtimelink=shared stage

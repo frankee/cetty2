@@ -1,0 +1,15 @@
+--indent-preprocessor
+--indent-col1-comments
+--pad-header
+--unpad-paren
+-y
+--add-brackets
+--keep-one-line-blocks
+--keep-one-line-statements
+--convert-tabs
+--indent=spaces=4
+-A2
+--align-pointer=type
+--align-reference=type
+--mode=c
+--lineend=linux

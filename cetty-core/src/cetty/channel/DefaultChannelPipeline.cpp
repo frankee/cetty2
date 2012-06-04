@@ -53,6 +53,7 @@ public:
         DefaultChannelHandlerContext* prev,
         DefaultChannelHandlerContext* next)
         : defaultChannelPipeline(pipeline),
+        channelPipeline(&pipeline),
         next(next),
         prev(prev),
         nextUpstreamContext(NULL),
@@ -87,7 +88,7 @@ public:
     }
 
     virtual const ChannelPipelinePtr& getPipeline() const {
-        return &defaultChannelPipeline;
+        return channelPipeline;
     }
 
     virtual bool canHandleDownstream() const {
@@ -309,6 +310,7 @@ private:
     std::string name;
 
     DefaultChannelPipeline& defaultChannelPipeline;
+    ChannelPipelinePtr channelPipeline;
 
     ChannelSinkPtr sink;
     void* attachment;

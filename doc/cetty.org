@@ -76,9 +76,16 @@ ServerBootstrap watchdog(factory);
 ** 连接数的限制
 ** 空闲连接的处理
 ** DDOS的防范
-
+** Backpressure
 * 服务群集管理
-** 服务的查找 NameService （Zookeeper）
+** 服务的注册 Service Registration （Zookeeper）
+** 连接管理 Connection Management
+*** 连接池（Connection Pooling）
+*** 自动管理链接（auto reconnecting）
+*** 负载均衡（Load Balancing）
+*** 错误检测，重试（Failure Detection、Failover/Retry）
+** 服务的发现（Service Discovery Zookeeper）
+** Rich Statistics
 
 * 框架高级使用模式
 ** 多种服务器（TCP、HTTP）共用asio线程池

@@ -28,7 +28,8 @@ Cookie::Cookie(const std::string& name, const std::string& value)
         throw InvalidArgumentException("empty name");
     }
 
-    for (int i = 0; i < name.length(); i ++) {
+    int nameSize = name.size();
+    for (int i = 0; i < nameSize; i ++) {
         char c = name.at(i);
 
         if (c > 127) {

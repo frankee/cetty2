@@ -122,6 +122,7 @@ private:
 };
 
 const NetworkInterface NetworkInterface::NULL_INTERFACE;
+static const std::string EMPTY_STRING;
 
 NetworkInterface::NetworkInterface() {}
 
@@ -202,8 +203,8 @@ const std::string& NetworkInterface::getName() const {
         return impl->getName();
     }
 
-    //TODO
-    return "";
+    
+    return EMPTY_STRING;
 }
 
 const std::string& NetworkInterface::getDisplayName() const {
@@ -211,7 +212,7 @@ const std::string& NetworkInterface::getDisplayName() const {
         return impl->getDisplayName();
     }
 
-    return "";
+    return EMPTY_STRING;
 }
 
 const IpAddress& NetworkInterface::getIpAddress() const {
@@ -315,9 +316,10 @@ namespace channel {
 
 NetworkInterface::NetworkInterfaceList NetworkInterface::getNetInterfaces() {
     NetworkInterfaceList result;
+    
+#if 0 //TODO
     DWORD rc;
 
-#if 0
     // On Windows XP/Server 2003 and later we use GetAdaptersAddresses.
     PIP_ADAPTER_ADDRESSES pAdapterAddresses;
     PIP_ADAPTER_ADDRESSES pAddress = 0;
