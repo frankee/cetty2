@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     }
 
     ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(
-                                        new AsioServicePool(1, true));
+                                        new AsioServicePool(threadCount));
     ServerBootstrap bootstrap(factory);
     bootstrap.setPipeline(Channels::pipeline(ChannelHandlerPtr(new EchoServerHandler)));
 

@@ -51,14 +51,15 @@ class AsioService : public cetty::util::ReferenceCounter<AsioService> {
 public:
   AsioService(int index) : poolIndex(index) {}
 
-  AsioServicePool& servicePool();
-  const AsioServicePool& servicePool() const;
+  //AsioServicePool& servicePool();
+  //const AsioServicePool& servicePool() const;
 
   int getId() const { return poolIndex; }
 
   boost::asio::io_service& service() { return ioService; }
   operator boost::asio::io_service& () { return ioService; }
  
+  void setThreadId(const boost::thread::id& id) { threadId = id; }
   const boost::thread::id& getThreadId() const { return threadId; }
 
 private:

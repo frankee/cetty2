@@ -87,7 +87,7 @@ private:
 
     void handleAccept(const boost::system::error_code& error,
         ChannelPtr channel,
-        const ChannelPtr& serverChannel);
+        ChannelPtr serverChannel);
 
     void handleServerChannelStateChange(const ChannelPtr& channel,
                                         const ChannelStateEvent& evt);

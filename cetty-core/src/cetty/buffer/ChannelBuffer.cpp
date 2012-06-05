@@ -553,7 +553,7 @@ int ChannelBuffer::skipBytes(int length) {
 }
 
 int ChannelBuffer::writeByte(int value) {
-    if (setByte(writerIdx + 1, value)) {
+    if (setByte(writerIdx, value)) {
         ++writerIdx;
         return 1;
     }

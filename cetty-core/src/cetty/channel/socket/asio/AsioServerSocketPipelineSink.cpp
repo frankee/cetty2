@@ -205,12 +205,12 @@ void AsioServerSocketPipelineSink::accept(const ChannelPtr& channel) {
         this,
         boost::asio::placeholders::error,
         ChannelPtr(c),
-        boost::cref(channel))));
+        channel)));
 }
 
 void AsioServerSocketPipelineSink::handleAccept(const boost::system::error_code& error,
     ChannelPtr channel,
-    const ChannelPtr& serverChannel) {
+    ChannelPtr serverChannel) {
     BOOST_ASSERT(channel && serverChannel);
 
     if (!error) {
@@ -243,7 +243,7 @@ void AsioServerSocketPipelineSink::handleAccept(const boost::system::error_code&
             this,
             boost::asio::placeholders::error,
             ChannelPtr(newChannel),
-            boost::cref(serverChannel))));
+            serverChannel)));
     }
     else {
         delete channel;

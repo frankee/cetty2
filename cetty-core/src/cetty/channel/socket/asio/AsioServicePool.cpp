@@ -80,6 +80,9 @@ AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
 
         running = true;
     }
+    else {
+        serviceContexts[0].service->setThreadId(boost::this_thread::get_id());
+    }
 }
 
 bool AsioServicePool::run() {
@@ -135,6 +138,8 @@ const AsioServicePtr& AsioServicePool::findService(int id) {
 
 int AsioServicePool::runIOservice(AsioServiceContext& context) {
     BOOST_ASSERT(context.service && "ioservice can not be NULL.");
+
+    context.service->setThreadId(boost::this_thread::get_id());
 
     boost::system::error_code err;
     std::size_t opCount = context.service->service().run(err);
