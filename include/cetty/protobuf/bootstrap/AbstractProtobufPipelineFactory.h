@@ -22,10 +22,7 @@
 #include "cetty/channel/ChannelPipelineFactory.h"
 #include "cetty/handler/rpc/protobuf/ProtobufServiceRegister.h"
 
-namespace cetty {
-namespace handler {
-namespace rpc {
-namespace protobuf {
+namespace cetty { namespace handler { namespace rpc { namespace protobuf {
 
 using namespace cetty::channel;
 
@@ -33,7 +30,7 @@ class AbstractProtobufPipelineFactory : public ChannelPipelineFactory {
 public:
     virtual ~AbstractProtobufPipelineFactory() {}
 
-    int registerService(ProtobufServicePtr& service) {
+    int registerService(ProtobufServicePtr& service) { 
         return servicesRegister.registerService(service);
     }
 
@@ -45,14 +42,6 @@ protected:
     ProtobufServiceRegister servicesRegister;
 };
 
-}
-}
-}
-}
+}}}}
 
 #endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_ABSTRACTPROTOBUFPIPELINEFACTORY_H)
-
-// Local Variables:
-// mode: c++
-// End:
-

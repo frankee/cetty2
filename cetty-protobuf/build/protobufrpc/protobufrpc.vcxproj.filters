@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="protobuf">
+      <UniqueIdentifier>{bc66daba-1cb8-490b-b04a-9f01a7612b2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf\handler">
+      <UniqueIdentifier>{f0152698-03cc-451c-b94d-9dbfe73641f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf\bootstrap">
+      <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcDecoder.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcEncoder.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessageHandler.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufRpcClientChannel.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServicePtr.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceRegister.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\Service.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufServiceRegister.cpp">
+      <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufRpcClientChannel.cpp">
+      <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcMessageHandler.cpp">
+      <Filter>protobuf\handler</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

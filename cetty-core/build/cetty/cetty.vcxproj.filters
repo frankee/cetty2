@@ -63,12 +63,6 @@
     <Filter Include="util\internal\asio">
       <UniqueIdentifier>{d09728e3-3d42-4a9e-b53d-9a4db7228b1d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="handler\rpc">
-      <UniqueIdentifier>{58cd833d-f73f-4773-98b5-33926f447571}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="handler\rpc\protobuf">
-      <UniqueIdentifier>{acfd1bcd-d1cd-4464-b680-b688cfb5ce5f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="logging">
       <UniqueIdentifier>{27365edd-2d8b-41b2-ac99-48acdbcd0ea3}</UniqueIdentifier>
     </Filter>

@@ -19,25 +19,18 @@
 
 #include <map>
 #include <string>
-#include <cetty/handler/rpc/protobuf/AbstractProtobufPipelineFactory.h>
+#include "cetty/handler/rpc/protobuf/AbstractProtobufPipelineFactory.h"
 
-namespace google {
-namespace protobuf {
+namespace google { namespace protobuf {
 class RpcChannel;
 class Service;
-}
-}
+}}
 
-namespace cetty {
-namespace channel {
+namespace cetty { namespace channel {
 class ChannelPipeline;
-}
-}
+}}
 
-namespace cetty {
-namespace handler {
-namespace rpc {
-namespace protobuf {
+namespace cetty { namespace handler { namespace rpc { namespace protobuf {
 
 using namespace cetty::channel;
 
@@ -60,14 +53,6 @@ private:
     ProtobufRpcMessageHandlerPtr messageHandler;
 };
 
-}
-}
-}
-}
+}}}}
 
 #endif //#if !defined(CETTY_HANDLER_CODEC_PROTOBUF_PROTOBUFRPCPIPELINEFACTORY_H)
-
-// Local Variables:
-// mode: c++
-// End:
-

@@ -20,84 +20,68 @@
 #include <deque>
 #include "boost/cstdint.hpp"
 #include "boost/thread/mutex.hpp"
-#include "google/protobuf/service.h>
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
-#include <cetty/handler/rpc/protobuf/ProtobufServiceRegister.h>
+#include "google/protobuf/service.h"
+#include "cetty/channel/SimpleChannelHandler.h"
+#include "cetty/handler/rpc/protobuf/ProtobufServiceRegister.h"
 
-namespace google {
-namespace protobuf {
+namespace google { namespace protobuf {
 class MethodDescriptor;
 class RpcController;
 class Message;
-class Closure;
-}
-}
+}}
 
-namespace cetty {
-namespace channel {
+namespace cetty { namespace channel {
 class Channel;
-}
-}
+}}
 
-namespace cetty {
-namespace handler {
-namespace rpc {
-namespace protobuf {
+namespace cetty { namespace protobuf { namespace proto {
+    class RpcMessage;
+}}}
 
+namespace cetty { namespace protobuf { namespace handler {
 using namespace cetty::channel;
 
 class ProtobufRpcMessageHandler;
 typedef boost::intrusive_ptr<ProtobufRpcMessageHandler> ProtobufRpcMessageHandlerPtr;
 
-class ProtobufRpcMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler,
-    public google::protobuf::RpcChannel {
+class ProtobufRpcMessageHandler : public cetty::channel::SimpleChannelHandler {
+public:
+    struct ProtobufRpcMessage {
+        cetty::protobuf::proto::RpcMessage* rpc;
+        google::protobuf::Message* payload;
+    };
+
+    struct OutstandingCall {
+        cetty::protobuf::proto::RpcMessage* rpc;
+        google::protobuf::Message* response;
+        google::protobuf::Closure* done;
+        google::protobuf::Message* message;
+    };
+
 public:
     ProtobufRpcMessageHandler();
     virtual ~ProtobufRpcMessageHandler();
 
-    // client will call this function.
-    virtual void CallMethod(const google::protobuf::MethodDescriptor* method,
-                            google::protobuf::RpcController* controller,
-                            const google::protobuf::Message* request,
-                            google::protobuf::Message* response,
-                            google::protobuf::Closure* done);
-
     virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
     virtual void channelDisconnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e);
+
+    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
     virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const { return "ProtoRpcMessageHandler"; }
-
-    void setServices(ProtobufServiceRegister* serviceRegister);
+    virtual std::string toString() const { return "ProtobufRpcMessageHandler"; }
 
 private:
     void doneCallback(google::protobuf::Message* response, boost::int64_t id);
 
-    struct OutstandingCall {
-        google::protobuf::Message* response;
-        google::protobuf::Closure* done;
-        google::protobuf::Message* message; // commonly client need write the message to the different thread, so using heap.
-    };
-
 private:
     Channel* channel;
-    boost::int64_t id;
-    std::map<boost::int64_t, OutstandingCall> outstandings;
 
-    boost::mutex mutex;
-    ProtobufServiceRegister* serviceRegister;
+    std::map<boost::int64_t, OutstandingCall> outstandings;
+    boost::int64_t id;
 };
 
-}
-}
-}
-}
+}}}
 
 #endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H)
-
-// Local Variables:
-// mode: c++
-// End:
-
