@@ -1,3 +1,6 @@
+#if !defined(CETTY_GEARMAN_GEARMANWORKER_H)
+#define CETTY_GEARMAN_GEARMANWORKER_H
+
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -14,6 +17,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 namespace cetty { namespace gearman { 
 
 }}
+
+#endif //#if !defined(CETTY_GEARMAN_GEARMANWORKER_H)
+
+// Local Variables:
+// mode: c++
+// End:
