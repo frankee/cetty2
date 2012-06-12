@@ -92,36 +92,42 @@ ChannelPipelinePtr Channels::pipeline(const ChannelHandlerPtr& handler) {
 }
 
 ChannelPipelinePtr Channels::pipeline(const ChannelHandlerPtr& handler0,
-                                    const ChannelHandlerPtr& handler1) {
+                                      const ChannelHandlerPtr& handler1) {
     ChannelPipelinePtr newPipeline = pipeline();
 
     if (handler0) { newPipeline->addLast("0", handler0); }
+
     if (handler1) { newPipeline->addLast("1", handler1); }
 
     return newPipeline;
 }
 
 ChannelPipelinePtr Channels::pipeline(const ChannelHandlerPtr& handler0,
-                                    const ChannelHandlerPtr& handler1,
-                                    const ChannelHandlerPtr& handler2) {
+                                      const ChannelHandlerPtr& handler1,
+                                      const ChannelHandlerPtr& handler2) {
     ChannelPipelinePtr newPipeline = pipeline();
 
     if (handler0) { newPipeline->addLast("0", handler0); }
+
     if (handler1) { newPipeline->addLast("1", handler1); }
+
     if (handler1) { newPipeline->addLast("2", handler2); }
 
     return newPipeline;
 }
 
 ChannelPipelinePtr Channels::pipeline(const ChannelHandlerPtr& handler0,
-                                    const ChannelHandlerPtr& handler1,
-                                    const ChannelHandlerPtr& handler2,
-                                    const ChannelHandlerPtr& handler3) {
+                                      const ChannelHandlerPtr& handler1,
+                                      const ChannelHandlerPtr& handler2,
+                                      const ChannelHandlerPtr& handler3) {
     ChannelPipelinePtr newPipeline = pipeline();
 
     if (handler0) { newPipeline->addLast("0", handler0); }
+
     if (handler1) { newPipeline->addLast("1", handler1); }
+
     if (handler1) { newPipeline->addLast("2", handler2); }
+
     if (handler1) { newPipeline->addLast("3", handler3); }
 
     return newPipeline;
@@ -165,7 +171,7 @@ void Channels::fireChannelOpen(const ChannelPtr& channel) {
     }
 
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::OPEN, boost::any(true)));
+            channel, ChannelState::OPEN, boost::any(true)));
 }
 
 void Channels::fireChannelOpen(ChannelHandlerContext& ctx) {
@@ -175,7 +181,7 @@ void Channels::fireChannelOpen(ChannelHandlerContext& ctx) {
 
 void Channels::fireChannelBound(const ChannelPtr& channel, const SocketAddress& localAddress) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::BOUND, boost::any(&localAddress)));
+            channel, ChannelState::BOUND, boost::any(&localAddress)));
 }
 
 void Channels::fireChannelBound(ChannelHandlerContext& ctx, const SocketAddress& localAddress) {
@@ -185,7 +191,7 @@ void Channels::fireChannelBound(ChannelHandlerContext& ctx, const SocketAddress&
 
 void Channels::fireChannelConnected(const ChannelPtr& channel, const SocketAddress& remoteAddress) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::CONNECTED, boost::any(&remoteAddress)));
+            channel, ChannelState::CONNECTED, boost::any(&remoteAddress)));
 }
 
 void Channels::fireChannelConnected(ChannelHandlerContext& ctx, const SocketAddress& remoteAddress) {
@@ -226,7 +232,7 @@ void Channels::fireWriteCompleted(ChannelHandlerContext& ctx, long amount) {
 
 void Channels::fireChannelInterestChanged(const ChannelPtr& channel, int interestOps) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::INTEREST_OPS, boost::any(interestOps)));
+            channel, ChannelState::INTEREST_OPS, boost::any(interestOps)));
 }
 
 void Channels::fireChannelInterestChanged(ChannelHandlerContext& ctx, int interestOps) {
@@ -236,7 +242,7 @@ void Channels::fireChannelInterestChanged(ChannelHandlerContext& ctx, int intere
 
 void Channels::fireChannelDisconnected(const ChannelPtr& channel) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::CONNECTED, boost::any()));
+            channel, ChannelState::CONNECTED, boost::any()));
 }
 
 void Channels::fireChannelDisconnected(ChannelHandlerContext& ctx) {
@@ -246,7 +252,7 @@ void Channels::fireChannelDisconnected(ChannelHandlerContext& ctx) {
 
 void Channels::fireChannelUnbound(const ChannelPtr& channel) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::BOUND, boost::any()));
+            channel, ChannelState::BOUND, boost::any()));
 }
 
 void Channels::fireChannelUnbound(ChannelHandlerContext& ctx) {
@@ -256,7 +262,7 @@ void Channels::fireChannelUnbound(ChannelHandlerContext& ctx) {
 
 void Channels::fireChannelClosed(const ChannelPtr& channel) {
     channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-                                           channel, ChannelState::OPEN, boost::any()));
+            channel, ChannelState::OPEN, boost::any()));
 
     // Notify the parent handler.
     const ChannelPtr& parent = channel->getParent();

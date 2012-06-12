@@ -29,7 +29,9 @@
 #include "cetty/channel/ChannelHandlerContext.h"
 #include "cetty/handler/rpc/protobuf/rpc.pb.h"
 
-namespace cetty { namespace protobuf { namespace handler {
+namespace cetty {
+namespace protobuf {
+namespace handler {
 
 using namespace cetty::channel;
 using namespace google::protobuf;
@@ -54,6 +56,7 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
         OutstandingCall out = { NULL, NULL, NULL, NULL};
         {
             std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
+
             if (it != outstandings.end()) {
                 out = it->second;
                 outstandings.erase(it);
@@ -62,9 +65,11 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
 
         if (out.response) {
             out.response->CopyFrom(message->payload);
+
             if (out.done) {
                 out.done->Run();
             }
+
             delete out.message;
         }
     }
@@ -78,7 +83,7 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
         if (method) {
             google::protobuf::Message* response = service->GetResponsePrototype(method).New();
             service->CallMethod(method, NULL, message->payload, response,
-                boost::bind(&ProtobufRpcMessageHandler::doneCallback, this, response, id));
+                                boost::bind(&ProtobufRpcMessageHandler::doneCallback, this, response, id));
         }
         else {
             // return error message
@@ -98,7 +103,8 @@ void deleteMessage(const ChannelFuturePtr& future, proto::RpcMessage* message) {
     }
 }
 
-void ProtobufRpcMessageHandler::doneCallback(google::protobuf::Message* response, boost::int64_t id) {
+void ProtobufRpcMessageHandler::doneCallback(google::protobuf::Message* response,
+        boost::int64_t id) {
     proto::RpcMessage* message = new proto::RpcMessage;
     message->set_type(proto::RESPONSE);
     message->set_id(id);
@@ -109,11 +115,13 @@ void ProtobufRpcMessageHandler::doneCallback(google::protobuf::Message* response
     delete response;
 }
 
-void ProtobufRpcMessageHandler::channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
+void ProtobufRpcMessageHandler::channelConnected(ChannelHandlerContext& ctx,
+        const ChannelStateEvent& e) {
     this->channel = e.getChannel();
 }
 
-void ProtobufRpcMessageHandler::channelDisconnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
+void ProtobufRpcMessageHandler::channelDisconnected(ChannelHandlerContext& ctx,
+        const ChannelStateEvent& e) {
     this->channel = NULL;
 }
 
@@ -127,7 +135,7 @@ void ProtobufRpcMessageHandler::exceptionCaught(ChannelHandlerContext& ctx, cons
 }
 
 void ProtobufRpcMessageHandler::writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    
+
     OutstandingCall call;
 
     if (call.rpc && call.rpc->type() == proto::REQUEST) {
@@ -136,9 +144,11 @@ void ProtobufRpcMessageHandler::writeRequested(ChannelHandlerContext& ctx, const
         }
 
         outstandings[id] = call;
-        
+
         ctx.sendDownstream();
     }
 }
 
-}}}
+}
+}
+}

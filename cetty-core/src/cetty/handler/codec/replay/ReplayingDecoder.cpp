@@ -85,9 +85,9 @@ const ChannelBufferPtr& ReplayingDecoder::internalBuffer() const {
 }
 
 void ReplayingDecoder::callDecode(ChannelHandlerContext& context,
-    const ChannelPtr& channel,
-    const ChannelBufferPtr& cumulation,
-    const SocketAddress& remoteAddress) {
+                                  const ChannelPtr& channel,
+                                  const ChannelBufferPtr& cumulation,
+                                  const SocketAddress& remoteAddress) {
     while (cumulation->readable()) {
         int oldReaderIndex = checkedPoint = cumulation->readerIndex();
         ChannelMessage result;
@@ -154,15 +154,15 @@ void ReplayingDecoder::callDecode(ChannelHandlerContext& context,
 }
 
 void ReplayingDecoder::unfoldAndfireMessageReceived(ChannelHandlerContext& context,
-    ChannelMessage& result,
-    const SocketAddress& remoteAddress) {
+        ChannelMessage& result,
+        const SocketAddress& remoteAddress) {
     if (unfold && result.isVector()) {
         int size = result.vectorSize();
 
         for (int i = 0; i < size; ++i) {
             Channels::fireMessageReceived(context,
-                                        result.value<ChannelMessage>(i),
-                                        remoteAddress);
+                                          result.value<ChannelMessage>(i),
+                                          remoteAddress);
         }
     }
     else {

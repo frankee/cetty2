@@ -48,14 +48,14 @@ InternalLogger* AsioServerSocketPipelineSink::logger = NULL;
 AsioServerSocketPipelineSink::AsioServerSocketPipelineSink(
     AsioServicePoolPtr& ioServicePool)
     : ioServicePool(ioServicePool),
-    acceptorService(ioServicePool->getService(AsioServicePool::PRIORITY_BOSS)),
-    acceptor(*(ioServicePool->getService(AsioServicePool::PRIORITY_BOSS))) {
+      acceptorService(ioServicePool->getService(AsioServicePool::PRIORITY_BOSS)),
+      acceptor(*(ioServicePool->getService(AsioServicePool::PRIORITY_BOSS))) {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("AsioServerSocketPipelineSink");
     }
 
     LOG_INFO(logger, "Construct the AsioServerSocketPipelineSink with the boss service ptr of %d.",
-        acceptorService->getId());
+             acceptorService->getId());
 }
 
 AsioServerSocketPipelineSink::~AsioServerSocketPipelineSink() {
@@ -64,13 +64,13 @@ AsioServerSocketPipelineSink::~AsioServerSocketPipelineSink() {
 void AsioServerSocketPipelineSink::writeRequested(
     const ChannelPipeline& pipeline,
     const MessageEvent& e) {
-        const ChannelPtr& channel = e.getChannel();
-        (static_cast<AsioSocketChannel*>(channel))->innerWrite(e);
+    const ChannelPtr& channel = e.getChannel();
+    (static_cast<AsioSocketChannel*>(channel))->innerWrite(e);
 }
 
 void AsioServerSocketPipelineSink::stateChangeRequested(
     const ChannelPipeline& pipeline,
-        const ChannelStateEvent& e) {
+    const ChannelStateEvent& e) {
     const ChannelPtr& channel = e.getChannel();
 
     if (channel->getParent()) {
@@ -82,8 +82,8 @@ void AsioServerSocketPipelineSink::stateChangeRequested(
 }
 
 void AsioServerSocketPipelineSink::handleServerChannelStateChange(
-         const ChannelPtr& channel,
-        const ChannelStateEvent& evt) {
+    const ChannelPtr& channel,
+    const ChannelStateEvent& evt) {
     const ChannelFuturePtr& future = evt.getFuture();
     const ChannelState& state = evt.getState();
     const boost::any& value = evt.getValue();
@@ -112,7 +112,7 @@ void AsioServerSocketPipelineSink::handleServerChannelStateChange(
 
 void AsioServerSocketPipelineSink::handleAcceptChannelStateChange(
     const ChannelPtr& channel,
-        const ChannelStateEvent& evt) {
+    const ChannelStateEvent& evt) {
     const ChannelFuturePtr& future = evt.getFuture();
     const ChannelState& state = evt.getState();
     const boost::any& value = evt.getValue();
@@ -143,7 +143,7 @@ void AsioServerSocketPipelineSink::bind(const ChannelPtr& channel,
             localAddress.port());
         DefaultAsioServerSocketChannelConfig* config =
             dynamic_cast<DefaultAsioServerSocketChannelConfig*>(&channel->getConfig());
-        
+
         if (localAddress.family() == IpAddress::IPv4) {
             acceptor.open(boost::asio::ip::tcp::v4());
             LOG_INFO(logger, "the server channel (acceptor) opened in IPV4 mode.");
@@ -159,6 +159,7 @@ void AsioServerSocketPipelineSink::bind(const ChannelPtr& channel,
         acceptor.bind(ep);
 
         const boost::optional<int> backlog = config->getBacklog();
+
         if (backlog) {
             acceptor.listen(*backlog);
         }
@@ -193,24 +194,24 @@ void AsioServerSocketPipelineSink::accept(const ChannelPtr& channel) {
 
     AsioAcceptedSocketChannel* c =
         new AsioAcceptedSocketChannel(channel,
-        channel->getFactory(),
-        pipeline,
-        this,
-        ioService,
-        ioService->getThreadId());
+                                      channel->getFactory(),
+                                      pipeline,
+                                      this,
+                                      ioService,
+                                      ioService->getThreadId());
 
     acceptor.async_accept(c->getSocket(),
-        makeCustomAllocHandler(acceptAllocator,
-        boost::bind(&AsioServerSocketPipelineSink::handleAccept,
-        this,
-        boost::asio::placeholders::error,
-        ChannelPtr(c),
-        channel)));
+                          makeCustomAllocHandler(acceptAllocator,
+                                  boost::bind(&AsioServerSocketPipelineSink::handleAccept,
+                                          this,
+                                          boost::asio::placeholders::error,
+                                          ChannelPtr(c),
+                                          channel)));
 }
 
 void AsioServerSocketPipelineSink::handleAccept(const boost::system::error_code& error,
-    ChannelPtr channel,
-    ChannelPtr serverChannel) {
+        ChannelPtr channel,
+        ChannelPtr serverChannel) {
     BOOST_ASSERT(channel && serverChannel);
 
     if (!error) {
@@ -238,12 +239,12 @@ void AsioServerSocketPipelineSink::handleAccept(const boost::system::error_code&
             ioService->getThreadId());
 
         acceptor.async_accept(newChannel->getSocket(),
-            makeCustomAllocHandler(acceptAllocator,
-            boost::bind(&AsioServerSocketPipelineSink::handleAccept,
-            this,
-            boost::asio::placeholders::error,
-            ChannelPtr(newChannel),
-            serverChannel)));
+                              makeCustomAllocHandler(acceptAllocator,
+                                      boost::bind(&AsioServerSocketPipelineSink::handleAccept,
+                                              this,
+                                              boost::asio::placeholders::error,
+                                              ChannelPtr(newChannel),
+                                              serverChannel)));
     }
     else {
         delete channel;
@@ -254,10 +255,12 @@ void AsioServerSocketPipelineSink::handleAccept(const boost::system::error_code&
 void AsioServerSocketPipelineSink::closeServerChannel(
     const ChannelPtr& channel,
     const ChannelFuturePtr& future) {
-        BOOST_ASSERT(channel);
+    BOOST_ASSERT(channel);
     boost::system::error_code error;
+
     if (acceptor.is_open()) {
         acceptor.close(error);
+
         if (error) {
             LOG_ERROR(logger, "failed to close acceptor, error code:%d, msg:%s.", error.value(), error.message().c_str());
             ChannelException e(error.message(), error.value());
@@ -274,6 +277,7 @@ void AsioServerSocketPipelineSink::closeServerChannel(
     // is notified after a new connection cannot be accepted anymore.
     // See NETTY-256 for more information.
     AsioServerSocketChannel* c = static_cast<AsioServerSocketChannel*>(channel);
+
     if (!c->getCloseFuture()->isDone()) {
         c->setClosed();
     }
@@ -304,6 +308,7 @@ void AsioServerSocketPipelineSink::closeAcceptChannel(
     //TODO should make sure thread safe, post to accept servicePtr
     //delete the channel.
     ChildChannels::iterator itr = childChannels.find(channel->getId());
+
     if (itr != childChannels.end()) {
         childChannels.erase(itr);
     }

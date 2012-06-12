@@ -19,7 +19,8 @@
 #include <cetty/channel/ReceiveBufferSizePredictor.h>
 #include <cetty/channel/FixedReceiveBufferSizePredictor.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
 FixedReceiveBufferSizePredictorFactory::FixedReceiveBufferSizePredictorFactory(int bufferSize) {
     predictor = new FixedReceiveBufferSizePredictor(bufferSize);
@@ -29,4 +30,5 @@ ReceiveBufferSizePredictorPtr FixedReceiveBufferSizePredictorFactory::getPredict
     return predictor;
 }
 
-}}
+}
+}

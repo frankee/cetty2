@@ -2,7 +2,7 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
- * you may not use this file except in compliance with the License.  
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
@@ -32,6 +32,6 @@ TEST(QueryStringEncoderTest, testEncoder) {
     encoder.addParam("aqi", "");
     encoder.addParam("aql", "");
     encoder.addParam("oq", "");
-    
+
     ASSERT_STREQ(EncoderStr, encoder.toString().c_str());
 }

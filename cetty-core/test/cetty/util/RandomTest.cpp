@@ -29,6 +29,7 @@ TEST(RandomTest, NextBytes) {
 TEST(RandomTest, NextIntPowerOfTwoMod) {
     Random r(69);
     int total = 0;
+
     for (int i = 0; i < 1000; i++) {
         total += r.nextInt(16);
     }
@@ -47,7 +48,7 @@ TEST(RandomTest, nextFloat) {
 
 TEST(RandomTest, nextDouble) {
     Random r;
-    
+
     for (int i = 0; i < 1000; ++i) {
         double d = r.nextDouble();
         ASSERT_TRUE(d > 0 && d < 1);

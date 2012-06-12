@@ -44,12 +44,12 @@ InternalLogger* DefaultAsioSocketChannelConfig::logger = NULL;
 ReceiveBufferSizePredictorFactoryPtr
 DefaultAsioSocketChannelConfig::DEFAULT_PREDICTOR_FACTORY = new AdaptiveReceiveBufferSizePredictorFactory;
 
-DefaultAsioSocketChannelConfig::DefaultAsioSocketChannelConfig(TcpSocket& socket) 
+DefaultAsioSocketChannelConfig::DefaultAsioSocketChannelConfig(TcpSocket& socket)
     : socket(socket),
-    writeBufferLowWaterMark(0),
-    writeBufferHighWaterMark(DEFAULT_WRITE_BUFFER_HIGH_WATERMARK),
-    predictor(NULL),
-    predictorFactory(DEFAULT_PREDICTOR_FACTORY) {
+      writeBufferLowWaterMark(0),
+      writeBufferHighWaterMark(DEFAULT_WRITE_BUFFER_HIGH_WATERMARK),
+      predictor(NULL),
+      predictorFactory(DEFAULT_PREDICTOR_FACTORY) {
 
     if (NULL == logger) {
         InternalLoggerFactory::getInstance("DefaultAsioSocketChannelConfig");
@@ -196,7 +196,7 @@ const boost::optional<bool>& DefaultAsioSocketChannelConfig::isReuseAddress() co
 const boost::optional<bool>& DefaultAsioSocketChannelConfig::isTcpNoDelay() const {
     if (tcpNoDelay) {
         return tcpNoDelay;
-    } 
+    }
 
     try {
         boost::asio::ip::tcp::no_delay option;

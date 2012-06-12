@@ -83,12 +83,11 @@ class ServiceDescriptor;     // descriptor.h
 class MethodDescriptor;      // descriptor.h
 class Message;               // message.h
 
-}}
+}
+}
 
-namespace cetty
-{
-namespace protobuf
-{
+namespace cetty {
+namespace protobuf {
 
 class RpcController;
 class Service;
@@ -102,23 +101,22 @@ class Service;
 //   RpcChannel* channel = new MyRpcChannel("remotehost.example.com:1234");
 //   MyService* service = new MyService::Stub(channel);
 //   service->MyMethod(request, &response, callback);
-class ProtobufRpcClientChannel
-{
- public:
-	  ProtobufRpcClientChannel();
-	  ~ProtobufRpcClientChannel();
+class ProtobufRpcClientChannel {
+public:
+    ProtobufRpcClientChannel();
+    ~ProtobufRpcClientChannel();
 
-  typedef ::boost::function2<void, const ::google::protobuf::Message*, const ::google::protobuf::Message*> DoneCallback;
+    typedef ::boost::function2<void, const ::google::protobuf::Message*, const ::google::protobuf::Message*> DoneCallback;
 
-  // Call the given method of the remote service.  The signature of this
-  // procedure looks the same as Service::CallMethod(), but the requirements
-  // are less strict in one important way:  the request and response objects
-  // need not be of any specific class as long as their descriptors are
-  // method->input_type() and method->output_type().
-  void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                  const ::google::protobuf::Message* request,
-                  const ::google::protobuf::Message* response,
-                  const DoneCallback& done);
+    // Call the given method of the remote service.  The signature of this
+    // procedure looks the same as Service::CallMethod(), but the requirements
+    // are less strict in one important way:  the request and response objects
+    // need not be of any specific class as long as their descriptors are
+    // method->input_type() and method->output_type().
+    void CallMethod(const ::google::protobuf::MethodDescriptor* method,
+                    const ::google::protobuf::Message* request,
+                    const ::google::protobuf::Message* response,
+                    const DoneCallback& done);
 
 private:
 

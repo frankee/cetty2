@@ -33,20 +33,20 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-    using namespace cetty::logging;
-    using namespace boost::asio;
+using namespace cetty::logging;
+using namespace boost::asio;
 
-    InternalLogger* AsioServicePool::logger = NULL;
+InternalLogger* AsioServicePool::logger = NULL;
 
 AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
     : usingthread(!onlyMainThread),
       running(false),
       nextServiceIndex(0),
       mainThreadId(boost::this_thread::get_id()) {
-    
-          if (NULL == logger) {
-              logger = InternalLoggerFactory::getInstance("AsioServicePool");
-          }
+
+    if (NULL == logger) {
+        logger = InternalLoggerFactory::getInstance("AsioServicePool");
+    }
 
     if (poolSize <= 0) {
         poolSize = boost::thread::hardware_concurrency();
@@ -56,11 +56,13 @@ AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
         LOG_WARN(logger, "if set onlyMainThread, pool size only can be 1.");
         poolSize = 1;
     }
+
     this->poolSize = poolSize;
 
     // Give all the io_services work to do so that their run() functions will not
     // exit until they are explicitly stopped.
     serviceContexts.resize(poolSize);
+
     for (int i = 0; i < poolSize; ++i) {
         AsioServicePtr service = new AsioService(i);
         serviceContexts[i].service = service;
@@ -73,9 +75,9 @@ AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
         for (std::size_t i = 0; i < serviceContexts.size(); ++i) {
             serviceContexts[i].thread
                 = ThreadPtr(new boost::thread(
-                                 boost::bind(&AsioServicePool::runIOservice,
-                                             this,
-                                             boost::ref(serviceContexts[i]))));
+                                boost::bind(&AsioServicePool::runIOservice,
+                                            this,
+                                            boost::ref(serviceContexts[i]))));
         }
 
         running = true;
@@ -88,9 +90,10 @@ AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
 bool AsioServicePool::run() {
     if (!running && !usingthread) {
         LOG_INFO(logger, "AsioServciePool running in main thread mode.");
+
         if (runIOservice(serviceContexts.front()) < 0) {
             LOG_ERROR(logger, "AsioServicePool run the %d service error.",
-                serviceContexts.front().service->getId());
+                      serviceContexts.front().service->getId());
             return false;
         }
     }

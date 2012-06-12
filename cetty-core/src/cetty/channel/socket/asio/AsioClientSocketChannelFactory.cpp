@@ -34,32 +34,32 @@ using namespace cetty::util::internal::asio;
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
     const AsioServicePoolPtr& ioServicePool)
     : ioServicePool(ioServicePool),
-    timerFactory(NULL),
-       socketAddressFactory(NULL),
-ipAddressFactory(NULL) {
+      timerFactory(NULL),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
     init();
 }
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
     const AsioServicePtr& ioService)
-: ioService(ioService),
-timerFactory(NULL),
-  socketAddressFactory(NULL),
-  ipAddressFactory(NULL) {
-      init();
+    : ioService(ioService),
+      timerFactory(NULL),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    init();
 }
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(int threadCnt)
-: ioServicePool(new AsioServicePool(threadCnt)),
-  timerFactory(NULL),
-  socketAddressFactory(NULL),
-  ipAddressFactory(NULL) {
-      init();
+    : ioServicePool(new AsioServicePool(threadCnt)),
+      timerFactory(NULL),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    init();
 }
 
 
 AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
-   deinit();
+    deinit();
 }
 
 void AsioClientSocketChannelFactory::init() {
@@ -72,16 +72,17 @@ void AsioClientSocketChannelFactory::init() {
         else {
             timerFactory = new AsioDeadlineTimerFactory(ioService);
         }
+
         TimerFactory::setFactory(timerFactory);
     }
 
     if (!SocketAddress::hasFactory()) {
         socketAddressFactory = new AsioTcpSocketAddressImplFactory(
             ioServicePool ? ioServicePool->getService(AsioServicePool::PRIORITY_BOSS)->service()
-                            : ioService->service());
+            : ioService->service());
         SocketAddress::setFacotry(socketAddressFactory);
     }
-    
+
     if (!IpAddress::hasFactory()) {
         ipAddressFactory = new AsioIpAddressImplFactory();
         IpAddress::setFactory(ipAddressFactory);
@@ -91,7 +92,7 @@ void AsioClientSocketChannelFactory::init() {
 void AsioClientSocketChannelFactory::deinit() {
     if (socketAddressFactory) {
         SocketAddress::resetFactory();
-        
+
         delete socketAddressFactory;
         socketAddressFactory = NULL;
     }
@@ -129,6 +130,7 @@ void AsioClientSocketChannelFactory::releaseExternalResources() {
         ioServicePool->stop();
         ioServicePool->waitForExit();
     }
+
     clientChannels.clear();
 }
 
@@ -136,6 +138,7 @@ bool AsioClientSocketChannelFactory::start() {
     if (needManuallyStartAsioService()) {
         return ioServicePool->run();
     }
+
     return true;
 }
 

@@ -137,123 +137,140 @@ bool HttpCodecUtil::isTransferEncodingChunked(const HttpMessage& m) {
     return false;
 }
 #if 0
-void HttpCodecUtil::splitElements(const std::string& s, std::vector<std::string>& elements, bool ignoreEmpty)
-{
+void HttpCodecUtil::splitElements(const std::string& s, std::vector<std::string>& elements, bool ignoreEmpty) {
     elements.clear();
     std::string::const_iterator it  = s.begin();
     std::string::const_iterator end = s.end();
     std::string elem;
     elem.reserve(64);
-    while (it != end)
-    {
-        if (*it == '"')
-        {
+
+    while (it != end) {
+        if (*it == '"') {
             elem += *it++;
-            while (it != end && *it != '"')
-            {
-                if (*it == '\\')
-                {
+
+            while (it != end && *it != '"') {
+                if (*it == '\\') {
                     ++it;
-                    if (it != end) elem += *it++;
+
+                    if (it != end) { elem += *it++; }
                 }
-                else elem += *it++;
+                else { elem += *it++; }
             }
-            if (it != end) elem += *it++;
+
+            if (it != end) { elem += *it++; }
         }
-        else if (*it == '\\')
-        {
+        else if (*it == '\\') {
             ++it;
-            if (it != end) elem += *it++;
+
+            if (it != end) { elem += *it++; }
         }
-        else if (*it == ',')
-        {
+        else if (*it == ',') {
             Poco::trimInPlace(elem);
-            if (!ignoreEmpty || !elem.empty())
+
+            if (!ignoreEmpty || !elem.empty()) {
                 elements.push_back(elem);
+            }
+
             elem.clear();
             ++it;
         }
-        else elem += *it++;
+        else { elem += *it++; }
     }
-    if (!elem.empty())
-    {
+
+    if (!elem.empty()) {
         Poco::trimInPlace(elem);
-        if (!ignoreEmpty || !elem.empty())
+
+        if (!ignoreEmpty || !elem.empty()) {
             elements.push_back(elem);
+        }
     }
 }
 
 
-void HttpCodecUtil::splitParameters(const std::string& s, std::string& value, NameValueCollection& parameters)
-{
+void HttpCodecUtil::splitParameters(const std::string& s, std::string& value, NameValueCollection& parameters) {
     value.clear();
     parameters.clear();
     std::string::const_iterator it  = s.begin();
     std::string::const_iterator end = s.end();
-    while (it != end && Poco::Ascii::isSpace(*it)) ++it;
-    while (it != end && *it != ';') value += *it++;
+
+    while (it != end && Poco::Ascii::isSpace(*it)) { ++it; }
+
+    while (it != end && *it != ';') { value += *it++; }
+
     Poco::trimRightInPlace(value);
-    if (it != end) ++it;
+
+    if (it != end) { ++it; }
+
     splitParameters(it, end, parameters);
 }
 
-void HttpCodecUtil::splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NameValueCollection& parameters)
-{
+void HttpCodecUtil::splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NameValueCollection& parameters) {
     std::string pname;
     std::string pvalue;
     pname.reserve(32);
     pvalue.reserve(64);
     std::string::const_iterator it = begin;
-    while (it != end)
-    {
+
+    while (it != end) {
         pname.clear();
         pvalue.clear();
-        while (it != end && Poco::Ascii::isSpace(*it)) ++it;
-        while (it != end && *it != '=' && *it != ';') pname += *it++;
+
+        while (it != end && Poco::Ascii::isSpace(*it)) { ++it; }
+
+        while (it != end && *it != '=' && *it != ';') { pname += *it++; }
+
         Poco::trimRightInPlace(pname);
-        if (it != end && *it != ';') ++it;
-        while (it != end && Poco::Ascii::isSpace(*it)) ++it;
-        while (it != end && *it != ';')
-        {
-            if (*it == '"')
-            {
+
+        if (it != end && *it != ';') { ++it; }
+
+        while (it != end && Poco::Ascii::isSpace(*it)) { ++it; }
+
+        while (it != end && *it != ';') {
+            if (*it == '"') {
                 ++it;
-                while (it != end && *it != '"')
-                {
-                    if (*it == '\\')
-                    {
+
+                while (it != end && *it != '"') {
+                    if (*it == '\\') {
                         ++it;
-                        if (it != end) pvalue += *it++;
+
+                        if (it != end) { pvalue += *it++; }
                     }
-                    else pvalue += *it++;
+                    else { pvalue += *it++; }
                 }
-                if (it != end) ++it;
+
+                if (it != end) { ++it; }
             }
-            else if (*it == '\\')
-            {
+            else if (*it == '\\') {
                 ++it;
-                if (it != end) pvalue += *it++;
+
+                if (it != end) { pvalue += *it++; }
             }
-            else pvalue += *it++;
+            else { pvalue += *it++; }
         }
+
         Poco::trimRightInPlace(pvalue);
-        if (!pname.empty()) parameters.add(pname, pvalue);
-        if (it != end) ++it;
+
+        if (!pname.empty()) { parameters.add(pname, pvalue); }
+
+        if (it != end) { ++it; }
     }
 }
 
 
-void HttpCodecUtil::quote(const std::string& value, std::string& result, bool allowSpace)
-{
+void HttpCodecUtil::quote(const std::string& value, std::string& result, bool allowSpace) {
     bool mustQuote = false;
-    for (std::string::const_iterator it = value.begin(); !mustQuote && it != value.end(); ++it)
-    {
-        if (!Poco::Ascii::isAlphaNumeric(*it) && *it != '.' && *it != '_' && *it != '-' && !(Poco::Ascii::isSpace(*it) && allowSpace))
+
+    for (std::string::const_iterator it = value.begin(); !mustQuote && it != value.end(); ++it) {
+        if (!Poco::Ascii::isAlphaNumeric(*it) && *it != '.' && *it != '_' && *it != '-' && !(Poco::Ascii::isSpace(*it) && allowSpace)) {
             mustQuote = true;
+        }
     }
-    if (mustQuote) result += '"';
+
+    if (mustQuote) { result += '"'; }
+
     result.append(value);
-    if (mustQuote) result += '"';
+
+    if (mustQuote) { result += '"'; }
 }
 #endif
 }

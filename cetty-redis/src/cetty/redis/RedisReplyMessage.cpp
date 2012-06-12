@@ -17,7 +17,8 @@
 
 #include "RedisReplyMessage.h"
 
-namespace cetty { namespace redis {
+namespace cetty {
+namespace redis {
 
 
 const ReplyType ReplyType::REPLY_STRING = 0;
@@ -27,4 +28,5 @@ const ReplyType ReplyType::REPLY_NIL = 3;
 const ReplyType ReplyType::REPLY_STATUS = 4;
 const ReplyType ReplyType::REPLY_ERROR = 5;
 
-}}
+}
+}

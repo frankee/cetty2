@@ -59,148 +59,155 @@ using namespace cetty::channel::socket::asio;
 
 class AsioSocketEchoTest : public testing::Test {
 private:
-	class EchoHandler;
-	typedef boost::intrusive_ptr<EchoHandler> EchoHandlerPtr;
+    class EchoHandler;
+    typedef boost::intrusive_ptr<EchoHandler> EchoHandlerPtr;
 
 public:
-	AsioSocketEchoTest() : data(buf, DATA_LENGTH) {}
-	virtual ~AsioSocketEchoTest() {}
+    AsioSocketEchoTest() : data(buf, DATA_LENGTH) {}
+    virtual ~AsioSocketEchoTest() {}
 
-	void SetUp() {
-		time_t t = time(0);
-		random.setSeed(t);
-		random.nextBytes(buf, DATA_LENGTH);
-	}
+    void SetUp() {
+        time_t t = time(0);
+        random.setSeed(t);
+        random.nextBytes(buf, DATA_LENGTH);
+    }
 
-	void TearDown() {
-	}
+    void TearDown() {
+    }
 
-	void testSimpleEcho() {
-		ServerBootstrap sb(ChannelFactoryPtr(new AsioServerSocketChannelFactory()));
-		ClientBootstrap cb(ChannelFactoryPtr(new AsioClientSocketChannelFactory()));
+    void testSimpleEcho() {
+        ServerBootstrap sb(ChannelFactoryPtr(new AsioServerSocketChannelFactory()));
+        ClientBootstrap cb(ChannelFactoryPtr(new AsioClientSocketChannelFactory()));
 
-		EchoHandlerPtr sh(new EchoHandler(data));
-		EchoHandlerPtr ch(new EchoHandler(data));
+        EchoHandlerPtr sh(new EchoHandler(data));
+        EchoHandlerPtr ch(new EchoHandler(data));
 
-		sb.getPipeline()->addFirst("server-handler", boost::dynamic_pointer_cast<ChannelHandler>(sh));
-		cb.getPipeline()->addFirst("client-handler", boost::dynamic_pointer_cast<ChannelHandler>(ch));
+        sb.getPipeline()->addFirst("server-handler", boost::dynamic_pointer_cast<ChannelHandler>(sh));
+        cb.getPipeline()->addFirst("client-handler", boost::dynamic_pointer_cast<ChannelHandler>(ch));
 
-		Channel* sc = sb.bind(SocketAddress(IpAddress::IPv4, 0));
-		int port = sc->getLocalAddress().port();
+        Channel* sc = sb.bind(SocketAddress(IpAddress::IPv4, 0));
+        int port = sc->getLocalAddress().port();
 
-		ChannelFuturePtr ccf = cb.connect(SocketAddress("127.0.0.1", port));
-		ASSERT_TRUE(ccf->awaitUninterruptibly().isSuccess());
+        ChannelFuturePtr ccf = cb.connect(SocketAddress("127.0.0.1", port));
+        ASSERT_TRUE(ccf->awaitUninterruptibly().isSuccess());
 
-		Channel& cc = ccf->getChannel();
-		for (int i = 0; i < data.length();) {
-			int length = std::min(random.nextInt(1024 * 64), data.length() - i);
+        Channel& cc = ccf->getChannel();
+
+        for (int i = 0; i < data.length();) {
+            int length = std::min(random.nextInt(1024 * 64), data.length() - i);
             ChannelBufferPtr buf = ChannelBuffers::wrappedBuffer(data, i, length);
+
             for (int j = 0; j < buf->readableBytes(); ++j) {
                 if (buf->getByte(j) != data[i + j]) {
                     printf("wrapbuffer has mistakes.\n");
-                } 
+                }
             }
-			cc.write(buf);
-			i += length;
-		}
 
-		while (ch->counter < data.length()) {
-			if (sh->exception != NULL) {
-				break;
-			}
-			if (ch->exception != NULL) {
-				break;
-			}
+            cc.write(buf);
+            i += length;
+        }
 
-			boost::this_thread::sleep(boost::posix_time::millisec(1));
-		}
+        while (ch->counter < data.length()) {
+            if (sh->exception != NULL) {
+                break;
+            }
 
-		while (sh->counter < data.length()) {
-			if (sh->exception != NULL) {
-				break;
-			}
-			if (ch->exception != NULL) {
-				break;
-			}
+            if (ch->exception != NULL) {
+                break;
+            }
 
-			boost::this_thread::sleep(boost::posix_time::millisec(1));
-		}
+            boost::this_thread::sleep(boost::posix_time::millisec(1));
+        }
 
-		sh->channel->close()->awaitUninterruptibly();
-		ch->channel->close()->awaitUninterruptibly();
-		sc->close()->awaitUninterruptibly();
+        while (sh->counter < data.length()) {
+            if (sh->exception != NULL) {
+                break;
+            }
 
-		if (sh->exception != NULL) {
-			sh->exception->rethrow();
-		}
-		if (ch->exception != NULL) {
-			ch->exception->rethrow();
-		}
-	}
+            if (ch->exception != NULL) {
+                break;
+            }
+
+            boost::this_thread::sleep(boost::posix_time::millisec(1));
+        }
+
+        sh->channel->close()->awaitUninterruptibly();
+        ch->channel->close()->awaitUninterruptibly();
+        sc->close()->awaitUninterruptibly();
+
+        if (sh->exception != NULL) {
+            sh->exception->rethrow();
+        }
+
+        if (ch->exception != NULL) {
+            ch->exception->rethrow();
+        }
+    }
 
 private:
-	class EchoHandler : public SimpleChannelUpstreamHandler {
-	public:
-		Channel* channel;
-		const Exception* exception;
-		volatile int counter;
+    class EchoHandler : public SimpleChannelUpstreamHandler {
+    public:
+        Channel* channel;
+        const Exception* exception;
+        volatile int counter;
 
-		EchoHandler(Array& data)
-			: channel(NULL), exception(NULL), counter(0), data(data) {
-		}
+        EchoHandler(Array& data)
+            : channel(NULL), exception(NULL), counter(0), data(data) {
+        }
 
-		virtual ~EchoHandler() {}
+        virtual ~EchoHandler() {}
 
-		virtual std::string toString() const { return "EchoHandler"; }
+        virtual std::string toString() const { return "EchoHandler"; }
 
-		virtual ChannelHandlerPtr clone() { return shared_from_this(); }
+        virtual ChannelHandlerPtr clone() { return shared_from_this(); }
 
-		virtual void channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-			channel = &(e.getChannel());
-		}
+        virtual void channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
+            channel = &(e.getChannel());
+        }
 
-		virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-			bool isclient = (channel->getParent() == NULL);
+        virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+            bool isclient = (channel->getParent() == NULL);
 
-			ChannelBufferPtr m = e.getMessage().smartPointer<ChannelBuffer>();
+            ChannelBufferPtr m = e.getMessage().smartPointer<ChannelBuffer>();
             printf("%s, rIdx = %d, wIdx = %d, count = %d\n",
-                    isclient ? "client" : "server", m->readerIndex(), m->writerIndex(), counter);
+                   isclient ? "client" : "server", m->readerIndex(), m->writerIndex(), counter);
 
-			int length = m->readableBytes();
-			ChannelBufferPtr copied = m->readSlice();
+            int length = m->readableBytes();
+            ChannelBufferPtr copied = m->readSlice();
 
-			Array actual(copied->array().data() + copied->readerIndex(), length);
-			int lastIdx = counter;
-			for (int i = 0; i < actual.length(); i ++) {
+            Array actual(copied->array().data() + copied->readerIndex(), length);
+            int lastIdx = counter;
+
+            for (int i = 0; i < actual.length(); i ++) {
                 if (data[i + lastIdx] != actual[i]) {
                     printf("data[%d] = %d, <%d>\n", i + lastIdx, data[i+lastIdx], actual[i]);
                 }
-			}
+            }
 
-			if (!isclient) {
-				channel->write(copied);
-			}
+            if (!isclient) {
+                channel->write(copied);
+            }
 
-			counter += length;
-		}
+            counter += length;
+        }
 
-		virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-			exception = &(e.getCause());
-			e.getChannel().close();
-		}
+        virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
+            exception = &(e.getCause());
+            e.getChannel().close();
+        }
 
-	private:
-		Array data;
-	};
+    private:
+        Array data;
+    };
 
 private:
-	Random random;
-	static const int DATA_LENGTH = 1048576;
-	char buf[DATA_LENGTH];
-	Array data;
+    Random random;
+    static const int DATA_LENGTH = 1048576;
+    char buf[DATA_LENGTH];
+    Array data;
 };
 
 
 TEST_F(AsioSocketEchoTest, testSimpleEcho) {
-	testSimpleEcho();
+    testSimpleEcho();
 }

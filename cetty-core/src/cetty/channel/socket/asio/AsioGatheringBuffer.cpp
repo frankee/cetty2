@@ -21,10 +21,13 @@
 #include <cetty/buffer/ChannelBuffer.h>
 
 
-namespace cetty { namespace channel { namespace socket { namespace asio { 
+namespace cetty {
+namespace channel {
+namespace socket {
+namespace asio {
 
-    using namespace cetty::channel;
-    using namespace cetty::buffer;
+using namespace cetty::channel;
+using namespace cetty::buffer;
 
 bool AsioGatheringBuffer::empty() const {
     return buffers.truncatedIndex == 0;
@@ -59,8 +62,8 @@ std::pair<char*, int> AsioGatheringBuffer::at(int index) {
     BOOST_ASSERT(index >= 0 && index < MAX_BUFFER_COUNT);
     AsioBuffer& buffer = buffers[index];
     return std::make_pair<char*,int>(
-        boost::asio::buffer_cast<char*>(buffer),
-        (int)boost::asio::buffer_size(buffer));
+               boost::asio::buffer_cast<char*>(buffer),
+               (int)boost::asio::buffer_size(buffer));
 }
 
 void AsioGatheringBuffer::mergeFrom(const MessageEvent& evt) {
@@ -75,4 +78,7 @@ void AsioGatheringBuffer::mergeFrom(const MessageEvent& evt) {
     }
 }
 
-}}}}
+}
+}
+}
+}

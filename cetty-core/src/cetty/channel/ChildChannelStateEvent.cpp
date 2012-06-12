@@ -17,6 +17,8 @@
 
 #include <cetty/channel/ChildChannelStateEvent.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
-}}
+}
+}

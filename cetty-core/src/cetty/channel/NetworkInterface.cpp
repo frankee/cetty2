@@ -203,7 +203,7 @@ const std::string& NetworkInterface::getName() const {
         return impl->getName();
     }
 
-    
+
     return EMPTY_STRING;
 }
 
@@ -316,7 +316,7 @@ namespace channel {
 
 NetworkInterface::NetworkInterfaceList NetworkInterface::getNetInterfaces() {
     NetworkInterfaceList result;
-    
+
 #if 0 //TODO
     DWORD rc;
 

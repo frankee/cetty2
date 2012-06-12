@@ -14,18 +14,22 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClient.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanRpcHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanPipelineFactory.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanTask.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanRpcHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanPipelineFactory.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}</ProjectGuid>
+    <ProjectGuid>{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}</ProjectGuid>
     <RootNamespace>GearmanClient</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

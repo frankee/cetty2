@@ -15,6 +15,8 @@
  * under the License.
  */
 
-namespace cetty { namespace gearman { 
+namespace cetty {
+namespace gearman {
 
-}}
+}
+}

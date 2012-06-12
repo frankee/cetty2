@@ -53,22 +53,24 @@ public:
         DefaultChannelHandlerContext* prev,
         DefaultChannelHandlerContext* next)
         : defaultChannelPipeline(pipeline),
-        channelPipeline(&pipeline),
-        next(next),
-        prev(prev),
-        nextUpstreamContext(NULL),
-        nextDownstreamContext(NULL),
-        canHandleUps(false),
-        canHandleDowns(false),
-        name(name),
-        handler(handler) {
+          channelPipeline(&pipeline),
+          next(next),
+          prev(prev),
+          nextUpstreamContext(NULL),
+          nextDownstreamContext(NULL),
+          canHandleUps(false),
+          canHandleDowns(false),
+          name(name),
+          handler(handler) {
 
         upstreamHandler = boost::dynamic_pointer_cast<ChannelUpstreamHandler>(handler);
+
         if (upstreamHandler) {
             this->canHandleUps = true;
         }
 
         downstreamHandler = boost::dynamic_pointer_cast<ChannelDownstreamHandler>(handler);
+
         if (downstreamHandler) {
             this->canHandleDowns = true;
         }
@@ -322,24 +324,24 @@ public:
     virtual ~DiscardingChannelSink() {}
 
     virtual void eventSunk(const ChannelPipeline& pipeline,
-        const ChannelEvent& e) {
-            logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
+                           const ChannelEvent& e) {
+        logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
     }
 
     virtual void writeRequested(const ChannelPipeline& pipeline,
-        const MessageEvent& e) {
-            logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
+                                const MessageEvent& e) {
+        logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
     }
 
     virtual void stateChangeRequested(const ChannelPipeline& pipeline,
-        const ChannelStateEvent& e) {
-            logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
+                                      const ChannelStateEvent& e) {
+        logger->warn(std::string("Not attached yet; discarding: ") + e.toString());
     }
 
     virtual void exceptionCaught(const ChannelPipeline& pipeline,
-        const ChannelEvent& e,
-        const ChannelPipelineException& cause) {
-            cause.rethrow();
+                                 const ChannelEvent& e,
+                                 const ChannelPipelineException& cause) {
+        cause.rethrow();
     }
 
 private:
@@ -354,7 +356,7 @@ DefaultChannelPipeline::DefaultChannelPipeline()
       head(NULL),
       tail(NULL),
       upstreamHead(NULL),
-      downstreamHead(NULL){
+      downstreamHead(NULL) {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("DefaultChannelPipeline");
     }
@@ -1311,9 +1313,11 @@ void DefaultChannelPipeline::setAttachment(const std::string& name, const boost:
 
 boost::any DefaultChannelPipeline::getAttachment(const std::string& name) const {
     AttachmentMap::const_iterator itr = attachments.find(name);
+
     if (itr != attachments.end()) {
         return itr->second;
     }
+
     return boost::any();
 }
 

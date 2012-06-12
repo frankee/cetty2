@@ -59,7 +59,7 @@ public:
     virtual int hashCode() const;
 
     /**
-     * Compares the @link #getId() ID@endlink of the two channels.
+     * Compares the {@link #getId() ID} of the two channels.
      */
     virtual int compareTo(const ChannelPtr& c) const;
 
@@ -95,7 +95,7 @@ public:
     virtual ChannelFuturePtr write(const ChannelMessage& message);
 
     virtual ChannelFuturePtr write(const ChannelMessage& message,
-        const SocketAddress& remoteAddress);
+                                   const SocketAddress& remoteAddress);
 
     /**
      * Returns the {@link std::string} representation of this channel.  The returned
@@ -122,11 +122,10 @@ protected:
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
      */
-    AbstractChannel(
-        const ChannelPtr& parent,
-        const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink);
+    AbstractChannel(const ChannelPtr& parent,
+                    const ChannelFactoryPtr& factory,
+                    const ChannelPipelinePtr& pipeline,
+                    const ChannelSinkPtr& sink);
 
     /**
      * (Internal use only) Creates a new temporary instance with the specified
@@ -142,12 +141,11 @@ protected:
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
      */
-    AbstractChannel(
-        int id,
-        const ChannelPtr& parent,
-        const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink);
+    AbstractChannel(int id,
+                    const ChannelPtr& parent,
+                    const ChannelFactoryPtr& factory,
+                    const ChannelPipelinePtr& pipeline,
+                    const ChannelSinkPtr& sink);
 
     /**
      * Marks this channel as closed.  This method is intended to be called by

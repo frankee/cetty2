@@ -27,12 +27,12 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 HttpRequest::HttpRequest(const HttpVersion& httpVersion,
-    const HttpMethod& method,
-    const std::string& uri)
+                         const HttpMethod& method,
+                         const std::string& uri)
     : HttpMessage(httpVersion),
-    method(method),
-    uriStr(uri),
-    uri(uri) {
+      method(method),
+      uriStr(uri),
+      uri(uri) {
 }
 
 HttpRequest::~HttpRequest() {
@@ -71,13 +71,14 @@ std::string HttpRequest::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-        "HttpRequest (chunked: %s)\r\n%s %s %s",
-        isChunked() ? "true" : "false",
-        getMethod().toString().c_str(),
-        getUri().c_str(),
-        getProtocolVersion().getText().c_str());
+                          "HttpRequest (chunked: %s)\r\n%s %s %s",
+                          isChunked() ? "true" : "false",
+                          getMethod().toString().c_str(),
+                          getUri().c_str(),
+                          getProtocolVersion().getText().c_str());
 
     ConstHeaderIterator end = getLastHeader();
+
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
         StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }

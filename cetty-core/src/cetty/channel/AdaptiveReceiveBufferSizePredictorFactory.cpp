@@ -19,7 +19,8 @@
 #include <cetty/channel/AdaptiveReceiveBufferSizePredictor.h>
 #include <cetty/util/Exception.h>
 
-namespace cetty { namespace channel {
+namespace cetty {
+namespace channel {
 
 using namespace cetty::util;
 
@@ -50,4 +51,5 @@ cetty::channel::ReceiveBufferSizePredictorPtr AdaptiveReceiveBufferSizePredictor
     return new AdaptiveReceiveBufferSizePredictor(minimum, initial, maximum);
 }
 
-}}
+}
+}

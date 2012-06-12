@@ -22,7 +22,10 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/logging/LoggerHelper.h>
 
-namespace cetty { namespace channel { namespace socket { namespace asio { 
+namespace cetty {
+namespace channel {
+namespace socket {
+namespace asio {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -46,6 +49,7 @@ bool AsioAcceptedSocketChannel::start() {
     Channels::fireChannelOpen(this);
 
     const SocketAddress& localAddress = AsioSocketChannel::getLocalAddress();
+
     if (!localAddress.validated()) {
         LOG_WARN(logger, "Accepted Channel start to open, but the local address is invalid.");
         return false;
@@ -55,6 +59,7 @@ bool AsioAcceptedSocketChannel::start() {
     Channels::fireChannelBound(this, localAddress);
 
     const SocketAddress& remoteAddress = AsioSocketChannel::getRemoteAddress();
+
     if (!remoteAddress.validated()) {
         LOG_WARN(logger, "Accepted Channel start to bind, but the remote address is invalid.");
         return false;
@@ -71,9 +76,9 @@ bool AsioAcceptedSocketChannel::start() {
         tcpSocket.async_read_some(
             boost::asio::buffer(arry.data(), arry.length()),
             boost::bind(&AsioSocketChannel::handleRead,
-            this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
+                        this,
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred));
     }
     else {
         LOG_INFO(logger, "Accepted channel is NOT readable, nothing with read operation.");
@@ -82,4 +87,7 @@ bool AsioAcceptedSocketChannel::start() {
     return true;
 }
 
-}}}}
+}
+}
+}
+}

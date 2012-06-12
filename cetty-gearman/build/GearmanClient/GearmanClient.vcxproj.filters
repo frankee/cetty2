@@ -19,10 +19,19 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanRpcHandler.h">
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h">
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessageHandler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanTask.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanPipelineFactory.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,10 +45,13 @@
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanRpcHandler.cpp">
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanPipelineFactory.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

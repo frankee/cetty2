@@ -184,6 +184,7 @@ int ChannelBuffer::getBytes(int index, Array* dst) const {
     if (dst) {
         return getBytes(index, dst, 0, dst->length());
     }
+
     return 0;
 }
 
@@ -259,8 +260,9 @@ int ChannelBuffer::setBytes(int index, const std::string& src, int srcIndex, int
 
 int ChannelBuffer::setBytes(int index, const ChannelBufferPtr& src) {
     if (src) {
-        setBytes(index, src, src->readableBytes());    
+        setBytes(index, src, src->readableBytes());
     }
+
     return 0;
 }
 
@@ -291,7 +293,8 @@ int ChannelBuffer::setZero(int index, int length) {
 
     //if length out_of_range, may cause out_of_range exception or just reduce the length.
     int leftBtyes = capacity() - index;
-    if (length > leftBtyes) length = leftBtyes;
+
+    if (length > leftBtyes) { length = leftBtyes; }
 
     int nLong = length >> 3;
     int nBytes = length & 7;
@@ -325,10 +328,11 @@ int ChannelBuffer::setZero(int index, int length) {
 
 boost::int8_t ChannelBuffer::readByte() {
     boost::int8_t v = 0;
+
     if (checkReadableBytes(1)) {
-         v = getByte(readerIdx++);
+        v = getByte(readerIdx++);
     }
-    
+
     return v;
 }
 
@@ -338,10 +342,12 @@ boost::uint8_t ChannelBuffer::readUnsignedByte() {
 
 boost::int16_t ChannelBuffer::readShort() {
     boost::int16_t v = 0;
+
     if (checkReadableBytes(2)) {
         v = getShort(readerIdx);
         readerIdx += 2;
     }
+
     return v;
 }
 
@@ -351,11 +357,12 @@ boost::uint16_t ChannelBuffer::readUnsignedShort() {
 
 boost::int32_t ChannelBuffer::readInt() {
     boost::int32_t v = 0;
+
     if (checkReadableBytes(4)) {
         v = getInt(readerIdx);
         readerIdx += 4;
     }
-    
+
     return v;
 }
 
@@ -365,28 +372,34 @@ boost::uint32_t ChannelBuffer::readUnsignedInt() {
 
 boost::int64_t ChannelBuffer::readLong() {
     boost::int64_t v = 0;
+
     if (checkReadableBytes(8)) {
         v = getLong(readerIdx);
         readerIdx += 8;
     }
+
     return v;
 }
 
 float ChannelBuffer::readFloat() {
     float v = 0;
+
     if (checkReadableBytes(4)) {
         v = getFloat(readerIdx);
         readerIdx += 4;
     }
+
     return v;
 }
 
 double ChannelBuffer::readDouble() {
     double v = 0;
+
     if (checkReadableBytes(8)) {
         v = getDouble(readerIdx);
         readerIdx += 8;
     }
+
     return v;
 }
 
@@ -424,6 +437,7 @@ int ChannelBuffer::readBytes(Array* dst, int dstIndex, int length) {
         readerIdx += length;
         return length;
     }
+
     return 0;
 }
 
@@ -470,6 +484,7 @@ int ChannelBuffer::readBytes(const ChannelBufferPtr& dst) {
     if (dst) {
         return readBytes(dst, dst->writableBytes());
     }
+
     return 0;
 }
 
@@ -496,6 +511,7 @@ int ChannelBuffer::readBytes(const ChannelBufferPtr& dst, int dstIndex, int leng
 int ChannelBuffer::readBytes(OutputStream* out, int length) {
     if (checkReadableBytes(length)) {
         int transferBytes = getBytes(readerIdx, out, length);
+
         if (transferBytes > 0) {
             readerIdx += transferBytes;
         }
@@ -518,13 +534,14 @@ ChannelBufferPtr ChannelBuffer::readSlice(int length) {
         readerIdx += length;
         return sliceBuffer;
     }
-    
+
     return ChannelBuffers::EMPTY_BUFFER;
 }
 
 int ChannelBuffer::readSlice(GatheringBuffer* gatheringBuffer) {
     if (gatheringBuffer) {
         int transferBytes = readSlice(gatheringBuffer, readableBytes());
+
         if (transferBytes) {
             readerIdx = writerIdx = 0;
             return transferBytes;
@@ -541,6 +558,7 @@ int ChannelBuffer::readSlice(GatheringBuffer* gatheringBuffer, int length) {
             return length;
         }
     }
+
     return 0;
 }
 
@@ -549,6 +567,7 @@ int ChannelBuffer::skipBytes(int length) {
         readerIdx += length;
         return length;
     }
+
     return 0;
 }
 
@@ -640,7 +659,7 @@ int ChannelBuffer::writeBytes(const ChannelBufferPtr& src, int length) {
         src->readerIndex(src->readerIndex() + length);
         return length;
     }
-    
+
     return 0;
 }
 
@@ -676,6 +695,7 @@ int ChannelBuffer::writeZero(int length) {
     //if length more than writableBytes(), may cause out_of_range exception
     //or auto reduce the length to writableBytes().
     int wb = writableBytes();
+
     if (length > wb) {
         length = wb;
     }
@@ -718,6 +738,7 @@ int ChannelBuffer::slice(GatheringBuffer* gatheringBuffer) {
     if (gatheringBuffer) {
         return slice(readerIdx, readableBytes(), gatheringBuffer);
     }
+
     return 0;
 }
 
@@ -745,6 +766,7 @@ int ChannelBuffer::bytesBefore(int length, boost::int8_t value) const {
     if (checkReadableBytes(length)) {
         return bytesBefore(readerIndex(), length, value);
     }
+
     return -1;
 }
 
@@ -752,6 +774,7 @@ int ChannelBuffer::bytesBefore(int length, const ChannelBufferIndexFinder::Funct
     if (checkReadableBytes(length)) {
         return bytesBefore(readerIndex(), length, indexFinder);
     }
+
     return -1;
 }
 
@@ -791,7 +814,7 @@ bool ChannelBuffer::checkReadableBytes(int minReadableBytes) const {
 std::string ChannelBuffer::toString() const {
     std::string buf = typeid(this).name();
     StringUtil::strprintf(&buf, "(ridx=&d, widx=%d, cap=%d)",
-        readerIdx, writerIdx, capacity());
+                          readerIdx, writerIdx, capacity());
     return buf;
 }
 
@@ -818,6 +841,7 @@ int ChannelBuffer::writeIntAhead(int value) {
         readerIdx -= 4;
         return 4;
     }
+
     return 0;
 }
 
@@ -826,6 +850,7 @@ int ChannelBuffer::writeLongAhead(boost::int64_t value) {
         readerIdx -= 8;
         return 8;
     }
+
     return 0;
 }
 
@@ -835,6 +860,7 @@ int ChannelBuffer::writeFloatAhead(float value) {
 
         return 4;
     }
+
     return 0;
 }
 
@@ -843,6 +869,7 @@ int ChannelBuffer::writeDoubleAhead(double value) {
         readerIdx -= 8;
         return 8;
     }
+
     return 0;
 }
 
@@ -850,6 +877,7 @@ int ChannelBuffer::writeBytesAhead(const ChannelBufferPtr& src) {
     if (src) {
         return writeBytesAhead(src, src->readableBytes());
     }
+
     return 0;
 }
 
@@ -867,6 +895,7 @@ int ChannelBuffer::writeBytesAhead(const ConstChannelBufferPtr& src, int srcInde
         readerIdx -= length;
         return length;
     }
+
     return 0;
 }
 
@@ -879,6 +908,7 @@ int ChannelBuffer::writeBytesAhead(const ConstArray& src, int srcIndex, int leng
         readerIdx -= length;
         return length;
     }
+
     return 0;
 }
 

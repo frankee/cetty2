@@ -30,8 +30,8 @@ using namespace cetty::util;
 using namespace cetty::util::internal;
 
 UpstreamChannelStateEvent::UpstreamChannelStateEvent(const ChannelPtr& channel,
-    const ChannelState& state,
-    const boost::any& value)
+        const ChannelState& state,
+        const boost::any& value)
     : channel(channel), state(state), value(value) {
 }
 

@@ -566,7 +566,7 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
                 //    current.back().append(line.trim().c_str());
                 //}
                 //else {
-                    // Content-Length, Transfer-Encoding, or Trailer
+                // Content-Length, Transfer-Encoding, or Trailer
                 //}
             }
             else {

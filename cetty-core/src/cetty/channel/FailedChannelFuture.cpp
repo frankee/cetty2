@@ -18,10 +18,11 @@
 #include <cetty/channel/FailedChannelFuture.h>
 #include <cetty/channel/Channel.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
 FailedChannelFuture::FailedChannelFuture(const ChannelPtr& channel,
-                                         const Exception& cause)
+        const Exception& cause)
     : CompleteChannelFuture(channel), cause(cause) {
 }
 
@@ -36,4 +37,5 @@ bool FailedChannelFuture::isSuccess() const {
     return false;
 }
 
-}}
+}
+}

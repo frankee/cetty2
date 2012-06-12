@@ -50,8 +50,10 @@ const TimeoutPtr& AsioDeadlineTimer::newTimeout(const TimerTask& task, boost::in
 
 void AsioDeadlineTimer::stop() {
     TimeoutList::iterator itr;
+
     for (itr = timeouts.begin(); itr != timeouts.end(); ++itr) {
         const TimeoutPtr& timeout = *itr;
+
         if (timeout && timeout->isActived()) {
             timeout->cancel();
         }

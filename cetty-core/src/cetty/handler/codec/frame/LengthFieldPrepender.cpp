@@ -173,7 +173,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength) : lengthFieldL
     lengthAdjustment(lengthFieldLength),
     checksumFieldLength(0),
     checksumCalcOffset(0) {
-        validateParameters();
+    validateParameters();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, const std::string& header1) : lengthFieldLength(lengthFieldLength),
@@ -182,7 +182,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFiel
     header1(header1),
     checksumFieldLength(0),
     checksumCalcOffset(0) {
-        validateParameters();
+    validateParameters();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, const std::string& header1) : lengthFieldLength(lengthFieldLength),
@@ -191,7 +191,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, const std::str
     header1(header1),
     checksumFieldLength(0),
     checksumCalcOffset(0) {
-        validateParameters();
+    validateParameters();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, int lengthAdjustment, const std::string& header1) {
@@ -205,7 +205,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFiel
     header2(header2),
     checksumFieldLength(0),
     checksumCalcOffset(0) {
-        validateParameters();
+    validateParameters();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, int lengthAdjustment, int checksumFieldLength, int checksumCalcOffset, const std::string& header1, const std::string& header2, ChecksumFunction checksumFunction) :   lengthFieldLength(lengthFieldLength),
@@ -213,7 +213,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFiel
     checksumFieldLength(checksumFieldLength),
     checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
     checksumFunction(checksumFunction) {
-        validateParameters();
+    validateParameters();
 }
 
 

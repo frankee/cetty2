@@ -1,5 +1,9 @@
+#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
+#define CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H
+
+
 /*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -14,8 +18,20 @@
  * under the License.
  */
 
-#include "DiscardServerHandler.h"
-#include "cetty/logging/InternalLoggerFactory.h"
+#include <cetty/channel/ChannelPipelineFactory.h>
 
-InternalLogger* DiscardServerHandler::logger =
-    InternalLoggerFactory::getInstance("DiscardServerHandler");
+namespace cetty {
+namespace gearman {
+
+class GearmanPipelineFactory : public cetty::channel::ChannelPipelineFactory {
+public:
+    GearmanPipelineFactory() {}
+    virtual GearmanPipelineFactory() {}
+
+    virtual ChannelPipelinePtr getPipeline();
+};
+
+}
+}
+
+#endif //#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)

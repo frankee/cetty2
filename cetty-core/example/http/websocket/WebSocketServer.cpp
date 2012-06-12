@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
         ChannelPipelineFactoryPtr(new WebSocketServerPipelineFactory()));
 
     // Bind and start to accept incoming connections.
-	bootstrap.bind(SocketAddress(IpAddress::IPv4, 8080));
+    bootstrap.bind(SocketAddress(IpAddress::IPv4, 8080));
 
     return 0;
 }

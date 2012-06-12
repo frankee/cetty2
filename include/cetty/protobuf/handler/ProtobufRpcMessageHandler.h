@@ -1,7 +1,7 @@
 #if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H)
 #define CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H
 
-/**
+/*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -24,21 +24,31 @@
 #include "cetty/channel/SimpleChannelHandler.h"
 #include "cetty/handler/rpc/protobuf/ProtobufServiceRegister.h"
 
-namespace google { namespace protobuf {
+namespace google {
+namespace protobuf {
 class MethodDescriptor;
 class RpcController;
 class Message;
-}}
+}
+}
 
-namespace cetty { namespace channel {
+namespace cetty {
+namespace channel {
 class Channel;
-}}
+}
+}
 
-namespace cetty { namespace protobuf { namespace proto {
-    class RpcMessage;
-}}}
+namespace cetty {
+namespace protobuf {
+namespace proto {
+class RpcMessage;
+}
+}
+}
 
-namespace cetty { namespace protobuf { namespace handler {
+namespace cetty {
+namespace protobuf {
+namespace handler {
 using namespace cetty::channel;
 
 class ProtobufRpcMessageHandler;
@@ -82,6 +92,8 @@ private:
     boost::int64_t id;
 };
 
-}}}
+}
+}
+}
 
 #endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H)

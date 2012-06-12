@@ -31,11 +31,11 @@ namespace asio {
 InternalLogger* AsioServerSocketChannel::logger = NULL;
 
 AsioServerSocketChannel::AsioServerSocketChannel(
-        boost::asio::ip::tcp::acceptor& acceptor,
-        const AsioServicePtr& ioService,
-        const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink)
+    boost::asio::ip::tcp::acceptor& acceptor,
+    const AsioServicePtr& ioService,
+    const ChannelFactoryPtr& factory,
+    const ChannelPipelinePtr& pipeline,
+    const ChannelSinkPtr& sink)
     : ServerSocketChannel(factory, pipeline, sink),
       ioService(ioService),
       acceptor(acceptor),
@@ -73,7 +73,7 @@ const SocketAddress& AsioServerSocketChannel::getLocalAddress() const {
     }
 
     localAddress = SocketAddress(
-        SocketAddress::SmartPointer(new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+                       SocketAddress::SmartPointer(new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
 
     return localAddress;
 }

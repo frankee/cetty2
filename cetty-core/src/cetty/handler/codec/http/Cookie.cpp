@@ -29,6 +29,7 @@ Cookie::Cookie(const std::string& name, const std::string& value)
     }
 
     int nameSize = name.size();
+
     for (int i = 0; i < nameSize; i ++) {
         char c = name.at(i);
 

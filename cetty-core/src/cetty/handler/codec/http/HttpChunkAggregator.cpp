@@ -124,6 +124,7 @@ void HttpChunkAggregator::messageReceived(ChannelHandlerContext& ctx, const Mess
             if (trailer) {
                 HttpChunkTrailer::ConstHeaderIterator itr = trailer->getFirstHeader();
                 HttpChunkTrailer::ConstHeaderIterator end = trailer->getLastHeader();
+
                 for (; itr != end; ++itr) {
                     currentMessage->setHeader(itr->first, itr->second);
                 }

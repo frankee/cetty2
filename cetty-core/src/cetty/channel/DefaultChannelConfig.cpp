@@ -26,9 +26,9 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-DefaultChannelConfig::DefaultChannelConfig() 
+DefaultChannelConfig::DefaultChannelConfig()
     : connectTimeoutMillis(10000/*ms*/),
-    bufferFactory(&(HeapChannelBufferFactory::getInstance())) {
+      bufferFactory(&(HeapChannelBufferFactory::getInstance())) {
 }
 
 void DefaultChannelConfig::setOptions(const std::map<std::string, boost::any>& options) {

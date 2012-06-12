@@ -31,7 +31,7 @@ AsioDeadlineTimeout::AsioDeadlineTimeout(const TimerPtr& timer,
         const TimerTask& task,
         boost::int64_t delay)
     : state(TIMER_ACTIVE), timer(timer), deadlineTimer(ioService->service()) {
-    
+
     BOOST_ASSERT(task);
     deadlineTimer.expires_from_now(boost::posix_time::milliseconds(delay));
     deadlineTimer.async_wait(boost::bind(&AsioDeadlineTimeout::timerExpiresCallback,
@@ -80,6 +80,7 @@ void AsioDeadlineTimeout::timerExpiresCallback(const boost::system::error_code& 
     }
     else {
         state = TIMER_EXPIRED;
+
         if (task) {
             task(*this);
         }
@@ -89,7 +90,7 @@ void AsioDeadlineTimeout::timerExpiresCallback(const boost::system::error_code& 
     }
 }
 
-}  
+}
 }
 }
 }

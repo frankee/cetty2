@@ -38,10 +38,10 @@ using namespace cetty::channel::socket::asio;
 
 int main(int argc, char* argv[]) {
     // Validate command line options.
-    if ( argc != 4) {
+    if (argc != 4) {
         printf(
-                "Usage: HexDumpProxy"
-                " <local port> <remote host> <remote port>\n");
+            "Usage: HexDumpProxy"
+            " <local port> <remote host> <remote port>\n");
         return -1;
     }
 
@@ -53,13 +53,13 @@ int main(int argc, char* argv[]) {
     printf("Proxying *:%d to %s:%d ...\n", localPort, remoteHost.c_str(), remotePort);
 
     // Configure the bootstrap.
-    
+
     ServerBootstrap sb(
-            ChannelFactoryPtr(new AsioServerSocketChannelFactory()));
+        ChannelFactoryPtr(new AsioServerSocketChannelFactory()));
 
     // Set up the event pipeline factory.
     ChannelFactoryPtr cf =
-            ChannelFactoryPtr(new AsioClientSocketChannelFactory());
+        ChannelFactoryPtr(new AsioClientSocketChannelFactory());
 
     sb.setPipelineFactory(
         ChannelPipelineFactoryPtr(
@@ -67,19 +67,23 @@ int main(int argc, char* argv[]) {
 
     // Start up the server.
     Channel* c = sb.bind(SocketAddress(IpAddress::IPv4, localPort));
+
     if (c->isBound()) {
         printf("Server is running...\n");
         printf("To quit server, press 'q'.\n");
 
         char input;
+
         do {
             input = getchar();
+
             if (input == 'q') {
                 c->close()->awaitUninterruptibly();
                 sb.releaseExternalResources();
                 return 0;
             }
-        } while (true);
+        }
+        while (true);
     }
 
     sb.releaseExternalResources();

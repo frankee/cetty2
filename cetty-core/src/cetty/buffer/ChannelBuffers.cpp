@@ -663,11 +663,13 @@ int ChannelBuffers::hashCode(const ChannelBuffer& buffer) {
 
 
 bool ChannelBuffers::equals(const ConstChannelBufferPtr& lbuffer,
-    const ConstChannelBufferPtr& rbuffer) {
-    if (!lbuffer || !rbuffer) return false;
-    if (lbuffer.get() == rbuffer.get()) return true;
-    
+                            const ConstChannelBufferPtr& rbuffer) {
+    if (!lbuffer || !rbuffer) { return false; }
+
+    if (lbuffer.get() == rbuffer.get()) { return true; }
+
     int len = lbuffer->readableBytes();
+
     if (len != rbuffer->readableBytes()) {
         return false;
     }
@@ -683,6 +685,7 @@ bool ChannelBuffers::equals(const ConstChannelBufferPtr& lbuffer,
             if (lbuffer->getLong(aIndex) != rbuffer->getLong(bIndex)) {
                 return false;
             }
+
             aIndex += 8;
             bIndex += 8;
         }
@@ -692,6 +695,7 @@ bool ChannelBuffers::equals(const ConstChannelBufferPtr& lbuffer,
             if (lbuffer->getLong(aIndex) != swapLong(rbuffer->getLong(bIndex))) {
                 return false;
             }
+
             aIndex += 8;
             bIndex += 8;
         }
@@ -701,6 +705,7 @@ bool ChannelBuffers::equals(const ConstChannelBufferPtr& lbuffer,
         if (lbuffer->getByte(aIndex) != rbuffer->getByte(bIndex)) {
             return false;
         }
+
         ++aIndex;
         ++bIndex;
     }
@@ -827,7 +832,7 @@ int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIn
     if (fromIndex >= toIndex || capacity == 0) {
         return -1;
     }
-    
+
     for (int i = fromIndex; i < toIndex; i ++) {
         if (indexFinder(*buffer, i)) {
             return i;
@@ -850,7 +855,7 @@ int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIn
     if (fromIndex >= toIndex || capacity == 0) {
         return -1;
     }
-    
+
     for (int i = fromIndex; i < toIndex; ++i) {
         if (buffer->getByte(i) == value) {
             return i;

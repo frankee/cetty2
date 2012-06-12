@@ -54,6 +54,7 @@ TEST(ChannelBuffersTest, testHashCode) {
     vec.push_back(std::make_pair(ArrayUtil::create(4, -1, -1, -1, 0xE1), 1));
 
     std::vector<std::pair<Array, int> >::iterator itr = vec.begin();
+
     while (itr != vec.end()) {
         ASSERT_EQ(
             itr->second,
@@ -117,20 +118,20 @@ TEST(ChannelBuffersTest, testEquals) {
 TEST(ChannelBuffersTest, testCompare) {
     std::vector<ChannelBufferPtr> expected;
 
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 1)));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 2, 1, 2)));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 1)));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(2, 1, 2)));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(10, 1, 2, 3, 4, 5, 6, 7, 8,  9, 10)));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(12, 1, 2, 3, 4, 5, 6, 7, 8,  9, 10, 11, 12)));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2)));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 2, 2, 3)));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 2)));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(2, 2, 3)));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(12, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 3, 2, 3, 4), 1, 1));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 4, 1, 2, 3, 4), 2, 2));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 2, 3, 4), 1, 1));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(4, 1, 2, 3, 4), 2, 2));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(13, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), 1, 10));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), 2, 12));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 4, 2, 3, 4, 5), 2, 1));
-    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create( 5, 1, 2, 3, 4, 5), 3, 2));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(4, 2, 3, 4, 5), 2, 1));
+    expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(5, 1, 2, 3, 4, 5), 3, 2));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(13, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), 2, 10));
     expected.push_back(ChannelBuffers::wrappedBuffer(ArrayUtil::create(15, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), 3, 12));
 
@@ -152,68 +153,68 @@ TEST(ChannelBuffersTest, testCompare) {
 
 TEST(ChannelBuffersTest, shouldReturnEmptyBufferWhenLengthIsZero) {
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::buffer(0));
+              ChannelBuffers::buffer(0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::buffer(ByteOrder::BYTE_ORDER_LITTLE, 0));
+              ChannelBuffers::buffer(ByteOrder::BYTE_ORDER_LITTLE, 0));
 
     char tmpBytes[8];
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(Array()));
+              ChannelBuffers::wrappedBuffer(Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array()));
+              ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(Array(tmpBytes, 8), 0, 0));
+              ChannelBuffers::wrappedBuffer(Array(tmpBytes, 8), 0, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 0, 0));
+              ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 0, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(Array(tmpBytes, 8), 8, 0));
+              ChannelBuffers::wrappedBuffer(Array(tmpBytes, 8), 8, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 8, 0));
+              ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 8, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ChannelBuffers::EMPTY_BUFFER));
+              ChannelBuffers::wrappedBuffer(ChannelBuffers::EMPTY_BUFFER));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(Array(), Array()));
+              ChannelBuffers::wrappedBuffer(Array(), Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(std::vector<Array>()));
+              ChannelBuffers::wrappedBuffer(std::vector<Array>()));
 
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(std::vector<ChannelBufferPtr>()));
+              ChannelBuffers::wrappedBuffer(std::vector<ChannelBufferPtr>()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ChannelBuffers::buffer(0), ChannelBufferPtr()));
+              ChannelBuffers::wrappedBuffer(ChannelBuffers::buffer(0), ChannelBufferPtr()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::wrappedBuffer(ChannelBuffers::buffer(0), ChannelBuffers::buffer(0), ChannelBufferPtr()));
+              ChannelBuffers::wrappedBuffer(ChannelBuffers::buffer(0), ChannelBuffers::buffer(0), ChannelBufferPtr()));
 
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(Array()));
+              ChannelBuffers::copiedBuffer(Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array()));
+              ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(Array(tmpBytes, 8), 0, 0));
+              ChannelBuffers::copiedBuffer(Array(tmpBytes, 8), 0, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 0, 0));
+              ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 0, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(Array(tmpBytes, 8), 8, 0));
+              ChannelBuffers::copiedBuffer(Array(tmpBytes, 8), 8, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 8, 0));
+              ChannelBuffers::copiedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(tmpBytes, 8), 8, 0));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ChannelBuffers::EMPTY_BUFFER));
+              ChannelBuffers::copiedBuffer(ChannelBuffers::EMPTY_BUFFER));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(std::vector<Array>()));
+              ChannelBuffers::copiedBuffer(std::vector<Array>()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(Array(), Array()));
+              ChannelBuffers::copiedBuffer(Array(), Array()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(std::vector<ChannelBufferPtr>()));
+              ChannelBuffers::copiedBuffer(std::vector<ChannelBufferPtr>()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ChannelBuffers::buffer(0), ChannelBufferPtr()));
+              ChannelBuffers::copiedBuffer(ChannelBuffers::buffer(0), ChannelBufferPtr()));
     ASSERT_EQ(ChannelBuffers::EMPTY_BUFFER,
-        ChannelBuffers::copiedBuffer(ChannelBuffers::buffer(0), ChannelBuffers::buffer(0), ChannelBufferPtr()));
+              ChannelBuffers::copiedBuffer(ChannelBuffers::buffer(0), ChannelBuffers::buffer(0), ChannelBufferPtr()));
 }
 
 TEST(ChannelBuffersTest, shouldAllowEmptyBufferToCreateCompositeBuffer) {
     ChannelBufferPtr buf = ChannelBuffers::wrappedBuffer(
-            ChannelBuffers::EMPTY_BUFFER,
-            ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(new char[16], 16)),
-            ChannelBuffers::EMPTY_BUFFER, ChannelBufferPtr());
+                               ChannelBuffers::EMPTY_BUFFER,
+                               ChannelBuffers::wrappedBuffer(ByteOrder::BYTE_ORDER_LITTLE, Array(new char[16], 16)),
+                               ChannelBuffers::EMPTY_BUFFER, ChannelBufferPtr());
     ASSERT_EQ(16, buf->capacity());
 }
 
@@ -221,40 +222,40 @@ TEST(ChannelBuffersTest, testWrappedBuffer) {
     //ASSERT_EQ(16, ChannelBuffers::wrappedBuffer(ByteBuffer.allocateDirect(16)).capacity());
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3), Array())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3), Array())));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::wrappedBuffer(
-                    ArrayUtil::create(1, 1),
-                    ArrayUtil::create(1, 2),
-                    ArrayUtil::create(1, 3))));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::wrappedBuffer(
+                        ArrayUtil::create(1, 1),
+                        ArrayUtil::create(1, 2),
+                        ArrayUtil::create(1, 3))));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::wrappedBuffer(
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)), ChannelBufferPtr())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::wrappedBuffer(
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)), ChannelBufferPtr())));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::wrappedBuffer(
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 1)),
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 2)),
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 3)))));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::wrappedBuffer(
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 1)),
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 2)),
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 3)))));
 
-//     ASSERT_EQ(
-//             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
-//             ChannelBuffers::wrappedBuffer(new ByteBuffer[] {
-//                     ByteBuffer.wrap(ArrayUtil::create( 1, 2, 3 })
-//             }));
-// 
-//     ASSERT_EQ(
-//             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
-//             ChannelBuffers::wrappedBuffer(
-//                     ByteBuffer.wrap(ArrayUtil::create( 1 }),
-//                     ByteBuffer.wrap(ArrayUtil::create( 2 }),
-//                     ByteBuffer.wrap(ArrayUtil::create( 3 })));
+    //     ASSERT_EQ(
+    //             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
+    //             ChannelBuffers::wrappedBuffer(new ByteBuffer[] {
+    //                     ByteBuffer.wrap(ArrayUtil::create( 1, 2, 3 })
+    //             }));
+    //
+    //     ASSERT_EQ(
+    //             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
+    //             ChannelBuffers::wrappedBuffer(
+    //                     ByteBuffer.wrap(ArrayUtil::create( 1 }),
+    //                     ByteBuffer.wrap(ArrayUtil::create( 2 }),
+    //                     ByteBuffer.wrap(ArrayUtil::create( 3 })));
 }
 
 
@@ -262,41 +263,41 @@ TEST(ChannelBuffersTest, testCopiedBuffer) {
     //ASSERT_EQ(16, ChannelBuffers::copiedBuffer(ByteBuffer.allocateDirect(16)).capacity());
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::copiedBuffer(ArrayUtil::create(3, 1, 2, 3), Array())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::copiedBuffer(ArrayUtil::create(3, 1, 2, 3), Array())));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::copiedBuffer(
-                    ArrayUtil::create(1, 1),
-                    ArrayUtil::create(1, 2),
-                    ArrayUtil::create(1, 3), Array())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::copiedBuffer(
+                        ArrayUtil::create(1, 1),
+                        ArrayUtil::create(1, 2),
+                        ArrayUtil::create(1, 3), Array())));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::copiedBuffer(
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)), ChannelBufferPtr())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::copiedBuffer(
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)), ChannelBufferPtr())));
 
     ASSERT_TRUE(ChannelBuffers::equals(
-            ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
-            ChannelBuffers::copiedBuffer(
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 1)),
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 2)),
-                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 3)),
-                    ChannelBufferPtr())));
+                    ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 1, 2, 3)),
+                    ChannelBuffers::copiedBuffer(
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 1)),
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 2)),
+                        ChannelBuffers::wrappedBuffer(ArrayUtil::create(1, 3)),
+                        ChannelBufferPtr())));
 
-//     ASSERT_EQ(
-//             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
-//             ChannelBuffers::copiedBuffer(new ByteBuffer[] {
-//                     ByteBuffer.wrap(ArrayUtil::create( 1, 2, 3 })
-//             }));
-// 
-//     ASSERT_EQ(
-//             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
-//             ChannelBuffers::copiedBuffer(
-//                     ByteBuffer.wrap(ArrayUtil::create( 1 }),
-//                     ByteBuffer.wrap(ArrayUtil::create( 2 }),
-//                     ByteBuffer.wrap(ArrayUtil::create( 3 })));
+    //     ASSERT_EQ(
+    //             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
+    //             ChannelBuffers::copiedBuffer(new ByteBuffer[] {
+    //                     ByteBuffer.wrap(ArrayUtil::create( 1, 2, 3 })
+    //             }));
+    //
+    //     ASSERT_EQ(
+    //             ChannelBuffers::wrappedBuffer(ArrayUtil::create( 1, 2, 3 }),
+    //             ChannelBuffers::copiedBuffer(
+    //                     ByteBuffer.wrap(ArrayUtil::create( 1 }),
+    //                     ByteBuffer.wrap(ArrayUtil::create( 2 }),
+    //                     ByteBuffer.wrap(ArrayUtil::create( 3 })));
 }
 
 
@@ -304,10 +305,10 @@ TEST(ChannelBuffersTest, testHexDump) {
     ASSERT_STREQ("", ChannelBuffers::hexDump(*ChannelBuffers::EMPTY_BUFFER).c_str());
 
     ASSERT_STREQ("123456", ChannelBuffers::hexDump(
-        *ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 0x12, 0x34, 0x56))).c_str());
+                     *ChannelBuffers::wrappedBuffer(ArrayUtil::create(3, 0x12, 0x34, 0x56))).c_str());
 
     ASSERT_STREQ("1234567890abcdef", ChannelBuffers::hexDump(
-        *ChannelBuffers::wrappedBuffer(ArrayUtil::create(8, 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF))).c_str());
+                     *ChannelBuffers::wrappedBuffer(ArrayUtil::create(8, 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF))).c_str());
 }
 
 
@@ -319,7 +320,7 @@ TEST(ChannelBuffersTest, testSwapMedium) {
 
 TEST(ChannelBuffersTest, testUnmodifiableBuffer) {
     ChannelBufferPtr buf = ChannelBuffers::unmodifiableBuffer(ChannelBuffers::buffer(16));
-    
+
     ASSERT_THROW(buf->discardReadBytes(), ReadOnlyBufferException);
     ASSERT_THROW(buf->setByte(0, 0), ReadOnlyBufferException);
     ASSERT_THROW(buf->setBytes(0, *ChannelBuffers::EMPTY_BUFFER, 0, 0), ReadOnlyBufferException);
@@ -331,18 +332,18 @@ TEST(ChannelBuffersTest, testUnmodifiableBuffer) {
     ASSERT_THROW(buf->setLong(0, 0), ReadOnlyBufferException);
 
 
-//     try {
-//         buf->setBytes(0, EasyMock.createMock(InputStream.class), 0);
-//         FAIL();
-//     } catch (const UnsupportedOperationException& e) {
-//         // Expected
-//     }
-// 
-//     try {
-//         buf->setBytes(0, EasyMock.createMock(ScatteringByteChannel.class), 0);
-//         FAIL();
-//     } catch (const UnsupportedOperationException& e) {
-//         // Expected
-//     }
+    //     try {
+    //         buf->setBytes(0, EasyMock.createMock(InputStream.class), 0);
+    //         FAIL();
+    //     } catch (const UnsupportedOperationException& e) {
+    //         // Expected
+    //     }
+    //
+    //     try {
+    //         buf->setBytes(0, EasyMock.createMock(ScatteringByteChannel.class), 0);
+    //         FAIL();
+    //     } catch (const UnsupportedOperationException& e) {
+    //         // Expected
+    //     }
 
 }

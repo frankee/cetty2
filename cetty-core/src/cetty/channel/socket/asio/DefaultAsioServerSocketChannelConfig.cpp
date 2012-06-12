@@ -23,7 +23,10 @@
 #include <cetty/util/Exception.h>
 #include <cetty/util/internal/ConversionUtil.h>
 
-namespace cetty { namespace channel { namespace socket { namespace asio { 
+namespace cetty {
+namespace channel {
+namespace socket {
+namespace asio {
 
 using namespace cetty::channel;
 using namespace cetty::channel::socket;
@@ -66,7 +69,7 @@ const boost::optional<bool>& DefaultAsioServerSocketChannelConfig::isReuseAddres
     if (this->acceptor.is_open()) {
         reuseAddress = isReuseAddress(this->acceptor);
     }
-    
+
     return reuseAddress;
 }
 
@@ -83,6 +86,7 @@ bool DefaultAsioServerSocketChannelConfig::isReuseAddress(tcp::acceptor& accepto
 
 void DefaultAsioServerSocketChannelConfig::setReuseAddress(bool reuseAddress) {
     this->reuseAddress = reuseAddress;
+
     if (this->acceptor.is_open()) {
         setReuseAddress(this->acceptor);
     }
@@ -127,6 +131,7 @@ int DefaultAsioServerSocketChannelConfig::getReceiveBufferSize(tcp::acceptor& ac
 void DefaultAsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) {
     if (receiveBufferSize > 0) {
         this->receiveBufferSize = receiveBufferSize;
+
         if (this->acceptor.is_open()) {
             setReceiveBufferSize(this->acceptor);
         }
@@ -176,4 +181,7 @@ bool DefaultAsioServerSocketChannelConfig::channelHasReaderBuffer() const {
 
 
 
-}}}}
+}
+}
+}
+}

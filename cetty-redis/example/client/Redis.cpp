@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 
     /*
     std::string buffer(1024* 100, 0xff);
-    
+
     client.set("test1", buffer);
     client.get("test1", boost::bind(myCallback, _1, _2));
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     values.push_back(std::make_pair("22", "12345--2"));
     client.hmset("ht", values);
     */
-    
+
     /*
     keys.push_back("11");
     keys.push_back("22");

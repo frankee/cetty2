@@ -14,7 +14,7 @@ class BaseInterface {
 public:
     virtual ~BaseInterface() {}
 
-    
+
     virtual std::string toString() const = 0;
 };
 
@@ -160,7 +160,7 @@ TEST(ChannelMessageTest, testVector2) {
 }
 
 TEST(ChannelMessageTest, testString) {
-    
+
 }
 
 TEST(ChannelMessageTest, testBasicAny) {

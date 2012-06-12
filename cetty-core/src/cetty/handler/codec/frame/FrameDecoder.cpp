@@ -116,9 +116,9 @@ void FrameDecoder::exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEv
 }
 
 void FrameDecoder::callDecode(ChannelHandlerContext& context,
-    const ChannelPtr& channel,
-    const ChannelBufferPtr& buffer,
-    const SocketAddress& remoteAddress) {
+                              const ChannelPtr& channel,
+                              const ChannelBufferPtr& buffer,
+                              const SocketAddress& remoteAddress) {
     while (buffer->readable()) {
         int oldReaderIndex = buffer->readerIndex();
         ChannelMessage frame = decode(context, channel, buffer);
@@ -210,8 +210,8 @@ ChannelBufferPtr& FrameDecoder::getCumulation(ChannelHandlerContext& ctx) {
 }
 
 cetty::channel::ChannelMessage FrameDecoder::decodeLast(ChannelHandlerContext& ctx,
-    const ChannelPtr& channel,
-    const ChannelBufferPtr& buffer) {
+        const ChannelPtr& channel,
+        const ChannelBufferPtr& buffer) {
     return decode(ctx, channel, buffer);
 }
 

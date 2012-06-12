@@ -76,13 +76,13 @@ TEST(ASioServerSocketShutdownTimeTest, testSuccessfulBindAttempt) {
         }
     }
     catch (...) {
-	}
+    }
 
-	startTime = boost::get_system_time();
+    startTime = boost::get_system_time();
     channel->close()->awaitUninterruptibly();
     bootstrap.releaseExternalResources();
 
-	long shutdownTime = (boost::get_system_time() - startTime).total_milliseconds();
+    long shutdownTime = (boost::get_system_time() - startTime).total_milliseconds();
     ASSERT_TRUE(shutdownTime < 500 /*"Shutdown takes too long: " + shutdownTime + " ms"*/);
 };
 

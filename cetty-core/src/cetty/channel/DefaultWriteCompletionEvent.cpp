@@ -26,10 +26,10 @@ namespace channel {
 
 DefaultWriteCompletionEvent::DefaultWriteCompletionEvent(const ChannelPtr& channel, int writtenAmount)
     : channel(channel),
-    writtenAmount(writtenAmount) {
-        if (writtenAmount < 0) {
-            throw InvalidArgumentException("writtenAmount must be a positive integer: ");
-        }
+      writtenAmount(writtenAmount) {
+    if (writtenAmount < 0) {
+        throw InvalidArgumentException("writtenAmount must be a positive integer: ");
+    }
 }
 
 DefaultWriteCompletionEvent::~DefaultWriteCompletionEvent() {
@@ -50,7 +50,7 @@ int DefaultWriteCompletionEvent::getWrittenAmount() const {
 std::string DefaultWriteCompletionEvent::toString() const {
     char buf[512];
     sprintf(buf, "%s WRITTEN_AMOUNT: %d",
-        channel->toString().c_str(), getWrittenAmount());
+            channel->toString().c_str(), getWrittenAmount());
 
     return buf;
 }

@@ -1,5 +1,7 @@
+#if !defined(CETTY_GEARMAN_GEARMANTASK_H)
+#define CETTY_GEARMAN_GEARMANTASK_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -15,27 +17,26 @@
  * under the License.
  */
 
-#include <cetty/channel/FixedReceiveBufferSizePredictor.h>
-#include <cetty/util/Exception.h>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <cetty/util/ReferenceCounter.h>
+
+#include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
-namespace channel {
+namespace gearman {
 
-FixedReceiveBufferSizePredictor::FixedReceiveBufferSizePredictor(int bufferSize) {
-    if (bufferSize <= 0) {
-        throw InvalidArgumentException("bufferSize must greater than 0: ");
-    }
+class GearmanTask : public cetty::util::ReferenceCounter<GearmanTask> {
+public:
+    GearmanMessagePtr request;
+    GearmanMessagePtr response;
 
-    this->bufferSize = bufferSize;
-}
+    std::string id;
+    boost::posix_time::ptime time;
+};
 
-int FixedReceiveBufferSizePredictor::nextReceiveBufferSize() const {
-    return this->bufferSize;
-}
-
-void FixedReceiveBufferSizePredictor::previousReceiveBufferSize(int previousReceiveBufferSize) {
-    // Ignore
-}
+typedef boost::intrusive_ptr<GearmanTask> GearmanTaskPtr;
 
 }
 }
+
+#endif //#if !defined(CETTY_GEARMAN_GEARMANTASK_H)

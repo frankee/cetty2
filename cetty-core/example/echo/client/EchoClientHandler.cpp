@@ -19,20 +19,21 @@
 using namespace cetty::channel::socket::asio;
 
 InternalLogger* EchoClientHandler::logger =
-                    InternalLoggerFactory::getInstance("EchoClientHandler");
+    InternalLoggerFactory::getInstance("EchoClientHandler");
 
 
 void EchoClientHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
     // Send back the received message to the remote peer.
     //transferredBytes.addAndGet(((ChannelBuffer) e.getMessage()).readableBytes());
-    
+
     const ChannelBufferPtr& buffer = e.getMessage().value<ChannelBufferPtr>();
+
     if (buffer) {
         int readableBytes = buffer->readableBytes();
 
         ChannelBufferPtr tmp = buffer->readBytes();
         ChannelPtr channel = e.getChannel();
-        
+
         if (intervalTime == 0) {
             channel->write(tmp);
         }

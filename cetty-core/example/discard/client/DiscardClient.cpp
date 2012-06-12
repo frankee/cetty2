@@ -48,7 +48,7 @@ int main(int argc, const char* argv[]) {
     // Print usage if no argument is specified.
     if (argc < 3 || argc > 4) {
         printf("Usage: DiscardClient"
-                " <host> <port> [<first message size>]");
+               " <host> <port> [<first message size>]");
         return -1;
     }
 
@@ -56,6 +56,7 @@ int main(int argc, const char* argv[]) {
     std::string host = argv[1];
     int port = Integer::parse(argv[2]);
     int firstMessageSize;
+
     if (argc == 4) {
         firstMessageSize = Integer::parse(argv[3]);
     }

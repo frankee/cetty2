@@ -16,9 +16,15 @@
 
 #include <cetty/handler/codec/http/QueryStringEncoder.h>
 
-namespace cetty { namespace handler { namespace codec { namespace http { 
+namespace cetty {
+namespace handler {
+namespace codec {
+namespace http {
 QueryStringEncoder::QueryStringEncoder(const std::string& uri) : uri(uri) {
 
 }
 
-}}}}
+}
+}
+}
+}

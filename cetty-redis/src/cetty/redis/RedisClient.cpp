@@ -31,11 +31,12 @@
 #include "RedisResponseDecoder.h"
 #include "RedisMessageHandler.h"
 
-namespace cetty { namespace redis {
+namespace cetty {
+namespace redis {
 
-    using namespace cetty::channel;
-    using namespace cetty::bootstrap;
-    using namespace cetty::channel::socket::asio;
+using namespace cetty::channel;
+using namespace cetty::bootstrap;
+using namespace cetty::channel::socket::asio;
 
 void dummyCallBack(const RedisReplyMessagePtr& reply) {
 #if defined(_DEBUG)
@@ -114,6 +115,7 @@ int cetty::redis::RedisClient::addServer(const std::string& host, int port) {
 
 void RedisClient::command(RedisCommandMaker& commandMaker, const CallBack& done) {
     RedisClientContext* context = getContext();
+
     if (context->connected()) {
         context->write(commandMaker.done());
         context->appendCallback(done);
@@ -121,11 +123,12 @@ void RedisClient::command(RedisCommandMaker& commandMaker, const CallBack& done)
     else {
         done(RedisReplyMessagePtr());
     }
-    
+
 }
 
 RedisClientContext* RedisClient::getContext() {
     RedisClientContext* context = clientContexts.begin()->second;
+
     if (context) {
         if (!context->connected()) {
             context->connect();
@@ -149,9 +152,11 @@ void RedisClient::get(const std::string& key, const StringCallBack& done) {
 
 void RedisClient::mget(const std::vector<std::string>& keys, const ArrayCallBack& done) {
     RedisCommandMaker maker("MGET");
+
     for (std::size_t i = 0; i < keys.size(); ++i) {
         maker << keys[i];
     }
+
     command(maker, boost::bind(arrayCallBack, _1, done));
 }
 
@@ -179,6 +184,7 @@ void RedisClient::hmset(const std::string& key, const std::vector<std::pair<std:
     RedisCommandMaker maker("HMSET");
 
     maker << key;
+
     for (std::size_t i = 0; i < fields.size(); ++i) {
         maker << fields[i].first << fields[i].second;
     }
@@ -190,6 +196,7 @@ void RedisClient::hmset(const std::string& key, const std::vector<std::pair<std:
     RedisCommandMaker maker("HMSET");
 
     maker << key;
+
     for (std::size_t i = 0; i < fields.size(); ++i) {
         maker << fields[i].first << fields[i].second;
     }
@@ -205,6 +212,7 @@ void RedisClient::hmget(const std::string& key, const std::vector<std::string>& 
     RedisCommandMaker maker("HMGET");
 
     maker << key;
+
     for (std::size_t i = 0; i < fields.size(); ++i) {
         maker << fields[i];
     }
@@ -230,9 +238,11 @@ void RedisClient::setnx(const std::string& key, const SimpleString& value) {
 
 bool RedisClient::connected() const {
     std::map<std::string, RedisClientContext*>::const_iterator itr = clientContexts.begin();
+
     for (; itr != clientContexts.end(); ++itr) {
-        if (itr->second->connected()) return true;
+        if (itr->second->connected()) { return true; }
     }
+
     return false;
 }
 
@@ -243,8 +253,8 @@ RedisClientContext::RedisClientContext(const std::string& host, int port)
         ChannelFactoryPtr(new AsioClientSocketChannelFactory()));
 
     bootstrap->setPipeline(Channels::pipeline(
-        ChannelHandlerPtr(new RedisResponseDecoder),
-        ChannelHandlerPtr(new RedisMessageHandler(boost::bind(&RedisClientContext::setDisconnected, this)))));
+                               ChannelHandlerPtr(new RedisResponseDecoder),
+                               ChannelHandlerPtr(new RedisMessageHandler(boost::bind(&RedisClientContext::setDisconnected, this)))));
 }
 
 int RedisClientContext::connect() {
@@ -253,6 +263,7 @@ int RedisClientContext::connect() {
 
     // Wait until the connection attempt succeeds or fails.
     channel = &(future->awaitUninterruptibly().getChannel());
+
     if (!future->isSuccess()) {
         printf("Exception happened, %s.", future->getCause()->what());
         //bootstrap->releaseExternalResources();
@@ -286,6 +297,7 @@ void RedisClientContext::appendCallback(const RedisClient::CallBack& callback) {
         if (!callback) {
             printf("append callback is empty.\n");
         }
+
         messageHandler->appendCallback(callback);
     }
 }
@@ -305,4 +317,5 @@ const TimerPtr& RedisClientContext::getTimer() {
     }
 }
 
-}}
+}
+}

@@ -64,13 +64,14 @@ TEST(ASioClientSocketShutdownTimeTest, testShutdownTime) {
         if (f->getCause() != NULL) {
             f->getCause()->rethrow();
         }
+
         ASSERT_TRUE(f->isSuccess());
 
         startTime = boost::get_system_time();
 
         f->getChannel().close()->awaitUninterruptibly();
     }
-    catch(...) {
+    catch (...) {
     }
 
     b.getFactory()->releaseExternalResources();

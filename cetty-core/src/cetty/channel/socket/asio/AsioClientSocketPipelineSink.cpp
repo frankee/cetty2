@@ -66,7 +66,7 @@ AsioClientSocketPipelineSink::~AsioClientSocketPipelineSink() {
 
 void AsioClientSocketPipelineSink::writeRequested(
     const ChannelPipeline& pipeline,
-        const MessageEvent& e) {
+    const MessageEvent& e) {
     const ChannelPtr& channel = e.getChannel();
     (static_cast<AsioSocketChannel*>(channel))->innerWrite(e);
 
@@ -75,7 +75,7 @@ void AsioClientSocketPipelineSink::writeRequested(
 
 void AsioClientSocketPipelineSink::stateChangeRequested(
     const ChannelPipeline& pipeline,
-        const ChannelStateEvent& e) {
+    const ChannelStateEvent& e) {
     handleStateChange(e);
 }
 
@@ -143,6 +143,7 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
 
     boost::system::error_code error;
     boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query, error);
+
     if (error) {
         LOG_ERROR(logger, "boost asio can NOT resolve %s:%s, code=%d, msg=%s, then firing this exception.", error.value(), error.message().c_str());
 
@@ -158,10 +159,10 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
     socketChannel->getSocket().async_connect(
         endpoint,
         boost::bind(&AsioSocketChannel::handleConnect,
-        socketChannel,
-        boost::asio::placeholders::error,
-        ++iterator,
-        cf));
+                    socketChannel,
+                    boost::asio::placeholders::error,
+                    ++iterator,
+                    cf));
 
     if (needStartRunService) {
         AsioClientSocketChannelFactory* factory

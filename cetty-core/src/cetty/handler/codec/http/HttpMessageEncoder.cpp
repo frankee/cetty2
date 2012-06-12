@@ -96,6 +96,7 @@ ChannelMessage HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
     }
 
     HttpChunkPtr chunk = msg.smartPointer<HttpChunk>();
+
     if (!chunk) {
         // Unknown message type.
         return msg;
@@ -117,8 +118,8 @@ ChannelMessage HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
                 trailer->writeByte(HttpCodecUtil::LF);
 
                 encodeHeaders(*trailer,
-                    chunkTrailer->getFirstHeader(),
-                    chunkTrailer->getLastHeader());
+                              chunkTrailer->getFirstHeader(),
+                              chunkTrailer->getLastHeader());
 
                 trailer->writeByte(HttpCodecUtil::CR);
                 trailer->writeByte(HttpCodecUtil::LF);
@@ -169,8 +170,8 @@ ChannelMessage HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
 }
 
 void HttpMessageEncoder::encodeHeaders(ChannelBuffer& buf,
-    const HttpMessage::ConstHeaderIterator& begin,
-    const HttpMessage::ConstHeaderIterator& end) {
+                                       const HttpMessage::ConstHeaderIterator& begin,
+                                       const HttpMessage::ConstHeaderIterator& end) {
 
     for (HttpMessage::ConstHeaderIterator itr = begin; itr != end; ++itr) {
         encodeHeader(buf, itr->first, itr->second);

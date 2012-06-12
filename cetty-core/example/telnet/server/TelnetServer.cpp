@@ -48,14 +48,17 @@ int main(int argc, char* argv[]) {
         printf("To quit server, press 'q'.\n");
 
         char input;
+
         do {
             input = getchar();
+
             if (input == 'q') {
                 c->close()->awaitUninterruptibly();
                 bootstrap.releaseExternalResources();
                 return 0;
             }
-        } while (true);
+        }
+        while (true);
     }
 
     bootstrap.releaseExternalResources();

@@ -21,28 +21,29 @@
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/Channel/DownstreamMessageEvent.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
 CopyableDownstreamMessageEvent::CopyableDownstreamMessageEvent(const ChannelPtr& channel,
-    const ChannelFuturePtr& future,
-    const ChannelMessage& message,
-    const SocketAddress& remoteAddress)
+        const ChannelFuturePtr& future,
+        const ChannelMessage& message,
+        const SocketAddress& remoteAddress)
     : channel(channel), future(future), message(message), remoteAddress(remoteAddress) {
 
 }
 
 CopyableDownstreamMessageEvent::CopyableDownstreamMessageEvent(const CopyableDownstreamMessageEvent& evt)
     : channel(evt.channel),
-    future(evt.future),
-    message(evt.message),
-    remoteAddress(evt.remoteAddress) {
+      future(evt.future),
+      message(evt.message),
+      remoteAddress(evt.remoteAddress) {
 }
 
 CopyableDownstreamMessageEvent::CopyableDownstreamMessageEvent(const DownstreamMessageEvent& evt)
     : channel(evt.getChannel()),
-    future(evt.getFuture()),
-    message(evt.getMessage()),
-    remoteAddress(evt.getRemoteAddress()) {
+      future(evt.getFuture()),
+      message(evt.getMessage()),
+      remoteAddress(evt.getRemoteAddress()) {
 }
 
 CopyableDownstreamMessageEvent& CopyableDownstreamMessageEvent::operator=(const CopyableDownstreamMessageEvent& evt) {
@@ -83,4 +84,5 @@ std::string CopyableDownstreamMessageEvent::toString() const {
     return buf;
 }
 
-}}
+}
+}

@@ -53,7 +53,7 @@ void OneToOneEncoder::writeRequested(ChannelHandlerContext& ctx, const MessageEv
 }
 
 void OneToOneEncoder::stateChangeRequested(ChannelHandlerContext& ctx,
-    const ChannelStateEvent& e) {
+        const ChannelStateEvent& e) {
     ctx.sendDownstream(e);
 }
 

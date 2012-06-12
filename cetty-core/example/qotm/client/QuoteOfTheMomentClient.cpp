@@ -45,9 +45,9 @@ int main(int argc, char* argv[]) {
 
     // Configure the pipeline factory.
     b.setPipeline(Channels::pipeline(
-        ChannelHandlerPtr(new StringEncoder()),
-        ChannelHandlerPtr(new StringDecoder()),
-        ChannelHandlerPtr(new QuoteOfTheMomentClientHandler())));
+                      ChannelHandlerPtr(new StringEncoder()),
+                      ChannelHandlerPtr(new StringDecoder()),
+                      ChannelHandlerPtr(new QuoteOfTheMomentClientHandler())));
 
     // Enable broadcast
     b.setOption("broadcast", boost::any(true));

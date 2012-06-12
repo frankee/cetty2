@@ -54,8 +54,8 @@ ChannelFuturePtr ClientBootstrap::connect() {
     if (remoteAddress == NULL) {
         LOG_ERROR(logger, "has not set the remoteAddress, connect failed.");
         return Channels::failedFuture(
-            NullChannel::getInstance(),
-            IllegalStateException("remoteAddress option is not set."));
+                   NullChannel::getInstance(),
+                   IllegalStateException("remoteAddress option is not set."));
     }
 
     return connect(*remoteAddress);
@@ -88,11 +88,12 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     SocketAddress local  = localAddress;
 
     const ChannelPipelineFactoryPtr& factory = getPipelineFactory();
+
     if (!factory) {
         LOG_ERROR(logger, "has not set the pipeline factory, then return a failed future.");
         return Channels::failedFuture(
-            NullChannel::getInstance(),
-            ChannelPipelineException("has not set the pipeline factory."));
+                   NullChannel::getInstance(),
+                   ChannelPipelineException("has not set the pipeline factory."));
     }
 
     try {
@@ -101,16 +102,17 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     catch (...) {
         LOG_ERROR(logger, "has an exception when get pipeline from factory, then return a failed future.");
         return Channels::failedFuture(
-            NullChannel::getInstance(),
-            ChannelPipelineException("Failed to initialize a pipeline."));
+                   NullChannel::getInstance(),
+                   ChannelPipelineException("Failed to initialize a pipeline."));
     }
 
     ch = getFactory()->newChannel(pipeline);
+
     if (!ch) {
         LOG_ERROR(logger, "failed to create a new channel from the factory, then return a failed future.");
         return Channels::failedFuture(
-            NullChannel::getInstance(),
-            ChannelPipelineException("Failed to create a new channel."));
+                   NullChannel::getInstance(),
+                   ChannelPipelineException("Failed to create a new channel."));
     }
 
     // Set the options.

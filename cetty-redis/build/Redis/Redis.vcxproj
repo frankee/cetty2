@@ -11,21 +11,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\redis\Redis.cpp" />
-    <ClCompile Include="..\..\example\redis\RedisClient.cpp" />
-    <ClCompile Include="..\..\example\redis\RedisMessageHandler.cpp" />
-    <ClCompile Include="..\..\example\redis\RedisReplyMessage.cpp" />
-    <ClCompile Include="..\..\example\redis\RedisResponseDecoder.cpp" />
+    <ClInclude Include="..\..\src\cetty\redis\RedisClient.h" />
+    <ClInclude Include="..\..\src\cetty\redis\RedisCommandMaker.h" />
+    <ClInclude Include="..\..\src\cetty\redis\RedisMessageHandler.h" />
+    <ClInclude Include="..\..\src\cetty\redis\RedisReplyMessage.h" />
+    <ClInclude Include="..\..\src\cetty\redis\RedisResponseDecoder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\example\redis\RedisClient.h" />
-    <ClInclude Include="..\..\example\redis\RedisCommandMaker.h" />
-    <ClInclude Include="..\..\example\redis\RedisMessageHandler.h" />
-    <ClInclude Include="..\..\example\redis\RedisResponseDecoder.h" />
-    <ClInclude Include="..\..\example\redis\RedisReplyMessage.h" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisMessageHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisResponseDecoder.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}</ProjectGuid>
+    <ProjectGuid>{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}</ProjectGuid>
     <RootNamespace>Redis</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

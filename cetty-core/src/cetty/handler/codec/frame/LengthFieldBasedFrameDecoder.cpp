@@ -133,8 +133,8 @@ LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         buffer->skipBytes(frameLengthInt);
         std::string msg;
         StringUtil::strprintf(&msg,
-            "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
-            frameLength, initialBytesToStrip);
+                              "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
+                              frameLength, initialBytesToStrip);
         throw CorruptedFrameException(msg);
     }
 
@@ -157,10 +157,11 @@ LengthFieldBasedFrameDecoder::extractFrame(const ChannelBufferPtr& buffer, int i
 
 void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx, int frameLength) {
     std::string msg;
+
     if (frameLength > 0) {
         StringUtil::strprintf(&msg,
-            "Adjusted frame length exceeds %d: % - discarded.",
-            maxFrameLength, frameLength);
+                              "Adjusted frame length exceeds %d: % - discarded.",
+                              maxFrameLength, frameLength);
         Channels::fireExceptionCaught(ctx.getChannel(), TooLongFrameException(msg));
     }
     else {
@@ -215,9 +216,9 @@ void LengthFieldBasedFrameDecoder::validateParameters() {
     if (lengthFieldOffset > maxFrameLength - lengthFieldLength) {
         std::string msg;
         StringUtil::strprintf(&msg,
-            "maxFrameLength (%d) must be equal to or greater \
+                              "maxFrameLength (%d) must be equal to or greater \
             than lengthFieldOffset (%d) + lengthFieldLength (%d).",
-            maxFrameLength, lengthFieldOffset, lengthFieldLength);
+                              maxFrameLength, lengthFieldOffset, lengthFieldLength);
 
         throw InvalidArgumentException(msg);
     }

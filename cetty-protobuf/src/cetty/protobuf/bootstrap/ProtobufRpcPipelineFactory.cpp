@@ -27,7 +27,10 @@
 #include "cetty/handler/rpc/protobuf/ProtobufRpcMessageHandler.h"
 
 
-namespace cetty { namespace handler { namespace rpc { namespace protobuf {
+namespace cetty {
+namespace handler {
+namespace rpc {
+namespace protobuf {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
@@ -45,12 +48,14 @@ ChannelPipeline* ProtobufRpcPipelineFactory::getPipeline() {
     pipeline->addLast("protobufEncoder", new ProtobufEncoder());
 
     ProtobufRpcMessageHandlerPtr handler;
+
     if (this->messageHandler) {
         handler = boost::dynamic_pointer_cast<ProtobufRpcMessageHandler>(this->messageHandler->clone());
     }
     else {
         handler = ProtobufRpcMessageHandlerPtr(new ProtobufRpcMessageHandler());
     }
+
     handler->setServices(&(this->servicesRegister));
 
     google::protobuf::RpcChannel* rpcChannel =
@@ -67,4 +72,7 @@ void ProtobufRpcPipelineFactory::setMessageHandler(const ProtobufRpcMessageHandl
     this->messageHandler = handler;
 }
 
-}}}}
+}
+}
+}
+}

@@ -16,7 +16,10 @@
 
 #include <cetty/handler/codec/http/QueryStringDecoder.h>
 
-namespace cetty { namespace handler { namespace codec { namespace http { 
+namespace cetty {
+namespace handler {
+namespace codec {
+namespace http {
 
 static void decodeParams(const std::string& s, NameValueCollection& params) {
     std::string name;
@@ -79,4 +82,7 @@ void QueryStringDecoder::getParameters(NameValueCollection* params) const {
     }
 }
 
-}}}}
+}
+}
+}
+}

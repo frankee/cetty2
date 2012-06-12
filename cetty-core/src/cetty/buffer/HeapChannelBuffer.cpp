@@ -118,6 +118,7 @@ int HeapChannelBuffer::getBytes(int index, Array* dst, int dstIndex, int length)
         Array::copy(*dst, dstIndex, this->arry, index, length);
         return length;
     }
+
     return 0;
 }
 
@@ -125,6 +126,7 @@ int HeapChannelBuffer::getBytes(int index, OutputStream* out, int length) const 
     if (out) {
         return out->write((const boost::int8_t*)arry.data(), index, length);
     }
+
     return 0;
 }
 

@@ -19,16 +19,17 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/util/Exception.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
 using namespace cetty::util;
 
 DefaultExceptionEvent::DefaultExceptionEvent(const ChannelPtr& channel,
-                                             const Exception& cause)
+        const Exception& cause)
     : channel(channel),
-    future(channel->getSucceededFuture()),
-    cause(cause) {
-        //StackTraceSimplifier.simplify(cause);
+      future(channel->getSucceededFuture()),
+      cause(cause) {
+    //StackTraceSimplifier.simplify(cause);
 }
 
 DefaultExceptionEvent::~DefaultExceptionEvent() {
@@ -55,4 +56,5 @@ std::string DefaultExceptionEvent::toString() const {
     return buf;
 }
 
-}}
+}
+}

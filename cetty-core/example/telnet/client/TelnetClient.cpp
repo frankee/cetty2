@@ -64,6 +64,7 @@ int main(int argc, char* argv[]) {
 
     // Wait until the connection attempt succeeds or fails.
     Channel& channel = future->awaitUninterruptibly().getChannel();
+
     if (!future->isSuccess()) {
         printf("Exception happened, %s.", future->getCause()->what());
         bootstrap.releaseExternalResources();
@@ -73,13 +74,14 @@ int main(int argc, char* argv[]) {
     // Read commands from the stdin.
     ChannelFuturePtr lastWriteFuture;
     std::string line;
+
     while (true) {
         line.clear();
         std::cout << "->";
         getline(std::cin, line);
-//         if (line.size() == 0) {
-//             break;
-//         }
+        //         if (line.size() == 0) {
+        //             break;
+        //         }
 
         line.append("\r\n");
 

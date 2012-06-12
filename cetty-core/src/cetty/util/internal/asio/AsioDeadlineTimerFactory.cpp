@@ -28,14 +28,17 @@
 #include <cetty/logging/InternalLoggerFactory.h>
 
 
-namespace cetty { namespace util { namespace internal { namespace asio { 
+namespace cetty {
+namespace util {
+namespace internal {
+namespace asio {
 
-    using namespace cetty::util;
-    using namespace cetty::channel;
-    using namespace cetty::logging;
-    using namespace cetty::channel::socket::asio;
+using namespace cetty::util;
+using namespace cetty::channel;
+using namespace cetty::logging;
+using namespace cetty::channel::socket::asio;
 
-    InternalLogger* AsioDeadlineTimerFactory::logger = NULL;
+InternalLogger* AsioDeadlineTimerFactory::logger = NULL;
 
 AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const AsioServicePtr& service) {
     BOOST_ASSERT(service && "Initialized service CAN NOT BE NULL.");
@@ -51,7 +54,7 @@ AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const AsioServicePtr& service
 
 AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const AsioServicePoolPtr& pool) {
     BOOST_ASSERT(pool && "Initialized pool CAN NOT BE NULL.");
-    
+
     if (pool) {
         AsioServicePool::Iterator itr = pool->begin();
         AsioServicePool::Iterator end = pool->end();
@@ -71,11 +74,13 @@ AsioDeadlineTimerFactory::~AsioDeadlineTimerFactory() {
     stopTimers();
 
     std::map<int, TimerPtr>::iterator itr;
+
     for (itr = timers.begin(); itr != timers.end(); ++itr) {
         const TimerPtr& ptr = itr->second;
         BOOST_ASSERT(ptr);
         delete ptr;
     }
+
     timers.clear();
 }
 
@@ -88,7 +93,7 @@ const TimerPtr& AsioDeadlineTimerFactory::getTimer(const ChannelPtr& channel) {
         throw RuntimeException("AsioDeadlineTimerFactory using before initialized.");
     }
 
-    // if the channel ptr is null, using the standalone timer. 
+    // if the channel ptr is null, using the standalone timer.
     if (!channel) {
         LOG_WARN(logger, "the input channel is NULL, return the default timer, you should make sure the thread safe.");
         return timers.begin()->second;
@@ -100,7 +105,7 @@ const TimerPtr& AsioDeadlineTimerFactory::getTimer(const ChannelPtr& channel) {
     if (socketChannel) {
         return timers[socketChannel->getService()->getId()];
     }
-    
+
     // TODO: CHECK UDP HERE
     //AsioDatagramChannel* datagramChannel =
     //    dynamic_cast<AsioDatagramChannel*>(channel.get());
@@ -120,4 +125,7 @@ void AsioDeadlineTimerFactory::stopTimers() {
     }
 }
 
-}}}}
+}
+}
+}
+}

@@ -40,7 +40,7 @@ using namespace cetty::channel::socket::asio;
 
 int main(int argc, const char* argv[]) {
     // Configure the server.
-    ServerBootstrap bootstrap (
+    ServerBootstrap bootstrap(
         ChannelFactoryPtr(new AsioServerSocketChannelFactory(0)));
 
     bootstrap.setOption("child.tcpNoDelay", boost::any(true));

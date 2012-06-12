@@ -62,14 +62,14 @@ public:
     }
 };
 
-AbstractChannel::AbstractChannel(const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink) 
+AbstractChannel::AbstractChannel(const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink)
     : parent(parent), factory(factory), pipeline(pipeline), interestOps(OP_READ) {
     BOOST_ASSERT(factory && pipeline && sink && "input must not to be NULL!");
     init(pipeline, sink);
     id = allocateId(this);
 }
 
-AbstractChannel::AbstractChannel(int id, const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink) 
+AbstractChannel::AbstractChannel(int id, const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink)
     : id(id), parent(parent), factory(factory), pipeline(pipeline), interestOps(OP_READ) {
     BOOST_ASSERT(factory && pipeline && sink && "input must not to be NULL!");
     init(pipeline, sink);
@@ -88,7 +88,7 @@ ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message,
     ChannelFuturePtr future;
 
     //if (withFuture) {
-        future = Channels::future(this);
+    future = Channels::future(this);
     //}
 
     pipeline->sendDownstream(DownstreamMessageEvent(this, future, message, remoteAddress));
@@ -133,7 +133,7 @@ ChannelFuturePtr AbstractChannel::setInterestOps(int interestOps) {
 }
 
 void AbstractChannel::init(const ChannelPipelinePtr& pipeline,
-                            const ChannelSinkPtr& sink) {
+                           const ChannelSinkPtr& sink) {
     pipeline->attach(this, sink);
     succeededFuture = new SucceededChannelFuture(this);
     closeFuture = new ChannelCloseFuture(this);
@@ -205,7 +205,7 @@ bool AbstractChannel::setClosed() {
 
 cetty::channel::ChannelFuturePtr AbstractChannel::getUnsupportedOperationFuture() {
     return ChannelFuturePtr(
-        new FailedChannelFuture(this, UnsupportedOperationException()));
+               new FailedChannelFuture(this, UnsupportedOperationException()));
 }
 
 void AbstractChannel::setInterestOpsNow(int interestOps) {
@@ -259,18 +259,18 @@ std::string AbstractChannel::toString() const {
     if (remoteAddress.validated()) {
         if (NULL == getParent()) { // server channel or client channel
             sprintf(buf, "[id: 0x%08x, %s => %s]", getId(),
-                localAddress.toString().c_str(),
-                remoteAddress.toString().c_str());
+                    localAddress.toString().c_str(),
+                    remoteAddress.toString().c_str());
         }
         else { // connection channel
             sprintf(buf, "[id: 0x%08x, %s => %s]", getId(),
-                remoteAddress.toString().c_str(),
-                localAddress.toString().c_str());
+                    remoteAddress.toString().c_str(),
+                    localAddress.toString().c_str());
         }
     }
     else if (localAddress.validated()) {
         sprintf(buf, "[id: 0x%08x, %s]", getId(),
-            localAddress.toString().c_str());
+                localAddress.toString().c_str());
     }
     else {
         sprintf(buf, "[id: 0x%08x]", getId());
@@ -290,6 +290,7 @@ int AbstractChannel::compareTo(const ChannelPtr& c) const {
     if (c) {
         return (getId() - c->getId());
     }
+
     return 1;
 }
 

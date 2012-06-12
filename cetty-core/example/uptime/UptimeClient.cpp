@@ -47,7 +47,7 @@ public:
         // Print usage if no argument is specified.
         if (argc != 3) {
             printf(
-                    "Usage: UptimeClient <host> <port>");
+                "Usage: UptimeClient <host> <port>");
             return;
         }
 
@@ -60,7 +60,7 @@ public:
 
         // Configure the client.
         ClientBootstrap bootstrap(ChannelFactoryPtr(
-                new AsioClientSocketChannelFactory(0)));
+                                      new AsioClientSocketChannelFactory(0)));
 
         // Configure the pipeline factory.
         bootstrap.getPipeline()->addLast(

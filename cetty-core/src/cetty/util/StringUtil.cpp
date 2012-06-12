@@ -92,86 +92,112 @@ void StringUtil::vstrprintf(std::string* dest, const char* format, va_list ap) {
             size_t cbsiz = 1;
             int32_t lnum = 0;
             format++;
+
             while (std::strchr("0123456789 .+-hlLz", *format) && *format != '\0' &&
-                cbsiz < NUMBUFSIZ - 1) {
-                    if (*format == 'l' || *format == 'L') lnum++;
-                    cbuf[cbsiz++] = *(format++);
+                    cbsiz < NUMBUFSIZ - 1) {
+                if (*format == 'l' || *format == 'L') { lnum++; }
+
+                cbuf[cbsiz++] = *(format++);
             }
+
             cbuf[cbsiz++] = *format;
             cbuf[cbsiz] = '\0';
+
             switch (*format) {
             case 's': {
                 const char* tmp = va_arg(ap, const char*);
+
                 if (tmp) {
                     dest->append(tmp);
-                } else {
+                }
+                else {
                     dest->append("(null)");
                 }
+
                 break;
-                      }
+            }
+
             case 'd': {
                 char tbuf[NUMBUFSIZ*4];
                 size_t tsiz;
+
                 if (lnum >= 2) {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, long long));
-                } else if (lnum >= 1) {
+                }
+                else if (lnum >= 1) {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, long));
-                } else {
+                }
+                else {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, int));
                 }
+
                 dest->append(tbuf, tsiz);
                 break;
-                      }
+            }
+
             case 'o': case 'u': case 'x': case 'X': case 'c': {
                 char tbuf[NUMBUFSIZ*4];
                 size_t tsiz;
+
                 if (lnum >= 2) {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, unsigned long long));
-                } else if (lnum >= 1) {
+                }
+                else if (lnum >= 1) {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, unsigned long));
-                } else {
+                }
+                else {
                     tsiz = std::sprintf(tbuf, cbuf, va_arg(ap, unsigned int));
                 }
+
                 dest->append(tbuf, tsiz);
                 break;
-                      }
+            }
+
             case 'e': case 'E': case 'f': case 'g': case 'G': {
                 char tbuf[NUMBUFSIZ*4];
                 size_t tsiz;
+
                 if (lnum >= 1) {
 #if defined(_MSC_VER)
                     tsiz = _snprintf(tbuf, sizeof(tbuf), cbuf, va_arg(ap, long double));
 #else
                     tsiz = snprintf(tbuf, sizeof(tbuf), cbuf, va_arg(ap, long double));
 #endif
-                } else {
+                }
+                else {
 #if defined(_MSC_VER)
                     tsiz = _snprintf(tbuf, sizeof(tbuf), cbuf, va_arg(ap, double));
 #else
                     tsiz = snprintf(tbuf, sizeof(tbuf), cbuf, va_arg(ap, double));
 #endif
                 }
+
                 if (tsiz > sizeof(tbuf)) {
                     tbuf[sizeof(tbuf)-1] = '*';
                     tsiz = sizeof(tbuf);
                 }
+
                 dest->append(tbuf, tsiz);
                 break;
-                      }
+            }
+
             case 'p': {
                 char tbuf[NUMBUFSIZ*4];
                 size_t tsiz = std::sprintf(tbuf, "%p", va_arg(ap, void*));
                 dest->append(tbuf, tsiz);
                 break;
-                      }
+            }
+
             case '%': {
                 dest->append("%", 1);
                 break;
-                      }
             }
-        } else {
+            }
+        }
+        else {
             dest->append(format, 1);
         }
+
         format++;
     }
 }

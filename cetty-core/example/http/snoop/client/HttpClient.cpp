@@ -58,6 +58,7 @@ int main(int argc, const char* argv[]) {
     std::string scheme = uri.getScheme().empty() ? "http" : uri.getScheme();
     std::string host = uri.getHost().empty() ? "localhost" : uri.getHost();
     int port = uri.getPort();
+
     if (port == -1) {
         if (scheme == "http") {
             port = 80;
@@ -87,6 +88,7 @@ int main(int argc, const char* argv[]) {
 
     // Wait until the connection attempt succeeds or fails.
     Channel& channel = future->awaitUninterruptibly().getChannel();
+
     if (!future->isSuccess()) {
         bootstrap.releaseExternalResources();
         return -1;
@@ -95,8 +97,8 @@ int main(int argc, const char* argv[]) {
     // Prepare the HTTP request.
     HttpRequestPtr request =
         HttpRequestPtr(new DefaultHttpRequest(HttpVersion::HTTP_1_1,
-                                              HttpMethod::HM_GET,
-                                              uri.toString()));
+                       HttpMethod::HM_GET,
+                       uri.toString()));
 
     request->setHeader(HttpHeaders::Names::HOST, host);
     request->setHeader(HttpHeaders::Names::CONNECTION, HttpHeaders::Values::CLOSE);

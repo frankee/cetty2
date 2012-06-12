@@ -38,18 +38,18 @@ InternalLogger* Bootstrap::logger = NULL;
 Bootstrap::Bootstrap()
     : externalSetPipelineFactory(false), pipeline(NULL), factory(NULL) {
 
-        if (NULL == logger) {
-            logger = InternalLoggerFactory::getInstance("Bootstrap");
-        }
+    if (NULL == logger) {
+        logger = InternalLoggerFactory::getInstance("Bootstrap");
+    }
 }
 
 Bootstrap::Bootstrap(const ChannelFactoryPtr& channelFactory)
     : externalSetPipelineFactory(false), pipeline(NULL), factory(NULL) {
-        setFactory(channelFactory);
+    setFactory(channelFactory);
 
-        if (NULL == logger) {
-            logger = InternalLoggerFactory::getInstance("Bootstrap");
-        }
+    if (NULL == logger) {
+        logger = InternalLoggerFactory::getInstance("Bootstrap");
+    }
 }
 
 Bootstrap::~Bootstrap() {

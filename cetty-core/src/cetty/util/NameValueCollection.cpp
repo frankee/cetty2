@@ -119,28 +119,33 @@ const std::string& NameValueCollection::get(const std::string& name, const std::
 
 const int NameValueCollection::get(const std::string& name, std::vector<std::string>* values) const {
     int count = 0;
+
     if (values) {
         ConstIterator itr = _map.find(name);
+
         for (; itr != _map.end(); ++itr) {
             values->push_back(itr->second);
             ++count;
         }
     }
+
     return count;
 }
 
 const int NameValueCollection::getNames(std::vector<std::string>* names) const {
     int count = 0;
+
     if (names) {
         for (ConstIterator itr = _map.begin(); itr != _map.end(); ++itr) {
             bool duplicated = false;
+
             for (std::vector<std::string>::const_iterator i = names->begin(); i != names->end(); ++i) {
                 if (boost::iequals(*i, itr->second)) {
                     duplicated = true;
                     break;
                 }
             }
-            
+
             if (!duplicated) {
                 names->push_back(itr->second);
                 ++count;

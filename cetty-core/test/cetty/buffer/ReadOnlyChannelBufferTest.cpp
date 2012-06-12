@@ -26,14 +26,14 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 /**
-* 
+*
 * @author <a href="http://gleamynode.net/">Trustin Lee</a>
 *
 * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
 *
 */
 // public class ReadOnlyChannelBufferTest {
-// 
+//
 //     @Test(expected = NullPointerException.class)
 //     public void shouldNotAllowNullInConstructor() {
 //         new ReadOnlyChannelBuffer(null);
@@ -47,8 +47,8 @@ TEST(ReadOnlyChannelBufferTest, testUnmodifiableBuffer) {
 TEST(ReadOnlyChannelBufferTest, testUnwrap) {
     ChannelBufferPtr buf = ChannelBuffers::buffer(1);
     ReadOnlyChannelBufferPtr wrapBuf =
-                                boost::dynamic_pointer_cast<ReadOnlyChannelBuffer>(
-                                    ChannelBuffers::unmodifiableBuffer(buf));
+        boost::dynamic_pointer_cast<ReadOnlyChannelBuffer>(
+            ChannelBuffers::unmodifiableBuffer(buf));
     ASSERT_EQ(buf, wrapBuf->unwrap());
 }
 
@@ -165,7 +165,7 @@ TEST(ReadOnlyChannelBufferTest, shouldRejectSetLong) {
 //     ASSERT_THROW(
 //         ChannelBuffers::unmodifiableBuffer(ChannelBuffers::EMPTY_BUFFER).setBytes(0, (InputStream) null, 0);
 // }
-// 
+//
 // TEST(ReadOnlyChannelBufferTest, shouldRejectSetBytes2) {
 //     ASSERT_THROW(
 //         ChannelBuffers::unmodifiableBuffer(ChannelBuffers::EMPTY_BUFFER).setBytes(0, (ScatteringByteChannel) null, 0);

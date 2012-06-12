@@ -39,6 +39,7 @@ void TimerFactory::resetFactory(const TimerFactoryPtr& timerFactory) {
             // log here.
             factory->stopTimers();
         }
+
         factory = timerFactory;
     }
 }

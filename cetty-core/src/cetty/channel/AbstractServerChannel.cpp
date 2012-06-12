@@ -16,7 +16,8 @@
 
 #include <cetty/channel/AbstractServerChannel.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
 
 AbstractServerChannel::AbstractServerChannel(const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink) : AbstractChannel(ChannelPtr(), factory, pipeline, sink) {
@@ -59,4 +60,5 @@ void AbstractServerChannel::setInterestOpsNow(int interestOps) {
     // Ignore.
 }
 
-}}
+}
+}

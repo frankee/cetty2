@@ -44,12 +44,13 @@ std::string HttpResponse::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-        "HttpResponse (chunked: %s)\r\n%s %s",
-        isChunked() ? "true" : "false",
-        getProtocolVersion().getText().c_str(),
-        getStatus().toString().c_str());
+                          "HttpResponse (chunked: %s)\r\n%s %s",
+                          isChunked() ? "true" : "false",
+                          getProtocolVersion().getText().c_str(),
+                          getStatus().toString().c_str());
 
     ConstHeaderIterator end = getLastHeader();
+
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
         StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }

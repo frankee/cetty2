@@ -27,7 +27,7 @@ class AsioDatagramChannelTest : public testing::Test {
 
     void Setup() {
         final NioDatagramChannelFactory channelFactory = new NioDatagramChannelFactory(
-                Executors.newCachedThreadPool());
+            Executors.newCachedThreadPool());
         final ConnectionlessBootstrap sb = new ConnectionlessBootstrap(channelFactory);
         inetSocketAddress = new InetSocketAddress("localhost", 9999);
         sc = sb.bind(inetSocketAddress);
@@ -36,18 +36,19 @@ class AsioDatagramChannelTest : public testing::Test {
     }
 
 
-	void TearDown() {
-			if (sc != null) {
-				final ChannelFuture future = sc.close();
-				if (future != null) {
-					future.awaitUninterruptibly();
-				}
-			}
-	}
+    void TearDown() {
+        if (sc != null) {
+            final ChannelFuture future = sc.close();
+
+            if (future != null) {
+                future.awaitUninterruptibly();
+            }
+        }
+    }
 
     void checkBoundPort() {
         final InetSocketAddress socketAddress = (InetSocketAddress) sc
-                .getLocalAddress();
+                                                .getLocalAddress();
         assertEquals(9999, socketAddress.getPort());
     }
 
@@ -58,6 +59,7 @@ class AsioDatagramChannelTest : public testing::Test {
 
     void sendReciveMultiple() {
         final String expectedPayload = "some payload";
+
         for (int i = 0; i < 1000; i ++) {
             sendRecive(expectedPayload);
         }
@@ -66,29 +68,29 @@ class AsioDatagramChannelTest : public testing::Test {
     void clientBootstrap() {
         ConnectionlessBootstrap bootstrap(new AsioDatagramChannelFactory());
         bootstrap.getPipeline()->addLast("test", ChannelHandlerPtr(new SimpleHandler()));
-		bootstrap.setOption("tcpNoDelay", boost::any(true));
-		bootstrap.setOption("keepAlive", boost::any(true));
+        bootstrap.setOption("tcpNoDelay", boost::any(true));
+        bootstrap.setOption("keepAlive", boost::any(true));
 
         SocketAddress clientAddress("localhost", 8888);
-		bootstrap.setOption("localAddress", boost::any(clientAddress));
+        bootstrap.setOption("localAddress", boost::any(clientAddress));
 
         ChannelFuturePtr ccf = bootstrap.connect(inetSocketAddress);
         ccf->awaitUninterruptibly();
 
         Channel& cc = ccf->getChannel();
-		ChannelFuturePtr write = cc.write(ChannelBuffers::copiedBuffer("client payload"));
+        ChannelFuturePtr write = cc.write(ChannelBuffers::copiedBuffer("client payload"));
         write->awaitUninterruptibly();
     }
 
 private:
-	void sendRecive(const std::string& expectedPayload) {
+    void sendRecive(const std::string& expectedPayload) {
         UdpClient udpClient = new UdpClient(inetSocketAddress
-                .getAddress(), inetSocketAddress.getPort());
+                                            .getAddress(), inetSocketAddress.getPort());
         final DatagramPacket dp = udpClient.send(expectedPayload.getBytes());
 
         dp.setData(new byte[expectedPayload.length()]);
         assertFalse("The payload should have been cleared", expectedPayload
-                .equals(new String(dp.getData())));
+                    .equals(new String(dp.getData())));
 
         udpClient.receive(dp);
 

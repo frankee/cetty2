@@ -42,7 +42,7 @@ HttpMessage::HttpMessage()
     : chunked(false),
       version(HttpVersion::HTTP_1_1),
       content(ChannelBuffers::EMPTY_BUFFER) {
-            httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
+    httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 bool HttpMessage::isChunked() const {
@@ -80,16 +80,17 @@ std::string HttpMessage::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-        "HttpMessage (version: %d, keepAlive: %s,  chunked: %s)",
-        getProtocolVersion().getText().c_str(),
-        HttpHeaders::isKeepAlive(*this) ? "true" : "false",
-        isChunked() ? "true" : "false");
+                          "HttpMessage (version: %d, keepAlive: %s,  chunked: %s)",
+                          getProtocolVersion().getText().c_str(),
+                          HttpHeaders::isKeepAlive(*this) ? "true" : "false",
+                          isChunked() ? "true" : "false");
 
     ConstHeaderIterator end = getLastHeader();
+
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
         StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }
-    
+
     return buf;
 }
 

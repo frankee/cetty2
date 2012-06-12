@@ -45,9 +45,9 @@ int main(int argc, const char* argv[]) {
 
     // Configure the pipeline factory.
     b.setPipeline(Channels::pipeline(
-        ChannelHandlerPtr(new StringEncoder()),
-        ChannelHandlerPtr(new StringDecoder()),
-        ChannelHandlerPtr(new QuoteOfTheMomentServerHandler())));
+                      ChannelHandlerPtr(new StringEncoder()),
+                      ChannelHandlerPtr(new StringDecoder()),
+                      ChannelHandlerPtr(new QuoteOfTheMomentServerHandler())));
 
     // Enable broadcast
     b.setOption("broadcast", boost::any(true));
@@ -74,12 +74,15 @@ int main(int argc, const char* argv[]) {
         printf("To quit server, please enter 'q'.\n");
 
         char input;
+
         do {
             input = getchar();
+
             if (input == 'q' || input == 'Q') {
                 printf("Are you sure to quit?\n\t\tplease enter y/n?\n");
                 input = getchar();
                 input = getchar();
+
                 if (input == 'y' || input == 'Y') {
                     printf("Closing the server...\n");
                     c->close()->awaitUninterruptibly();
@@ -89,7 +92,8 @@ int main(int argc, const char* argv[]) {
                     printf("Server is continue to running...\n");
                 }
             }
-        } while (true);
+        }
+        while (true);
     }
 
     b.releaseExternalResources();

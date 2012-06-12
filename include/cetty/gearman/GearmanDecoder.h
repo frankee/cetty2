@@ -19,20 +19,26 @@
 
 #include <cetty/handler/codec/oneone/OneToOneDecoder.h>
 
-namespace cetty { namespace gearman {
+namespace cetty {
+namespace gearman {
+using namespace cetty::channel;
 
-    class GearmanDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
-    public:
-        GearmanDecoder();
-        virtual ~GearmanDecoder();
+class GearmanDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
+public:
+    GearmanDecoder();
+    virtual ~GearmanDecoder();
 
-    protected:
-        virtual ChannelMessage decode(ChannelHandlerContext& ctx,
-            const ChannelPtr& channel,
-            const ChannelMessage& msg);
-    };
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
 
-}}
+protected:
+    virtual ChannelMessage decode(ChannelHandlerContext& ctx,
+                                  const ChannelPtr& channel,
+                                  const ChannelMessage& msg);
+};
+
+}
+}
 
 #endif //#if !defined(CETTY_GEARMAN_GEARMANDECODER_H)
 

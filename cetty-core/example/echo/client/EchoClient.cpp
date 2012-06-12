@@ -24,8 +24,7 @@ using namespace cetty::buffer;
 
 using namespace cetty::util;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     // Print usage if no argument is specified.
     if (argc < 3 || argc > 7) {
         printf(
@@ -37,21 +36,25 @@ int main(int argc, char* argv[])
     std::string host = argv[1];
     int port = atoi(argv[2]);
     int firstMessageSize = 256;
+
     if (argc >= 4) {
         firstMessageSize = atoi(argv[3]);
     }
 
     int clientCount = 1;
+
     if (argc >= 5) {
         clientCount = atoi(argv[4]);
     }
 
     int sendIntervals = 0;
+
     if (argc >= 6) {
         sendIntervals = atoi(argv[5]);
     }
 
     int ioThreadCount = 1;
+
     if (argc >= 7) {
         ioThreadCount = atoi(argv[6]);
     }
@@ -62,10 +65,11 @@ int main(int argc, char* argv[])
     // Set up the pipeline factory.
     bootstrap.setPipeline(
         Channels::pipeline(
-        new EchoClientHandler(firstMessageSize, sendIntervals)));
+            new EchoClientHandler(firstMessageSize, sendIntervals)));
 
     // Start the connection attempt.
     std::vector<Channel*> clientChannels;
+
     for (int i = 0; i < clientCount; ++i) {
         ChannelFuturePtr future = bootstrap.connect(host, port);
         future->awaitUninterruptibly();
@@ -82,6 +86,6 @@ int main(int argc, char* argv[])
     // Shut down thread pools to exit.
     bootstrap.releaseExternalResources();
 
-	return 0;
+    return 0;
 }
 

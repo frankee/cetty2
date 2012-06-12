@@ -17,6 +17,16 @@
 
 #include <cetty/gearman/GearmanDecoder.h>
 
-namespace cetty { namespace gearman { 
+namespace cetty {
+namespace gearman {
 
-}}
+using namespace cetty::channel;
+
+ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
+                                      const ChannelPtr& channel,
+                                      const ChannelMessage& msg) {
+
+}
+
+}
+}

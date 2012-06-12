@@ -14,6 +14,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace gearman { 
+namespace cetty {
+namespace gearman {
 
-}}
+}
+}

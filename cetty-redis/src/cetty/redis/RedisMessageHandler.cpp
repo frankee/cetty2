@@ -17,6 +17,8 @@
 
 #include "RedisMessageHandler.h"
 
-namespace cetty { namespace redis {
+namespace cetty {
+namespace redis {
 
-}}
+}
+}

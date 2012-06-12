@@ -17,6 +17,25 @@
 
 #include <cetty/gearman/GearmanEncoder.h>
 
-namespace cetty { namespace gearman { 
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/gearman/GearmanMessage.h>
 
-}}
+namespace cetty {
+namespace gearman {
+
+using namespace cetty::channel;
+
+ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
+                                      const ChannelPtr& channel,
+                                      const ChannelMessage& msg) {
+
+    GearmanMessagePtr message = msg.smartPointer<GearmanMessage>();
+
+    if (message) {
+        int headerLength = caculateHeaderLength(message);
+
+    }
+}
+
+}
+}

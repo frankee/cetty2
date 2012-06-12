@@ -23,8 +23,8 @@ namespace http {
 
 
 HttpRequestDecoder::HttpRequestDecoder(int maxInitialLineLength,
-    int maxHeaderSize,
-    int maxChunkSize)
+                                       int maxHeaderSize,
+                                       int maxChunkSize)
     : HttpMessageDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
 
 }
@@ -35,9 +35,9 @@ HttpRequestDecoder::~HttpRequestDecoder() {
 
 ChannelHandlerPtr HttpRequestDecoder::clone() {
     return ChannelHandlerPtr(
-        new HttpRequestDecoder(maxInitialLineLength,
-        maxHeaderSize,
-        maxChunkSize));
+               new HttpRequestDecoder(maxInitialLineLength,
+                                      maxHeaderSize,
+                                      maxChunkSize));
 }
 
 std::string HttpRequestDecoder::toString() const {
@@ -46,12 +46,12 @@ std::string HttpRequestDecoder::toString() const {
 
 HttpMessagePtr HttpRequestDecoder::createMessage(const char* str1, const char* str2, const char* str3) {
     BOOST_ASSERT(str1 && str2 && str3
-        && "createMessage parameters should not be NULL");
+                 && "createMessage parameters should not be NULL");
 
     if (!request) { //has not initial ready.
         request = new HttpRequest(HttpVersion::valueOf(str3),
-            HttpMethod::valueOf(str1),
-            str2);
+                                  HttpMethod::valueOf(str1),
+                                  str2);
     }
     else {
         request->clear();

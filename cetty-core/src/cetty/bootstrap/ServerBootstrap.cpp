@@ -69,6 +69,7 @@ public:
 
         // Split options into two categories: parent and child.
         OptionsMap& allOptions = bootstrap.getOptions();
+
         for (OptionsMap::iterator itr = allOptions.begin(); itr != allOptions.end(); ++itr) {
             if (itr->first.find("child.") == 0) {
                 childOptions.insert(std::make_pair(itr->first.substr(6), itr->second));
@@ -84,7 +85,7 @@ public:
 
         futureQueue.push_front(e.getChannel()->bind(localAddress));
     }
-    
+
     void childChannelOpen(ChannelHandlerContext& ctx, const ChildChannelStateEvent& e) {
         // Apply child options.
         e.getChildChannel()->getConfig().setOptions(childOptions);
@@ -127,6 +128,7 @@ void ServerBootstrap::setParentHandler(const ChannelHandlerPtr& parentHandler) {
 
 ChannelPtr ServerBootstrap::bind() {
     const SocketAddress* localAddress = getTypedOption<SocketAddress>("localAddress");
+
     if (NULL == localAddress) {
         return ChannelPtr();
     }
@@ -157,12 +159,14 @@ ChannelPtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     }
 
     const ChannelFactoryPtr& factory = getFactory();
+
     if (!factory) {
         LOG_ERROR(logger, "has not set the factory.");
         return ChannelPtr();
     }
 
     ChannelPtr channel = getFactory()->newChannel(bossPipeline);
+
     if (!channel) {
         LOG_ERROR(logger, "Server channel factory failed to create a new channel.");
         return ChannelPtr();
@@ -179,6 +183,7 @@ ChannelPtr ServerBootstrap::bind(const SocketAddress& localAddress) {
         }
 
         boost::this_thread::yield();
+
         if (boost::this_thread::interruption_requested()) {
             return ChannelPtr();
         }

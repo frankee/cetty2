@@ -42,7 +42,7 @@ bool DefaultChannelFuture::disabledDeadLockCheckerOnce = false;
 Exception DefaultChannelFuture::CANCELLED("Future cancelled");
 
 DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
-    bool cancellable)
+        bool cancellable)
     : cancellable(cancellable),
       done(false),
       channel(channel),
@@ -70,6 +70,7 @@ DefaultChannelFuture::~DefaultChannelFuture() {
     if (cond) {
         delete cond;
     }
+
     if (mutex) {
         delete mutex;
     }
@@ -168,6 +169,7 @@ void DefaultChannelFuture::removeListener(const CompletedCallback& listener) {
     if (!listener) {
         return;
     }
+
 #if 0
     boost::lock_guard<boost::mutex> guard(getMutex());
 
@@ -185,6 +187,7 @@ void DefaultChannelFuture::removeListener(const CompletedCallback& listener) {
             completedListeners->remove(listener);
         }
     }
+
 #endif
 }
 
@@ -192,12 +195,14 @@ void DefaultChannelFuture::removeProgressListener(const ProgressedCallback& list
     if (!listener) {
         return;
     }
+
 #if 0
     boost::lock_guard<boost::mutex> guard(getMutex());
 
     if (!done && completedListeners != NULL) {
         completedListeners->remove(listener);
     }
+
 #endif
 }
 
@@ -465,7 +470,7 @@ void DefaultChannelFuture::notifyListeners() {
 }
 
 void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {
-    if (l.empty()) return;
+    if (l.empty()) { return; }
 
     try {
         l(*this);
@@ -477,9 +482,9 @@ void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {
 }
 
 void DefaultChannelFuture::notifyProgressListener(const ProgressedCallback& l,
-    int amount,
-    int current,
-    int total) {
+        int amount,
+        int current,
+        int total) {
 
     if (l.empty()) { return; }
 
@@ -497,6 +502,7 @@ boost::condition_variable& DefaultChannelFuture::condition() {
     if (!cond) {
         cond = new boost::condition_variable();
     }
+
     return *cond;
 }
 
@@ -508,6 +514,7 @@ boost::mutex& DefaultChannelFuture::getMutex() const {
     if (!mutex) {
         mutex = new boost::mutex();
     }
+
     return *mutex;
 }
 

@@ -38,11 +38,11 @@ static bool validateHeaderName(const std::string& name) {
     }
 
     if (boost::algorithm::iequals(name, HttpHeaders::Names::CONTENT_LENGTH) ||
-        boost::algorithm::iequals(name, HttpHeaders::Names::TRANSFER_ENCODING) ||
-        boost::algorithm::iequals(name, HttpHeaders::Names::TRAILER)) {
-            return false;
-            throw InvalidArgumentException(
-                std::string("prohibited trailing header: ") + name);
+            boost::algorithm::iequals(name, HttpHeaders::Names::TRANSFER_ENCODING) ||
+            boost::algorithm::iequals(name, HttpHeaders::Names::TRAILER)) {
+        return false;
+        throw InvalidArgumentException(
+            std::string("prohibited trailing header: ") + name);
     }
 
     return true;

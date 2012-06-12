@@ -30,6 +30,7 @@ DefaultServerChannelConfig::DefaultServerChannelConfig()
 
 void DefaultServerChannelConfig::setOptions(const std::map<std::string, boost::any>& options) {
     std::map<std::string, boost::any>::const_iterator itr;
+
     for (itr = options.begin(); itr != options.end(); ++itr) {
         setOption(itr->first, itr->second);
     }

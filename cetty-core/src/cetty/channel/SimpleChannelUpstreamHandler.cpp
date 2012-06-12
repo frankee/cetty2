@@ -59,8 +59,8 @@ void SimpleChannelUpstreamHandler::exceptionCaught(ChannelHandlerContext& ctx,
         const ExceptionEvent& e) {
     if (this == ctx.getPipeline()->getLast().get()) {
         LOG_WARN(logger,
-            "EXCEPTION:%s, please implement SimpleChannelUpstreamHandler"
-            ".exceptionCaught() for proper handling.", e.getCause().getMessage().c_str());
+                 "EXCEPTION:%s, please implement SimpleChannelUpstreamHandler"
+                 ".exceptionCaught() for proper handling.", e.getCause().getMessage().c_str());
     }
 
     ctx.sendUpstream(e);

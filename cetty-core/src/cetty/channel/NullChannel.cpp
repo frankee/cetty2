@@ -104,8 +104,8 @@ void NullChannel::write(const ChannelMessage& message,
 }
 
 void NullChannel::write(const ChannelMessage& message,
-                         const SocketAddress& remoteAddress,
-                         ChannelFuturePtr* future) {
+                        const SocketAddress& remoteAddress,
+                        ChannelFuturePtr* future) {
 
 }
 

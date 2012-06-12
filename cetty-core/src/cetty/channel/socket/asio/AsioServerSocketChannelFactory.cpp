@@ -55,26 +55,28 @@ AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(int threadCnt)
       ipAddressFactory(NULL),
       socketAddressFactory(NULL) {
     BOOST_ASSERT(ioServicePool && "ioServicePool SHOULD NOT BE NULL.");
-    init(); 
+    init();
 }
 
 AsioServerSocketChannelFactory::~AsioServerSocketChannelFactory() {
-    deinit(); 
+    deinit();
 }
 
 ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
     ChannelPtr channel;
-    AsioServerSocketPipelineSink* sink = 
+    AsioServerSocketPipelineSink* sink =
         new AsioServerSocketPipelineSink(ioServicePool);
 
     channel = new AsioServerSocketChannel(sink->getAcceptor(),
-                                            sink->getAcceptorService(),
-                                            this,
-                                            pipeline,
-                                            sink);
+                                          sink->getAcceptorService(),
+                                          this,
+                                          pipeline,
+                                          sink);
     LOG_INFO(logger, "Created the AsioServerSocketChannel.");
+
     if (ioServicePool->onlyMainThread()) {
         LOG_INFO(logger, "the asio service pool starting to run in main thread.");
+
         if (!ioServicePool->run()) {
             LOG_ERROR(logger, "start the boost asio service error, stop service pool and close channel.");
             ioServicePool->stop();

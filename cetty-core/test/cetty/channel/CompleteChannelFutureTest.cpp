@@ -60,7 +60,7 @@ public class CompleteChannelFutureTest {
     public void shouldNotRethrowListenerException() {
         ChannelFutureListener l = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future)
-                    throws Exception {
+            throws Exception {
                 throw new ExpectedError();
             }
         };

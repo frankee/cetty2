@@ -19,22 +19,25 @@
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/util/Integer.h>
 
-namespace cetty { namespace handler { namespace codec { namespace http { 
+namespace cetty {
+namespace handler {
+namespace codec {
+namespace http {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
 HttpResponseDecoder::HttpResponseDecoder()
     : response(new HttpResponse),
-    HttpMessageDecoder(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE) {
+      HttpMessageDecoder(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE) {
 }
 
 HttpResponseDecoder::HttpResponseDecoder(int maxInitialLineLength,
-    int maxHeaderSize,
-    int maxChunkSize)
+        int maxHeaderSize,
+        int maxChunkSize)
     : response(new HttpResponse),
-    HttpMessageDecoder(maxInitialLineLength,
-    maxHeaderSize,
-    maxChunkSize) {
+      HttpMessageDecoder(maxInitialLineLength,
+                         maxHeaderSize,
+                         maxChunkSize) {
 }
 
 HttpResponseDecoder::~HttpResponseDecoder() {
@@ -43,9 +46,9 @@ HttpResponseDecoder::~HttpResponseDecoder() {
 
 cetty::channel::ChannelHandlerPtr HttpResponseDecoder::clone() {
     return ChannelHandlerPtr(
-        new HttpResponseDecoder(maxInitialLineLength,
-        maxHeaderSize,
-        maxChunkSize));
+               new HttpResponseDecoder(maxInitialLineLength,
+                                       maxHeaderSize,
+                                       maxChunkSize));
 }
 
 std::string HttpResponseDecoder::toString() const {
@@ -63,4 +66,7 @@ bool HttpResponseDecoder::isDecodingRequest() const {
     return false;
 }
 
-}}}}
+}
+}
+}
+}

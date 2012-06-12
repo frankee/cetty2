@@ -24,9 +24,9 @@ namespace cetty {
 namespace channel {
 
 DownstreamMessageEvent::DownstreamMessageEvent(const ChannelPtr& channel,
-    const ChannelFuturePtr& future,
-    const ChannelMessage& message,
-    const SocketAddress& remoteAddress)
+        const ChannelFuturePtr& future,
+        const ChannelMessage& message,
+        const SocketAddress& remoteAddress)
     : channel(channel), future(future), message(message), remoteAddress(remoteAddress) {
 }
 

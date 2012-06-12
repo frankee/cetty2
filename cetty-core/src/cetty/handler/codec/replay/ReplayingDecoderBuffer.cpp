@@ -189,12 +189,13 @@ int ReplayingDecoderBuffer::slice(int index, int length, GatheringBuffer* gather
     if (checkIndex(index, length)) {
         return buffer->slice(index, length, gatheringBuffer);
     }
+
     return 0;
 }
 
 std::string ReplayingDecoderBuffer::toString() const {
     return StringUtil::strprintf("ReplayingDecoderBuffer (ridx=%d, widx=%d)",
-        readerIndex(), writerIndex());
+                                 readerIndex(), writerIndex());
 }
 
 void ReplayingDecoderBuffer::writableBytes(Array* arry) {

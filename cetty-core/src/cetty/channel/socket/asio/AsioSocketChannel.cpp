@@ -77,8 +77,8 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
     const ChannelBufferFactoryPtr& bufferFactory = config.getBufferFactory();
     const ReceiveBufferSizePredictorPtr& predictor = config.getReceiveBufferSizePredictor();
     readBuffer = bufferFactory->getBuffer(
-                                    bufferFactory->getDefaultOrder(),
-                                    predictor->nextReceiveBufferSize());
+                     bufferFactory->getDefaultOrder(),
+                     predictor->nextReceiveBufferSize());
 
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("AsioSocketChannel");
@@ -189,11 +189,11 @@ ChannelFuturePtr AsioSocketChannel::write(const ChannelMessage& message) {
         LOG_INFO(logger, "write message in different thread, post the msg to pipeline.");
         ioService->service().post(
             makeCustomAllocHandler(ipcWriteAllocator,
-                                      boost::bind<void, ChannelPipeline, const MessageEvent&>(
-                                          &ChannelPipeline::sendDownstream,
-                                          pipeline,
-                                          CopyableDownstreamMessageEvent(
-                                              this, future, message, this->remoteAddress))));
+                                   boost::bind<void, ChannelPipeline, const MessageEvent&>(
+                                       &ChannelPipeline::sendDownstream,
+                                       pipeline,
+                                       CopyableDownstreamMessageEvent(
+                                           this, future, message, this->remoteAddress))));
     }
 
     return future;
@@ -221,10 +221,10 @@ void AsioSocketChannel::innerWrite(const MessageEvent& evt) {
         LOG_WARN(logger, "write an empty message, do not write to the socket,\
                          just post a handleWrite operation.");
         ioService->service().post(boost::bind(
-                                     &AsioSocketChannel::handleWrite,
-                                     this,
-                                     boost::system::error_code(),
-                                     0));
+                                      &AsioSocketChannel::handleWrite,
+                                      this,
+                                      boost::system::error_code(),
+                                      0));
         return;
     }
 
@@ -260,11 +260,11 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::unbind() {
     else {
         ioService->service().post(
             makeCustomAllocHandler(ipcStateChangeAllocator,
-                                      boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
-                                          &ChannelPipeline::sendDownstream,
-                                          pipeline,
-                                          CopyableDownstreamChannelStateEvent(
-                                              this, future, ChannelState::BOUND))));
+                                   boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
+                                       &ChannelPipeline::sendDownstream,
+                                       pipeline,
+                                       CopyableDownstreamChannelStateEvent(
+                                           this, future, ChannelState::BOUND))));
     }
 
     return future;
@@ -282,11 +282,11 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::close() {
     else {
         ioService->service().post(
             makeCustomAllocHandler(ipcStateChangeAllocator,
-                                      boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
-                                          &ChannelPipeline::sendDownstream,
-                                          pipeline,
-                                          CopyableDownstreamChannelStateEvent(
-                                              this, closeFuture, ChannelState::OPEN))));
+                                   boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
+                                       &ChannelPipeline::sendDownstream,
+                                       pipeline,
+                                       CopyableDownstreamChannelStateEvent(
+                                           this, closeFuture, ChannelState::OPEN))));
     }
 
     return closeFuture;
@@ -299,19 +299,22 @@ void AsioSocketChannel::innerClose(const ChannelFuturePtr& future) {
     }
 
     boost::system::error_code error;
+
     if (isConnected()) {
         // if shutdown failed, try to close tcp socket directly.
         tcpSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+
         if (error) {
             LOG_ERROR(logger, "failed to shutdown the tcp socket, %d:%s.",
-                error.value(), error.message().c_str());
+                      error.value(), error.message().c_str());
         }
     }
 
     tcpSocket.close(error);
+
     if (error) {
         LOG_ERROR(logger, "failed to close the tcp socket. %d:%s.",
-            error.value(), error.message().c_str());
+                  error.value(), error.message().c_str());
 
         IOException e("failed to close the tcp socket.", error.value());
         future->setFailure(e);
@@ -343,7 +346,7 @@ bool AsioSocketChannel::setClosed() {
     Channels::fireChannelClosed(this);
 
     LOG_INFO(logger, "closed the socket channel, finally calling FutureListener"
-        " which to the ChannelCloseFuture.");
+             " which to the ChannelCloseFuture.");
 
     return AbstractChannel::setClosed();
 }
@@ -358,11 +361,11 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::disconnect() {
     else {
         ioService->service().post(
             makeCustomAllocHandler(ipcStateChangeAllocator,
-                                      boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
-                                          &ChannelPipeline::sendDownstream,
-                                          pipeline,
-                                          CopyableDownstreamChannelStateEvent(
-                                              this, future, ChannelState::CONNECTED))));
+                                   boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
+                                       &ChannelPipeline::sendDownstream,
+                                       pipeline,
+                                       CopyableDownstreamChannelStateEvent(
+                                           this, future, ChannelState::CONNECTED))));
     }
 
     return future;
@@ -379,11 +382,11 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::setInterestOps(int interestO
     else {
         ioService->service().post(
             makeCustomAllocHandler(ipcStateChangeAllocator,
-                                      boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
-                                          &ChannelPipeline::sendDownstream,
-                                          pipeline,
-                                          CopyableDownstreamChannelStateEvent(
-                                              this, future, ChannelState::INTEREST_OPS, boost::any(interestOps)))));
+                                   boost::bind<void, ChannelPipeline, const ChannelStateEvent&>(
+                                       &ChannelPipeline::sendDownstream,
+                                       pipeline,
+                                       CopyableDownstreamChannelStateEvent(
+                                           this, future, ChannelState::INTEREST_OPS, boost::any(interestOps)))));
     }
 
     return future;
@@ -435,10 +438,10 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
             tcpSocket.async_read_some(
                 boost::asio::buffer(arry.data(), arry.length()),
                 makeCustomAllocHandler(readAllocator,
-                                          boost::bind(&AsioSocketChannel::handleRead,
-                                                  this,
-                                                  boost::asio::placeholders::error,
-                                                  boost::asio::placeholders::bytes_transferred)));
+                                       boost::bind(&AsioSocketChannel::handleRead,
+                                                   this,
+                                                   boost::asio::placeholders::error,
+                                                   boost::asio::placeholders::bytes_transferred)));
         }
     }
     else {
@@ -484,19 +487,20 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
             tcpSocket.async_read_some(
                 boost::asio::buffer(arry.data(), arry.length()),
                 makeCustomAllocHandler(readAllocator,
-                                          boost::bind(&AsioSocketChannel::handleRead,
-                                                  this,
-                                                  boost::asio::placeholders::error,
-                                                  boost::asio::placeholders::bytes_transferred)));
+                                       boost::bind(&AsioSocketChannel::handleRead,
+                                                   this,
+                                                   boost::asio::placeholders::error,
+                                                   boost::asio::placeholders::bytes_transferred)));
         }
     }
     else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator()) {
         LOG_WARN(logger, "resolved more than one address, try to connect the next address.");
         boost::system::error_code error;
         tcpSocket.close(error);
+
         if (error) {
             LOG_ERROR(logger, "failed to close tcp socket before connect, %d:%s, but skip it.",
-                error.value(), error.message());
+                      error.value(), error.message());
         }
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
