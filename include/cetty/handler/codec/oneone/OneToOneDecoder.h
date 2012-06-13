@@ -20,14 +20,10 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
+
+#include <cetty/channel/ChannelFwd.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelUpstreamHandler.h>
-
-namespace cetty {
-namespace channel {
-class Channel;
-}
-}
 
 namespace cetty {
 namespace handler {

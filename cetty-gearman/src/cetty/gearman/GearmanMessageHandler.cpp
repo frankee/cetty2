@@ -28,6 +28,12 @@ namespace gearman {
 
 using namespace cetty::channel;
 
+GearmanMessageHandler::GearmanMessageHandler() {
+}
+
+GearmanMessageHandler::~GearmanMessageHandler() {
+}
+
 void GearmanMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
     GearmanMessagePtr message = e.getMessage().smartPointer<GearmanMessage>();
 
@@ -35,11 +41,26 @@ void GearmanMessageHandler::messageReceived(ChannelHandlerContext& ctx, const Me
         ctx.sendUpstream(e);
     }
 
-    switch (message->type) {
-    case GearmanMessage::CAN_DO:
-        break;
+    switch (message->getType()) {
 
-    case GearmanMessage::CANT_DO:
+    case GearmanMessage::JOB_CREATED:
+
+    case GearmanMessage::WORK_STATUS:
+    case GearmanMessage::WORK_COMPLETE:
+    case GearmanMessage::WORK_FAIL:
+    case GearmanMessage::WORK_EXCEPTION:
+    case GearmanMessage::WORK_DATA:
+
+    case GearmanMessage::STATUS_RES:
+    case GearmanMessage::OPTION_RES:
+
+    case GearmanMessage::NOOP:
+    case GearmanMessage::NO_JOB:
+    case GearmanMessage::JOB_ASSIGN:
+    case GearmanMessage::JOB_ASSIGN_UNIQ:
+
+    case GearmanMessage::ECHO_RES:
+
         break;
 
     default:
@@ -53,6 +74,14 @@ void GearmanMessageHandler::writeRequested(ChannelHandlerContext& ctx, const Mes
     tasks.push_back(task);
 
     Channels::write(ctx, e.getFuture(), ChannelMessage(task->request));
+}
+
+ChannelHandlerPtr GearmanMessageHandler::clone() {
+    return ChannelHandlerPtr(new GearmanMessageHandler);
+}
+
+std::string GearmanMessageHandler::toString() const {
+    return "GearmanMessageHandler";
 }
 
 }

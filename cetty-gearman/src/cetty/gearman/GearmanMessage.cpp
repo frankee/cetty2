@@ -1,6 +1,3 @@
-#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
-#define CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H
-
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,22 +15,17 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelPipelineFactory.h>
+#include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
 
-using namespace cetty::channel;
-
-class GearmanPipelineFactory : public cetty::channel::ChannelPipelineFactory {
-public:
-    GearmanPipelineFactory() {}
-    virtual~ GearmanPipelineFactory() {}
-
-    virtual ChannelPipelinePtr getPipeline();
-};
+GearmanMessagePtr GearmanMessage::createEchoReqMessage(const ChannelBufferPtr& payload) {
+    GearmanMessagePtr request(new GearmanMessage);
+    request->setType(GearmanMessage::ECHO_REQ);
+    request->setData(payload);
+    return request;
+}
 
 }
 }
-
-#endif //#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)

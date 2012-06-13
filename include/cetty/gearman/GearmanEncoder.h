@@ -18,6 +18,7 @@
  */
 
 #include <cetty/handler/codec/oneone/OneToOneEncoder.h>
+#include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
@@ -38,8 +39,12 @@ protected:
                                   const ChannelMessage& msg);
 
 private:
-    int caculateHeaderLength(const GearmanMessagePtr& msg);
-    int checkMessage(const GearmanMessagePtr& msg);
+    int caculateParametersLength(const GearmanMessagePtr& msg);
+
+    void writeHeader(const ChannelBufferPtr& buffer, int type, int length);
+    void writeParameters(const ChannelBufferPtr& buffer,
+        const std::vector<std::string>& parameters,
+        bool withZeroPad);
 };
 
 }

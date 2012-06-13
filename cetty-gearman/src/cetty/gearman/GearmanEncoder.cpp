@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -25,6 +24,24 @@ namespace gearman {
 
 using namespace cetty::channel;
 
+GearmanEncoder::GearmanEncoder() {
+
+}
+
+GearmanEncoder::~GearmanEncoder() {
+
+}
+
+ChannelHandlerPtr GearmanEncoder::clone() {
+    return ChannelHandlerPtr(new GearmanEncoder);
+}
+
+std::string GearmanEncoder::toString() const {
+    return "GearmanEncoder";
+}
+
+static const std::string REQUEST_MAGIC("\0REQ", 4);
+
 ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
                                       const ChannelPtr& channel,
                                       const ChannelMessage& msg) {
@@ -32,10 +49,83 @@ ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
     GearmanMessagePtr message = msg.smartPointer<GearmanMessage>();
 
     if (message) {
-        int headerLength = caculateHeaderLength(message);
+        int parametersLength = caculateParametersLength(message);
+        int headerLength = 12;
+        int bodyLenth = parametersLength;
+        int messageLength = 0;
 
+        if (message->hasData()) {
+            const ChannelBufferPtr data = message->getData();
+            bodyLenth += data->readableBytes();
+            messageLength = bodyLenth + headerLength;
+
+            if (data->aheadWritableBytes() >= parametersLength + headerLength) {
+                data->offsetWriterIndex(-parametersLength - headerLength);
+
+                writeHeader(data, message->getType(), messageLength);
+                writeParameters(data, message->getParameters(), true);
+
+                return ChannelMessage(data);
+            }
+            else {
+                ChannelBufferPtr buffer = ChannelBuffers::buffer(bodyLenth + headerLength);
+
+                writeHeader(buffer, message->getType(), messageLength);
+                writeParameters(buffer, message->getParameters(), true);
+                buffer->writeBytes(data);
+
+                return ChannelMessage(buffer);
+            }
+        }
+        else {
+            --bodyLenth;
+            messageLength = bodyLenth + headerLength;
+            ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength);
+            writeHeader(buffer, message->getType(), messageLength);
+            writeParameters(buffer, message->getParameters(), false);
+
+            return ChannelMessage(buffer);
+        }
+    }
+    else {
+        return msg;
     }
 }
+
+int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
+    int length = 0;
+
+    const std::vector<std::string>& parameters = msg->getParameters();
+    for (int i = 0, j = parameters.size(); i < j; ++i) {
+        length += parameters[i].size();
+        length += 1;
+    }
+
+    return length;
+}
+
+void GearmanEncoder::writeHeader(const ChannelBufferPtr& buffer, int type, int length) {
+    buffer->writeBytes(REQUEST_MAGIC);
+    buffer->writeInt(type);
+    buffer->writeInt(length);
+}
+
+void GearmanEncoder::writeParameters(const ChannelBufferPtr& buffer,
+                                     const std::vector<std::string>& parameters,
+                                     bool withZeroPad) {
+    for (int i = 0, j = parameters.size(); i < j; ++i) {
+        buffer->writeBytes(parameters[i]);
+
+        if (!withZeroPad && ((j - i) == 1)) {
+            // last one no zero pad
+            break;
+        }
+
+        buffer->writeByte(0);
+    }
+}
+
+
 
 }
 }

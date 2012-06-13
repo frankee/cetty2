@@ -19,6 +19,7 @@
 
 #include <list>
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/gearman/GearmanTask.h>
 
 namespace cetty { namespace gearman { 
 
@@ -31,6 +32,7 @@ namespace cetty { namespace gearman {
 
         virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
         virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
+
 
         virtual ChannelHandlerPtr clone();
         virtual std::string toString() const;

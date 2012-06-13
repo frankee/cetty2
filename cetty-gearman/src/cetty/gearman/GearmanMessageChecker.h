@@ -1,6 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
-#define CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H
-
+#if !defined(CETTY_GEARMAN_GEARMANMESSAGECHECKER_H)
+#define CETTY_GEARMAN_GEARMANMESSAGECHECKER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,22 +17,20 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelPipelineFactory.h>
+#include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
 
-using namespace cetty::channel;
-
-class GearmanPipelineFactory : public cetty::channel::ChannelPipelineFactory {
+class GearmanMessageChecker {
 public:
-    GearmanPipelineFactory() {}
-    virtual~ GearmanPipelineFactory() {}
+    static bool check(const GearmanMessagePtr& msg);
 
-    virtual ChannelPipelinePtr getPipeline();
+private:
+    GearmanMessageChecker();
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
+#endif //#if !defined(CETTY_GEARMAN_GEARMANMESSAGECHECKER_H)

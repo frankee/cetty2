@@ -34,6 +34,9 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanPipelineFactory.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\cetty\gearman\GearmanMessageChecker.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp">
@@ -52,6 +55,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanPipelineFactory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageChecker.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanTest", "GearmanTest.vcxproj", "{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B} = {CA71411F-D9FF-4686-8DC6-56A2FC982D9B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanClient", "..\GearmanClient\GearmanClient.vcxproj", "{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}.Debug|Win32.Build.0 = Debug|Win32
+		{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}.Release|Win32.ActiveCfg = Release|Win32
+		{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}.Release|Win32.Build.0 = Release|Win32
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}.Debug|Win32.Build.0 = Debug|Win32
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}.Release|Win32.ActiveCfg = Release|Win32
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

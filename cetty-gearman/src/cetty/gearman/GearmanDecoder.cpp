@@ -17,15 +17,59 @@
 
 #include <cetty/gearman/GearmanDecoder.h>
 
+#include <cetty/channel/Channel.h>
+
+#include <cetty/gearman/GearmanMessage.h>
+
 namespace cetty {
 namespace gearman {
 
 using namespace cetty::channel;
 
-ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
-                                      const ChannelPtr& channel,
-                                      const ChannelMessage& msg) {
+GearmanDecoder::GearmanDecoder() {
 
+}
+
+GearmanDecoder::~GearmanDecoder() {
+
+}
+
+ChannelHandlerPtr GearmanDecoder::clone() {
+    return ChannelHandlerPtr(new GearmanDecoder);
+}
+
+std::string GearmanDecoder::toString() const {
+    return "GearmanDecoder";
+}
+
+ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
+    const ChannelPtr& channel,
+    const ChannelMessage& msg) {
+    ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
+
+    if (buffer) {
+        GearmanMessagePtr message(new GearmanMessage);
+        int type = buffer->readInt();
+        int length = buffer->readInt();
+        while (length > 0) {
+            int bytes = buffer->bytesBefore(0);
+            if (bytes > 0) {
+                std::string* str = message->addParameter();
+                str->reserve(bytes+1);
+                buffer->readBytes(str, bytes+1);
+            }
+            else {
+                if (buffer->readable()) {
+                    message->setData(buffer);
+                }
+                break;
+            }
+        }
+
+        return ChannelMessage(message);
+    }
+
+    return ChannelMessage::EMPTY_MESSAGE;
 }
 
 }

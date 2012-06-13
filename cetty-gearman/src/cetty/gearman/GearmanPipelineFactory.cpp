@@ -16,6 +16,8 @@
 
 #include <cetty/gearman/GearmanPipelineFactory.h>
 
+#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanDecoder.h>
@@ -24,6 +26,7 @@
 namespace cetty {
 namespace gearman {
 
+    using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 
 static const int MAX_FRAME_LENGTH = 1024*1024;
