@@ -20,6 +20,9 @@
 namespace cetty {
 namespace gearman {
 
+const std::string GearmanMessage::RESPONSE_MAGIC("\0RES", 4);
+const std::string GearmanMessage::REQUEST_MAGIC("\0REQ", 4);
+
 GearmanMessagePtr GearmanMessage::createEchoReqMessage(const ChannelBufferPtr& payload) {
     GearmanMessagePtr request(new GearmanMessage);
     request->setType(GearmanMessage::ECHO_REQ);

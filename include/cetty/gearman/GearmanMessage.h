@@ -80,6 +80,9 @@ public:
         SUBMIT_JOB_EPOCH   = 36
     };
 
+    static const std::string REQUEST_MAGIC;
+    static const std::string RESPONSE_MAGIC;
+
 public:
     static GearmanMessagePtr createEchoReqMessage(const ChannelBufferPtr& payload);
 

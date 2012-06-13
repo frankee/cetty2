@@ -61,7 +61,8 @@ public:
           canHandleUps(false),
           canHandleDowns(false),
           name(name),
-          handler(handler) {
+          handler(handler),
+          sink() {
 
         upstreamHandler = boost::dynamic_pointer_cast<ChannelUpstreamHandler>(handler);
 
@@ -79,8 +80,6 @@ public:
             throw InvalidArgumentException(
                 "handler must be either ChannelUpstreamHandler or ChannelDownstreamHandler.");
         }
-
-        sink = this->defaultChannelPipeline.getSink();
     }
 
     virtual ~DefaultChannelHandlerContext() {}
@@ -135,6 +134,10 @@ public:
                 nextDownstreamContext->downstreamHandler->handleDownstream(*nextDownstreamContext, e);
             }
             else {
+                if (!sink) {
+                    sink = this->defaultChannelPipeline.getSink();
+                }
+
                 BOOST_ASSERT(sink);
                 sink->eventSunk(defaultChannelPipeline, e);
             }
@@ -156,6 +159,10 @@ public:
                 nextDownstreamContext->downstreamHandler->writeRequested(*nextDownstreamContext, e);
             }
             else {
+                if (!sink) {
+                    sink = this->defaultChannelPipeline.getSink();
+                }
+
                 BOOST_ASSERT(sink);
                 sink->writeRequested(defaultChannelPipeline, e);
             }
@@ -177,6 +184,10 @@ public:
                 nextDownstreamContext->downstreamHandler->stateChangeRequested(*nextDownstreamContext, e);
             }
             else {
+                if (!sink) {
+                    sink = this->defaultChannelPipeline.getSink();
+                }
+
                 BOOST_ASSERT(sink);
                 sink->stateChangeRequested(defaultChannelPipeline, e);
             }

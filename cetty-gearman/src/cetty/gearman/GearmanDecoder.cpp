@@ -66,6 +66,8 @@ ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
             }
         }
 
+        message->setType(type);
+
         return ChannelMessage(message);
     }
 

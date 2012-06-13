@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     // Print usage if no argument is specified.
 
     // Parse options.
-    std::string host = "192.168.2.145";
+    std::string host = "192.168.1.112";
     int port = 4730;
     int ioThreadCount = 1;
 
@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
     GearmanTaskPtr task(new GearmanTask);
     
     ChannelBufferPtr buffer = ChannelBuffers::buffer(1024, 64);
-    for (int i = 0; i < 1024; i += 4) {
-        buffer->writeInt(4);
+    for (int i = 0; i < 1024; ++i) {
+        buffer->writeByte('0');
     }
     task->request = GearmanMessage::createEchoReqMessage(buffer);
     c->write(ChannelMessage(task));

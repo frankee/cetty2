@@ -42,7 +42,11 @@ private:
     int caculateParametersLength(const GearmanMessagePtr& msg);
 
     void writeHeader(const ChannelBufferPtr& buffer, int type, int length);
+    void writeHeaderAhead(const ChannelBufferPtr& buffer, int type, int length);
     void writeParameters(const ChannelBufferPtr& buffer,
+        const std::vector<std::string>& parameters,
+        bool withZeroPad);
+    void writeParametersAhead(const ChannelBufferPtr& buffer,
         const std::vector<std::string>& parameters,
         bool withZeroPad);
 };
