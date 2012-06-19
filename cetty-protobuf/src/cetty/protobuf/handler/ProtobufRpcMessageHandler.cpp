@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -21,76 +21,64 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ChannelFuture.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/channel/ChannelHandlerContext.h"
-#include "cetty/handler/rpc/protobuf/rpc.pb.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/MessageEvent.h>
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/ChannelStateEvent.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+
+#include <cetty/protobuf/ProtobufService.h>
+#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/ProtobufServiceRegister.h>
+#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
+#include <cetty/protobuf/proto/rpc.pb.h>
 
 namespace cetty {
 namespace protobuf {
 namespace handler {
 
 using namespace cetty::channel;
+using namespace cetty::protobuf;
+using namespace cetty::protobuf::proto;
 using namespace google::protobuf;
 
-ProtobufRpcMessageHandler::ProtobufRpcMessageHandler()
-    : channel(NULL), id(NULL) {
+ProtobufRpcMessageHandler::ProtobufRpcMessageHandler() {
 }
 
 ProtobufRpcMessageHandler::~ProtobufRpcMessageHandler() {
 }
 
 void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    ProtobufRpcMessage* message = e.getMessage()<proto::RpcMessage, google::protobuf::MessageLite>();
+    ProtobufRpcMessagePtr msg = e.getMessage().smartPointer<ProtobufRpcMessage>();
+    const RpcMessage* rpc = msg->rpc;
 
-    if (NULL == message) {
+    if (NULL == msg) {
         ctx.sendUpstream(e);
     }
-    else if (message->rpc->type() == proto::RESPONSE) {
-        boost::int64_t id = message->id();
-        assert(message->has_response());
-
-        OutstandingCall out = { NULL, NULL, NULL, NULL};
-        {
-            std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
-
-            if (it != outstandings.end()) {
-                out = it->second;
-                outstandings.erase(it);
-            }
-        }
-
-        if (out.response) {
-            out.response->CopyFrom(message->payload);
-
-            if (out.done) {
-                out.done->Run();
-            }
-
-            delete out.message;
-        }
-    }
-    else if (message->rpc->type() == proto::REQUEST) {
-        ProtobufServicePtr& service = serviceRegister->getService(message->rpc->service());
+    else if (rpc->type() == proto::REQUEST) {
+        ProtobufServicePtr& service = serviceRegister->getService(rpc->service());
         const google::protobuf::MethodDescriptor* method =
-            serviceRegister->getMethodDescriptor(service, message->method());
+            serviceRegister->getMethodDescriptor(service, rpc->method());
 
-        boost::int64_t id = message->rpc->id();
+        boost::int64_t id = rpc->id();
 
         if (method) {
-            google::protobuf::Message* response = service->GetResponsePrototype(method).New();
-            service->CallMethod(method, NULL, message->payload, response,
-                                boost::bind(&ProtobufRpcMessageHandler::doneCallback, this, response, id));
+            ProtobufServiceFuturePtr future(new ProtobufServiceFuture);
+            future->addListenser(boost::bind(&ProtobufRpcMessageHandler::doneCallback,
+                                             this,
+                                             _1,
+                                             _2,
+                                             id));
+
+            service->CallMethod(method, msg->payload, future);
         }
         else {
             // return error message
             printf("has no such service or method.\n");
         }
     }
-    else if (message->type() == proto::ERROR) {
+    else if (rpc->type() == proto::ERROR) {
     }
     else {
         ctx.sendUpstream(e);
@@ -115,38 +103,12 @@ void ProtobufRpcMessageHandler::doneCallback(google::protobuf::Message* response
     delete response;
 }
 
-void ProtobufRpcMessageHandler::channelConnected(ChannelHandlerContext& ctx,
-        const ChannelStateEvent& e) {
-    this->channel = e.getChannel();
-}
-
-void ProtobufRpcMessageHandler::channelDisconnected(ChannelHandlerContext& ctx,
-        const ChannelStateEvent& e) {
-    this->channel = NULL;
-}
-
 cetty::channel::ChannelHandlerPtr ProtobufRpcMessageHandler::clone() {
-    ProtobufRpcMessageHandler* handler = new ProtobufRpcMessageHandler();
-    return ChannelHandlerPtr(dynamic_cast<ChannelHandler*>(handler));
+    return ChannelHandlerPtr(new ProtobufRpcMessageHandler());
 }
 
-void ProtobufRpcMessageHandler::exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-    ctx.getChannel().close();
-}
-
-void ProtobufRpcMessageHandler::writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-
-    OutstandingCall call;
-
-    if (call.rpc && call.rpc->type() == proto::REQUEST) {
-        if (!call.rpc->has_id()) {
-            message->set_id(++this->id);
-        }
-
-        outstandings[id] = call;
-
-        ctx.sendDownstream();
-    }
+std::string ProtobufRpcMessageHandler::toString() const {
+    return "ProtobufRpcMessageHandler";
 }
 
 }

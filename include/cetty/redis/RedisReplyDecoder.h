@@ -1,7 +1,7 @@
 #if !defined(CETTY_REDIS_REDISRESPONSEDECODER_H)
 #define CETTY_REDIS_REDISRESPONSEDECODER_H
 
-/**
+/*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -25,11 +25,11 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 using namespace cetty::util;
 
-class RedisResponseDecoder : public cetty::handler::codec::frame::FrameDecoder {
+class RedisReplyDecoder : public cetty::handler::codec::frame::FrameDecoder {
 public:
-    RedisResponseDecoder() {}
-    RedisResponseDecoder(int maxSize) {}
-    virtual ~RedisResponseDecoder() {}
+    RedisReplyDecoder() {}
+    RedisReplyDecoder(int maxSize) {}
+    virtual ~RedisReplyDecoder() {}
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const { return "RedisResponseDecoder"; }
@@ -59,3 +59,7 @@ private:
 }}
 
 #endif //#if !defined(CETTY_REDIS_REDISRESPONSEDECODER_H)
+
+// Local Variables:
+// mode: c++
+// End:

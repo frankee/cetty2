@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENTCHANNEL_H)
-#define CETTY_PROTOBUF_PROTOBUFRPCCLIENTCHANNEL_H
+#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H)
+#define CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -16,26 +16,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
-// Copyright 2010, Shuo Chen.  All rights reserved.
-// http://code.google.com/p/muduo/
-//
-// Use of this source code is governed by a BSD-style license
-// that can be found in the License file.
-
-// Author: Shuo Chen (chenshuo at chenshuo dot com)
-//
-// This is a public header file, it must only include public header files.
-
-#ifndef MUDUO_PROTORPC2_RPCCHANNEL_H
-#define MUDUO_PROTORPC2_RPCCHANNEL_H
-
-
-#include <map>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <google/protobuf/stubs/common.h> // implicit_cast, down_cast
-
 
 // Service and RpcChannel classes are incorporated from
 // google/protobuf/service.h
@@ -74,6 +54,9 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
+#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/DownCastServiceFuture.h>
+
 namespace google {
 namespace protobuf {
 
@@ -89,9 +72,6 @@ class Message;               // message.h
 namespace cetty {
 namespace protobuf {
 
-class RpcController;
-class Service;
-
 // Abstract interface for an RPC channel.  An RpcChannel represents a
 // communication line to a Service which can be used to call that Service's
 // methods.  The Service may be running on another machine.  Normally, you
@@ -101,12 +81,10 @@ class Service;
 //   RpcChannel* channel = new MyRpcChannel("remotehost.example.com:1234");
 //   MyService* service = new MyService::Stub(channel);
 //   service->MyMethod(request, &response, callback);
-class ProtobufRpcClientChannel {
+class ProtobufClientServiceAdaptor {
 public:
-    ProtobufRpcClientChannel();
-    ~ProtobufRpcClientChannel();
-
-    typedef ::boost::function2<void, const ::google::protobuf::Message*, const ::google::protobuf::Message*> DoneCallback;
+    ProtobufClientServiceAdaptor();
+    ~ProtobufClientServiceAdaptor();
 
     // Call the given method of the remote service.  The signature of this
     // procedure looks the same as Service::CallMethod(), but the requirements
@@ -115,8 +93,17 @@ public:
     // method->input_type() and method->output_type().
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
                     const ::google::protobuf::Message* request,
-                    const ::google::protobuf::Message* response,
-                    const DoneCallback& done);
+                    const ProtobufServiceFuturePtr& future);
+
+    template<typename ResponseT>
+    void CallMethod(const ::google::protobuf::MethodDescriptor* method,
+                    const ::google::protobuf::Message* request,
+                    const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {
+        CallMethod(method,
+                   request,
+                   ProtobufServiceFuturePtr(
+                       new DownCastServiceFuture<Message, ResponseT>(future)));
+    }
 
 private:
 
@@ -125,4 +112,4 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENTCHANNEL_H)
+#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H)

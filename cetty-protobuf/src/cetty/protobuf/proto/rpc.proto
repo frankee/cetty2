@@ -2,6 +2,8 @@ package cetty.protobuf.proto;
 option java_package = "cetty.protobuf.proto";
 option java_outer_classname = "RpcProto";
 
+import "google/protobuf/descriptor.proto";
+
 enum MessageType {
   REQUEST  = 1;
   RESPONSE = 2;

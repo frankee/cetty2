@@ -113,9 +113,9 @@ public:
 
     virtual bool setClosed();
 
-    void innerWrite(const MessageEvent& evt);
-    void innerClose(const ChannelFuturePtr& future);
-    void innerSetInterestOps(const ChannelFuturePtr& future, int interestOps);
+    void internalWrite(const MessageEvent& evt);
+    void internalClose(const ChannelFuturePtr& future);
+    void internalSetInterestOps(const ChannelFuturePtr& future, int interestOps);
     void cleanUpWriteBuffer();
 
     void handleRead(const boost::system::error_code& error, size_t bytes_transferred);

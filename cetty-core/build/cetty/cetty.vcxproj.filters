@@ -72,6 +72,9 @@
     <Filter Include="handler\execution">
       <UniqueIdentifier>{f585ecef-9b88-405b-8473-ec0c8cfded58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="service">
+      <UniqueIdentifier>{393eaf8f-a722-4a93-bb42-034b3379b32d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
@@ -1045,41 +1048,53 @@
     <ClInclude Include="..\..\..\include\cetty\handler\execution\ServicePoolExecutor.h">
       <Filter>handler\execution</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\Channel.h">
-      <Filter>buffer</Filter>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureProgressListener.h">
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelDownstreamHandler.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelEvent.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelException.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactory.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuture.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureListener.h">
-      <Filter>buffer</Filter>
+      <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureProgressListener.h">
-      <Filter>buffer</Filter>
+    <ClInclude Include="..\..\..\include\cetty\channel\Channel.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\DownCastServiceFuture.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\Service.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h">
+      <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

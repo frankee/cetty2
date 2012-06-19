@@ -25,6 +25,9 @@ private:
     typedef std::map<std::string, ProtobufServicePtr> ServiceMap;
 
 public:
+    static ProtobufServiceRegister& instance();
+
+public:
     int  registerService(ProtobufServicePtr& service);
     void unregisterService(const std::string& name);
 

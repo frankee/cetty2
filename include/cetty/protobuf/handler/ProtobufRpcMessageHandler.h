@@ -54,42 +54,20 @@ using namespace cetty::channel;
 class ProtobufRpcMessageHandler;
 typedef boost::intrusive_ptr<ProtobufRpcMessageHandler> ProtobufRpcMessageHandlerPtr;
 
-class ProtobufRpcMessageHandler : public cetty::channel::SimpleChannelHandler {
-public:
-    struct ProtobufRpcMessage {
-        cetty::protobuf::proto::RpcMessage* rpc;
-        google::protobuf::Message* payload;
-    };
-
-    struct OutstandingCall {
-        cetty::protobuf::proto::RpcMessage* rpc;
-        google::protobuf::Message* response;
-        google::protobuf::Closure* done;
-        google::protobuf::Message* message;
-    };
-
+class ProtobufRpcMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler {
 public:
     ProtobufRpcMessageHandler();
     virtual ~ProtobufRpcMessageHandler();
 
-    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
-    virtual void channelDisconnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e);
-
-    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
     virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const { return "ProtobufRpcMessageHandler"; }
+    virtual std::string toString() const;
 
 private:
-    void doneCallback(google::protobuf::Message* response, boost::int64_t id);
+    void doneCallback(const google::protobuf::Message& response, boost::int64_t id);
 
 private:
-    Channel* channel;
-
-    std::map<boost::int64_t, OutstandingCall> outstandings;
-    boost::int64_t id;
 };
 
 }

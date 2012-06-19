@@ -1,7 +1,7 @@
 #if !defined(CETTY_REDIS_REDISREPLYMESSAGE_H)
 #define CETTY_REDIS_REDISREPLYMESSAGE_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -23,31 +23,36 @@
 #include <cetty/util/SimpleString.h>
 #include <cetty/util/ReferenceCounter.h>
 
-namespace cetty { namespace redis {
+namespace cetty {
+namespace redis {
 
 using namespace cetty::util;
 
-class ReplyType : public cetty::util::Enum<ReplyType> {
+class RedisReplyMessageType : public cetty::util::Enum<RedisReplyMessageType> {
 public:
-    static const ReplyType REPLY_STRING;
-    static const ReplyType REPLY_ARRAY;
-    static const ReplyType REPLY_INTEGER;
-    static const ReplyType REPLY_NIL;
-    static const ReplyType REPLY_STATUS;
-    static const ReplyType REPLY_ERROR;
+    static const RedisReplyMessageType STRING;
+    static const RedisReplyMessageType ARRAY;
+    static const RedisReplyMessageType INTEGER;
+    static const RedisReplyMessageType NIL;
+    static const RedisReplyMessageType STATUS;
+    static const RedisReplyMessageType ERROR;
 
 private:
-    ReplyType(int value) : cetty::util::Enum<ReplyType>(value) {}
+    RedisReplyMessageType(int value) : cetty::util::Enum<RedisReplyMessageType>(value) {}
 };
 
-typedef boost::variant<boost::int64_t, SimpleString, std::vector<SimpleString> > ReplyValue;
+typedef boost::variant<boost::int64_t, SimpleString, std::vector<SimpleString> > RedisReplyMessageValue;
 
 class RedisReplyMessage : public ReferenceCounter<RedisReplyMessage> {
 public:
-    RedisReplyMessage() : type(ReplyType::REPLY_NIL) {}
+    RedisReplyMessage() : type(RedisReplyMessageType::NIL) {}
 
-    void setType(const ReplyType& type) { this->type = type; }
-    const ReplyType& getType() const { return this->type; }
+    void setType(const RedisReplyMessageType& type) {
+        this->type = type;
+    }
+    const RedisReplyMessageType& getType() const {
+        return this->type;
+    }
 
     void setValue(boost::int64_t integer) {
         value = integer;
@@ -62,48 +67,51 @@ public:
     }
 
     boost::int64_t getInteger() const {
-        if (type == ReplyType::REPLY_INTEGER) {
+        if (type == RedisReplyMessageType::INTEGER) {
             return boost::get<boost::int64_t>(value);
         }
     }
 
     const SimpleString& getString() const {
-        if (type == ReplyType::REPLY_STRING) {
+        if (type == RedisReplyMessageType::STRING) {
             return boost::get<SimpleString>(value);
         }
     }
 
     const SimpleString& getStatus() const {
-        if (type == ReplyType::REPLY_STATUS) {
+        if (type == RedisReplyMessageType::STATUS) {
             return boost::get<SimpleString>(value);
         }
     }
 
     const SimpleString& getError() const {
-        if (type == ReplyType::REPLY_ERROR) {
+        if (type == RedisReplyMessageType::ERROR) {
             return boost::get<SimpleString>(value);
         }
     }
 
     bool isNil() const {
-        return type == ReplyType::REPLY_NIL;
+        return type == RedisReplyMessageType::NIL;
     }
 
     const std::vector<SimpleString>& getArray() const {
-        if (type == ReplyType::REPLY_ARRAY) {
+        if (type == RedisReplyMessageType::ARRAY) {
             return boost::get<std::vector<SimpleString> >(value);
         }
     }
 
 private:
-    ReplyType  type;
-    ReplyValue value;
+    RedisReplyMessageType  type;
+    RedisReplyMessageValue value;
 };
-
 
 typedef boost::intrusive_ptr<RedisReplyMessage> RedisReplyMessagePtr;
 
-}}
-
+}
+}
 
 #endif //#if !defined(CETTY_REDIS_REDISREPLYMESSAGE_H)
+
+// Local Variables:
+// mode: c++
+// End:

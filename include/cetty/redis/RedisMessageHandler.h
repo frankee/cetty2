@@ -1,7 +1,7 @@
 #if !defined(CETTY_REDIS_REDISMESSAGEHANDLER_H)
 #define CETTY_REDIS_REDISMESSAGEHANDLER_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -31,10 +31,8 @@ using namespace cetty::channel;
 class RedisMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler {
 public:
     typedef boost::function1<void, const RedisReplyMessagePtr&> CallBack;
-    typedef boost::function0<void> DisConnectCallback;
 
 public:
-    RedisMessageHandler(const DisConnectCallback& callback) : disconnectCallback(callback) {}
     RedisMessageHandler() {}
     virtual ~RedisMessageHandler() {}
 

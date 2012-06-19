@@ -199,7 +199,7 @@ ChannelFuturePtr AsioSocketChannel::write(const ChannelMessage& message) {
     return future;
 }
 
-void AsioSocketChannel::innerWrite(const MessageEvent& evt) {
+void AsioSocketChannel::internalWrite(const MessageEvent& evt) {
     const ChannelFuturePtr& f = evt.getFuture();
 
     if (!isConnected()) {
@@ -292,7 +292,7 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::close() {
     return closeFuture;
 }
 
-void AsioSocketChannel::innerClose(const ChannelFuturePtr& future) {
+void AsioSocketChannel::internalClose(const ChannelFuturePtr& future) {
     if (!isOpen() || !tcpSocket.is_open() || getCloseFuture()->isDone()) {
         LOG_INFO(logger, "close the socket channel, but the channel already closed.");
         return;
@@ -392,7 +392,7 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::setInterestOps(int interestO
     return future;
 }
 
-void AsioSocketChannel::innerSetInterestOps(const ChannelFuturePtr& future, int interestOps) {
+void AsioSocketChannel::internalSetInterestOps(const ChannelFuturePtr& future, int interestOps) {
     bool isOrgReadable = isReadable();
 
     // Override OP_WRITE flag - a user cannot change this flag.
@@ -513,7 +513,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
     }
     else {
         cf->setFailure(ChannelException("failed to connect to remote server", error.value()));
-        innerClose(cf);
+        internalClose(cf);
     }
 }
 

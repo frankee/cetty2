@@ -22,3 +22,7 @@ namespace cetty { namespace gearman {
 }}
 
 #endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENT_H)
+
+// Local Variables:
+// mode: c++
+// End:

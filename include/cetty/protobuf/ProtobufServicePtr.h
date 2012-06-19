@@ -1,15 +1,13 @@
 #if !defined(CETTY_PROTOBUF_PROTOBUFSERVICEPTR_H)
 #define CETTY_PROTOBUF_PROTOBUFSERVICEPTR_H
 
-#include <boost/shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 
-namespace google { namespace protobuf {
-    class Service;
-}}
 
 namespace cetty { namespace protobuf { 
 
-typedef boost::shared_ptr<google::protobuf::Service> ProtobufServicePtr;
+class ProtobufService;
+typedef boost::intrusive_ptr<ProtobufService> ProtobufServicePtr;
 
 }}
 

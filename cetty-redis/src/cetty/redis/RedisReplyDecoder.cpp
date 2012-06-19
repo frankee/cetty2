@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include "RedisResponseDecoder.h"
+#include <cetty/redis/RedisReplyDecoder.h>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/Channels.h>
@@ -24,7 +24,7 @@
 
 #include <cetty/handler/codec/frame/TooLongFrameException.h>
 
-#include "RedisReplyMessage.h"
+#include <cetty/redis/RedisReplyMessage.h>
 
 namespace cetty {
 namespace redis {
@@ -33,7 +33,7 @@ using namespace cetty::util;
 using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 
-#define REDIS_LBR                       "\r\n"
+static const char* REDIS_LBR                       = "\r\n";
 static const char* REDIS_STATUS_REPLY_OK           = "OK";
 static const char* REDIS_PREFIX_STATUS_REPLY_ERROR = "-ERR ";
 
@@ -45,8 +45,7 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 
 //static const char REDIS_WHITESPACE                " \f\n\r\t\v"
 
-cetty::channel::ChannelMessage
-RedisResponseDecoder::decode(ChannelHandlerContext& ctx,
+ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
                              Channel& channel,
                              const ChannelBufferPtr& buffer) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
@@ -61,23 +60,23 @@ RedisResponseDecoder::decode(ChannelHandlerContext& ctx,
 
     if (frameLength > 0) {
         if (arry[0] == REDIS_PREFIX_STATUS_REPLY) {
-            reply->setType(ReplyType::REPLY_STATUS);
+            reply->setType(RedisReplyMessageType::STATUS);
             buffer->skipBytes(frameLength + 2);
             reply->setValue(SimpleString(arry.data(1), frameLength-1));
         }
         else if (arry[0] == REDIS_PREFIX_INTEGER_REPLY) {
-            reply->setType(ReplyType::REPLY_INTEGER);
+            reply->setType(RedisReplyMessageType::INTEGER);
             buffer->skipBytes(frameLength + 2);
             reply->setValue(atoi(arry.data(1)));
         }
         else if (arry[0] == REDIS_PREFIX_ERROR_REPLY) {
-            reply->setType(ReplyType::REPLY_ERROR);
+            reply->setType(RedisReplyMessageType::ERROR);
             buffer->skipBytes(frameLength + 2);
             reply->setValue(SimpleString(arry.data(1), frameLength-1));
         }
         else if (arry[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
             if (arry[1] != '-') {
-                reply->setType(ReplyType::REPLY_STRING);
+                reply->setType(RedisReplyMessageType::STRING);
                 arry[frameLength] = '\0';
                 int strSize = atoi(arry.data(1));
 
@@ -95,12 +94,12 @@ RedisResponseDecoder::decode(ChannelHandlerContext& ctx,
             }
             else {
                 buffer->skipBytes(frameLength + 2);
-                reply->setType(ReplyType::REPLY_NIL);
+                reply->setType(RedisReplyMessageType::NIL);
             }
         }
         else if (arry[0] == REDIS_PREFIX_MULTI_BULK_REPLY) {
             if (arry[1] != '-' && arry[1] != '0') {
-                reply->setType(ReplyType::REPLY_ARRAY);
+                reply->setType(RedisReplyMessageType::ARRAY);
                 arry[frameLength] = '\0';
                 int arrayCount = atoi(arry.data(1));
                 std::vector<SimpleString> stringArray;
@@ -150,7 +149,7 @@ RedisResponseDecoder::decode(ChannelHandlerContext& ctx,
             }
             else {
                 buffer->skipBytes(frameLength + 2);
-                reply->setType(ReplyType::REPLY_NIL);
+                reply->setType(RedisReplyMessageType::NIL);
             }
         }
 
@@ -175,7 +174,7 @@ RedisResponseDecoder::decode(ChannelHandlerContext& ctx,
     }
 }
 
-void RedisResponseDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
+void RedisReplyDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
     std::string msg;
     msg.reserve(64);
 
@@ -199,7 +198,7 @@ void RedisResponseDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
     }
 }
 
-int RedisResponseDecoder::indexOf(const Array& arry, int offset) {
+int RedisReplyDecoder::indexOf(const Array& arry, int offset) {
     for (int i = offset; i < arry.length(); ++i) {
         if (arry[i] == '\r' || arry[i] == '\0') {
             if (i+1 == arry.length()) {
@@ -214,8 +213,8 @@ int RedisResponseDecoder::indexOf(const Array& arry, int offset) {
     return -1;
 }
 
-cetty::channel::ChannelHandlerPtr RedisResponseDecoder::clone() {
-    return ChannelHandlerPtr(new RedisResponseDecoder());
+ChannelHandlerPtr RedisReplyDecoder::clone() {
+    return ChannelHandlerPtr(new RedisReplyDecoder());
 }
 
 }

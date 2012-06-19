@@ -1,5 +1,4 @@
-
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -15,18 +14,17 @@
  * under the License.
  */
 
-#include "RedisReplyMessage.h"
+#include <cetty/redis/RedisReplyMessage.h>
 
 namespace cetty {
 namespace redis {
 
-
-const ReplyType ReplyType::REPLY_STRING = 0;
-const ReplyType ReplyType::REPLY_ARRAY = 1;
-const ReplyType ReplyType::REPLY_INTEGER = 2;
-const ReplyType ReplyType::REPLY_NIL = 3;
-const ReplyType ReplyType::REPLY_STATUS = 4;
-const ReplyType ReplyType::REPLY_ERROR = 5;
+const RedisReplyMessageType RedisReplyMessageType::STRING  = 0;
+const RedisReplyMessageType RedisReplyMessageType::ARRAY   = 1;
+const RedisReplyMessageType RedisReplyMessageType::INTEGER = 2;
+const RedisReplyMessageType RedisReplyMessageType::NIL     = 3;
+const RedisReplyMessageType RedisReplyMessageType::STATUS  = 4;
+const RedisReplyMessageType RedisReplyMessageType::ERROR   = 5;
 
 }
 }
