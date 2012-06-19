@@ -1,4 +1,4 @@
-/*
+*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -14,8 +14,17 @@
  * under the License.
  */
 
+#include <string>
+#include <map>
+#include <cetty/gearman/GearmanWorker.h>
+
+typedef void* (worker_fn)(std::string& args);
+
+
+
 namespace cetty {
 namespace gearman {
+	
 
 }
 }

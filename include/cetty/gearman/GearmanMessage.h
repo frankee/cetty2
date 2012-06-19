@@ -85,34 +85,50 @@ public:
 
 public:
     static GearmanMessagePtr createEchoReqMessage(const ChannelBufferPtr& payload);
+    // worker  request
+	static GearmanMessagePtr createCandoMessage(const std::string& functionName);
+	static GearmanMessagePtr createCandoTimeoutMessage(const std::string& functionName, int timeout);
+	static GearmanMessagePtr createCantdoMessage(const std::string& functionName);
+	static GearmanMessagePtr createResetAbilitiesMessage();
+	static GearmanMessagePtr createPreSleepMessage();
+	static GearmanMessagePtr createGrabJobMessage();
+	static GearmanMessagePtr createGrabJobUniqMessage();
+	static GearmanMessagePtr createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator);
+	static GearmanMessagePtr createWorkCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+	static GearmanMessagePtr createWorkFailMessage(const std::string& jobHandle);
+	static GearmanMessagePtr createWorkWarningMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+	static GearmanMessagePtr createWorkExceptionMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+	static GearmanMessagePtr createWorkDataMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
 
-    // worker
-    static GearmanMessagePtr createCandoMessage(const std::string& functionName);
-    static GearmanMessagePtr createCandoTimeoutMessage(const std::string& functionName, int timeout);
-    static GearmanMessagePtr createCantdoMessage(const std::string& functionName);
-    static GearmanMessagePtr createResetAbilitiesMessage();
-    static GearmanMessagePtr createPreSleepMessage();
-    static GearmanMessagePtr createGrabJobMessage();
-    static GearmanMessagePtr createGrabJobUniqMessage();
-    static GearmanMessagePtr createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator);
-    static GearmanMessagePtr createWrokCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-    static GearmanMessagePtr createWorkFailMessage(const std::string& jobHandle);
-    static GearmanMessagePtr createWorkWarningMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-    static GearmanMessagePtr createWorkExceptionMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-    static GearmanMessagePtr createWorkDataMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-    
-    static GearmanMessagePtr createSetClientIdMessage(const std::string& clientId);
-    static GearmanMessagePtr createAllYoursMessage();
+	static GearmanMessagePtr createSetClientIdMessage(const std::string& clientId);
+	static GearmanMessagePtr createAllYoursMessage();
+
+
 
     // client
     static GearmanMessagePtr createsubmitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
     static GearmanMessagePtr createsubmitJobHighMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
     static GearmanMessagePtr createsubmitJobLowMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-    static GearmanMessagePtr createGetStatusMessage(const std::string& jobHandle);
+   
+	//client submit-bg
+	static GearmanMessagePtr createsubmitJobBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+	static GearmanMessagePtr createsubmitJobHighBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+	static GearmanMessagePtr createsubmitJobLowBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+
+	static GearmanMessagePtr createGetStatusMessage(const std::string& jobHandle);
     static GearmanMessagePtr createOptionReqMessage(const std::string& option);
 
 public:
     GearmanMessage() {}
+	GearmanMessage(int type);
+	GearmanMessage(int type, const ChannelBufferPtr& payload);
+	GearmanMessage(int type, const std::string& param);
+	GearmanMessage(int type, const std::string& param, const ChannelBufferPtr& payload);
+
+	GearmanMessage(int type, const std::string& param1, const std::string& param2);
+	GearmanMessage(int type, const std::string& param1, const std::string& param2, const std::string& param3);
+	GearmanMessage(int type, const std::string& param1, const std::string& param2, const ChannelBufferPtr& payload);
+
     ~GearmanMessage() {}
 
     int getType() const { return type; }
@@ -130,6 +146,15 @@ public:
     void setData(const ChannelBufferPtr& data) {
         this->data = data;
     }
+
+    ChannelBufferPtr getData() {
+        return data;
+    }
+
+	std::vector<std::string>  getParameters()
+	{
+		return parameters;
+	}
 
 private:
     GearmanMessage(const GearmanMessage&);
