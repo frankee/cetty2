@@ -98,7 +98,6 @@ public:
         e.getChannel()->close();
     }
 
-
     virtual ChannelHandlerPtr clone() {
         ChannelHandlerPtr ptr(
             new EchoClientHandler(firstMessageSize, intervalTime));

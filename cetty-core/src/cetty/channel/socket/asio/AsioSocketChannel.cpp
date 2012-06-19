@@ -214,8 +214,7 @@ void AsioSocketChannel::innerWrite(const MessageEvent& evt) {
     }
 
     isWriting = true;
-    writeQueue->offer(evt, f);
-    AsioWriteOperation& operation = writeQueue->peek();
+    AsioWriteOperation& operation = writeQueue->offer(evt, f);
 
     if (operation.writeBufferSize() == 0) {
         LOG_WARN(logger, "write an empty message, do not write to the socket,\

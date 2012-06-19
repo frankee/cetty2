@@ -21,51 +21,74 @@
 
 #include <cetty/gearman/GearmanMessage.h>
 
-namespace cetty {
-namespace gearman {
+namespace cetty
+{
+namespace gearman
+{
 
 using namespace cetty::channel;
 
-GearmanDecoder::GearmanDecoder() {
+GearmanDecoder::GearmanDecoder()
+{
 
 }
 
-GearmanDecoder::~GearmanDecoder() {
+GearmanDecoder::~GearmanDecoder()
+{
 
 }
 
-ChannelHandlerPtr GearmanDecoder::clone() {
+ChannelHandlerPtr GearmanDecoder::clone()
+{
     return ChannelHandlerPtr(new GearmanDecoder);
 }
 
-std::string GearmanDecoder::toString() const {
+std::string GearmanDecoder::toString() const
+{
     return "GearmanDecoder";
 }
 
 ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
-    const ChannelPtr& channel,
-    const ChannelMessage& msg) {
+                                      const ChannelPtr& channel,
+                                      const ChannelMessage& msg)
+{
+	//smartPointer得到具体message的类型
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
-    if (buffer) {
+    if (buffer)
+    {
         GearmanMessagePtr message(new GearmanMessage);
         int type = buffer->readInt();
         int length = buffer->readInt();
-        while (length > 0) {
+        while (length > 0)
+        {
             int bytes = buffer->bytesBefore(0);
-            if (bytes > 0) {
+            if (bytes > 0)
+            {
                 std::string* str = message->addParameter();
-                str->reserve(bytes+1);
-                buffer->readBytes(str, bytes+1);
+                str->reserve(bytes + 1);
+				//从buffer往str里写bytes+1个数据
+                buffer->readBytes(str, bytes + 1);
             }
-            else {
-                if (buffer->readable()) {
+            else
+            {
+				//these types take the param as the last elem
+				if(type == GearmanMessage::JOB_CREATED || type == GearmanMessage::STATUS_RES || type == GearmanMessage::OPTION_RES ||
+					type == GearmanMessage::WORK_STATUS || type == GearmanMessage::WORK_FAIL || type == GearmanMessage::ERROR)
+				{
+					std::string* str = message->addParameter();
+					int lastParamLen = buffer->readableBytes();
+					str->reserve(lastParamLen);
+					buffer->readBytes(str,lastParamLen);
+					break;
+				}
+				else if (buffer->readable())
+                {
                     message->setData(buffer);
                 }
                 break;
             }
         }
-
         message->setType(type);
 
         return ChannelMessage(message);

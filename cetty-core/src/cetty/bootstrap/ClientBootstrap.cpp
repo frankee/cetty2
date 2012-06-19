@@ -97,7 +97,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     }
 
     try {
-        pipeline = getPipelineFactory()->getPipeline();
+        pipeline = factory->getPipeline();
     }
     catch (...) {
         LOG_ERROR(logger, "has an exception when get pipeline from factory, then return a failed future.");

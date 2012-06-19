@@ -126,9 +126,10 @@ public:
         return polledOp;
     }
 
-    void offer(const MessageEvent& evt, const ChannelFuturePtr& f) {
+    AsioWriteOperation& offer(const MessageEvent& evt, const ChannelFuturePtr& f) {
         ops.push_back(AsioWriteOperation(evt, f));
-        plusWriteBufferSize(peek().writeBufferSize());
+        plusWriteBufferSize(ops.back().writeBufferSize());
+		return ops.back();
     }
 
     int  getWriteBufferSize() const {

@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\cetty\gearman\GearmanTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\gearman\GearmanClientTest.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}</ProjectGuid>
+    <ProjectGuid>{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}</ProjectGuid>
     <RootNamespace>GearmanTest</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

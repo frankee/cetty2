@@ -30,7 +30,9 @@ namespace cetty { namespace gearman {
         GearmanMessageHandler();
         virtual ~GearmanMessageHandler();
 
+		//upstream
         virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+		//downstream
         virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
 
