@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_SERVICE_H)
-#define CETTY_SERVICE_SERVICE_H
+#if !defined(CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H)
+#define CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,27 +17,34 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
-#include <cetty/util/ReferenceCounter.h>
+#include <boost/function.hpp>
+#include <cetty/service/ServiceFuture.h>
 
 namespace cetty {
 namespace service {
 
-class Service : public cetty::util::ReferenceCounter<Service> {
+template<typename GeneralT, typename SpecialT>
+class SpecilizedServiceFuture : public ServiceFuture<GeneralT> {
 public:
-    virtual ~Service() {}
+    typedef boost::intrusive_ptr<ServiceFuture<SpecialT> > SpecialTypePtr;
+    typedef boost::function2<void, GeneralT&, SpecialT&> TypeCastFunctor;
+
+public:
+    SpecilizedServiceFuture(const SpecialTypePtr& future, const TypeCastFunctor& functor);
+    virtual ~SpecilizedServiceFuture();
+
+    virtual void setComplete() {
+
+    }
 
 private:
-    Service(const Service&);
-    Service& operator=(const Service&);
+    SpecialTypePtr future;
 };
 
-typedef boost::intrusive_ptr<Service> ServicePtr;
-
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_SERVICE_H)
+#endif //#if !defined(CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H)
 
 // Local Variables:
 // mode: c++

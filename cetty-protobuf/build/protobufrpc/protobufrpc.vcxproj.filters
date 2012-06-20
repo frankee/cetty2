@@ -33,17 +33,11 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceFuture.h">
       <Filter>protobuf</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ServiceFuture.h">
-      <Filter>protobuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufRpcClient.h">
-      <Filter>protobuf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\DownCastServiceFuture.h">
-      <Filter>protobuf</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessage.h">
       <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufClientServiceAdaptor.h">
+      <Filter>protobuf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -53,14 +47,14 @@
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcMessageHandler.cpp">
       <Filter>protobuf\handler</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufRpcClient.cpp">
-      <Filter>protobuf</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcDecoder.cpp">
       <Filter>protobuf\handler</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcEncoder.cpp">
       <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufClientServiceAdaptor.cpp">
+      <Filter>protobuf</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

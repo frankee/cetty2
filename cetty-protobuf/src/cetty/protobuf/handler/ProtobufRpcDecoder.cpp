@@ -36,24 +36,28 @@ ChannelMessage ProtobufRpcDecoder::decode(ChannelHandlerContext& ctx,
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
     if (buffer) {
-        RpcMessage* message = new RpcMessage;
+        ProtobufRpcMessage message(new ProtobufRpcMessage);
+        RpcMessage* rpc = message.mutableRpcMessage();
 
-        if (!decode(buffer, message)) {
+        if (!decode(buffer, rpc)) {
             const google::protobuf::Message* prototype = NULL;
 
-            if (message->type() == REQUEST) {
+            if (rpc->type() == REQUEST) {
                 prototype = ProtobufServiceRegister::instance().getRequestPrototype(
-                                message->service(), message->method());
+                                rpc->service(), rpc->method());
             }
-            else if (message->type() == RESPONSE) {
+            else if (rpc->type() == RESPONSE) {
                 prototype = ProtobufServiceRegister::instance().getResponsePrototype(
-                                message->service(), message->method());
+                                rpc->service(), rpc->method());
             }
 
             google::protobuf::Message* payload = prototype->New();
             Array arry;
             buffer->readableBytes(&arry);
             payload->ParseFromArray(arry.data(), arry.length());
+            message.setPayload(payload);
+
+            return ChannelMessage(message);
         }
     }
 }

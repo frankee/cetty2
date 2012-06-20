@@ -38,6 +38,10 @@ protected:
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
+private:
+    int getMessageSize();
+    void encodeRpcMessage(const ChannelBufferPtr& buffer, const ProtobufRpcMessagePtr& message);
+
 };
 
 }

@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_DOWNCASTSERVICEFUTURE_H)
-#define CETTY_SERVICE_DOWNCASTSERVICEFUTURE_H
+#if !defined(CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H)
+#define CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,30 +17,19 @@
  * under the License.
  */
 
-#include <cetty/service/ServiceFuture.h>
+#include <cetty/service/ClientService.h>
 
 namespace cetty {
-namespace service {
+namespace protobuf {
 
-template<typename T, typename DownCastT>
-class DownCastServiceFuture : public ServiceFuture<T> {
-public:
-    typedef boost::intrusive_ptr<ServiceFuture<DownCastT> > DownCastPtr;
-
-public:
-    DownCastServiceFuture(const DownCastPtr& future);
-
-
-    virtual void setComplete() {
-
-    }
-
-
-private:
-    DownCastPtr future;
-};
+typedef ClientService<google::protobuf::Message, google::protobuf::Message> ProtobufClientService;
+typedef boost::intrusive_ptr<ProtobufClientService> ProtobufClientServicePtr;
 
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_DOWNCASTSERVICEFUTURE_H)
+#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H)
+
+// Local Variables:
+// mode: c++
+// End:

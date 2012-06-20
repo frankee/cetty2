@@ -90,6 +90,8 @@ class ServiceGenerator {
   void GenerateMethodSignatures(StubOrNon stub_or_non,
                                 io::Printer* printer);
 
+  void GenerateFutureType(io::Printer* printer);
+
   // Source file stuff.
 
   // Generate the default implementations of the service methods, which

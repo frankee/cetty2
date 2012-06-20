@@ -350,7 +350,7 @@
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\DownCastServiceFuture.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\SpecializedServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />

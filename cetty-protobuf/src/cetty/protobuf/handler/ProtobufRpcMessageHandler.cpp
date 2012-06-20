@@ -39,6 +39,7 @@ namespace protobuf {
 namespace handler {
 
 using namespace cetty::channel;
+using namespace cetty::service;
 using namespace cetty::protobuf;
 using namespace cetty::protobuf::proto;
 using namespace google::protobuf;
@@ -51,17 +52,20 @@ ProtobufRpcMessageHandler::~ProtobufRpcMessageHandler() {
 
 void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
     ProtobufRpcMessagePtr msg = e.getMessage().smartPointer<ProtobufRpcMessage>();
-    const RpcMessage* rpc = msg->rpc;
+    const RpcMessage& rpc = msg->getRpcMessage();
 
     if (NULL == msg) {
         ctx.sendUpstream(e);
     }
-    else if (rpc->type() == proto::REQUEST) {
-        ProtobufServicePtr& service = serviceRegister->getService(rpc->service());
-        const google::protobuf::MethodDescriptor* method =
-            serviceRegister->getMethodDescriptor(service, rpc->method());
+    else if (rpc.type() == cetty::protobuf::proto::REQUEST) {
+        ProtobufServicePtr& service = 
+            ProtobufServiceRegister::instance().getService(rpc.service());
 
-        boost::int64_t id = rpc->id();
+        const google::protobuf::MethodDescriptor* method =
+            ProtobufServiceRegister::instance().getMethodDescriptor(service,
+            rpc.method());
+
+        boost::int64_t id = rpc.id();
 
         if (method) {
             ProtobufServiceFuturePtr future(new ProtobufServiceFuture);
@@ -71,14 +75,14 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
                                              _2,
                                              id));
 
-            service->CallMethod(method, msg->payload, future);
+            service->CallMethod(method, msg->getPayload(), future);
         }
         else {
             // return error message
             printf("has no such service or method.\n");
         }
     }
-    else if (rpc->type() == proto::ERROR) {
+    else if (rpc.type() == cetty::protobuf::proto::ERROR) {
     }
     else {
         ctx.sendUpstream(e);

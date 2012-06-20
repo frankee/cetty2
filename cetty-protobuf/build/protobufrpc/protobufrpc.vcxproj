@@ -11,23 +11,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\DownCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufRpcClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceRegister.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ServiceFuture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcMessageHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufRpcClient.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\ProtobufServiceRegister.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

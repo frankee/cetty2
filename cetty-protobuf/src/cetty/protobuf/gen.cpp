@@ -89,7 +89,7 @@ void ServiceGenerator::GenerateInterface(io::Printer* printer) {
         "\n"
         "const ::google::protobuf::ServiceDescriptor* GetDescriptor();\n"
         "void CallMethod(const ::google::protobuf::MethodDescriptor* method,\n"
-        "                const ::google::protobuf::MessagePtr& request,\n"
+        "                const ::google::protobuf::Message* request,\n"
         "                const ::google::protobuf::Message* responsePrototype,\n"
         "                const DoneCallback& done);\n"
         "const ::google::protobuf::Message& GetRequestPrototype(\n"
@@ -132,6 +132,22 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
                    "  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS($classname$_Stub);\n"
                    "};\n"
                    "\n");
+}
+
+void ServiceGenerator::GenerateFutureType(io::Printer* printer) {
+        for (int i = 0; i < descriptor_->method_count(); i++) {
+            const MethodDescriptor* method = descriptor_->method(i);
+            map<string, string> sub_vars;
+            sub_vars["classname"] = descriptor_->name();
+            sub_vars["name"] = method->name();
+            sub_vars["input_type"] = ClassName(method->input_type(), true);
+            sub_vars["output_type"] = ClassName(method->output_type(), true);
+            sub_vars["virtual"] = "virtual ";
+
+            printer->Print(sub_vars,
+                "typedef ServiceFuture<$output_type$> $output_type$Future\n"
+                "typedef boost::intrusive<ServiceFuture<$output_type$> > $output_type$FuturePtr\n");
+        }
 }
 
 void ServiceGenerator::GenerateMethodSignatures(

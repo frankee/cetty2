@@ -39,6 +39,7 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 
+#include <cetty/service/Service.h>
 #include <cetty/protobuf/ProtobufServiceFuture.h>
 
 namespace google {
@@ -62,7 +63,7 @@ namespace protobuf {
 // stubs), but they subclass this base interface.  The methods of this
 // interface can be used to call the methods of the Service without knowing
 // its exact type at compile time (analogous to Reflection).
-class ProtobufService : boost::noncopyable {
+class ProtobufService : cetty::service::Service {
 public:
     ProtobufService() {}
     virtual ~ProtobufService() {}

@@ -55,7 +55,8 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <cetty/protobuf/ProtobufServiceFuture.h>
-#include <cetty/protobuf/DownCastServiceFuture.h>
+#include <cetty/protobuf/ProtobufClientService.h>
+#include <cetty/service/SpecializedServiceFuture.h>
 
 namespace google {
 namespace protobuf {
@@ -72,18 +73,22 @@ class Message;               // message.h
 namespace cetty {
 namespace protobuf {
 
+using namespace cetty::service;
+
 // Abstract interface for an RPC channel.  An RpcChannel represents a
 // communication line to a Service which can be used to call that Service's
 // methods.  The Service may be running on another machine.  Normally, you
 // should not call an RpcChannel directly, but instead construct a stub Service
 // wrapping it.  Example:
-// FIXME: update here
-//   RpcChannel* channel = new MyRpcChannel("remotehost.example.com:1234");
-//   MyService* service = new MyService::Stub(channel);
-//   service->MyMethod(request, &response, callback);
+// 
+//   ProtobufClientServicePtr service = ProtobufClientBuilder("remotehost.example.com:1234");
+//   MyService* myService = new MyService::Stub(service);
+//   MyMehodResponseFuturePtr future(new MyMehodResponseFuture(callback));
+//   myService->MyMethod(request, future);
+//
 class ProtobufClientServiceAdaptor {
 public:
-    ProtobufClientServiceAdaptor();
+    ProtobufClientServiceAdaptor(const ProtobufClientServicePtr& service);
     ~ProtobufClientServiceAdaptor();
 
     // Call the given method of the remote service.  The signature of this
@@ -95,6 +100,9 @@ public:
                     const ::google::protobuf::Message* request,
                     const ProtobufServiceFuturePtr& future);
 
+    template<ResponseT>
+    void downCastFunctor(const Message*, const ResponseT*);
+    
     template<typename ResponseT>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
                     const ::google::protobuf::Message* request,
@@ -102,11 +110,11 @@ public:
         CallMethod(method,
                    request,
                    ProtobufServiceFuturePtr(
-                       new DownCastServiceFuture<Message, ResponseT>(future)));
+                       new SpecilizedServiceFuture<Message, ResponseT>(future)));
     }
 
 private:
-
+    ProtobufClientServicePtr service;
 };
 
 }

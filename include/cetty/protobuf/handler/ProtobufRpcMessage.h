@@ -38,10 +38,26 @@ namespace cetty {
 namespace protobuf {
 namespace handler {
 
+    using google::protobuf::Message;
+    using namespace cetty::protobuf::proto;
+
 class ProtobufRpcMessage : public cetty::util::ReferenceCounter<ProtobufRpcMessage> {
 public:
-    cetty::protobuf::proto::RpcMessage* rpc;
-    google::protobuf::Message* payload;
+    ProtobufRpcMessage();
+    ProtobufRpcMessage(int type);
+    ProtobufRpcMessage(int type, const std::string& service, const std::string& method);
+    ProtobufRpcMessage(int type, const std::string& service, const std::string& method, const Message* payload);
+
+    RpcMessage* mutableRpcMessage();
+    const RpcMessage& getRpcMessage() const;
+
+    const Message* getPayload() const;
+
+    void setPayload(const Message* message);
+
+private:
+    cetty::protobuf::proto::RpcMessage rpc;
+    const google::protobuf::Message* payload;
 };
 
 typedef boost::intrusive_ptr<ProtobufRpcMessage> ProtobufRpcMessagePtr;
