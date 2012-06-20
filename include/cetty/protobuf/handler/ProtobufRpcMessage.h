@@ -38,26 +38,52 @@ namespace cetty {
 namespace protobuf {
 namespace handler {
 
-    using google::protobuf::Message;
-    using namespace cetty::protobuf::proto;
+using google::protobuf::Message;
+using namespace cetty::protobuf::proto;
 
 class ProtobufRpcMessage : public cetty::util::ReferenceCounter<ProtobufRpcMessage> {
 public:
     ProtobufRpcMessage();
-    ProtobufRpcMessage(int type);
-    ProtobufRpcMessage(int type, const std::string& service, const std::string& method);
-    ProtobufRpcMessage(int type, const std::string& service, const std::string& method, const Message* payload);
+    ProtobufRpcMessage(int type) {
+        rpc.set_type(type);
+    }
+    ProtobufRpcMessage(int type, int id) {
+        rpc.set_type(type);
+        rpc.set_id(id);
+    }
+    ProtobufRpcMessage(int type, int id, const MessagePtr& payload) : payload(payload) {
+        rpc.set_type(type);
+        rpc.set_id(id);
+    }
+    ProtobufRpcMessage(int type, const std::string& service, const std::string& method) {
+        rpc.set_type(type);
+        rpc.set_service(service);
+        rpc.set_method(method);
+    }
+    ProtobufRpcMessage(int type, const std::string& service, const std::string& method, const MessagePtr& payload) : payload(payload) {
+        rpc.set_type(type);
+        rpc.set_service(service);
+        rpc.set_method(method);
+    }
 
-    RpcMessage* mutableRpcMessage();
-    const RpcMessage& getRpcMessage() const;
+    RpcMessage* mutableRpcMessage() {
+        return &rpc;
+    }
+    const RpcMessage& getRpcMessage() const {
+        return rpc;
+    }
 
-    const Message* getPayload() const;
+    const MessagePtr& getPayload() const {
+        return payload;
+    }
 
-    void setPayload(const Message* message);
+    void setPayload(const MessagePtr& message) {
+        this->payload = message;
+    }
 
 private:
     cetty::protobuf::proto::RpcMessage rpc;
-    const google::protobuf::Message* payload;
+    MessagePtr payload;
 };
 
 typedef boost::intrusive_ptr<ProtobufRpcMessage> ProtobufRpcMessagePtr;

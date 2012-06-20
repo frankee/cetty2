@@ -97,7 +97,7 @@ public:
     //   RpcController can be queried to determine if an error occurred and
     //   possibly to get more information about the error.
     virtual void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                            const ::google::protobuf::Message* request,
+                            const MessagePtr& request,
                             const ProtobufServiceFuturePtr& future) = 0;
 
     // CallMethod() requires that the request and response passed in are of a
@@ -113,10 +113,10 @@ public:
     //   Message* response = stub->GetResponsePrototype(method)->New();
     //   request->ParseFromString(input);
     //   service->CallMethod(method, request, response, callback);
-    virtual const ::google::protobuf::Message& GetRequestPrototype(
+    virtual const ::google::protobuf::Message* GetRequestPrototype(
         const ::google::protobuf::MethodDescriptor* method) const = 0;
 
-    virtual const ::google::protobuf::Message& GetResponsePrototype(
+    virtual const ::google::protobuf::Message* GetResponsePrototype(
         const ::google::protobuf::MethodDescriptor* method) const = 0;
 
 };

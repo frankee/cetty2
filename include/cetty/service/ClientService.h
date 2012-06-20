@@ -26,13 +26,10 @@ template <typename RequestT, typename ResponseT>
 class ClientService {
 public:
     typedef RequestT& RequestRef;
+    typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
 
 public:
-    void call(RequestT* request, ServiceFuture<ResponseT>* future);
-
-    struct OutstandingCall {
-
-    };
+    void call(const RequestT& request, const ServiceFuturePtr& future);
 };
 
 

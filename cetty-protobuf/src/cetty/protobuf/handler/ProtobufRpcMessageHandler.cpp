@@ -69,10 +69,11 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
 
         if (method) {
             ProtobufServiceFuturePtr future(new ProtobufServiceFuture);
-            future->addListenser(boost::bind(&ProtobufRpcMessageHandler::doneCallback,
+            future->addListener(boost::bind(&ProtobufRpcMessageHandler::doneCallback,
                                              this,
                                              _1,
                                              _2,
+                                             boost::ref(ctx),
                                              id));
 
             service->CallMethod(method, msg->getPayload(), future);
@@ -89,22 +90,14 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
     }
 }
 
-void deleteMessage(const ChannelFuturePtr& future, proto::RpcMessage* message) {
-    if (message) {
-        delete message;
-    }
-}
-
-void ProtobufRpcMessageHandler::doneCallback(google::protobuf::Message* response,
+void ProtobufRpcMessageHandler::doneCallback(
+    const ProtobufServiceFuturePtr& future,
+    const MessagePtr& response,
+    ChannelHandlerContext& ctx,
         boost::int64_t id) {
-    proto::RpcMessage* message = new proto::RpcMessage;
-    message->set_type(proto::RESPONSE);
-    message->set_id(id);
 
-    ChannelFuturePtr future = channel->write(ChannelMessage((MessageLite*)(message)));
-    future->setListener(boost::bind(deleteMessage, _1, message));
-
-    delete response;
+    ProtobufRpcMessagePtr message(new ProtobufRpcMessage(RESPONSE, id, response));
+    Channels::write(ctx.getChannel(), ChannelMessage(response));
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufRpcMessageHandler::clone() {

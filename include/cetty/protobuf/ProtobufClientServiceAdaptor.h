@@ -80,7 +80,7 @@ using namespace cetty::service;
 // methods.  The Service may be running on another machine.  Normally, you
 // should not call an RpcChannel directly, but instead construct a stub Service
 // wrapping it.  Example:
-// 
+//
 //   ProtobufClientServicePtr service = ProtobufClientBuilder("remotehost.example.com:1234");
 //   MyService* myService = new MyService::Stub(service);
 //   MyMehodResponseFuturePtr future(new MyMehodResponseFuture(callback));
@@ -97,20 +97,23 @@ public:
     // need not be of any specific class as long as their descriptors are
     // method->input_type() and method->output_type().
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const ::google::protobuf::Message* request,
+                    const MessagePtr& request,
                     const ProtobufServiceFuturePtr& future);
 
     template<ResponseT>
-    void downCastFunctor(const Message*, const ResponseT*);
-    
+    ResponseT downCastFunctor(const MessagePtr& from) {
+        return static_pointer_cast<ResponseT::element_type>(from);
+    }
+
     template<typename ResponseT>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const ::google::protobuf::Message* request,
+                    const MessagePtr& request,
                     const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {
         CallMethod(method,
                    request,
                    ProtobufServiceFuturePtr(
-                       new SpecilizedServiceFuture<Message, ResponseT>(future)));
+                       new SpecilizedServiceFuture<MessagePtr, ResponseT>(future,
+                               boost::bind(&ProtobufClientServiceAdaptor::downCastFunctor<ResponseT>, this, _1, _2))));
     }
 
 private:

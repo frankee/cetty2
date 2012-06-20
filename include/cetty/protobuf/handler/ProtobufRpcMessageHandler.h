@@ -65,7 +65,11 @@ public:
     virtual std::string toString() const;
 
 private:
-    void doneCallback(const google::protobuf::Message& response, boost::int64_t id);
+    void doneCallback(
+        const ProtobufServiceFuturePtr& future,
+        const MessagePtr& response,
+        ChannelHandlerContext& ctx,
+        boost::int64_t id);
 
 private:
 };

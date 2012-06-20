@@ -22,12 +22,16 @@
 #include <cetty/protobuf/ProtobufService.h>
 #include <cetty/protobuf/handler/ProtobufRpcMessage.h>
 #include <cetty/protobuf/proto/rpc.pb.h>
+#include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace protobuf {
 
+using namespace google::protobuf;
+using namespace cetty::service;
 using namespace cetty::protobuf::handler;
 using namespace cetty::protobuf::proto;
+using namespace cetty::util;
 
 // Call the given method of the remote service.  The signature of this
 // procedure looks the same as Service::CallMethod(), but the requirements
@@ -36,12 +40,12 @@ using namespace cetty::protobuf::proto;
 // method->input_type() and method->output_type().
 void ProtobufClientServiceAdaptor::CallMethod(
     const ::google::protobuf::MethodDescriptor* method,
-    const ::google::protobuf::Message* request,
+    const MessagePtr& request,
     const ProtobufServiceFuturePtr& future) {
 
     if (!service) {
         if (future) {
-            future->setFailure();
+            future->setFailure(Exception(""));
         }
 
         return;

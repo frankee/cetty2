@@ -30,19 +30,33 @@ public:
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
 
-    typedef typename boost::function1<void, SelfConstRefType, ResponseConstRefType> Callback;
+    typedef typename boost::function1<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
 
 public:
+    ServiceFuture() {}
+    ServiceFuture(int timeout) {}
+    virtual ~ServiceFuture() {}
+
     // Resets the RpcController to its initial state so that it may be reused in
     // a new call.  Must not be called while an RPC is in progress.
-    virtual void Reset() = 0;
+    //void reset();
 
     // Advises the RPC system that the caller desires that the RPC call be
     // canceled.  The RPC system may cancel it immediately, may wait awhile and
     // then cancel it, or may not even cancel the call at all.  If the call is
     // canceled, the "done" callback will still be called and the RpcController
     // will indicate that the call failed at that time.
-    virtual void StartCancel() = 0;
+    void startCancel();
+
+    /**
+     * Cancels the I/O operation associated with this future
+     * and notifies all listeners if canceled successfully.
+     *
+     * @return <tt>true</tt> if and only if the operation has been canceled.
+     *         <tt>false</tt> if the operation can't be canceled or is already
+     *         completed.
+     */
+    //bool cancel();
 
     /**
      * Returns a channel where the I/O operation associated with this
@@ -55,28 +69,19 @@ public:
      * complete, regardless of whether the operation was successful, failed,
      * or cancelled.
      */
-    virtual bool isDone() const = 0;
-
-    // If true, indicates that the client canceled the RPC, so the server may
-    // as well give up on replying to it.  The server should still call the
-    // final "done" callback.
-    /**
-     * Returns <tt>true</tt> if and only if this future was
-     * cancelled by a {@link #cancel()} method.
-     */
-    virtual bool isCancelled() const = 0;
+    bool isDone() const;
 
     /**
      * Returns <tt>true</tt> if and only if the I/O operation was completed
      * successfully.
      */
-    virtual bool isSuccess() const = 0;
+    bool isSuccess() const;
 
     // After a call has finished, returns true if the call failed.  The possible
     // reasons for failure depend on the RPC implementation.  Failed() must not
     // be called before a call has finished.  If Failed() returns true, the
     // contents of the response message are undefined.
-    virtual bool Failed() const = 0;
+    bool failed() const;
 
     /**
      * Returns the cause of the failed I/O operation if the I/O operation has
@@ -86,17 +91,16 @@ public:
      *         <tt>NULL</tt> if succeeded or this future is not
      *         completed yet.
      */
-    virtual const Exception* getCause() const = 0;
+    const Exception* getCause() const;
 
+    // If true, indicates that the client canceled the RPC, so the server may
+    // as well give up on replying to it.  The server should still call the
+    // final "done" callback.
     /**
-     * Cancels the I/O operation associated with this future
-     * and notifies all listeners if canceled successfully.
-     *
-     * @return <tt>true</tt> if and only if the operation has been canceled.
-     *         <tt>false</tt> if the operation can't be canceled or is already
-     *         completed.
+     * Returns <tt>true</tt> if and only if this future was
+     * cancelled by a {@link #cancel()} method.
      */
-    virtual bool cancel() = 0;
+    virtual bool isCancelled() const;
 
     /**
      * Marks this future as a success and notifies all
@@ -106,7 +110,9 @@ public:
      *         a success. Otherwise <tt>false</tt> because this future is
      *         already marked as either a success or a failure.
      */
-    virtual bool setSuccess() = 0;
+    virtual bool setSuccess();
+
+    virtual bool setSuccess(const T& response);
 
     /**
      * Marks this future as a failure and notifies all
@@ -116,11 +122,15 @@ public:
      *         a failure. Otherwise <tt>false</tt> because this future is
      *         already marked as either a success or a failure.
      */
-    virtual bool setFailure(const Exception& cause) = 0;
+    virtual bool setFailure(const Exception& cause);
+
+    virtual bool setFailure(const T& response, const Exception& cause);
 
 
-    void setResponse(const T& response);
-    const T& getResponse() const;
+    virtual void setResponse(const T& response);
+
+
+    virtual const T& getResponse() const;
 
     // Asks that the given callback be called when the RPC is canceled.  The
     // callback will always be called exactly once.  If the RPC completes without
@@ -129,7 +139,7 @@ public:
     // will be called immediately.
     //
     // NotifyOnCancel() must be called no more than once per request.
-    virtual void NotifyOnCancel(Closure* callback) = 0;
+    //void NotifyOnCancel(Closure* callback);
 
     /**
      * Adds the specified listener, which is a function object, to this future.
@@ -140,7 +150,7 @@ public:
      * Use this function, you may not have to take care the listener's
      * life circle, otherwise, the ChannelFutureListener should.
      */
-    virtual void addListener(const CompletedCallback& listenerr) = 0;
+    void addListener(const CompletedCallback& listenerr);
 
     /**
      * Waits for this future to be completed.
@@ -148,14 +158,14 @@ public:
      * @throws InterruptedException
      *         if the current thread was interrupted
      */
-    virtual ServiceFuturePtr await() = 0;
+    void await();
 
     /**
      * Waits for this future to be completed without
      * interruption.  This method catches an {@link InterruptedException} and
      * discards it silently.
      */
-    virtual ServiceFuturePtr awaitUninterruptibly() = 0;
+    void awaitUninterruptibly();
 
     /**
      * Waits for this future to be completed within the
@@ -167,7 +177,7 @@ public:
      * @throws InterruptedException
      *         if the current thread was interrupted
      */
-    virtual bool await(int timeoutMillis) = 0;
+    bool await(int timeoutMillis);
 
     /**
      * Waits for this future to be completed within the
@@ -177,10 +187,14 @@ public:
      * @return <tt>true</tt> if and only if the future was completed within
      *         the specified time limit
      */
-    virtual bool awaitUninterruptibly(int timeoutMillis) = 0;
+    bool awaitUninterruptibly(int timeoutMillis);
+
+protected:
+    typedef boost::function0<void, void> StartCancelCallback;
+    void setStartCancelCallback(const StartCancelCallback& callback);
 
 private:
-    std::vector<Callback> callbacks;
+    std::vector<CompletedCallback> callbacks;
 };
 
 }

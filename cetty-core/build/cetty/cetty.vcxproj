@@ -353,6 +353,7 @@
     <ClInclude Include="..\..\..\include\cetty\service\SpecializedServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
