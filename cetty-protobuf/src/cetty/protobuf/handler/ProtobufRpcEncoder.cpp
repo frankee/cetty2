@@ -15,6 +15,8 @@
  */
 
 #include <cetty/protobuf/handler/ProtobufRpcEncoder.h>
+
+#include <cetty/channel/ChannelMessage.h>
 #include <cetty/protobuf/handler/ProtobufRpcMessage.h>
 
 namespace cetty {
@@ -31,6 +33,18 @@ ChannelMessage ProtobufRpcEncoder::encode(ChannelHandlerContext& ctx,
     if (message) {
 
     }
+    else {
+        return msg;
+    }
+}
+
+int ProtobufRpcEncoder::getMessageSize() {
+    return 0;
+}
+
+void ProtobufRpcEncoder::encodeRpcMessage(const ChannelBufferPtr& buffer,
+    const ProtobufRpcMessagePtr& message) {
+
 }
 
 }

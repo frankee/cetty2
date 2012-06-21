@@ -17,10 +17,20 @@
  * under the License.
  */
 
+#include <vector>
+#include <boost/function.hpp>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
+    namespace util {
+        class Exception;
+    }
+}
+
+namespace cetty {
 namespace service {
+
+    using cetty::util::Exception;
 
 template <typename T>
 class ServiceFuture : public cetty::util::ReferenceCounter<ServiceFuture<T>, int> {
@@ -30,7 +40,7 @@ public:
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
 
-    typedef typename boost::function1<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
+    typedef typename boost::function2<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
 
 public:
     ServiceFuture() {}
@@ -190,7 +200,7 @@ public:
     bool awaitUninterruptibly(int timeoutMillis);
 
 protected:
-    typedef boost::function0<void, void> StartCancelCallback;
+    typedef boost::function0<void> StartCancelCallback;
     void setStartCancelCallback(const StartCancelCallback& callback);
 
 private:

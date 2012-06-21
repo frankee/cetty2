@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_SERVICE_H)
-#define CETTY_SERVICE_SERVICE_H
+#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H)
+#define CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,28 +17,19 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
-#include <cetty/util/ReferenceCounter.h>
+#include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
-namespace service {
+namespace protobuf {
+namespace handler {
 
-class Service : public cetty::util::ReferenceCounter<Service> {
-public:
-    Service() {}
-    virtual ~Service() {}
-
-private:
-    Service(const Service&);
-    Service& operator=(const Service&);
-};
-
-typedef boost::intrusive_ptr<Service> ServicePtr;
+    typedef ServiceRequestHandler<>
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_SERVICE_SERVICE_H)
+#endif //#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H)
 
 // Local Variables:
 // mode: c++

@@ -19,6 +19,7 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/proto/rpc.pb.h>
 #include <cetty/protobuf/ProtobufServiceRegister.h>
+#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
 
 namespace cetty {
 namespace protobuf {
@@ -36,8 +37,8 @@ ChannelMessage ProtobufRpcDecoder::decode(ChannelHandlerContext& ctx,
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
     if (buffer) {
-        ProtobufRpcMessage message(new ProtobufRpcMessage);
-        RpcMessage* rpc = message.mutableRpcMessage();
+        ProtobufRpcMessagePtr message(new ProtobufRpcMessage);
+        RpcMessage* rpc = message->mutableRpcMessage();
 
         if (!decode(buffer, rpc)) {
             const google::protobuf::Message* prototype = NULL;
@@ -55,15 +56,22 @@ ChannelMessage ProtobufRpcDecoder::decode(ChannelHandlerContext& ctx,
             Array arry;
             buffer->readableBytes(&arry);
             payload->ParseFromArray(arry.data(), arry.length());
-            message.setPayload(payload);
+            message->setPayload(payload);
 
             return ChannelMessage(message);
         }
+        else {
+            // error here
+            return msg;
+        }
+    }
+    else {
+        return msg;
     }
 }
 
 int ProtobufRpcDecoder::decode(const ChannelBufferPtr& buffer, RpcMessage* message) {
-
+    return 0;
 }
 
 }

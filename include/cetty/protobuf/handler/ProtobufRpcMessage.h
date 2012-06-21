@@ -18,50 +18,37 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <boost/intrusive_ptr.hpp>
-
-namespace google {
-namespace protobuf {
-class Message;
-}
-}
-
-namespace cetty {
-namespace protobuf {
-namespace proto {
-class RpcMessage;
-}
-}
-}
+#include <cetty/protobuf/proto/rpc.pb.h>
+#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/handler/ProtobufRpcMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
 namespace handler {
 
-using google::protobuf::Message;
 using namespace cetty::protobuf::proto;
 
 class ProtobufRpcMessage : public cetty::util::ReferenceCounter<ProtobufRpcMessage> {
 public:
     ProtobufRpcMessage();
     ProtobufRpcMessage(int type) {
-        rpc.set_type(type);
+        rpc.set_type(int2type(type));
     }
-    ProtobufRpcMessage(int type, int id) {
-        rpc.set_type(type);
+    ProtobufRpcMessage(int type, boost::int64_t id) {
+        rpc.set_type(int2type(type));
         rpc.set_id(id);
     }
-    ProtobufRpcMessage(int type, int id, const MessagePtr& payload) : payload(payload) {
-        rpc.set_type(type);
+    ProtobufRpcMessage(int type, boost::int64_t id, const MessagePtr& payload) : payload(payload) {
+        rpc.set_type(int2type(type));
         rpc.set_id(id);
     }
     ProtobufRpcMessage(int type, const std::string& service, const std::string& method) {
-        rpc.set_type(type);
+        rpc.set_type(int2type(type));
         rpc.set_service(service);
         rpc.set_method(method);
     }
     ProtobufRpcMessage(int type, const std::string& service, const std::string& method, const MessagePtr& payload) : payload(payload) {
-        rpc.set_type(type);
+        rpc.set_type(int2type(type));
         rpc.set_service(service);
         rpc.set_method(method);
     }
@@ -82,11 +69,23 @@ public:
     }
 
 private:
-    cetty::protobuf::proto::RpcMessage rpc;
+    MessageType int2type(int type) {
+        switch (type) {
+        case REQUEST:
+            return REQUEST;
+        case RESPONSE:
+            return RESPONSE;
+        case ERROR:
+            return ERROR;
+        default:
+            return ERROR;
+        }
+    }
+
+private:
+    RpcMessage rpc;
     MessagePtr payload;
 };
-
-typedef boost::intrusive_ptr<ProtobufRpcMessage> ProtobufRpcMessagePtr;
 
 }
 }

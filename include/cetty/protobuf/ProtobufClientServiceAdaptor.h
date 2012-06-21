@@ -100,7 +100,7 @@ public:
                     const MessagePtr& request,
                     const ProtobufServiceFuturePtr& future);
 
-    template<ResponseT>
+    template<typename ResponseT>
     ResponseT downCastFunctor(const MessagePtr& from) {
         return static_pointer_cast<ResponseT::element_type>(from);
     }

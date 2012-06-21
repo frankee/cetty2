@@ -1,16 +1,15 @@
-#include "cetty/protobuf/ProtobufServiceRegister.h"
+#include <cetty/protobuf/ProtobufServiceRegister.h>
 
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
+#include <cetty/protobuf/ProtobufService.h>
 
 namespace cetty {
-namespace handler {
-namespace rpc {
 namespace protobuf {
 
 ProtobufServicePtr ProtobufServiceRegister::nullService;
 
-int ProtobufServiceRegister::registerService(ProtobufServicePtr& service) {
+int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) {
     if (!service) {
         printf("the name or the service SHOULD NOT be NULL.\n");
         return -1;
@@ -18,7 +17,7 @@ int ProtobufServiceRegister::registerService(ProtobufServicePtr& service) {
 
     std::string serviceName = service->GetDescriptor()->full_name();
 
-    ServiceMapType::const_iterator itr = serviceMap.find(serviceName);
+    ServiceMap::const_iterator itr = serviceMap.find(serviceName);
 
     if (itr != serviceMap.end()) {
         printf("the name of the service already registered, will be update.\n");
@@ -30,22 +29,28 @@ int ProtobufServiceRegister::registerService(ProtobufServicePtr& service) {
 }
 
 void ProtobufServiceRegister::unregisterService(const std::string& name) {
-    ServiceMapType::const_iterator itr = serviceMap.find(name);
+    ServiceMap::const_iterator itr = serviceMap.find(name);
 
     if (itr != serviceMap.end()) {
         serviceMap.erase(itr);
     }
 }
 
-ProtobufServicePtr& ProtobufServiceRegister::getService(const std::string& name) {
-    if (name.empty()) { return nullService; }
-
-    return serviceMap[name];
+const ProtobufServicePtr& ProtobufServiceRegister::getService(const std::string& name) const {
+    if (name.empty()) {
+        return nullService;
+    }
+    
+    ServiceMap::const_iterator itr = serviceMap.find(name);
+    if (itr != serviceMap.end()) {
+        return itr->second;
+    }
+    return nullService;
 }
 
-const ProtobufServiceRegister::MethodDescriptor*
-ProtobufServiceRegister::getMethodDescriptor(const ProtobufServicePtr& service,
-        const std::string& method) {
+const MethodDescriptor* ProtobufServiceRegister::getMethodDescriptor(
+    const ProtobufServicePtr& service,
+        const std::string& method) const {
     if (!service) { return NULL; }
 
     const google::protobuf::ServiceDescriptor* desc = service->GetDescriptor();
@@ -57,7 +62,47 @@ ProtobufServiceRegister::getMethodDescriptor(const ProtobufServicePtr& service,
     return NULL;
 }
 
-int protobuf::ProtobufServiceRegister::getRegisteredServices(std::vector<std::string>* names) {
+const Message* ProtobufServiceRegister::getRequestPrototype(
+    const ProtobufServicePtr& service, 
+    const std::string& method) const {
+    if (!service || method.empty()) {
+        return NULL;
+    }
+
+    const google::protobuf::ServiceDescriptor* desc = service->GetDescriptor();
+
+    if (desc) {
+        const MethodDescriptor* methodDescriptor = desc->FindMethodByName(method);
+
+        if (methodDescriptor) {
+            return service->GetRequestPrototype(methodDescriptor);
+        }
+    }
+
+    return NULL;
+}
+
+const Message* ProtobufServiceRegister::getResponsePrototype(
+    const ProtobufServicePtr& service,
+    const std::string& method) const {
+    if (!service) {
+        return NULL;
+    }
+
+    const google::protobuf::ServiceDescriptor* desc = service->GetDescriptor();
+
+    if (desc) {
+        const MethodDescriptor* methodDescriptor = desc->FindMethodByName(method);
+
+        if (methodDescriptor) {
+            return service->GetResponsePrototype(methodDescriptor);
+        }
+    }
+
+    return NULL;
+}
+
+int ProtobufServiceRegister::getRegisteredServices(std::vector<std::string>* names) const {
     if (NULL == names) { return 0; }
 
     int count = 0;
@@ -71,7 +116,6 @@ int protobuf::ProtobufServiceRegister::getRegisteredServices(std::vector<std::st
     return count;
 }
 
-}
-}
+
 }
 }

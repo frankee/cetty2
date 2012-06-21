@@ -1099,5 +1099,8 @@
     <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h">
+      <Filter>service</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

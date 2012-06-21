@@ -22,6 +22,7 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelFuture.h>
@@ -58,25 +59,24 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
         ctx.sendUpstream(e);
     }
     else if (rpc.type() == cetty::protobuf::proto::REQUEST) {
-        ProtobufServicePtr& service = 
+        const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
 
         const google::protobuf::MethodDescriptor* method =
             ProtobufServiceRegister::instance().getMethodDescriptor(service,
-            rpc.method());
+                    rpc.method());
 
         boost::int64_t id = rpc.id();
 
         if (method) {
-            ProtobufServiceFuturePtr future(new ProtobufServiceFuture);
-            future->addListener(boost::bind(&ProtobufRpcMessageHandler::doneCallback,
-                                             this,
-                                             _1,
-                                             _2,
-                                             boost::ref(ctx),
-                                             id));
-
-            service->CallMethod(method, msg->getPayload(), future);
+            service->CallMethod(method,
+                                msg->getPayload(),
+                                MessagePtr(),
+                                boost::bind(&ProtobufRpcMessageHandler::doneCallback,
+                                            this,
+                                            _1,
+                                            boost::ref(ctx),
+                                            id));
         }
         else {
             // return error message
@@ -90,10 +90,8 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
     }
 }
 
-void ProtobufRpcMessageHandler::doneCallback(
-    const ProtobufServiceFuturePtr& future,
-    const MessagePtr& response,
-    ChannelHandlerContext& ctx,
+void ProtobufRpcMessageHandler::doneCallback(const MessagePtr& response,
+        ChannelHandlerContext& ctx,
         boost::int64_t id) {
 
     ProtobufRpcMessagePtr message(new ProtobufRpcMessage(RESPONSE, id, response));

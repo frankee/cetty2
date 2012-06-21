@@ -209,7 +209,7 @@ template<class E, class T, class Y> std::basic_ostream<E, T>& operator<< (std::b
 
 template< class T > struct hash;
 
-template< class T > std::size_t hash_value(boost::BarePointer<T> const& p) {
+template< class T > std::size_t hash_value(BarePointer<T> const& p) {
     return boost::hash< T* >()(p.get());
 }
 

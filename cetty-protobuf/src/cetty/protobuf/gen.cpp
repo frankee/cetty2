@@ -53,6 +53,20 @@ namespace cpp {
 
 string ClassName(const Descriptor* descriptor, bool qualified);
 
+ServiceGenerator::ServiceGenerator(const ServiceDescriptor* descriptor,
+    const string& dllexport_decl)
+    : descriptor_(descriptor) {
+        vars_["classname"] = descriptor_->name();
+        vars_["full_name"] = descriptor_->full_name();
+        if (dllexport_decl.empty()) {
+            vars_["dllexport"] = "";
+        } else {
+            vars_["dllexport"] = dllexport_decl + " ";
+        }
+}
+
+ServiceGenerator::~ServiceGenerator() {}
+
 void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
     fprintf(stderr, "GenerateDeclarations\n");
     // Forward-declare the stub type.
@@ -66,7 +80,7 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
 
 void ServiceGenerator::GenerateInterface(io::Printer* printer) {
     printer->Print(vars_,
-                   "class $dllexport$$classname$ : public ::cetty::protobuf::Service {\n"
+                   "class $dllexport$$classname$ : public ::cetty::protobuf::ProtobufService {\n"
                    " protected:\n"
                    "  // This class should be treated as an abstract interface.\n"
                    "  inline $classname$() {};\n"
@@ -89,12 +103,12 @@ void ServiceGenerator::GenerateInterface(io::Printer* printer) {
         "\n"
         "const ::google::protobuf::ServiceDescriptor* GetDescriptor();\n"
         "void CallMethod(const ::google::protobuf::MethodDescriptor* method,\n"
-        "                const ::google::protobuf::Message* request,\n"
+        "                const MessagePtr& request,\n"
         "                const ::google::protobuf::Message* responsePrototype,\n"
-        "                const DoneCallback& done);\n"
-        "const ::google::protobuf::Message& GetRequestPrototype(\n"
+        "                const ProtobufServiceFuturePtr& future& );\n"
+        "const ::google::protobuf::Message* GetRequestPrototype(\n"
         "  const ::google::protobuf::MethodDescriptor* method) const;\n"
-        "const ::google::protobuf::Message& GetResponsePrototype(\n"
+        "const ::google::protobuf::Message* GetResponsePrototype(\n"
         "  const ::google::protobuf::MethodDescriptor* method) const;\n");
 
     printer->Outdent();
@@ -114,10 +128,10 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Indent();
 
     printer->Print(vars_,
-                   "$classname$_Stub(const ::cetty::channel::ChannelPtr& channel);\n"
+                   "$classname$_Stub(const ProtobufClientServicePtr& service);\n"
                    "~$classname$_Stub();\n"
                    "\n"
-                   "inline const ::cetty::channel::ChannelPtr& channel() { return channel_; }\n"
+                   "inline const ProtobufClientServicePtr& channel() { return channel_; }\n"
                    "\n"
                    "// implements $classname$ ------------------------------------------\n"
                    "\n");
@@ -127,7 +141,7 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Outdent();
     printer->Print(vars_,
                    " private:\n"
-                   "  const ::cetty::channel::RpcChannelPtr channel_;\n"
+                   "  ProtobufClientServicePtr channel_;\n"
                    "  bool owns_channel_;\n"
                    "  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS($classname$_Stub);\n"
                    "};\n"
@@ -163,16 +177,14 @@ void ServiceGenerator::GenerateMethodSignatures(
 
         if (stub_or_non == NON_STUB) {
             printer->Print(sub_vars,
-                           "$virtual$void $name$(const ::boost::shared_ptr<const $input_type$>& request,\n"
-                           "                     const $output_type$* responsePrototype,\n"
+                "$virtual$void $name$(const ::cetty::barePointer<const $input_type$>& request,\n"
                            "                     const DoneCallback& done);\n");
         }
         else {
             printer->Print(sub_vars,
                            "using $classname$::$name$;\n"
-                           "$virtual$void $name$(const $input_type$& request,\n"
-                           "                     const ::boost::function1<void,\n"
-                           "                           const ::boost::shared_ptr< $output_type$>&>& done);\n");
+                           "$virtual$void $name$(const ::cetty::barePointer<const $input_type$>& request,\n"
+                           "                     const ProtobufServiceFuturePtr& future);\n");
         }
     }
 }
@@ -214,8 +226,8 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-                   "$classname$_Stub::$classname$_Stub(::cetty::protobuf::ProtobufRpcChannel* channel__)\n"
-                   "  : channel_(channel__), owns_channel_(false) {}\n"
+                   "$classname$_Stub::$classname$_Stub(const ProtobufClientServicePtr& service)\n"
+                   "  : channel_(service), owns_channel_(false) {}\n"
                    "$classname$_Stub::~$classname$_Stub() {\n"
                    "}\n"
                    "\n");
@@ -234,12 +246,12 @@ void ServiceGenerator::GenerateNotImplementedMethods(io::Printer* printer) {
         sub_vars["output_type"] = ClassName(method->output_type(), true);
 
         printer->Print(sub_vars,
-                       "void $classname$::$name$(const ::boost::shared_ptr<const $input_type$>&,\n"
-                       "                         const $output_type$*,\n"
+                       "void $classname$::$name$(const ::cetty::barePointer<const $input_type$>& request,\n"
+                       "                         const ::cetty::barePointer<$output_type$>& response,\n"
                        "                         const DoneCallback& done) {\n"
                        // "  controller->SetFailed(\"Method $name$() not implemented.\");\n"
                        "  assert(0);\n"
-                       "  done(NULL);\n"
+                       "  done(::cetty::barePointer());\n"
                        "}\n"
                        "\n");
     }
@@ -334,7 +346,7 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
                        "void $classname$_Stub::$name$(const $input_type$& request,\n"
                        "                              const ::boost::function1<void,\n"
                        "                                    const ::boost::shared_ptr< $output_type$>&>& done) {"
-                       "  channel_->CallMethod(descriptor()->method($index$),\n"
+                       "  channel_.CallMethod(descriptor()->method($index$),\n"
                        "                       request, &$output_type$::default_instance(), done);\n"
                        "}\n");
     }

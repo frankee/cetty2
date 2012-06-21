@@ -18,11 +18,14 @@
  */
 
 #include <cetty/handler/codec/oneone/OneToOneEncoder.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/protobuf/handler/ProtobufRpcMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
 namespace handler {
 
+using namespace cetty::buffer;
 using namespace cetty::channel;
 
 class ProtobufRpcEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {

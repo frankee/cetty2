@@ -18,17 +18,15 @@
  */
 
 #include <deque>
-#include "boost/cstdint.hpp"
-#include "boost/thread/mutex.hpp"
-#include "google/protobuf/service.h"
-#include "cetty/channel/SimpleChannelHandler.h"
-#include "cetty/handler/rpc/protobuf/ProtobufServiceRegister.h"
+#include <boost/cstdint.hpp>
+#include <cetty/channel/SimpleChannelUpstreamHandler.h>
+#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/ProtobufServiceRegister.h>
 
 namespace google {
 namespace protobuf {
 class MethodDescriptor;
 class RpcController;
-class Message;
 }
 }
 
@@ -65,11 +63,9 @@ public:
     virtual std::string toString() const;
 
 private:
-    void doneCallback(
-        const ProtobufServiceFuturePtr& future,
-        const MessagePtr& response,
-        ChannelHandlerContext& ctx,
-        boost::int64_t id);
+    void doneCallback(const MessagePtr& response,
+                      ChannelHandlerContext& ctx,
+                      boost::int64_t id);
 
 private:
 };

@@ -3,7 +3,6 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-
 namespace cetty { namespace protobuf { 
 
 class ProtobufService;

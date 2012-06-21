@@ -33,13 +33,6 @@ public:
 };
 
 
-class ClientServiceMessageHandler {
-
-
-
-};
-
-
 class ClientServiceChannel {
 public:
 

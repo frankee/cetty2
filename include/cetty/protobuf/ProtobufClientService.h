@@ -18,10 +18,14 @@
  */
 
 #include <cetty/service/ClientService.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
+#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/handler/ProtobufRpcMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
+
+using namespace cetty::service;
+using namespace cetty::protobuf::handler;
 
 typedef ClientService<ProtobufRpcMessagePtr, MessagePtr> ProtobufClientService;
 typedef boost::intrusive_ptr<ProtobufClientService> ProtobufClientServicePtr;

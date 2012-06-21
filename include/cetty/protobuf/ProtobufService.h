@@ -63,7 +63,10 @@ namespace protobuf {
 // stubs), but they subclass this base interface.  The methods of this
 // interface can be used to call the methods of the Service without knowing
 // its exact type at compile time (analogous to Reflection).
-class ProtobufService : cetty::service::Service {
+class ProtobufService : public cetty::service::Service {
+public:
+    typedef boost::function1<void, const MessagePtr&> DoneCallback;
+
 public:
     ProtobufService() {}
     virtual ~ProtobufService() {}
@@ -98,7 +101,8 @@ public:
     //   possibly to get more information about the error.
     virtual void CallMethod(const ::google::protobuf::MethodDescriptor* method,
                             const MessagePtr& request,
-                            const ProtobufServiceFuturePtr& future) = 0;
+                            const MessagePtr& response,
+                            const DoneCallback& done) = 0;
 
     // CallMethod() requires that the request and response passed in are of a
     // particular subclass of Message.  GetRequestPrototype() and
