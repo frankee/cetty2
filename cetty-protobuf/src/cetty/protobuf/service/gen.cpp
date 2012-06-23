@@ -178,7 +178,8 @@ void ServiceGenerator::GenerateMethodSignatures(
         if (stub_or_non == NON_STUB) {
             printer->Print(sub_vars,
                 "$virtual$void $name$(const ::cetty::barePointer<const $input_type$>& request,\n"
-                           "                     const DoneCallback& done);\n");
+                "                     const ::cetty::barePointer<$output_type$>& response,\n"
+                "                     const DoneCallback& done);\n");
         }
         else {
             printer->Print(sub_vars,
@@ -219,6 +220,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
                    "\n");
 
     // Generate methods of the interface.
+    GenerateFutureType(printer);
     GenerateNotImplementedMethods(printer);
     GenerateCallMethod(printer);
     GenerateGetPrototype(REQUEST, printer);
@@ -251,7 +253,7 @@ void ServiceGenerator::GenerateNotImplementedMethods(io::Printer* printer) {
                        "                         const DoneCallback& done) {\n"
                        // "  controller->SetFailed(\"Method $name$() not implemented.\");\n"
                        "  assert(0);\n"
-                       "  done(::cetty::barePointer());\n"
+                       "  done(::cetty::barePointer<$output_type$>());\n"
                        "}\n"
                        "\n");
     }
@@ -261,7 +263,7 @@ void ServiceGenerator::GenerateCallMethod(io::Printer* printer) {
     printer->Print(vars_,
                    "void $classname$::CallMethod(const ::google::protobuf::MethodDescriptor* method,\n"
                    "                             const ::google::protobuf::MessagePtr& request,\n"
-                   "                             const ::google::protobuf::Message* responsePrototype,\n"
+                   "                             const ::google::protobuf::MessagePtr& response,\n"
                    "                             const DoneCallback& done) {\n"
                    "  GOOGLE_DCHECK_EQ(method->service(), $classname$_descriptor_);\n"
                    "  switch(method->index()) {\n");
@@ -278,8 +280,8 @@ void ServiceGenerator::GenerateCallMethod(io::Printer* printer) {
         //   not references.
         printer->Print(sub_vars,
                        "    case $index$:\n"
-                       "      $name$(::google::protobuf::down_pointer_cast<const $input_type$>(request),\n"
-                       "             ::google::protobuf::down_cast<const $output_type$*>(responsePrototype),\n"
+                       "      $name$(channel_.downPointerCast<::cetty::util::BarePointer<$input_type$> >(request),\n"
+                       "             channel_.downPointerCast<::cetty::util::BarePointer<$output_type$> >(response),\n"
                        "             done);\n"
                        "      break;\n");
     }
@@ -301,7 +303,7 @@ void ServiceGenerator::GenerateGetPrototype(RequestOrResponse which,
     }
     else {
         printer->Print(vars_,
-                       "const ::google::protobuf::Message& $classname$::GetResponsePrototype(\n");
+                       "const ::google::protobuf::Message* $classname$::GetResponsePrototype(\n");
     }
 
     printer->Print(vars_,
@@ -320,13 +322,14 @@ void ServiceGenerator::GenerateGetPrototype(RequestOrResponse which,
 
         printer->Print(sub_vars,
                        "    case $index$:\n"
-                       "      return $type$::default_instance();\n");
+                       "      return &$type$::default_instance();\n");
     }
 
     printer->Print(vars_,
                    "    default:\n"
                    "      GOOGLE_LOG(FATAL) << \"Bad method index; this should never happen.\";\n"
-                   "      return *reinterpret_cast< ::google::protobuf::Message*>(NULL);\n"
+                   "      return NULL;\n"
+                   //"      return *reinterpret_cast< ::google::protobuf::Message*>(NULL);\n"
                    "  }\n"
                    "}\n"
                    "\n");
@@ -343,11 +346,10 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
         sub_vars["output_type"] = ClassName(method->output_type(), true);
 
         printer->Print(sub_vars,
-                       "void $classname$_Stub::$name$(const $input_type$& request,\n"
-                       "                              const ::boost::function1<void,\n"
-                       "                                    const ::boost::shared_ptr< $output_type$>&>& done) {"
+                       "void $classname$_Stub::$name$(const ::cetty::util::BarePointer<$input_type$>& request,\n"
+                       "                              const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {\n"
                        "  channel_.CallMethod(descriptor()->method($index$),\n"
-                       "                       request, &$output_type$::default_instance(), done);\n"
+                       "                      request, future);\n"
                        "}\n");
     }
 }

@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{75A24313-B5BB-489C-80E4-B22C18BEEC0F}</ProjectGuid>
-    <RootNamespace>protobufgen</RootNamespace>
+    <RootNamespace>ProtobufServiceGenerator</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

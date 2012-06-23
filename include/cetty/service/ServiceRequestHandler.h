@@ -27,7 +27,6 @@ class OutstandingCall {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
 
-
 public:
     RequestT request;
     ServiceFuturePtr future;
@@ -43,7 +42,7 @@ public:
     virtual ServiceRequestHandler();
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        ResponseT& response = e.getMessage().value();
+        ResponseMessageT& response = e.getMessage().value();
 
         if (response) {
             boost::int64_t id = message->id();

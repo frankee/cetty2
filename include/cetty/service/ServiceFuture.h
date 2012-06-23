@@ -122,7 +122,10 @@ public:
      */
     virtual bool setSuccess();
 
-    virtual bool setSuccess(const T& response);
+    virtual bool setSuccess(const T& response) {
+        setResponse(response);
+        return setSuccess();
+    }
 
     /**
      * Marks this future as a failure and notifies all
@@ -134,13 +137,20 @@ public:
      */
     virtual bool setFailure(const Exception& cause);
 
-    virtual bool setFailure(const T& response, const Exception& cause);
+    virtual bool setFailure(const T& response, const Exception& cause) {
+        setResponse(response);
+        return setFailure(cause);
+    }
 
 
-    virtual void setResponse(const T& response);
+    virtual void setResponse(const T& response) {
+        this->response = response;
+    }
 
 
-    virtual const T& getResponse() const;
+    virtual const T& getResponse() const {
+        return this->response;
+    }
 
     // Asks that the given callback be called when the RPC is canceled.  The
     // callback will always be called exactly once.  If the RPC completes without
@@ -160,7 +170,9 @@ public:
      * Use this function, you may not have to take care the listener's
      * life circle, otherwise, the ChannelFutureListener should.
      */
-    void addListener(const CompletedCallback& listenerr);
+    void addListener(const CompletedCallback& listener) {
+        callbacks.push_back(listener);
+    }
 
     /**
      * Waits for this future to be completed.
@@ -201,10 +213,14 @@ public:
 
 protected:
     typedef boost::function0<void> StartCancelCallback;
-    void setStartCancelCallback(const StartCancelCallback& callback);
+    void setStartCancelCallback(const StartCancelCallback& callback) {
+        startCancelCallback = callback;
+    }
 
 private:
-    std::vector<CompletedCallback> callbacks;
+    T response;
+    StartCancelCallback startCancelCallback;
+    std::deque<CompletedCallback> callbacks;
 };
 
 }

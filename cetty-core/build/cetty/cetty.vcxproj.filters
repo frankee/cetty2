@@ -1093,13 +1093,13 @@
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\SpecializedServiceFuture.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h">
       <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>

@@ -56,7 +56,7 @@
 
 #include <cetty/protobuf/ProtobufServiceFuture.h>
 #include <cetty/protobuf/ProtobufClientService.h>
-#include <cetty/service/SpecializedServiceFuture.h>
+#include <cetty/service/TypeCastServiceFuture.h>
 
 namespace google {
 namespace protobuf {
@@ -74,6 +74,15 @@ namespace cetty {
 namespace protobuf {
 
 using namespace cetty::service;
+
+
+template<typename To, typename From>     // use like this: down_cast<T*>(foo);
+inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
+#if !defined(NDEBUG)
+    assert(!f || point_dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
+#endif
+    return static_cast<To>(f);
+}
 
 // Abstract interface for an RPC channel.  An RpcChannel represents a
 // communication line to a Service which can be used to call that Service's
@@ -101,19 +110,19 @@ public:
                     const ProtobufServiceFuturePtr& future);
 
     template<typename ResponseT>
-    ResponseT downCastFunctor(const MessagePtr& from) {
+    ResponseT downPointerCast(const MessagePtr& from) {
         return static_pointer_cast<ResponseT::element_type>(from);
     }
 
-    template<typename ResponseT>
+    template<typename RequestT, typename ResponseT>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const MessagePtr& request,
+                    const cetty::util::BarePointer<RequestT>& request,
                     const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {
         CallMethod(method,
-                   request,
+                   cetty::util::static_pointer_cast<MessagePtr::element_type>(request),
                    ProtobufServiceFuturePtr(
-                       new SpecilizedServiceFuture<MessagePtr, ResponseT>(future,
-                               boost::bind(&ProtobufClientServiceAdaptor::downCastFunctor<ResponseT>, this, _1, _2))));
+                       new TypeCastServiceFuture<MessagePtr, ResponseT>(future,
+                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<ResponseT>, this, _1, _2))));
     }
 
 private:

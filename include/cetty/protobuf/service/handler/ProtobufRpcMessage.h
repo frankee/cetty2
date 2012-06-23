@@ -64,6 +64,14 @@ public:
         return payload;
     }
 
+    const MessagePtr& getResponse() const {
+        return payload;
+    }
+
+    const MessagePtr& getRequest() const {
+        return payload;
+    }
+
     void setPayload(const MessagePtr& message) {
         this->payload = message;
     }

@@ -9,6 +9,15 @@ namespace protobuf {
 
 ProtobufServicePtr ProtobufServiceRegister::nullService;
 
+
+ProtobufServiceRegister::ProtobufServiceRegister() {
+
+}
+
+ProtobufServiceRegister::~ProtobufServiceRegister() {
+
+}
+
 int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) {
     if (!service) {
         printf("the name or the service SHOULD NOT be NULL.\n");
@@ -116,6 +125,10 @@ int ProtobufServiceRegister::getRegisteredServices(std::vector<std::string>* nam
     return count;
 }
 
+ProtobufServiceRegister& ProtobufServiceRegister::instance() {
+    static ProtobufServiceRegister serviceRegister;
+    return serviceRegister;
+}
 
 }
 }

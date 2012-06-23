@@ -23,7 +23,7 @@ namespace cetty {
 namespace protobuf {
 namespace handler {
 
-    typedef ServiceRequestHandler<>
+    //typedef ServiceRequestHandler<>
 
 }
 }

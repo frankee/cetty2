@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H)
-#define CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H
+#if !defined(CETTY_SERVICE_TYPECASTSERVICEFUTURE_H)
+#define CETTY_SERVICE_TYPECASTSERVICEFUTURE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -24,14 +24,14 @@ namespace cetty {
 namespace service {
 
 template<typename GeneralT, typename SpecialT>
-class SpecilizedServiceFuture : public ServiceFuture<GeneralT> {
+class TypeCastServiceFuture : public ServiceFuture<GeneralT> {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<SpecialT> > SpecialTypePtr;
     typedef boost::function1<SpecialT, const GeneralT&> TypeCastFunctor;
 
 public:
-    SpecilizedServiceFuture(const SpecialTypePtr& future, const TypeCastFunctor& functor);
-    virtual ~SpecilizedServiceFuture() {}
+    TypeCastServiceFuture(const SpecialTypePtr& future, const TypeCastFunctor& functor);
+    virtual ~TypeCastServiceFuture() {}
 
     virtual bool isCancelled() const {
         return future->isCancelled();
@@ -89,7 +89,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_SPECILIZEDSERVICEFUTURE_H)
+#endif //#if !defined(CETTY_SERVICE_TYPECASTSERVICEFUTURE_H)
 
 // Local Variables:
 // mode: c++

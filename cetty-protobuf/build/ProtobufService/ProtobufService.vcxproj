@@ -11,28 +11,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcMessagePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\handler\ProtobufRpcRequestHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufClientServiceAdaptor.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufService.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\ProtobufServiceRegister.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessagePtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcRequestHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientService.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceRegister.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcEncoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\handler\ProtobufRpcMessageHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufClientServiceAdaptor.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\ProtobufServiceRegister.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcEncoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcMessageHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}</ProjectGuid>
-    <RootNamespace>protobufrpc</RootNamespace>
+    <RootNamespace>ProtobufService</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

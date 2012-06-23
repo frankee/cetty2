@@ -1,0 +1,28 @@
+traffic:
+maps/api/traffic/event[alp.traffic.TrafficService.GetCityTrafficEvent]/{time_stamp}.format?
+maps/api/traffic/tile/{}
+
+route
+maps/api/route/direction.format?
+maps/api/route/
+
+
+poi
+maps/api/poi/suggestions[alp.poi.PoiService.Suggestion].format?
+
+maps/api/poi/pois[alp.poi.PoiService.Search].format?key={keyword}&lat={center.lat}&lng={center.lng}&d={distance}&min_x={bounds.min.x}&min_y={bounds.min.y}&cat={categories}&district={districts}&page={page_items}&index={page_index}
+
+maps/api/poi/poi[alp.poi.PoiService.Get]/{poi_id}.format?
+maps/api/poi/categories[alp.poi.PoiService.Category].format?lang={lang}&f={father}&fid={father_id}&l={level}
+
+maps/api/poi/districts[alp.poi.PoiService.District].format?lang={lang}&f={father}&fid={father_id}&l={levle}
+
+
+map_center
+maps/api/map/map_center[alp.map.MapCenterService.GetMapCenter].format?
+
+alp.map.MapCenterService.GetMapCenter GET
+
+
+tile map
+maps/tile[alp.map.TileMapService.GetTile]/{tileset_id.name}/{tileset_id.version}/{tile_x}/{tile_y}/{level}

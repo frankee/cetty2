@@ -23,8 +23,10 @@ using google::protobuf::Service;
 using google::protobuf::MethodDescriptor;
 
 class ProtobufServiceRegister {
-private:
+public:
     typedef std::map<std::string, ProtobufServicePtr> ServiceMap;
+    typedef ServiceMap::iterator ServiceIterator;
+    typedef ServiceMap::const_iterator ServiceConstIterator;
 
 public:
     static ProtobufServiceRegister& instance();
@@ -35,6 +37,19 @@ public:
 
     const ProtobufServicePtr& getService(const std::string& name) const;
     int getRegisteredServices(std::vector<std::string>* names) const;
+
+    ServiceIterator serviceBegin() {
+        return serviceMap.begin();
+    }
+    ServiceConstIterator serviceBegin() const {
+        return serviceMap.begin();
+    }
+    ServiceIterator serviceEnd() {
+        return serviceMap.end();
+    }
+    ServiceConstIterator serviceEnd() const {
+        return serviceMap.end();
+    }
 
     const MethodDescriptor* getMethodDescriptor(const ProtobufServicePtr& service,
             const std::string& method) const;
@@ -70,6 +85,9 @@ private:
     static ProtobufServicePtr nullService;
 
 private:
+    ProtobufServiceRegister();
+    ~ProtobufServiceRegister();
+
     ProtobufServiceRegister(const ProtobufServiceRegister&);
     ProtobufServiceRegister& operator=(const ProtobufServiceRegister&);
 
