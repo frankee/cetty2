@@ -10,17 +10,11 @@
     <Filter Include="protobuf\bootstrap">
       <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="protobuf\proto">
+      <UniqueIdentifier>{0f80022b-068b-40cb-908c-8207256060e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcDecoder.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcEncoder.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessageHandler.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h">
       <Filter>protobuf</Filter>
     </ClInclude>
@@ -33,37 +27,55 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h">
       <Filter>protobuf</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessage.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h">
       <Filter>protobuf</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcRequestHandler.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufRpcMessagePtr.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientService.h">
       <Filter>protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessage.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessagePtr.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h">
+      <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h">
+      <Filter>protobuf\proto</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcMessageHandler.cpp">
-      <Filter>protobuf\handler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcDecoder.cpp">
-      <Filter>protobuf\handler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufRpcEncoder.cpp">
-      <Filter>protobuf\handler</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp">
       <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp">
+      <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp">
+      <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp">
+      <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\proto\service.pb.cc">
+      <Filter>protobuf\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessage.cpp">
+      <Filter>protobuf\handler</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

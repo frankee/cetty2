@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <vector>
+#include <deque>
 #include <boost/function.hpp>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -40,7 +40,7 @@ public:
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
 
-    typedef typename boost::function2<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
+    typedef boost::function2<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
 
 public:
     ServiceFuture() {}
@@ -225,6 +225,7 @@ private:
 
 }
 }
+
 #endif //#if !defined(CETTY_SERVICE_SERVICEFUTURE_H)
 
 

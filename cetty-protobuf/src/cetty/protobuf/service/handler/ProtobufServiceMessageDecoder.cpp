@@ -14,31 +14,32 @@
  * under the License.
  */
 
-#include <cetty/protobuf/handler/ProtobufRpcDecoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/protobuf/proto/rpc.pb.h>
-#include <cetty/protobuf/ProtobufServiceRegister.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
+#include <cetty/protobuf/service/proto/service.pb.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 namespace handler {
 
 using namespace cetty::buffer;
 using namespace cetty::channel;
-using namespace cetty::protobuf;
-using namespace cetty::protobuf::proto;
+using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::service::proto;
 
-ChannelMessage ProtobufRpcDecoder::decode(ChannelHandlerContext& ctx,
+ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
         const ChannelMessage& msg) {
 
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
     if (buffer) {
-        ProtobufRpcMessagePtr message(new ProtobufRpcMessage);
-        RpcMessage* rpc = message->mutableRpcMessage();
+        ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
+        ServiceMessage* rpc = message->mutableServiceMessage();
 
         if (!decode(buffer, rpc)) {
             const google::protobuf::Message* prototype = NULL;
@@ -70,10 +71,11 @@ ChannelMessage ProtobufRpcDecoder::decode(ChannelHandlerContext& ctx,
     }
 }
 
-int ProtobufRpcDecoder::decode(const ChannelBufferPtr& buffer, RpcMessage* message) {
+int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer, ServiceMessage* message) {
     return 0;
 }
 
+}
 }
 }
 }

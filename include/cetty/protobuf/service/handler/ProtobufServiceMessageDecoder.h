@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCENCODER_H)
-#define CETTY_PROTOBUF_HANDLER_PROTOBUFRPCENCODER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H)
+#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,41 +17,51 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessagePtr.h>
+#include <cetty/handler/codec/oneone/OneToOneDecoder.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
+namespace proto {
+class ServiceMessage;
+}
+}
+}
+}
+
+namespace cetty {
+namespace protobuf {
+namespace service {
 namespace handler {
 
-using namespace cetty::buffer;
 using namespace cetty::channel;
+using namespace cetty::protobuf::service::proto;
 
-class ProtobufRpcEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {
+class ProtobufServiceMessageDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
 public:
-    ProtobufRpcEncoder();
-    virtual ~ProtobufRpcEncoder();
+    ProtobufServiceMessageDecoder();
+    virtual ~ProtobufServiceMessageDecoder();
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 protected:
-    virtual ChannelMessage encode(ChannelHandlerContext& ctx,
+    virtual ChannelMessage decode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
+
 private:
-    int getMessageSize();
-    void encodeRpcMessage(const ChannelBufferPtr& buffer, const ProtobufRpcMessagePtr& message);
+    int decode(const ChannelBufferPtr& buffer, ServiceMessage* message);
 
 };
 
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCENCODER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H)
 
 // Local Variables:
 // mode: c++

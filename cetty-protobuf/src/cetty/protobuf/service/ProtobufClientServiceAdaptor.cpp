@@ -14,23 +14,24 @@
  * under the License.
  */
 
-#include <cetty/protobuf/ProtobufClientServiceAdaptor.h>
+#include <cetty/protobuf/service/ProtobufClientServiceAdaptor.h>
 
 #include <boost/bind.hpp>
 #include <google/protobuf/descriptor.h>
 
-#include <cetty/protobuf/ProtobufService.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
-#include <cetty/protobuf/proto/rpc.pb.h>
+#include <cetty/protobuf/service/ProtobufService.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 using namespace google::protobuf;
 using namespace cetty::service;
-using namespace cetty::protobuf::handler;
-using namespace cetty::protobuf::proto;
+using namespace cetty::protobuf::service::handler;
+using namespace cetty::protobuf::service::proto;
 using namespace cetty::util;
 
 // Call the given method of the remote service.  The signature of this
@@ -51,8 +52,8 @@ void ProtobufClientServiceAdaptor::CallMethod(
         return;
     }
 
-    ProtobufRpcMessagePtr message(
-        new ProtobufRpcMessage(REQUEST,
+    ProtobufServiceMessagePtr message(
+        new ProtobufServiceMessage(REQUEST,
                                method->service()->full_name(),
                                method->name(),
                                request));
@@ -60,5 +61,6 @@ void ProtobufClientServiceAdaptor::CallMethod(
     service->call(message, future);
 }
 
+}
 }
 }

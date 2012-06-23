@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_PROTOBUFSERVICE_H)
-#define CETTY_PROTOBUF_PROTOBUFSERVICE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICE_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICE_H
 
 // Service and RpcChannel classes are incorporated from
 // google/protobuf/service.h
@@ -40,7 +40,7 @@
 
 
 #include <cetty/service/Service.h>
-#include <cetty/protobuf/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
 
 namespace google {
 namespace protobuf {
@@ -57,6 +57,7 @@ class Message;               // message.h
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 // Abstract base interface for protocol-buffer-based RPC services.  Services
 // themselves are abstract interfaces (implemented either by servers or as
@@ -127,5 +128,10 @@ public:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFSERVICE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICE_H)
+
+// Local Variables:
+// mode: c++
+// End:

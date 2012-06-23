@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H)
-#define CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICEADAPTOR_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICEADAPTOR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -54,8 +54,8 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
-#include <cetty/protobuf/ProtobufServiceFuture.h>
-#include <cetty/protobuf/ProtobufClientService.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufClientService.h>
 #include <cetty/service/TypeCastServiceFuture.h>
 
 namespace google {
@@ -72,6 +72,7 @@ class Message;               // message.h
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 using namespace cetty::service;
 
@@ -131,5 +132,10 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFRPCCLIENT_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICEADAPTOR_H)
+
+// Local Variables:
+// mode: c++
+// End:

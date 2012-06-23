@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_PROTOBUFSERVICEFUTURE_H)
-#define CETTY_PROTOBUF_PROTOBUFSERVICEFUTURE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -29,6 +29,7 @@ class Message;
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 typedef ::cetty::util::BarePointer<::google::protobuf::Message> MessagePtr;
 typedef ::cetty::util::BarePointer<::google::protobuf::Message const> ConstMessagePtr;
@@ -38,5 +39,10 @@ typedef ::boost::intrusive_ptr<ProtobufServiceFuture> ProtobufServiceFuturePtr;
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFSERVICEFUTURE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H)
+
+// Local Variables:
+// mode: c++
+// End:

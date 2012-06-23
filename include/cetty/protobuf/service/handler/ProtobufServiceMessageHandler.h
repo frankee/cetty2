@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H)
-#define CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEHANDLER_H)
+#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEHANDLER_H
 
 /*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,8 +20,8 @@
 #include <deque>
 #include <boost/cstdint.hpp>
 #include <cetty/channel/SimpleChannelUpstreamHandler.h>
-#include <cetty/protobuf/ProtobufServiceFuture.h>
-#include <cetty/protobuf/ProtobufServiceRegister.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 
 namespace google {
 namespace protobuf {
@@ -46,16 +46,17 @@ class RpcMessage;
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 namespace handler {
 using namespace cetty::channel;
 
-class ProtobufRpcMessageHandler;
-typedef boost::intrusive_ptr<ProtobufRpcMessageHandler> ProtobufRpcMessageHandlerPtr;
+class ProtobufServiceMessageHandler;
+typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufRpcMessageHandlerPtr;
 
-class ProtobufRpcMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler {
+class ProtobufServiceMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler {
 public:
-    ProtobufRpcMessageHandler();
-    virtual ~ProtobufRpcMessageHandler();
+    ProtobufServiceMessageHandler();
+    virtual ~ProtobufServiceMessageHandler();
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
 
@@ -73,5 +74,10 @@ private:
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFRPCMESSAGEHANDLER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEHANDLER_H)
+
+// Local Variables:
+// mode: c++
+// End:

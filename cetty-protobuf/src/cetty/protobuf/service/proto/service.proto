@@ -1,6 +1,7 @@
-package cetty.protobuf.proto;
-option java_package = "cetty.protobuf.proto";
-option java_outer_classname = "RpcProto";
+package cetty.protobuf.service.proto;
+
+option java_package = "cetty.protobuf.service.proto";
+option java_outer_classname = "ServiceProto";
 
 import "google/protobuf/descriptor.proto";
 
@@ -18,16 +19,17 @@ enum ErrorCode {
   INVALID_RESPONSE = 5;
 }
 
-message RpcMessage {
+message ServiceMessage {
   required MessageType type = 1;
   required fixed64       id = 2;
 
   optional string   service = 3;
   optional string    method = 4;
   
-  optional bytes    request = 5;
-  optional bytes   response = 6;
-  optional ErrorCode  error = 7;
+  optional ErrorCode  error = 5;
+  
+  optional bytes    request = 6;
+  optional bytes   response = 7;
 }
 
 message Empty {
@@ -35,5 +37,5 @@ message Empty {
 
 extend google.protobuf.MethodOptions {
   optional bool idempotent = 1111;
-  optional bool no_return = 1112;
+  optional bool  no_return = 1112;
 }

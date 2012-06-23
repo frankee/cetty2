@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H)
-#define CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,22 +18,24 @@
  */
 
 #include <cetty/service/ClientService.h>
-#include <cetty/protobuf/ProtobufServiceFuture.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 using namespace cetty::service;
-using namespace cetty::protobuf::handler;
+using namespace cetty::protobuf::service::handler;
 
-typedef ClientService<ProtobufRpcMessagePtr, MessagePtr> ProtobufClientService;
+typedef ClientService<ProtobufServiceMessagePtr, MessagePtr> ProtobufClientService;
 typedef boost::intrusive_ptr<ProtobufClientService> ProtobufClientServicePtr;
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_PROTOBUFCLIENTSERVICE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
 
 // Local Variables:
 // mode: c++

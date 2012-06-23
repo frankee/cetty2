@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCDECODER_H)
-#define CETTY_PROTOBUF_HANDLER_PROTOBUFRPCDECODER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEENCODER_H)
+#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEENCODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,47 +17,43 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/oneone/OneToOneDecoder.h>
+#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
-namespace proto {
-class RpcMessage;
-}
-}
-}
-
-namespace cetty {
-namespace protobuf {
+namespace service {
 namespace handler {
 
+using namespace cetty::buffer;
 using namespace cetty::channel;
-using namespace cetty::protobuf::proto;
 
-class ProtobufRpcDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
+class ProtobufServiceMessageEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {
 public:
-    ProtobufRpcDecoder();
-    virtual ~ProtobufRpcDecoder();
+    ProtobufServiceMessageEncoder();
+    virtual ~ProtobufServiceMessageEncoder();
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 protected:
-    virtual ChannelMessage decode(ChannelHandlerContext& ctx,
+    virtual ChannelMessage encode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
-
 private:
-    int decode(const ChannelBufferPtr& buffer, RpcMessage* message);
+    int getMessageSize();
+    void encodeRpcMessage(const ChannelBufferPtr& buffer, const ProtobufServiceMessagePtr& message);
 
 };
 
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCDECODER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEENCODER_H)
 
 // Local Variables:
 // mode: c++

@@ -14,21 +14,23 @@
  * under the License.
  */
 
-#include <cetty/protobuf/handler/ProtobufRpcEncoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 
 #include <cetty/channel/ChannelMessage.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 namespace handler {
+
 using namespace cetty::channel;
 
-ChannelMessage ProtobufRpcEncoder::encode(ChannelHandlerContext& ctx,
+ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
         const ChannelMessage& msg) {
 
-    ProtobufRpcMessagePtr message = msg.smartPointer<ProtobufRpcMessage>();
+    ProtobufServiceMessagePtr message = msg.smartPointer<ProtobufServiceMessage>();
 
     if (message) {
 
@@ -38,15 +40,16 @@ ChannelMessage ProtobufRpcEncoder::encode(ChannelHandlerContext& ctx,
     }
 }
 
-int ProtobufRpcEncoder::getMessageSize() {
+int ProtobufServiceMessageEncoder::getMessageSize() {
     return 0;
 }
 
-void ProtobufRpcEncoder::encodeRpcMessage(const ChannelBufferPtr& buffer,
-    const ProtobufRpcMessagePtr& message) {
+void ProtobufServiceMessageEncoder::encodeRpcMessage(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message) {
 
 }
 
+}
 }
 }
 }

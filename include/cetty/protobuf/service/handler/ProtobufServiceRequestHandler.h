@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H)
-#define CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEREQUESTHANDLER_H)
+#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEREQUESTHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,15 +21,17 @@
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 namespace handler {
 
-    //typedef ServiceRequestHandler<>
+//typedef ServiceRequestHandler<>
 
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_HANDLER_PROTOBUFRPCREQUESTHANDLER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEREQUESTHANDLER_H)
 
 // Local Variables:
 // mode: c++

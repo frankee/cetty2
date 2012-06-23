@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/protobuf/handler/ProtobufRpcMessageHandler.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 
 #include <boost/thread/locks.hpp>
 #include <boost/bind.hpp>
@@ -29,36 +29,37 @@
 #include <cetty/channel/ChannelStateEvent.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 
-#include <cetty/protobuf/ProtobufService.h>
-#include <cetty/protobuf/ProtobufServiceFuture.h>
-#include <cetty/protobuf/ProtobufServiceRegister.h>
-#include <cetty/protobuf/handler/ProtobufRpcMessage.h>
-#include <cetty/protobuf/proto/rpc.pb.h>
+#include <cetty/protobuf/service/ProtobufService.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/proto/service.pb.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 namespace handler {
 
 using namespace cetty::channel;
 using namespace cetty::service;
-using namespace cetty::protobuf;
-using namespace cetty::protobuf::proto;
+using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::service::proto;
 using namespace google::protobuf;
 
-ProtobufRpcMessageHandler::ProtobufRpcMessageHandler() {
+ProtobufServiceMessageHandler::ProtobufServiceMessageHandler() {
 }
 
-ProtobufRpcMessageHandler::~ProtobufRpcMessageHandler() {
+ProtobufServiceMessageHandler::~ProtobufServiceMessageHandler() {
 }
 
-void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    ProtobufRpcMessagePtr msg = e.getMessage().smartPointer<ProtobufRpcMessage>();
-    const RpcMessage& rpc = msg->getRpcMessage();
+void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+    ProtobufServiceMessagePtr msg = e.getMessage().smartPointer<ProtobufServiceMessage>();
+    const ServiceMessage& rpc = msg->getServiceMessage();
 
     if (NULL == msg) {
         ctx.sendUpstream(e);
     }
-    else if (rpc.type() == cetty::protobuf::proto::REQUEST) {
+    else if (rpc.type() == cetty::protobuf::service::proto::REQUEST) {
         const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
 
@@ -72,7 +73,7 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
             service->CallMethod(method,
                                 msg->getPayload(),
                                 MessagePtr(),
-                                boost::bind(&ProtobufRpcMessageHandler::doneCallback,
+                                boost::bind(&ProtobufServiceMessageHandler::doneCallback,
                                             this,
                                             _1,
                                             boost::ref(ctx),
@@ -83,29 +84,30 @@ void ProtobufRpcMessageHandler::messageReceived(ChannelHandlerContext& ctx, cons
             printf("has no such service or method.\n");
         }
     }
-    else if (rpc.type() == cetty::protobuf::proto::ERROR) {
+    else if (rpc.type() == cetty::protobuf::service::proto::ERROR) {
     }
     else {
         ctx.sendUpstream(e);
     }
 }
 
-void ProtobufRpcMessageHandler::doneCallback(const MessagePtr& response,
+void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ChannelHandlerContext& ctx,
         boost::int64_t id) {
 
-    ProtobufRpcMessagePtr message(new ProtobufRpcMessage(RESPONSE, id, response));
+    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE, id, response));
     Channels::write(ctx.getChannel(), ChannelMessage(response));
 }
 
-cetty::channel::ChannelHandlerPtr ProtobufRpcMessageHandler::clone() {
-    return ChannelHandlerPtr(new ProtobufRpcMessageHandler());
+cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {
+    return ChannelHandlerPtr(new ProtobufServiceMessageHandler());
 }
 
-std::string ProtobufRpcMessageHandler::toString() const {
+std::string ProtobufServiceMessageHandler::toString() const {
     return "ProtobufRpcMessageHandler";
 }
 
+}
 }
 }
 }

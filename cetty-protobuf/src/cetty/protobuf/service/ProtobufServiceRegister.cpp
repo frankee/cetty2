@@ -1,11 +1,12 @@
-#include <cetty/protobuf/ProtobufServiceRegister.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
-#include <cetty/protobuf/ProtobufService.h>
+#include <cetty/protobuf/service/ProtobufService.h>
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 ProtobufServicePtr ProtobufServiceRegister::nullService;
 
@@ -49,17 +50,19 @@ const ProtobufServicePtr& ProtobufServiceRegister::getService(const std::string&
     if (name.empty()) {
         return nullService;
     }
-    
+
     ServiceMap::const_iterator itr = serviceMap.find(name);
+
     if (itr != serviceMap.end()) {
         return itr->second;
     }
+
     return nullService;
 }
 
 const MethodDescriptor* ProtobufServiceRegister::getMethodDescriptor(
     const ProtobufServicePtr& service,
-        const std::string& method) const {
+    const std::string& method) const {
     if (!service) { return NULL; }
 
     const google::protobuf::ServiceDescriptor* desc = service->GetDescriptor();
@@ -72,7 +75,7 @@ const MethodDescriptor* ProtobufServiceRegister::getMethodDescriptor(
 }
 
 const Message* ProtobufServiceRegister::getRequestPrototype(
-    const ProtobufServicePtr& service, 
+    const ProtobufServicePtr& service,
     const std::string& method) const {
     if (!service || method.empty()) {
         return NULL;
@@ -130,5 +133,6 @@ ProtobufServiceRegister& ProtobufServiceRegister::instance() {
     return serviceRegister;
 }
 
+}
 }
 }

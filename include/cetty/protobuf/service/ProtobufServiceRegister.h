@@ -1,11 +1,11 @@
-#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFSERVICEREGISTER_H)
-#define CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFSERVICEREGISTER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEREGISTER_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEREGISTER_H
 
 #include <map>
 #include <vector>
 #include <string>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/protobuf/ProtobufServicePtr.h>
+#include <cetty/protobuf/service/ProtobufServicePtr.h>
 
 namespace google {
 namespace protobuf {
@@ -17,6 +17,7 @@ class MethodDescriptor;
 
 namespace cetty {
 namespace protobuf {
+namespace service {
 
 using google::protobuf::Message;
 using google::protobuf::Service;
@@ -55,10 +56,10 @@ public:
             const std::string& method) const;
 
     const Message* getRequestPrototype(const ProtobufServicePtr& service,
-        const std::string& method) const;
+                                       const std::string& method) const;
 
     const Message* getResponsePrototype(const ProtobufServicePtr& service,
-        const std::string& method) const;
+                                        const std::string& method) const;
 
     const Message* getRequestPrototype(const std::string& service,
                                        const std::string& method) const {
@@ -97,5 +98,11 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFSERVICEREGISTER_H)
+
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEREGISTER_H)
+
+// Local Variables:
+// mode: c++
+// End:
