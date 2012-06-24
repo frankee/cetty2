@@ -220,8 +220,42 @@ std::string StringUtil::strprintf(const char* format, ...) {
     return str;
 }
 
+size_t StringUtil::strsplit(const std::string& str, char delim, std::vector<std::string>* elems) {
+    assert(elems);
+    elems->clear();
+    std::string::const_iterator it = str.begin();
+    std::string::const_iterator pv = it;
+    while (it != str.end()) {
+        if (*it == delim) {
+            std::string col(pv, it);
+            elems->push_back(col);
+            pv = it + 1;
+        }
+        ++it;
+    }
+    std::string col(pv, it);
+    elems->push_back(col);
+    return elems->size();
+}
 
-
+size_t StringUtil::strsplit(const std::string& str, const std::string& delims, std::vector<std::string>* elems) {
+    assert(elems);
+    elems->clear();
+    std::string::const_iterator it = str.begin();
+    std::string::const_iterator pv = it;
+    while (it != str.end()) {
+        while (delims.find(*it, 0) != std::string::npos) {
+            std::string col(pv, it);
+            elems->push_back(col);
+            pv = it + 1;
+            break;
+        }
+        ++it;
+    }
+    std::string col(pv, it);
+    elems->push_back(col);
+    return elems->size();
+}
 
 }
 }

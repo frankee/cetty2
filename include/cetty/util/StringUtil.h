@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <vector>
 #include <stdarg.h>
 #include "cetty/util/Character.h"
 
@@ -69,6 +70,26 @@ public:
      * @return the result string.
      */
     static std::string strprintf(const char* format, ...);
+
+    /**
+ * Split a string with a delimiter.
+ * @param str the string.
+ * @param delim the delimiter.
+ * @param elems a vector object into which the result elements are pushed.
+ * @return the number of result elements.
+ */
+static size_t strsplit(const std::string& str, char delim, std::vector<std::string>* elems);
+
+
+/**
+ * Split a string with delimiters.
+ * @param str the string.
+ * @param delims the delimiters.
+ * @param elems a vector object into which the result elements are pushed.
+ * @return the number of result elements.
+ */
+static size_t strsplit(const std::string& str, const std::string& delims,
+                std::vector<std::string>* elems);
 
 private:
     StringUtil() {}

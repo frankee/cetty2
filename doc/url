@@ -3,7 +3,7 @@ maps/api/traffic/event[alp.traffic.TrafficService.GetCityTrafficEvent]/{time_sta
 maps/api/traffic/tile/{}
 
 route
-maps/api/route/direction.format?
+maps/api/route{/direction}{.format}?key={xx}
 maps/api/route/
 
 

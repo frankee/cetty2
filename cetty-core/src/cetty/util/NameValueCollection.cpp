@@ -121,9 +121,10 @@ const int NameValueCollection::get(const std::string& name, std::vector<std::str
     int count = 0;
 
     if (values) {
-        ConstIterator itr = _map.find(name);
+        std::pair<ConstIterator, ConstIterator> range = _map.equal_range(name);
 
-        for (; itr != _map.end(); ++itr) {
+        ConstIterator itr = range.first;
+        for (; itr != _map.end() && itr != range.second; ++itr) {
             values->push_back(itr->second);
             ++count;
         }
@@ -164,26 +165,29 @@ NameValueCollection::ConstIterator NameValueCollection::find(const std::string& 
     return _map.find(name);
 }
 
+NameValueCollection::ConstIterator NameValueCollection::lowerBound(const std::string& name) const {
+    return this->_map.lower_bound(name);
+}
+
+NameValueCollection::ConstIterator NameValueCollection::upperBound(const std::string& name) const {
+    return this->_map.upper_bound(name);
+}
 
 NameValueCollection::ConstIterator NameValueCollection::begin() const {
     return _map.begin();
 }
 
-
 NameValueCollection::ConstIterator NameValueCollection::end() const {
     return _map.end();
 }
-
 
 bool NameValueCollection::empty() const {
     return _map.empty();
 }
 
-
 int NameValueCollection::size() const {
     return (int) _map.size();
 }
-
 
 void NameValueCollection::erase(const std::string& name) {
     _map.erase(name);

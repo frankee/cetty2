@@ -67,6 +67,7 @@ public:
     typedef HeaderMap::const_iterator ConstIterator;
     typedef boost::function<bool (const std::string&)> ValidateNameFunctor;
 
+public:
     NameValueCollection();
     /// Creates an empty NameValueCollection.
 
@@ -118,6 +119,10 @@ public:
     ConstIterator find(const std::string& name) const;
     /// Returns an iterator pointing to the first name-value pair
     /// with the given name.
+
+    ConstIterator lowerBound(const std::string& name) const;
+
+    ConstIterator upperBound(const std::string& name) const;
 
     ConstIterator begin() const;
     /// Returns an iterator pointing to the begin of

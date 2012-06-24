@@ -25,9 +25,9 @@
 #include <vector>
 
 namespace cetty {
-    namespace util {
-        class NameValueCollection;
-    }
+namespace util {
+class NameValueCollection;
+}
 }
 
 namespace cetty {
@@ -35,7 +35,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
 /**
  * An HTTP <a href="http://en.wikipedia.org/wiki/HTTP_cookie">Cookie</a>.
@@ -49,7 +49,7 @@ namespace http {
 class Cookie {
 public:
     Cookie(const std::string& name);
-    /// Creates a cookie with the given name.	
+    /// Creates a cookie with the given name.
     /// The cookie never expires.
 
     Cookie(const NameValueCollection& nvc);
