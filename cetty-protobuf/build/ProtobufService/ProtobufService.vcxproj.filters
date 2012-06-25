@@ -13,6 +13,12 @@
     <Filter Include="protobuf\proto">
       <UniqueIdentifier>{0f80022b-068b-40cb-908c-8207256060e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="protobuf\http">
+      <UniqueIdentifier>{dee23f7c-063d-475c-b071-ba9c811c0306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf\http\map">
+      <UniqueIdentifier>{794b072b-71db-4be7-a03b-939587c52811}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h">
@@ -54,6 +60,30 @@
     <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h">
       <Filter>protobuf\proto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h">
+      <Filter>protobuf\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceReponseMapper.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
@@ -76,6 +106,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessage.cpp">
       <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp">
+      <Filter>protobuf\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\UriServiceTemplate.cpp">
+      <Filter>protobuf\http</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

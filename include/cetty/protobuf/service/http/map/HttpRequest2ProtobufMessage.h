@@ -19,7 +19,13 @@
 
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
-#include <cetty/protobuf/service/http/UriServiceTemplate.h>
+#include <cetty/protobuf/service/http/ServiceTemplates.h>
+
+namespace google {
+    namespace protobuf {
+        class Message;
+    }
+}
 
 namespace cetty {
 namespace protobuf {
@@ -29,20 +35,21 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service::handler;
+using google::protobuf::Message;
 
 class HttpRequest2ProtobufMessage {
 public:
-    HttpRequest2ProtobufMessage();
+    HttpRequest2ProtobufMessage(const ServiceTemplatesPtr& serviceTemplates);
 
     //1, method uri
     //2, method uri content (format) header(cookie)
-    ProtobufServiceMessagePtr getProtobufMessage(const HttpRequestPtr& request) {
-
-    }
+    ProtobufServiceMessagePtr getProtobufMessage(const HttpRequestPtr& request);
 
 private:
-    std::vector<UriServiceTemplate> uriTemplates;
+    int parse(const HttpServiceTemplate& tmpl, const HttpRequestPtr& request, Message* message);
 
+private:
+    ServiceTemplatesPtr templates;
 };
 
 }

@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEFWD_H)
-#define CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEFWD_H
+#if !defined(CETTY_HTTP_COOKIETEMPLATE_H)
+#define CETTY_HTTP_COOKIETEMPLATE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,31 +17,18 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+namespace cetty { namespace http { 
 
-namespace cetty {
-namespace handler {
-namespace codec {
-namespace http {
+    // [name:alias]={param:alias}:{:alias}
+    class CookieTemplate {
+    public:
+        CookieTemplate();
+    };
 
-class HttpMessage;
-class HttpRequest;
-class HttpResponse;
-class HttpChunk;
-class HttpChunkTrailer;
 
-typedef boost::intrusive_ptr<HttpMessage> HttpMessagePtr;
-typedef boost::intrusive_ptr<HttpRequest> HttpRequestPtr;
-typedef boost::intrusive_ptr<HttpResponse> HttpResponsePtr;
-typedef boost::intrusive_ptr<HttpChunk> HttpChunkPtr;
-typedef boost::intrusive_ptr<HttpChunkTrailer> HttpChunkTrailerPtr;
+}}
 
-}
-}
-}
-}
-
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEFWD_H)
+#endif //#if !defined(CETTY_HTTP_COOKIETEMPLATE_H)
 
 // Local Variables:
 // mode: c++

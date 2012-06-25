@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_URISERVICETEMPLATE_H)
-#define CETTY_PROTOBUF_SERVICE_HTTP_URISERVICETEMPLATE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_HTTPSERVICETEMPLATE_H)
+#define CETTY_PROTOBUF_SERVICE_HTTP_MAP_HTTPSERVICETEMPLATE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,22 +17,49 @@
  * under the License.
  */
 
-#include <cetty/util/StringUtil.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <cetty/http/UriTemplate.h>
+#include <cetty/http/CookieTemplate.h>
+#include <cetty/handler/codec/http/HttpMethod.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace http {
+namespace map {
 
-using namespace cetty::util;
+using namespace cetty::http;
+using namespace cetty::handler::codec::http;
 
-class UriServiceTemplate {
+// GET uri template
+class HttpServiceTemplate {
 public:
     typedef std::vector<std::string> Alias;
 
-public:
-    UriServiceTemplate(const std::string& templateStr);
+    struct Parameter {
+        enum Type {
+            T_PATH   = 1,
+            T_QUERY  = 2,
+            T_COOKIE = 3
+        };
 
+        int type;
+        int index;
+        std::string cookie;
+        std::string parameter;
+    };
+
+public:
+    HttpServiceTemplate();
+
+    bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const;
+
+    const std::string& getService() const;
+    const std::string& getMethod() const;
+
+    int getParameter(const Alias& alias, std::vector<Parameter*>* parameters) const;
 
 private:
     void parseAlias(const std::map<std::string, std::string>& aliases) {
@@ -50,18 +77,18 @@ private:
     }
 
 private:
-    std::string service;
-    std::string method;
-
-    std::map<std::string, Alias> parameterAliases;
+    HttpMethod method;
+    UriTemplate uriTemplate;
+    CookieTemplate cookieTemplate;
 };
 
 }
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_URISERVICETEMPLATE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_HTTPSERVICETEMPLATE_H)
 
 // Local Variables:
 // mode: c++

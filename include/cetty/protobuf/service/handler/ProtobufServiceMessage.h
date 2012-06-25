@@ -41,6 +41,13 @@ using namespace cetty::protobuf::service::proto;
 
 class ProtobufServiceMessage : public cetty::util::ReferenceCounter<ProtobufServiceMessage> {
 public:
+    enum Type {
+        T_REQUEST  = 1,
+        T_RESPONSE = 2,
+        T_ERROR    = 3
+    };
+
+public:
     ProtobufServiceMessage();
     ProtobufServiceMessage(int type);
     ProtobufServiceMessage(int type, boost::int64_t id);
@@ -79,6 +86,9 @@ public:
 
     const MessagePtr& getResponse() const;
     const MessagePtr& getRequest() const;
+
+private:
+    bool checkType(int type);
 
 private:
     ProtobufServiceMessage(const ProtobufServiceMessage&);

@@ -26,23 +26,6 @@ namespace handler {
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
 
-static MessageType int2type(int type) {
-    switch (type) {
-    case REQUEST:
-        return REQUEST;
-
-    case RESPONSE:
-        return RESPONSE;
-
-    case ERROR:
-        return ERROR;
-
-    default:
-        return ERROR;
-    }
-}
-
-
 ProtobufServiceMessage::ProtobufServiceMessage()
     : message(new ServiceMessage) {
 
@@ -50,12 +33,12 @@ ProtobufServiceMessage::ProtobufServiceMessage()
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type)
     : message(new ServiceMessage) {
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type, boost::int64_t id)
     : message(new ServiceMessage) {
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
     message->set_id(id);
 }
 
@@ -63,7 +46,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         boost::int64_t id,
         const MessagePtr& payload)
     : message(new ServiceMessage), payload(payload) {
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
     message->set_id(id);
 }
 
@@ -71,7 +54,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method)
     : message(new ServiceMessage) {
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
     message->set_service(service);
     message->set_method(method);
 }
@@ -81,7 +64,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& method,
         const MessagePtr& payload)
     : message(new ServiceMessage), payload(payload) {
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
     message->set_service(service);
     message->set_method(method);
 }
@@ -109,7 +92,7 @@ bool ProtobufServiceMessage::isError() const {
 
 void ProtobufServiceMessage::setType(int type) {
     BOOST_ASSERT(message && "message should not be NULL.");
-    message->set_type(int2type(type));
+    message->set_type(MessageType(type));
 }
 
 boost::int64_t ProtobufServiceMessage::getId() const {
@@ -163,6 +146,10 @@ const MessagePtr& ProtobufServiceMessage::getRequest() const {
     }
 
     return EMPTY_MESSAGE;
+}
+
+bool ProtobufServiceMessage::checkType(int type) {
+    return MessageType_IsValid(type);
 }
 
 }

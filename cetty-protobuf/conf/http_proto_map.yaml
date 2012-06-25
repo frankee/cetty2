@@ -1,0 +1,22 @@
+cookie: [name:alias]{value:alias}{}{};[]{}{}
+http-proto-req-map:
+	- uri : [/method_path:alias]/path{/parameter:alias}{.format:alias}{?parameter1:alias}{&parameter2:alias}
+      method: get
+	- uri: /maps[/poi/search:alp.poi.PoiService.Search]{.format}{?key:keyword}{&lat:center.lat}{&lng:center.lng}{&d:distance}{&minx:bounds.min.x}{&miny:bounds.min.y}{&maxx:bounds.max.x}{&maxy:bounds.max.y}{&cat:categories}{&dist:districts}{&page:page_items}{&index:page_index}
+	- uri: /maps[/poi/suggestions:alp.poi.PoiService.Suggestion]{.format}{?}
+	- uri: /maps[/poi/poi:alp.poi.PoiService.Get]/{id:}{.format}
+	- uri: /maps/[poi/categories:alp.poi.PoiService.Category]{.format}{?lang:lang}{&f:father}{&fid:fatherId}{&l:level}
+	- uri: 	/maps/[poi/districts:alp.poi.PoiService.District]{.format}{?lang:lang}{&f:father}{&fid:fatherId}{&l:levle}
+	- uri: /maps[/map/center:alp.map.MapCenterService.GetMapCenter]{.format}
+	  method: get
+	- uri: /maps[/map/tile[alp.map.TileMapService.GetTile]/{name:tilesetId.name}/{version:tilesetId.version}/{x:tileX}/{y:tileY}/{l:level}{.format}
+	  method: get
+	
+http-proto-rep-map:
+	- service: alp.map.TileMapService
+	  method: GetTile
+	  content: tile.tile
+	  headers:
+		- Cache-control: xx
+		- 
+	

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <cetty/protobuf/service/http/map/ServiceReponseMapper.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
@@ -27,11 +29,21 @@ class ProtobufMessage2HttpResponse {
 public:
     ProtobufMessage2HttpResponse();
 
+    HttpResponsePtr getHttpResponse(const ProtobufServiceMessagePtr& message) {
 
-    HttpResponsePtr getHttpResponse(const ProtobufServiceMessagePtr& message);
+        const ServiceReponseMapper::MapValue* v = mapper.match(message->getService(), message->getMethod());
+        
+        if (v) {
+            HttpResponsePtr response(new HttpResponse);
+            ServiceReponseMapper::setHttpHeaders(*v, response);
+            ServiceReponseMapper::setHttpContent(*v, response);
+            return response;
+        }
+        
+    }
 
 private:
-
+    ServiceReponseMapper mapper;
 };
 
 }

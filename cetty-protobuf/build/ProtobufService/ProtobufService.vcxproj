@@ -17,6 +17,14 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessagePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceReponseMapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
@@ -30,6 +38,12 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\UriServiceTemplate.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\proto\service.pb.cc" />
@@ -76,8 +90,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../include;../../src;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include; ../../src; ../../../../thirdparty/_include; %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32; _DEBUG; _WINDOWS; _WIN32_WINNT=0x0501; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -85,12 +99,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996; %(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).lib</OutputFile>
-      <AdditionalLibraryDirectories>../../lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../lib/win32; %(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
     </Lib>
   </ItemDefinitionGroup>
@@ -98,21 +112,21 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>../../include;../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../include; ../../src; %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32; NDEBUG; _WINDOWS; _WIN32_WINNT=0x0501; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996; %(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalOptions>/FIXED %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libtcmalloc_minimal.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ForceSymbolReferences>__tcmalloc;%(ForceSymbolReferences)</ForceSymbolReferences>
+      <AdditionalDependencies>libtcmalloc_minimal.lib; %(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../lib/win32; %(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceSymbolReferences>__tcmalloc; %(ForceSymbolReferences)</ForceSymbolReferences>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
