@@ -50,9 +50,11 @@ protected:
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
-
 private:
-    int decode(const ChannelBufferPtr& buffer, ServiceMessage* message);
+    int decode(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message);
+    int decodePayload(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message)
 
 };
 

@@ -43,9 +43,10 @@ protected:
                                   const ChannelMessage& msg);
 
 private:
-    int getMessageSize();
-    void encodeRpcMessage(const ChannelBufferPtr& buffer, const ProtobufServiceMessagePtr& message);
-
+    void encodeMessage(const ChannelBufferPtr& buffer,
+                       const ProtobufServiceMessagePtr& message);
+    void encodeProtobufMessage(const ChannelBufferPtr& buffer,
+                               const google::protobuf::Message& message)
 };
 
 }

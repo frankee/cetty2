@@ -18,24 +18,21 @@
  */
 
 #include <vector>
+#include <cetty/channel/AbstractChannel.h>
 
 namespace cetty {
 namespace service {
 
 template <typename RequestT, typename ResponseT>
-class ClientService {
+class ClientService : public cetty::channel::AbstractChannel {
 public:
     typedef RequestT& RequestRef;
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
 
 public:
     void call(const RequestT& request, const ServiceFuturePtr& future);
-};
 
-
-class ClientServiceChannel {
-public:
-
+    void fireResponseReceived(const ResponseT);
 };
 
 }

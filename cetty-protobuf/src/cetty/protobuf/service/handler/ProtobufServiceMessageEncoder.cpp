@@ -18,7 +18,7 @@
 
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageUtil.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageCodec.h>
 
 namespace cetty {
 namespace protobuf {
@@ -35,39 +35,49 @@ ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
     ProtobufServiceMessagePtr message = msg.smartPointer<ProtobufServiceMessage>();
 
     if (message) {
-		uint64_t msgSize = message->mutableServiceMessage()->ByteSize();
-		ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize);
-		encodeRpcMessage(buffer,message);
+        int msgSize = message->getMessageSize();
+        ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize + 8);
+        encodeMessage(buffer, message);
 
-		return ChannelMessage(buffer);
+        return ChannelMessage(buffer);
     }
     else {
         return msg;
     }
 }
 
-int ProtobufServiceMessageEncoder::getMessageSize() {
-    return 0;
+void ProtobufServiceMessageEncoder::encodeProtobufMessage(const ChannelBufferPtr& buffer,
+        const google::protobuf::Message& message) {
+    Array arry;
+    buffer->writableBytes(&arry);
+    int messageSize = message.GetCachedSize();
+    message.SerializeToArray(arry.data(), messageSize);
+    buffer->offsetWriterIndex(messageSize);
 }
 
-void ProtobufServiceMessageEncoder::encodeRpcMessage(ChannelBufferPtr& buffer,
+void ProtobufServiceMessageEncoder::encodeMessage(ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
-		
-		MessageType msgType = message->mutableServiceMessage()->type();
-		ProtobufUtil::lenthDelimitedEncode(buffer,msgType,1);
-		int64_t id = message->getId();
-		ProtobufUtil::fixed64Encode(buffer,id);
-		std::string service = message->getService();
-		ProtobufUtil::lenthDelimitedEncode(buffer,service,3);
-		std::string method = message->getMethod();
-		ProtobufUtil::lenthDelimitedEncode(buffer,method,4);
-		ErrorCode errCode = message->mutableServiceMessage->error();
-		ProtobufUtil::lenthDelimitedEncode(buffer,errCode,5);
 
-		Array array;
-		buffer->writableBytes(&array)
-		message->getPayload()->SerializeToArray(array.data(),array.length());
+    const ServiceMessage& serviceMessage = message->getServiceMessage();
+
+    encodeProtobufMessage(buffer, serviceMessage);
+
+    if (serviceMessage.type() == REQUEST) {
+        int payloadSize = message->getPayload()->GetCachedSize();
+        ProtobufServiceMessageCodec::encodeTag(buffer, 6, ProtobufServiceMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufServiceMessageCodec::encodeVarint(buffer, payloadSize);
+
+        encodeProtobufMessage(buffer, *message->getPayload());
+    }
+    else if (serviceMessage.type() == RESPONSE) {
+        int payloadSize = message->getPayload()->GetCachedSize();
+        ProtobufServiceMessageCodec::encodeTag(buffer, 7, ProtobufServiceMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufServiceMessageCodec::encodeVarint(buffer, payloadSize);
+
+        encodeProtobufMessage(buffer, *message->getPayload());
+    }
 }
+
 }
 }
 }

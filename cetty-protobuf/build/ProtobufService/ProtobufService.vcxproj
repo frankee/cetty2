@@ -16,6 +16,7 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessagePtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.h" />
@@ -38,11 +39,11 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageCodec.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\UriServiceTemplate.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />

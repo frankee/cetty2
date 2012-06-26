@@ -87,6 +87,8 @@ public:
     const MessagePtr& getResponse() const;
     const MessagePtr& getRequest() const;
 
+    int getMessageSize() const;
+
 private:
     bool checkType(int type);
 

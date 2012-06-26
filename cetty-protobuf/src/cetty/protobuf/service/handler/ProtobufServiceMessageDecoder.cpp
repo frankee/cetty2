@@ -20,7 +20,6 @@
 #include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
-//add by ysp
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageUtil.h>
 
 namespace cetty {
@@ -41,26 +40,7 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
 
     if (buffer) {
         ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
-        ServiceMessage* rpc = message->mutableServiceMessage();
-
-        if (!decode(buffer, rpc)) {
-            const google::protobuf::Message* prototype = NULL;
-
-            if (rpc->type() == REQUEST) {
-                prototype = ProtobufServiceRegister::instance().getRequestPrototype(
-                                rpc->service(), rpc->method());
-            }
-            else if (rpc->type() == RESPONSE) {
-                prototype = ProtobufServiceRegister::instance().getResponsePrototype(
-                                rpc->service(), rpc->method());
-            }
-
-            google::protobuf::Message* payload = prototype->New();
-            Array arry;
-            buffer->readableBytes(&arry);
-            payload->ParseFromArray(arry.data(), arry.length());
-            message->setPayload(payload);
-
+        if (!decode(buffer, message)) {
             return ChannelMessage(message);
         }
         else {
@@ -73,38 +53,80 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
 }
 
-int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer, ServiceMessage* message)
-{
-	while(true)
-	{
-		uint64_t tag = ProtobufUtil::varintDecode(buffer);
-		MyWireType wireType =  ProtobufUtil::GetTagWireType(tag);
-		int fieldNum = ProtobufUtil::GetTagFieldNumber(tag);
-		
-		void* ret = ProtobufUtil::fieldDecode(buffer,wireType,fieldNum);
-		switch(fieldNum)
-		{
-			//involved varint
-			case 1:
-				message->set_type(*(static_cast<MessageType*>(ret)));
-				break;
-			case 2:
-				message->set_id(*(static_cast<uint64_t*>(ret)));
-				break;
-			case 3:
-				message->set_service(*(static_cast<std::string*>(ret)));
-				break;
-			case 4:
-				message->set_method(*(static_cast<std::string*>(ret)));
-				break;
-			case 5:
-				message->set_error(*(static_cast<ErrorCode*>(ret)));
-				break;
-			default:
-				break;
-		}
-	}
-	return 0;
+int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message) {
+    const google::protobuf::Message* prototype = NULL;
+
+    const ServiceMessage& serviceMessage = message->getServiceMessage();
+
+    if (serviceMessage.type() == REQUEST) {
+        prototype = ProtobufServiceRegister::instance().getRequestPrototype(
+                        serviceMessage.service(), serviceMessage.method());
+    }
+    else if (serviceMessage.type() == RESPONSE) {
+        prototype = ProtobufServiceRegister::instance().getResponsePrototype(
+                        serviceMessage.service(), serviceMessage.method());
+    }
+
+    google::protobuf::Message* payload = prototype->New();
+    Array arry;
+    buffer->readableBytes(&arry);
+    payload->ParseFromArray(arry.data(), arry.length());
+    message->setPayload(payload);
+
+    return true;
+}
+
+int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message) {
+    ServiceMessage* serviceMessage = message->mutableServiceMessage();
+
+    while (buffer->readable()) {
+        int wireType;
+        int fieldNum;
+        int fieldLength;
+
+        if (ProtobufServiceMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
+            switch (fieldNum) {
+                //involved varint
+            case 1:
+                int64_t type = ProtobufServiceMessageCodec::decodeVarint(buffer);
+                serviceMessage->set_type(static_cast<MessageType>(type));
+                break;
+
+            case 2:
+                int64_t id = ProtobufServiceMessageCodec::decodeFixed64(buffer);
+                serviceMessage->set_id(id);
+                break;
+
+            case 3:
+                buffer->readBytes(serviceMessage->mutable_service(), fieldLength);
+                break;
+
+            case 4:
+                buffer->readBytes(serviceMessage->mutable_method(), fieldLength);
+                break;
+
+            case 5:
+                int64_t error = ProtobufServiceMessageCodec::decodeVarint(buffer);
+                serviceMessage->set_error((ErrorCode)error);
+                break;
+
+            case 6:
+                decodePayload(buffer, message);
+                break;
+
+            case 7:
+                decodePayload(buffer, message);
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    return 0;
 }
 
 }

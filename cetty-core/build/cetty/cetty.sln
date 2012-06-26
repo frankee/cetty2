@@ -18,8 +18,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufService", "..\..\..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceGenerator", "..\..\..\cetty-protobuf\build\ProtobufServiceGenerator\ProtobufServiceGenerator.vcxproj", "{75A24313-B5BB-489C-80E4-B22C18BEEC0F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufTest", "..\..\..\cetty-protobuf\build\test\test.vcxproj", "{954741AF-9629-4B90-9172-3D07A893B2E0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -54,10 +52,6 @@ Global
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Debug|Win32.Build.0 = Debug|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.ActiveCfg = Release|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.Build.0 = Release|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Debug|Win32.Build.0 = Debug|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Release|Win32.ActiveCfg = Release|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
