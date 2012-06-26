@@ -152,6 +152,11 @@ bool ProtobufServiceMessage::checkType(int type) {
     return MessageType_IsValid(type);
 }
 
+int ProtobufServiceMessage::getMessageSize() const {
+    return message->ByteSize() + (payload ? payload->ByteSize() + 8 : 0);
+}
+
+
 }
 }
 }

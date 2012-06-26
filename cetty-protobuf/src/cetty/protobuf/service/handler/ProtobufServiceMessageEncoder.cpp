@@ -51,7 +51,7 @@ void ProtobufServiceMessageEncoder::encodeProtobufMessage(const ChannelBufferPtr
     Array arry;
     buffer->writableBytes(&arry);
     int messageSize = message.GetCachedSize();
-    message.SerializeToArray(arry.data(), messageSize);
+    message.SerializeWithCachedSizesToArray((google::protobuf::uint8*)arry.data());
     buffer->offsetWriterIndex(messageSize);
 }
 
