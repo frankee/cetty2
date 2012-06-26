@@ -59,6 +59,9 @@ void ProtobufServiceMessageEncoder::encodeMessage(ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
 
     const ServiceMessage& serviceMessage = message->getServiceMessage();
+    BOOST_ASSERT(!serviceMessage.has_request()
+                 && !serviceMessage.has_response()
+                 && "Can not contain the response or request payload in service message");
 
     encodeProtobufMessage(buffer, serviceMessage);
 
