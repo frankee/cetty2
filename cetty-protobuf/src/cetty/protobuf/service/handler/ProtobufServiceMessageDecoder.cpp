@@ -20,6 +20,8 @@
 #include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+//add by ysp
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageUtil.h>
 
 namespace cetty {
 namespace protobuf {
@@ -71,8 +73,38 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
 }
 
-int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer, ServiceMessage* message) {
-    return 0;
+int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer, ServiceMessage* message)
+{
+	while(true)
+	{
+		uint64_t tag = ProtobufUtil::varintDecode(buffer);
+		MyWireType wireType =  ProtobufUtil::GetTagWireType(tag);
+		int fieldNum = ProtobufUtil::GetTagFieldNumber(tag);
+		
+		void* ret = ProtobufUtil::fieldDecode(buffer,wireType,fieldNum);
+		switch(fieldNum)
+		{
+			//involved varint
+			case 1:
+				message->set_type(*(static_cast<MessageType*>(ret)));
+				break;
+			case 2:
+				message->set_id(*(static_cast<uint64_t*>(ret)));
+				break;
+			case 3:
+				message->set_service(*(static_cast<std::string*>(ret)));
+				break;
+			case 4:
+				message->set_method(*(static_cast<std::string*>(ret)));
+				break;
+			case 5:
+				message->set_error(*(static_cast<ErrorCode*>(ret)));
+				break;
+			default:
+				break;
+		}
+	}
+	return 0;
 }
 
 }

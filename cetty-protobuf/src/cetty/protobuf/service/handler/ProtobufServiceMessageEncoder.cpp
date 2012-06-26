@@ -18,6 +18,7 @@
 
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageUtil.h>
 
 namespace cetty {
 namespace protobuf {
@@ -25,6 +26,7 @@ namespace service {
 namespace handler {
 
 using namespace cetty::channel;
+using namespace cetty::protobuf::service::proto;
 
 ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
@@ -33,7 +35,11 @@ ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
     ProtobufServiceMessagePtr message = msg.smartPointer<ProtobufServiceMessage>();
 
     if (message) {
+		uint64_t msgSize = message->mutableServiceMessage()->ByteSize();
+		ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize);
+		encodeRpcMessage(buffer,message);
 
+		return ChannelMessage(buffer);
     }
     else {
         return msg;
@@ -44,11 +50,24 @@ int ProtobufServiceMessageEncoder::getMessageSize() {
     return 0;
 }
 
-void ProtobufServiceMessageEncoder::encodeRpcMessage(const ChannelBufferPtr& buffer,
+void ProtobufServiceMessageEncoder::encodeRpcMessage(ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
+		
+		MessageType msgType = message->mutableServiceMessage()->type();
+		ProtobufUtil::lenthDelimitedEncode(buffer,msgType,1);
+		int64_t id = message->getId();
+		ProtobufUtil::fixed64Encode(buffer,id);
+		std::string service = message->getService();
+		ProtobufUtil::lenthDelimitedEncode(buffer,service,3);
+		std::string method = message->getMethod();
+		ProtobufUtil::lenthDelimitedEncode(buffer,method,4);
+		ErrorCode errCode = message->mutableServiceMessage->error();
+		ProtobufUtil::lenthDelimitedEncode(buffer,errCode,5);
 
+		Array array;
+		buffer->writableBytes(&array)
+		message->getPayload()->SerializeToArray(array.data(),array.length());
 }
-
 }
 }
 }

@@ -14,7 +14,6 @@ namespace cetty {namespace gearman{
 			static void handle3(std::string& args);
 			static void handle4(std::string& args);
 			static void handle5(std::string& args);
-
 	};
 }}
 

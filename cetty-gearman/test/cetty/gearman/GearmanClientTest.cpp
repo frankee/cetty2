@@ -44,7 +44,6 @@ void test4submitJob(ChannelPtr& c)
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
-
 	task->request = GearmanMessage::createsubmitJobMessage(functionName,uniqueId,payload);
 	//writedown   ÍùgearmanÐ´Êý¾Ý
 	c->write(ChannelMessage(task));
