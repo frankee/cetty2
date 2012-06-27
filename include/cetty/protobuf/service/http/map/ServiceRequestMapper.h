@@ -48,7 +48,7 @@ private:
     std::vector<HttpServiceTemplate> serviceTemplates;
 };
 
-typedef boost::intrusive_ptr<ServiceRequestMapper> ServiceTemplatesPtr;
+typedef boost::intrusive_ptr<ServiceRequestMapper> ServiceRequestMapperPtr;
 
 }
 }

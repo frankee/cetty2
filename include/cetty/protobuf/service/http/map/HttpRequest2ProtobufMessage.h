@@ -18,8 +18,8 @@
  */
 
 #include <cetty/handler/codec/http/HttpRequest.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
-#include <cetty/protobuf/service/http/ServiceTemplates.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
 
 namespace google {
     namespace protobuf {
@@ -34,12 +34,12 @@ namespace http {
 namespace map {
 
 using namespace cetty::handler::codec::http;
-using namespace cetty::protobuf::service::handler;
+using namespace cetty::protobuf::service;
 using google::protobuf::Message;
 
 class HttpRequest2ProtobufMessage {
 public:
-    HttpRequest2ProtobufMessage(const ServiceTemplatesPtr& serviceTemplates);
+    HttpRequest2ProtobufMessage(const ServiceRequestMapperPtr& serviceTemplates);
 
     //1, method uri
     //2, method uri content (format) header(cookie)
@@ -49,7 +49,7 @@ private:
     int parse(const HttpServiceTemplate& tmpl, const HttpRequestPtr& request, Message* message);
 
 private:
-    ServiceTemplatesPtr templates;
+    ServiceRequestMapperPtr templates;
 };
 
 }

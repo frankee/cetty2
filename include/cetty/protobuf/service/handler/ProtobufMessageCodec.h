@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <boost/cstdint.hpp>
 #include <cetty/buffer/ChannelBufferFwd.h>
 
 namespace cetty {
@@ -24,7 +25,9 @@ namespace protobuf {
 namespace service {
 namespace handler {
 
-class ProtobufServiceMessageCodec {
+using namespace cetty::buffer;
+
+class ProtobufMessageCodec {
 public:
     enum WireType {
         WIRETYPE_VARINT           = 0,
@@ -36,11 +39,11 @@ public:
     };
 
 public:
-    inline static int getTagWireType(int64_t tag) {
+    inline static int getTagWireType(boost::int64_t tag) {
         return static_cast<int>(tag & TAG_TYPE_MASK);
     }
 
-    inline static int getTagFieldNumber(int64_t tag) {
+    inline static int getTagFieldNumber(boost::int64_t tag) {
         return static_cast<int>(tag >> TAG_TYPE_BITS);
     }
 
@@ -49,21 +52,21 @@ public:
         int* fieldNumber,
         int* fieldLength);
 
-    static int64_t decodeFixed64(const ChannelBufferPtr& buffer);
-    static int decodeFixed32(ChannelBufferPtr& buffer);
-    static int64_t decodeVarint(const ChannelBufferPtr& buffer);
+    static boost::int64_t decodeFixed64(const ChannelBufferPtr& buffer);
+    static int decodeFixed32(const ChannelBufferPtr& buffer);
+    static boost::int64_t decodeVarint(const ChannelBufferPtr& buffer);
 
-    static uint64_t encodeFixed64(ChannelBufferPtr& buffer, int64_t data);
-    static uint64_t encodeFixed32(ChannelBufferPtr& buffer, int data);
+    static void encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data);
+    static void encodeFixed32(const ChannelBufferPtr& buffer, int data);
 
     static void encodeTag(const ChannelBufferPtr& buffer, int fieldNum, int type);
-    static void encodeVarint(const ChannelBufferPtr& buffer, int64_t vint);
+    static void encodeVarint(const ChannelBufferPtr& buffer, boost::int64_t vint);
 
 private:
 
 private:
-    ProtobufServiceMessageCodec() {}
-    ~ProtobufServiceMessageCodec() {}
+    ProtobufMessageCodec() {}
+    ~ProtobufMessageCodec() {}
 
 private:
     static const int TAG_TYPE_BITS = 3;

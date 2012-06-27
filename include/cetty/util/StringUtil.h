@@ -91,6 +91,23 @@ static size_t strsplit(const std::string& str, char delim, std::vector<std::stri
 static size_t strsplit(const std::string& str, const std::string& delims,
                 std::vector<std::string>* elems);
 
+/**
+ * Check whether a string begins with a key.
+ * @param str the string.
+ * @param key the forward matching key string.
+ * @return true if the target string begins with the key, else, it is false.
+ */
+static bool strfwm(const std::string& str, const std::string& key);
+
+
+/**
+ * Check whether a string ends with a key.
+ * @param str the string.
+ * @param key the backward matching key string.
+ * @return true if the target string ends with the key, else, it is false.
+ */
+static bool strbwm(const std::string& str, const std::string& key);
+
 private:
     StringUtil() {}
     ~StringUtil() {}

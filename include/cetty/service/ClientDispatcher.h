@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
-#define CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H
+#if !defined(CETTY_SERVICE_CLIENTDISPATCHER_H)
+#define CETTY_SERVICE_CLIENTDISPATCHER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,25 +17,39 @@
  * under the License.
  */
 
-#include <cetty/service/ClientService.h>
-#include <cetty/protobuf/service/ProtobufServiceFuture.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/channel/SimpleChannelHandler.h>
 
 namespace cetty {
-namespace protobuf {
 namespace service {
 
-using namespace cetty::service;
-using namespace cetty::protobuf::service;
+using namespace cetty::channel;
 
-typedef ClientService<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufClientService;
-typedef boost::intrusive_ptr<ProtobufClientService> ProtobufClientServicePtr;
+struct Connection {
+    int port;
+    int limited;
+    std::string host;
+};
+
+class ClientDispatcher : public cetty::channel::SimpleChannelHandler {
+public:
+    ClientDispatcher(const std::vector<Connection>& connections);
+
+public:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const MessageEvent& e);
+
+    virtual void writeRequested(ChannelHandlerContext& ctx,
+        const MessageEvent& e);
+     
+private:
+    
+
+};
 
 }
 }
-}
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
+#endif //#if !defined(CETTY_SERVICE_CLIENTDISPATCHER_H)
 
 // Local Variables:
 // mode: c++

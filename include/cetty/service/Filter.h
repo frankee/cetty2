@@ -22,6 +22,8 @@
 namespace cetty {
 namespace service {
 
+using namespace cetty::channel;
+
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
 * transformations to the input and output of that service:
@@ -50,10 +52,10 @@ public:
     virtual ~Filter() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const MessageEvent& e);
+                                 const MessageEvent& e);
 
     virtual void writeRequested(ChannelHandlerContext& ctx,
-        const MessageEvent& e);
+                                const MessageEvent& e);
 
 protected:
     virtual ReqOutT filterReq(const ReqInT& req) = 0;

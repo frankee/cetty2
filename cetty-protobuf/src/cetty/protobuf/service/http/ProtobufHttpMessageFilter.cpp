@@ -15,12 +15,25 @@
  */
 
 #include <cetty/protobuf/service/http/ProtobufHttpMessageFilter.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace http {
 
+using namespace cetty::handler::codec::http;
+using namespace cetty::protobuf::service;
+
+ProtobufServiceMessagePtr ProtobufHttpMessageFilter::filterReq(const HttpRequestPtr& req) {
+    return http2proto.getProtobufMessage(req);
+}
+
+HttpResponsePtr ProtobufHttpMessageFilter::filterRep(const ProtobufServiceMessagePtr& rep) {
+    return proto2http.getHttpResponse(rep);
+}
 
 }
 }

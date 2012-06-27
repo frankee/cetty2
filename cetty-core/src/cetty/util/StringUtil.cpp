@@ -257,5 +257,17 @@ size_t StringUtil::strsplit(const std::string& str, const std::string& delims, s
     return elems->size();
 }
 
+bool StringUtil::strfwm(const std::string& str, const std::string& key) {
+    std::size_t ksiz = key.size();
+    if (ksiz > str.size()) return false;
+    return !std::memcmp(str.data(), key.data(), ksiz);
+}
+
+bool StringUtil::strbwm(const std::string& str, const std::string& key) {
+    std::size_t ksiz = key.size();
+    if (ksiz > str.size()) return false;
+    return !std::memcmp(str.data() + str.size() - ksiz, key.data(), ksiz);
+}
+
 }
 }

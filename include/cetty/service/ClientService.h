@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <cetty/channel/AbstractChannel.h>
+#include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
 namespace service {
@@ -26,13 +27,17 @@ namespace service {
 template <typename RequestT, typename ResponseT>
 class ClientService : public cetty::channel::AbstractChannel {
 public:
-    typedef RequestT& RequestRef;
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
 
 public:
-    void call(const RequestT& request, const ServiceFuturePtr& future);
+    ClientService();
+    virtual ~ClientService();
 
-    void fireResponseReceived(const ResponseT);
+public:
+    void call(const RequestT& request, const ServiceFuturePtr& future) {
+        OutstandingCall<RequestT, ResponseT> outstanding = { request, future };
+        write(ChannelMessage(outstanding));
+    }
 };
 
 }

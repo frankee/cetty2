@@ -18,6 +18,8 @@
  */
 
 #include <cetty/handler/codec/oneone/OneToOneDecoder.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
@@ -36,6 +38,8 @@ namespace handler {
 
 using namespace cetty::channel;
 using namespace cetty::protobuf::service::proto;
+using namespace cetty::buffer;
+using namespace cetty::protobuf::service::handler;
 
 class ProtobufServiceMessageDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
 public:
@@ -54,7 +58,7 @@ private:
     int decode(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message);
     int decodePayload(const ChannelBufferPtr& buffer,
-        const ProtobufServiceMessagePtr& message)
+        const ProtobufServiceMessagePtr& message);
 
 };
 

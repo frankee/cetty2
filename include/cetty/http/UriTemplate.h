@@ -17,7 +17,13 @@
  * under the License.
  */
 
+#include <string>
+#include <vector>
+#include <cetty/util/NameValueCollection.h>
+
 namespace cetty { namespace http { 
+
+    using namespace cetty::util;
 
     // path
     // [/method_path:alias]/path{/parameter:alias}{.format:alias}{?parameter1:alias}{&parameter2:alias}
@@ -64,7 +70,7 @@ namespace cetty { namespace http {
                 if (this->pathSegments[i].type == PATH_SEG_PARAM) {
                     continue;
                 }
-                if (pathSegments[i] != this->pathSegments[i]) {
+                if (pathSegments[i].compare(this->pathSegments[i].name)) {
                     return false;
                 }
             }

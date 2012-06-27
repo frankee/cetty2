@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H)
-#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGEPTR_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGEPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,32 +18,19 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
-#include <cetty/util/BarePointer.h>
-#include <cetty/service/ServiceFuture.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-
-namespace google {
-namespace protobuf {
-class Message;
-}
-}
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 
-
-typedef ::cetty::util::BarePointer<::google::protobuf::Message> MessagePtr;
-typedef ::cetty::util::BarePointer<::google::protobuf::Message const> ConstMessagePtr;
-
-typedef ::cetty::service::ServiceFuture<ProtobufServiceMessagePtr>   ProtobufServiceFuture;
-typedef ::boost::intrusive_ptr<ProtobufServiceFuture> ProtobufServiceFuturePtr;
+class ProtobufServiceMessage;
+typedef boost::intrusive_ptr<ProtobufServiceMessage> ProtobufServiceMessagePtr;
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEFUTURE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGEPTR_H)
 
 // Local Variables:
 // mode: c++

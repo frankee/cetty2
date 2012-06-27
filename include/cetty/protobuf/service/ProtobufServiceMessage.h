@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGE_H)
-#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGE_H
+#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGE_H)
+#define CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -19,22 +19,21 @@
 
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
-    namespace protobuf {
-        namespace service {
-            namespace proto {
-                class ServiceMessage;
-            }
-        }
-    }
+namespace protobuf {
+namespace service {
+namespace proto {
+class ServiceMessage;
+}
+}
+}
 }
 
 namespace cetty {
 namespace protobuf {
 namespace service {
-namespace handler {
 
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
@@ -59,7 +58,7 @@ public:
     bool isRequest() const;
     bool isResponse() const;
     bool isError() const;
-    
+
     void setType(int type);
 
     boost::int64_t getId() const;
@@ -67,7 +66,7 @@ public:
 
     const std::string& getService() const;
     std::string* mutableService();
-    
+
     const std::string& getMethod() const;
     std::string* mutableMethod();
 
@@ -104,9 +103,8 @@ private:
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGE_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGE_H)
 
 // Local Variables:
 // mode: c++

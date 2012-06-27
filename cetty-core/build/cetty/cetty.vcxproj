@@ -239,7 +239,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureListener.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureProgressListener.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h" />
@@ -349,6 +348,7 @@
     <ClInclude Include="..\..\..\include\cetty\handler\execution\ServicePoolExecutor.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Filter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />

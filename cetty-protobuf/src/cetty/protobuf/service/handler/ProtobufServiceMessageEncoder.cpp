@@ -16,9 +16,11 @@
 
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 
+#include <boost/assert.hpp>
 #include <cetty/channel/ChannelMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageCodec.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
+#include <cetty/protobuf/service/proto/service.pb.h>
 
 namespace cetty {
 namespace protobuf {
@@ -26,6 +28,7 @@ namespace service {
 namespace handler {
 
 using namespace cetty::channel;
+using namespace cetty::buffer;
 using namespace cetty::protobuf::service::proto;
 
 ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
@@ -55,7 +58,7 @@ void ProtobufServiceMessageEncoder::encodeProtobufMessage(const ChannelBufferPtr
     buffer->offsetWriterIndex(messageSize);
 }
 
-void ProtobufServiceMessageEncoder::encodeMessage(ChannelBufferPtr& buffer,
+void ProtobufServiceMessageEncoder::encodeMessage(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
 
     const ServiceMessage& serviceMessage = message->getServiceMessage();
@@ -67,15 +70,15 @@ void ProtobufServiceMessageEncoder::encodeMessage(ChannelBufferPtr& buffer,
 
     if (serviceMessage.type() == REQUEST) {
         int payloadSize = message->getPayload()->GetCachedSize();
-        ProtobufServiceMessageCodec::encodeTag(buffer, 6, ProtobufServiceMessageCodec::WIRETYPE_LENGTH_DELIMITED);
-        ProtobufServiceMessageCodec::encodeVarint(buffer, payloadSize);
+        ProtobufMessageCodec::encodeTag(buffer, 6, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufMessageCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobufMessage(buffer, *message->getPayload());
     }
     else if (serviceMessage.type() == RESPONSE) {
         int payloadSize = message->getPayload()->GetCachedSize();
-        ProtobufServiceMessageCodec::encodeTag(buffer, 7, ProtobufServiceMessageCodec::WIRETYPE_LENGTH_DELIMITED);
-        ProtobufServiceMessageCodec::encodeVarint(buffer, payloadSize);
+        ProtobufMessageCodec::encodeTag(buffer, 7, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufMessageCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobufMessage(buffer, *message->getPayload());
     }

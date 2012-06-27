@@ -19,7 +19,7 @@
 #include <boost/assert.hpp>
 #include <google/protobuf/message.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace protobuf {
@@ -29,7 +29,6 @@ namespace map {
 
 using namespace google::protobuf;
 using namespace cetty::protobuf::service;
-using namespace cetty::protobuf::service::handler;
 
 ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     const HttpRequestPtr& request) {
@@ -70,6 +69,7 @@ int HttpRequest2ProtobufMessage::parse(const HttpServiceTemplate& tmpl,
     Message* message) {
     BOOST_ASSERT(message);
 
+    return -1;
 
 }
 

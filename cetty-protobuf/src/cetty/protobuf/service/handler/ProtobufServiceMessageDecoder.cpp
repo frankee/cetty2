@@ -19,8 +19,8 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageUtil.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
 namespace cetty {
 namespace protobuf {
@@ -45,6 +45,7 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
         else {
             // error here
+            printf("ProtobufServiceMessageDecoder::decode failed beacuse of type wrong");
             return msg;
         }
     }
@@ -77,6 +78,7 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
     return true;
 }
 
+//if successful then return 0,if type is wrong return -1;
 int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
@@ -85,17 +87,24 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         int wireType;
         int fieldNum;
         int fieldLength;
+		int64_t type;
+		int64_t id;
+		int64_t error;
 
-        if (ProtobufServiceMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
+        if (ProtobufMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
                 //involved varint
             case 1:
-                int64_t type = ProtobufServiceMessageCodec::decodeVarint(buffer);
+                type = ProtobufMessageCodec::decodeVarint(buffer);
+				if(type != REQUEST && type != RESPONSE && type != ERROR)
+				{
+					return -1;
+				}
                 serviceMessage->set_type(static_cast<MessageType>(type));
                 break;
 
             case 2:
-                int64_t id = ProtobufServiceMessageCodec::decodeFixed64(buffer);
+                id = ProtobufMessageCodec::decodeFixed64(buffer);
                 serviceMessage->set_id(id);
                 break;
 
@@ -108,7 +117,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
                 break;
 
             case 5:
-                int64_t error = ProtobufServiceMessageCodec::decodeVarint(buffer);
+                error = ProtobufMessageCodec::decodeVarint(buffer);
                 serviceMessage->set_error((ErrorCode)error);
                 break;
 

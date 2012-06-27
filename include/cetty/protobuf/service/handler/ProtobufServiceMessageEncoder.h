@@ -19,7 +19,13 @@
 
 #include <cetty/handler/codec/oneone/OneToOneEncoder.h>
 #include <cetty/buffer/ChannelBufferFwd.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+
+namespace google {
+namespace protobuf {
+class Message;
+}
+}
 
 namespace cetty {
 namespace protobuf {
@@ -28,6 +34,7 @@ namespace handler {
 
 using namespace cetty::buffer;
 using namespace cetty::channel;
+using namespace cetty::protobuf::service;
 
 class ProtobufServiceMessageEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {
 public:
@@ -46,7 +53,7 @@ private:
     void encodeMessage(const ChannelBufferPtr& buffer,
                        const ProtobufServiceMessagePtr& message);
     void encodeProtobufMessage(const ChannelBufferPtr& buffer,
-                               const google::protobuf::Message& message)
+                               const google::protobuf::Message& message);
 };
 
 }

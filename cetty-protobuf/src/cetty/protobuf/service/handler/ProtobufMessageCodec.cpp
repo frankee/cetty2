@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageCodec.h>
+#include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
@@ -27,34 +27,33 @@ namespace handler {
 using namespace cetty::protobuf::service::handler;
 using namespace cetty::buffer;
 
-bool ProtobufServiceMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wireType, int* fieldNumber, int* fieldLength) {
+bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wireType, int* fieldNumber, int* fieldLength) {
     if (NULL == wireType || NULL == fieldNumber || NULL == fieldLength) {
         return false;
     }
 
-    int64_t tag = decodeVarint(buffer);
+    boost::int64_t tag = decodeVarint(buffer);
     *wireType = getTagWireType(tag);
     *fieldNumber = getTagFieldNumber(tag);
 
     if (*wireType == WIRETYPE_LENGTH_DELIMITED) {
         *fieldLength = (int)decodeVarint(buffer);
     }
-
     return true;
 }
 
-int64_t ProtobufServiceMessageCodec::decodeFixed64(ChannelBufferPtr& buffer) {
+int64_t ProtobufMessageCodec::decodeFixed64(const ChannelBufferPtr& buffer) {
     return buffer->readLong();
 }
 
 
-int ProtobufServiceMessageCodec::decodeFixed32(ChannelBufferPtr& buffer) {
+int ProtobufMessageCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
     return buffer->readInt();
 }
 
-int64_t ProtobufServiceMessageCodec::decodeVarint(ChannelBufferPtr& buffer) {
+boost::int64_t ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     uint8_t temp;
-    uint64_t ret;
+    boost::int64_t ret;
     int i = 0;
     while (true) {
         temp = buffer->readByte();
@@ -71,40 +70,25 @@ int64_t ProtobufServiceMessageCodec::decodeVarint(ChannelBufferPtr& buffer) {
             break;
         }
     }
-
     return ret;
 }
 
-uint64_t  ProtobufServiceMessageCodec::encodeFixed64(ChannelBufferPtr& buffer,uint64_t data) {
+void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data) {
     buffer->writeLong(data);
 }
 
-uint64_t  ProtobufServiceMessageCodec::encodeFixed32(ChannelBufferPtr& buffer,int data) {
+void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,int data) {
     buffer->writeInt(data);
 }
 
-//the flag is indict that if varint is embedded，1:embedded  0:unembedded
-//只有嵌套的varint里面才需要写 tag
-uint64_t  ProtobufServiceMessageCodec::varintEncode(ChannelBufferPtr& buffer,uint64_t val,bool  flag) {
-    //如果是嵌套的，先把字节数写在前面，字节数也是varint
-    if (flag) {
-        varintEncode(buffer,varintSize,0);
-        //里面嵌套的头
-        encodeTag(buffer,1,0);
-    }
-
-    Array array((char*)(buf-varintSize),varintSize);
-    buffer->writeBytes(array);
+void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum,int type) {
+    int tag = (fieldNum << 3) | type;
+    encodeVarint(buffer, tag);
 }
 
-void ProtobufServiceMessageCodec::encodeTag(ChannelBufferPtr& buffer,uint64_t fieldNum,uint64_t type) {
-    uint64_t tag = (fieldNum<<3)|type;
-    varintEncode(buffer, tag);
-}
-
-void ProtobufServiceMessageCodec::encodeVarint(ChannelBufferPtr& buffer,uint64_t len) {
-    uint8_t* buf;
-    uint64_t varintSize = 0;
+void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, boost::int64_t val) {
+    boost::uint8_t buf[10];
+    int varintSize = 0;
 
     do {
         uint8_t byte = val & 0x7f;
@@ -112,10 +96,14 @@ void ProtobufServiceMessageCodec::encodeVarint(ChannelBufferPtr& buffer,uint64_t
 
         if (val) { byte |= 0x80; }
 
-        *buf++ = byte;
+        buf[varintSize] = byte;
         varintSize++;
     }
     while (val);
+
+	//write to buffer
+	Array array((char*)(buf-varintSize),varintSize);
+	buffer->writeBytes(array);
 }
 
 }

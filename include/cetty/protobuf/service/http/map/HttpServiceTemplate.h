@@ -23,6 +23,7 @@
 #include <cetty/http/UriTemplate.h>
 #include <cetty/http/CookieTemplate.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace protobuf {
@@ -31,6 +32,7 @@ namespace http {
 namespace map {
 
 using namespace cetty::http;
+using namespace cetty::util;
 using namespace cetty::handler::codec::http;
 
 // GET uri template
@@ -66,8 +68,8 @@ private:
         std::map<std::string, std::string>::const_iterator itr;
 
         for (itr = aliases.begin(); itr != aliases.end(); ++itr) {
-            Alias& alias = parameterAliases[itr->first];
-            parseAlias(itr->second, &alias);
+            //Alias& alias = parameterAliases[itr->first];
+            //parseAlias(itr->second, &alias);
         }
     }
     void parseAlias(const std::string& str, Alias* alias) {

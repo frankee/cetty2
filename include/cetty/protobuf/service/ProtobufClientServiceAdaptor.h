@@ -107,22 +107,22 @@ public:
     // need not be of any specific class as long as their descriptors are
     // method->input_type() and method->output_type().
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const MessagePtr& request,
+                    const ConstMessagePtr& request,
                     const ProtobufServiceFuturePtr& future);
 
     template<typename ResponseT>
-    ResponseT downPointerCast(const MessagePtr& from) {
-        return static_pointer_cast<ResponseT::element_type>(from);
+    ResponseT downPointerCast(const ProtobufServiceMessagePtr& from) {
+        return cetty::util::static_pointer_cast<ResponseT::element_type>(from->getPayload());
     }
 
     template<typename RequestT, typename ResponseT>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const cetty::util::BarePointer<RequestT>& request,
+                    const cetty::util::BarePointer<RequestT const>& request,
                     const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {
         CallMethod(method,
-                   cetty::util::static_pointer_cast<MessagePtr::element_type>(request),
+                   cetty::util::static_pointer_cast<MessagePtr::element_type const>(request),
                    ProtobufServiceFuturePtr(
-                       new TypeCastServiceFuture<MessagePtr, ResponseT>(future,
+                       new TypeCastServiceFuture<ProtobufServiceMessagePtr, ResponseT>(future,
                                boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<ResponseT>, this, _1, _2))));
     }
 

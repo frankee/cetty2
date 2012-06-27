@@ -19,12 +19,15 @@
 
 #include <map>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/handler/codec/http/HttpMessageFwd.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace http {
 namespace map {
+
+using namespace cetty::handler::codec::http;
 
 class ServiceReponseMapper : public cetty::util::ReferenceCounter<ServiceReponseMapper> {
 public:

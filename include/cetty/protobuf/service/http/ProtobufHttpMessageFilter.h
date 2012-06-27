@@ -19,7 +19,7 @@
 
 #include <cetty/service/Filter.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>
 
@@ -30,23 +30,19 @@ namespace http {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec::http;
-using namespace cetty::protobuf::service::handler;
+using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::http::map;
 
 class ProtobufHttpMessageFilter
         : public cetty::service::Filter<HttpRequestPtr, HttpResponsePtr, ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
 
 public:
-    virtual ChannelHandlerPtr& clone();
-    virtual std::string& toString() const;
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterReq(const HttpRequestPtr& req) {
-        return http2proto.getProtobufMessage(req);
-    }
-    virtual HttpResponsePtr filterRep(const ProtobufServiceMessagePtr& rep) {
-        return proto2http.getHttpResponse(rep);
-    }
+    virtual ProtobufServiceMessagePtr filterReq(const HttpRequestPtr& req);
+    virtual HttpResponsePtr filterRep(const ProtobufServiceMessagePtr& rep);
 
 private:
     HttpRequest2ProtobufMessage http2proto;

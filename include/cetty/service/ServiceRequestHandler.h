@@ -22,6 +22,8 @@
 namespace cetty {
 namespace service {
 
+using namespace cetty::channel;
+
 template<typename RequestT, typename ResponseT>
 class OutstandingCall {
 public:
@@ -32,33 +34,39 @@ public:
     ServiceFuturePtr future;
 };
 
-template<typename RequestT, typename ResponseT, typename ResponseMessageT>
+template<typename RequestT, typename ResponseT>
 class ServiceRequestHandler : public cetty::channel::SimpleChannelHandler {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
+    typedef OutstandingCall<RequestT, ResponseT> OutstandingMessage;
 
 public:
-    ServiceRequestHandler();
-    virtual ServiceRequestHandler();
+    ServiceRequestHandler() {}
+    virtual ~ServiceRequestHandler() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        ResponseMessageT& response = e.getMessage().value();
+        ResponseT& response = e.getMessage().value();
 
         if (response) {
-            boost::int64_t id = message->id();
+            //boost::int64_t id = message->id();
 
-            OutstandingCall out = { NULL, NULL, NULL};
+            OutstandingMessage& out = outMessages.front();
+#if 0
             {
                 std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
+
                 if (it != outstandings.end()) {
                     out = it->second;
                     outstandings.erase(it);
                 }
             }
+#endif
 
             if (out.future) {
                 out.future->setSuccess(response);
             }
+
+            outMessages.pop_front();
         }
         else {
             ctx.sendUpstream(e);
@@ -66,12 +74,14 @@ public:
     }
 
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-
+        OutstandingMessage msg = e.getMessage().value<OutstandingMessage>();
+        outMessages.push_back(msg);
+        //Channels::write(ctx, )
+        //ctx.sendDownstream(MessageEvent());
     }
 
-
     virtual ChannelHandlerPtr clone() {
-
+        return ChannelHandlerPtr(new ServiceRequestHandler<RequestT, ResponseT>());
     }
 
     virtual std::string toString() const {
@@ -79,7 +89,7 @@ public:
     }
 
 private:
-
+    std::deque<OutstandingMessage> outMessages;
 };
 
 }

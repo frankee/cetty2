@@ -1048,9 +1048,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\execution\ServicePoolExecutor.h">
       <Filter>handler\execution</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureProgressListener.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1103,6 +1100,9 @@
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\Filter.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h">
       <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>

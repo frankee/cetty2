@@ -20,7 +20,7 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/protobuf/service/ProtobufService.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/util/Exception.h>
 
@@ -30,7 +30,6 @@ namespace service {
 
 using namespace google::protobuf;
 using namespace cetty::service;
-using namespace cetty::protobuf::service::handler;
 using namespace cetty::protobuf::service::proto;
 using namespace cetty::util;
 
@@ -41,7 +40,7 @@ using namespace cetty::util;
 // method->input_type() and method->output_type().
 void ProtobufClientServiceAdaptor::CallMethod(
     const ::google::protobuf::MethodDescriptor* method,
-    const MessagePtr& request,
+    const ConstMessagePtr& request,
     const ProtobufServiceFuturePtr& future) {
 
     if (!service) {
@@ -56,9 +55,9 @@ void ProtobufClientServiceAdaptor::CallMethod(
         new ProtobufServiceMessage(REQUEST,
                                method->service()->full_name(),
                                method->name(),
-                               request));
+                               cetty::util::const_pointer_cast<google::protobuf::Message>(request)));
 
-    service->call(message, future);
+    //service->call(message, future);
 }
 
 }

@@ -32,7 +32,7 @@
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 
 namespace cetty {
@@ -104,7 +104,7 @@ cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {
 }
 
 std::string ProtobufServiceMessageHandler::toString() const {
-    return "ProtobufRpcMessageHandler";
+    return "ProtobufServiceMessageHandler";
 }
 
 }

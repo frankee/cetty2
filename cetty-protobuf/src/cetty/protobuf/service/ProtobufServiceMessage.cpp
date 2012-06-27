@@ -15,13 +15,12 @@
  */
 
 #include <boost/assert.hpp>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
-namespace handler {
 
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
@@ -157,7 +156,6 @@ int ProtobufServiceMessage::getMessageSize() const {
 }
 
 
-}
 }
 }
 }

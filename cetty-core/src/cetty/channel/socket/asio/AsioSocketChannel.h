@@ -158,10 +158,10 @@ protected:
     mutable SocketAddress remoteAddress;
 
 private:
-    static const int CHANNEL_ST_OPEN = 0;
-    static const int CHANNEL_ST_BOUND = 1;
-    static const int CHANNEL_ST_CONNECTED = 2;
-    static const int CHANNEL_ST_CLOSED = -1;
+    static const int CHANNEL_ST_OPEN      =  0;
+    static const int CHANNEL_ST_BOUND     =  1;
+    static const int CHANNEL_ST_CONNECTED =  2;
+    static const int CHANNEL_ST_CLOSED    = -1;
 
     int state;
 };
