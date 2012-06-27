@@ -21,6 +21,7 @@
 #include <cetty/buffer/ChannelBufferFwd.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
+
 namespace cetty {
 namespace protobuf {
 namespace service {
@@ -43,22 +44,22 @@ using namespace cetty::protobuf::service::handler;
 
 class ProtobufServiceMessageDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
 public:
-    ProtobufServiceMessageDecoder();
-    virtual ~ProtobufServiceMessageDecoder();
+    ProtobufServiceMessageDecoder() {}
+    virtual ~ProtobufServiceMessageDecoder() {}
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
-protected:
+    //protected:
     virtual ChannelMessage decode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
 private:
     int decode(const ChannelBufferPtr& buffer,
-        const ProtobufServiceMessagePtr& message);
+               const ProtobufServiceMessagePtr& message);
     int decodePayload(const ChannelBufferPtr& buffer,
-        const ProtobufServiceMessagePtr& message);
+                      const ProtobufServiceMessagePtr& message);
 
 };
 

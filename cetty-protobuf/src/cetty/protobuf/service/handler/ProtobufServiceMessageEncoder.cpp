@@ -31,6 +31,15 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::protobuf::service::proto;
 
+
+ChannelHandlerPtr ProtobufServiceMessageEncoder::clone() {
+    return ChannelHandlerPtr(this);
+}
+
+std::string ProtobufServiceMessageEncoder::toString() const {
+    return "ProtobufServiceMessageEncoder";
+}
+
 ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
         const ChannelMessage& msg) {

@@ -32,6 +32,15 @@ using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
 
+
+ChannelHandlerPtr ProtobufServiceMessageDecoder::clone() {
+    return ChannelHandlerPtr(this);
+}
+
+std::string ProtobufServiceMessageDecoder::toString() const {
+    return "ProtobufServiceMessageDecoder";
+}
+
 ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
         const ChannelMessage& msg) {
@@ -40,6 +49,7 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
 
     if (buffer) {
         ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
+
         if (!decode(buffer, message)) {
             return ChannelMessage(message);
         }
@@ -87,19 +97,20 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         int wireType;
         int fieldNum;
         int fieldLength;
-		int64_t type;
-		int64_t id;
-		int64_t error;
+        int64_t type;
+        int64_t id;
+        int64_t error;
 
         if (ProtobufMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
                 //involved varint
             case 1:
                 type = ProtobufMessageCodec::decodeVarint(buffer);
-				if(type != REQUEST && type != RESPONSE && type != ERROR)
-				{
-					return -1;
-				}
+
+                if (type != REQUEST && type != RESPONSE && type != ERROR) {
+                    return -1;
+                }
+
                 serviceMessage->set_type(static_cast<MessageType>(type));
                 break;
 
