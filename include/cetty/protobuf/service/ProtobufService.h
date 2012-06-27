@@ -101,7 +101,7 @@ public:
     //   RpcController can be queried to determine if an error occurred and
     //   possibly to get more information about the error.
     virtual void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                            const MessagePtr& request,
+                            const ConstMessagePtr& request,
                             const MessagePtr& response,
                             const DoneCallback& done) = 0;
 

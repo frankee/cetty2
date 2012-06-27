@@ -79,6 +79,28 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                    "class $classname$_Stub;\n"
                    "\n");
 
+    std::map<std::string, std::string> input_types;
+    std::map<std::string, std::string> output_types;
+
+    for (int i = 0; i < descriptor_->method_count(); i++) {
+        const MethodDescriptor* method = descriptor_->method(i);
+        input_types[ClassName(method->input_type(), true)] = ClassName(method->input_type(), false);
+        output_types[ClassName(method->output_type(), true)] = ClassName(method->output_type(), false);
+    }
+    for (map<string, string>::iterator it = input_types.begin(); it != input_types.end(); ++it) {
+            map<string, string> sub_vars;
+            sub_vars["type"] = it->first;
+            sub_vars["typedef"] = it->second;
+            printer->Print(sub_vars, "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n");
+    }
+    for (map<string, string>::iterator it = output_types.begin(); it != output_types.end(); ++it) {
+        map<string, string> sub_vars;
+        sub_vars["type"] = it->first;
+        sub_vars["typedef"] = it->second;
+        printer->Print(sub_vars, "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n");
+    }
+    printer->Print("\n");
+    
     GenerateInterface(printer);
     GenerateStubDefinition(printer);
 }
@@ -109,7 +131,8 @@ void ServiceGenerator::GenerateInterface(io::Printer* printer) {
         "const ::google::protobuf::ServiceDescriptor* GetDescriptor();\n"
         "void CallMethod(const ::google::protobuf::MethodDescriptor* method,\n"
         "                const ::cetty::protobuf::service::ConstMessagePtr& request,\n"
-        "                const ::cetty::protobuf::service::ProtobufServiceFuturePtr& future);\n\n"
+        "                const ::cetty::protobuf::service::MessagePtr& response,\n"
+        "                const DoneCallback& done);\n\n"
         "const ::google::protobuf::Message* GetRequestPrototype(\n"
         "  const ::google::protobuf::MethodDescriptor* method) const;\n"
         "const ::google::protobuf::Message* GetResponsePrototype(\n"
@@ -135,7 +158,9 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
         "$classname$_Stub(const ::cetty::protobuf::service::ProtobufClientServicePtr& service);\n"
                    "~$classname$_Stub();\n"
                    "\n"
-                   "inline const ::cetty::protobuf::service::ProtobufClientServicePtr& channel() { return channel_; }\n"
+                   "inline const ::cetty::protobuf::service::ProtobufClientServicePtr& channel() {\n"
+                   "    return channel_.getService();\n"
+                   "}\n"
                    "\n"
                    "// implements $classname$ ------------------------------------------\n"
                    "\n");
@@ -145,7 +170,7 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Outdent();
     printer->Print(vars_,
                    " private:\n"
-                   "  cetty::protobuf::service::ProtobufClientServicePtr channel_;\n"
+                   "  cetty::protobuf::service::ProtobufClientServiceAdaptor channel_;\n"
                    "  bool owns_channel_;\n"
                    "  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS($classname$_Stub);\n"
                    "};\n"
@@ -175,23 +200,22 @@ void ServiceGenerator::GenerateMethodSignatures(
         map<string, string> sub_vars;
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
-        sub_vars["input_type"] = ClassName(method->input_type(), true);
-        sub_vars["output_type"] = ClassName(method->output_type(), true);
+        sub_vars["input_type"] = ClassName(method->input_type(), false);
+        sub_vars["output_type"] = ClassName(method->output_type(), false);
         sub_vars["virtual"] = "virtual ";
 
         if (stub_or_non == NON_STUB) {
             printer->Print(sub_vars,
-                "typedef ::cetty::util::barePointer<$input_type$ const> Const$input_type$Ptr;\n"
-                "typedef ::cetty::util::barePointer<$output_type$> $output_type$Ptr;\n"
                 "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                "                     const $output_type$Ptr>& response,\n"
+                "                     const $output_type$Ptr& response,\n"
                            "                     const DoneCallback& done);\n");
         }
         else {
             printer->Print(sub_vars,
                            "using $classname$::$name$;\n"
+                           "typedef boost::intrusive_ptr<::cetty::service::ServiceFuture<$output_type$Ptr> > $output_type$FuturePtr;\n"
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                           "                     const ::cetty::protobuf::service::ProtobufServiceFuturePtr& future);\n");
+                           "                     const $output_type$FuturePtr& future);\n");
         }
     }
 }
@@ -226,7 +250,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
                    "\n");
 
     // Generate methods of the interface.
-    GenerateFutureType(printer);
+    //GenerateFutureType(printer);
     GenerateNotImplementedMethods(printer);
     GenerateCallMethod(printer);
     GenerateGetPrototype(REQUEST, printer);
@@ -234,7 +258,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-                   "$classname$_Stub::$classname$_Stub(const ProtobufClientServicePtr& service)\n"
+        "$classname$_Stub::$classname$_Stub(const cetty::protobuf::service::ProtobufClientServicePtr& service)\n"
                    "  : channel_(service), owns_channel_(false) {}\n"
                    "$classname$_Stub::~$classname$_Stub() {\n"
                    "}\n"
@@ -250,16 +274,16 @@ void ServiceGenerator::GenerateNotImplementedMethods(io::Printer* printer) {
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);
-        sub_vars["input_type"] = ClassName(method->input_type(), true);
-        sub_vars["output_type"] = ClassName(method->output_type(), true);
+        sub_vars["input_type"] = ClassName(method->input_type(), false);
+        sub_vars["output_type"] = ClassName(method->output_type(), false);
 
         printer->Print(sub_vars,
-                       "void $classname$::$name$(const ::cetty::barePointer<$input_type$ const>& request,\n"
-                       "                         const ::cetty::barePointer<$output_type$>& response,\n"
+                       "void $classname$::$name$(const Const$input_type$Ptr& request,\n"
+                       "                         const $output_type$Ptr& response,\n"
                        "                         const DoneCallback& done) {\n"
                        // "  controller->SetFailed(\"Method $name$() not implemented.\");\n"
                        "  assert(0);\n"
-                       "  done(::cetty::barePointer<$output_type$>());\n"
+                       //"  done($output_type$Ptr());\n"
                        "}\n"
                        "\n");
     }
@@ -287,7 +311,7 @@ void ServiceGenerator::GenerateCallMethod(io::Printer* printer) {
         printer->Print(sub_vars,
                        "    case $index$:\n"
                        "      $name$(::cetty::util::static_pointer_cast<$input_type$ const>(request),\n"
-                       "             ::cetty::util::static_pointer_cast<$input_type$>(response),\n"
+                       "             ::cetty::util::static_pointer_cast<$output_type$>(response),\n"
                        "             done);\n"
                        "      break;\n");
     }
@@ -348,12 +372,12 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);
-        sub_vars["input_type"] = ClassName(method->input_type(), true);
-        sub_vars["output_type"] = ClassName(method->output_type(), true);
+        sub_vars["input_type"] = ClassName(method->input_type(), false);
+        sub_vars["output_type"] = ClassName(method->output_type(), false);
 
         printer->Print(sub_vars,
-                       "void $classname$_Stub::$name$(const ::cetty::util::BarePointer<$input_type$>& request,\n"
-                       "                              const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {\n"
+                       "void $classname$_Stub::$name$(const Const$input_type$Ptr& request,\n"
+                       "                              const $output_type$FuturePtr& future) {\n"
                        "  channel_.CallMethod(descriptor()->method($index$),\n"
                        "                      request, future);\n"
                        "}\n");
@@ -384,8 +408,10 @@ void findOutput(int argc, char* argv[], std::string* path) {
     if (NULL == path || argc < 2) return;
 
     for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "--cpp_out") == 0 && i < argc - 1) {
-            *path = argv[i+1];
+        std::string str(argv[i]);
+        std::string::size_type pos = str.find("--cpp_out=");
+        if (pos != str.npos) {
+            *path = str.substr(10);
         }
     }
 }
@@ -395,12 +421,14 @@ void changeHeader(const std::string& proto) {
     hfile.replace(hfile.end() - 6, hfile.end(), ".pb.h");
     
     std::vector<std::string> lines;
-    std::fstream file(hfile, std::fstream::in);
-    while (!file.end) {
+    std::fstream file;
+    file.open(hfile, std::fstream::in);
+    while (!file.eof()) {
         std::string line;
         std::getline(file, line);
 
         if (line.find("google/protobuf/service.h") != line.npos) {
+            lines.push_back("#include <cetty/util/BarePointer.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufService.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufServiceFuture.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>");

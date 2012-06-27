@@ -22,15 +22,15 @@
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
-    namespace util {
-        class Exception;
-    }
+namespace util {
+class Exception;
+}
 }
 
 namespace cetty {
 namespace service {
 
-    using cetty::util::Exception;
+using cetty::util::Exception;
 
 template <typename T>
 class ServiceFuture : public cetty::util::ReferenceCounter<ServiceFuture<T>, int> {
@@ -110,7 +110,7 @@ public:
      * Returns <tt>true</tt> if and only if this future was
      * cancelled by a {@link #cancel()} method.
      */
-    virtual bool isCancelled() const;
+    virtual bool isCancelled() const { return false; }
 
     /**
      * Marks this future as a success and notifies all
@@ -120,7 +120,14 @@ public:
      *         a success. Otherwise <tt>false</tt> because this future is
      *         already marked as either a success or a failure.
      */
-    virtual bool setSuccess();
+    virtual bool setSuccess() {
+        std::deque<CompletedCallback>::const_iterator itr = callbacks.begin();
+        for (; itr != callbacks.end(); ++itr) {
+            (*itr)(*this, response);
+        }
+        
+        return true;
+    }
 
     virtual bool setSuccess(const T& response) {
         setResponse(response);
@@ -135,7 +142,9 @@ public:
      *         a failure. Otherwise <tt>false</tt> because this future is
      *         already marked as either a success or a failure.
      */
-    virtual bool setFailure(const Exception& cause);
+    virtual bool setFailure(const Exception& cause) {
+        return true;
+    }
 
     virtual bool setFailure(const T& response, const Exception& cause) {
         setResponse(response);
