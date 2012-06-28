@@ -21,86 +21,85 @@
 #include <vector>
 #include <cetty/util/NameValueCollection.h>
 
-namespace cetty { namespace http { 
+namespace cetty {
+namespace http {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
-    // path
-    // [/method_path:alias]/path{/parameter:alias}{.format:alias}{?parameter1:alias}{&parameter2:alias}
-    // /method_path/path/parameter.format
-    // parameter1
-    // parameter2
+// path
+// [/method_path:alias]/path{/parameter:alias}{.format:alias}{?parameter1:alias}{&parameter2:alias}
+// /method_path/path/parameter.format
+// parameter1
+// parameter2
 
-    class UriTemplate {
-    public:
-        enum PathSegmentType {
-            PATH_SEG_NORMAL = 0,
-            PATH_SEG_ALIAS  = 1,
-            PATH_SEG_PARAM  = 2,
-        };
+class UriTemplate {
+public:
+    enum PathSegmentType {
+        PATH_SEG_NORMAL = 0,
+        PATH_SEG_ALIAS  = 1,
+        PATH_SEG_PARAM  = 2,
+    };
 
-        struct PathSegment {
-            int type;
-            int nextSameTypeIndex;
-            int nextDiffTypeIndex;
-            std::string name;
-            std::string alias;
-        };
+    struct PathSegment {
+        int type;
+        int nextSameTypeIndex;
+        int nextDiffTypeIndex;
+        std::string name;
+        std::string alias;
+    };
 
-    public:
-        UriTemplate(const std::string& templateStr);
+public:
+    UriTemplate(const std::string& templateStr);
 
 
-        std::string expand(const NameValueCollection& values);
+    //std::string expand(const NameValueCollection& values);
 
-        //int extract(const std::string& uri, NameValueCollection* values);
+    //int extract(const std::string& uri, NameValueCollection* values);
 
-        //int extract(const std::vector<std::string>& pathSegments,
-        //    const NameValueCollection& queryParameters,
-        //    NameValueCollection* values) {
-        //}
+    //int extract(const std::vector<std::string>& pathSegments,
+    //    const NameValueCollection& queryParameters,
+    //    NameValueCollection* values) {
+    //}
 
-        bool matchPath(const std::vector<std::string>& pathSegments) {
-            if (pathSegments.size() != this->pathSegments.size()) {
-                return false;
-            }
-
-            int j = (int)this->pathSegments.size();
-            for (int i = 0; i < j; ++i) {
-                if (this->pathSegments[i].type == PATH_SEG_PARAM) {
-                    continue;
-                }
-                if (pathSegments[i].compare(this->pathSegments[i].name)) {
-                    return false;
-                }
-            }
-            return true;
+    bool matchPath(const std::vector<std::string>& pathSegments) const {
+        if (pathSegments.size() != this->pathSegments.size()) {
+            return false;
         }
 
-        int getFirstPathAliasSegmentIndex() const;
-        int getFirstPathParamSegmentIndex() const;
+        int j = (int)this->pathSegments.size();
 
-        const std::string& getLabelAlias() const;
-        const std::string& getParameterAlias(const std::string& parameter) const;
+        for (int i = 0; i < j; ++i) {
+            if (this->pathSegments[i].type == PATH_SEG_PARAM) {
+                continue;
+            }
 
-    private:
-        //path
-        std::vector<PathSegment> pathSegments;
+            if (pathSegments[i].compare(this->pathSegments[i].name)) {
+                return false;
+            }
+        }
 
-        //label
-        std::string label;
-        std::string labelAlias;
+        return true;
+    }
 
-        std::map<std::string, std::string> parameterAliases;
-    };
+    int getFirstPathAliasSegmentIndex() const;
+    int getFirstPathParamSegmentIndex() const;
 
-    class UriTemplates {
-    public:
+    const std::string& getLabelAlias() const;
+    const std::string& getParameterAlias(const std::string& parameter) const;
 
-    private:
-        std::vector<UriTemplate> uriTemplates;
-    };
-}}
+private:
+    //path
+    std::vector<PathSegment> pathSegments;
+
+    //label
+    std::string label;
+    std::string labelAlias;
+
+    std::map<std::string, std::string> parameterAliases;
+};
+
+}
+}
 
 #endif //#if !defined(CETTY_HTTP_URLTEMPLATE_H)
 

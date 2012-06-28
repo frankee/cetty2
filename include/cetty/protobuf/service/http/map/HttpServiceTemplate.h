@@ -24,6 +24,7 @@
 #include <cetty/http/CookieTemplate.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/SimpleTrie.h>
 
 namespace cetty {
 namespace protobuf {
@@ -38,8 +39,6 @@ using namespace cetty::handler::codec::http;
 // GET uri template
 class HttpServiceTemplate {
 public:
-    typedef std::vector<std::string> Alias;
-
     struct Parameter {
         enum Type {
             T_PATH   = 1,
@@ -47,41 +46,48 @@ public:
             T_COOKIE = 3
         };
 
+        bool isInPath() const { return type == T_PATH; }
+        bool isInQuery() const { return type == T_QUERY; }
+        bool isInCookie() const { return type == T_COOKIE; }
+
         int type;
         int index;
         std::string cookie;
-        std::string parameter;
+        std::string name;
     };
 
 public:
     HttpServiceTemplate();
 
-    bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const;
-
-    const std::string& getService() const;
-    const std::string& getMethod() const;
-
-    int getParameter(const Alias& alias, std::vector<Parameter*>* parameters) const;
-
-private:
-    void parseAlias(const std::map<std::string, std::string>& aliases) {
-        std::map<std::string, std::string>::const_iterator itr;
-
-        for (itr = aliases.begin(); itr != aliases.end(); ++itr) {
-            //Alias& alias = parameterAliases[itr->first];
-            //parseAlias(itr->second, &alias);
-        }
+    bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const {
+        return method == this->method && uriTemplate.matchPath(pathSegments);
     }
-    void parseAlias(const std::string& str, Alias* alias) {
-        if (alias) {
-            StringUtil::strsplit(str, '.', alias);
+
+    const std::string& getService() const { return service; }
+    const std::string& getMethod() const { return method; }
+
+    bool hasField(const std::string& field) const {
+        return trie.countPrefix(field) > 0;
+    }
+
+    const Parameter* getParameter(const std::string& field) const {
+        std::map<std::string, Parameter>::const_iterator itr = parameters.find(field);
+        if (itr != parameters.end()) {
+            return &(itr->second);
         }
+        return NULL;
     }
 
 private:
     HttpMethod method;
     UriTemplate uriTemplate;
     CookieTemplate cookieTemplate;
+
+    // parsed data.
+    std::string service;
+    std::string method;
+    SimpleTrie trie;
+    std::map<std::string, Parameter> parameters;
 };
 
 }

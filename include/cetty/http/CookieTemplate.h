@@ -17,16 +17,18 @@
  * under the License.
  */
 
-namespace cetty { namespace http { 
+namespace cetty {
+namespace http {
 
-    // [name:alias]={param:alias}:{:alias}
-    class CookieTemplate {
-    public:
-        CookieTemplate();
-    };
+// [name:alias]={}:{param:alias}:{:alias}
+class CookieTemplate {
+public:
+    CookieTemplate();
+};
 
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_HTTP_COOKIETEMPLATE_H)
 

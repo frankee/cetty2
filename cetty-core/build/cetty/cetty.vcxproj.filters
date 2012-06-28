@@ -75,6 +75,12 @@
     <Filter Include="service">
       <UniqueIdentifier>{393eaf8f-a722-4a93-bb42-034b3379b32d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="http">
+      <UniqueIdentifier>{fb45ad08-497f-48e2-a7c4-bd2c946180bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="http\service">
+      <UniqueIdentifier>{5754f83c-599e-482b-b099-6e34d9738660}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
@@ -451,6 +457,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\QueryStringEncoder.cpp">
       <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\http\CookieTemplate.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\http\UriTemplate.cpp">
+      <Filter>http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1104,6 +1116,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h">
       <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\http\CookieTemplate.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\http\UriTemplate.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\http\service\HttpMessageFilter.h">
+      <Filter>http\service</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

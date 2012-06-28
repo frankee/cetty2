@@ -1,6 +1,3 @@
-#if !defined(CETTY_HTTP_SERVICE_HTTPMESSAGEFILTER_H)
-#define CETTY_HTTP_SERVICE_HTTPMESSAGEFILTER_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,31 +14,10 @@
  * under the License.
  */
 
-#include <cetty/service/Filter.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/http/CookieTemplate.h>
 
 namespace cetty {
 namespace http {
-namespace service {
-
-using namespace cetty::service;
-using namespace cetty::handler::codec::http;
-
-class HttpMessageFilter
-        : public cetty::service::Filter<HttpRequestPtr, HttpResponsePtr> {
-public:
-
-protected:
-    virtual HttpRequestPtr filterReq(const HttpRequestPtr& req);
-    virtual HttpResponsePtr filterRep(const HttpResponsePtr& rep);
-};
 
 }
 }
-}
-
-#endif //#if !defined(CETTY_HTTP_SERVICE_HTTPMESSAGEFILTER_H)
-
-// Local Variables:
-// mode: c++
-// End:

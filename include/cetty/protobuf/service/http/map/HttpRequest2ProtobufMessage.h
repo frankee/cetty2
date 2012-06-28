@@ -22,9 +22,10 @@
 #include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
 
 namespace google {
-    namespace protobuf {
-        class Message;
-    }
+namespace protobuf {
+class Message;
+class FieldDescriptor;
+}
 }
 
 namespace cetty {
@@ -36,6 +37,7 @@ namespace map {
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 using google::protobuf::Message;
+using google::protobuf::FieldDescriptor;
 
 class HttpRequest2ProtobufMessage {
 public:
@@ -46,7 +48,14 @@ public:
     ProtobufServiceMessagePtr getProtobufMessage(const HttpRequestPtr& request);
 
 private:
-    int parse(const HttpServiceTemplate& tmpl, const HttpRequestPtr& request, Message* message);
+    bool parseMessage(const HttpServiceTemplate& tmpl,
+                      const HttpRequestPtr& request,
+                      Message* message);
+
+    bool parseField(const HttpServiceTemplate& tmpl,
+                    const HttpRequestPtr& request,
+                    const FieldDescriptor* field,
+                    Message* message);
 
 private:
     ServiceRequestMapperPtr templates;

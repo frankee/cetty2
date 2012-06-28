@@ -200,6 +200,8 @@
     <ClCompile Include="..\..\src\cetty\handler\timeout\TimeoutException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\http\CookieTemplate.cpp" />
+    <ClCompile Include="..\..\src\cetty\http\UriTemplate.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LoggerHelperPrivate.cpp" />
     <ClCompile Include="..\..\src\cetty\util\CharsetUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
@@ -346,6 +348,9 @@
     <ClInclude Include="..\..\..\include\cetty\handler\execution\ExecutionHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\execution\OrderedServicePoolExecutor.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\execution\ServicePoolExecutor.h" />
+    <ClInclude Include="..\..\..\include\cetty\http\CookieTemplate.h" />
+    <ClInclude Include="..\..\..\include\cetty\http\service\HttpMessageFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\http\UriTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h" />

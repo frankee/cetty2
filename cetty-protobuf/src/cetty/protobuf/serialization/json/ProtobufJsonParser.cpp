@@ -6,7 +6,6 @@
 
 namespace cetty { namespace handler { namespace rpc { namespace protobuf { 
 
-
 void ProtobufJsonParser::parseFromString(const std::string& str, google::protobuf::Message* message) {
     if (str.empty() || !message) return;
 
