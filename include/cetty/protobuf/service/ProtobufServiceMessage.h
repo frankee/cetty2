@@ -79,6 +79,10 @@ public:
         return payload;
     }
 
+    ConstMessagePtr getConstPayload() const {
+        return payload.get();
+    }
+
     void setPayload(const MessagePtr& message) {
         this->payload = message;
     }

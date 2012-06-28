@@ -54,8 +54,10 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
+#include <boost/bind.hpp>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufClientService.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/service/TypeCastServiceFuture.h>
 
 namespace google {
@@ -123,7 +125,11 @@ public:
                    cetty::util::static_pointer_cast<MessagePtr::element_type const>(request),
                    ProtobufServiceFuturePtr(
                        new TypeCastServiceFuture<ProtobufServiceMessagePtr, ResponseT>(future,
-                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<ResponseT>, this, _1, _2))));
+                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<ResponseT>, this, _1))));
+    }
+
+    const ProtobufClientServicePtr& getService() {
+        return service;
     }
 
 private:

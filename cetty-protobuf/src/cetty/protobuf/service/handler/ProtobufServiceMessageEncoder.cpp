@@ -33,7 +33,7 @@ using namespace cetty::protobuf::service::proto;
 
 
 ChannelHandlerPtr ProtobufServiceMessageEncoder::clone() {
-    return ChannelHandlerPtr(this);
+    return ChannelHandlerPtr(new ProtobufServiceMessageEncoder);
 }
 
 std::string ProtobufServiceMessageEncoder::toString() const {

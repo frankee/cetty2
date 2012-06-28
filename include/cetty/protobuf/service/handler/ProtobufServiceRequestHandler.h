@@ -18,13 +18,17 @@
  */
 
 #include <cetty/service/ServiceRequestHandler.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
-//typedef ServiceRequestHandler<>
+using namespace cetty::service;
+using namespace cetty::protobuf::service;
+
+typedef ServiceRequestHandler<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceRequestHandler;
 
 }
 }

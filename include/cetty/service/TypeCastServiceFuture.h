@@ -30,7 +30,9 @@ public:
     typedef boost::function1<SpecialT, const GeneralT&> TypeCastFunctor;
 
 public:
-    TypeCastServiceFuture(const SpecialTypePtr& future, const TypeCastFunctor& functor);
+    TypeCastServiceFuture(const SpecialTypePtr& future, const TypeCastFunctor& functor)
+        : future(future), typecastFunctor(functor) {}
+
     virtual ~TypeCastServiceFuture() {}
 
     virtual bool isCancelled() const {
@@ -68,7 +70,7 @@ public:
 
     virtual bool setFailure(const GeneralT& response, const Exception& cause) {
         this->setResponse(response);
-        return future->setFailure(cause)
+        return future->setFailure(cause);
     }
 
     virtual void setResponse(const GeneralT& response) {

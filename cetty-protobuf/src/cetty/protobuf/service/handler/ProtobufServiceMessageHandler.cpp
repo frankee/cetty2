@@ -71,7 +71,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, 
 
         if (method) {
             service->CallMethod(method,
-                                msg->getPayload(),
+                                msg->getConstPayload(),
                                 MessagePtr(),
                                 boost::bind(&ProtobufServiceMessageHandler::doneCallback,
                                             this,

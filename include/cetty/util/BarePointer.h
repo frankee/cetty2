@@ -28,6 +28,8 @@
 //  See http://www.boost.org/libs/smart_ptr/intrusive_ptr.html for documentation.
 //
 
+#include <boost/assert.hpp>
+
 namespace cetty {
 namespace util {
 
@@ -99,7 +101,19 @@ public:
     }
 
     // implicit conversion to "bool"
-#include <boost/smart_ptr/detail/operator_bool.hpp>
+//#include <boost/smart_ptr/detail/operator_bool.hpp>
+    typedef T * this_type::*unspecified_bool_type;
+
+    operator unspecified_bool_type() const // never throws
+    {
+        return px == 0? 0: &this_type::px;
+    }
+
+    // operator! is redundant, but some compilers need it
+    bool operator! () const // never throws
+    {
+        return px == 0;
+    }
 
     void swap(BarePointer& rhs) {
         T* tmp = px;
@@ -170,40 +184,6 @@ template<class T, class U> BarePointer<T> const_pointer_cast(BarePointer<U> cons
 template<class T, class U> BarePointer<T> dynamic_pointer_cast(BarePointer<U> const& p) {
     return dynamic_cast<T*>(p.get());
 }
-
-// operator<<
-
-#if !defined(BOOST_NO_IOSTREAM)
-
-#if defined(BOOST_NO_TEMPLATED_IOSTREAMS) || ( defined(__GNUC__) &&  (__GNUC__ < 3) )
-
-template<class Y> std::ostream& operator<< (std::ostream& os, BarePointer<Y> const& p) {
-    os << p.get();
-    return os;
-}
-
-#else
-
-// in STLport's no-iostreams mode no iostream symbols can be used
-#ifndef _STLP_NO_IOSTREAMS
-
-# if defined(BOOST_MSVC) && BOOST_WORKAROUND(BOOST_MSVC, < 1300 && __SGI_STL_PORT)
-// MSVC6 has problems finding std::basic_ostream through the using declaration in namespace _STL
-using std::basic_ostream;
-template<class E, class T, class Y> basic_ostream<E, T>& operator<< (basic_ostream<E, T>& os, BarePointer<Y> const& p)
-# else
-template<class E, class T, class Y> std::basic_ostream<E, T>& operator<< (std::basic_ostream<E, T>& os, BarePointer<Y> const& p)
-# endif
-{
-    os << p.get();
-    return os;
-}
-
-#endif // _STLP_NO_IOSTREAMS
-
-#endif // __GNUC__ < 3
-
-#endif // !defined(BOOST_NO_IOSTREAM)
 
 // hash_value
 

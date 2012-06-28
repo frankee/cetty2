@@ -32,9 +32,8 @@ using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
 
-
 ChannelHandlerPtr ProtobufServiceMessageDecoder::clone() {
-    return ChannelHandlerPtr(this);
+    return ChannelHandlerPtr(new ProtobufServiceMessageDecoder);
 }
 
 std::string ProtobufServiceMessageDecoder::toString() const {

@@ -18,6 +18,10 @@
  */
 
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/channel/MessageEvent.h>
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace service {
@@ -25,13 +29,17 @@ namespace service {
 using namespace cetty::channel;
 
 template<typename RequestT, typename ResponseT>
-class OutstandingCall {
+class OutstandingCall : public cetty::util::ReferenceCounter<OutstandingCall<RequestT, ResponseT>, int> {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
 
 public:
     RequestT request;
     ServiceFuturePtr future;
+
+public:
+    OutstandingCall(const RequestT& request, const ServiceFuturePtr& future)
+        : request(request), future(future) {}
 };
 
 template<typename RequestT, typename ResponseT>
@@ -39,18 +47,19 @@ class ServiceRequestHandler : public cetty::channel::SimpleChannelHandler {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
     typedef OutstandingCall<RequestT, ResponseT> OutstandingMessage;
+    typedef boost::intrusive_ptr<OutstandingCall<RequestT, ResponseT> > OutstandingCallPtr;
 
 public:
     ServiceRequestHandler() {}
     virtual ~ServiceRequestHandler() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        ResponseT& response = e.getMessage().value();
+        ResponseT& response = e.getMessage().value<ResponseT>();
 
         if (response) {
             //boost::int64_t id = message->id();
 
-            OutstandingMessage& out = outMessages.front();
+            const OutstandingCallPtr& out = outMessages.front();
 #if 0
             {
                 std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
@@ -62,8 +71,8 @@ public:
             }
 #endif
 
-            if (out.future) {
-                out.future->setSuccess(response);
+            if (out->future) {
+                out->future->setSuccess(response);
             }
 
             outMessages.pop_front();
@@ -74,7 +83,7 @@ public:
     }
 
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        OutstandingMessage msg = e.getMessage().value<OutstandingMessage>();
+        OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingMessage>();
         outMessages.push_back(msg);
         //Channels::write(ctx, )
         //ctx.sendDownstream(MessageEvent());
@@ -89,7 +98,7 @@ public:
     }
 
 private:
-    std::deque<OutstandingMessage> outMessages;
+    std::deque<OutstandingCallPtr> outMessages;
 };
 
 }

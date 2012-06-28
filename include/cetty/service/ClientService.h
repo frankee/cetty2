@@ -18,26 +18,41 @@
  */
 
 #include <vector>
-#include <cetty/channel/AbstractChannel.h>
+//#include <cetty/channel/AbstractChannel.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/util/ReferenceCounter.h>
+#include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
 namespace service {
 
+using namespace cetty::channel;
+
 template <typename RequestT, typename ResponseT>
-class ClientService : public cetty::channel::AbstractChannel {
+class ClientService : public cetty::util::ReferenceCounter<ClientService<RequestT, ResponseT>, int> {
 public:
     typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
+    typedef boost::intrusive_ptr<OutstandingCall<RequestT, ResponseT> > OutstandingCallPtr;
 
 public:
-    ClientService();
-    virtual ~ClientService();
+    ClientService(const ChannelPtr& channel) : channel(channel) {}
+    virtual ~ClientService() {}
+
+    void setChannel(const ChannelPtr& channel) {
+        this->channel = channel;
+    }
 
 public:
     void call(const RequestT& request, const ServiceFuturePtr& future) {
-        OutstandingCall<RequestT, ResponseT> outstanding = { request, future };
-        write(ChannelMessage(outstanding));
+        OutstandingCallPtr outstanding(new OutstandingCall<RequestT, ResponseT>(request, future));
+        channel->write(ChannelMessage(outstanding));
     }
+
+private:
+    ChannelPtr channel;
 };
 
 }
