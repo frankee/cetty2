@@ -32,7 +32,7 @@ bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wire
         return false;
     }
 
-    boost::int64_t tag = decodeVarint(buffer);
+    int tag = decodeVarint(buffer);
     *wireType = getTagWireType(tag);
     *fieldNumber = getTagFieldNumber(tag);
 
@@ -51,10 +51,11 @@ int ProtobufMessageCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
     return buffer->readInt();
 }
 
-boost::int64_t ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
-    uint8_t temp;
-    boost::int64_t ret;
+int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
+    int temp = 0;
+    int ret = 0;
     int i = 0;
+	int off = 0;
     while (true) {
         temp = buffer->readByte();
 
@@ -65,7 +66,9 @@ boost::int64_t ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer
             ++i;
         }
         else {
-            ret |= temp << (7 * i);
+			off = 7*i;
+			ret = ret + (temp<<off);
+            //ret = ret + (temp<<0);
             //达到最后一个数据，并且是最高位
             break;
         }
@@ -83,26 +86,29 @@ void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,int dat
 
 void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum,int type) {
     int tag = (fieldNum << 3) | type;
-    encodeVarint(buffer, tag);
+    ProtobufMessageCodec::encodeVarint(buffer, tag);
 }
 
-void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, boost::int64_t val) {
+void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {
     boost::uint8_t buf[10];
     int varintSize = 0;
 
     do {
         uint8_t byte = val & 0x7f;
-        val >>= 7;
-
-        if (val) { byte |= 0x80; }
-
         buf[varintSize] = byte;
-        varintSize++;
+		varintSize++;
+
+        if (val>>7) 
+		{
+			byte |= 0x80;
+		}
+	    val >>= 7;
+		
     }
     while (val);
 
 	//write to buffer
-	Array array((char*)(buf-varintSize),varintSize);
+	Array array((char*)buf,varintSize);
 	buffer->writeBytes(array);
 }
 

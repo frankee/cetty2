@@ -21,13 +21,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufService", "..\..\..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceGenerator", "..\..\..\cetty-protobuf\build\ProtobufServiceGenerator\ProtobufServiceGenerator.vcxproj", "{75A24313-B5BB-489C-80E4-B22C18BEEC0F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceTest", "..\..\..\cetty-protobuf\build\ProtobufServiceTest\test.vcxproj", "{954741AF-9629-4B90-9172-3D07A893B2E0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanTest", "..\..\..\cetty-gearman\build\GearmanTest\GearmanTest.vcxproj", "{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceTest", "..\..\..\cetty-protobuf\build\ProtobufServiceTest2\ProtobufServiceTest2.vcxproj", "{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8} = {F0FE3882-462B-48CC-8AB7-8363E8F20BE8}
 		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B} = {5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanTest", "..\..\..\cetty-gearman\build\GearmanTest\GearmanTest.vcxproj", "{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,14 +63,14 @@ Global
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Debug|Win32.Build.0 = Debug|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.ActiveCfg = Release|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.Build.0 = Release|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Debug|Win32.Build.0 = Debug|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Release|Win32.ActiveCfg = Release|Win32
-		{954741AF-9629-4B90-9172-3D07A893B2E0}.Release|Win32.Build.0 = Release|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Debug|Win32.Build.0 = Debug|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Release|Win32.ActiveCfg = Release|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Release|Win32.Build.0 = Release|Win32
+		{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}.Debug|Win32.Build.0 = Debug|Win32
+		{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}.Release|Win32.ActiveCfg = Release|Win32
+		{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

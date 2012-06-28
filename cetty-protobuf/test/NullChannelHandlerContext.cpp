@@ -1,4 +1,4 @@
-#include <cetty/protobuf/test/NullChannelHandlerContext.h>
+#include <NullChannelHandlerContext.h>
 
 NullChannelContext* NullChannelContext::nullChannelContext=NULL;
 

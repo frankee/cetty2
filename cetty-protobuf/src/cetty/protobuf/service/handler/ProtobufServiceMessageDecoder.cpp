@@ -94,12 +94,12 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
 
     while (buffer->readable()) {
-        int wireType;
-        int fieldNum;
-        int fieldLength;
-        int64_t type;
-        int64_t id;
-        int64_t error;
+        int wireType=0;
+        int fieldNum=0;
+        int fieldLength=0;
+        int64_t type=0;
+        int64_t id=0;
+        int64_t error=0;
 
         if (ProtobufMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
@@ -116,6 +116,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 
             case 2:
                 id = ProtobufMessageCodec::decodeFixed64(buffer);
+				id = ChannelBuffers::swapLong(id);
                 serviceMessage->set_id(id);
                 break;
 

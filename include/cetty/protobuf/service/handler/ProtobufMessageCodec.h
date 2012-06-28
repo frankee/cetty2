@@ -54,13 +54,13 @@ public:
 
     static boost::int64_t decodeFixed64(const ChannelBufferPtr& buffer);
     static int decodeFixed32(const ChannelBufferPtr& buffer);
-    static boost::int64_t decodeVarint(const ChannelBufferPtr& buffer);
+    static int decodeVarint(const ChannelBufferPtr& buffer);
 
     static void encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data);
     static void encodeFixed32(const ChannelBufferPtr& buffer, int data);
 
     static void encodeTag(const ChannelBufferPtr& buffer, int fieldNum, int type);
-    static void encodeVarint(const ChannelBufferPtr& buffer, boost::int64_t vint);
+    static void encodeVarint(const ChannelBufferPtr& buffer, int val);
 
 private:
 
