@@ -1,0 +1,7 @@
+
+
+message CodecTest {
+	optional int32 id = 1;
+	optional int64 f  = 2;
+	optional string content = 3;
+}
