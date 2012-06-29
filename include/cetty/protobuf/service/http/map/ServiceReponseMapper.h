@@ -43,11 +43,22 @@ public:
 
 public:
     ServiceReponseMapper();
+    ServiceReponseMapper(const std::string& file);
+    ServiceReponseMapper(const YAML::Node& node);
 
-    const MapValue* match(const std::string& service, const std::string& method);
+    int configure(const std::string& conf);
+    int configure(const YAML::Node& node);
+    int configureFromFile(const std::string& file);
 
-    static void setHttpHeaders(const MapValue& value, const HttpResponsePtr& response);
-    static void setHttpContent(const MapValue& value, const HttpResponsePtr& response);
+    const MapValue* match(const std::string& service, const std::string& method) const;
+
+    static void setHttpHeaders(const MapValue& value, const HttpResponsePtr& response) {
+        std::map<std::string, std::string>::const_iterator itr = value.headers.begin();
+        std::map<std::string, std::string>::const_iterator end = value.headers.end();
+        for (; itr != end; ++i) {
+            response->setHeader(itr->first, itr->second);
+        }
+    }
 
 private:
     std::map<MapKey, MapValue> maps;

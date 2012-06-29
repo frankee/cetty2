@@ -17,42 +17,86 @@
  * under the License.
  */
 
+#include <boost/assert.hpp>
 #include <cetty/util/StringUtil.h>
 
 namespace cetty { namespace util {
 
 class SimpleTrieNode {
+private:
+    static const int MAX_CHAR_COUNT = 30;
+    static const int ALPHABET_COUNT = 26;
+
 public:
     int words;
     int prefixes;
-    SimpleTrieNode* references[26];
+    // . - _ ?
+    SimpleTrieNode* references[MAX_CHAR_COUNT];
+    void* data;
 
-    SimpleTrieNode() : words(0), prefixes(0) {
-        references = {0};
+    SimpleTrieNode() : words(0), prefixes(0), data(NULL) {
+        std::memset(references, 0, sizeof(references));
     }
 
     ~SimpleTrieNode() {
+        for (int i = 0; i < MAX_CHAR_COUNT; ++i) {
+            if (references[i]) {
+                delete references[i];
+                references[i] = NULL;
+            }
+        }
+    }
 
+    void freeData() {
+        for (int i = 0; i < MAX_CHAR_COUNT; ++i) {
+            if (references[i]) {
+                references[i]->freeData();
+            }
+        }
+
+        if (data) {
+            delete data;
+            data = NULL;
+        }
     }
 
     bool hasReferenceTo(char c) {
-        return references[c - 'a'] != NULL;
+        return references[getIndex(c)] != NULL;
+    }
+
+    static inline int getIndex(int c) {
+        if (c == 46) { // '.'
+            return ALPHABET_COUNT;
+        }
+        else if (c > 96 && c < 123) { // 'a~z'
+            return c - 97;
+        }
+        else {
+            return MAX_CHAR_COUNT - 1;
+        }
     }
 };
 
-class SimpleTrie{
+class SimpleTrie {
 public:
     SimpleTrie();
-    void addWord(const std::string& word);
+
+    void addKey(const std::string& key, void* value);
+    void addKey(const std::string& key);
+
+    void* getValue(const std::string& key) const;
+    void freeValue() {
+        root.freeData();
+    }
+
     int countPrefix(const std::string& prefix) const;
-    int countWord(const std::string& word) const;
+    int countKey(const std::string& key) const;
 
 private:
-    void addWord(SimpleTrieNode &n, std::string* word);
+    void addKey(SimpleTrieNode &n, std::string* key, void* data);
     int countPrefix(const SimpleTrieNode &n, std::string* prefix) const;
-    int countWord(const SimpleTrieNode &n, std::string* word) const;
-
-    int getIndex(char c) { return c -'a'; }
+    
+    const SimpleTrieNode* getLeafNode(const SimpleTrieNode &n, std::string* word) const;
 
 private:
     SimpleTrieNode root;
@@ -60,38 +104,42 @@ private:
 
 SimpleTrie::SimpleTrie() {}
 
-void SimpleTrie::addWord(SimpleTrieNode &n, std::string* word){
+void SimpleTrie::addKey(SimpleTrieNode &n, std::string* word, void* data) {
     BOOST_ASSERT(word);
     if (word->length() == 0){
         n.words += 1;
+        n.data = data;
         return;
     }
 
     n.prefixes += 1;
     char first = word->front();
-    int index = getIndex(first);
+    int index = SimpleTrieNode::getIndex(first);
     if (!n.hasReferenceTo(first)){
         n.references[index] = new SimpleTrieNode();
     }
 
-    addWord(*n.references[index], word->erase(0,1));
+    word->erase(0,1);
+    addKey(*n.references[index], word, data);
 }
 
-int SimpleTrie::countWord(const SimpleTrieNode &n, std::string* word) const {
-    BOOST_ASSERT(word);
+const SimpleTrieNode* SimpleTrie::getLeafNode(const SimpleTrieNode &n,
+    std::string* word) const {
+        BOOST_ASSERT(word);
 
-    if(word->length() == 0){
-        return n.words;
-    }
+        if(word->length() == 0){
+            return &n;
+        }
 
-    char first = word[0];
-    int index = getIndex(first);
-    if(n.references[index] == NULL){
-        return 0;
-    }
-    else {
-        return countWord(*n.references[index], word->erase(0,1));
-    }
+        char first = word->front();
+        int index = SimpleTrieNode::getIndex(first);
+        if(n.references[index] == NULL){
+            return NULL;
+        }
+        else {
+            word->erase(0,1);
+            return getLeafNode(*n.references[index], word);
+        }
 }
 
 int SimpleTrie::countPrefix(const SimpleTrieNode &n, std::string* word) const {
@@ -101,20 +149,27 @@ int SimpleTrie::countPrefix(const SimpleTrieNode &n, std::string* word) const {
         return n.prefixes;
     }
 
-    char first = word[0];
-    int index = getIndex(first);
+    char first = word->front();
+    int index = SimpleTrieNode::getIndex(first);
     if(n.references[index] == NULL){
         return 0;
     }
     else {
-        return countPrefix(*n.references[index], word->erase(0, 1));
+        word->erase(0, 1);
+        return countPrefix(*n.references[index], word);
     }
 }
 
-void SimpleTrie::addWord(const std::string& word) {
+void SimpleTrie::addKey(const std::string& word) {
     std::string lower(word);
     StringUtil::strtolower(&lower);
-    addWord(root, &lower);
+    addKey(root, &lower, NULL);
+}
+
+void SimpleTrie::addKey(const std::string& word, void* data) {
+    std::string lower(word);
+    StringUtil::strtolower(&lower);
+    addKey(root, &lower, data);
 }
 
 int SimpleTrie::countPrefix(const std::string& prefix) const {
@@ -123,10 +178,20 @@ int SimpleTrie::countPrefix(const std::string& prefix) const {
     return countPrefix(root, &lower);
 }
 
-int SimpleTrie::countWord(const std::string& word) const {
+int SimpleTrie::countKey(const std::string& word) const {
     std::string lower;
     StringUtil::strtolower(&lower);
-    return countWord(root, &lower);
+
+    const SimpleTrieNode* node = getLeafNode(root, &lower);
+    return node ? node->words : 0;
+}
+
+void* SimpleTrie::getValue(const std::string& key) const {
+    std::string lower;
+    StringUtil::strtolower(&lower);
+
+    const SimpleTrieNode* node = getLeafNode(root, &lower);
+    return node ? node->data : 0;
 }
 
 }}

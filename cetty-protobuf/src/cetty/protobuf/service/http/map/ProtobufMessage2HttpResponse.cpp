@@ -27,13 +27,18 @@ namespace map {
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
-HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(const ProtobufServiceMessagePtr& message) {
+HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
+    const HttpRequestPtr& req,
+    const ProtobufServiceMessagePtr& message) {
     const ServiceReponseMapper::MapValue* v = mapper.match(message->getService(), message->getMethod());
 
     if (v) {
         HttpResponsePtr response(new HttpResponse);
         ServiceReponseMapper::setHttpHeaders(*v, response);
-        ServiceReponseMapper::setHttpContent(*v, response);
+
+
+
+        //ServiceReponseMapper::setHttpContent(*v, response);
         return response;
     }
 }

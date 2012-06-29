@@ -59,7 +59,7 @@ public:
 
 protected:
     virtual ReqOutT filterReq(const ReqInT& req) = 0;
-    virtual RepOutT filterRep(const RepInT& rep) = 0;
+    virtual RepOutT filterRep(const ReqInT& req, const RepInT& rep) = 0;
 };
 
 }

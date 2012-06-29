@@ -113,14 +113,14 @@ public:
      * @param str the string to convert.
      * @return the string itself.
      */
-    std::string* strtoupper(std::string* str);
+    static std::string* strtoupper(std::string* str);
 
     /**
      * Convert the letters of a string into lower case.
      * @param str the string to convert.
      * @return the string itself.
      */
-    std::string* strtolower(std::string* str);
+    static std::string* strtolower(std::string* str);
 
     /**
      *

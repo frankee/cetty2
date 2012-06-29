@@ -141,7 +141,7 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
         return parseMessage(tmpl, request, msg);
     }
 
-    HttpServiceTemplate::Parameter* parameter = tmpl.getParameter(field->full_name());
+    const HttpServiceTemplate::Parameter* parameter = tmpl.getParameter(field->full_name());
     NameValueCollection::ConstIterator beginParam;
     NameValueCollection::ConstIterator endParam;
 
@@ -156,11 +156,11 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
             const std::string& value = itr->second;
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-                reflection->AddInt32(message, field, StringUtil::atoi(value));
+                reflection->AddInt32(message, field, std::atoi(value));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-                reflection->AddInt64(message, field, StringUtil::atoi(value));
+                reflection->AddInt64(message, field, std::atoi(value));
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:

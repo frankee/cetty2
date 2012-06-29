@@ -33,6 +33,12 @@ using namespace cetty::handler::codec::http;
 class ServiceRequestMapper : public cetty::util::ReferenceCounter<ServiceRequestMapper> {
 public:
     ServiceRequestMapper();
+    ServiceRequestMapper(const std::string& file);
+    ServiceRequestMapper(const YAML::Node& node);
+
+    int configure(const std::string& conf);
+    int configure(const YAML::Node& node);
+    int configureFromFile(const std::string& file);
 
     HttpServiceTemplate* match(const HttpMethod& method, const std::vector<std::string>& pathSegments) {
         std::size_t j = serviceTemplates.size();

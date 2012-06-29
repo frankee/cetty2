@@ -34,7 +34,8 @@ class ProtobufMessage2HttpResponse {
 public:
     ProtobufMessage2HttpResponse();
 
-    HttpResponsePtr getHttpResponse(const ProtobufServiceMessagePtr& message);
+    HttpResponsePtr getHttpResponse(const HttpRequestPtr& req,
+        const ProtobufServiceMessagePtr& message);
 
 private:
     ServiceReponseMapper mapper;

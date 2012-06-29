@@ -60,7 +60,7 @@ public:
     HttpServiceTemplate();
 
     bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const {
-        return method == this->method && uriTemplate.matchPath(pathSegments);
+        return method == httpMethod && uriTemplate.matchPath(pathSegments);
     }
 
     const std::string& getService() const { return service; }
@@ -71,15 +71,12 @@ public:
     }
 
     const Parameter* getParameter(const std::string& field) const {
-        std::map<std::string, Parameter>::const_iterator itr = parameters.find(field);
-        if (itr != parameters.end()) {
-            return &(itr->second);
-        }
-        return NULL;
+        void* data = trie.getValue(field);
+        return data ? (const Parameter*)data : NULL;
     }
 
 private:
-    HttpMethod method;
+    HttpMethod httpMethod;
     UriTemplate uriTemplate;
     CookieTemplate cookieTemplate;
 
@@ -87,7 +84,6 @@ private:
     std::string service;
     std::string method;
     SimpleTrie trie;
-    std::map<std::string, Parameter> parameters;
 };
 
 }

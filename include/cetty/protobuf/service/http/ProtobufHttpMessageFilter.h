@@ -42,7 +42,8 @@ public:
 
 protected:
     virtual ProtobufServiceMessagePtr filterReq(const HttpRequestPtr& req);
-    virtual HttpResponsePtr filterRep(const ProtobufServiceMessagePtr& rep);
+    virtual HttpResponsePtr filterRep(const HttpRequestPtr& req,
+        const ProtobufServiceMessagePtr& rep);
 
 private:
     HttpRequest2ProtobufMessage http2proto;
