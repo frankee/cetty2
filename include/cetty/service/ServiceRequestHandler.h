@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <boost/cstdint.hpp>
 #include <cetty/channel/SimpleChannelHandler.h>
 #include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelMessage.h>
@@ -50,14 +51,15 @@ public:
     typedef boost::intrusive_ptr<OutstandingCall<RequestT, ResponseT> > OutstandingCallPtr;
 
 public:
-    ServiceRequestHandler() {}
+    ServiceRequestHandler() : id(0) {}
     virtual ~ServiceRequestHandler() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
         ResponseT& response = e.getMessage().value<ResponseT>();
 
         if (response) {
-            //boost::int64_t id = message->id();
+            // TODO: using template traits to define the pointer or object.
+            boost::int64_t id = response->getId();
 
             const OutstandingCallPtr& out = outMessages.front();
 #if 0
@@ -84,6 +86,7 @@ public:
 
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
         OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingMessage>();
+        msg->request->setId(++id);
         outMessages.push_back(msg);
         Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
     }
@@ -97,6 +100,7 @@ public:
     }
 
 private:
+    boost::int64_t id;
     std::deque<OutstandingCallPtr> outMessages;
 };
 
