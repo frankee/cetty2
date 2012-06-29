@@ -464,6 +464,9 @@
     <ClCompile Include="..\..\src\cetty\http\UriTemplate.cpp">
       <Filter>http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -1125,6 +1128,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\http\service\HttpMessageFilter.h">
       <Filter>http\service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

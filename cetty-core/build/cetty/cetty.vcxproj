@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp" />
     <ClCompile Include="..\..\src\cetty\util\SimpleString.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp" />
     <ClCompile Include="..\..\src\cetty\util\StringUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\util\TimerFactory.cpp" />
     <ClCompile Include="..\..\src\cetty\util\TimeUnit.cpp" />
@@ -364,6 +365,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TimerFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h" />
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioAcceptedSocketChannel.h" />

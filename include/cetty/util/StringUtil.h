@@ -20,7 +20,8 @@
 #include <string>
 #include <vector>
 #include <stdarg.h>
-#include "cetty/util/Character.h"
+#include <boost/cstdint.hpp>
+#include <cetty/util/Character.h>
 
 namespace cetty {
 namespace util {
@@ -125,7 +126,9 @@ public:
     /**
      *
      */
-    static inline boost::int64_t atoi(const std::string& str) { return atoi(str.c_str()); }
+    static inline boost::int64_t atoi(const std::string& str) {
+        return StringUtil::atoi(str.c_str());
+    }
 
     /**
      * Convert a decimal string to an integer.
@@ -138,7 +141,9 @@ public:
      *
      *
      */
-    static inline double atof(const std::string& str) { return atof(str.c_str()); }
+    static inline double atof(const std::string& str) {
+        return StringUtil::atof(str.c_str());
+    }
 
     /**
      * Convert a decimal string to a real number.

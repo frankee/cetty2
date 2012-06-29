@@ -14,6 +14,7 @@
  * under the License.
  */
 
+#include <limits>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
 #include <cetty/util/StringUtil.h>
@@ -305,7 +306,7 @@ double StringUtil::atof(const char* str) {
     if ((str[0] == 'i' || str[0] == 'I') && (str[1] == 'n' || str[1] == 'N') &&
         (str[2] == 'f' || str[2] == 'F')) return HUGE_VAL * sign;
     if ((str[0] == 'n' || str[0] == 'N') && (str[1] == 'a' || str[1] == 'A') &&
-        (str[2] == 'n' || str[2] == 'N')) return nan();
+        (str[2] == 'n' || str[2] == 'N')) return std::numeric_limits<double>::quiet_NaN();
     long double num = 0;
     int32_t col = 0;
     while (*str != '\0') {

@@ -32,9 +32,9 @@ ProtobufServiceMessagePtr ProtobufHttpMessageFilter::filterReq(const HttpRequest
 }
 
 HttpResponsePtr ProtobufHttpMessageFilter::filterRep(const HttpRequestPtr& req,
-    const ProtobufServiceMessagePtr& rep) {
+        const ProtobufServiceMessagePtr& rep) {
 
-    return proto2http.getHttpResponse(rep);
+    return proto2http.getHttpResponse(req, rep);
 }
 
 }

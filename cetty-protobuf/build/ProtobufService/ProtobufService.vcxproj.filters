@@ -128,5 +128,14 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp">
       <Filter>protobuf\handler</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpServiceTemplate.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceReponseMapper.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

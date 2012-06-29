@@ -21,6 +21,10 @@
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 
+namespace YAML {
+    class Node;
+}
+
 namespace cetty {
 namespace protobuf {
 namespace service {
@@ -52,13 +56,7 @@ public:
 
     const MapValue* match(const std::string& service, const std::string& method) const;
 
-    static void setHttpHeaders(const MapValue& value, const HttpResponsePtr& response) {
-        std::map<std::string, std::string>::const_iterator itr = value.headers.begin();
-        std::map<std::string, std::string>::const_iterator end = value.headers.end();
-        for (; itr != end; ++i) {
-            response->setHeader(itr->first, itr->second);
-        }
-    }
+    static void setHttpHeaders(const MapValue& value, const HttpResponsePtr& response);
 
 private:
     std::map<MapKey, MapValue> maps;

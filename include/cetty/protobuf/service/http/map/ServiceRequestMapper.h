@@ -22,6 +22,10 @@
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/protobuf/service/http/map/HttpServiceTemplate.h>
 
+namespace YAML {
+    class Node;
+}
+
 namespace cetty {
 namespace protobuf {
 namespace service {

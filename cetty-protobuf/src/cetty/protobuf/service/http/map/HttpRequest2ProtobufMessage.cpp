@@ -16,6 +16,7 @@
 
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>
 
+#include <cstdlib>
 #include <boost/assert.hpp>
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
@@ -156,11 +157,11 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
             const std::string& value = itr->second;
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-                reflection->AddInt32(message, field, std::atoi(value));
+                reflection->AddInt32(message, field, std::atoi(value.c_str()));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-                reflection->AddInt64(message, field, std::atoi(value));
+                reflection->AddInt64(message, field, std::atoi(value.c_str()));
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
@@ -181,11 +182,11 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
 
         switch (field->cpp_type()) {
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-            reflection->SetInt32(message, field, StringUtil::atoi(value));
+            reflection->SetInt32(message, field, std::atoi(value.c_str()));
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-            reflection->SetInt64(message, field, StringUtil::atoi(value));
+            reflection->SetInt64(message, field, std::atoi(value.c_str()));
             break;
 
         case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
