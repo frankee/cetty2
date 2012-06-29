@@ -31,9 +31,9 @@
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
+}
 }
 
 namespace cetty {
@@ -41,35 +41,35 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-    using namespace cetty::logging;
+using namespace cetty::logging;
 
-  /**
-   * 
-   *
-   */
+/**
+ *
+ *
+ */
 class AsioService : public cetty::util::ReferenceCounter<AsioService> {
 public:
-  AsioService(int index) : poolIndex(index) {}
+    AsioService(int index) : poolIndex(index) {}
 
-  //AsioServicePool& servicePool();
-  //const AsioServicePool& servicePool() const;
+    //AsioServicePool& servicePool();
+    //const AsioServicePool& servicePool() const;
 
-  int getId() const { return poolIndex; }
+    int getId() const { return poolIndex; }
 
-  boost::asio::io_service& service() { return ioService; }
-  operator boost::asio::io_service& () { return ioService; }
- 
-  void setThreadId(const boost::thread::id& id) { threadId = id; }
-  const boost::thread::id& getThreadId() const { return threadId; }
+    boost::asio::io_service& service() { return ioService; }
+    operator boost::asio::io_service& () { return ioService; }
+
+    void setThreadId(const boost::thread::id& id) { threadId = id; }
+    const boost::thread::id& getThreadId() const { return threadId; }
 
 private:
     AsioService(const AsioService&);
     AsioService& operator=(const AsioService&);
 
 private:
-  int                     poolIndex;
-  boost::thread::id       threadId;
-  boost::asio::io_service ioService;
+    int                     poolIndex;
+    boost::thread::id       threadId;
+    boost::asio::io_service ioService;
 };
 
 /**
@@ -114,7 +114,7 @@ public:
     static const int PRIORITY_WORK = 1;
 
     static AsioService& current();
-    
+
 public:
 
     /**
@@ -180,7 +180,7 @@ private:
 
         int state;
         int priority;
-        
+
         WorkPtr work; /// The work that keeps the io_services running.
         ThreadPtr thread;
         AsioServicePtr service;

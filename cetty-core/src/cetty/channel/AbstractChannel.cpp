@@ -86,10 +86,7 @@ ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message) {
 ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message,
                                         const SocketAddress& remoteAddress) {
     ChannelFuturePtr future;
-
-    //if (withFuture) {
     future = Channels::future(this);
-    //}
 
     pipeline->sendDownstream(DownstreamMessageEvent(this, future, message, remoteAddress));
 

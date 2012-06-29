@@ -1,8 +1,7 @@
 #if !defined(CETTY_CHANNEL_CHANNELFUTUREFWD_H)
 #define CETTY_CHANNEL_CHANNELFUTUREFWD_H
 
-
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").

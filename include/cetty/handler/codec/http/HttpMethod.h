@@ -122,6 +122,10 @@ public:
         return compareTo(method) == 0;
     }
 
+    bool operator!=(const HttpMethod& method) const {
+        return compareTo(method) != 0;
+    }
+
     /**
      * Returns the name of this method.
      */

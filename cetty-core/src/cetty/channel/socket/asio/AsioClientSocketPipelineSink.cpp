@@ -68,7 +68,7 @@ void AsioClientSocketPipelineSink::writeRequested(
     const ChannelPipeline& pipeline,
     const MessageEvent& e) {
     const ChannelPtr& channel = e.getChannel();
-    (static_cast<AsioSocketChannel*>(channel))->innerWrite(e);
+    (static_cast<AsioSocketChannel*>(channel))->internalWrite(e);
 
     LOG_INFO(logger, "has written the msg to the address.");
 }
@@ -89,13 +89,13 @@ void AsioClientSocketPipelineSink::handleStateChange(const ChannelStateEvent& ev
 
     if (state == ChannelState::OPEN) {
         if (value.empty()) {
-            asioSocketChannel->innerClose(future);
+            asioSocketChannel->internalClose(future);
             LOG_INFO(logger, "received a close channel event, so closed the channel.");
         }
     }
     else if (state == ChannelState::BOUND) {
         if (value.empty()) {
-            asioSocketChannel->innerClose(future);
+            asioSocketChannel->internalClose(future);
             LOG_INFO(logger, "received an unbound channel event, so closed the channel.");
         }
         else {
@@ -115,14 +115,14 @@ void AsioClientSocketPipelineSink::handleStateChange(const ChannelStateEvent& ev
             }
         }
         else {
-            asioSocketChannel->innerClose(future);
+            asioSocketChannel->internalClose(future);
             LOG_INFO(logger, "received an disconnect channel event, so closed the channel.");
         }
     }
     else if (state == ChannelState::INTEREST_OPS) {
         if (!value.empty()) {
             int v = ConversionUtil::toInt(value);
-            asioSocketChannel->innerSetInterestOps(future, v);
+            asioSocketChannel->internalSetInterestOps(future, v);
             LOG_INFO(logger, "received an interestOps (%s) event.", Channel::getInterestOpsString(v));
         }
         else {
@@ -151,7 +151,7 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
         cf->setFailure(exception);
         Channels::fireExceptionCaught(channel, exception);
 
-        socketChannel->innerClose(channel->getCloseFuture());
+        socketChannel->internalClose(channel->getCloseFuture());
         return;
     }
 
@@ -180,7 +180,7 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
                 ChannelException e("the boost asio service can not be started.");
                 cf->setFailure(e);
                 Channels::fireExceptionCaught(channel, e);
-                socketChannel->innerClose(channel->getCloseFuture());
+                socketChannel->internalClose(channel->getCloseFuture());
 
                 //TODO: should terminate the program
                 std::terminate();

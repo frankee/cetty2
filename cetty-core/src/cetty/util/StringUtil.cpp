@@ -14,6 +14,7 @@
  * under the License.
  */
 
+#include <limits>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
 #include <cetty/util/StringUtil.h>
@@ -220,8 +221,143 @@ std::string StringUtil::strprintf(const char* format, ...) {
     return str;
 }
 
+size_t StringUtil::strsplit(const std::string& str, char delim, std::vector<std::string>* elems) {
+    assert(elems);
+    elems->clear();
+    std::string::const_iterator it = str.begin();
+    std::string::const_iterator pv = it;
+    while (it != str.end()) {
+        if (*it == delim) {
+            std::string col(pv, it);
+            elems->push_back(col);
+            pv = it + 1;
+        }
+        ++it;
+    }
+    std::string col(pv, it);
+    elems->push_back(col);
+    return elems->size();
+}
 
+size_t StringUtil::strsplit(const std::string& str, const std::string& delims, std::vector<std::string>* elems) {
+    assert(elems);
+    elems->clear();
+    std::string::const_iterator it = str.begin();
+    std::string::const_iterator pv = it;
+    while (it != str.end()) {
+        while (delims.find(*it, 0) != std::string::npos) {
+            std::string col(pv, it);
+            elems->push_back(col);
+            pv = it + 1;
+            break;
+        }
+        ++it;
+    }
+    std::string col(pv, it);
+    elems->push_back(col);
+    return elems->size();
+}
 
+bool StringUtil::strfwm(const std::string& str, const std::string& key) {
+    std::size_t ksiz = key.size();
+    if (ksiz > str.size()) return false;
+    return !std::memcmp(str.data(), key.data(), ksiz);
+}
+
+bool StringUtil::strbwm(const std::string& str, const std::string& key) {
+    std::size_t ksiz = key.size();
+    if (ksiz > str.size()) return false;
+    return !std::memcmp(str.data() + str.size() - ksiz, key.data(), ksiz);
+}
+
+boost::int64_t StringUtil::atoi(const char* str) {
+    BOOST_ASSERT(str);
+    while (*str > '\0' && *str <= ' ') {
+        str++;
+    }
+    int32_t sign = 1;
+    int64_t num = 0;
+    if (*str == '-') {
+        str++;
+        sign = -1;
+    } else if (*str == '+') {
+        str++;
+    }
+    while (*str != '\0') {
+        if (*str < '0' || *str > '9') break;
+        num = num * 10 + *str - '0';
+        str++;
+    }
+    return num * sign;
+}
+
+double StringUtil::atof(const char* str) {
+    BOOST_ASSERT(str);
+    while (*str > '\0' && *str <= ' ') {
+        str++;
+    }
+    int32_t sign = 1;
+    if (*str == '-') {
+        str++;
+        sign = -1;
+    } else if (*str == '+') {
+        str++;
+    }
+    if ((str[0] == 'i' || str[0] == 'I') && (str[1] == 'n' || str[1] == 'N') &&
+        (str[2] == 'f' || str[2] == 'F')) return HUGE_VAL * sign;
+    if ((str[0] == 'n' || str[0] == 'N') && (str[1] == 'a' || str[1] == 'A') &&
+        (str[2] == 'n' || str[2] == 'N')) return std::numeric_limits<double>::quiet_NaN();
+    long double num = 0;
+    int32_t col = 0;
+    while (*str != '\0') {
+        if (*str < '0' || *str > '9') break;
+        num = num * 10 + *str - '0';
+        str++;
+        if (num > 0) col++;
+    }
+    if (*str == '.') {
+        str++;
+        long double fract = 0.0;
+        long double base = 10;
+        while (col < 16 && *str != '\0') {
+            if (*str < '0' || *str > '9') break;
+            fract += (*str - '0') / base;
+            str++;
+            col++;
+            base *= 10;
+        }
+        num += fract;
+    }
+    if (*str == 'e' || *str == 'E') {
+        str++;
+        num *= std::pow((long double)10, (long double)atoi(str));
+    }
+    return num * sign;
+}
+
+std::string* StringUtil::strtoupper(std::string* str) {
+    BOOST_ASSERT(str);
+    if (NULL == str) return NULL;
+
+    size_t size = str->size();
+    for (size_t i = 0; i < size; i++) {
+        int32_t c = (unsigned char)(*str)[i];
+        if (c >= 'a' && c <= 'z') (*str)[i] = c - ('a' - 'A');
+    }
+    return str;
+}
+
+std::string* StringUtil::strtolower(std::string* str) {
+    BOOST_ASSERT(str);
+    if (NULL == str) return NULL;
+
+    size_t size = str->size();
+    for (size_t i = 0; i < size; i++) {
+        int32_t c = (unsigned char)(*str)[i];
+        if (c >= 'A' && c <= 'Z') (*str)[i] = c + ('a' - 'A');
+    }
+    return str;
+}
 
 }
 }

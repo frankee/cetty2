@@ -65,7 +65,7 @@ void AsioServerSocketPipelineSink::writeRequested(
     const ChannelPipeline& pipeline,
     const MessageEvent& e) {
     const ChannelPtr& channel = e.getChannel();
-    (static_cast<AsioSocketChannel*>(channel))->innerWrite(e);
+    (static_cast<AsioSocketChannel*>(channel))->internalWrite(e);
 }
 
 void AsioServerSocketPipelineSink::stateChangeRequested(
@@ -120,7 +120,7 @@ void AsioServerSocketPipelineSink::handleAcceptChannelStateChange(
     if (ChannelState::INTEREST_OPS == state) {
         AsioSocketChannel* socketChannel = static_cast<AsioSocketChannel*>(channel);
         int v = ConversionUtil::toInt(value);
-        socketChannel->innerSetInterestOps(future, v);
+        socketChannel->internalSetInterestOps(future, v);
     }
     else {
         // when AsioAcceptedSocketChannel started, it has connected. So it will has
@@ -303,7 +303,7 @@ void AsioServerSocketPipelineSink::closeAcceptChannel(
     const ChannelFuturePtr& future) {
 
     AsioSocketChannel* c = static_cast<AsioSocketChannel*>(channel);
-    c->innerClose(future);
+    c->internalClose(future);
 
     //TODO should make sure thread safe, post to accept servicePtr
     //delete the channel.

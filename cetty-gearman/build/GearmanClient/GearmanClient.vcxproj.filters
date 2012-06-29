@@ -37,6 +37,9 @@
     <ClInclude Include="..\..\src\cetty\gearman\GearmanMessageChecker.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="GearmanWorkers.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp">

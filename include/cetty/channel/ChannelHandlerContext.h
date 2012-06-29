@@ -26,14 +26,14 @@
 #include <cetty/channel/ChannelPipelineFwd.h>
 
 namespace cetty {
-namespace channel {
+	namespace channel {
 
-class ChannelEvent;
-class MessageEvent;
-class ExceptionEvent;
-class ChannelStateEvent;
-class WriteCompletionEvent;
-class ChildChannelStateEvent;
+		class ChannelEvent;
+		class MessageEvent;
+		class ExceptionEvent;
+		class ChannelStateEvent;
+		class WriteCompletionEvent;
+		class ChildChannelStateEvent;
 
 /**
  * Enables a {@link ChannelHandler} to interact with its {@link ChannelPipeline}

@@ -11,17 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\redis\RedisClient.h" />
-    <ClInclude Include="..\..\src\cetty\redis\RedisCommandMaker.h" />
-    <ClInclude Include="..\..\src\cetty\redis\RedisMessageHandler.h" />
-    <ClInclude Include="..\..\src\cetty\redis\RedisReplyMessage.h" />
-    <ClInclude Include="..\..\src\cetty\redis\RedisResponseDecoder.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
     <ClCompile Include="..\..\src\cetty\redis\RedisMessageHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisResponseDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisReplyDecoder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommand.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisServiceFuture.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}</ProjectGuid>
@@ -66,7 +67,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../example/echo;../../include;../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../include;../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;BOOST_ALL_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

@@ -14,8 +14,17 @@
  * under the License.
  */
 
+#include <string>
+#include <map>
+#include <cetty/gearman/GearmanWorker.h>
+
+typedef void* (worker_fn)(std::string& args);
+
+
+
 namespace cetty {
 namespace gearman {
+	
 
 }
 }

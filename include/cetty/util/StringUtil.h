@@ -18,8 +18,10 @@
  */
 
 #include <string>
+#include <vector>
 #include <stdarg.h>
-#include "cetty/util/Character.h"
+#include <boost/cstdint.hpp>
+#include <cetty/util/Character.h>
 
 namespace cetty {
 namespace util {
@@ -69,6 +71,86 @@ public:
      * @return the result string.
      */
     static std::string strprintf(const char* format, ...);
+
+    /**
+     * Split a string with a delimiter.
+     * @param str the string.
+     * @param delim the delimiter.
+     * @param elems a vector object into which the result elements are pushed.
+     * @return the number of result elements.
+     */
+    static size_t strsplit(const std::string& str, char delim, std::vector<std::string>* elems);
+
+
+    /**
+     * Split a string with delimiters.
+     * @param str the string.
+     * @param delims the delimiters.
+     * @param elems a vector object into which the result elements are pushed.
+     * @return the number of result elements.
+     */
+    static size_t strsplit(const std::string& str, const std::string& delims,
+                    std::vector<std::string>* elems);
+
+    /**
+     * Check whether a string begins with a key.
+     * @param str the string.
+     * @param key the forward matching key string.
+     * @return true if the target string begins with the key, else, it is false.
+     */
+    static bool strfwm(const std::string& str, const std::string& key);
+
+
+    /**
+     * Check whether a string ends with a key.
+     * @param str the string.
+     * @param key the backward matching key string.
+     * @return true if the target string ends with the key, else, it is false.
+     */
+    static bool strbwm(const std::string& str, const std::string& key);
+
+    /**
+     * Convert the letters of a string into upper case.
+     * @param str the string to convert.
+     * @return the string itself.
+     */
+    static std::string* strtoupper(std::string* str);
+
+    /**
+     * Convert the letters of a string into lower case.
+     * @param str the string to convert.
+     * @return the string itself.
+     */
+    static std::string* strtolower(std::string* str);
+
+    /**
+     *
+     */
+    static inline boost::int64_t atoi(const std::string& str) {
+        return StringUtil::atoi(str.c_str());
+    }
+
+    /**
+     * Convert a decimal string to an integer.
+     * @param str the decimal string.
+     * @return the integer.  If the string does not contain numeric expression, 0 is returned.
+     */
+    static boost::int64_t atoi(const char* str);
+
+    /**
+     *
+     *
+     */
+    static inline double atof(const std::string& str) {
+        return StringUtil::atof(str.c_str());
+    }
+
+    /**
+     * Convert a decimal string to a real number.
+     * @param str the decimal string.
+     * @return the real number.  If the string does not contain numeric expression, 0.0 is returned.
+     */
+    static double atof(const char* str);
 
 private:
     StringUtil() {}

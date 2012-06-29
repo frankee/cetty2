@@ -62,8 +62,8 @@ public:
     * @param uri         the URI or path of the request
     */
     HttpRequest(const HttpVersion& httpVersion,
-        const HttpMethod& method,
-        const std::string& uri);
+                const HttpMethod& method,
+                const std::string& uri);
 
     virtual ~HttpRequest();
 
@@ -100,7 +100,7 @@ public:
     void setUri(const char* uri) {
         if (uri) {
             this->uriStr = uri;
-            this->uri = uri;
+            this->uri = this->uriStr;
         }
     }
 
