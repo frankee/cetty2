@@ -6,11 +6,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoServer", "EchoServer.vc
 		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8} = {F0FE3882-462B-48CC-8AB7-8363E8F20BE8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufService", "..\ProtobufService\ProtobufService.vcxproj", "{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoClient", "EchoClient.vcxproj", "{90CF637D-4D5E-4C16-A970-9F1D37F4328E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8} = {F0FE3882-462B-48CC-8AB7-8363E8F20BE8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cetty", "..\..\..\cetty-core\build\cetty\cetty.vcxproj", "{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufService", "..\ProtobufService\ProtobufService.vcxproj", "{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +25,6 @@ Global
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Debug|Win32.Build.0 = Debug|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.ActiveCfg = Release|Win32
 		{75A24313-B5BB-489C-80E4-B22C18BEEC0F}.Release|Win32.Build.0 = Release|Win32
-		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Debug|Win32.Build.0 = Debug|Win32
-		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Release|Win32.ActiveCfg = Release|Win32
-		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Release|Win32.Build.0 = Release|Win32
 		{90CF637D-4D5E-4C16-A970-9F1D37F4328E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{90CF637D-4D5E-4C16-A970-9F1D37F4328E}.Debug|Win32.Build.0 = Debug|Win32
 		{90CF637D-4D5E-4C16-A970-9F1D37F4328E}.Release|Win32.ActiveCfg = Release|Win32
@@ -34,6 +33,10 @@ Global
 		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}.Debug|Win32.Build.0 = Debug|Win32
 		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}.Release|Win32.ActiveCfg = Release|Win32
 		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}.Release|Win32.Build.0 = Release|Win32
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Debug|Win32.Build.0 = Debug|Win32
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Release|Win32.ActiveCfg = Release|Win32
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
