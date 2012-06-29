@@ -54,6 +54,8 @@ public:
         }
     }
 
+	echo::EchoService_Stub* getStub() { return &stub; }
+
 private:
     echo::EchoService_Stub::EchoResponseFuturePtr future;
     echo::EchoService_Stub stub;
@@ -95,12 +97,11 @@ int main(int argc, char* argv[]) {
     future->awaitUninterruptibly();
     ChannelPtr c = future->getChannel();
 
-
-
     ProtobufClientServicePtr service(new ProtobufClientService(c));
 
-
     EchoClient client(service);
+	ProtobufServiceRegister::instance().registerService(ProtobufServicePtr(client.getStub()));
+
     client.sendRequest();
 
     // Wait until the connection is closed or the connection attempt fails.

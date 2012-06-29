@@ -82,6 +82,8 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
     Array arry;
     buffer->readableBytes(&arry);
     payload->ParseFromArray(arry.data(), arry.length());
+	buffer->offsetReaderIndex(arry.length());
+
     message->setPayload(payload);
 
     return true;
@@ -91,14 +93,15 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
 int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
+	bool flag = false;
 
-    while (buffer->readable()) {
-        int wireType=0;
-        int fieldNum=0;
-        int fieldLength=0;
-        int64_t type=0;
-        int64_t id=0;
-        int64_t error=0;
+	while (buffer->readable() && !flag) {
+		int wireType = 0;
+        int fieldNum = 0;
+        int fieldLength = 0;
+        int64_t type = 0;
+        int64_t id = 0;
+        int64_t error = 0;
 
         if (ProtobufMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
@@ -134,10 +137,12 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 
             case 6:
                 decodePayload(buffer, message);
+				flag = true;
                 break;
 
             case 7:
                 decodePayload(buffer, message);
+				flag = true;
                 break;
 
             default:

@@ -89,6 +89,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, 
     else {
         ctx.sendUpstream(e);
     }
+
 }
 
 void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
@@ -96,7 +97,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         boost::int64_t id) {
 
     ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE, id, response));
-    Channels::write(ctx.getChannel(), ChannelMessage(response));
+    Channels::write(ctx.getChannel(), ChannelMessage(message));
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {
