@@ -68,6 +68,18 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
     message->set_method(method);
 }
 
+ProtobufServiceMessage::ProtobufServiceMessage(int type,
+        boost::int64_t id,
+        const std::string& service,
+        const std::string& method,
+        const MessagePtr& payload)
+    : message(new ServiceMessage), payload(payload) {
+    message->set_type((MessageType)type);
+    message->set_id(id);
+    message->set_service(service);
+    message->set_method(method);
+}
+
 ProtobufServiceMessage::~ProtobufServiceMessage() {
     if (message) {
         delete message;
@@ -154,7 +166,6 @@ bool ProtobufServiceMessage::checkType(int type) {
 int ProtobufServiceMessage::getMessageSize() const {
     return message->ByteSize() + (payload ? payload->ByteSize() + 8 : 0);
 }
-
 
 }
 }

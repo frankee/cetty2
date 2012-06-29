@@ -53,6 +53,7 @@ public:
     ProtobufServiceMessage(int type, boost::int64_t id, const MessagePtr& payload);
     ProtobufServiceMessage(int type, const std::string& service, const std::string& method);
     ProtobufServiceMessage(int type, const std::string& service, const std::string& method, const MessagePtr& payload);
+    ProtobufServiceMessage(int type, boost::int64_t id, const std::string& service, const std::string& method, const MessagePtr& payload);
     ~ProtobufServiceMessage();
 
     bool isRequest() const;

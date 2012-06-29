@@ -51,68 +51,70 @@ ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
         int parametersLength = caculateParametersLength(message);
         int headerLength = 12;
         //int bodyLenth = parametersLength;
-		int bodyLenth = 0;
+        int bodyLenth = 0;
         int messageLength = 0;
 
-		//如果有hasData
+        //如果有hasData
         if (message->hasData()) {
             const ChannelBufferPtr& data = message->getData();
             bodyLenth += data->readableBytes();
             messageLength = bodyLenth + parametersLength;
 
-			//往前面写
+            //往前面写
             if (data->aheadWritableBytes() >= parametersLength + headerLength) {
                 if (parametersLength) {
                     writeParametersAhead(data, message->getParameters(), true);
                 }
+
                 writeHeaderAhead(data, message->getType(), messageLength);
-				//to check the data
-				std::string ret = ChannelBuffers::hexDump(data);
-				std::cout<<"the send data is "<<ret<<std::endl;
+                //to check the data
+                std::string ret = ChannelBuffers::hexDump(data);
+                std::cout<<"the send data is "<<ret<<std::endl;
                 return ChannelMessage(data);
             }
             else {
-				//如果不够就重新创建个channelbuffer
+                //如果不够就重新创建个channelbuffer
                 ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength + headerLength);
 
                 writeHeader(buffer, message->getType(), messageLength);
+
                 if (parametersLength) {
                     writeParameters(buffer, message->getParameters(), true);
                 }
-                
-				//写data
+
+                //写data
                 buffer->writeBytes(data);
-				//to check the data
-				std::string ret = ChannelBuffers::hexDump(buffer);
-				std::cout<<"the send data is "<<ret<<std::endl;
+                //to check the data
+                std::string ret = ChannelBuffers::hexDump(buffer);
+                std::cout<<"the send data is "<<ret<<std::endl;
                 return ChannelMessage(buffer);
             }
         }
         else {
-			//if (bodyLenth) { //no need to remove the last zero pad
-			//	--bodyLenth;
-			//}
-			//         
+            //if (bodyLenth) { //no need to remove the last zero pad
+            //  --bodyLenth;
+            //}
+            //
             //messageLength = bodyLenth + headerLength;
 
-			
-			if(message->getParameters().size() != 0)
-			{
-				messageLength =  parametersLength-1;
-			}
-			else
-			{
-				messageLength =  parametersLength;
-			}
+
+            if (message->getParameters().size() != 0) {
+                messageLength =  parametersLength - 1;
+            }
+            else {
+                messageLength =  parametersLength;
+            }
+
             ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength+headerLength);
             writeHeader(buffer, message->getType(), messageLength);
 
-            if ((parametersLength-1)>0) {
+            if ((parametersLength - 1) > 0) {
                 writeParameters(buffer, message->getParameters(), false);
             }
-			//to check the data
-			std::string ret = ChannelBuffers::hexDump(buffer);
-			std::cout<<"the send data is "<<ret<<std::endl;
+
+            //to check the data
+            std::string ret = ChannelBuffers::hexDump(buffer);
+            std::cout<<"the send data is "<<ret<<std::endl;
             return ChannelMessage(buffer);
         }
     }
@@ -125,6 +127,7 @@ int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
     int length = 0;
 
     const std::vector<std::string>& parameters = msg->getParameters();
+
     for (int i = 0, j = parameters.size(); i < j; ++i) {
         length += parameters[i].size();
         length += 1;
@@ -149,6 +152,7 @@ void GearmanEncoder::writeParameters(const ChannelBufferPtr& buffer,
                                      const std::vector<std::string>& parameters,
                                      bool withZeroPad) {
     int j = parameters.size();
+
     for (int i = 0; i < j; ++i) {
         buffer->writeBytes(parameters[i]);
 
@@ -162,14 +166,16 @@ void GearmanEncoder::writeParameters(const ChannelBufferPtr& buffer,
 }
 
 void GearmanEncoder::writeParametersAhead(const ChannelBufferPtr& buffer,
-    const std::vector<std::string>& parameters,
-    bool withZeroPad) {
+        const std::vector<std::string>& parameters,
+        bool withZeroPad) {
     int j = parameters.size();
-    if (j == 0) return;
+
+    if (j == 0) { return; }
 
     if (withZeroPad) {
         buffer->writeByteAhead(0);
     }
+
     buffer->writeBytesAhead(parameters[j - 1]);
 
     for (int i = j - 2; i >= 0; --i) {

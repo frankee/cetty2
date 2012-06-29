@@ -77,6 +77,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, 
                                             this,
                                             _1,
                                             boost::ref(ctx),
+                                            msg,
                                             id));
         }
         else {
@@ -89,14 +90,15 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, 
     else {
         ctx.sendUpstream(e);
     }
-
 }
 
 void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ChannelHandlerContext& ctx,
+        ProtobufServiceMessagePtr req,
         boost::int64_t id) {
 
-    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE, id, response));
+    ProtobufServiceMessagePtr message(
+        new ProtobufServiceMessage(RESPONSE, id, req->getService(), req->getMethod(), response));
     Channels::write(ctx.getChannel(), ChannelMessage(message));
 }
 

@@ -22,6 +22,7 @@
 #include <cetty/channel/SimpleChannelUpstreamHandler.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace google {
 namespace protobuf {
@@ -66,6 +67,7 @@ public:
 private:
     void doneCallback(const MessagePtr& response,
                       ChannelHandlerContext& ctx,
+                      ProtobufServiceMessagePtr req,
                       boost::int64_t id);
 
 private:

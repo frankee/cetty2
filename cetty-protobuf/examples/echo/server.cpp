@@ -67,6 +67,7 @@ public:
 };
 
 int main(int argc, char* argv[]) {
+    //ConfigureCenter::instance().load();
     ProtobufServiceRegister::instance().registerService(ProtobufServicePtr(new echo::EchoServiceImpl));
 
     int threadCount = 1;
