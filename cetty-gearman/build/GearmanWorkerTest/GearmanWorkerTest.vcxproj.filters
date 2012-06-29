@@ -18,7 +18,7 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GearmanWorkerTest.cpp">
+    <ClCompile Include="..\..\test\GearmanWorkerTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

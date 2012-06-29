@@ -85,8 +85,7 @@ public:
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
         OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingMessage>();
         outMessages.push_back(msg);
-        //Channels::write(ctx, )
-        //ctx.sendDownstream(MessageEvent());
+        Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
     }
 
     virtual ChannelHandlerPtr clone() {

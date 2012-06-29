@@ -86,24 +86,23 @@ void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,int dat
 
 void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum,int type) {
     int tag = (fieldNum << 3) | type;
-    ProtobufMessageCodec::encodeVarint(buffer, tag);
+    ProtobufMessageCodec::encodeVarint(buffer, tag);  
 }
 
 void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {
     boost::uint8_t buf[10];
     int varintSize = 0;
-
     do {
         uint8_t byte = val & 0x7f;
-        buf[varintSize] = byte;
-		varintSize++;
 
-        if (val>>7) 
+		if (val>>7) 
 		{
 			byte |= 0x80;
 		}
+
+        buf[varintSize] = byte;
+		varintSize++;
 	    val >>= 7;
-		
     }
     while (val);
 

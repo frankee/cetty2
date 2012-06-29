@@ -86,12 +86,16 @@ int main(int argc, char* argv[]) {
     // Configure the client.
     ClientBootstrap bootstrap(new AsioClientSocketChannelFactory(1));
 
+	bootstrap.setPipelineFactory(new EchoChannelPipelineFactory);
     // Set up the pipeline factory.
 
     // Start the connection attempt.
     ChannelFuturePtr future = bootstrap.connect("127.0.0.1", 1980);
+
     future->awaitUninterruptibly();
     ChannelPtr c = future->getChannel();
+
+
 
     ProtobufClientServicePtr service(new ProtobufClientService(c));
 

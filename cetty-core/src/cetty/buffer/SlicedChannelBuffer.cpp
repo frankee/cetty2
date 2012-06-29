@@ -180,7 +180,7 @@ void SlicedChannelBuffer::readableBytes(Array* arry) {
         Array underArry;
         buffer->aheadWritableBytes(&underArry);
 
-        arry->reset(underArry.data(readerIdx + adjustment), length - readerIdx);
+        arry->reset(underArry.data() + readerIdx + adjustment, length - readerIdx);
     }
 }
 

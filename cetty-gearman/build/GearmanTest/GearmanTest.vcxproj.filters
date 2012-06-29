@@ -11,7 +11,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\cetty\gearman\GearmanClientTest.cpp">
+    <ClCompile Include="..\..\test\GearmanClientTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
