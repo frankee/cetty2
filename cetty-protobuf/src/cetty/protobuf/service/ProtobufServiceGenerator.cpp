@@ -91,13 +91,19 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
             map<string, string> sub_vars;
             sub_vars["type"] = it->first;
             sub_vars["typedef"] = it->second;
-            printer->Print(sub_vars, "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n");
+            printer->Print(sub_vars, 
+                "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n"
+                "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n");
     }
     for (map<string, string>::iterator it = output_types.begin(); it != output_types.end(); ++it) {
         map<string, string> sub_vars;
         sub_vars["type"] = it->first;
         sub_vars["typedef"] = it->second;
-        printer->Print(sub_vars, "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n");
+        printer->Print(sub_vars,
+            "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n"
+            "typedef ::cetty::service::ServiceFuture<$typedef$Ptr> > $typedef$Future;\n"
+            "typedef boost::intrusive_ptr<$typedef$Future> $typedef$FuturePtr;\n"
+            );
     }
     printer->Print("\n");
     
@@ -213,7 +219,7 @@ void ServiceGenerator::GenerateMethodSignatures(
         else {
             printer->Print(sub_vars,
                            "using $classname$::$name$;\n"
-                           "typedef boost::intrusive_ptr<::cetty::service::ServiceFuture<$output_type$Ptr> > $output_type$FuturePtr;\n"
+                           
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
                            "                     const $output_type$FuturePtr& future);\n");
         }
@@ -250,7 +256,6 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
                    "\n");
 
     // Generate methods of the interface.
-    //GenerateFutureType(printer);
     GenerateNotImplementedMethods(printer);
     GenerateCallMethod(printer);
     GenerateGetPrototype(REQUEST, printer);
@@ -259,7 +264,32 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
     // Generate stub implementation.
     printer->Print(vars_,
         "$classname$_Stub::$classname$_Stub(const cetty::protobuf::service::ProtobufClientServicePtr& service)\n"
-                   "  : channel_(service), owns_channel_(false) {}\n"
+                   "  : channel_(service), owns_channel_(false) {\n"
+                   "    static int init = 0;\n"
+                   "    if (!init) {\n"
+                   "        ::cetty::protobuf::service::ProtobufServiceRegister& register =\n"
+                   "            ::cetty::protobuf::service::ProtobufServiceRegister::instance();\n"
+                   "\n");
+
+    // create response register
+    for (int i = 0; i < descriptor_->method_count(); i++) {
+        const MethodDescriptor* method = descriptor_->method(i);
+        map<string, string> sub_vars;
+        sub_vars["classname"] = descriptor_->name();
+        sub_vars["name"] = method->name();
+
+        printer->Print(sub_vars,
+
+            "       register.registerResponsePrototype($classname$,\n"
+            "                                          $name$,\n"
+            "                                          &$classname$::default_instance());\n"
+            "\n");
+    }
+
+    printer->Print(vars_,
+                   "        init = 1;\n"
+                   "    }\n"
+                   "}\n"
                    "$classname$_Stub::~$classname$_Stub() {\n"
                    "}\n"
                    "\n");
@@ -453,7 +483,36 @@ void changeHeader(const std::string& proto) {
     wfile.close();
 }
 
-void changeHeaders(int argc, char* argv[]) {
+void changeSource(const std::string& proto) {
+    std::string hfile(proto);
+    hfile.replace(hfile.end() - 6, hfile.end(), ".pb.cc");
+
+    std::vector<std::string> lines;
+    std::fstream file;
+    file.open(hfile, std::fstream::in);
+    while (!file.eof()) {
+        std::string line;
+        std::getline(file, line);
+        
+        if (line.find("google/protobuf/wire_format.h") != line.npos) {
+            lines.push_back("#include <google/protobuf/wire_format.h>");
+            lines.push_back("#include <cetty/protobuf/service/ProtobufServiceRegister.h>");
+        }
+        else {
+            lines.push_back(line);
+        }
+    }
+    file.close();
+
+    std::fstream wfile(hfile, std::fstream::out);
+    for (std::size_t i = 0; i < lines.size(); ++i) {
+        wfile << lines[i] << "\n";
+    }
+    wfile << "\n";
+    wfile.close();
+}
+
+void changeGeneratedFiles(int argc, char* argv[]) {
     std::vector<std::string> files;
     std::string path;
 
@@ -470,6 +529,7 @@ void changeHeaders(int argc, char* argv[]) {
     int j = files.size();
     for (int i = 0; i < j; ++i) {
         changeHeader(path + files[i]);
+        changeSource(path + files[i]);
     }
 }
 
@@ -485,6 +545,6 @@ int main(int argc, char* argv[]) {
         "Generate C++ header and source.");
 
     if (!cli.Run(argc, argv)) {
-        changeHeaders(argc, argv);
+        changeGeneratedFiles(argc, argv);
     }
 }

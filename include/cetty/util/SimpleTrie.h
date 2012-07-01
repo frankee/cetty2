@@ -86,9 +86,7 @@ public:
     void addKey(const std::string& key);
 
     void* getValue(const std::string& key) const;
-    void freeValue() {
-        root.freeData();
-    }
+    void  freeValue() { root.freeData(); }
 
     int countPrefix(const std::string& prefix) const;
     int countKey(const std::string& key) const;

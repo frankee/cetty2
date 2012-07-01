@@ -23,25 +23,12 @@
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/service/OutstandingCall.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-
-template<typename RequestT, typename ResponseT>
-class OutstandingCall : public cetty::util::ReferenceCounter<OutstandingCall<RequestT, ResponseT>, int> {
-public:
-    typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
-
-public:
-    RequestT request;
-    ServiceFuturePtr future;
-
-public:
-    OutstandingCall(const RequestT& request, const ServiceFuturePtr& future)
-        : request(request), future(future) {}
-};
 
 template<typename RequestT, typename ResponseT>
 class ServiceRequestHandler : public cetty::channel::SimpleChannelHandler {
@@ -59,9 +46,8 @@ public:
 
         if (response) {
             // TODO: using template traits to define the pointer or object.
-            boost::int64_t id = response->getId();
-
             const OutstandingCallPtr& out = outMessages.front();
+            boost::int64_t id = out->getId();
 #if 0
             {
                 std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
@@ -86,7 +72,7 @@ public:
 
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
         OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingMessage>();
-        msg->request->setId(++id);
+        msg->setId(++id);
         outMessages.push_back(msg);
         Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
     }

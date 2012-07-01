@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/http/map/ServiceReponseMapper.h>
+#include <cetty/protobuf/service/http/map/ServiceResponseMapper.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 
 namespace cetty {
@@ -25,7 +25,7 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 
-void ServiceReponseMapper::setHttpHeaders(const MapValue& value,
+void ServiceResponseMapper::setHttpHeaders(const MapValue& value,
         const HttpResponsePtr& response) {
     std::map<std::string, std::string>::const_iterator itr = value.headers.begin();
     std::map<std::string, std::string>::const_iterator end = value.headers.end();

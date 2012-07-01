@@ -26,6 +26,7 @@ using google::protobuf::MethodDescriptor;
 class ProtobufServiceRegister {
 public:
     typedef std::map<std::string, ProtobufServicePtr> ServiceMap;
+    typedef std::map<std::string, const Message*> ResponsePrototypeMap;
     typedef ServiceMap::iterator ServiceIterator;
     typedef ServiceMap::const_iterator ServiceConstIterator;
 
@@ -36,21 +37,16 @@ public:
     int  registerService(const ProtobufServicePtr& service);
     void unregisterService(const std::string& name);
 
+    int registerResponsePrototype(const std::string& service, const std::string& method, const Message* proto);
+    void unregisterResponsePrototype(const std::string& service, const std::string& method);
+
     const ProtobufServicePtr& getService(const std::string& name) const;
     int getRegisteredServices(std::vector<std::string>* names) const;
 
-    ServiceIterator serviceBegin() {
-        return serviceMap.begin();
-    }
-    ServiceConstIterator serviceBegin() const {
-        return serviceMap.begin();
-    }
-    ServiceIterator serviceEnd() {
-        return serviceMap.end();
-    }
-    ServiceConstIterator serviceEnd() const {
-        return serviceMap.end();
-    }
+    ServiceIterator serviceBegin() { return serviceMap.begin(); }
+    ServiceIterator serviceEnd() { return serviceMap.end(); }
+    ServiceConstIterator serviceBegin() const { return serviceMap.begin(); }
+    ServiceConstIterator serviceEnd() const { return serviceMap.end(); }
 
     const MethodDescriptor* getMethodDescriptor(const ProtobufServicePtr& service,
             const std::string& method) const;
@@ -62,25 +58,9 @@ public:
                                         const std::string& method) const;
 
     const Message* getRequestPrototype(const std::string& service,
-                                       const std::string& method) const {
-        ServiceMap::const_iterator itr = serviceMap.find(service);
-
-        if (itr != serviceMap.end()) {
-            return getRequestPrototype(itr->second, method);
-        }
-
-        return NULL;
-    }
+                                       const std::string& method) const;
     const Message* getResponsePrototype(const std::string& service,
-                                        const std::string& method) const {
-        ServiceMap::const_iterator itr = serviceMap.find(service);
-
-        if (itr != serviceMap.end()) {
-            return getResponsePrototype(itr->second, method);
-        }
-
-        return NULL;
-    }
+                                        const std::string& method) const;
 
 private:
     static ProtobufServicePtr nullService;
@@ -94,6 +74,7 @@ private:
 
 private:
     ServiceMap serviceMap;
+    ResponsePrototypeMap responsePrototypeMap;
 };
 
 }

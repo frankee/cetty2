@@ -20,6 +20,7 @@
 #include <vector>
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 #include <cetty/protobuf/service/http/map/HttpServiceTemplate.h>
 
 namespace YAML {
@@ -34,13 +35,14 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 
-class ServiceRequestMapper : public cetty::util::ReferenceCounter<ServiceRequestMapper> {
+class ServiceRequestMapper : public cetty::util::ReferenceCounter<ServiceRequestMapper, int> {
 public:
     ServiceRequestMapper();
     ServiceRequestMapper(const std::string& file);
     ServiceRequestMapper(const YAML::Node& node);
 
     int configure(const std::string& conf);
+    int configure(const char* conf);
     int configure(const YAML::Node& node);
     int configureFromFile(const std::string& file);
 
@@ -57,8 +59,6 @@ public:
 private:
     std::vector<HttpServiceTemplate> serviceTemplates;
 };
-
-typedef boost::intrusive_ptr<ServiceRequestMapper> ServiceRequestMapperPtr;
 
 }
 }

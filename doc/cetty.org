@@ -54,6 +54,20 @@ ServerBootstrap watchdog(factory);
 * 基于Google Protobuf的Service栈
   支持Protobuf RPC，REST，SOAP1.1
 ** 简要说明
+   
+   service_stub ---> ProtobufClientServiceAdaptor ---> ProtobufClientServicePtr
+                                                            OutStandingCall
+                                                            
+                                                            dispatcher                      ----
+                                                            (OutStandingCall)
+                                                                                            (OutStandingCall)
+                                                            ServiceRequestHandler           ----
+                                                            (request)                       
+                                                                                             (response)  
+                                                            RequestEncoder                   ResponseDecoder
+   
+
+
 ** Protobuf RPC
 *** 服务器端
 *** 客户端

@@ -114,6 +114,8 @@ public:
     */
     const std::vector<std::string>& getPathSegments() const;
 
+    const std::string& getLabel() const;
+
     virtual std::string toString() const;
 
     virtual void clear();
@@ -121,8 +123,9 @@ public:
 private:
     mutable std::vector<std::string> pathSegments;
     mutable NameValueCollection queryParams;
+    mutable std::string label;
 
-    HttpMethod method;
+    HttpMethod  method;
     std::string uriStr;
     URI uri;
 };

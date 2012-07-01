@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICEREPONSEMAPPER_H)
-#define CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICEREPONSEMAPPER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICERESPONSEMAPPER_H)
+#define CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICERESPONSEMAPPER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,6 +20,7 @@
 #include <map>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
 namespace YAML {
     class Node;
@@ -33,7 +34,7 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 
-class ServiceReponseMapper : public cetty::util::ReferenceCounter<ServiceReponseMapper> {
+class ServiceResponseMapper : public cetty::util::ReferenceCounter<ServiceResponseMapper, int> {
 public:
     struct MapKey {
         std::string service;
@@ -46,9 +47,9 @@ public:
     };
 
 public:
-    ServiceReponseMapper();
-    ServiceReponseMapper(const std::string& file);
-    ServiceReponseMapper(const YAML::Node& node);
+    ServiceResponseMapper();
+    ServiceResponseMapper(const std::string& file);
+    ServiceResponseMapper(const YAML::Node& node);
 
     int configure(const std::string& conf);
     int configure(const YAML::Node& node);
@@ -68,7 +69,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICEREPONSEMAPPER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_MAP_SERVICERESPONSEMAPPER_H)
 
 // Local Variables:
 // mode: c++

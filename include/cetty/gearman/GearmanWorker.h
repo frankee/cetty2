@@ -1,7 +1,6 @@
 #if !defined(CETTY_GEARMAN_GEARMANWORKER_H)
 #define CETTY_GEARMAN_GEARMANWORKER_H
 
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *

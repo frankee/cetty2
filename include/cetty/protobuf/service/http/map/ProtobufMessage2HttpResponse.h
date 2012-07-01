@@ -19,7 +19,7 @@
 
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-#include <cetty/protobuf/service/http/map/ServiceReponseMapper.h>
+#include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
 namespace cetty {
 namespace protobuf {
@@ -32,13 +32,13 @@ using namespace cetty::protobuf::service;
 
 class ProtobufMessage2HttpResponse {
 public:
-    ProtobufMessage2HttpResponse();
+    ProtobufMessage2HttpResponse(const ServiceReponseMapperPtr& mapper);
 
     HttpResponsePtr getHttpResponse(const HttpRequestPtr& req,
-        const ProtobufServiceMessagePtr& message);
+                                    const ProtobufServiceMessagePtr& message);
 
 private:
-    ServiceReponseMapper mapper;
+    ServiceReponseMapperPtr mapper;
 };
 
 }

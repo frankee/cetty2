@@ -17,8 +17,28 @@
  * under the License.
  */
 
+#include <boost/intrusive_ptr.hpp>
+#include <cetty/service/OutstandingCall.h>
 #include <cetty/service/ServiceRequestHandler.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+
+namespace cetty {
+namespace service {
+
+using namespace cetty::protobuf::service;
+
+template<>
+boost::int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::getId() const {
+    return future->getResponse()->getId();
+}
+
+template<>
+void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(boost::int64_t id) {
+    request->setId(id);
+}
+
+}
+}
 
 namespace cetty {
 namespace protobuf {
@@ -27,6 +47,9 @@ namespace handler {
 
 using namespace cetty::service;
 using namespace cetty::protobuf::service;
+
+typedef OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceCall;
+typedef boost::intrusive_ptr<ProtobufServiceCall> ProtobufServiceCallPtr;
 
 typedef ServiceRequestHandler<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceRequestHandler;
 

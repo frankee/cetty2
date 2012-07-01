@@ -20,7 +20,8 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceReponseMapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceMapperPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h" />
@@ -44,7 +45,7 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpServiceTemplate.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceReponseMapper.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />

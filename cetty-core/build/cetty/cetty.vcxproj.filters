@@ -1132,5 +1132,8 @@
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
+      <Filter>service</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

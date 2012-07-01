@@ -133,6 +133,57 @@ ProtobufServiceRegister& ProtobufServiceRegister::instance() {
     return serviceRegister;
 }
 
+int ProtobufServiceRegister::registerResponsePrototype(const std::string& service,
+    const std::string& method,
+    const Message* proto) {
+     if (NULL == proto || service.empty() || method.empty()) {
+         return -1;
+     }
+
+     // if duplicated, just override.
+     responsePrototypeMap[service + method] = proto;
+     return 0;
+}
+
+void ProtobufServiceRegister::unregisterResponsePrototype(const std::string& service,
+    const std::string& method) {
+    ResponsePrototypeMap::const_iterator itr = responsePrototypeMap.find(service + method);
+
+    if (itr != responsePrototypeMap.end()) {
+        responsePrototypeMap.erase(itr);
+    }
+}
+
+const Message* ProtobufServiceRegister::getRequestPrototype(const std::string& service,
+    const std::string& method) const {
+    ServiceMap::const_iterator itr = serviceMap.find(service);
+
+    if (itr != serviceMap.end()) {
+        return getRequestPrototype(itr->second, method);
+    }
+
+    return NULL;
+}
+
+const Message* ProtobufServiceRegister::getResponsePrototype(const std::string& service,
+    const std::string& method) const {
+    std::string key(service);
+    ResponsePrototypeMap::const_iterator repItr = responsePrototypeMap.find(service + method);
+
+    if (repItr != responsePrototypeMap.end()) {
+        return repItr->second;
+    }
+
+    ServiceMap::const_iterator itr = serviceMap.find(service);
+
+    if (itr != serviceMap.end()) {
+        return getResponsePrototype(itr->second, method);
+    }
+
+    return NULL;
+}
+
+
 }
 }
 }

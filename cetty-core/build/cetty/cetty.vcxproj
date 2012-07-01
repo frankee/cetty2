@@ -357,6 +357,7 @@
     <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Filter.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />

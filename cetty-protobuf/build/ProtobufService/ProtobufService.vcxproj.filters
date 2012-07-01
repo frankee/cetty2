@@ -75,9 +75,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h">
       <Filter>protobuf\http\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceReponseMapper.h">
-      <Filter>protobuf\http\map</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessagePtr.h">
       <Filter>protobuf</Filter>
     </ClInclude>
@@ -86,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h">
       <Filter>protobuf\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceMapperPtr.h">
+      <Filter>protobuf\http\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h">
+      <Filter>protobuf\http\map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -131,10 +134,10 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpServiceTemplate.cpp">
       <Filter>protobuf\http\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceReponseMapper.cpp">
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp">
       <Filter>protobuf\http\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp">
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp">
       <Filter>protobuf\http\map</Filter>
     </ClCompile>
   </ItemGroup>

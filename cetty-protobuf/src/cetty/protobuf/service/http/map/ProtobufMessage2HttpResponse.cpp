@@ -16,7 +16,9 @@
 
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/http/map/ServiceResponseMapper.h>
 
 namespace cetty {
 namespace protobuf {
@@ -30,15 +32,14 @@ using namespace cetty::protobuf::service;
 HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
     const HttpRequestPtr& req,
     const ProtobufServiceMessagePtr& message) {
-    const ServiceReponseMapper::MapValue* v = mapper.match(message->getService(), message->getMethod());
+    const ServiceResponseMapper::MapValue* v = mapper->match(message->getService(), message->getMethod());
 
     if (v) {
         HttpResponsePtr response(new HttpResponse);
-        ServiceReponseMapper::setHttpHeaders(*v, response);
+        ServiceResponseMapper::setHttpHeaders(*v, response);
 
+        const std::string& format = req->getLabel();
 
-
-        //ServiceReponseMapper::setHttpContent(*v, response);
         return response;
     }
 }
