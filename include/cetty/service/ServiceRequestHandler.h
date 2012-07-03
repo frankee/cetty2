@@ -23,6 +23,7 @@
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/channel/Channels.h>
 
 namespace cetty {
 namespace service {

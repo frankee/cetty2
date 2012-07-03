@@ -26,7 +26,7 @@
 #include <cetty/util/BarePointer.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/ProtobufClientServiceAdaptor.h>
 // @@protoc_insertion_point(includes)
 
@@ -262,10 +262,15 @@ class EchoService_Stub : public EchoService {
   
   // implements EchoService ------------------------------------------
   
-  using EchoService::Echo;
-  typedef boost::intrusive_ptr<::cetty::service::ServiceFuture<EchoResponsePtr> > EchoResponseFuturePtr;
+  //using EchoService::Echo;
+  typedef boost::intrusive_ptr< ::cetty::service::ServiceFuture<EchoResponsePtr> > EchoResponseFuturePtr;
   virtual void Echo(const ConstEchoRequestPtr& request,
                        const EchoResponseFuturePtr& future);
+
+  //template<typename RequestT,typename ResponseT>
+  //void Echo(const ::cetty::util::BarePointer<RequestT>& request,
+//	  const boost::intrusive_ptr< ::cetty::service::ServiceFuture<ResponseT> >& future);
+
  private:
   cetty::protobuf::service::ProtobufClientServiceAdaptor channel_;
   bool owns_channel_;

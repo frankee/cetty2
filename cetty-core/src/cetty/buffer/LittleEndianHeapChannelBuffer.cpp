@@ -26,11 +26,11 @@ namespace buffer {
 using namespace cetty::util;
 
 ChannelBufferFactory& LittleEndianHeapChannelBuffer::factory() const {
-    return HeapChannelBufferFactory::getInstance(ByteOrder::LITTLE_ENDIAN);
+    return HeapChannelBufferFactory::getInstance(ByteOrder::little_endian);
 }
 
 cetty::buffer::ByteOrder LittleEndianHeapChannelBuffer::order() const {
-    return ByteOrder::LITTLE_ENDIAN;
+    return ByteOrder::little_endian;
 }
 
 boost::int16_t LittleEndianHeapChannelBuffer::getShort(int index) const {

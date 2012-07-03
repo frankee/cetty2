@@ -85,7 +85,7 @@ public:
         typedef std::vector<AsioServiceContext>::iterator ServiceIterator;
 
     public:
-        Iterator(ServiceIterator& iter) : iter(iter) {}
+        Iterator(const ServiceIterator& iter) : iter(iter) {}
         Iterator(const Iterator& iter) : iter(iter.iter) {}
 
         Iterator& operator++() {

@@ -87,16 +87,17 @@ ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message,
                                         const SocketAddress& remoteAddress) {
     ChannelFuturePtr future;
     future = Channels::future(this);
-
-    pipeline->sendDownstream(DownstreamMessageEvent(this, future, message, remoteAddress));
+	DownstreamMessageEvent evt(this, future, message, remoteAddress);
+    pipeline->sendDownstream(evt);
 
     return future;
 }
 
 ChannelFuturePtr AbstractChannel::unbind() {
     ChannelFuturePtr future = Channels::future(this);
-    pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                 this, future, ChannelState::BOUND));
+	DownstreamChannelStateEvent evt(
+		this, future, ChannelState::BOUND);
+    pipeline->sendDownstream(evt);
 
     return future;
 }
@@ -105,17 +106,18 @@ ChannelFuturePtr AbstractChannel::close() {
     if (closeFuture->isDone()) {
         return closeFuture;
     }
-
-    pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                 this, closeFuture, ChannelState::OPEN));
+	DownstreamChannelStateEvent evt(
+		this, closeFuture, ChannelState::OPEN);
+    pipeline->sendDownstream(evt);
 
     return closeFuture;
 }
 
 ChannelFuturePtr AbstractChannel::disconnect() {
     ChannelFuturePtr future = Channels::future(this);
-    pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                 this, future, ChannelState::CONNECTED));
+	DownstreamChannelStateEvent evt(
+		this, future, ChannelState::CONNECTED);
+    pipeline->sendDownstream(evt);
 
     return future;
 }
@@ -124,8 +126,9 @@ ChannelFuturePtr AbstractChannel::setInterestOps(int interestOps) {
     interestOps = Channels::validateAndFilterDownstreamInteresOps(interestOps);
 
     ChannelFuturePtr future = Channels::future(this);
-    pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                 this, future, ChannelState::INTEREST_OPS, boost::any(interestOps)));
+	DownstreamChannelStateEvent evt(
+		this, future, ChannelState::INTEREST_OPS, boost::any(interestOps));
+    pipeline->sendDownstream(evt);
     return future;
 }
 

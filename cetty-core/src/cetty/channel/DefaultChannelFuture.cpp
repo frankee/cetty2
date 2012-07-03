@@ -19,6 +19,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 
+#include <boost/thread/detail/thread.hpp>
+
 #include <cetty/channel/Channel.h>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -458,7 +460,7 @@ void DefaultChannelFuture::notifyListeners() {
 
     if (completedListeners && !completedListeners->empty()) {
         while (!completedListeners->empty()) {
-            PriorityCallback& callback = completedListeners->top();
+            const PriorityCallback& callback = completedListeners->top();
             notifyListener(callback.callback);
             completedListeners->pop();
         }

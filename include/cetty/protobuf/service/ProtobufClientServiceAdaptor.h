@@ -79,13 +79,13 @@ namespace service {
 using namespace cetty::service;
 
 
-template<typename To, typename From>     // use like this: down_cast<T*>(foo);
-inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
-#if !defined(NDEBUG)
-    assert(!f || point_dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
-#endif
-    return static_cast<To>(f);
-}
+// template<typename To, typename From>     // use like this: down_cast<T*>(foo);
+// inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
+// #if !defined(NDEBUG)
+//     assert(!f || point_dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
+// #endif
+//     return static_cast<To>(f);
+// }
 
 // Abstract interface for an RPC channel.  An RpcChannel represents a
 // communication line to a Service which can be used to call that Service's
@@ -114,7 +114,7 @@ public:
 
     template<typename ResponseT>
     ResponseT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return cetty::util::static_pointer_cast<ResponseT::element_type>(from->getPayload());
+        return cetty::util::static_pointer_cast<typename ResponseT::element_type>(from->getPayload());
     }
 
     template<typename RequestT, typename ResponseT>

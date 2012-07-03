@@ -86,7 +86,7 @@ void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,int dat
 
 void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum,int type) {
     int tag = (fieldNum << 3) | type;
-    ProtobufMessageCodec::encodeVarint(buffer, tag);  
+    ProtobufMessageCodec::encodeVarint(buffer, tag);
 }
 
 void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {

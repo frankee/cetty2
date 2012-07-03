@@ -25,8 +25,8 @@ namespace buffer {
 
 class ByteOrder : public cetty::util::Enum<ByteOrder> {
 public:
-    static const ByteOrder BIG_ENDIAN;
-    static const ByteOrder LITTLE_ENDIAN;
+    static const ByteOrder big_endian;
+    static const ByteOrder little_endian;
 
     /**
      * Retrieves the native byte order of the underlying platform.

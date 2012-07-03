@@ -11,6 +11,7 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/reflection_ops.h>
 #include <google/protobuf/wire_format.h>
+
 // @@protoc_insertion_point(includes)
 
 namespace echo {
@@ -598,8 +599,8 @@ void EchoService::CallMethod(const ::google::protobuf::MethodDescriptor* method,
   GOOGLE_DCHECK_EQ(method->service(), EchoService_descriptor_);
   switch(method->index()) {
     case 0:
-      Echo(::cetty::util::static_pointer_cast<::echo::EchoRequest const>(request),
-             ::cetty::util::static_pointer_cast<::echo::EchoResponse>(response),
+      Echo( ::cetty::util::static_pointer_cast< ::echo::EchoRequest const>(request),
+             ::cetty::util::static_pointer_cast< ::echo::EchoResponse>(response),
              done);
       break;
     default:
@@ -638,10 +639,16 @@ EchoService_Stub::~EchoService_Stub() {
 }
 
 void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
-                              const EchoResponseFuturePtr& future) {
-  channel_.CallMethod(descriptor()->method(0),
-                      request, future);
+	const EchoService_Stub::EchoResponseFuturePtr& future) {
+		channel_.CallMethod<EchoRequest, EchoResponsePtr>(descriptor()->method(0), request, future);
 }
+
+
+//void EchoService_Stub::Echo(const ::cetty::util::BarePointer<echo::EchoRequest>& request,
+//	const boost::intrusive_ptr< ::cetty::service::ServiceFuture<echo::EchoRequest> >& future) {
+//		channel_.CallMethod<RequestT,ResponseT>(descriptor()->method(0),
+//			request, future);
+//}
 
 // @@protoc_insertion_point(namespace_scope)
 

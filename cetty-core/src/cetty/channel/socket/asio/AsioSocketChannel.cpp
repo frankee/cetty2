@@ -182,8 +182,8 @@ ChannelFuturePtr AsioSocketChannel::write(const ChannelMessage& message) {
 
     if (boost::this_thread::get_id() == threadId) {
         LOG_INFO(logger, "write message, sending the msg to the pipeline.");
-        pipeline->sendDownstream(
-            DownstreamMessageEvent(this, future, message, this->remoteAddress));
+		DownstreamMessageEvent evt(this, future, message, this->remoteAddress);
+        pipeline->sendDownstream(evt);
     }
     else {
         LOG_INFO(logger, "write message in different thread, post the msg to pipeline.");
@@ -253,8 +253,8 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::unbind() {
     ChannelFuturePtr future = Channels::future(this);
 
     if (boost::this_thread::get_id() == threadId) {
-        pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                     this, future, ChannelState::BOUND));
+		DownstreamChannelStateEvent evt(this, future, ChannelState::BOUND);
+        pipeline->sendDownstream(evt);
     }
     else {
         ioService->service().post(
@@ -275,8 +275,8 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::close() {
     }
 
     if (boost::this_thread::get_id() == threadId) {
-        pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                     this, closeFuture, ChannelState::OPEN));
+		DownstreamChannelStateEvent evt(this, closeFuture, ChannelState::OPEN);
+        pipeline->sendDownstream(evt);
     }
     else {
         ioService->service().post(
@@ -354,8 +354,9 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::disconnect() {
     ChannelFuturePtr future = Channels::future(this);
 
     if (boost::this_thread::get_id() == threadId) {
-        pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                     this, future, ChannelState::CONNECTED));
+		DownstreamChannelStateEvent evt(
+			this, future, ChannelState::CONNECTED);
+        pipeline->sendDownstream(evt);
     }
     else {
         ioService->service().post(
@@ -375,8 +376,9 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::setInterestOps(int interestO
     ChannelFuturePtr future = Channels::future(this);
 
     if (boost::this_thread::get_id() == threadId) {
-        pipeline->sendDownstream(DownstreamChannelStateEvent(
-                                     this, future, ChannelState::INTEREST_OPS, boost::any(interestOps)));
+		DownstreamChannelStateEvent evt(
+			this, future, ChannelState::INTEREST_OPS, boost::any(interestOps));
+        pipeline->sendDownstream(evt);
     }
     else {
         ioService->service().post(
@@ -427,8 +429,8 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         readBuffer->offsetWriterIndex(bytes_transferred);
 
         // Fire the event.
-        pipeline->sendUpstream(
-            UpstreamMessageEvent(this, ChannelMessage(readBuffer), remoteAddress));
+		UpstreamMessageEvent evt(this, ChannelMessage(readBuffer), remoteAddress);
+        pipeline->sendUpstream(evt);
         //Channels::fireMessageReceived(*this, ChannelMessage(readBuffer));
 
         if (interestOps & OP_READ) { //readable
@@ -453,8 +455,8 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
     if (!error) {
         writeQueue->poll().setSuccess();
 
-        pipeline->sendUpstream(
-            DefaultWriteCompletionEvent(this, bytes_transferred));
+		DefaultWriteCompletionEvent evt(this, bytes_transferred);
+        pipeline->sendUpstream(evt);
         //Channels::fireWriteComplete(*this, bytes_transferred);
 
         if (writeQueue->empty()) {

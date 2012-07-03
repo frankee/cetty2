@@ -33,8 +33,8 @@ namespace protobuf {
 namespace service {
 
 
-typedef ::cetty::util::BarePointer<::google::protobuf::Message> MessagePtr;
-typedef ::cetty::util::BarePointer<::google::protobuf::Message const> ConstMessagePtr;
+typedef ::cetty::util::BarePointer< ::google::protobuf::Message> MessagePtr;
+typedef ::cetty::util::BarePointer< ::google::protobuf::Message const> ConstMessagePtr;
 
 typedef ::cetty::service::ServiceFuture<ProtobufServiceMessagePtr>   ProtobufServiceFuture;
 typedef ::boost::intrusive_ptr<ProtobufServiceFuture> ProtobufServiceFuturePtr;

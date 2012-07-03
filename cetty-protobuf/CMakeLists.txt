@@ -7,10 +7,9 @@
 # CMake files in this project can refer to the root source directory
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
-# Language "C" is required for find_package(Threads).
-PROJECT(CETTY CXX C)
+# Language "C" is required for find_package(Threads).PROJECT(PROTOBUF_SERV	 CXX C)
+PROJECT(PROTOBUFSERVICE CXX C)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/cmake)
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
 if (MSVC)
@@ -34,6 +33,7 @@ endif()
 INCLUDE_DIRECTORIES(
   ${PROJECT_SOURCE_DIR}/../include
   ${PROJECT_SOURCE_DIR}/src
+  ${PROJECT_SOURCE_DIR}/src/cetty/protobuf/service/proto
  # ${PROJECT_SOURCE_DIR}/include
   #${PROJECT_SOURCE_DIR}/cetty-core/src
   # ${PROJECT_SOURCE_DIR}
@@ -52,7 +52,7 @@ find_package( Boost 1.49.0 COMPONENTS date_time system thread REQUIRED )
 INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BOOST_LIB_DIRS})
 
-  
+
 # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
 FIND_PACKAGE(Threads)
 
@@ -121,9 +121,11 @@ function(cxx_library_with_type name type cxx_flags)
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
     if (CMAKE_USE_PTHREADS_INIT)
-      target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+      target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT}
+${Boost_LIBRARIES} libprotobuf.a libcetty.a)
 	elseif (CMAKE_USE_PTHREADS_INIT)
-	  target_link_libraries(${name} ${Boost_LIBRARIES})
+	  target_link_libraries(${name} ${Boost_LIBRARIES} libprotobuf.a
+libcetty.a)
     endif()
 endfunction()
 
@@ -138,7 +140,7 @@ endfunction()
 #cxx_static_library(cetty "${cxx_default}" ${libsources})
 #target_link_libraries(gtest_main gtest)
 
-ADD_SUBDIRECTORY(src cetty)
+ADD_SUBDIRECTORY(src protobufservice)
 
 ########################################################################
 #

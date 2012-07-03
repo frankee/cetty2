@@ -169,100 +169,113 @@ void Channels::fireChannelOpen(const ChannelPtr& channel) {
     if (parent) {
         fireChildChannelStateChanged(parent, channel);
     }
-
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::OPEN, boost::any(true)));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::OPEN, boost::any(true));
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelOpen(ChannelHandlerContext& ctx) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::OPEN, boost::any(true)));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::OPEN, boost::any(true));
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelBound(const ChannelPtr& channel, const SocketAddress& localAddress) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::BOUND, boost::any(&localAddress)));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::BOUND, boost::any(&localAddress));
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelBound(ChannelHandlerContext& ctx, const SocketAddress& localAddress) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::BOUND, boost::any(&localAddress)));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::BOUND, boost::any(&localAddress));
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelConnected(const ChannelPtr& channel, const SocketAddress& remoteAddress) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::CONNECTED, boost::any(&remoteAddress)));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::CONNECTED, boost::any(&remoteAddress));
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelConnected(ChannelHandlerContext& ctx, const SocketAddress& remoteAddress) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::CONNECTED, boost::any(&remoteAddress)));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::CONNECTED, boost::any(&remoteAddress));
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireMessageReceived(const ChannelPtr& channel, const ChannelMessage& message) {
-    channel->getPipeline()->sendUpstream(
-        UpstreamMessageEvent(channel, message, channel->getRemoteAddress()));
+	UpstreamMessageEvent evt(channel, message, channel->getRemoteAddress());
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireMessageReceived(const ChannelPtr& channel, const ChannelMessage& message, const SocketAddress& remoteAddress) {
-    channel->getPipeline()->sendUpstream(
-        UpstreamMessageEvent(channel, message, remoteAddress));
+    UpstreamMessageEvent evt(channel, message, remoteAddress);
+	channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireMessageReceived(ChannelHandlerContext& ctx, const ChannelMessage& message) {
     const ChannelPtr& channel = ctx.getChannel();
-    ctx.sendUpstream(
-        UpstreamMessageEvent(channel, message, channel->getRemoteAddress()));
+	UpstreamMessageEvent evt(channel, message, channel->getRemoteAddress());
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireMessageReceived(ChannelHandlerContext& ctx, const ChannelMessage& message, const SocketAddress& remoteAddress) {
-    ctx.sendUpstream(
-        UpstreamMessageEvent(ctx.getChannel(), message, remoteAddress));
+    UpstreamMessageEvent evt(ctx.getChannel(), message, remoteAddress);
+	ctx.sendUpstream(evt);
 }
 
 void Channels::fireWriteCompleted(const ChannelPtr& channel, long amount) {
     if (amount == 0) { return; }
-
-    channel->getPipeline()->sendUpstream(DefaultWriteCompletionEvent(channel, amount));
+	DefaultWriteCompletionEvent evt(channel, amount);
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireWriteCompleted(ChannelHandlerContext& ctx, long amount) {
-    ctx.sendUpstream(DefaultWriteCompletionEvent(ctx.getChannel(), amount));
+	DefaultWriteCompletionEvent evt(ctx.getChannel(), amount);
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelInterestChanged(const ChannelPtr& channel, int interestOps) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::INTEREST_OPS, boost::any(interestOps)));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::INTEREST_OPS, boost::any(interestOps));
+	channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelInterestChanged(ChannelHandlerContext& ctx, int interestOps) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::INTEREST_OPS, boost::any(interestOps)));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::INTEREST_OPS, boost::any(interestOps));
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelDisconnected(const ChannelPtr& channel) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::CONNECTED, boost::any()));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::CONNECTED, boost::any());
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelDisconnected(ChannelHandlerContext& ctx) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::CONNECTED, boost::any()));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::CONNECTED, boost::any());
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelUnbound(const ChannelPtr& channel) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::BOUND, boost::any()));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::BOUND, boost::any());
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireChannelUnbound(ChannelHandlerContext& ctx) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::BOUND, boost::any()));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::BOUND, boost::any());
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireChannelClosed(const ChannelPtr& channel) {
-    channel->getPipeline()->sendUpstream(UpstreamChannelStateEvent(
-            channel, ChannelState::OPEN, boost::any()));
+	UpstreamChannelStateEvent evt(
+		channel, ChannelState::OPEN, boost::any());
+    channel->getPipeline()->sendUpstream(evt);
 
     // Notify the parent handler.
     const ChannelPtr& parent = channel->getParent();
@@ -273,29 +286,33 @@ void Channels::fireChannelClosed(const ChannelPtr& channel) {
 }
 
 void Channels::fireChannelClosed(ChannelHandlerContext& ctx) {
-    ctx.sendUpstream(UpstreamChannelStateEvent(
-                         ctx.getChannel(), ChannelState::OPEN, boost::any()));
+	UpstreamChannelStateEvent evt(
+		ctx.getChannel(), ChannelState::OPEN, boost::any());
+    ctx.sendUpstream(evt);
 }
 
 void Channels::fireExceptionCaught(const ChannelPtr& channel, const Exception& cause) {
-    channel->getPipeline()->sendUpstream(
-        DefaultExceptionEvent(channel, cause));
+	DefaultExceptionEvent evt(channel, cause);
+    channel->getPipeline()->sendUpstream(evt);
 }
 
 void Channels::fireExceptionCaught(ChannelHandlerContext& ctx, const Exception& cause) {
-    ctx.sendUpstream(DefaultExceptionEvent(ctx.getChannel(), cause));
+	DefaultExceptionEvent evt(ctx.getChannel(), cause);
+    ctx.sendUpstream(evt);
 }
 
 ChannelFuturePtr Channels::bind(const ChannelPtr& channel, const SocketAddress& localAddress) {
     ChannelFuturePtr future = Channels::future(channel);
-    channel->getPipeline()->sendDownstream(DownstreamChannelStateEvent(
-            channel, future, ChannelState::BOUND, boost::any(localAddress)));
+	DownstreamChannelStateEvent evt(
+		channel, future, ChannelState::BOUND, boost::any(localAddress));
+    channel->getPipeline()->sendDownstream(evt);
     return future;
 }
 
 void Channels::bind(ChannelHandlerContext& ctx, const ChannelFuturePtr& future, const SocketAddress& localAddress) {
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::BOUND, boost::any(localAddress)));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::BOUND, boost::any(localAddress));
+    ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::unbind(const ChannelPtr& channel) {
@@ -303,22 +320,24 @@ ChannelFuturePtr Channels::unbind(const ChannelPtr& channel) {
 }
 
 void Channels::unbind(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::BOUND));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::BOUND);
+    ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::connect(const ChannelPtr& channel, const SocketAddress& remoteAddress) {
     ChannelFuturePtr future = Channels::future(channel, true);
-
-    channel->getPipeline()->sendDownstream(DownstreamChannelStateEvent(
-            channel, future, ChannelState::CONNECTED, boost::any(remoteAddress)));
+	DownstreamChannelStateEvent evt(
+		channel, future, ChannelState::CONNECTED, boost::any(remoteAddress));
+    channel->getPipeline()->sendDownstream(evt);
 
     return future;
 }
 
 void Channels::connect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future, const SocketAddress& remoteAddress) {
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::CONNECTED, boost::any(remoteAddress)));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::CONNECTED, boost::any(remoteAddress));
+	ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::write(const ChannelPtr& channel,
@@ -342,8 +361,8 @@ void Channels::write(ChannelHandlerContext& ctx,
                      const ChannelFuturePtr& future,
                      const ChannelMessage& message,
                      const SocketAddress& remoteAddress) {
-    ctx.sendDownstream(
-        DownstreamMessageEvent(ctx.getChannel(), future, message, remoteAddress));
+	DownstreamMessageEvent evt(ctx.getChannel(), future, message, remoteAddress);
+    ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::setInterestOps(const ChannelPtr& channel, int interestOps) {
@@ -355,9 +374,9 @@ void Channels::setInterestOps(ChannelHandlerContext& ctx,
                               int interestOps) {
     validateInterestOps(interestOps);
     interestOps = filterDownstreamInterestOps(interestOps);
-
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::INTEREST_OPS, boost::any(interestOps)));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::INTEREST_OPS, boost::any(interestOps));
+    ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::disconnect(const ChannelPtr& channel) {
@@ -365,8 +384,9 @@ ChannelFuturePtr Channels::disconnect(const ChannelPtr& channel) {
 }
 
 void Channels::disconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::CONNECTED));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::CONNECTED);
+    ctx.sendDownstream(evt);
 }
 
 ChannelFuturePtr Channels::close(const ChannelPtr& channel) {
@@ -374,8 +394,9 @@ ChannelFuturePtr Channels::close(const ChannelPtr& channel) {
 }
 
 void Channels::close(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-    ctx.sendDownstream(DownstreamChannelStateEvent(
-                           ctx.getChannel(), future, ChannelState::OPEN));
+	DownstreamChannelStateEvent evt(
+		ctx.getChannel(), future, ChannelState::OPEN);
+    ctx.sendDownstream(evt);
 }
 
 void Channels::fireChildChannelStateChanged(const ChannelPtr& channel, const ChannelPtr& childChannel) {

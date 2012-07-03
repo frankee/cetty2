@@ -29,6 +29,8 @@
 //
 
 #include <boost/assert.hpp>
+#include <boost/functional/hash/extensions.hpp>
+
 
 namespace cetty {
 namespace util {
@@ -190,7 +192,7 @@ template<class T, class U> BarePointer<T> dynamic_pointer_cast(BarePointer<U> co
 template< class T > struct hash;
 
 template< class T > std::size_t hash_value(BarePointer<T> const& p) {
-    return boost::hash< T* >()(p.get());
+    return boost::hash<T*>()(p.get());
 }
 
 }

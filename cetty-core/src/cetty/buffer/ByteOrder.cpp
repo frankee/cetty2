@@ -19,21 +19,21 @@
 namespace cetty {
 namespace buffer {
 
-const ByteOrder ByteOrder::BIG_ENDIAN = 0;
-const ByteOrder ByteOrder::LITTLE_ENDIAN = 1;
+const ByteOrder ByteOrder::big_endian = 0;
+const ByteOrder ByteOrder::little_endian = 1;
 
 ByteOrder ByteOrder::nativeOrder() {
     static const char tmp[2] = {0x01, 0x02};
 
     if (*((const short*)tmp) == 0x0102) {
-        return BIG_ENDIAN;
+        return big_endian;
     }
 
-    return LITTLE_ENDIAN;
+    return little_endian;
 }
 
 std::string ByteOrder::toString() const {
-    if (m_value == BIG_ENDIAN.m_value) {
+    if (m_value == big_endian.m_value) {
         return "BIG_ENDIAN";
     }
 

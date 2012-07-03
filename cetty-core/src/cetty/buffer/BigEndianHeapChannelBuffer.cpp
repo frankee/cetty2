@@ -29,11 +29,11 @@ namespace buffer {
 using namespace cetty::util;
 
 ChannelBufferFactory& BigEndianHeapChannelBuffer::factory() const {
-    return HeapChannelBufferFactory::getInstance(ByteOrder::BIG_ENDIAN);
+    return HeapChannelBufferFactory::getInstance(ByteOrder::big_endian);
 }
 
 cetty::buffer::ByteOrder BigEndianHeapChannelBuffer::order() const {
-    return ByteOrder::BIG_ENDIAN;
+    return ByteOrder::big_endian;
 }
 
 boost::int16_t BigEndianHeapChannelBuffer::getShort(int index) const {

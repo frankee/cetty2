@@ -55,7 +55,7 @@ public:
 
     virtual std::string toString() const;
 
-protected:
+//protected:
     UpstreamMessageEvent(const UpstreamMessageEvent&);
     UpstreamMessageEvent& operator=(const UpstreamMessageEvent&);
 
