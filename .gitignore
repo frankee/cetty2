@@ -13,6 +13,9 @@
 *.orig
 *.lib
 *.exe
+*.cmake
+CMakeCache.txt
 Debug/
 Release/
 ipch/
+CMakeFiles/
