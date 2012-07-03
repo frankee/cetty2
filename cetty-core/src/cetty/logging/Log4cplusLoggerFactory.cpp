@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -15,6 +15,8 @@
  */
 
 #include <cetty/logging/Log4cplusLoggerFactory.h>
+
+#if defined(HAS_LOG4CPLUS)
 
 #include <log4cplus/logger.h>
 #include <log4cplus/fileappender.h>
@@ -47,3 +49,15 @@ InternalLogger* Log4cplusLoggerFactory::newInstance(const std::string& name) {
 
 }
 }
+
+#else
+
+namespace cetty {
+namespace logging {
+Log4cplusLoggerFactory::Log4cplusLoggerFactory(const std::string& configureFile) {}
+Log4cplusLoggerFactory::~Log4cplusLoggerFactory() {}
+InternalLogger* Log4cplusLoggerFactory::newInstance(const std::string& name) {}
+}
+}
+
+#endif

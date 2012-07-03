@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#if defined(HAS_LOG4CPLUS)
+
 #include <log4cplus/logger.h>
 #include <cetty/logging/AbstractInternalLogger.h>
 
@@ -59,5 +61,7 @@ private:
 
 }
 }
+
+#endif
 
 #endif //#if !defined(CETTY_LOGGING_LOG4CPLUSLOGGER_H)
