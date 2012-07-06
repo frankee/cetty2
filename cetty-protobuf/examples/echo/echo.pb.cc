@@ -11,6 +11,7 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/reflection_ops.h>
 #include <google/protobuf/wire_format.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 // @@protoc_insertion_point(includes)
 
 namespace echo {
@@ -633,12 +634,24 @@ const ::google::protobuf::Message* EchoService::GetResponsePrototype(
 }
 
 EchoService_Stub::EchoService_Stub(const cetty::protobuf::service::ProtobufClientServicePtr& service)
-  : channel_(service), owns_channel_(false) {}
+  : channel_(service), owns_channel_(false) {
+    static int init = 0;
+    if (!init) {
+        ::cetty::protobuf::service::ProtobufServiceRegister& serviceRegister =
+            ::cetty::protobuf::service::ProtobufServiceRegister::instance();
+
+       serviceRegister.registerResponsePrototype("echo.EchoService",
+                                                 "Echo",
+                                                 &EchoResponse::default_instance());
+
+        init = 1;
+    }
+}
 EchoService_Stub::~EchoService_Stub() {
 }
 
 void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
-                              const EchoResponseFuturePtr& future) {
+                              const EchoServiceFuturePtr& future) {
   channel_.CallMethod(descriptor()->method(0),
                       request, future);
 }
@@ -648,3 +661,5 @@ void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
 }  // namespace echo
 
 // @@protoc_insertion_point(global_scope)
+
+

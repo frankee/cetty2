@@ -216,8 +216,11 @@ class EchoResponse : public ::google::protobuf::Message {
 
 class EchoService_Stub;
 
+typedef ::cetty::util::BarePointer< ::echo::EchoRequest> EchoRequestPtr;
 typedef ::cetty::util::BarePointer< ::echo::EchoRequest const> ConstEchoRequestPtr;
 typedef ::cetty::util::BarePointer< ::echo::EchoResponse> EchoResponsePtr;
+typedef ::cetty::service::ServiceFuture<EchoResponsePtr> EchoServiceFuture;
+typedef boost::intrusive_ptr<EchoServiceFuture> EchoServiceFuturePtr;
 
 class EchoService : public ::cetty::protobuf::service::ProtobufService {
  protected:
@@ -263,9 +266,8 @@ class EchoService_Stub : public EchoService {
   // implements EchoService ------------------------------------------
   
   using EchoService::Echo;
-  typedef boost::intrusive_ptr<::cetty::service::ServiceFuture<EchoResponsePtr> > EchoResponseFuturePtr;
   virtual void Echo(const ConstEchoRequestPtr& request,
-                       const EchoResponseFuturePtr& future);
+                       const EchoServiceFuturePtr& future);
  private:
   cetty::protobuf::service::ProtobufClientServiceAdaptor channel_;
   bool owns_channel_;

@@ -418,7 +418,7 @@ public:
      */
     //static ChannelBufferPtr unmodifiableBuffer(const ChannelBufferPtr& buffer);
 
-    static int ChannelBuffers::hashCode(const ChannelBuffer& buffer);
+    static int hashCode(const ChannelBuffer& buffer);
 
     /**
      * Returns a <a href="http://en.wikipedia.org/wiki/Hex_dump">hex dump</a>

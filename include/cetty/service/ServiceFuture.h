@@ -40,7 +40,8 @@ public:
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
 
-    typedef boost::function2<void, SelfConstRefType, ResponseConstRefType> CompletedCallback;
+    typedef boost::function2<void,ServiceFuture<T> const&,T const&> CompletedCallback;
+	//typedef std::deque<CompletedCallback>::const_iterator ConstCallbacksIterator;
 
 public:
     ServiceFuture() {}
@@ -121,10 +122,16 @@ public:
      *         already marked as either a success or a failure.
      */
     virtual bool setSuccess() {
-        std::deque<CompletedCallback>::const_iterator itr = callbacks.begin();
-        for (; itr != callbacks.end(); ++itr) {
-            (*itr)(*this, response);
-        }
+		std::size_t j = callbacks.size();
+		for (std::size_t i = 0; i < j; ++i)
+		{
+			(callbacks[i])(*this, response);
+		}
+
+        //ConstCallbacksIterator itr;
+        //for (itr = callbacks.begin(); itr != callbacks.end(); ++itr) {
+        //    (*itr)(*this, response);
+        //}
         
         return true;
     }

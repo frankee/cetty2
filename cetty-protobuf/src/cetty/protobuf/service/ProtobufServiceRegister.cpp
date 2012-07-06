@@ -27,7 +27,7 @@ int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) 
 
     std::string serviceName = service->GetDescriptor()->full_name();
 
-    ServiceMap::const_iterator itr = serviceMap.find(serviceName);
+    ServiceIterator itr = serviceMap.find(serviceName);
 
     if (itr != serviceMap.end()) {
         printf("the name of the service already registered, will be update.\n");
@@ -39,7 +39,7 @@ int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) 
 }
 
 void ProtobufServiceRegister::unregisterService(const std::string& name) {
-    ServiceMap::const_iterator itr = serviceMap.find(name);
+    ServiceIterator itr = serviceMap.find(name);
 
     if (itr != serviceMap.end()) {
         serviceMap.erase(itr);

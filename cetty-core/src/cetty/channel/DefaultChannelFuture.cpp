@@ -19,6 +19,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 
+#include <boost/thread/detail/thread.hpp>
+
 #include <cetty/channel/Channel.h>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -248,6 +250,7 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
                 condition().wait(lock);
             }
             catch (const boost::thread_interrupted& e) {
+                (void)e;
                 interrupted = true;
                 waiters--;
 
@@ -269,6 +272,7 @@ bool DefaultChannelFuture::awaitUninterruptibly(int timeoutMillis) {
         return await0(timeoutMillis, false);
     }
     catch (const boost::thread_interrupted& e) {
+        (void)e;
         throw RuntimeException("thread interrupted.");
     }
 }
@@ -405,6 +409,7 @@ bool DefaultChannelFuture::await0(int timeoutMillis, bool interruptable) {
                     condition().timed_wait(lock, expiredTime);
                 }
                 catch (const boost::thread_interrupted& e) {
+                    (void)e;
                     if (interruptable) {
                         throw InterruptedException("");
                     }
@@ -458,7 +463,7 @@ void DefaultChannelFuture::notifyListeners() {
 
     if (completedListeners && !completedListeners->empty()) {
         while (!completedListeners->empty()) {
-            PriorityCallback& callback = completedListeners->top();
+            const PriorityCallback& callback = completedListeners->top();
             notifyListener(callback.callback);
             completedListeners->pop();
         }

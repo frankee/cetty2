@@ -1,7 +1,7 @@
 #if !defined(CETTY_LOGGING_LOG4CPLUSLOGGER_H)
 #define CETTY_LOGGING_LOG4CPLUSLOGGER_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -16,6 +16,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
+#if defined(HAS_LOG4CPLUS)
 
 #include <log4cplus/logger.h>
 #include <cetty/logging/AbstractInternalLogger.h>
@@ -60,4 +62,10 @@ private:
 }
 }
 
+#endif
+
 #endif //#if !defined(CETTY_LOGGING_LOG4CPLUSLOGGER_H)
+
+// Local Variables:
+// mode: c++
+// End:

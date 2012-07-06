@@ -28,8 +28,8 @@ namespace buffer {
 using namespace cetty::util;
 
 DynamicChannelBuffer::DynamicChannelBuffer(int estimatedLength)
-    : endianness(ByteOrder::BIG_ENDIAN),
-      bufferFactory(HeapChannelBufferFactory::getInstance(ByteOrder::BIG_ENDIAN)) {
+    : endianness(ByteOrder::big_endian),
+      bufferFactory(HeapChannelBufferFactory::getInstance(ByteOrder::big_endian)) {
     if (estimatedLength < 0) {
         throw InvalidArgumentException("estimatedLength is negtive: " /*+ estimatedLength*/);
     }

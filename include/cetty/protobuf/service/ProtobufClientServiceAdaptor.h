@@ -79,13 +79,13 @@ namespace service {
 using namespace cetty::service;
 
 
-template<typename To, typename From>     // use like this: down_cast<T*>(foo);
-inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
-#if !defined(NDEBUG)
-    assert(!f || point_dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
-#endif
-    return static_cast<To>(f);
-}
+// template<typename To, typename From>     // use like this: down_cast<T*>(foo);
+// inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
+// #if !defined(NDEBUG)
+//     assert(!f || point_dynamic_cast<To>(f) != NULL);  // RTTI: debug mode only!
+// #endif
+//     return static_cast<To>(f);
+// }
 
 // Abstract interface for an RPC channel.  An RpcChannel represents a
 // communication line to a Service which can be used to call that Service's
@@ -112,20 +112,20 @@ public:
                     const ConstMessagePtr& request,
                     const ProtobufServiceFuturePtr& future);
 
-    template<typename ResponseT>
-    ResponseT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return cetty::util::static_pointer_cast<ResponseT::element_type>(from->getPayload());
+    template<typename RepT>
+    RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
+        return cetty::util::static_pointer_cast<RepT::element_type>(from->getPayload());
     }
 
-    template<typename RequestT, typename ResponseT>
+    template<typename ReqT, typename RepT>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const cetty::util::BarePointer<RequestT const>& request,
-                    const boost::intrusive_ptr<ServiceFuture<ResponseT> >& future) {
+                    const cetty::util::BarePointer<ReqT const>& request,
+                    const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
         CallMethod(method,
                    cetty::util::static_pointer_cast<MessagePtr::element_type const>(request),
                    ProtobufServiceFuturePtr(
-                       new TypeCastServiceFuture<ProtobufServiceMessagePtr, ResponseT>(future,
-                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<ResponseT>, this, _1))));
+                       new TypeCastServiceFuture<ProtobufServiceMessagePtr, RepT>(future,
+                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<RepT>, this, _1))));
     }
 
     const ProtobufClientServicePtr& getService() {

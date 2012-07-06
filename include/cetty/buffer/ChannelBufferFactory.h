@@ -76,7 +76,7 @@ protected:
      * Creates a new factory whose default {@link ByteOrder} is
      * {@link ByteOrder#BIG_ENDIAN}.
      */
-    ChannelBufferFactory() : defaultOrder(ByteOrder::BIG_ENDIAN) {
+    ChannelBufferFactory() : defaultOrder(ByteOrder::big_endian) {
     }
 
     /**

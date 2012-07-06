@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,12 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/string/StringDecoder.h>
+#include <cetty/service/builder/ClientBuilder.h>
 
 namespace cetty {
-namespace handler {
-namespace codec {
-namespace string {
+namespace service {
+namespace builder {
 
-ChannelMessage StringDecoder::decode(ChannelHandlerContext& ctx,
-                                     const ChannelPtr& channel,
-                                     const ChannelMessage& msg) {
-    const ChannelBufferPtr& buffer = msg.value<ChannelBufferPtr>();
-
-    if (buffer) {
-        std::string str;
-        buffer->readBytes(&str);
-        return str;
-    }
-
-    return msg;
-}
-
-}
 }
 }
 }

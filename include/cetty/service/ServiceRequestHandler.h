@@ -22,7 +22,6 @@
 #include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/util/ReferenceCounter.h>
 #include <cetty/service/OutstandingCall.h>
 
 namespace cetty {
@@ -30,39 +29,39 @@ namespace service {
 
 using namespace cetty::channel;
 
-template<typename RequestT, typename ResponseT>
+template<typename ReqT, typename RepT>
 class ServiceRequestHandler : public cetty::channel::SimpleChannelHandler {
 public:
-    typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
-    typedef OutstandingCall<RequestT, ResponseT> OutstandingMessage;
-    typedef boost::intrusive_ptr<OutstandingCall<RequestT, ResponseT> > OutstandingCallPtr;
+    typedef ServiceFuture<RepT> ServiceFutureType;
+    typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
+    typedef ServiceRequestHandler<ReqT, RepT> ServiceRequestHandlerType;
+
+    typedef boost::intrusive_ptr<ServiceFutureType> ServiceFuturePtr;
+    typedef boost::intrusive_ptr<OutstandingCallType> OutstandingCallPtr;
 
 public:
-    ServiceRequestHandler() : id(0) {}
+    ServiceRequestHandler(const ChannelPtr& parent) : parent(parent) {}
     virtual ~ServiceRequestHandler() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        ResponseT& response = e.getMessage().value<ResponseT>();
+        RepT& response = e.getMessage().value<RepT>();
 
         if (response) {
             // TODO: using template traits to define the pointer or object.
             const OutstandingCallPtr& out = outMessages.front();
-            boost::int64_t id = out->getId();
-#if 0
-            {
-                std::map<boost::int64_t, OutstandingCall>::iterator it = outstandings.find(id);
-
-                if (it != outstandings.end()) {
-                    out = it->second;
-                    outstandings.erase(it);
-                }
-            }
-#endif
 
             if (out->future) {
-                out->future->setSuccess(response);
+                if (parent) { // if has father channel, just delegate the message to father channel.
+                    out->future->setResponse(response);
+                }
+                else {
+                    out->future->setSuccess(response);
+                }
             }
 
+            if (parent) {
+                Channels::fireMessageReceived(parent, ChannelMessage(out));
+            }
             outMessages.pop_front();
         }
         else {
@@ -71,22 +70,21 @@ public:
     }
 
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingMessage>();
-        msg->setId(++id);
+        OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingCallType>();
         outMessages.push_back(msg);
         Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
     }
 
     virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new ServiceRequestHandler<RequestT, ResponseT>());
+        return ChannelHandlerPtr(new ServiceRequestHandlerType(parent));
     }
 
     virtual std::string toString() const {
-        return "ServiceRequestHandler";
+        return "ServiceRequestHandlerType";
     }
 
 private:
-    boost::int64_t id;
+    ChannelPtr parent;
     std::deque<OutstandingCallPtr> outMessages;
 };
 

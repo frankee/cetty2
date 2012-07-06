@@ -124,7 +124,7 @@ boost::int16_t CompositeChannelBuffer::getShort(int index) const {
     if (index + 2 <= indices[componentId + 1]) {
         return components[componentId]->getShort(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         return (boost::int16_t)(((getByte(index) & 0xff) << 8) | (getByte(index + 1) & 0xff));
     }
     else {
@@ -138,7 +138,7 @@ boost::int32_t CompositeChannelBuffer::getInt(int index) const {
     if (index + 4 <= indices[componentId + 1]) {
         return components[componentId]->getInt(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         return ((getShort(index) & 0xffff) << 16) | (getShort(index + 2) & 0xffff);
     }
     else {
@@ -152,7 +152,7 @@ boost::int64_t CompositeChannelBuffer::getLong(int index) const {
     if (index + 8 <= indices[componentId + 1]) {
         return components[componentId]->getLong(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         return (((boost::int64_t)getInt(index) & 0xffffffffL) << 32) | (getInt(index + 4) & 0xffffffffL);
     }
     else {
@@ -248,7 +248,7 @@ int CompositeChannelBuffer::setShort(int index, int value) {
     if (index + 2 <= indices[componentId + 1]) {
         return components[componentId]->setShort(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         setByte(index, (value >> 8));
         setByte(index + 1, value);
     }
@@ -266,7 +266,7 @@ int CompositeChannelBuffer::setInt(int index, int value) {
     if (index + 4 <= indices[componentId + 1]) {
         return components[componentId]->setInt(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         setShort(index, (value >> 16));
         setShort(index + 2, value);
     }
@@ -284,7 +284,7 @@ int CompositeChannelBuffer::setLong(int index, boost::int64_t value) {
     if (index + 8 <= indices[componentId + 1]) {
         return components[componentId]->setLong(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::BIG_ENDIAN) {
+    else if (order() == ByteOrder::big_endian) {
         setInt(index, (int)(value >> 32));
         setInt(index + 4, (int) value);
     }

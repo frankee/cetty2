@@ -1,7 +1,7 @@
-#if !defined(CETTY_UTIL_TIMERFACOTRYFWD_H)
-#define CETTY_UTIL_TIMERFACOTRYFWD_H
+#if !defined(CETTY_CONFIG_CONFIGCENTER_H)
+#define CETTY_CONFIG_CONFIGCENTER_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -16,8 +16,42 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace util { 
 
-}}
+#include <string>
 
-#endif //#if !defined(CETTY_UTIL_TIMERFACOTRYFWD_H)
+namespace cetty {
+namespace config {
+
+class ConfigObject;
+
+class ConfigCenter {
+public:
+    static ConfigCenter& instance();
+
+public:
+    ConfigCenter();
+
+    int load(int argc, char* argv[]);
+
+    int load(const char* str);
+    int load(const std::string& str);
+    int loadFromFile(const std::string& file);
+
+    int configure(ConfigObject* object) const;
+
+private:
+    static ConfigCenter* center;
+
+private:
+    int argc;
+    char** argv;
+};
+
+}
+}
+
+#endif //#if !defined(CETTY_CONFIG_CONFIGCENTER_H)
+
+// Local Variables:
+// mode: c++
+// End:

@@ -54,14 +54,14 @@ public:
 };
 
 ChannelBufferPtr ChannelBuffers::buffer(const ByteOrder& endianness, int capacity, int aheadBytes) {
-    if (endianness == ByteOrder::BIG_ENDIAN) {
+    if (endianness == ByteOrder::big_endian) {
         if (capacity == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(capacity, aheadBytes));
     }
-    else if (endianness == ByteOrder::LITTLE_ENDIAN) {
+    else if (endianness == ByteOrder::little_endian) {
         if (capacity == 0) {
             return EMPTY_BUFFER;
         }
@@ -73,7 +73,7 @@ ChannelBufferPtr ChannelBuffers::buffer(const ByteOrder& endianness, int capacit
 }
 
 cetty::buffer::ChannelBufferPtr ChannelBuffers::buffer(int capacity, int aheadBytes) {
-    return ChannelBuffers::buffer(ByteOrder::BIG_ENDIAN, capacity, aheadBytes);
+    return ChannelBuffers::buffer(ByteOrder::big_endian, capacity, aheadBytes);
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer(ChannelBufferFactory& factory) {
@@ -99,22 +99,22 @@ ChannelBufferPtr ChannelBuffers::dynamicBuffer(const ByteOrder& endianness,
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer() {
-    return ChannelBuffers::dynamicBuffer(ByteOrder::BIG_ENDIAN, 256);
+    return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, 256);
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer(int estimatedLength) {
-    return ChannelBuffers::dynamicBuffer(ByteOrder::BIG_ENDIAN, estimatedLength);
+    return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, estimatedLength);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const ByteOrder& endianness, const Array& arry) {
-    if (endianness == ByteOrder::BIG_ENDIAN) {
+    if (endianness == ByteOrder::big_endian) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(arry));
     }
-    else if (endianness == ByteOrder::LITTLE_ENDIAN) {
+    else if (endianness == ByteOrder::little_endian) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
@@ -280,23 +280,23 @@ ChannelBufferPtr ChannelBuffers::wrappedBuffer(std::string& str) {
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& arry) {
-    return ChannelBuffers::wrappedBuffer(ByteOrder::BIG_ENDIAN, arry);
+    return ChannelBuffers::wrappedBuffer(ByteOrder::big_endian, arry);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& arry, int offset, int length) {
-    return ChannelBuffers::wrappedBuffer(ByteOrder::BIG_ENDIAN, arry, offset, length);
+    return ChannelBuffers::wrappedBuffer(ByteOrder::big_endian, arry, offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& array0, const Array& array1) {
-    return wrappedBuffer(ByteOrder::BIG_ENDIAN, array0, array1);
+    return wrappedBuffer(ByteOrder::big_endian, array0, array1);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& array0, const Array& array1, const Array& array2) {
-    return wrappedBuffer(ByteOrder::BIG_ENDIAN, array0, array1, array2);
+    return wrappedBuffer(ByteOrder::big_endian, array0, array1, array2);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(std::vector<Array>& arrays) {
-    return wrappedBuffer(ByteOrder::BIG_ENDIAN, arrays);
+    return wrappedBuffer(ByteOrder::big_endian, arrays);
 }
 
 ChannelBufferPtr
@@ -317,14 +317,14 @@ ChannelBuffers::compositeBuffer(const ByteOrder& endianness,
 
 ChannelBufferPtr
 ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const ConstArray& arry) {
-    if (endianness == ByteOrder::BIG_ENDIAN) {
+    if (endianness == ByteOrder::big_endian) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(ConstArray::clone(arry), true));
     }
-    else if (endianness == ByteOrder::LITTLE_ENDIAN) {
+    else if (endianness == ByteOrder::little_endian) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
@@ -521,27 +521,27 @@ ChannelBuffers::copiedBuffer(const std::vector<ChannelBufferPtr>& buffers) {
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ConstArray& arry) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, arry);
+    return copiedBuffer(ByteOrder::big_endian, arry);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ConstArray& arry, int offset, int length) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, arry, offset, length);
+    return copiedBuffer(ByteOrder::big_endian, arry, offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const Array& array0, const Array& array1) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, array0, array1);
+    return copiedBuffer(ByteOrder::big_endian, array0, array1);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const Array& array0, const Array& array1, const Array& array2) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, array0, array1, array2);
+    return copiedBuffer(ByteOrder::big_endian, array0, array1, array2);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::vector<Array>& arrays) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, arrays);
+    return copiedBuffer(ByteOrder::big_endian, arrays);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::string& string) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, ConstArray::fromString(string));
+    return copiedBuffer(ByteOrder::big_endian, ConstArray::fromString(string));
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const std::string& string) {
@@ -549,7 +549,7 @@ ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::string& string, int offset, int length) {
-    return copiedBuffer(ByteOrder::BIG_ENDIAN, ConstArray::fromString(string), offset, length);
+    return copiedBuffer(ByteOrder::big_endian, ConstArray::fromString(string), offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const std::string& string, int offset, int length) {
@@ -636,7 +636,7 @@ int ChannelBuffers::hashCode(const ChannelBuffer& buffer) {
     int hashCode = 1;
     int arrayIndex = buffer.readerIndex();
 
-    if (buffer.order() == ByteOrder::BIG_ENDIAN) {
+    if (buffer.order() == ByteOrder::big_endian) {
         for (int i = intCount; i > 0; --i) {
             hashCode = 31 * hashCode + buffer.getInt(arrayIndex);
             arrayIndex += 4;
