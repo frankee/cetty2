@@ -32,13 +32,16 @@ using namespace cetty::protobuf::service;
 
 class ProtobufMessage2HttpResponse {
 public:
-    ProtobufMessage2HttpResponse(const ServiceReponseMapperPtr& mapper);
+    ProtobufMessage2HttpResponse();
+    ProtobufMessage2HttpResponse(const ServiceResponseMapperPtr& mapper);
+
+    void setResponseMapper(const ServiceResponseMapperPtr& mapper);
 
     HttpResponsePtr getHttpResponse(const HttpRequestPtr& req,
                                     const ProtobufServiceMessagePtr& message);
 
 private:
-    ServiceReponseMapperPtr mapper;
+    ServiceResponseMapperPtr mapper;
 };
 
 }

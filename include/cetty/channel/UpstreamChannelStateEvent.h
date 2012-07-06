@@ -22,7 +22,9 @@
  */
 
 #include <string>
+#include <boost/any.hpp>
 #include <cetty/channel/ChannelStateEvent.h>
+#include <cetty/channel/ChannelState.h>
 
 namespace cetty {
 namespace channel {
@@ -60,8 +62,8 @@ private:
 
 private:
     const ChannelPtr&   channel;
-    const ChannelState& state;
-    const boost::any&   value;
+    ChannelState state;
+    boost::any   value;
 };
 
 }

@@ -29,7 +29,7 @@ class ServiceRequestMapper;
 class ServiceResponseMapper;
 
 typedef boost::intrusive_ptr<ServiceRequestMapper> ServiceRequestMapperPtr;
-typedef boost::intrusive_ptr<ServiceResponseMapper> ServiceReponseMapperPtr;
+typedef boost::intrusive_ptr<ServiceResponseMapper> ServiceResponseMapperPtr;
 
 }
 }

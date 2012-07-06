@@ -25,6 +25,37 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 
+
+ServiceResponseMapper::ServiceResponseMapper() {
+
+}
+
+ServiceResponseMapper::ServiceResponseMapper(const std::string& conf) {
+
+}
+
+ServiceResponseMapper::ServiceResponseMapper(const ConfigCenter& confCenter) {
+
+}
+
+int ServiceResponseMapper::configure(const std::string& conf) {
+    return 0;
+}
+
+int ServiceResponseMapper::configure(const ConfigCenter& confCenter) {
+    return 0;
+}
+
+int ServiceResponseMapper::configureFromFile(const std::string& file) {
+    return 0;
+}
+
+const ServiceResponseMapper::MapValue* ServiceResponseMapper::match(
+    const std::string& service,
+    const std::string& method) const {
+        return NULL;
+}
+
 void ServiceResponseMapper::setHttpHeaders(const MapValue& value,
         const HttpResponsePtr& response) {
     std::map<std::string, std::string>::const_iterator itr = value.headers.begin();
@@ -34,6 +65,11 @@ void ServiceResponseMapper::setHttpHeaders(const MapValue& value,
         response->setHeader(itr->first, itr->second);
     }
 }
+
+//ServiceResponseMapperConfig repConfig;
+//ServiceRequestMapperConfig reqConfig;
+//config.configure(&reqConfig);
+//config.configure(&repConfig);
 
 }
 }

@@ -19,7 +19,7 @@
 
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-#include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
+#include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
 namespace google {
 namespace protobuf {
@@ -39,10 +39,16 @@ using namespace cetty::protobuf::service;
 using google::protobuf::Message;
 using google::protobuf::FieldDescriptor;
 
+class HttpServiceTemplate;
+
 class HttpRequest2ProtobufMessage {
 public:
+    HttpRequest2ProtobufMessage();
     HttpRequest2ProtobufMessage(const ServiceRequestMapperPtr& serviceTemplates);
 
+    void setRequestMapper(const ServiceRequestMapperPtr& requestMapper);
+
+public:
     //1, method uri
     //2, method uri content (format) header(cookie)
     ProtobufServiceMessagePtr getProtobufMessage(const HttpRequestPtr& request);

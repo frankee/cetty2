@@ -81,6 +81,15 @@
     <Filter Include="http\service">
       <UniqueIdentifier>{5754f83c-599e-482b-b099-6e34d9738660}</UniqueIdentifier>
     </Filter>
+    <Filter Include="service\asio">
+      <UniqueIdentifier>{8be64c74-cb4b-471e-8124-3d507f913639}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="service\builder">
+      <UniqueIdentifier>{9e2401ff-a6d0-4918-a2ea-e39e928829f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{0bfd156e-7150-49c1-ab10-af090d3c9ae1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
@@ -466,6 +475,27 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
       <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp">
+      <Filter>service\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\Log4cplusLoggerFactory.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigReflection.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigCenter.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp">
+      <Filter>service\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientService.cpp">
+      <Filter>service\asio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp">
+      <Filter>service\asio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1117,9 +1147,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\Filter.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientDispatcher.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\http\CookieTemplate.h">
       <Filter>http</Filter>
     </ClInclude>
@@ -1134,6 +1161,45 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
       <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientService.h">
+      <Filter>service\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h">
+      <Filter>service\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h">
+      <Filter>service\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h">
+      <Filter>service\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h">
+      <Filter>service\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\logging\Log4cplusLogger.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h">
+      <Filter>service\builder</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

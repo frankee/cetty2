@@ -22,8 +22,10 @@
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
-namespace YAML {
-    class Node;
+namespace cetty {
+namespace config {
+class ConfigCenter;
+}
 }
 
 namespace cetty {
@@ -32,6 +34,7 @@ namespace service {
 namespace http {
 namespace map {
 
+using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 
 class ServiceResponseMapper : public cetty::util::ReferenceCounter<ServiceResponseMapper, int> {
@@ -48,11 +51,11 @@ public:
 
 public:
     ServiceResponseMapper();
-    ServiceResponseMapper(const std::string& file);
-    ServiceResponseMapper(const YAML::Node& node);
+    ServiceResponseMapper(const std::string& conf);
+    ServiceResponseMapper(const ConfigCenter& confCenter);
 
     int configure(const std::string& conf);
-    int configure(const YAML::Node& node);
+    int configure(const ConfigCenter& confCenter);
     int configureFromFile(const std::string& file);
 
     const MapValue* match(const std::string& service, const std::string& method) const;

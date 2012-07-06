@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <list>
+#include <vector>
 
 namespace google {
 namespace protobuf {
@@ -79,31 +80,32 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                    "class $classname$_Stub;\n"
                    "\n");
 
-    std::map<std::string, std::string> input_types;
-    std::map<std::string, std::string> output_types;
-
-    for (int i = 0; i < descriptor_->method_count(); i++) {
+    std::vector<std::pair<std::string, std::string> > input_types;
+    std::vector<std::pair<std::string, std::string> > output_types;
+    std::vector<std::string> method_names;
+    int j = descriptor_->method_count();
+    for (int i = 0; i < j; ++i) {
         const MethodDescriptor* method = descriptor_->method(i);
-        input_types[ClassName(method->input_type(), true)] = ClassName(method->input_type(), false);
-        output_types[ClassName(method->output_type(), true)] = ClassName(method->output_type(), false);
+        input_types.push_back(std::make_pair(ClassName(method->input_type(), true),
+                                             ClassName(method->input_type(), false)));
+        output_types.push_back(std::make_pair(ClassName(method->output_type(), true),
+                                              ClassName(method->output_type(), false)));
+        method_names.push_back(method->name());
     }
-    for (map<string, string>::iterator it = input_types.begin(); it != input_types.end(); ++it) {
+    for (int i = 0; i < j; ++i) {
             map<string, string> sub_vars;
-            sub_vars["type"] = it->first;
-            sub_vars["typedef"] = it->second;
+            sub_vars["type"] = input_types[i].first;
+            sub_vars["typedef"] = input_types[i].second;
+            sub_vars["out_type"] = output_types[i].first;
+            sub_vars["out_typedef"] = output_types[i].second;
+            sub_vars["method"] = method_names[i];
             printer->Print(sub_vars, 
                 "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n"
-                "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n");
-    }
-    for (map<string, string>::iterator it = output_types.begin(); it != output_types.end(); ++it) {
-        map<string, string> sub_vars;
-        sub_vars["type"] = it->first;
-        sub_vars["typedef"] = it->second;
-        printer->Print(sub_vars,
-            "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n"
-            "typedef ::cetty::service::ServiceFuture<$typedef$Ptr> > $typedef$Future;\n"
-            "typedef boost::intrusive_ptr<$typedef$Future> $typedef$FuturePtr;\n"
-            );
+                "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n"
+                "typedef ::cetty::util::BarePointer< $out_type$> $out_typedef$Ptr;\n"
+                "typedef ::cetty::service::ServiceFuture<$out_typedef$Ptr> $method$ServiceFuture;\n"
+                "typedef boost::intrusive_ptr<$method$ServiceFuture> $method$ServiceFuturePtr;\n"
+                );
     }
     printer->Print("\n");
     
@@ -183,22 +185,6 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
                    "\n");
 }
 
-void ServiceGenerator::GenerateFutureType(io::Printer* printer) {
-    for (int i = 0; i < descriptor_->method_count(); i++) {
-        const MethodDescriptor* method = descriptor_->method(i);
-        map<string, string> sub_vars;
-        sub_vars["classname"] = descriptor_->name();
-        sub_vars["name"] = method->name();
-        sub_vars["input_type"] = ClassName(method->input_type(), true);
-        sub_vars["output_type"] = ClassName(method->output_type(), true);
-        sub_vars["virtual"] = "virtual ";
-
-        printer->Print(sub_vars,
-            "typedef cetty::service::ServiceFuture<$output_type$> $output_type$Future;\n"
-                       "typedef boost::intrusive<$output_type$Future> $output_type$FuturePtr;\n\n");
-    }
-}
-
 void ServiceGenerator::GenerateMethodSignatures(
     StubOrNon stub_or_non, io::Printer* printer) {
     for (int i = 0; i < descriptor_->method_count(); i++) {
@@ -221,7 +207,7 @@ void ServiceGenerator::GenerateMethodSignatures(
                            "using $classname$::$name$;\n"
                            
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                           "                     const $output_type$FuturePtr& future);\n");
+                           "                     const $name$ServiceFuturePtr& future);\n");
         }
     }
 }
@@ -267,7 +253,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
                    "  : channel_(service), owns_channel_(false) {\n"
                    "    static int init = 0;\n"
                    "    if (!init) {\n"
-                   "        ::cetty::protobuf::service::ProtobufServiceRegister& register =\n"
+                   "        ::cetty::protobuf::service::ProtobufServiceRegister& serviceRegister =\n"
                    "            ::cetty::protobuf::service::ProtobufServiceRegister::instance();\n"
                    "\n");
 
@@ -275,14 +261,15 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
     for (int i = 0; i < descriptor_->method_count(); i++) {
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
-        sub_vars["classname"] = descriptor_->name();
+        sub_vars["classname"] = descriptor_->full_name();
         sub_vars["name"] = method->name();
+        sub_vars["response"] = method->output_type()->name();
 
         printer->Print(sub_vars,
 
-            "       register.registerResponsePrototype($classname$,\n"
-            "                                          $name$,\n"
-            "                                          &$classname$::default_instance());\n"
+            "       serviceRegister.registerResponsePrototype(\"$classname$\",\n"
+            "                                                 \"$name$\",\n"
+            "                                                 &$response$::default_instance());\n"
             "\n");
     }
 
@@ -407,7 +394,7 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
 
         printer->Print(sub_vars,
                        "void $classname$_Stub::$name$(const Const$input_type$Ptr& request,\n"
-                       "                              const $output_type$FuturePtr& future) {\n"
+                       "                              const $name$ServiceFuturePtr& future) {\n"
                        "  channel_.CallMethod(descriptor()->method($index$),\n"
                        "                      request, future);\n"
                        "}\n");

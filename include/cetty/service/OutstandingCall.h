@@ -24,21 +24,21 @@
 namespace cetty {
 namespace service {
 
-template<typename RequestT, typename ResponseT>
-class OutstandingCall : public cetty::util::ReferenceCounter<OutstandingCall<RequestT, ResponseT>, int> {
+template<typename ReqT, typename RepT>
+class OutstandingCall : public cetty::util::ReferenceCounter<OutstandingCall<ReqT, RepT>, int> {
 public:
-    typedef boost::intrusive_ptr<ServiceFuture<ResponseT> > ServiceFuturePtr;
+    typedef boost::intrusive_ptr<ServiceFuture<RepT> > ServiceFuturePtr;
 
 public:
     void setId(boost::int64_t id);
     boost::int64_t getId() const;
 
 public:
-    RequestT request;
+    ReqT request;
     ServiceFuturePtr future;
 
 public:
-    OutstandingCall(const RequestT& request, const ServiceFuturePtr& future)
+    OutstandingCall(const ReqT& request, const ServiceFuturePtr& future)
         : request(request), future(future) {}
 
 private:

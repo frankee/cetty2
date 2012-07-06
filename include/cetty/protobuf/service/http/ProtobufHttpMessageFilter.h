@@ -24,11 +24,18 @@
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>
 
 namespace cetty {
+namespace config {
+class ConfigCenter;
+}
+}
+
+namespace cetty {
 namespace protobuf {
 namespace service {
 namespace http {
 
 using namespace cetty::channel;
+using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::http::map;
@@ -37,15 +44,23 @@ class ProtobufHttpMessageFilter
         : public cetty::service::Filter<HttpRequestPtr, HttpResponsePtr, ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
 
 public:
+    ProtobufHttpMessageFilter(const ConfigCenter& config);
+
+    ProtobufHttpMessageFilter(const ServiceRequestMapperPtr& requestMapper,
+                              const ServiceResponseMapperPtr& responseMap);
+
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 protected:
     virtual ProtobufServiceMessagePtr filterReq(const HttpRequestPtr& req);
     virtual HttpResponsePtr filterRep(const HttpRequestPtr& req,
-        const ProtobufServiceMessagePtr& rep);
+                                      const ProtobufServiceMessagePtr& rep);
 
 private:
+    ServiceRequestMapperPtr requestMapper;
+    ServiceResponseMapperPtr responseMapper;
+
     HttpRequest2ProtobufMessage http2proto;
     ProtobufMessage2HttpResponse proto2http;
 };

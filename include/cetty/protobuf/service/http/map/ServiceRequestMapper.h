@@ -23,8 +23,10 @@
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 #include <cetty/protobuf/service/http/map/HttpServiceTemplate.h>
 
-namespace YAML {
-    class Node;
+namespace cetty {
+namespace config {
+class ConfigCenter;
+}
 }
 
 namespace cetty {
@@ -33,28 +35,21 @@ namespace service {
 namespace http {
 namespace map {
 
+using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 
 class ServiceRequestMapper : public cetty::util::ReferenceCounter<ServiceRequestMapper, int> {
 public:
     ServiceRequestMapper();
-    ServiceRequestMapper(const std::string& file);
-    ServiceRequestMapper(const YAML::Node& node);
+    ServiceRequestMapper(const std::string& conf);
+    ServiceRequestMapper(const ConfigCenter& confCenter);
 
-    int configure(const std::string& conf);
     int configure(const char* conf);
-    int configure(const YAML::Node& node);
+    int configure(const std::string& conf);
+    int configure(const ConfigCenter& confCenter);
     int configureFromFile(const std::string& file);
 
-    HttpServiceTemplate* match(const HttpMethod& method, const std::vector<std::string>& pathSegments) {
-        std::size_t j = serviceTemplates.size();
-        for (std::size_t i = 0; i < j; ++i) {
-            if (serviceTemplates[i].match(method, pathSegments)) {
-                return &serviceTemplates[i];
-            }
-        }
-        return NULL;
-    }
+    HttpServiceTemplate* match(const HttpMethod& method, const std::vector<std::string>& pathSegments);
 
 private:
     std::vector<HttpServiceTemplate> serviceTemplates;

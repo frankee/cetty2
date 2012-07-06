@@ -22,6 +22,7 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/util/StringUtil.h>
+#include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
@@ -34,6 +35,21 @@ namespace map {
 using namespace google::protobuf;
 using namespace cetty::util;
 using namespace cetty::protobuf::service;
+
+HttpRequest2ProtobufMessage::HttpRequest2ProtobufMessage() {
+
+}
+
+HttpRequest2ProtobufMessage::HttpRequest2ProtobufMessage(
+    const ServiceRequestMapperPtr& serviceTemplates)
+    : templates(serviceTemplates) {
+
+}
+
+void HttpRequest2ProtobufMessage::setRequestMapper(
+    const ServiceRequestMapperPtr& requestMapper) {
+        this->templates = requestMapper;
+}
 
 ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     const HttpRequestPtr& request) {

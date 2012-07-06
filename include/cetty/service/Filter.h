@@ -52,10 +52,14 @@ public:
     virtual ~Filter() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const MessageEvent& e);
+                                 const MessageEvent& e) {
+
+    }
 
     virtual void writeRequested(ChannelHandlerContext& ctx,
-                                const MessageEvent& e);
+                                const MessageEvent& e) {
+
+    }
 
 protected:
     virtual ReqOutT filterReq(const ReqInT& req) = 0;

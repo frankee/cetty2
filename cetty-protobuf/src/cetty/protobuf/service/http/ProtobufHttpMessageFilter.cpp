@@ -17,7 +17,10 @@
 #include <cetty/protobuf/service/http/ProtobufHttpMessageFilter.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
+#include <cetty/config/ConfigCenter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
+#include <cetty/protobuf/service/http/map/ServiceResponseMapper.h>
 
 namespace cetty {
 namespace protobuf {
@@ -26,6 +29,30 @@ namespace http {
 
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
+
+ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ServiceRequestMapperPtr& requestMapper,
+        const ServiceResponseMapperPtr& responseMapper)
+    : requestMapper(requestMapper),
+      responseMapper(responseMapper),
+      http2proto(requestMapper),
+      proto2http(responseMapper) {
+}
+
+ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ConfigCenter& config) {
+    requestMapper = new ServiceRequestMapper(config);
+    responseMapper = new ServiceResponseMapper(config);
+
+    http2proto.setRequestMapper(requestMapper);
+    proto2http.setResponseMapper(responseMapper);
+}
+
+ChannelHandlerPtr ProtobufHttpMessageFilter::clone() {
+    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
+}
+
+std::string ProtobufHttpMessageFilter::toString() const {
+    return "ProtobufHttpMessageFilter";
+}
 
 ProtobufServiceMessagePtr ProtobufHttpMessageFilter::filterReq(const HttpRequestPtr& req) {
     return http2proto.getProtobufMessage(req);

@@ -57,7 +57,7 @@ void ProtobufClientServiceAdaptor::CallMethod(
                                method->name(),
                                cetty::util::const_pointer_cast<google::protobuf::Message>(request)));
 
-    service->call(message, future);
+    callMethod(service, message, future);
 }
 
 ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ProtobufClientServicePtr& service)

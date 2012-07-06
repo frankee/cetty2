@@ -29,7 +29,7 @@ using namespace cetty::protobuf::service;
 
 template<>
 boost::int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::getId() const {
-    return future->getResponse()->getId();
+    return request->getId(); //future->getResponse()->getId();
 }
 
 template<>

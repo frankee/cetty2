@@ -115,7 +115,7 @@ void AsioClientSocketChannelFactory::deinit() {
 ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
     const AsioServicePtr& service = ioServicePool ? ioServicePool->getService() : ioService;
     ChannelPtr client =
-        new AsioClientSocketChannel(this,
+        new AsioClientSocketChannel(shared_from_this(),
                                     pipeline,
                                     sink,
                                     service,

@@ -7,9 +7,6 @@
     <Filter Include="protobuf\handler">
       <UniqueIdentifier>{f0152698-03cc-451c-b94d-9dbfe73641f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="protobuf\bootstrap">
-      <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
-    </Filter>
     <Filter Include="protobuf\proto">
       <UniqueIdentifier>{0f80022b-068b-40cb-908c-8207256060e5}</UniqueIdentifier>
     </Filter>
@@ -18,6 +15,9 @@
     </Filter>
     <Filter Include="protobuf\http\map">
       <UniqueIdentifier>{794b072b-71db-4be7-a03b-939587c52811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protobuf\builder">
+      <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +90,12 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h">
       <Filter>protobuf\http\map</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h">
+      <Filter>protobuf\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h">
+      <Filter>protobuf\builder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
@@ -139,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp">
       <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp">
+      <Filter>protobuf\builder</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

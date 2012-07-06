@@ -69,7 +69,7 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
 
     channel = new AsioServerSocketChannel(sink->getAcceptor(),
                                           sink->getAcceptorService(),
-                                          this,
+                                          shared_from_this(),
                                           pipeline,
                                           sink);
     LOG_INFO(logger, "Created the AsioServerSocketChannel.");

@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{75A24313-B5BB-489C-80E4-B22C18BEEC0F}</ProjectGuid>
+    <ProjectGuid>{9724E85B-D149-4A62-ADF3-7161707C99F6}</ProjectGuid>
     <RootNamespace>EchoServer</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

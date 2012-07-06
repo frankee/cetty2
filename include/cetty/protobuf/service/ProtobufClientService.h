@@ -28,8 +28,8 @@ namespace service {
 using namespace cetty::service;
 using namespace cetty::protobuf::service;
 
-typedef ClientService<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufClientService;
-typedef boost::intrusive_ptr<ProtobufClientService> ProtobufClientServicePtr;
+typedef ClientService ProtobufClientService;
+typedef ProtobufClientService* ProtobufClientServicePtr;
 
 }
 }
