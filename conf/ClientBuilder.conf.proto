@@ -1,0 +1,45 @@
+package cetty.service.builder
+
+message ServerConnection {
+	optional string service = 1;
+	
+	optional string host = 2;
+	optional int32 port = 3;
+	optional int32 limit = 4;
+}
+
+message ClientBuilder {
+	optional bool shared_io_service = 1 ;
+	optional int32 thread_count = 2;
+	repeated ServerConnection connections = 3;
+}
+
+message ProtobufClientBuilder {
+	optional ClientBuilder builder = 1 [embed = true];
+}
+
+
+message PoiService {
+	option embed = true;
+	
+	optional ProtobufClientBuilder address_builder = 1
+	[embed = false note="xxxxxx"];
+	
+	optional ProtobufClientBuilder route_builder = 2;
+	optional ProtobufClientBuilder search_builder = 3;
+	optional ProtobufServerBuilder server_builder = 4;
+}
+
+
+- protobufClientBuilder:
+	builder:
+		shared_io_service : true
+		connections:
+			- host:
+			  port:
+			- host:
+			  port:
+
+		
+
+

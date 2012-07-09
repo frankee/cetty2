@@ -38,6 +38,7 @@ public:
     int loadFromFile(const std::string& file);
 
     int configure(ConfigObject* object) const;
+    int configure(const std::string& name, ConfigObject* object) const;
 
 private:
     static ConfigCenter* center;

@@ -114,7 +114,7 @@ public:
 
     template<typename RepT>
     RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return cetty::util::static_pointer_cast<RepT::element_type>(from->getPayload());
+        return cetty::util::static_pointer_cast<typename RepT::element_type>(from->getPayload());
     }
 
     template<typename ReqT, typename RepT>
@@ -122,7 +122,7 @@ public:
                     const cetty::util::BarePointer<ReqT const>& request,
                     const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
         CallMethod(method,
-                   cetty::util::static_pointer_cast<MessagePtr::element_type const>(request),
+                   cetty::util::static_pointer_cast<typename MessagePtr::element_type const>(request),
                    ProtobufServiceFuturePtr(
                        new TypeCastServiceFuture<ProtobufServiceMessagePtr, RepT>(future,
                                boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<RepT>, this, _1))));

@@ -72,24 +72,6 @@
     <Filter Include="handler\execution">
       <UniqueIdentifier>{f585ecef-9b88-405b-8473-ec0c8cfded58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="service">
-      <UniqueIdentifier>{393eaf8f-a722-4a93-bb42-034b3379b32d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="http">
-      <UniqueIdentifier>{fb45ad08-497f-48e2-a7c4-bd2c946180bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="http\service">
-      <UniqueIdentifier>{5754f83c-599e-482b-b099-6e34d9738660}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="service\asio">
-      <UniqueIdentifier>{8be64c74-cb4b-471e-8124-3d507f913639}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="service\builder">
-      <UniqueIdentifier>{9e2401ff-a6d0-4918-a2ea-e39e928829f9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="config">
-      <UniqueIdentifier>{0bfd156e-7150-49c1-ab10-af090d3c9ae1}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
@@ -467,35 +449,17 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\QueryStringEncoder.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\http\CookieTemplate.cpp">
-      <Filter>http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\http\UriTemplate.cpp">
-      <Filter>http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
       <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp">
-      <Filter>service\builder</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\logging\Log4cplusLoggerFactory.cpp">
       <Filter>logging</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigReflection.cpp">
-      <Filter>config</Filter>
+    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioIpAddressImplFactory.cpp">
+      <Filter>channel\socket\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigCenter.cpp">
-      <Filter>config</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp">
-      <Filter>service\builder</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientService.cpp">
-      <Filter>service\asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp">
-      <Filter>service\asio</Filter>
+    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketAddressImplFactory.cpp">
+      <Filter>channel\socket\asio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -670,9 +634,6 @@
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioIpAddressImpl.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioIpAddressImplFactory.h">
-      <Filter>channel\socket\asio</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioServerSocketChannel.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
@@ -686,9 +647,6 @@
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketAddressImpl.h">
-      <Filter>channel\socket\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketAddressImplFactory.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannel.h">
@@ -1126,80 +1084,20 @@
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\Service.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\Filter.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\http\CookieTemplate.h">
-      <Filter>http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\http\UriTemplate.h">
-      <Filter>http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\http\service\HttpMessageFilter.h">
-      <Filter>http\service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientService.h">
-      <Filter>service\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h">
-      <Filter>service\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h">
-      <Filter>service\builder</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h">
-      <Filter>service\builder</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h">
-      <Filter>service\builder</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cetty\logging\Log4cplusLogger.h">
       <Filter>logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h">
-      <Filter>config</Filter>
+    <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioIpAddressImplFactory.h">
+      <Filter>channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h">
-      <Filter>config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h">
-      <Filter>config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h">
-      <Filter>config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h">
-      <Filter>service\builder</Filter>
+    <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioSocketAddressImplFactory.h">
+      <Filter>channel\socket\asio</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

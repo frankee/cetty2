@@ -18,9 +18,7 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanPipelineFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanTask.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h" />
     <ClInclude Include="..\..\src\cetty\gearman\GearmanMessageChecker.h" />
-    <ClInclude Include="GearmanWorkers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp" />
@@ -30,7 +28,6 @@
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageChecker.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanPipelineFactory.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}</ProjectGuid>

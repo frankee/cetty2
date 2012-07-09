@@ -24,12 +24,13 @@
 namespace cetty {
 namespace util {
 
-template<class T, class Count = boost::detail::atomic_count>
+template<typename T, typename Count = boost::detail::atomic_count>
 class ReferenceCounter {
 public:
     ReferenceCounter() : refCount(0) {}
     virtual ~ReferenceCounter() {}
 
+#if 0
     friend void intrusive_ptr_add_ref(ReferenceCounter<T, Count> const* s) {
         BOOST_ASSERT(s != 0);
         s->duplicate();
@@ -39,6 +40,7 @@ public:
         BOOST_ASSERT(s != 0);
         s->release();
     }
+#endif
 
     /**
      * Increments the reference count.
@@ -98,6 +100,16 @@ private:
 };
 
 }
+}
+
+template<typename T, typename U>
+inline void intrusive_ptr_add_ref(cetty::util::ReferenceCounter<T, U> const* expr){
+    expr->duplicate();
+}
+
+template<typename T, typename U>
+inline void intrusive_ptr_release(cetty::util::ReferenceCounter<T, U> const* expr){
+    expr->release();
 }
 
 #endif //#if !defined(CETTY_UTIL_REFERENCECOUNTER_H)

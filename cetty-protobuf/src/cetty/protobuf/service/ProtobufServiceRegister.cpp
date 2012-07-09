@@ -147,7 +147,7 @@ int ProtobufServiceRegister::registerResponsePrototype(const std::string& servic
 
 void ProtobufServiceRegister::unregisterResponsePrototype(const std::string& service,
     const std::string& method) {
-    ResponsePrototypeMap::const_iterator itr = responsePrototypeMap.find(service + method);
+    ResponsePrototypeMap::iterator itr = responsePrototypeMap.find(service + method);
 
     if (itr != responsePrototypeMap.end()) {
         responsePrototypeMap.erase(itr);

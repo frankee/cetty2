@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cetty/http/UriTemplate.h>
-#include <cetty/http/CookieTemplate.h>
+#include <cetty/service/http/UriTemplate.h>
+#include <cetty/service/http/CookieTemplate.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/SimpleTrie.h>
@@ -32,9 +32,9 @@ namespace service {
 namespace http {
 namespace map {
 
-using namespace cetty::http;
 using namespace cetty::util;
 using namespace cetty::handler::codec::http;
+using namespace cetty::service::http;
 
 // GET uri template
 class HttpServiceTemplate {

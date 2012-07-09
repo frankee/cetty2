@@ -24,6 +24,8 @@
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
+#include <cetty/config/ConfigCenter.h>
+
 #include <cetty/service/ClientService.h>
 #include <cetty/service/ClientServiceDispatcher.h>
 #include <cetty/service/ClientServiceMessageHandler.h>
@@ -37,6 +39,7 @@ namespace builder {
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
+using namespace cetty::config;
 using namespace cetty::service;
 using namespace cetty::service::asio;
 
@@ -66,52 +69,55 @@ public:
           asioService(ioService) {
     }
 
-    //ClientBuilder(ConfigureCenter& confcenter);
+    ClientBuilder(const ConfigCenter& confCenter);
+    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePoolPtr& ioServciePool);
+    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePtr& ioService);
 
     void setPipeline(const ChannelPipelinePtr& pipeline) {
         clientPipeline = pipeline;
-        //clientBootstrap.setPipeline(pipeline);
     }
-
-    //void setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory) {
-    //    clientBootstrap.setPipelineFactory(pipelineFactory);
-    //}
 
     void addConnection(const std::string& host, int port, int limit = 1) {
         connections.push_back(Connection(host, port, limit));
     }
 
     ClientServicePtr build() {
+        ServiceContext context;
         const AsioServicePtr& asioService =
             asioServicePool ? asioServicePool->getService() : asioService;
-        ServiceContext context;
 
         ServiceContextMap::iterator itr = serviceContext.find(asioService->getId());
 
         if (itr != serviceContext.end()) {
             context = itr->second;
-            
         }
         else {
             ChannelFactoryPtr factory =
                 new AsioClientServiceFactory(asioService, asioServicePool);
 
-            // construct the pipeline
-            ChannelHandlerPtr dispatcher(
-                new DispatcherType(connections, clientPipeline, asioService));
+            context = std::make_pair(factory,
+                                     getPipelineFactory(asioService));
 
-            ChannelHandlerPtr messageHandler(new MessageHandlerType);
-
-            ChannelPipelinePtr pipeline = Channels::pipeline();
-            pipeline->addLast("dispatcher", dispatcher);
-            pipeline->addLast("message", messageHandler);
-
-            context = std::make_pair(factory, Channels::pipelineFactory(pipeline));
             serviceContext[asioService->getId()] = context;
         }
 
         ChannelPtr channel = context.first->newChannel(context.second->getPipeline());
         return (ClientServicePtr)channel;
+    }
+
+private:
+    ChannelPipelineFactoryPtr getPipelineFactory(const AsioServicePtr& ioService) {
+        // construct the pipeline
+        ChannelHandlerPtr dispatcher(
+            new DispatcherType(connections, clientPipeline, ioService));
+
+        ChannelHandlerPtr messageHandler(new MessageHandlerType);
+
+        ChannelPipelinePtr pipeline = Channels::pipeline();
+        pipeline->addLast("dispatcher", dispatcher);
+        pipeline->addLast("message", messageHandler);
+
+        return Channels::pipelineFactory(pipeline);
     }
 
 private:

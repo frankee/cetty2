@@ -18,6 +18,7 @@
  */
 
 #include <boost/cstdint.hpp>
+#include <cetty/channel/Channels.h>
 #include <cetty/channel/SimpleChannelHandler.h>
 #include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelMessage.h>

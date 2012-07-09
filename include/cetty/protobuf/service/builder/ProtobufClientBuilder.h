@@ -74,7 +74,6 @@ private:
         pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
 
         pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
-        //pipeline->addLast("requestHandler", new ProtobufServiceRequestHandler());
 
         ClientBuilderType::setPipeline(pipeline);
     }

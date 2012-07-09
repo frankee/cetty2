@@ -19,9 +19,6 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -37,9 +34,6 @@
     <ClInclude Include="..\..\src\cetty\gearman\GearmanMessageChecker.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="GearmanWorkers.h">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp">
@@ -49,9 +43,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessageHandler.cpp">

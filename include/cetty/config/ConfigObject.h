@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <string>
 #include <map>
 
 namespace cetty {
@@ -28,20 +29,28 @@ class ConfigDescriptor;
 class ConfigObject {
 public:
     ConfigObject() {}
+    ConfigObject(const std::string& name) {}
     virtual ~ConfigObject() {}
 
-    const ConfigReflection& getreflection() const { }
-    const ConfigDescriptor& getdescriptor() const { }
+    virtual const ConfigReflection& getreflection() const;
+    virtual const ConfigDescriptor& getdescriptor() const;
 
     virtual ConfigObject* create() const = 0;
 
 protected:
-    void addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object) {
+    void addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object);
 
-    }
+protected:
+    std::string className;
 
 private:
-    static std::map<std::string, std::pair<ConfigDescriptor*, ConfigObject*> > objects;
+    struct DescriptorContainer {
+        ConfigDescriptor* descriptor;
+        ConfigObject* object;
+    };
+
+    typedef std::map<std::string, DescriptorContainer>  ObjectDescriptorMap;
+    static ObjectDescriptorMap objects;
 };
 
 }

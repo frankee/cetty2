@@ -24,6 +24,8 @@
  *
  */
 
+#include <string>
+
 #if defined(BOOST_MSVC)
 #undef TRACE
 #endif

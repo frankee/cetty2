@@ -107,10 +107,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\protobuf\cpp_service.h" />
+    <ClInclude Include="..\..\src\cetty\protobuf\service\generator\cpp_service.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\generator\ProtobufServiceGenerator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

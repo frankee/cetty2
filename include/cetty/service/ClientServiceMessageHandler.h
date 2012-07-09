@@ -41,7 +41,7 @@ public:
     virtual ~ClientServiceMessageHandler() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        OutstandingCallPtr& response = e.getMessage().smartPointer<OutstandingCallType>();
+        OutstandingCallPtr response = e.getMessage().smartPointer<OutstandingCallType>();
 
         if (response) {
             boost::int64_t id = response->getId();

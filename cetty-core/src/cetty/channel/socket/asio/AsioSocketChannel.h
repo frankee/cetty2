@@ -172,3 +172,8 @@ private:
 }
 
 #endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNEL_H)
+
+// Local Variables:
+// mode: c++
+// End:
+

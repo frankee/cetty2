@@ -248,7 +248,7 @@ static void sigtermHandler(int sig) {
     CETTY_NOTUSED(sig);
 
     //LOGGER(LOGGER_WARN,"Received SIGTERM, scheduling shutdown...");
-    server.shutdown_asap = 1;
+    //server.shutdown_asap = 1;
 }
 
 #undef CETTY_NOTUSED
@@ -440,7 +440,7 @@ void ServerBuilder::registerPipeline(const std::string& name,
 }
 
 void ServerBuilder::unregisterPipeline(const std::string& name) {
-    std::map<std::string, ChannelPipelinePtr>::const_iterator itr =
+    std::map<std::string, ChannelPipelinePtr>::iterator itr =
         pipelines.find(name);
 
     if (itr != pipelines.end()) {

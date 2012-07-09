@@ -165,3 +165,8 @@ private:
 }
 
 #endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOIPADDRESS_H)
+
+// Local Variables:
+// mode: c++
+// End:
+
