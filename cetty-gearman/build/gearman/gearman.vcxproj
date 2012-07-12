@@ -34,6 +34,7 @@
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufClientFilter.cpp" />

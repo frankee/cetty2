@@ -92,5 +92,8 @@
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp">
       <Filter>gearman\protobuf\builder</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

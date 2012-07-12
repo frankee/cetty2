@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/SimpleChannelHandler.h>
@@ -38,8 +39,15 @@ public:
     GearmanWorkerHandler();
     virtual ~GearmanWorkerHandler();
 
+
+    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+
     void registerWorker(const std::string& functionName,
         const GrabJobCallback& worker);
+
+    void start();
+
+    void handleJob(GearmanMessagePtr gearmanMessage);
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
         const MessageEvent& e);
@@ -50,10 +58,15 @@ public:
     virtual std::string toString() const;
 
 private:
-    static void start();
-    static void grabJob();
-    static void grabJobUnique();
-    static void preSleep();
+    void grabJob();
+    void grabJobUnique();
+    void preSleep();
+
+    int grabCount;
+    ChannelPtr channel;
+    //<functionName,functionPointer>
+    std::map<const std::string,GrabJobCallback&>funcMap;
+    typedef std::map<const std::string,GrabJobCallback&>::const_iterator  FuncMapIter;
 };
 
 }
