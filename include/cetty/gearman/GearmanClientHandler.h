@@ -17,14 +17,30 @@
  * under the License.
  */
 
+#include <list>
 #include <cetty/channel/SimpleChannelHandler.h>
 
 namespace cetty {
 namespace gearman {
 
+using namespace cetty::channel;
+
 class GearmanClientHandler : public cetty::channel::SimpleChannelHandler {
 public:
-    GearmanClientHandler() {}
+    GearmanClientHandler();
+    virtual ~GearmanClientHandler();
+
+    //upstream
+    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+    //downstream
+    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
+
+
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
+
+private:
+    std::list<GearmanMessagePtr> msgs;
 };
 
 }

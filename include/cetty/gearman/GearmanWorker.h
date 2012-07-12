@@ -27,6 +27,7 @@ namespace gearman {
 class GearmanWorker;
 typedef boost::intrusive_ptr<GearmanWorker> GearmanWorkerPtr;
 
+
 class GearmanWorker : public cetty::util::ReferenceCounter<GearmanWorker, int> {
 public:
     GearmanWorker();
