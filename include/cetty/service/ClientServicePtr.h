@@ -20,6 +20,7 @@
 namespace cetty {
 namespace service {
 
+class ClientService;
 typedef ClientService* ClientServicePtr;
 
 }

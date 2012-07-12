@@ -256,10 +256,10 @@ class EchoService : public ::cetty::protobuf::service::ProtobufService {
 
 class EchoService_Stub : public EchoService {
  public:
-  EchoService_Stub(const ::cetty::protobuf::service::ProtobufClientServicePtr& service);
+  EchoService_Stub(const ::cetty::service::ClientServicePtr& service);
   ~EchoService_Stub();
   
-  inline const ::cetty::protobuf::service::ProtobufClientServicePtr& channel() {
+  inline const ::cetty::service::ClientServicePtr& channel() {
       return channel_.getService();
   }
   
