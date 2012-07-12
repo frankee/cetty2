@@ -86,5 +86,11 @@
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
       <Filter>gearman</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

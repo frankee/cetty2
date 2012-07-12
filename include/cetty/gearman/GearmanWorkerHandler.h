@@ -28,7 +28,19 @@ public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
 public:
+    GearmanWorkerHandler();
+    ~GearmanWorkerHandler();
 
+    static void start();
+    static void grabJob();
+    static void grabJobUnique();
+    static void preSleep();
+
+    void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+    void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
+
+    ChannelHandlerPtr clone();
+    std::string toString() const();
 };
 
 }
