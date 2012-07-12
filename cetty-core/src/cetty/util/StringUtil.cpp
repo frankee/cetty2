@@ -15,6 +15,7 @@
  */
 
 #include <limits>
+#include <cmath>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
 #include <cetty/util/StringUtil.h>

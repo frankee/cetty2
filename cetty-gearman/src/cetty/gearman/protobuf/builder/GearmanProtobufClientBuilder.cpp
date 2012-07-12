@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,35 +15,39 @@
  * under the License.
  */
 
-#include <cetty/gearman/GearmanPipelineFactory.h>
+#include <cetty/gearman/protobuf/builder/GearmanProtobufClientBuilder.h>
 
 #include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
-#include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanDecoder.h>
-#include <cetty/gearman/GearmanMessageHandler.h>
+#include <cetty/gearman/GearmanEncoder.h>
+#include <cetty/gearman/GearmanClientHandler.h>
+#include <cetty/gearman/protobuf/GearmanProtobufMessageFilter.h>
 
 namespace cetty {
 namespace gearman {
+namespace protobuf {
+namespace builder {
 
-    using namespace cetty::channel;
+using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
+using namespace cetty::gearman;
+using namespace cetty::gearman::protobuf;
 
-static const int MAX_FRAME_LENGTH = 1024*1024;
+void GearmanProtobufClientBuilder::init() {
+    pipeline = Channels::pipeline();
 
-cetty::channel::ChannelPipelinePtr GearmanPipelineFactory::getPipeline() {
-    ChannelPipelinePtr pipeline = Channels::pipeline();
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
+    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
+    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+    pipeline->addLast("gearmanClient", new GearmanClientHandler());
+    pipeline->addLast("gearmanFilter", new GearmanProtobufClientFilter());
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 8, 4, 0, 4));
-
-    pipeline->addLast("gearmanDecoder", new GearmanDecoder);
-    pipeline->addLast("gearmanEncoder", new GearmanEncoder);
-
-    pipeline->addLast("gearmanHandler", new GearmanMessageHandler);
-
-    return pipeline;
+    ClientBuilderType::setPipeline(pipeline);
 }
 
+}
+}
 }
 }

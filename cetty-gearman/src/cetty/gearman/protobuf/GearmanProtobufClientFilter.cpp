@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,8 +13,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
+#include <cetty/gearman/protobuf/GearmanProtobufClientFilter.h>
+
 namespace cetty {
 namespace gearman {
+namespace protobuf {
 
+}
 }
 }

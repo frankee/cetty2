@@ -60,7 +60,7 @@ FIND_PACKAGE(Threads)
 #include_directories(${LOG4CPLUS_INCLUDE_DIRS})
 #LINK_DIRECTORIES(${LOG4CPLUS_LIBRARY_DIRS})
 
-# Defines the compiler/linker flags used to build gtest.  You can
+# Defines the compiler/linker flags used to build cetty.  You can
 # tweak these definitions to suit your need.  A variable's value is
 # empty before it's explicitly assigned to.
 
@@ -81,14 +81,14 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   # Until version 4.3.2, GCC doesn't define a macro to indicate
   # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
   # explicitly.
-  set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
+  set(cxx_no_rtti_flags "-fno-rtti -DCETTY_HAS_RTTI=0")
   set(cxx_strict_flags "-Wextra")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
   set(cxx_exception_flags "-features=except")
   # Sun Pro doesn't provide macros to indicate whether exceptions and
   # RTTI are enabled, so we define GTEST_HAS_* explicitly.
-  set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
-  set(cxx_no_rtti_flags "-features=no%rtti -DGTEST_HAS_RTTI=0")
+  set(cxx_no_exception_flags "-features=no%except -DCETTY_HAS_EXCEPTIONS=0")
+  set(cxx_no_rtti_flags "-features=no%rtti -DCETTY_HAS_RTTI=0")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
         CMAKE_CXX_COMPILER_ID STREQUAL "XL")
   # CMake 2.8 changes Visual Age's compiler ID to "XL".
@@ -97,11 +97,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
   # Until version 9.0, Visual Age doesn't define a macro to indicate
   # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
   # explicitly.
-  set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
+  set(cxx_no_rtti_flags "-qnortti -DCETTY_HAS_RTTI=0")
 endif()
 
 if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
-  set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
+  set(cxx_base_flags "${cxx_base_flags} -DCETTY_HAS_PTHREAD=1")
 endif()
 
 # For building cetty's own tests and samples.
@@ -139,9 +139,6 @@ function(cxx_shared_library name cxx_flags)
   cxx_library_with_type(${name} SHARED "${cxx_flags}" ${ARGN})
 endfunction()
 
-#cxx_static_library(cetty "${cxx_default}" ${libsources})
-#target_link_libraries(gtest_main gtest)
-
 
 ########################################################################
 #
@@ -166,6 +163,15 @@ function(cxx_executable_with_flags name cxx_flags lib)
   target_link_libraries(${name} ${lib})
 endfunction()
 
+function(cxx_executable_with_flags_no_link name cxx_flags)
+  add_executable(${name} ${ARGN})
+  if (cxx_flags)
+    set_target_properties(${name}
+      PROPERTIES
+      COMPILE_FLAGS "${cxx_flags}")
+  endif()
+endfunction()
+
 # cxx_executable(name dir lib srcs...)
 #
 # creates a named target that depends on the given lib and is built
@@ -179,6 +185,11 @@ endfunction()
 function(cxx_executable_current_path name lib)
   cxx_executable_with_flags(
     ${name} "${cxx_default}" ${lib} "${name}.cpp" ${ARGN})
+endfunction()
+
+function(cxx_executable_current_path_no_link name)
+  cxx_executable_with_flags_no_link(
+    ${name} "${cxx_default}" "${name}.cpp" ${ARGN})
 endfunction()
 
 #if (BUILD_EXAMPLES)

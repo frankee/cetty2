@@ -49,11 +49,13 @@ public:
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
+
+    static void encodeMessage(const ChannelBufferPtr& buffer,
+                              const ProtobufServiceMessagePtr& message);
+
 private:
-    void encodeMessage(const ChannelBufferPtr& buffer,
-                       const ProtobufServiceMessagePtr& message);
-    void encodeProtobufMessage(const ChannelBufferPtr& buffer,
-                               const google::protobuf::Message& message);
+    static void encodeProtobufMessage(const ChannelBufferPtr& buffer,
+                                      const google::protobuf::Message& message);
 };
 
 }

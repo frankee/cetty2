@@ -19,10 +19,10 @@
 
 #include <vector>
 #include <string>
-#include <boost/intrusive_ptr.hpp>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 #if defined(WIN32) && defined(ERROR)
 #undef ERROR
@@ -32,10 +32,6 @@ namespace cetty {
 namespace gearman {
 
 using namespace cetty::buffer;
-
-class GearmanMessage;
-typedef boost::intrusive_ptr<GearmanMessage> GearmanMessagePtr;
-typedef boost::intrusive_ptr<GearmanMessage const> GearmanMessageConstPtr;
 
 class GearmanMessage : public cetty::util::ReferenceCounter<GearmanMessage, int> {
 public:
@@ -102,8 +98,6 @@ public:
 
     static GearmanMessagePtr createSetClientIdMessage(const std::string& clientId);
     static GearmanMessagePtr createAllYoursMessage();
-
-
 
     // client
     static GearmanMessagePtr createsubmitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);

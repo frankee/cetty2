@@ -1,6 +1,3 @@
-#if !defined(CETTY_GEARMAN_GEARMANRPCHANDLER_H)
-#define CETTY_GEARMAN_GEARMANRPCHANDLER_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,20 +14,12 @@
  * under the License.
  */
 
-#include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
-namespace cetty { namespace gearman { 
-    class GearmanRpcHandler : public cetty::channel::SimpleChannelHandler {
-    public:
-        GearmanRpcHandler();
-        virtual ~GearmanRpcHandler();
+namespace cetty {
+namespace gearman {
+namespace builder {
 
-    };
-
-}}
-
-#endif //#if !defined(CETTY_GEARMAN_GEARMANRPCHANDLER_H)
-
-// Local Variables:
-// mode: c++
-// End:
+}
+}
+}

@@ -55,11 +55,13 @@ public:
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);
 
-private:
-    int decode(const ChannelBufferPtr& buffer,
-               const ProtobufServiceMessagePtr& message);
-    int decodePayload(const ChannelBufferPtr& buffer,
+
+    static int decode(const ChannelBufferPtr& buffer,
                       const ProtobufServiceMessagePtr& message);
+
+private:
+    static int decodePayload(const ChannelBufferPtr& buffer,
+                             const ProtobufServiceMessagePtr& message);
 
 };
 

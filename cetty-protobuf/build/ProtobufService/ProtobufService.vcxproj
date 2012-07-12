@@ -27,7 +27,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />

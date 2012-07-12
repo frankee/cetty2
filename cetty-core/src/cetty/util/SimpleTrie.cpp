@@ -24,14 +24,14 @@ SimpleTrie::SimpleTrie() {}
 void SimpleTrie::addKey(SimpleTrieNode& n, std::string* word, void* data) {
     BOOST_ASSERT(word);
 
-    if (word->length() == 0) {
+    if (word->empty()) {
         n.words += 1;
         n.data = data;
         return;
     }
 
     n.prefixes += 1;
-    char first = word->front();
+    char first = (*word)[0];
     int index = SimpleTrieNode::getIndex(first);
 
     if (!n.hasReferenceTo(first)) {
@@ -46,11 +46,11 @@ const SimpleTrieNode* SimpleTrie::getLeafNode(const SimpleTrieNode& n,
         std::string* word) const {
     BOOST_ASSERT(word);
 
-    if (word->length() == 0) {
+    if (word->empty()) {
         return &n;
     }
 
-    char first = word->front();
+    char first = (*word)[0];
     int index = SimpleTrieNode::getIndex(first);
 
     if (n.references[index] == NULL) {
@@ -65,11 +65,11 @@ const SimpleTrieNode* SimpleTrie::getLeafNode(const SimpleTrieNode& n,
 int SimpleTrie::countPrefix(const SimpleTrieNode& n, std::string* word) const {
     BOOST_ASSERT(word);
 
-    if (word->length() == 0) {
+    if (word->empty()) {
         return n.prefixes;
     }
 
-    char first = word->front();
+    char first = (*word)[0];
     int index = SimpleTrieNode::getIndex(first);
 
     if (n.references[index] == NULL) {

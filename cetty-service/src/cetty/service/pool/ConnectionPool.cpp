@@ -1,6 +1,3 @@
-#if !defined(CETTY_GEARMAN_GEARMANTASK_H)
-#define CETTY_GEARMAN_GEARMANTASK_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,26 +14,8 @@
  * under the License.
  */
 
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <cetty/util/ReferenceCounter.h>
+#include <cetty/service/pool/ConnectionPool.h>
 
-#include <cetty/gearman/GearmanMessage.h>
+namespace cetty { namespace service { namespace pool { 
 
-namespace cetty {
-namespace gearman {
-
-class GearmanTask : public cetty::util::ReferenceCounter<GearmanTask> {
-public:
-    GearmanMessagePtr request;
-    GearmanMessagePtr response;
-
-    std::string id;
-    boost::posix_time::ptime time;
-};
-
-typedef boost::intrusive_ptr<GearmanTask> GearmanTaskPtr;
-
-}
-}
-
-#endif //#if !defined(CETTY_GEARMAN_GEARMANTASK_H)
+}}}

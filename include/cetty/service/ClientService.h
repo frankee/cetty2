@@ -24,6 +24,7 @@
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/service/ServiceFuture.h>
+#include <cetty/service/ClientServicePtr.h>
 #include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {

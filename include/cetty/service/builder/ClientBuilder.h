@@ -49,8 +49,6 @@ public:
     typedef cetty::service::ClientServiceDispatcher<ReqT, RepT> DispatcherType;
     typedef cetty::service::ClientServiceMessageHandler<ReqT, RepT> MessageHandlerType;
 
-    typedef ClientService* ClientServicePtr;
-
 public:
     ClientBuilder()
         : serviceInited(false),

@@ -1,6 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
-#define CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H
-
+#if !defined(CETTY_GEARMAN_GEARMANCLIENTHANDLER_H)
+#define CETTY_GEARMAN_GEARMANCLIENTHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,22 +17,21 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelPipelineFactory.h>
+#include <cetty/channel/SimpleChannelHandler.h>
 
 namespace cetty {
 namespace gearman {
 
-using namespace cetty::channel;
-
-class GearmanPipelineFactory : public cetty::channel::ChannelPipelineFactory {
+class GearmanClientHandler : public cetty::channel::SimpleChannelHandler {
 public:
-    GearmanPipelineFactory() {}
-    virtual~ GearmanPipelineFactory() {}
-
-    virtual ChannelPipelinePtr getPipeline();
+    GearmanClientHandler() {}
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANPIPELINEFACTORY_H)
+#endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENTHANDLER_H)
+
+// Local Variables:
+// mode: c++
+// End:

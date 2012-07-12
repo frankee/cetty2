@@ -103,13 +103,15 @@ private:
 }
 
 template<typename T, typename U>
-inline void intrusive_ptr_add_ref(cetty::util::ReferenceCounter<T, U> const* expr){
-    expr->duplicate();
+inline void intrusive_ptr_add_ref(cetty::util::ReferenceCounter<T, U> const* counter) {
+    BOOST_ASSERT(counter != 0);
+    counter->duplicate();
 }
 
 template<typename T, typename U>
-inline void intrusive_ptr_release(cetty::util::ReferenceCounter<T, U> const* expr){
-    expr->release();
+inline void intrusive_ptr_release(cetty::util::ReferenceCounter<T, U> const* counter) {
+    BOOST_ASSERT(counter != 0);
+    counter->release();
 }
 
 #endif //#if !defined(CETTY_UTIL_REFERENCECOUNTER_H)

@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
-#define CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H
+#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
+#define CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,25 +17,25 @@
  * under the License.
  */
 
-#include <cetty/service/ClientService.h>
-#include <cetty/protobuf/service/ProtobufServiceFuture.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <boost/intrusive_ptr.hpp>
+#include <cetty/service/OutstandingCall.h>
+#include <cetty/service/ServiceRequestHandler.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
-namespace cetty {
-namespace protobuf {
-namespace service {
+namespace cetty { namespace gearman { 
 
 using namespace cetty::service;
 using namespace cetty::protobuf::service;
 
-typedef ClientService ProtobufClientService;
-typedef ProtobufClientService* ProtobufClientServicePtr;
+typedef OutstandingCall<GearmanMessagePtr, GearmanMessagePtr> GearmanClientCall;
+typedef boost::intrusive_ptr<GearmanClientCall> GearmanClientCallPtr;
+
+typedef ServiceRequestHandler<GearmanMessagePtr, GearmanMessagePtr> GearmanClientRequestHandler;
 
 }
 }
-}
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFCLIENTSERVICE_H)
+#endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
 
 // Local Variables:
 // mode: c++
