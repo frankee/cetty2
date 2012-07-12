@@ -27,6 +27,7 @@ namespace builder {
 
 using namespace cetty::service;
 using namespace cetty::service::builder;
+using namespace cetty::protobuf::service;
 
 class GearmanProtobufClientBuilder
         : public cetty::service::builder::ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {

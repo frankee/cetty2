@@ -57,6 +57,9 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h">
       <Filter>gearman</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp">
@@ -86,11 +89,8 @@
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
       <Filter>gearman</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp">
-      <Filter>gearman</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp">
-      <Filter>gearman</Filter>
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp">
+      <Filter>gearman\protobuf\builder</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

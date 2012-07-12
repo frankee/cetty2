@@ -14,32 +14,18 @@
  * under the License.
  */
 
-#include <cetty/service/pool/ConnectionPool.h>
-
-#include <boost/bind.hpp>
-#include <cetty/channel/ChannelFuture.h>
+#include <cetty/gearman/protobuf/builder/GearmanProtobufWorkerBuilder.h>
 
 namespace cetty {
-namespace service {
-namespace pool {
+namespace gearman {
+namespace protobuf {
+namespace builder {
 
-using namespace cetty::channel;
-using namespace cetty::service;
+void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
 
-cetty::channel::ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
-    if (channels.empty()) {
-        ChannelFuturePtr future =
-            bootstrap.connect(connections[0].host, connections[0].port);
-        callbacks.push_back(callback);
-
-        future->addListener(boost::bind(
-                                &ConnectionPool::connectedCallback, this, _1));
-    }
-    else {
-        return channels.begin()->second;
-    }
 }
 
+}
 }
 }
 }

@@ -23,7 +23,7 @@
 #include <cetty/gearman/GearmanDecoder.h>
 #include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanClientHandler.h>
-#include <cetty/gearman/protobuf/GearmanProtobufMessageFilter.h>
+#include <cetty/gearman/protobuf/GearmanProtobufClientFilter.h>
 
 namespace cetty {
 namespace gearman {

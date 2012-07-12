@@ -1,3 +1,6 @@
+#if !defined(CETTY_SERVICE_CONNECTION_H)
+#define CETTY_SERVICE_CONNECTION_H
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,32 +17,36 @@
  * under the License.
  */
 
-#include <cetty/service/pool/ConnectionPool.h>
-
-#include <boost/bind.hpp>
-#include <cetty/channel/ChannelFuture.h>
+#include <string>
+#include <vector>
 
 namespace cetty {
 namespace service {
-namespace pool {
 
-using namespace cetty::channel;
-using namespace cetty::service;
+struct Connection {
+    int port;
+    int limited;
+    std::string host;
 
-cetty::channel::ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
-    if (channels.empty()) {
-        ChannelFuturePtr future =
-            bootstrap.connect(connections[0].host, connections[0].port);
-        callbacks.push_back(callback);
+    // format like :  host:port:limited
+    Connection(const std::string& connection) {
 
-        future->addListener(boost::bind(
-                                &ConnectionPool::connectedCallback, this, _1));
     }
-    else {
-        return channels.begin()->second;
-    }
-}
+
+    Connection(const std::string& host, int port, int limited)
+        : port(port), limited(limited), host(host) {}
+
+    Connection(int port, int limited)
+        : port(port), limited(limited) {}
+};
+
+typedef std::vector<Connection> Connections;
 
 }
 }
-}
+
+#endif //#if !defined(CETTY_SERVICE_CONNECTION_H)
+
+// Local Variables:
+// mode: c++
+// End:

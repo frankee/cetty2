@@ -1,3 +1,6 @@
+#if !defined(CETTY_GEARMAN_GEARMANWORKERPTR_H)
+#define CETTY_GEARMAN_GEARMANWORKERPTR_H
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,32 +17,19 @@
  * under the License.
  */
 
-#include <cetty/service/pool/ConnectionPool.h>
-
-#include <boost/bind.hpp>
-#include <cetty/channel/ChannelFuture.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
-namespace service {
-namespace pool {
+namespace gearman {
 
-using namespace cetty::channel;
-using namespace cetty::service;
-
-cetty::channel::ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
-    if (channels.empty()) {
-        ChannelFuturePtr future =
-            bootstrap.connect(connections[0].host, connections[0].port);
-        callbacks.push_back(callback);
-
-        future->addListener(boost::bind(
-                                &ConnectionPool::connectedCallback, this, _1));
-    }
-    else {
-        return channels.begin()->second;
-    }
-}
+class GearmanWorker;
+typedef boost::intrusive_ptr<GearmanWorker> GearmanWorkerPtr;
 
 }
 }
-}
+
+#endif //#if !defined(CETTY_GEARMAN_GEARMANWORKERPTR_H)
+
+// Local Variables:
+// mode: c++
+// End:

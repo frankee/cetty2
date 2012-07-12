@@ -107,5 +107,8 @@
     <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h">
       <Filter>service</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\Connection.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

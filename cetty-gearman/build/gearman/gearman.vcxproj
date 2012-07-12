@@ -21,6 +21,7 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessagePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufClientFilter.h" />
@@ -29,13 +30,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanWorkerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufClientFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.cpp" />
   </ItemGroup>

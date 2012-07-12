@@ -79,6 +79,7 @@ private:
     boost::int64_t id;
     std::deque<OutstandingCallPtr> outMessages;
 };
+
 }
 }
 

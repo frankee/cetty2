@@ -17,38 +17,27 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/service/Connection.h>
 #include <cetty/service/pool/WatermarkConnectionPool.h>
 
 namespace cetty {
 namespace gearman {
 
-class GearmanWorker;
-typedef boost::intrusive_ptr<GearmanWorker> GearmanWorkerPtr;
-
+using namespace cetty::channel::socket::asio;
+using namespace cetty::service;
+using namespace cetty::service::pool;
 
 class GearmanWorker : public cetty::util::ReferenceCounter<GearmanWorker, int> {
 public:
-    GearmanWorker();
-    GearmanWorker(const AsioServicePtr& ioService);
+    GearmanWorker(const AsioServicePtr& ioService,
+                  const ChannelPipelinePtr& pipeline,
+                  const Connections& connections);
+
+    virtual ~GearmanWorker();
 
 private:
-    void init() {
-        ChannelPipelinePtr pipeline = Channels::pipeline();
-
-        pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
-
-        pipeline->addLast("gearmanDecoder", new GearmanDecoder());
-        pipeline->addLast("gearmanEncoder", new GearmanEncoder());
-        pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
-
-        connectionPool.getBootstrap().setPipeline(pipeline);
-        connectionPool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(ioService));
-    }
-
-private:
-    AsioServicePtr ioService;
     WatermarkConnectionPool connectionPool;
 };
 

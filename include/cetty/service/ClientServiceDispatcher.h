@@ -29,23 +29,14 @@
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
+#include <cetty/service/Connection.h>
+
 namespace cetty {
 namespace service {
 
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
-
-struct Connection {
-    int port;
-    int limited;
-    std::string host;
-
-    Connection(const std::string& host, int port, int limited)
-        : port(port), limited(limited), host(host) {}
-    Connection(int port, int limited)
-        : port(port), limited(limited) {}
-};
 
 template<typename ReqT, typename RepT>
 class ClientServiceDispatcher : public cetty::channel::SimpleChannelHandler {
@@ -57,7 +48,7 @@ public:
     typedef boost::intrusive_ptr<OutstandingCallType> OutstandingCallPtr;
 
 public:
-    ClientServiceDispatcher(const std::vector<Connection>& connections,
+    ClientServiceDispatcher(const Connections& connections,
                             const ChannelPipelinePtr& pipeline,
                             const AsioServicePtr& asioService)
         : connections(connections),

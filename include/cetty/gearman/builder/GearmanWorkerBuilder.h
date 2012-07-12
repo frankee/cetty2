@@ -17,43 +17,58 @@
  * under the License.
  */
 
-namespace cetty { namespace gearman { namespace builder { 
+#include <vector>
+#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/service/Connection.h>
+#include <cetty/service/builder/ServerBuilder.h>
+#include <cetty/gearman/GearmanWorkerPtr.h>
+#include <cetty/gearman/GearmanWorkerHandler.h>
 
-    class GearmanWorkerBuilder {
-    public:
-        GearmanWorkerBuilder();
-        GearmanWorkerBuilder(int threadCnt);
+namespace cetty {
+namespace gearman {
+namespace builder {
 
-        void addConnection(const std::string& host, int port) {
-            connections.push_back(Connection(host, port, limit));
-        }
+using namespace cetty::channel::socket::asio;
+using namespace cetty::service;
+using namespace cetty::service::builder;
+using namespace cetty::gearman;
 
-        GearmanWorkerPtr build() {
-            ServiceContext context;
-            const AsioServicePtr& asioService =
-                asioServicePool ? asioServicePool->getService() : asioService;
+class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
+public:
+    typedef GearmanWorkerHandler::GrabJobCallback WorkerFuncotr;
 
-            ServiceContextMap::iterator itr = serviceContext.find(asioService->getId());
+public:
+    GearmanWorkerBuilder();
+    GearmanWorkerBuilder(int threadCnt);
+    virtual ~GearmanWorkerBuilder();
 
-            if (itr != serviceContext.end()) {
-                context = itr->second;
-            }
-            else {
-                ChannelFactoryPtr factory =
-                    new AsioClientServiceFactory(asioService, asioServicePool);
+    void addConnection(const std::string& host, int port);
 
-                context = std::make_pair(factory,
-                    getPipelineFactory(asioService));
+    void registerWorker(const std::string& functionName, const WorkerFuncotr& worker);
 
-                serviceContext[asioService->getId()] = context;
-            }
+    void setWorkerPipeline(const ChannelPipelinePtr& pipeline);
+    const ChannelPipelinePtr& getWorkerPipeline();
 
-            ChannelPtr channel = context.first->newChannel(context.second->getPipeline());
-            return (ClientServicePtr)channel;
-        }
-    };
+    const std::vector<GearmanWorkerPtr>& buildWorkers();
 
-}}}
+protected:
+    virtual void initDefaultPipeline();
+
+private:
+    void buildWorker(const AsioServicePtr& ioService);
+
+protected:
+    ChannelPipelinePtr pipeline;
+
+private:
+    std::vector<Connection> connections;
+    std::vector<GearmanWorkerPtr> workers;
+};
+
+}
+}
+}
 
 #endif //#if !defined(CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H)
 

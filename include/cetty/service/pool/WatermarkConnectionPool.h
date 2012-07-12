@@ -37,7 +37,13 @@ namespace pool {
  */
 class WatermarkConnectionPool : public ConnectionPool {
 public:
-    WatermarkConnectionPool();
+    WatermarkConnectionPool(const Connections& connections);
+    WatermarkConnectionPool(const Connections& connections,
+                            int lowWatermark,
+                            int highWatermark);
+
+    int setLowWatermark(int lowWatermark);
+    int setHighWatermark(int hightWatermark);
 
 private:
     int lowWatermark;

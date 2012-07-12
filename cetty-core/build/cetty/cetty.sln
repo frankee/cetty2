@@ -41,6 +41,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "service", "..\..\..\cetty-service\build\service\service.vcxproj", "{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gearman", "..\..\..\cetty-gearman\build\gearman\gearman.vcxproj", "{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1} = {17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}
+		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B} = {5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoClient", "..\..\..\cetty-gearman\build\GearmanEchoClient\GearmanEchoClient.vcxproj", "{E19E303B-ED55-4945-90CA-CFF36E1ED81B}"
 EndProject

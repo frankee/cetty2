@@ -14,11 +14,35 @@
  * under the License.
  */
 
-#include <cetty/gearman/builder/GearmanWorker.h>
+#include <cetty/gearman/GearmanWorker.h>
+
+#include <cetty/bootstrap/ClientBootstrap.h>
+#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
 namespace cetty {
 namespace gearman {
 
+using namespace cetty::bootstrap;
+using namespace cetty::channel;
+using namespace cetty::channel::socket::asio;
+using namespace cetty::service;
+using namespace cetty::service::pool;
+
+GearmanWorker::GearmanWorker(const AsioServicePtr& ioService,
+                             const ChannelPipelinePtr& pipeline,
+                             const Connections& connections)
+    : connectionPool(connections,
+                     (int)connections.size(),
+                     (int)connections.size()) {
+    connectionPool.getBootstrap().setPipeline(pipeline);
+    connectionPool.getBootstrap().setFactory(
+        new AsioClientSocketChannelFactory(ioService));
+}
+
+GearmanWorker::~GearmanWorker() {
+
+}
 
 }
 }

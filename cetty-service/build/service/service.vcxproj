@@ -117,6 +117,7 @@
     <ClInclude Include="..\..\..\include\cetty\service\http\UriTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\pool\Connection.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />

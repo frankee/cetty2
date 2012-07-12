@@ -36,7 +36,7 @@ class GearmanProtobufClientFilter
             GearmanMessagePtr,
             GearmanMessagePtr> {
 public:
-    GearmanProtobufClientFilter(const ConfigCenter& config);
+    GearmanProtobufClientFilter();
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;

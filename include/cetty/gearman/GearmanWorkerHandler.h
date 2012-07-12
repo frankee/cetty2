@@ -18,10 +18,17 @@
  */
 
 #include <boost/function.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
+
+class GearmanWorkerHandler;
+typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
+
+using namespace cetty::channel;
 
 class GearmanWorkerHandler : public cetty::channel::SimpleChannelHandler {
 public:
@@ -29,18 +36,24 @@ public:
 
 public:
     GearmanWorkerHandler();
-    ~GearmanWorkerHandler();
+    virtual ~GearmanWorkerHandler();
 
+    void registerWorker(const std::string& functionName,
+        const GrabJobCallback& worker);
+
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const MessageEvent& e);
+    virtual void writeRequested(ChannelHandlerContext& ctx,
+        const MessageEvent& e);
+
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
+
+private:
     static void start();
     static void grabJob();
     static void grabJobUnique();
     static void preSleep();
-
-    void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-    void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
-
-    ChannelHandlerPtr clone();
-    std::string toString() const();
 };
 
 }

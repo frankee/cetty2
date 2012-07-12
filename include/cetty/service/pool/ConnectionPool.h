@@ -25,6 +25,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/ChannelFwd.h>
+#include <cetty/service/Connection.h>
 
 namespace cetty {
 namespace service {
@@ -32,29 +33,18 @@ namespace pool {
 
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
+using namespace cetty::service;
 
 class ConnectionPool {
 public:
     typedef boost::function1<void, const ChannelPtr&> ConnectedCallback;
 
 public:
-    ConnectionPool(const std::vector<Connection>& connections);
+    ConnectionPool(const Connections& connections);
     virtual ~ConnectionPool() {}
 
 public:
-    ChannelPtr getChannel(const ConnectedCallback& callback) {
-        if (channels.empty()) {
-            ChannelFuturePtr future =
-                bootstrap.connect(connections[0].host, connections[0].port);
-            callbacks.push_back(callback);
-
-            future->addListener(boost::bind(
-                                    &ConnectionPool::connectedCallback, this, _1));
-        }
-        else {
-            return channels.begin()->second;
-        }
-    }
+    ChannelPtr getChannel(const ConnectedCallback& callback);
 
     void close() {}
 

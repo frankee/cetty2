@@ -15,10 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\GearmanEchoClient\GearmanEchoClient.cpp">
+    <ClCompile Include="..\..\sample\GearmanEchoClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

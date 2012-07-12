@@ -32,6 +32,15 @@ public:
 
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
+
+    GearmanWorkerBuilder builder();
+    builder.registerWorkerCallback();
+    builder.buildWorkers();
+
+    GearmanProtobufWorkerBuilder builder();
+    builder.registerService();
+    builder.buildAll();
+    
     
     ProtobufServerBuilder builder(ConfigCenter::instance());
     builder.registerService(new echo::EchoServiceImpl);
