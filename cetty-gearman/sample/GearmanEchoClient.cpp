@@ -30,11 +30,12 @@ public:
         callMethod(service,GearmanMessage::createsubmitJobMessage("test","1234",buf),future);
 
         service->write(ChannelMessage(
-            GearmanMessage::createsubmitJobMessage("test","1234",buf)));
+                           GearmanMessage::createsubmitJobMessage("test","1234",buf)));
     }
 
     void replied(const GearmanServiceFuturePtr& f, const GearmanMessagePtr& resp) {
         ++count;
+
         if (count < 10000) {
             sendRequest();
         }
