@@ -1,6 +1,4 @@
-#if !defined(CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H)
 #define CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -71,7 +69,6 @@ private:
 }
 }
 }
-
 #endif //#if !defined(CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H)
 
 // Local Variables:

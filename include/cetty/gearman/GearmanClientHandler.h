@@ -35,11 +35,17 @@ public:
     //downstream
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
+    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
+    void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
 private:
+    void submitJob(const GearmanMessagePtr& msg);
+
+private:
+    ChannelPtr channel;
     std::list<GearmanMessagePtr> msgs;
 };
 

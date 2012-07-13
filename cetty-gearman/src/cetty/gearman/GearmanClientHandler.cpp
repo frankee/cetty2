@@ -32,10 +32,25 @@ namespace gearman {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-GearmanClientHandler::GearmanClientHandler() {
+GearmanClientHandler::GearmanClientHandler(): channel(0) {
 }
 
 GearmanClientHandler::~GearmanClientHandler() {
+}
+
+
+void GearmanClientHandler::channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
+    channel = ctx.getChannel();
+}
+
+void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg) {
+    if (channel) {
+        channel->write(ChannelMessage(msg));
+    }
+}
+
+void GearmanClientHandler::handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e) {
+    //do something to the msg
 }
 
 void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
@@ -53,6 +68,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         std::cout<<"the JOB_SUBMIT is ok "<< std::endl;
         params = message->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
+        //can store the job-handler for match the result
         break;
 
     case GearmanMessage::WORK_STATUS:
@@ -61,6 +77,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         std::cout<<"the percent complete numerator is "<<params[1]<<std::endl;
         std::cout<<"the Percent complete denominator is "<<params[2]<<std::endl;
+        //to monitor the Percent complete of job
         break;
 
         //job handler来唯一标识一个job  定义一个 map<主job，vector<分job handler> >
@@ -70,6 +87,8 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         message->getData()->readBytes(&data);
         std::cout<<"the work complete is "<<data<<std::endl;
+
+        handleRet(message,ctx,e);
         //to send the response to client
         //ctx.getChannel()->write(ChannelMessage(message->getData()));
         //ctx.sendUpstream(e);

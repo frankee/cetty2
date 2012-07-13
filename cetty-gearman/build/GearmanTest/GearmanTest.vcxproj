@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\GearmanClientTest.cpp" />
+    <ClCompile Include="..\..\test\GearmanEchoClientTest.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}</ProjectGuid>
