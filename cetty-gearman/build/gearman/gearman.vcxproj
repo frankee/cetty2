@@ -30,6 +30,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanWorkerBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp" />

@@ -48,7 +48,6 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
     }
 
     switch (message->getType()) {
-        //client rsp
     case GearmanMessage::JOB_CREATED:
         std::cout<<"the JOB_SUBMIT is ok "<< std::endl;
         params = message->getParameters();
@@ -132,7 +131,6 @@ void GearmanClientHandler::writeRequested(ChannelHandlerContext& ctx, const Mess
     else {
         ctx.sendDownstream(e);
     }
-
 }
 
 ChannelHandlerPtr GearmanClientHandler::clone() {

@@ -103,17 +103,6 @@ void GearmanWorkerBuilder::registerWorker(const std::string& functionName,
     }
 }
 
-void GearmanWorkerBuilder::startWorker()
-{
-    ChannelHandlerPtr handler = pipeline->get("gearmanWorker");
-    GearmanWorkerHandlerPtr workerHandler =
-        boost::dynamic_pointer_cast<GearmanWorkerHandler>(handler);
-
-    if (workerHandler) {
-        workerHandler->start();
-    }
-}
-
 }
 }
 }

@@ -31,6 +31,26 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 using namespace cetty::gearman;
 
+GearmanClientBuilder::GearmanClientBuilder()
+    : ClientBuilderType() {
+    init();
+}
+
+GearmanClientBuilder::GearmanClientBuilder(int threadCnt)
+    : ClientBuilderType(threadCnt) {
+    init();
+}
+
+GearmanClientBuilder::GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool)
+    : ClientBuilderType(ioServicePool) {
+    init();
+}
+
+GearmanClientBuilder::GearmanClientBuilder(const AsioServicePtr& ioService)
+    :  ClientBuilderType(ioService) {
+    init();
+}
+
 void GearmanClientBuilder::init() {
     pipeline = Channels::pipeline();
 

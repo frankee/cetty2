@@ -43,6 +43,8 @@ using namespace cetty::config;
 using namespace cetty::service;
 using namespace cetty::service::asio;
 
+class ClientBuilderConfig;
+
 template<typename ReqT, typename RepT>
 class ClientBuilder {
 public:
@@ -67,9 +69,11 @@ public:
           asioService(ioService) {
     }
 
-    ClientBuilder(const ConfigCenter& confCenter);
-    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePoolPtr& ioServciePool);
-    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePtr& ioService);
+    ClientBuilder(const ClientBuilderConfig& conf);
+    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePoolPtr& ioServciePool);
+    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePtr& ioService);
+
+    virtual ~ClientBuilder() {}
 
     void setPipeline(const ChannelPipelinePtr& pipeline) {
         clientPipeline = pipeline;

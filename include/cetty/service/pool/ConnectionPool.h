@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <boost/function.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/ChannelFwd.h>
@@ -41,20 +42,19 @@ public:
 
 public:
     ConnectionPool(const Connections& connections);
-    virtual ~ConnectionPool() {}
+    virtual ~ConnectionPool();
 
 public:
     ChannelPtr getChannel(const ConnectedCallback& callback);
-
-    void close() {}
 
     ClientBootstrap& getBootstrap() {
         return this->bootstrap;
     }
 
+    void close() {}
+
 private:
-    void connectedCallback(const ChannelFuture& future) {
-    }
+    void connectedCallback(const ChannelFuture& future);
 
 protected:
     struct ChannelConnection {
@@ -74,7 +74,7 @@ private:
     std::vector<Connection> connections;
 
     ClientBootstrap bootstrap;
-    std::map<int, ChannelPtr> channels;
+    boost::ptr_map<int, ChannelConnection> channels;
 };
 
 }

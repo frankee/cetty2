@@ -33,22 +33,10 @@ public:
     typedef ClientBuilder<GearmanMessagePtr, GearmanMessagePtr> ClientBuilderType;
 
 public:
-    GearmanClientBuilder()
-        : ClientBuilderType() {
-            init();
-    }
-    GearmanClientBuilder(int threadCnt)
-        : ClientBuilderType(threadCnt) {
-            init();
-    }
-    GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool)
-        : ClientBuilderType(ioServicePool) {
-            init();
-    }
-    GearmanClientBuilder(const AsioServicePtr& ioService)
-        :  ClientBuilderType(ioService) {
-            init();
-    }
+    GearmanClientBuilder();
+    GearmanClientBuilder(int threadCnt);
+    GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool);
+    GearmanClientBuilder(const AsioServicePtr& ioService);
 
 private:
     void init();

@@ -18,6 +18,7 @@
  */
 
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
+#include <cetty/protobuf/service/ProtobufServicePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -25,12 +26,14 @@ namespace protobuf {
 namespace builder {
 
 using namespace cetty::gearman::builder;
+using namespace cetty::protobuf::service;
 
 class GearmanProtobufWorkerBuilder : public GearmanWorkerBuilder {
 public:
     GearmanProtobufWorkerBuilder();
     virtual ~GearmanProtobufWorkerBuilder();
-
+    
+    GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);
 
 protected:
     virtual void initDefaultPipeline();

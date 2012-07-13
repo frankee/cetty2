@@ -17,8 +17,9 @@
  * under the License.
  */
 
-#include <list>
+#include <deque>
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -35,12 +36,11 @@ public:
     //downstream
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
-
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 private:
-    std::list<GearmanMessagePtr> msgs;
+    std::deque<GearmanMessagePtr> msgs;
 };
 
 }

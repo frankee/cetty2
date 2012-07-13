@@ -20,6 +20,7 @@
 #include <map>
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <cetty/channel/ChannelFwd.h>
 #include <cetty/channel/SimpleChannelHandler.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
@@ -39,34 +40,39 @@ public:
     GearmanWorkerHandler();
     virtual ~GearmanWorkerHandler();
 
-
     virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
 
-    void registerWorker(const std::string& functionName,
-        const GrabJobCallback& worker);
-
-    void start();
-
-    void handleJob(GearmanMessagePtr gearmanMessage);
-
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const MessageEvent& e);
+                                 const MessageEvent& e);
     virtual void writeRequested(ChannelHandlerContext& ctx,
-        const MessageEvent& e);
+                                const MessageEvent& e);
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
+    void registerWorker(const std::string& functionName,
+                        const GrabJobCallback& worker);
+
 private:
+    void handleJob(const GearmanMessagePtr& gearmanMessage,
+                   ChannelHandlerContext& ctx,
+                   const MessageEvent& e);
+
+private:
+    void registerFunction(const std::string& functionName);
+
+    void preSleep();
     void grabJob();
     void grabJobUnique();
-    void preSleep();
 
-    int grabCount;
+private:
+    typedef std::map<std::string, GrabJobCallback> CallbackMap;
+
+private:
+    int maxGrabIdleCount;
+    int grabIdleCount;
     ChannelPtr channel;
-    //<functionName,functionPointer>
-    std::map<const std::string,GrabJobCallback&>funcMap;
-    typedef std::map<const std::string,GrabJobCallback&>::const_iterator  FuncMapIter;
+    CallbackMap workerFunctors;
 };
 
 }
