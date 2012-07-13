@@ -29,6 +29,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoServer", "..\echo\EchoServer.vcxproj", "{D8476A3C-7ECF-4D11-8C2D-ED48401749F7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufEchoClient", "..\..\..\cetty-protobuf\build\echo\ProtobufEchoClient.vcxproj", "{90CF637D-4D5E-4C16-A970-9F1D37F4328E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8} = {F0FE3882-462B-48CC-8AB7-8363E8F20BE8}
+		{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1} = {17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufEchoServer", "..\..\..\cetty-protobuf\build\echo\ProtobufEchoServer.vcxproj", "{9724E85B-D149-4A62-ADF3-7161707C99F6}"
 	ProjectSection(ProjectDependencies) = postProject

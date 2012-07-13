@@ -44,6 +44,8 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
 
         future->addListener(boost::bind(
                                 &ConnectionPool::connectedCallback, this, _1));
+
+        return ChannelPtr();
     }
     else {
         return channels.begin()->second->channel;
@@ -52,9 +54,19 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
 
 void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     ChannelConnection* conn = new ChannelConnection;
-    conn->channel = future.getChannel();
-    int id = conn->channel->getId();
+    ChannelPtr channel = future.getChannel();
+    
+    conn->channel = channel;
+    int id = channel->getId();
     channels.insert(id, conn);
+
+    while (!callbacks.empty()) {
+        const ConnectedCallback& call = callbacks.front();
+        if (call) {
+            call(channel);
+        }
+        callbacks.pop_front();
+    }
 }
 
 }
