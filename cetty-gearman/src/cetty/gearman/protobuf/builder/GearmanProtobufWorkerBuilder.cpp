@@ -16,13 +16,62 @@
 
 #include <cetty/gearman/protobuf/builder/GearmanProtobufWorkerBuilder.h>
 
+#include <google/protobuf/descriptor.h>
+#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
+#include <cetty/protobuf/service/ProtobufService.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
+#include <cetty/gearman/GearmanDecoder.h>
+#include <cetty/gearman/GearmanEncoder.h>
+#include <cetty/gearman/GearmanWorkerHandler.h>
+#include <cetty/gearman/protobuf/GearmanProtobufWorkerFilter.h>
+
 namespace cetty {
 namespace gearman {
 namespace protobuf {
 namespace builder {
 
-void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
+using namespace google::protobuf;
+using namespace cetty::channel;
+using namespace cetty::handler::codec::frame;
+using namespace cetty::protobuf::service::handler;
 
+void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
+    pipeline = Channels::pipeline();
+
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
+
+    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
+    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+    pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
+    pipeline->addLast("gearmanProtobufFilter", new GearmanProtobufWorkerFilter());
+    pipeline->addLast("protobufMessageHandler", new ProtobufServiceMessageHandler());
+}
+
+GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
+    const ProtobufServicePtr& service) {
+
+        if (!service) {
+            printf("");
+            return *this;
+        }
+
+    const ServiceDescriptor* descriptor = service->GetDescriptor();
+    BOOST_ASSERT(descriptor);
+
+    std::string serviceName = descriptor->name();
+    int methodCnt = descriptor->method_count();
+
+    std::string functionName;
+    WorkerFuncotr nullWorker;
+    for (int i = 0; i < methodCnt; ++i) {
+        functionName = serviceName;
+        const MethodDescriptor* method = descriptor->method(i);
+        functionName += method->name();
+
+        registerWorker(functionName, nullWorker);
+    }
 }
 
 }

@@ -1,5 +1,3 @@
-#if !defined(CETTY_SERVICE_CONNECTION_H)
-#define CETTY_SERVICE_CONNECTION_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,33 +15,34 @@
  * under the License.
  */
 
-#include <string>
+#include <cetty/service/pool/WatermarkConnectionPool.h>
 
 namespace cetty {
 namespace service {
+namespace pool {
 
-struct Connection {
-    int port;
-    int limited;
-    std::string host;
 
-    // format like :  host:port:limited
-    Connection(const std::string& connection) {
+WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections)
+    : ConnectionPool(connections),
+    lowWatermark(1),
+    highWatermark(0xffff) {
 
-    }
+}
 
-    Connection(const std::string& host, int port, int limited)
-        : port(port), limited(limited), host(host) {}
+WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
+    int lowWatermark,
+    int highWatermark)
+: ConnectionPool(connections),
+    lowWatermark(lowWatermark),
+    highWatermark(highWatermark) {
+}
 
-    Connection(int port, int limited)
-        : port(port), limited(limited) {}
-};
+WatermarkConnectionPool::~WatermarkConnectionPool() {
+
+}
+
+
 
 }
 }
-
-#endif //#if !defined(CETTY_SERVICE_CONNECTION_H)
-
-// Local Variables:
-// mode: c++
-// End:
+}

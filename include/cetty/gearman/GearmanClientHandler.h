@@ -17,8 +17,9 @@
  * under the License.
  */
 
-#include <list>
+#include <deque>
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -42,6 +43,7 @@ public:
 
     void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
 private:
+    std::deque<GearmanMessagePtr> msgs;
     void submitJob(const GearmanMessagePtr& msg);
 
 private:

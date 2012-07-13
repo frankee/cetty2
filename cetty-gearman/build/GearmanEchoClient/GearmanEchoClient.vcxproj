@@ -56,7 +56,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;libprotobufd.lib;ProtobufServiced.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;gearmand.lib;libprotobufd.lib;ProtobufServiced.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

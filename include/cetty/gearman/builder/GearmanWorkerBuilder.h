@@ -45,8 +45,6 @@ public:
 
     void registerWorker(const std::string& functionName, const WorkerFuncotr& worker);
 
-    void startWorker();
-
     void setWorkerPipeline(const ChannelPipelinePtr& pipeline);
     const ChannelPipelinePtr& getWorkerPipeline();
 

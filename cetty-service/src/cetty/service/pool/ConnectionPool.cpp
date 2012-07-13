@@ -17,6 +17,7 @@
 #include <cetty/service/pool/ConnectionPool.h>
 
 #include <boost/bind.hpp>
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
 
 namespace cetty {
@@ -26,7 +27,16 @@ namespace pool {
 using namespace cetty::channel;
 using namespace cetty::service;
 
-cetty::channel::ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
+ConnectionPool::ConnectionPool(const Connections& connections)
+    : connections(connections) {
+
+}
+
+ConnectionPool::~ConnectionPool() {
+
+}
+
+ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
     if (channels.empty()) {
         ChannelFuturePtr future =
             bootstrap.connect(connections[0].host, connections[0].port);
@@ -36,8 +46,15 @@ cetty::channel::ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& c
                                 &ConnectionPool::connectedCallback, this, _1));
     }
     else {
-        return channels.begin()->second;
+        return channels.begin()->second->channel;
     }
+}
+
+void ConnectionPool::connectedCallback(const ChannelFuture& future) {
+    ChannelConnection* conn = new ChannelConnection;
+    conn->channel = future.getChannel();
+    int id = conn->channel->getId();
+    channels.insert(id, conn);
 }
 
 }

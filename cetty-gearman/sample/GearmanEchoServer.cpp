@@ -1,48 +1,19 @@
 #include <stdio.h>
-#include <boost/bind.hpp>
-#include <cetty/service/ClientService.h>
-#include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 #include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
-using namespace cetty::channel;
 using namespace cetty::gearman;
-using namespace cetty::bootstrap;
-using namespace cetty::service;
 using namespace cetty::gearman::builder;
 
-class GearmanEchoWorker {
-public:
-    GearmanEchoWorker(const ClientServicePtr& s): service(s),count(0) {
-
-    }
-    virtual ~GearmanEchoWorker() {}
-
-    void sendRequest() {
-        ChannelBufferPtr buf = ChannelBuffers::buffer(10);
-        buf->writeBytes("hello");
-
-        GearmanMessagePtr request(GearmanMessage::createsubmitJobMessage("test","1234",buf));
-        service->write(ChannelMessage(request));
-    }
-
-    //void replied(const echo::EchoServiceFuture& f, const echo::EchoResponsePtr& resp) {
-    //    ++count;
-    //    if (count < 10000) {
-    //        sendRequest();
-    //    }
-    //}
-
-private:
-    int count;
-    ClientServicePtr service;
-};
+GearmanMessagePtr echo(const GearmanMessagePtr& message) {
+    return GearmanMessagePtr();
+}
 
 int main(int argc, char* argv[]) {
     GearmanWorkerBuilder builder;
     builder.addConnection("127.0.0.1", 4730);
+    builder.registerWorker("test", &echo);
+    builder.buildWorkers();
 
-    ClientServicePtr service = builder.build();
-    GearmanEchoWorker client(service);
-    client.sendRequest();
-    service->getCloseFuture()->awaitUninterruptibly();
+    //
 }

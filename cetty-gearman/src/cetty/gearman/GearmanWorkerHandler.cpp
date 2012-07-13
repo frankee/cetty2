@@ -13,17 +13,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
+#include <cetty/gearman/GearmanWorkerHandler.h>
+
 #include <string>
 #include <iostream>
 
-#include <cetty/gearman/GearmanMessage.h>
-#include <cetty/gearman/GearmanWorkerHandler.h>
-#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/Channels.h>
 #include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelStateEvent.h>
 #include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/ChannelStateEvent.h>
+#include <cetty/channel/ChannelHandlerContext.h>
 
+#include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
@@ -31,54 +34,62 @@ namespace gearman {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-GearmanWorkerHandler::GearmanWorkerHandler():channel(0),grabCount(0) {
+GearmanWorkerHandler::GearmanWorkerHandler()
+    : channel(0), grabIdleCount(0) {
 }
 
 GearmanWorkerHandler::~GearmanWorkerHandler() {
 }
 
-void GearmanWorkerHandler::start() {
-    grabJob();
+void GearmanWorkerHandler::channelConnected(ChannelHandlerContext& ctx,
+        const ChannelStateEvent& e) {
+    channel = ctx.getChannel();
+
+    if (channel) {
+        CallbackMap::const_iterator itr = workerFunctors.begin();
+
+        for (; itr != workerFunctors.end(); ++itr) {
+            registerFunction(itr->first);
+        }
+
+        grabJob();
+    }
 }
 
-void GearmanWorkerHandler::channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e)
-{
-    channel = e.getChannel();
-}
-
-void GearmanWorkerHandler::registerWorker(const std::string& functionName,const GrabJobCallback& worker)
-{
-    GearmanMessagePtr msg(GearmanMessage::createCandoMessage(functionName));
-    channel->write(ChannelMessage(msg));
+void GearmanWorkerHandler::registerWorker(const std::string& functionName,
+        const GrabJobCallback& worker) {
+    //GearmanMessagePtr msg(GearmanMessage::createCandoMessage(functionName));
+    //channel->write(ChannelMessage(msg));
     //add the worker to the funcMap
-    funcMap.insert(std::pair<const std::string,GrabJobCallback&>(functionName,worker));
+    workerFunctors.insert(std::make_pair(functionName, worker));
 }
 
+void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
+                                     ChannelHandlerContext& ctx,
+                                     const MessageEvent& e) {
 
-void GearmanWorkerHandler::handleJob(GearmanMessagePtr gearmanMessage)
-{
-    FuncMapIter  iter;
-    if ((iter = funcMap.find(gearmanMessage->getParameters()[1])) != funcMap.end())
-    {
-        //to call the function rely on the functionName
-        iter->second(gearmanMessage);
+    const std::string& functionName = gearmanMessage->getParamater(1);
+    CallbackMap::const_iterator itr = workerFunctors.find(functionName);
+
+    if (itr != workerFunctors.end()) {
+        const GrabJobCallback& callback = itr->second;
+
+        if (callback) {
+            GearmanMessagePtr message = callback(gearmanMessage);
+            //
+        }
+        else {
+            ctx.sendUpstream(e);
+        }
     }
 }
 
 void GearmanWorkerHandler::grabJob() {
-    if(grabCount>2)
-    {
-        preSleep();
-    }
     GearmanMessagePtr msg(GearmanMessage::createGrabJobMessage());
     channel->write(ChannelMessage(msg));
 }
 
 void GearmanWorkerHandler::grabJobUnique() {
-    if(grabCount>2)
-    {
-        preSleep();
-    }
     GearmanMessagePtr msg(GearmanMessage::createGrabJobUniqMessage());
     channel->write(ChannelMessage(msg));
 }
@@ -88,7 +99,8 @@ void GearmanWorkerHandler::preSleep() {
     channel->write(ChannelMessage(msg));
 }
 
-void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
+        const MessageEvent& e) {
     GearmanMessagePtr message = e.getMessage().smartPointer<GearmanMessage>();
     std::string  data;
     std::vector<std::string> params;
@@ -97,37 +109,37 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         ctx.sendUpstream(e);
     }
 
-    switch(message->getType()) {
-        //worker rsp
+    switch (message->getType()) {
     case GearmanMessage::NOOP:
-        std::cout<<"the NOOP is recivered,wake up to do job"<< std::endl;
+        std::cout<<"the NOOP is received, wake up to do job"<< std::endl;
         grabJob();
         break;
 
     case GearmanMessage::NO_JOB:
         std::cout<<"the GRAB_JOB  RSP is NO_JOB "<< std::endl;
-        grabCount++;
-        grabJob();
+
+        if (++grabIdleCount > maxGrabIdleCount) {
+            preSleep();
+        }
+        else {
+            grabJob();
+        }
+
         break;
 
     case GearmanMessage::JOB_ASSIGN:
         std::cout<<"the GRAB_JOB  RSP  is JOB_ASSIGN,do the job now "<< std::endl;
+
+#if defined(_DEBUG)
         params = message->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         std::cout<<"the function name is "<<params[1]<<std::endl;
         data = ChannelBuffers::hexDump(message->getData());
         std::cout<<"the arg data is "<<data<<std::endl;
-        std::string unique;
+#endif
 
-        handlerJob(params[1],)
-        //grabCount reset
-        grabCount = 0;
-        //如果需要分割job
-        /*if(message->Split())
-        {
-            GearmanWorker::splitJob();
-        }
-        GearmanWorker::handleJob(params[1],ChannelBuffers::hexDump(message->getData()),unique);*/
+        handleJob(message, ctx, e);
+        grabIdleCount = 0;
         break;
 
     case GearmanMessage::JOB_ASSIGN_UNIQ:
@@ -139,10 +151,8 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         data = ChannelBuffers::hexDump(message->getData());
         std::cout<<"the arg data is "<<data<<std::endl;
 
-        //grabCount reset
-        grabCount = 0;
-        //call message handler of uniq
-        //GearmanWorker::handleJob(params[1],ChannelBuffers::hexDump(message->getData()),params[2]);
+        grabIdleCount = 0;
+        handleJob(message, ctx, e);
         break;
 
     case GearmanMessage::ECHO_RES:
@@ -156,17 +166,10 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
     }
 }
 
-void GearmanWorkerHandler::writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    GearmanMessagePtr msg = e.getMessage().smartPointer<GearmanMessage>();
+void GearmanWorkerHandler::writeRequested(ChannelHandlerContext& ctx,
+        const MessageEvent& e) {
 
-    if (msg->getType() == GearmanMessage::PRE_SLEEP)
-        if (msg) {
-            msgs.push_back(msg);
-            Channels::write(ctx, e.getFuture(), ChannelMessage(msg));
-        }
-        else {
-            ctx.sendDownstream(e);
-        }
+    ctx.sendDownstream(e);
 }
 
 ChannelHandlerPtr GearmanWorkerHandler::clone() {

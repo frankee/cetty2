@@ -35,22 +35,11 @@ public:
     typedef ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ClientBuilderType;
 
 public:
-    GearmanProtobufClientBuilder()
-        : ClientBuilderType() {
-        init();
-    }
-    GearmanProtobufClientBuilder(int threadCnt)
-        : ClientBuilderType(threadCnt) {
-        init();
-    }
-    GearmanProtobufClientBuilder(const AsioServicePoolPtr& ioServicePool)
-        : ClientBuilderType(ioServicePool) {
-        init();
-    }
-    GearmanProtobufClientBuilder(const AsioServicePtr& ioService)
-        :  ClientBuilderType(ioService) {
-        init();
-    }
+    GearmanProtobufClientBuilder();
+    GearmanProtobufClientBuilder(int threadCnt);
+    GearmanProtobufClientBuilder(const AsioServicePoolPtr& ioServicePool);
+    GearmanProtobufClientBuilder(const AsioServicePtr& ioService);
+    virtual ~GearmanProtobufClientBuilder();
 
 private:
     void init();

@@ -22,8 +22,8 @@ public:
         ChannelBufferPtr buf = ChannelBuffers::buffer(10);
         buf->writeBytes("hello");
 
-        GearmanMessagePtr request(GearmanMessage::createsubmitJobMessage("test","1234",buf));
-        service->write(ChannelMessage(request));
+        service->write(ChannelMessage(
+            GearmanMessage::createsubmitJobMessage("test","1234",buf)));
     }
 
     //void replied(const echo::EchoServiceFuture& f, const echo::EchoResponsePtr& resp) {
