@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
@@ -11,9 +12,8 @@ GearmanMessagePtr echo(const GearmanMessagePtr& message) {
 
 int main(int argc, char* argv[]) {
     GearmanWorkerBuilder builder;
-    builder.addConnection("127.0.0.1", 4730);
+    builder.addConnection("192.168.1.162", 4730);
     builder.registerWorker("test", &echo);
     builder.buildWorkers();
-
-    //
+    return 0;
 }
