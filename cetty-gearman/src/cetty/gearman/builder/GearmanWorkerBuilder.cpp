@@ -35,12 +35,12 @@ using namespace cetty::handler::codec::frame;
 
 GearmanWorkerBuilder::GearmanWorkerBuilder()
     : ServerBuilder() {
-
+        initDefaultPipeline();
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
     : ServerBuilder(threadCnt) {
-
+        initDefaultPipeline();
 }
 
 GearmanWorkerBuilder::~GearmanWorkerBuilder() {

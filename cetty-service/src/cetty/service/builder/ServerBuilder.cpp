@@ -456,6 +456,14 @@ cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string&
     return ChannelPipelinePtr();
 }
 
+const AsioServicePoolPtr& ServerBuilder::getServicePool() {
+    if (!servicePool) {
+        servicePool = new AsioServicePool(config.threadCount);
+    }
+
+    return servicePool;
+}
+
 
 }
 }

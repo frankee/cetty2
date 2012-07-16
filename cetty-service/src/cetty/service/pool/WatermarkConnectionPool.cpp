@@ -17,6 +17,9 @@
 
 #include <cetty/service/pool/WatermarkConnectionPool.h>
 
+#include <boost/bind.hpp>
+#include <cetty/channel/ChannelFuture.h>
+
 namespace cetty {
 namespace service {
 namespace pool {
@@ -24,24 +27,29 @@ namespace pool {
 
 WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections)
     : ConnectionPool(connections),
-    lowWatermark(1),
-    highWatermark(0xffff) {
-
+      lowWatermark(1),
+      highWatermark(0xffff) {
 }
 
 WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
-    int lowWatermark,
-    int highWatermark)
-: ConnectionPool(connections),
-    lowWatermark(lowWatermark),
-    highWatermark(highWatermark) {
+        int lowWatermark,
+        int highWatermark)
+    : ConnectionPool(connections),
+      lowWatermark(lowWatermark),
+      highWatermark(highWatermark) {
 }
 
 WatermarkConnectionPool::~WatermarkConnectionPool() {
 
 }
 
+void WatermarkConnectionPool::start() {
+    ChannelFuturePtr future =
+        bootstrap.connect(connections[0].host, connections[0].port);
 
+    future->addListener(boost::bind(
+                            &ConnectionPool::connectedCallback, this, _1));
+}
 
 }
 }

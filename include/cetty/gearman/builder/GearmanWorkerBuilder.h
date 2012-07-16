@@ -1,3 +1,4 @@
+#if !defined(CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H)
 #define CETTY_GEARMAN_BUILDER_GEARMANWORKERBUILDER_H
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -50,7 +51,7 @@ public:
 
     const std::vector<GearmanWorkerPtr>& buildWorkers();
 
-protected:
+//protected:
     virtual void initDefaultPipeline();
 
 private:

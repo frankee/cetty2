@@ -56,6 +56,16 @@ void GearmanWorkerHandler::channelConnected(ChannelHandlerContext& ctx,
     }
 }
 
+
+void GearmanWorkerHandler::registerFunction(const std::string& functionName)
+{
+    GearmanMessagePtr msg(GearmanMessage::createCandoMessage(functionName));
+    if(channel)
+    {
+        channel->write(ChannelMessage(msg));
+    }
+}
+
 void GearmanWorkerHandler::registerWorker(const std::string& functionName,
         const GrabJobCallback& worker) {
     //GearmanMessagePtr msg(GearmanMessage::createCandoMessage(functionName));
@@ -76,6 +86,10 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
         if (callback) {
             GearmanMessagePtr message = callback(gearmanMessage);
+            if(channel)
+            {
+                channel->write(ChannelMessage(message));
+            }
             //
         }
         else {
@@ -86,7 +100,10 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
 void GearmanWorkerHandler::grabJob() {
     GearmanMessagePtr msg(GearmanMessage::createGrabJobMessage());
-    channel->write(ChannelMessage(msg));
+    if(channel)
+    {
+        channel->write(ChannelMessage(msg));
+    }
 }
 
 void GearmanWorkerHandler::grabJobUnique() {

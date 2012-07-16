@@ -68,6 +68,7 @@ public:
 
         pool.getBootstrap().setPipeline(pipeline);
         pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(asioService));
+
     }
 
     virtual void messageReceived(ChannelHandlerContext& ctx,

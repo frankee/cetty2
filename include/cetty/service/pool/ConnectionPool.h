@@ -53,7 +53,7 @@ public:
 
     void close() {}
 
-private:
+//protected:
     void connectedCallback(const ChannelFuture& future);
 
 protected:
@@ -69,11 +69,13 @@ private:
     ConnectionPool(const ConnectionPool&);
     ConnectionPool& operator=(const ConnectionPool&);
 
+protected:
+    std::vector<Connection> connections;
+    ClientBootstrap bootstrap;
+
 private:
     std::deque<ConnectedCallback> callbacks;
-    std::vector<Connection> connections;
-
-    ClientBootstrap bootstrap;
+    
     boost::ptr_map<int, ChannelConnection> channels;
 };
 

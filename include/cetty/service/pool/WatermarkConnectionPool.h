@@ -49,7 +49,8 @@ public:
     int getLowWatermark() const { return lowWatermark; }
     int getHighWatermark() const { return highWatermark; }
 
-    
+    void start();
+
 private:
     int lowWatermark;
     int highWatermark;

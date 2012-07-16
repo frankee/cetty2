@@ -17,7 +17,9 @@
  * under the License.
  */
 
-#include <deque>
+#include <list>
+
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/SimpleChannelHandler.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
@@ -43,7 +45,6 @@ public:
 
     void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
 private:
-    std::deque<GearmanMessagePtr> msgs;
     void submitJob(const GearmanMessagePtr& msg);
 
 private:

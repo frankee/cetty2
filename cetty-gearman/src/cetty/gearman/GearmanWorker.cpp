@@ -38,6 +38,7 @@ GearmanWorker::GearmanWorker(const AsioServicePtr& ioService,
     connectionPool.getBootstrap().setPipeline(pipeline);
     connectionPool.getBootstrap().setFactory(
         new AsioClientSocketChannelFactory(ioService));
+    connectionPool.start();
 }
 
 GearmanWorker::~GearmanWorker() {

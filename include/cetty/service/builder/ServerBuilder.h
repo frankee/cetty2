@@ -69,7 +69,7 @@ public:
     ChannelPipelinePtr getPipeline(const std::string& name);
 
     const ServerBuilderConfig& getConfig() const { return config; }
-    const AsioServicePoolPtr& getServicePool() const { return servicePool; }
+    const AsioServicePoolPtr& getServicePool();
 
 protected:
     ChannelPtr build(const std::string& name, int port);

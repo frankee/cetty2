@@ -27,15 +27,11 @@ public:
         ChannelBufferPtr buf = ChannelBuffers::buffer(10);
         buf->writeBytes("hello");
 
-        callMethod(service,GearmanMessage::createsubmitJobMessage("test","1234",buf),future);
-
-        service->write(ChannelMessage(
-                           GearmanMessage::createsubmitJobMessage("test","1234",buf)));
+        callMethod(service,GearmanMessage::createsubmitJobMessage("echo","1234",buf),future);
     }
 
-    void replied(const GearmanServiceFuturePtr& f, const GearmanMessagePtr& resp) {
+    void replied(const GearmanServiceFuture& f, const GearmanMessagePtr& resp) {
         ++count;
-
         if (count < 10000) {
             sendRequest();
         }
