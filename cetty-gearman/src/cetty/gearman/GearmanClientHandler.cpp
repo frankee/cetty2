@@ -51,13 +51,14 @@ void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg) {
 
 void GearmanClientHandler::handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e) {
     //do something to the msg
+    ctx.sendUpstream(e);
 }
 
 void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
     GearmanMessagePtr message = e.getMessage().smartPointer<GearmanMessage>();
     std::string  data;
     std::vector<std::string> params;
-
+    
     if (!message) {
         ctx.sendUpstream(e);
     }
@@ -84,8 +85,11 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         std::cout<<"the WORK_COMPLETE! "<< std::endl;
         params = message->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        message->getData()->readBytes(&data);
-        std::cout<<"the work complete is "<<data<<std::endl;
+
+
+        
+        data = ChannelBuffers::hexDump(message->getData());
+        std::cout<<"the work complete data is "<< data <<std::endl;
 
         handleRet(message,ctx,e);
         //to send the response to client

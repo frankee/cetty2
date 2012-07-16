@@ -127,7 +127,7 @@ public:
     int getType() const { return type; }
     const std::vector<std::string>& getParameters() const { return parameters; }
     const std::string& getParamater(int index) { return parameters.at(index); }
-    const ChannelBufferPtr& getData() const { return data; }
+    const ChannelBufferPtr& getData()const { return data; }
 
     bool hasData() const { return data && data->readable(); }
 

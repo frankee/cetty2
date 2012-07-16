@@ -38,6 +38,9 @@ public:
 
 public:
     GearmanWorkerHandler();
+    GearmanWorkerHandler(int maxGrabIdleCount);
+    GearmanWorkerHandler(int maxGrabIdleCount,
+        const std::map<std::string, GrabJobCallback>& workerFunctors);
     virtual ~GearmanWorkerHandler();
 
     virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
@@ -69,10 +72,11 @@ private:
     typedef std::map<std::string, GrabJobCallback> CallbackMap;
 
 private:
-    int maxGrabIdleCount;
-    int grabIdleCount;
-    ChannelPtr channel;
-    CallbackMap workerFunctors;
+    bool isSleep;
+    int m_maxGrabIdleCount;
+    int m_grabIdleCount;
+    ChannelPtr m_channel;
+    CallbackMap m_workerFunctors;
 };
 
 }

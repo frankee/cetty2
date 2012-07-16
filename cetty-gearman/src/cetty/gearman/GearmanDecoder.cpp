@@ -66,13 +66,14 @@ ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
             if (bytes > 0)
             {
                 std::string* str = message->addParameter();
-                str->reserve(bytes + 1);
+                str->reserve(bytes);
 				//从buffer往str里写bytes+1个数据
-                buffer->readBytes(str, bytes + 1);
+                buffer->readBytes(str, bytes);
+                buffer->skipBytes(1);
             }
             else
             {
-				//these types take the param as the last elem
+				//these types take the param as the last element
 				if(type == GearmanMessage::JOB_CREATED || type == GearmanMessage::STATUS_RES || type == GearmanMessage::OPTION_RES ||
 					type == GearmanMessage::WORK_STATUS || type == GearmanMessage::WORK_FAIL || type == GearmanMessage::ERROR)
 				{
