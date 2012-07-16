@@ -3,9 +3,11 @@ package cetty.service.builder
 message ServerConnection {
 	optional string service = 1;
 	
-	optional string host = 2;
-	optional int32 port = 3;
-	optional int32 limit = 4;
+	optional string connection = 2;
+	
+	optional string host = 3;
+	optional int32 port = 4;
+	optional int32 limit = 5;
 }
 
 message ClientBuilder {
@@ -18,9 +20,10 @@ message ProtobufClientBuilder {
 	optional ClientBuilder builder = 1 [embed = true];
 }
 
-
 message PoiService {
 	option embed = true;
+	
+	repeated ProtobufClientBuilder client_builders = 1;
 	
 	optional ProtobufClientBuilder address_builder = 1
 	[embed = false note="xxxxxx"];
@@ -30,6 +33,29 @@ message PoiService {
 	optional ProtobufServerBuilder server_builder = 4;
 }
 
+address_builder:
+	builder:
+		xxx
+		xxx
+			- host:
+			
+
+PoiService:
+	address_builder:
+	server_builder:
+	
+	client_builders:
+		- xxxxx
+		- xxxxx
+		- xxxxx
+		
+		
+	ProtobufClientBuilder : address_builder
+		
+	ProtobufClientBuilder : address_builder
+		- 
+	- ProtobufClientBuilder : route_builder
+	
 
 - protobufClientBuilder:
 	builder:

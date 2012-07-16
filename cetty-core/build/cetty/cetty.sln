@@ -59,6 +59,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoClient", "..\..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoWorker", "..\..\..\cetty-gearman\build\GearmanEchoWorker\GearmanEchoWorker.vcxproj", "{A0D7D3E7-386B-440E-AB0C-A3D7EA99CA93}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfigGenerator", "..\..\..\cetty-config\build\ConfigGenerator\ConfigGenerator.vcxproj", "{0452B388-3767-4DED-930D-652177D13DCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -129,6 +131,10 @@ Global
 		{A0D7D3E7-386B-440E-AB0C-A3D7EA99CA93}.Debug|Win32.Build.0 = Debug|Win32
 		{A0D7D3E7-386B-440E-AB0C-A3D7EA99CA93}.Release|Win32.ActiveCfg = Release|Win32
 		{A0D7D3E7-386B-440E-AB0C-A3D7EA99CA93}.Release|Win32.Build.0 = Release|Win32
+		{0452B388-3767-4DED-930D-652177D13DCD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0452B388-3767-4DED-930D-652177D13DCD}.Debug|Win32.Build.0 = Debug|Win32
+		{0452B388-3767-4DED-930D-652177D13DCD}.Release|Win32.ActiveCfg = Release|Win32
+		{0452B388-3767-4DED-930D-652177D13DCD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

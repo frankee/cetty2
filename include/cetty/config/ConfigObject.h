@@ -32,24 +32,28 @@ public:
     ConfigObject(const std::string& name) {}
     virtual ~ConfigObject() {}
 
-    virtual const ConfigReflection& getreflection() const;
-    virtual const ConfigDescriptor& getdescriptor() const;
+    virtual const ConfigReflection* getreflection() const;
+    virtual const ConfigDescriptor* getdescriptor() const;
 
     virtual ConfigObject* create() const = 0;
+	virtual std::string name() const = 0;
+	
+	virtual void clear();
+	virtual void copyFrom(const ConfigObject& from);
 
 protected:
     void addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object);
 
 protected:
-    std::string className;
+    std::string name;
 
 private:
-    struct DescriptorContainer {
+    struct Metadata {
         ConfigDescriptor* descriptor;
         ConfigObject* object;
     };
 
-    typedef std::map<std::string, DescriptorContainer>  ObjectDescriptorMap;
+    typedef std::map<std::string, Metadata>  ObjectDescriptorMap;
     static ObjectDescriptorMap objects;
 };
 
