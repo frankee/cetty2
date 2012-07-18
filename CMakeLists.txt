@@ -43,7 +43,7 @@ LINK_DIRECTORIES(
 set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package( Boost 1.49.0 COMPONENTS date_time system thread REQUIRED )
+find_package( Boost 1.48.0 COMPONENTS date_time system thread REQUIRED )
 
 INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BOOST_LIB_DIRS})

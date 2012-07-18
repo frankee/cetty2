@@ -49,4 +49,3 @@ CETTY_DECLARE_EXCEPTION(ChannelException, RuntimeException)
 // Local Variables:
 // mode: c++
 // End:
-

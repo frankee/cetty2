@@ -424,4 +424,3 @@ namespace protobuf {
 // Local Variables:
 // mode: c++
 // End:
-

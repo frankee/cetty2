@@ -47,4 +47,3 @@ CETTY_DECLARE_EXCEPTION(WriteTimeoutException, TimeoutException)
 // Local Variables:
 // mode: c++
 // End:
-

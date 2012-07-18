@@ -119,4 +119,3 @@ TEST(QueryStringDecoderTest, testExotic) {
     assertQueryString("/foo?a=b&c=d", "/foo?a=b&c=d");
     assertQueryString("/foo?a=1&a=&a=", "/foo?a=1&a&a=");
 }
-

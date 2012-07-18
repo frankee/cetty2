@@ -53,4 +53,3 @@ CETTY_DECLARE_EXCEPTION(CodecEmbedderException, RuntimeException);
 // Local Variables:
 // mode: c++
 // End:
-

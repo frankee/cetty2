@@ -30,4 +30,3 @@ typedef boost::intrusive_ptr<ChannelPipelineFactory> ChannelPipelineFactoryPtr;
 // Local Variables:
 // mode: c++
 // End:
-

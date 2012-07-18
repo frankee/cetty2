@@ -48,4 +48,3 @@ CETTY_DECLARE_EXCEPTION(ReadTimeoutException, TimeoutException)
 // Local Variables:
 // mode: c++
 // End:
-

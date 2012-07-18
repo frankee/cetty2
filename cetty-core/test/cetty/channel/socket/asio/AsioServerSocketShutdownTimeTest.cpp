@@ -85,4 +85,3 @@ TEST(ASioServerSocketShutdownTimeTest, testSuccessfulBindAttempt) {
     long shutdownTime = (boost::get_system_time() - startTime).total_milliseconds();
     ASSERT_TRUE(shutdownTime < 500 /*"Shutdown takes too long: " + shutdownTime + " ms"*/);
 };
-

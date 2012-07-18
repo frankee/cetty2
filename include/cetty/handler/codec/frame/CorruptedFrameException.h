@@ -50,4 +50,3 @@ CETTY_DECLARE_EXCEPTION(CorruptedFrameException, RuntimeException)
 // Local Variables:
 // mode: c++
 // End:
-

@@ -53,4 +53,3 @@ class CookieDateFormat {
 // Local Variables:
 // mode: c++
 // End:
-

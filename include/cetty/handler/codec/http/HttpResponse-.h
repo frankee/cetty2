@@ -75,4 +75,3 @@ typedef boost::intrusive_ptr<HttpResponse> HttpResponsePtr;
 // Local Variables:
 // mode: c++
 // End:
-

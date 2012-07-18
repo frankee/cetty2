@@ -242,4 +242,3 @@ typedef boost::intrusive_ptr<HttpMessage> HttpMessagePtr;
 // Local Variables:
 // mode: c++
 // End:
-

@@ -88,4 +88,3 @@ TEST(ASioClientSocketShutdownTimeTest, testShutdownTime) {
     boost::system_time::time_duration_type shutdownTime = stopTime - startTime;
     ASSERT_TRUE(shutdownTime < boost::posix_time::milliseconds(500));
 };
-

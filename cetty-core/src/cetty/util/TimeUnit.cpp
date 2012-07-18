@@ -113,5 +113,3 @@ std::string TimeUnit::toString() const {
 
 }
 }
-
-

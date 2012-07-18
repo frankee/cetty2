@@ -27,4 +27,3 @@ namespace cetty { namespace channel {
 // Local Variables:
 // mode: c++
 // End:
-

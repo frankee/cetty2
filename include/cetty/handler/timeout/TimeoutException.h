@@ -48,4 +48,3 @@ CETTY_DECLARE_EXCEPTION(TimeoutException, cetty::channel::ChannelException)
 // Local Variables:
 // mode: c++
 // End:
-

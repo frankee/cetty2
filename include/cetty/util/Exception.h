@@ -277,4 +277,3 @@ CETTY_DECLARE_EXCEPTION(BadCastException, RuntimeException)
 // Local Variables:
 // mode: c++
 // End:
-

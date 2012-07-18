@@ -242,4 +242,3 @@ inline bool Cookie::isHttpOnly() const { return httpOnly; }
 // Local Variables:
 // mode: c++
 // End:
-

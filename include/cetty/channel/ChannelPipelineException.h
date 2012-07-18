@@ -49,4 +49,3 @@ CETTY_DECLARE_EXCEPTION(ChannelPipelineException, ChannelException)
 // Local Variables:
 // mode: c++
 // End:
-

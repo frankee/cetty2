@@ -191,4 +191,3 @@ inline NDCScope::~NDCScope() {
 // Local Variables:
 // mode: c++
 // End:
-

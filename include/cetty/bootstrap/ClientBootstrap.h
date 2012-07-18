@@ -208,4 +208,3 @@ public:
 // Local Variables:
 // mode: c++
 // End:
-

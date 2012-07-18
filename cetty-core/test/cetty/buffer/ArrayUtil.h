@@ -52,4 +52,3 @@ public:
 }}
 
 #endif //#if !defined(CETTY_BUFFER_ARRAYUTIL_H)
-

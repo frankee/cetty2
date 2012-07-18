@@ -398,4 +398,3 @@ inline void swap(IpAddress& addr1, IpAddress& addr2) {
 // Local Variables:
 // mode: c++
 // End:
-

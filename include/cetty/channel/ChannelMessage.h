@@ -485,4 +485,3 @@ ChannelMessage& ChannelMessage::value<ChannelMessage>(int index) const {
 // Local Variables:
 // mode: c++
 // End:
-

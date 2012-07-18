@@ -16,4 +16,3 @@ TEST_F(DynamicChannelBufferTest, shouldNotFailOnInitialIndexUpdate3) {
 
 #define CHANNEL_BUFFER_IMPL_TEST DynamicChannelBufferTest
 #include "cetty/buffer/AbstractChannelBufferTest.inc.h"
-

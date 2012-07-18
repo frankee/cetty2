@@ -52,4 +52,3 @@ CETTY_DECLARE_EXCEPTION(UnreplayableOperationException, UnsupportedOperationExce
 // Local Variables:
 // mode: c++
 // End:
-

@@ -171,4 +171,3 @@ inline void swap(NameValueCollection& nvc1, NameValueCollection& nvc2) {
 // Local Variables:
 // mode: c++
 // End:
-

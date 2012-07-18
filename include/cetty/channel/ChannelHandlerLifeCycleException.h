@@ -54,4 +54,3 @@ CETTY_DECLARE_EXCEPTION(ChannelHandlerLifeCycleException, RuntimeException)
 // Local Variables:
 // mode: c++
 // End:
-

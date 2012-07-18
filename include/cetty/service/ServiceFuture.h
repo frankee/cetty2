@@ -243,5 +243,3 @@ private:
 }
 
 #endif //#if !defined(CETTY_SERVICE_SERVICEFUTURE_H)
-
-

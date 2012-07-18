@@ -55,4 +55,3 @@ TEST(ChannelBufferIndexFinderTest, testBackward) {
     EXPECT_EQ(2, buf->indexOf(6, 0, ChannelBufferIndexFinder::NOT_CRLF));
     EXPECT_EQ(-1, buf->indexOf(3, 0, ChannelBufferIndexFinder::CRLF));
 }
-

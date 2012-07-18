@@ -21,4 +21,3 @@ using namespace cetty::buffer;
 #define CHANNEL_BUFFER_IMPL_TEST BigEndianCompositeChannelBufferTest
 #include "cetty/buffer/AbstractChannelBufferTest.inc.h"
 #include "cetty/buffer/AbstractCompositeChannelBufferTest.inc.h"
-

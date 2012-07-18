@@ -117,4 +117,3 @@ inline void intrusive_ptr_release(cetty::util::ReferenceCounter<T, U> const* exp
 // Local Variables:
 // mode: c++
 // End:
-

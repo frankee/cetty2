@@ -156,4 +156,3 @@ typedef boost::intrusive_ptr<HttpChunkTrailer> HttpChunkTrailerPtr;
 // Local Variables:
 // mode: c++
 // End:
-

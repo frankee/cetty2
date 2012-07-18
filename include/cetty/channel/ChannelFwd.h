@@ -32,4 +32,3 @@ typedef Channel const* ConstChannelPtr;
 // Local Variables:
 // mode: c++
 // End:
-

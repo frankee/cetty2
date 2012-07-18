@@ -32,4 +32,3 @@ namespace cetty { namespace util {
 }}
 
 #endif //#if !defined(CETTY_UTIL_TIMERFWD_H)
-
