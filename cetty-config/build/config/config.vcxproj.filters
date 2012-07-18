@@ -15,6 +15,9 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp">
       <Filter>config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\ConfigIncludeFileFinder.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h">
@@ -27,6 +30,9 @@
       <Filter>config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\config\ConfigIncludeFileFinder.h">
       <Filter>config</Filter>
     </ClInclude>
   </ItemGroup>

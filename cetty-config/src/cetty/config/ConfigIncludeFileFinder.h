@@ -1,5 +1,5 @@
-#if !defined(CETTY_CONFIG_CONFIGCENTER_H)
-#define CETTY_CONFIG_CONFIGCENTER_H
+#if !defined(CETTY_CONFIG_CONFIGINCLUDEFILEFINDER_H)
+#define CETTY_CONFIG_CONFIGINCLUDEFILEFINDER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,43 +18,22 @@
  */
 
 #include <string>
+#include <vector>
 
 namespace cetty {
 namespace config {
 
-class ConfigObject;
-
-class ConfigCenter {
+class ConfigIncludeFileFinder {
 public:
-    static ConfigCenter& instance();
+    ConfigIncludeFileFinder();
 
-public:
-    ConfigCenter();
-
-    int load(int argc, char* argv[]);
-
-    int load(const char* str);
-    int load(const std::string& str);
-    int loadFromFile(const std::string& file);
-
-    int configure(ConfigObject* object) const;
-    int configure(const std::string& name, ConfigObject* object) const;
-	
-private:
-	int getFileContent(const std::string& file, std::string* content);
-
-private:
-    static ConfigCenter* center;
-
-private:
-    int argc;
-    char** argv;
+    int find(const std::string& file, std::vector<std::string>* files);
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CONFIG_CONFIGCENTER_H)
+#endif //#if !defined(CETTY_CONFIG_CONFIGINCLUDEFILEFINDER_H)
 
 // Local Variables:
 // mode: c++
