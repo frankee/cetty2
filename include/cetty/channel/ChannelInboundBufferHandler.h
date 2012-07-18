@@ -1,7 +1,7 @@
-#if !defined(CETTY_CHANNEL_CHANNELHANDLERFWD_H)
-#define CETTY_CHANNEL_CHANNELHANDLERFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H)
+#define CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -17,21 +17,17 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+#include <cetty/channel/ChannelInboundHandler.h>
 
 namespace cetty { namespace channel { 
-    class ChannelHandler;
-    class ChannelUpstreamHandler;
-    class ChannelDownstreamHandler;
 
-    typedef boost::intrusive_ptr<ChannelHandler> ChannelHandlerPtr;
-    typedef boost::intrusive_ptr<ChannelUpstreamHandler> ChannelInboundHandlerPtr;
-    typedef boost::intrusive_ptr<ChannelDownstreamHandler> ChannelOutboundHandlerPtr;
+class ChannelInboundBufferHandler : public ChannelInboundHandler {
+};
+
 }}
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELHANDLERFWD_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H)
 
 // Local Variables:
 // mode: c++
 // End:
-

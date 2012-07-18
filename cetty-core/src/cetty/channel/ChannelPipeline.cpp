@@ -14,23 +14,16 @@
  * under the License.
  */
 
-#include <cetty/channel/DefaultChannelPipeline.h>
+#include <cetty/channel/ChannelPipeline.h>
 
 #include <cetty/channel/Channel.h>
 
 #include <cetty/channel/ChannelEvent.h>
 #include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelStateEvent.h>
-#include <cetty/channel/ChildChannelStateEvent.h>
-#include <cetty/channel/ExceptionEvent.h>
-#include <cetty/channel/WriteCompletionEvent.h>
 
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelUpstreamHandler.h>
-#include <cetty/channel/ChannelDownstreamHandler.h>
-#include <cetty/channel/LifeCycleAwareChannelHandler.h>
 
 #include <cetty/logging/InternalLogger.h>
 #include <cetty/logging/InternalLoggerFactory.h>
@@ -43,291 +36,6 @@ namespace channel {
 using namespace cetty::util;
 
 InternalLogger* DefaultChannelPipeline::logger = NULL;
-
-class DefaultChannelHandlerContext : public ChannelHandlerContext {
-public:
-    DefaultChannelHandlerContext(
-        DefaultChannelPipeline& pipeline,
-        const std::string& name,
-        const ChannelHandlerPtr& handler,
-        DefaultChannelHandlerContext* prev,
-        DefaultChannelHandlerContext* next)
-        : defaultChannelPipeline(pipeline),
-          channelPipeline(&pipeline),
-          next(next),
-          prev(prev),
-          nextUpstreamContext(NULL),
-          nextDownstreamContext(NULL),
-          canHandleUps(false),
-          canHandleDowns(false),
-          name(name),
-          handler(handler),
-          sink() {
-
-        upstreamHandler = boost::dynamic_pointer_cast<ChannelUpstreamHandler>(handler);
-
-        if (upstreamHandler) {
-            this->canHandleUps = true;
-        }
-
-        downstreamHandler = boost::dynamic_pointer_cast<ChannelDownstreamHandler>(handler);
-
-        if (downstreamHandler) {
-            this->canHandleDowns = true;
-        }
-
-        if (!canHandleUps && !canHandleDowns) {
-            throw InvalidArgumentException(
-                "handler must be either ChannelUpstreamHandler or ChannelDownstreamHandler.");
-        }
-    }
-
-    virtual ~DefaultChannelHandlerContext() {}
-
-    virtual const ChannelPtr& getChannel() const {
-        return defaultChannelPipeline.getChannel();
-    }
-
-    virtual const ChannelPipelinePtr& getPipeline() const {
-        return channelPipeline;
-    }
-
-    virtual bool canHandleDownstream() const {
-        return this->canHandleDowns;
-    }
-
-    virtual bool canHandleUpstream() const {
-        return this->canHandleUps;
-    }
-
-    virtual const ChannelHandlerPtr& getHandler() const {
-        return this->handler;
-    }
-
-    virtual const ChannelUpstreamHandlerPtr& getUpstreamHandler() const {
-        return this->upstreamHandler;
-    }
-
-    virtual const ChannelDownstreamHandlerPtr& getDownstreamHandler() const {
-        return this->downstreamHandler;
-    }
-
-    virtual const std::string& getName() const {
-        return this->name;
-    }
-
-    virtual void* getAttachment() {
-        return this->attachment;
-    }
-
-    virtual const void* getAttachment() const {
-        return this->attachment;
-    }
-
-    virtual void setAttachment(void* attachment) {
-        this->attachment = attachment;
-    }
-
-    virtual void sendDownstream(const ChannelEvent& e) {
-        try {
-            if (nextDownstreamContext) {
-                nextDownstreamContext->downstreamHandler->handleDownstream(*nextDownstreamContext, e);
-            }
-            else {
-                if (!sink) {
-                    sink = this->defaultChannelPipeline.getSink();
-                }
-
-                BOOST_ASSERT(sink);
-                sink->eventSunk(defaultChannelPipeline, e);
-            }
-        }
-        catch (const Exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, t);
-        }
-        catch (const std::exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-        }
-        catch (...) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-        }
-    }
-
-    virtual void sendDownstream(const MessageEvent& e) {
-        try {
-            if (nextDownstreamContext) {
-                nextDownstreamContext->downstreamHandler->writeRequested(*nextDownstreamContext, e);
-            }
-            else {
-                if (!sink) {
-                    sink = this->defaultChannelPipeline.getSink();
-                }
-
-                BOOST_ASSERT(sink);
-                sink->writeRequested(defaultChannelPipeline, e);
-            }
-        }
-        catch (const Exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, t);
-        }
-        catch (const std::exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-        }
-        catch (...) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-        }
-    }
-
-    virtual void sendDownstream(const ChannelStateEvent& e) {
-        try {
-            if (nextDownstreamContext) {
-                nextDownstreamContext->downstreamHandler->stateChangeRequested(*nextDownstreamContext, e);
-            }
-            else {
-                if (!sink) {
-                    sink = this->defaultChannelPipeline.getSink();
-                }
-
-                BOOST_ASSERT(sink);
-                sink->stateChangeRequested(defaultChannelPipeline, e);
-            }
-        }
-        catch (const Exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, t);
-        }
-        catch (const std::exception& t) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-        }
-        catch (...) {
-            defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-        }
-    }
-
-    virtual void sendUpstream(const ChannelEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->handleUpstream(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-    virtual void sendUpstream(const MessageEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->messageReceived(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-    virtual void sendUpstream(const WriteCompletionEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->writeCompleted(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-    virtual void sendUpstream(const ChannelStateEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->channelStateChanged(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-    virtual void sendUpstream(const ChildChannelStateEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->childChannelStateChanged(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-    virtual void sendUpstream(const ExceptionEvent& e) {
-        if (nextUpstreamContext) {
-            try {
-                nextUpstreamContext->upstreamHandler->exceptionCaught(*nextUpstreamContext, e);
-            }
-            catch (const Exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, t);
-            }
-            catch (const std::exception& t) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception(t.what()));
-            }
-            catch (...) {
-                defaultChannelPipeline.notifyHandlerException(e, Exception("unknown exception."));
-            }
-        }
-    }
-
-public:
-    bool canHandleUps;
-    bool canHandleDowns;
-
-    ChannelHandlerPtr           handler;
-    ChannelUpstreamHandlerPtr   upstreamHandler;
-    ChannelDownstreamHandlerPtr downstreamHandler;
-
-    DefaultChannelHandlerContext* next;
-    DefaultChannelHandlerContext* prev;
-
-    DefaultChannelHandlerContext* nextUpstreamContext;
-    DefaultChannelHandlerContext* nextDownstreamContext;
-
-private:
-    std::string name;
-
-    DefaultChannelPipeline& defaultChannelPipeline;
-    ChannelPipelinePtr channelPipeline;
-
-    ChannelSinkPtr sink;
-    void* attachment;
-};
 
 class DiscardingChannelSink : public ChannelSink {
 public:
@@ -366,8 +74,8 @@ DefaultChannelPipeline::DefaultChannelPipeline()
       channel(NULL),
       head(NULL),
       tail(NULL),
-      upstreamHead(NULL),
-      downstreamHead(NULL) {
+      inboundHead(NULL),
+      outboundHead(NULL) {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("DefaultChannelPipeline");
     }
@@ -1013,11 +721,11 @@ void DefaultChannelPipeline::init(const std::string& name, const ChannelHandlerP
 
     // for upstream and downstream single list.
     if (ctx->canHandleUps) {
-        upstreamHead = ctx;
+        inboundHead = ctx;
     }
 
     if (ctx->canHandleDowns) {
-        downstreamHead = ctx;
+        outboundHead = ctx;
     }
 
     name2ctx.clear();
@@ -1092,9 +800,9 @@ DefaultChannelHandlerContext* DefaultChannelPipeline::getContextNoLock(const std
 
 
 void DefaultChannelPipeline::sendUpstream(const ChannelEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->handleUpstream(*upstreamHead, e);
+            inboundHead->upstreamHandler->handleUpstream(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1112,9 +820,9 @@ void DefaultChannelPipeline::sendUpstream(const ChannelEvent& e) {
 }
 
 void DefaultChannelPipeline::sendUpstream(const MessageEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->messageReceived(*upstreamHead, e);
+            inboundHead->upstreamHandler->messageReceived(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1132,9 +840,9 @@ void DefaultChannelPipeline::sendUpstream(const MessageEvent& e) {
 }
 
 void DefaultChannelPipeline::sendUpstream(const ExceptionEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->exceptionCaught(*upstreamHead, e);
+            inboundHead->upstreamHandler->exceptionCaught(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1152,9 +860,9 @@ void DefaultChannelPipeline::sendUpstream(const ExceptionEvent& e) {
 }
 
 void DefaultChannelPipeline::sendUpstream(const WriteCompletionEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->writeCompleted(*upstreamHead, e);
+            inboundHead->upstreamHandler->writeCompleted(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1172,9 +880,9 @@ void DefaultChannelPipeline::sendUpstream(const WriteCompletionEvent& e) {
 }
 
 void DefaultChannelPipeline::sendUpstream(const ChannelStateEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->channelStateChanged(*upstreamHead, e);
+            inboundHead->upstreamHandler->channelStateChanged(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1192,9 +900,9 @@ void DefaultChannelPipeline::sendUpstream(const ChannelStateEvent& e) {
 }
 
 void DefaultChannelPipeline::sendUpstream(const ChildChannelStateEvent& e) {
-    if (upstreamHead) {
+    if (inboundHead) {
         try {
-            upstreamHead->upstreamHandler->childChannelStateChanged(*upstreamHead, e);
+            inboundHead->upstreamHandler->childChannelStateChanged(*inboundHead, e);
         }
         catch (const Exception& t) {
             notifyHandlerException(e, t);
@@ -1213,8 +921,8 @@ void DefaultChannelPipeline::sendUpstream(const ChildChannelStateEvent& e) {
 
 void DefaultChannelPipeline::sendDownstream(const ChannelEvent& e) {
     try {
-        if (downstreamHead) {
-            downstreamHead->downstreamHandler->handleDownstream(*downstreamHead, e);
+        if (outboundHead) {
+            outboundHead->downstreamHandler->handleDownstream(*outboundHead, e);
         }
         else {
             BOOST_ASSERT(sink);
@@ -1234,8 +942,8 @@ void DefaultChannelPipeline::sendDownstream(const ChannelEvent& e) {
 
 void DefaultChannelPipeline::sendDownstream(const MessageEvent& e) {
     try {
-        if (downstreamHead) {
-            downstreamHead->downstreamHandler->writeRequested(*downstreamHead, e);
+        if (outboundHead) {
+            outboundHead->downstreamHandler->writeRequested(*outboundHead, e);
         }
         else {
             BOOST_ASSERT(sink);
@@ -1255,8 +963,8 @@ void DefaultChannelPipeline::sendDownstream(const MessageEvent& e) {
 
 void DefaultChannelPipeline::sendDownstream(const ChannelStateEvent& e) {
     try {
-        if (downstreamHead) {
-            downstreamHead->downstreamHandler->stateChangeRequested(*downstreamHead, e);
+        if (outboundHead) {
+            outboundHead->downstreamHandler->stateChangeRequested(*outboundHead, e);
         }
         else {
             BOOST_ASSERT(sink);
@@ -1277,12 +985,12 @@ void DefaultChannelPipeline::sendDownstream(const ChannelStateEvent& e) {
 void DefaultChannelPipeline::updateUpstreamList() {
     DefaultChannelHandlerContext* contextIndex = this->head;
     DefaultChannelHandlerContext* upstreamContextIndex = NULL;
-    this->upstreamHead = NULL;
+    this->inboundHead = NULL;
 
     while (contextIndex) {
         if (contextIndex->canHandleUps) {
-            if (!this->upstreamHead) {
-                this->upstreamHead = contextIndex;
+            if (!this->inboundHead) {
+                this->inboundHead = contextIndex;
             }
 
             if (upstreamContextIndex) {
@@ -1299,12 +1007,12 @@ void DefaultChannelPipeline::updateUpstreamList() {
 void DefaultChannelPipeline::updateDownstreamList() {
     DefaultChannelHandlerContext* contextIndex = this->tail;
     DefaultChannelHandlerContext* downstreamContextIndex = NULL;
-    this->downstreamHead = NULL;
+    this->outboundHead = NULL;
 
     while (contextIndex) {
         if (contextIndex->canHandleDowns) {
-            if (!this->downstreamHead) {
-                this->downstreamHead = contextIndex;
+            if (!this->outboundHead) {
+                this->outboundHead = contextIndex;
             }
 
             if (downstreamContextIndex) {
@@ -1330,6 +1038,106 @@ boost::any DefaultChannelPipeline::getAttachment(const std::string& name) const 
     }
 
     return boost::any();
+}
+
+
+void ChannelPipeline::fireChannelCreated() {
+    if (inboundHead) {
+        inboundHead->fireChannelRegistered(*inboundHead);
+    }
+}
+
+void ChannelPipeline::fireChannelActive() {
+    firedChannelActive = true;
+    head.fireChannelActive();
+    if (fireInboundBufferUpdatedOnActivation) {
+        fireInboundBufferUpdatedOnActivation = false;
+        head.fireInboundBufferUpdated();
+    }
+}
+
+void ChannelPipeline::fireChannelInactive() {
+    // Some implementations such as EmbeddedChannel can trigger inboundBufferUpdated()
+    // after deactivation, so it's safe not to revert the firedChannelActive flag here.
+    // Also, all known transports never get re-activated.
+    //firedChannelActive = false;
+    outboundHead->fireChannelInactive(*outboundHead);
+}
+
+void ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
+    head.fireExceptionCaught(cause);
+}
+
+void ChannelPipeline::fireEventTriggered(const ChannelEvent& event) {
+    head.fireEventTriggered(event);
+}
+
+void ChannelPipeline::fireMessageUpdated() {
+    if (!firedChannelActive) {
+        fireInboundBufferUpdatedOnActivation = true;
+        return;
+    }
+    head.fireInboundBufferUpdated();
+}
+
+ChannelFuturePtr ChannelPipeline::bind(const SocketAddress& localAddress) {
+    return bind(localAddress, channel->newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+    if (outboundHead) {
+        outboundHead->bind(*outboundHead, localAddress, future);
+    }
+}
+
+ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress) {
+    return connect(remoteAddress, channel->newFuture());
+}
+
+ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress) {
+    return connect(remoteAddress, localAddress, channel.newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress, const ChannelFuturePtr& future) {
+    return connect(remoteAddress, null, future);
+}
+
+const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+    return connect(outboundHead, remoteAddress, localAddress, future);
+}
+
+ChannelFuturePtr ChannelPipeline::disconnect() {
+    return disconnect(channel.newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::disconnect(const ChannelFuturePtr& future) {
+    return disconnect(firstContext(DIR_OUTBOUND), future);
+}
+
+
+ChannelFuturePtr ChannelPipeline::close() {
+    return close(channel.newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::close(const ChannelFuturePtr& future) {
+    return close(firstContext(DIR_OUTBOUND), future);
+}
+
+ChannelFuturePtr ChannelPipeline::flush() {
+    return flush(channel.newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::flush(const const ChannelFuturePtr&& future) {
+    return flush(outboundHead, future);
+}
+
+
+ChannelFuturePtr ChannelPipeline::write(const ChannelMessage& message) {
+    return write(message, channel.newFuture());
+}
+
+const ChannelFuturePtr& ChannelPipeline::write(Object message, const ChannelFuturePtr& future) {
+    return write(tail, message, future);
 }
 
 }

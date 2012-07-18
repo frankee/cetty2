@@ -6,11 +6,11 @@ const ChannelPtr& NullChannelContext::getChannel()const { return ChannelPtr(); }
 const ChannelPipelinePtr& NullChannelContext::getPipeline()const {return ChannelPipelinePtr();}
 const std::string& NullChannelContext::getName()const {return std::string();}
 const ChannelHandlerPtr& NullChannelContext::getHandler()const {return ChannelHandlerPtr();}
-const ChannelUpstreamHandlerPtr& NullChannelContext::getUpstreamHandler()const {return ChannelUpstreamHandlerPtr();}
-const ChannelDownstreamHandlerPtr&  NullChannelContext::getDownstreamHandler()const {return ChannelDownstreamHandlerPtr();}
+const ChannelInboundHandlerPtr& NullChannelContext::getInboundHandler()const {return ChannelInboundHandlerPtr();}
+const ChannelOutboundHandlerPtr&  NullChannelContext::getOutboundHandler()const {return ChannelOutboundHandlerPtr();}
 
-bool  NullChannelContext::canHandleUpstream()const {return true;}
-bool  NullChannelContext::canHandleDownstream()const {return true;}
+bool  NullChannelContext::canHandleInboundMessage()const {return true;}
+bool  NullChannelContext::canHandleOutboundMessage()const {return true;}
 void  NullChannelContext::sendUpstream(const ChannelEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const MessageEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const ChannelStateEvent& e) {return;}

@@ -33,9 +33,6 @@
     <Filter Include="handler\codec\frame">
       <UniqueIdentifier>{c6af99c5-0997-4928-bb66-c9050c195a6c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="handler\codec\protobuf">
-      <UniqueIdentifier>{17d2bc2d-7622-412f-ad98-aceaabfcc9df}</UniqueIdentifier>
-    </Filter>
     <Filter Include="handler\codec\base64">
       <UniqueIdentifier>{a3d84f1a-1b27-4b4a-961b-a19dd42f4dab}</UniqueIdentifier>
     </Filter>
@@ -44,9 +41,6 @@
     </Filter>
     <Filter Include="handler\codec\replay">
       <UniqueIdentifier>{d1e8b13d-c954-48a4-bbe4-0c35ceec8ef6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="handler\codec\string">
-      <UniqueIdentifier>{68c4e136-3571-4b7d-8adf-1f86905f761e}</UniqueIdentifier>
     </Filter>
     <Filter Include="handler\codec\oneone">
       <UniqueIdentifier>{405b7217-829d-4f3b-88f2-107b443e3c37}</UniqueIdentifier>
@@ -77,9 +71,6 @@
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\AbstractChannelSink.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\ChannelException.cpp">
       <Filter>channel</Filter>
     </ClCompile>
@@ -98,13 +89,7 @@
     <ClCompile Include="..\..\src\cetty\channel\Channels.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\ChannelState.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\CompleteChannelFuture.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\CopyableDownstreamChannelStateEvent.cpp">
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\DefaultChannelConfig.cpp">
@@ -113,16 +98,7 @@
     <ClCompile Include="..\..\src\cetty\channel\DefaultChannelFuture.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\DefaultChannelPipeline.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\DefaultServerChannelConfig.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\DownstreamChannelStateEvent.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\DownstreamMessageEvent.cpp">
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\IpAddress.cpp">
@@ -134,19 +110,7 @@
     <ClCompile Include="..\..\src\cetty\channel\NullChannel.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\SimpleChannelDownstreamHandler.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\SimpleChannelUpstreamHandler.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\SocketAddress.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\UpstreamChannelStateEvent.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\UpstreamMessageEvent.cpp">
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioClientSocketChannel.cpp">
@@ -314,25 +278,13 @@
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferFactory.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\DefaultWriteCompletionEvent.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\AbstractServerChannel.cpp">
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\SucceededChannelFuture.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\SimpleChannelHandler.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\FailedChannelFuture.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\DefaultExceptionEvent.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\CopyableDownstreamMessageEvent.cpp">
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\AdaptiveReceiveBufferSizePredictor.cpp">
@@ -461,6 +413,9 @@
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketAddressImplFactory.cpp">
       <Filter>channel\socket\asio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\ChannelPipeline.cpp">
+      <Filter>channel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -490,28 +445,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\Channels.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelState.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelUpstreamHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChildChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\CompleteChannelFuture.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\CopyableDownstreamChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\CopyableDownstreamMessageEvent.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\DefaultChannelConfig.h">
@@ -520,28 +454,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\DefaultChannelFuture.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DefaultChannelPipeline.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DefaultChildChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DefaultExceptionEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\DefaultServerChannelConfig.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DefaultWriteCompletionEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DownstreamChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\DownstreamMessageEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ExceptionEvent.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\FailedChannelFuture.h">
@@ -551,9 +464,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\IpAddressImpl.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\LifeCycleAwareChannelHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\MessageEvent.h">
@@ -571,15 +481,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ServerChannelFactory.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\SimpleChannelDownstreamHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\SimpleChannelHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\SimpleChannelUpstreamHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\SocketAddress.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -587,15 +488,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\SucceededChannelFuture.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\UpstreamChannelStateEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\UpstreamMessageEvent.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\WriteCompletionEvent.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\socket\ClientSocketChannelFactory.h">
@@ -874,9 +766,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFwd.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSinkFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\AdaptiveReceiveBufferSizePredictor.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1054,9 +943,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelDownstreamHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelEvent.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1078,9 +964,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1098,6 +981,84 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioSocketAddressImplFactory.h">
       <Filter>channel\socket\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferCodec.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferEncoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToMessageCodec.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToMessageDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\CodecException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\CodecUtil.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\DecoderException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\EncoderException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\MessageToBufferEncoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\MessageToMessageCodec.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\MessageToMessageDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\MessageToMessageEncoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundInvoker.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundInvoker.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\EventLoop.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPool.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>channel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

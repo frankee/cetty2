@@ -26,6 +26,9 @@
 #include <cetty/channel/ChannelFutureFwd.h>
 #include <cetty/channel/ChannelFactoryFwd.h>
 #include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelInboundInvoker.h>
+#include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
@@ -122,53 +125,18 @@ class ChannelMessage;
  * @enddot
  *
  */
-class Channel {
+class Channel
+    : public ChannelInboundInvoker,
+    public ChannelOutboundInvoker,
+    public cetty::util::ReferenceCounter<Channel> {
+
 public:
     virtual ~Channel() {}
-
-    /**
-     * The {@link #getInterestOps() interestOps} value which tells that only
-     * read operation has been suspended.
-     */
-    static const int OP_NONE = 0;
-
-    /**
-     * The {@link #getInterestOps() interestOps} value which tells that neither
-     * read nor write operation has been suspended.
-     */
-    static const int OP_READ = 1;
-
-    /**
-     * The {@link #getInterestOps() interestOps} value which tells that both
-     * read and write operation has been suspended.
-     */
-    static const int OP_WRITE = 4;
-
-    /**
-     * The {@link #getInterestOps() interestOps} value which tells that only
-     * write operation has been suspended.
-     */
-    static const int OP_READ_WRITE = OP_READ | OP_WRITE;
-
-    static const char* getInterestOpsString(int ops) {
-        switch (ops) {
-        case OP_READ: return "OP_READ";
-        case OP_WRITE: return "OP_WRITE";
-        case OP_READ_WRITE: return "OP_READ_WRITE";
-        case OP_NONE: return "OP_NONE";
-        default: return "OP_UNKNOWN";
-        }
-    }
 
     /**
      * Returns the unique integer ID of this channel.
      */
     virtual int getId() const = 0;
-
-    /**
-     * Returns the identity hash code of this channel.
-     */
-    virtual int hashCode() const = 0;
 
     /**
      * Returns the parent of this channel.
@@ -205,16 +173,11 @@ public:
     virtual bool isOpen() const = 0;
 
     /**
-     * Returns <tt>true</tt> if and only if this channel is bound to a
-     * {@link #getLocalAddress() local address}.
-     */
-    virtual bool isBound() const = 0;
-
-    /**
-     * Returns <tt>true</tt> if and only if this channel is connected to a
+     * Returns <tt>true</tt> if this channel is bound to a
+     * {@link #getLocalAddress() local address} or connected to a
      * {@link #getRemoteAddress() remote address}.
      */
-    virtual bool isConnected() const = 0;
+    virtual bool isActive() const = 0;
 
     /**
      * Returns the local address where this channel is bound to.
@@ -238,104 +201,9 @@ public:
      *         return {@link SocketAddress NULL_ADDRESS}.
      */
     virtual const SocketAddress& getRemoteAddress() const = 0;
-
-    /**
-     * Sends a message to this channel asynchronously.    If this channel was
-     * created by a connectionless transport (e.g. {@link DatagramChannel})
-     * and is not connected yet, you have to call
-     * {@link #write(const ChannelMessage&, const SocketAddress&, bool)}
-     * instead.  Otherwise, the write request will fail with
-     * {@link NotYetConnectedException} and an <tt>'exceptionCaught'</tt> event
-     * will be triggered.
-     *
-     * @param message the message to write
-     * @param withFuture indicated whether to return a future or not
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         write request succeeds or fails
-     *
-     */
-    virtual ChannelFuturePtr write(const ChannelMessage& message) = 0;
-
-    //virtual void write(const ChannelMessage& message,
-    //                    ChannelFuturePtr* future) = 0;
-
-    /**
-     * Sends a message to this channel asynchronously.  It has an additional
-     * parameter that allows a user to specify where to send the specified
-     * message instead of this channel's current remote address.  If this
-     * channel was created by a connectionless transport (e.g. {@link DatagramChannel})
-     * and is not connected yet, you must specify NOT NULL_ADDRESS.  Otherwise,
-     * the write request will fail with {@link NotYetConnectedException} and
-     * an <tt>'exceptionCaught'</tt> event will be triggered.
-     *
-     * @param message       the message to write
-     * @param remoteAddress where to send the specified message.
-     *                      This method is identical to
-     *                      {@link #write(const ChannelMessage&, bool)}
-     *                      if <tt>NULL_ADDRESS</tt> is specified here.
-     * @param withFurture indicated wether to return a future or not.
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         write request succeeds or fails
-     *
-     */
-    virtual ChannelFuturePtr write(const ChannelMessage& message,
-                                   const SocketAddress& remoteAddress) = 0;
-
-    //virtual void write(const ChannelMessage& message,
-    //                    const SocketAddress& remoteAddress,
-    //                    ChannelFuturePtr* future) = 0;
-
-    /**
-     * Binds this channel to the specified local address asynchronously.
-     *
-     * @param localAddress where to bind
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be
-     *         notified when the bind request succeeds or fails
-     *
-     */
-    virtual ChannelFuturePtr bind(const SocketAddress& localAddress) = 0;
-
-    /**
-     * Connects this channel to the specified remote address asynchronously.
-     *
-     * @param remoteAddress where to connect
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be
-     *         notified when the connection request succeeds or fails
-     *
-     */
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress) = 0;
-
-    /**
-     * Disconnects this channel from the current remote address asynchronously.
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         disconnection request succeeds or fails
-     */
-    virtual ChannelFuturePtr disconnect() = 0;
-
-    /**
-     * Unbinds this channel from the current local address asynchronously.
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         unbind request succeeds or fails
-     */
-    virtual ChannelFuturePtr unbind() = 0;
-
-    /**
-     * Closes this channel asynchronously.  If this channel is bound or
-     * connected, it will be disconnected and unbound first.  Once a channel
-     * is closed, it can not be open again.  Calling this method on a closed
-     * channel has no effect.  Please note that this method always returns the
-     * same future instance.
-     *
-     * @return the {@link ChannelFuture  ChannelFuturePtr} which will be notified when the
-     *         close request succeeds or fails
-     */
-    virtual ChannelFuturePtr close() = 0;
+    
+    virtual ChannelFuturePtr newFuture() const = 0;
+    virtual ChannelFuturePtr newFailedFuture() const = 0;
 
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
@@ -349,66 +217,6 @@ public:
      * for easy use.
      */
     virtual const ChannelFuturePtr& getSucceededFuture() = 0;
-
-    /**
-     * Returns the current <tt>interestOps</tt> of this channel.
-     *
-     * @return {@link #OP_NONE}, {@link #OP_READ}, {@link #OP_WRITE}, or
-     *         {@link #OP_READ_WRITE}
-     */
-    virtual int getInterestOps() const = 0;
-
-    /**
-     * Returns <tt>true</tt> if and only if the I/O thread will read a message
-     * from this channel.  This method is a shortcut to the following code:
-     * <pre>
-     * return (getInterestOps() & OP_READ) != 0;
-     * </pre>
-     */
-    virtual bool isReadable() const = 0;
-
-    /**
-     * Returns <tt>true</tt> if and only if the I/O thread will perform the
-     * requested write operation immediately.  Any write requests made when
-     * this method returns <tt>false</tt> are queued until the I/O thread is
-     * ready to process the queued write requests.  This method is a shortcut
-     * to the following code:
-     * <pre>
-     * return (getInterestOps() & OP_WRITE) == 0;
-     * </pre>
-     */
-    virtual bool isWritable() const = 0;
-
-    /**
-     * Changes the <tt>interestOps</tt> of this channel asynchronously.
-     *
-     * @param interestOps the new <tt>interestOps</tt>
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         <tt>interestOps</tt> change request succeeds or fails
-     */
-    virtual ChannelFuturePtr setInterestOps(int interestOps) = 0;
-
-    /**
-     * Suspends or resumes the read operation of the I/O thread asynchronously.
-     * This method is a shortcut to the following code:
-     * <pre>
-     * int interestOps = getInterestOps();
-     * if (readable) {
-     *     setInterestOps(interestOps | OP_READ);
-     * }
-     * else {
-     *     setInterestOps(interestOps & ~OP_READ);
-     * }
-     * </pre>
-     *
-     * @param readable <tt>true</tt> to resume the read operation and
-     *                 <tt>false</tt> to suspend the read operation
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         <tt>interestOps</tt> change request succeeds or fails
-     */
-    virtual ChannelFuturePtr setReadable(bool readable) = 0;
 
     /**
      * Compares the @link #getId() ID@endlink of the two channels.

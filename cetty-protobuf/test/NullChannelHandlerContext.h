@@ -41,10 +41,10 @@ public:
     const ChannelPipelinePtr& getPipeline()const;
     const std::string& getName() const;
     const ChannelHandlerPtr& getHandler()const;
-    const ChannelUpstreamHandlerPtr& getUpstreamHandler()const;
-    const ChannelDownstreamHandlerPtr& getDownstreamHandler()const;
-    bool canHandleUpstream()const;
-    bool canHandleDownstream()const;
+    const ChannelInboundHandlerPtr& getInboundHandler()const;
+    const ChannelOutboundHandlerPtr& getOutboundHandler()const;
+    bool canHandleInboundMessage()const;
+    bool canHandleOutboundMessage()const;
     void sendUpstream(const ChannelEvent& e);
     void sendUpstream(const MessageEvent& e);
     void sendUpstream(const ChannelStateEvent& e);

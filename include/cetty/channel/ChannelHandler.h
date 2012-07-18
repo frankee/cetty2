@@ -28,6 +28,10 @@
 namespace cetty {
 namespace channel {
 
+class ChannelEvent;
+class ChannelException;
+class ChannelHandlerContext;
+
 /**
  * Handles or intercepts a {@link ChannelEvent}, and sends a
  * {@link ChannelEvent} to the next handler in a {@link ChannelPipeline}.
@@ -215,6 +219,38 @@ public:
     virtual ~ChannelHandler() {}
 
     /**
+     *
+     */
+    virtual void beforeAdd(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void afterAdd(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void beforeRemove(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void afterRemove(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause) = 0;
+
+    /**
+     *
+     */
+    virtual void eventTriggered(ChannelHandlerContext& ctx,
+                                const ChannelEvent& evt) = 0;
+
+    /**
      * Clone the instance of {@link ChannelHandler this}.
      *
      * If the returned instance is same with this, it indicated that the
@@ -236,6 +272,7 @@ public:
      * Returns a string representation of the ChannelHandler.
      */
     virtual std::string toString() const = 0;
+
 };
 
 }
