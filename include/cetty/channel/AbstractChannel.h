@@ -127,6 +127,8 @@ public:
     std::string toString() const;
 
     //TODO: should use a concurrent hash map.
+
+
     typedef std::map<int, ChannelPtr> ChannelMap;
 
 protected:
@@ -160,7 +162,8 @@ protected:
      * @param sink
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
-     */
+    
+    */
     AbstractChannel(int id,
         const ChannelPtr& parent,
         const ChannelFactoryPtr& factory,
@@ -177,7 +180,9 @@ protected:
      * are doing.
      *
      * @return <tt>true</tt> if and only if this channel was not marked as
-     *                      closed yet
+    
+    
+    *                      closed yet
      */
     virtual bool setClosed();
 
@@ -211,6 +216,8 @@ protected:
     ChannelPtr parent; // just reference, do not maintenance it's life cycle
     ChannelFactoryPtr  factory; // just reference.
     ChannelPipelinePtr pipeline;
+
+
 
     ChannelFuturePtr succeededFuture;
     ChannelFuturePtr closeFuture;
