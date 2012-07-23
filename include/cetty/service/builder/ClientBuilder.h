@@ -45,7 +45,7 @@ using namespace cetty::service::asio;
 
 class ClientBuilderConfig;
 
-template<typename ReqT, typename RepT>
+template<typename ReqT, typename RepT = ReqT>
 class ClientBuilder {
 public:
     typedef cetty::service::ClientServiceDispatcher<ReqT, RepT> DispatcherType;

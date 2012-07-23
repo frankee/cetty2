@@ -30,9 +30,9 @@ using namespace cetty::service::builder;
 using namespace cetty::protobuf::service;
 
 class GearmanProtobufClientBuilder
-        : public cetty::service::builder::ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
+        : public ClientBuilder<ProtobufServiceMessagePtr> {
 public:
-    typedef ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ClientBuilderType;
+    typedef ClientBuilder<ProtobufServiceMessagePtr> ClientBuilderType;
 
 public:
     GearmanProtobufClientBuilder();
