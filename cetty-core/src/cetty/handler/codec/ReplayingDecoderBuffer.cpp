@@ -14,8 +14,8 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/replay/ReplayingDecoderBuffer.h>
-#include <cetty/handler/codec/replay/UnreplayableOperationException.h>
+#include <cetty/handler/codec/ReplayingDecoderBuffer.h>
+#include <cetty/handler/codec/UnreplayableOperationException.h>
 
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/util/Integer.h>
@@ -24,7 +24,6 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace replay {
 
 using namespace cetty::buffer;
 using namespace cetty::util;
@@ -234,7 +233,6 @@ bool ReplayingDecoderBuffer::checkReadableBytes(int readableBytes) const {
     return false;
 }
 
-}
 }
 }
 }

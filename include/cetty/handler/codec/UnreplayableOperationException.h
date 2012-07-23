@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_CORRUPTEDFRAMEEXCEPTION_H)
-#define CETTY_HANDLER_CODEC_FRAME_CORRUPTEDFRAMEEXCEPTION_H
+#if !defined(CETTY_HANDLER_CODEC_UNREPLAYABLEOPERATIONEXCEPTION_H)
+#define CETTY_HANDLER_CODEC_UNREPLAYABLEOPERATIONEXCEPTION_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -16,36 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+/*
+ * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ */
 
 #include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
-using namespace  cetty::util;
+using namespace cetty::util;
 
 /**
- * An {@link Exception} which is thrown when the received frame data can not
- * be decoded by a {@link FrameDecoder} implementation.
+ * An {@link Exception} which is thrown when a user calls an unsupported
+ * operation on a {@link ChannelBuffer} in a {@link ReplayingDecoder}
+ * implementation.
  *
  *
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
- *
- * @apiviz.hidden
  */
 
-CETTY_DECLARE_EXCEPTION(CorruptedFrameException, RuntimeException)
+CETTY_DECLARE_EXCEPTION(UnreplayableOperationException, UnsupportedOperationException)
 
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_CORRUPTEDFRAMEEXCEPTION_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_UNREPLAYABLEOPERATIONEXCEPTION_H)
 
 // Local Variables:
 // mode: c++

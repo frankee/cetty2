@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_FIXEDLENGTHFRAMEDECODER_H)
-#define CETTY_HANDLER_CODEC_FRAME_FIXEDLENGTHFRAMEDECODER_H
+#if !defined(CETTY_HANDLER_CODEC_FIXEDLENGTHFRAMEDECODER_H)
+#define CETTY_HANDLER_CODEC_FIXEDLENGTHFRAMEDECODER_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -22,12 +22,11 @@
  */
 
 #include <cetty/channel/ChannelHandler.h>
-#include <cetty/handler/codec/frame/FrameDecoder.h>
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::channel;
 
@@ -53,7 +52,7 @@ using namespace cetty::channel;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class FixedLengthFrameDecoder : public FrameDecoder {
+class FixedLengthFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
 public:
     /**
      * Creates a new instance.
@@ -76,9 +75,9 @@ public:
     virtual std::string toString() const { return "FixedLengthFrameDecoder"; }
 
 protected:
-    virtual ChannelMessage decode(
-        ChannelHandlerContext& ctx, const ChannelPtr& channel, const ChannelBufferPtr& buffer) {
-        if (buffer->readableBytes() < frameLength) {
+    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in) {
+        if (in->readableBytes() < frameLength) {
             return ChannelMessage::EMPTY_MESSAGE;
         }
         else {
@@ -93,13 +92,11 @@ private:
     int frameLength;
 };
 
-
-}
 }
 }
 }
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_FIXEDLENGTHFRAMEDECODER_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_FIXEDLENGTHFRAMEDECODER_H)
 
 // Local Variables:
 // mode: c++

@@ -14,18 +14,16 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/frame/CorruptedFrameException.h>
+#include <cetty/handler/codec/CorruptedFrameException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::util;
 
 CETTY_IMPLEMENT_EXCEPTION(CorruptedFrameException, RuntimeException, "Frame data undecodedable")
 
-}
 }
 }
 }

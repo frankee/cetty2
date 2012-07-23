@@ -14,18 +14,16 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::util;
 
 CETTY_IMPLEMENT_EXCEPTION(TooLongFrameException, RuntimeException, "Frame length greater than the maximum")
 
-}
 }
 }
 }

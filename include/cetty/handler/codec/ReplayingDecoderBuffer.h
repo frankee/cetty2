@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODERBUFFER_H)
-#define CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODERBUFFER_H
+#if !defined(CETTY_HANDLER_CODEC_REPLAYINGDECODERBUFFER_H)
+#define CETTY_HANDLER_CODEC_REPLAYINGDECODERBUFFER_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -26,7 +26,6 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace replay {
 
 using namespace cetty::buffer;
 
@@ -122,13 +121,11 @@ private:
     ChannelBufferPtr buffer;
 };
 
-
-}
 }
 }
 }
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODERBUFFER_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_REPLAYINGDECODERBUFFER_H)
 
 // Local Variables:
 // mode: c++

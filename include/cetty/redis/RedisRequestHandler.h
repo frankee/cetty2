@@ -1,5 +1,8 @@
+#if !defined(CETTY_REDIS_REDISREQUESTHANDLER_H)
+#define CETTY_REDIS_REDISREQUESTHANDLER_H
+
 /*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -14,18 +17,20 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/replay/UnreplayableOperationException.h>
+#include <cetty/service/OutstandingCall.h>
+#include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
-namespace handler {
-namespace codec {
-namespace replay {
+namespace redis {
 
-using namespace cetty::util;
+using namespace cetty::service;
 
-CETTY_IMPLEMENT_EXCEPTION(UnreplayableOperationException, UnsupportedOperationException, "Unsupported operation")
+typedef OutstandingCall<RedisCommandPtr, RedisReplyMessagePtr> RedisServiceCall;
+typedef boost::intrusive_ptr<RedisServiceCall> RedisServiceCallPtr;
+
+typedef ServiceRequestHandler<RedisCommandPtr, RedisReplyMessagePtr> RedisRequestHandler;
 
 }
 }
-}
-}
+
+#endif //#if !defined(CETTY_REDIS_REDISREQUESTHANDLER_H)

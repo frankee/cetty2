@@ -14,7 +14,8 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/frame/LengthFieldPrepender.h>
+#include <cetty/handler/codec/LengthFieldPrepender.h>
+
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelConfig.h>
@@ -26,14 +27,13 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-cetty::channel::ChannelMessage LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
-        const ChannelPtr& channel,
-        const ChannelMessage& msg) {
+void LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
+    const ChannelBufferPtr& msg,
+    ChannelBufferPtr& out) {
     ChannelBufferPtr body = msg.smartPointer<ChannelBuffer>();
 
     if (!body) {
@@ -216,14 +216,6 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFiel
     validateParameters();
 }
 
-
-
-
-
-
-
-
-}
 }
 }
 }

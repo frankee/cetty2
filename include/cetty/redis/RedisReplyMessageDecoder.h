@@ -17,15 +17,16 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/frame/FrameDecoder.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/redis/RedisReplyMessagePtr.h>
 
 namespace cetty { namespace redis {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec::frame;
 using namespace cetty::util;
+using namespace cetty::handler::codec;
 
-class RedisReplyDecoder : public cetty::handler::codec::frame::FrameDecoder {
+class RedisReplyDecoder : public ReplayingDecoder<RedisReplyMessagePtr> {
 public:
     RedisReplyDecoder() {}
     RedisReplyDecoder(int maxSize) {}

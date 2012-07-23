@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_TOOLONGFRAMEEXCEPTION_H)
-#define CETTY_HANDLER_CODEC_FRAME_TOOLONGFRAMEEXCEPTION_H
+#if !defined(CETTY_HANDLER_CODEC_CORRUPTEDFRAMEEXCEPTION_H)
+#define CETTY_HANDLER_CODEC_CORRUPTEDFRAMEEXCEPTION_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -22,13 +22,12 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
-using namespace cetty::util;
+using namespace  cetty::util;
 
 /**
- * An {@link Exception} which is thrown when the length of the frame
- * decoded by {@link DelimiterBasedFrameDecoder} is greater than the maximum.
+ * An {@link Exception} which is thrown when the received frame data can not
+ * be decoded by a {@link FrameDecoder} implementation.
  *
  *
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
@@ -38,14 +37,13 @@ using namespace cetty::util;
  * @apiviz.hidden
  */
 
-CETTY_DECLARE_EXCEPTION(TooLongFrameException, RuntimeException)
+CETTY_DECLARE_EXCEPTION(CorruptedFrameException, RuntimeException)
 
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_TOOLONGFRAMEEXCEPTION_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_CORRUPTEDFRAMEEXCEPTION_H)
 
 // Local Variables:
 // mode: c++

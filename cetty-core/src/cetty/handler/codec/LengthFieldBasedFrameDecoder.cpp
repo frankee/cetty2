@@ -14,6 +14,8 @@
  * under the License.
  */
 
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
+
 #include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
@@ -22,14 +24,12 @@
 #include <cetty/util/Exception.h>
 #include <cetty/logging/LoggerHelper.h>
 
-#include <cetty/handler/codec/frame/CorruptedFrameException.h>
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
+#include <cetty/handler/codec/CorruptedFrameException.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -39,10 +39,8 @@ ChannelHandlerPtr LengthFieldBasedFrameDecoder::clone() {
     return ChannelHandlerPtr(new LengthFieldBasedFrameDecoder(*this));
 }
 
-cetty::channel::ChannelMessage
-LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
-                                     const ChannelPtr& channel,
-                                     const ChannelBufferPtr& buffer) {
+ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
+    const ChannelBufferPtr& in) {
     if (discardingTooLongFrame) {
         int bytesToDiscard = this->bytesToDiscard;
         int localBytesToDiscard = std::min(bytesToDiscard, buffer->readableBytes());
@@ -84,7 +82,7 @@ LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         break;
 
     case 4:
-        frameLength = buffer->getUnsignedInt(actualLengthFieldOffset);
+        frameLength = (int)buffer->getUnsignedInt(actualLengthFieldOffset);
         break;
 
     case 8:
@@ -224,7 +222,6 @@ void LengthFieldBasedFrameDecoder::validateParameters() {
     }
 }
 
-}
 }
 }
 }

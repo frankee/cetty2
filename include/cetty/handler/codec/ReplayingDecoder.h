@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODER_H)
-#define CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODER_H
+#if !defined(CETTY_HANDLER_CODEC_REPLAYINGDECODER_H)
+#define CETTY_HANDLER_CODEC_REPLAYINGDECODER_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -24,13 +24,13 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
-#include <cetty/handler/codec/replay/ReplayingDecoderBuffer.h>
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
+#include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
+}
 }
 
 namespace cetty {
@@ -43,7 +43,6 @@ class SocketAddress;
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace replay {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -304,21 +303,10 @@ using namespace cetty::logging;
  * @apiviz.has org.jboss.netty.handler.codec.replay.UnreplayableOperationException oneway - - throws
  */
 
-class ReplayingDecoder : public cetty::channel::SimpleChannelUpstreamHandler {
+template<typename InboundOutT>
+class ReplayingDecoder : public BufferToMessageDecoder<InboundOutT> {
 public:
     virtual ~ReplayingDecoder() {}
-
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-        const MessageEvent& e);
-
-    virtual void channelDisconnected(ChannelHandlerContext& ctx,
-        const ChannelStateEvent& e);
-
-    virtual void channelClosed(ChannelHandlerContext& ctx,
-        const ChannelStateEvent& e);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-        const ExceptionEvent& e);
 
 protected:
     /**
@@ -412,6 +400,7 @@ protected:
      *
      * @return the decoded frame
      */
+
     virtual ChannelMessage decode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ReplayingDecoderBufferPtr& buffer,
@@ -468,9 +457,8 @@ private:
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_REPLAY_REPLAYINGDECODER_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_REPLAYINGDECODER_H)
 
 // Local Variables:
 // mode: c++

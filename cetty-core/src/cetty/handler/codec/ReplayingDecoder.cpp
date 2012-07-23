@@ -16,8 +16,8 @@
 
 #include <typeinfo>
 
-#include <cetty/handler/codec/replay/ReplayingDecoder.h>
-#include <cetty/handler/codec/replay/UnsafeDynamicChannelBuffer.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/handler/codec/UnsafeDynamicChannelBuffer.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
@@ -39,7 +39,6 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace replay {
 
 void ReplayingDecoder::messageReceived(ChannelHandlerContext& ctx,
                                        const MessageEvent& e) {
@@ -229,7 +228,6 @@ const ChannelBufferPtr& ReplayingDecoder::getCumulation(ChannelHandlerContext& c
     return cumulation;
 }
 
-}
 }
 }
 }

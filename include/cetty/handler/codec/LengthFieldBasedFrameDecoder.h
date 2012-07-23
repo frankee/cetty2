@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDBASEDFRAMEDECODER_H)
-#define CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDBASEDFRAMEDECODER_H
+#if !defined(CETTY_HANDLER_CODEC_LENGTHFIELDBASEDFRAMEDECODER_H)
+#define CETTY_HANDLER_CODEC_LENGTHFIELDBASEDFRAMEDECODER_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -24,12 +24,13 @@
 #include <boost/function.hpp>
 #include <boost/cstdint.hpp>
 
-#include <cetty/handler/codec/frame/FrameDecoder.h>
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
+
+    using namespace cetty::channel;
 
 /**
  * A decoder that splits the received {@link ChannelBuffer}s dynamically by the
@@ -196,7 +197,7 @@ namespace frame {
  *
  * @see LengthFieldPrepender
  */
-class LengthFieldBasedFrameDecoder : public FrameDecoder {
+class LengthFieldBasedFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
 public:
     typedef boost::function2<boost::uint32_t, const boost::uint8_t*, int> ChecksumFunction;
 
@@ -344,8 +345,8 @@ public:
     virtual std::string toString() const { return "LengthFieldBasedFrameDecoder"; }
 
 protected:
-    virtual ChannelMessage decode(
-        ChannelHandlerContext& ctx, const ChannelPtr& channel, const ChannelBufferPtr& buffer);
+    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in);
 
     /**
      * Extract the sub-region of the specified buffer. This method is called by
@@ -393,9 +394,8 @@ private:
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDBASEDFRAMEDECODER_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_LENGTHFIELDBASEDFRAMEDECODER_H)
 
 // Local Variables:
 // mode: c++

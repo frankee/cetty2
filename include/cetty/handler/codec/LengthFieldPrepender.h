@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDPREPENDER_H)
-#define CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDPREPENDER_H
+#if !defined(CETTY_HANDLER_CODEC_LENGTHFIELDPREPENDER_H)
+#define CETTY_HANDLER_CODEC_LENGTHFIELDPREPENDER_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -22,18 +22,16 @@
  */
 
 #include <boost/function.hpp>
-#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/Integer.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::channel;
 using namespace cetty::util;
-using namespace cetty::handler::codec::oneone;
 
 /**
  * An encoder that prepends the length of the message.  The length value is
@@ -68,7 +66,7 @@ using namespace cetty::handler::codec::oneone;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class LengthFieldPrepender : public ::cetty::handler::codec::oneone::OneToOneEncoder {
+class LengthFieldPrepender : public MessageToBufferEncoder<ChannelBufferPtr> {
 public:
     typedef boost::function2<boost::uint32_t, const boost::uint8_t*, int> ChecksumFunction;
 
@@ -142,8 +140,9 @@ public:
         const std::string& header2,
         ChecksumFunction checksumFunction);
 
-    virtual ChannelMessage encode(
-        ChannelHandlerContext& ctx, const ChannelPtr& channel, const ChannelMessage& msg);
+    virtual void encode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg,
+        ChannelBufferPtr& out);
 
     virtual ChannelHandlerPtr clone() {
         return shared_from_this();
@@ -170,9 +169,8 @@ private:
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_LENGTHFIELDPREPENDER_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_LENGTHFIELDPREPENDER_H)
 
 // Local Variables:
 // mode: c++
