@@ -74,7 +74,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& method,
         const MessagePtr& payload)
     : message(new ServiceMessage), payload(payload) {
-    message->set_type((MessageType)type);
+    message->set_type(static_cast<MessageType>(type));
     message->set_id(id);
     message->set_service(service);
     message->set_method(method);

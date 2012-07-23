@@ -37,7 +37,11 @@ GearmanMessage::GearmanMessage(int type, const std::string& param) {
 }
 GearmanMessage::GearmanMessage(int type, const std::string& param, const ChannelBufferPtr& payload) {
     this->type = type;
-    this->parameters.push_back(param);
+
+    if (param.size()>0) {
+        this->parameters.push_back(param);
+    }
+
     this->data = payload;
 }
 
@@ -58,6 +62,12 @@ GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::s
     this->parameters.push_back(param1);
     this->parameters.push_back(param2);
     this->data = payload;
+}
+
+GearmanMessage::GearmanMessage(GearmanMessage& msg) {
+    this->type = msg.getType();
+    this->parameters = msg.getParameters();
+    this->data = msg.getData()->copy();
 }
 
 

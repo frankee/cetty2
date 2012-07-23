@@ -18,6 +18,7 @@
  */
 
 #include <map>
+#include <stack>
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelFwd.h>
@@ -40,10 +41,12 @@ public:
     GearmanWorkerHandler();
     GearmanWorkerHandler(int maxGrabIdleCount);
     GearmanWorkerHandler(int maxGrabIdleCount,
-        const std::map<std::string, GrabJobCallback>& workerFunctors);
+                         const std::map<std::string, GrabJobCallback>& workerFunctors);
+
     virtual ~GearmanWorkerHandler();
 
-    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+    virtual void channelConnected(ChannelHandlerContext& ctx,
+                                  const ChannelStateEvent& e);
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
                                  const MessageEvent& e);
@@ -62,11 +65,12 @@ private:
                    const MessageEvent& e);
 
 private:
-    void registerFunction(const std::string& functionName);
+    void registerFunction(const std::string& functionName,
+                          ChannelHandlerContext& ctx);
 
-    void preSleep();
-    void grabJob();
-    void grabJobUnique();
+    void preSleep(ChannelHandlerContext& ctx);
+    void grabJob(ChannelHandlerContext& ctx);
+    void grabJobUnique(ChannelHandlerContext& ctx);
 
 private:
     typedef std::map<std::string, GrabJobCallback> CallbackMap;
@@ -75,8 +79,10 @@ private:
     bool isSleep;
     int m_maxGrabIdleCount;
     int m_grabIdleCount;
-    ChannelPtr m_channel;
+    ChannelPtr channel;
     CallbackMap m_workerFunctors;
+    //record the job handle of gearman Message
+    //std::stack<std::string>jobHandles;
 };
 
 }

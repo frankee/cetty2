@@ -35,12 +35,12 @@ using namespace cetty::handler::codec::frame;
 
 GearmanWorkerBuilder::GearmanWorkerBuilder()
     : ServerBuilder() {
-        initDefaultPipeline();
+    initDefaultPipeline();
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
     : ServerBuilder(threadCnt) {
-        initDefaultPipeline();
+    initDefaultPipeline();
 }
 
 GearmanWorkerBuilder::~GearmanWorkerBuilder() {
@@ -66,6 +66,7 @@ const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
 }
 
 void GearmanWorkerBuilder::buildWorker(const AsioServicePtr& ioService) {
+    //to connect to remote at this point
     GearmanWorkerPtr worker =
         new GearmanWorker(ioService, pipeline, connections);
     workers.push_back(worker);

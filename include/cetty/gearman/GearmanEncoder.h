@@ -33,7 +33,7 @@ public:
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
-protected:
+//protected:
     virtual ChannelMessage encode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ChannelMessage& msg);

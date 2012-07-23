@@ -31,6 +31,7 @@ using namespace cetty::protobuf::service;
 class GearmanProtobufWorkerBuilder : public GearmanWorkerBuilder {
 public:
     GearmanProtobufWorkerBuilder();
+    GearmanProtobufWorkerBuilder(int threadCnt);
     virtual ~GearmanProtobufWorkerBuilder();
     
     GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);

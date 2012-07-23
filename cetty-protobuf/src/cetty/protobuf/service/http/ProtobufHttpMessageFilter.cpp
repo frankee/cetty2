@@ -47,7 +47,8 @@ ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ConfigCenter& config)
 }
 
 ChannelHandlerPtr ProtobufHttpMessageFilter::clone() {
-    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
+//    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
+    return NULL;
 }
 
 std::string ProtobufHttpMessageFilter::toString() const {

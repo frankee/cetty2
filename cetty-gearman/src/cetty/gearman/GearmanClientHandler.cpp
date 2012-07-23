@@ -19,6 +19,8 @@
 #include <cetty/channel/Channels.h>
 #include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/DownstreamMessageEvent.h>
+#include <cetty/channel/UpstreamMessageEvent.h>
 
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/GearmanWorker.h>
@@ -43,10 +45,12 @@ void GearmanClientHandler::channelConnected(ChannelHandlerContext& ctx, const Ch
     channel = ctx.getChannel();
 }
 
-void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg) {
-    if (channel) {
-        channel->write(ChannelMessage(msg));
-    }
+void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e) {
+    /*if (channel) {
+    channel->write(ChannelMessage(msg));
+    }*/
+    DownstreamMessageEvent message(e.getChannel(),e.getFuture(),ChannelMessage(msg),e.getRemoteAddress());
+    ctx.sendDownstream(message);
 }
 
 void GearmanClientHandler::handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e) {
@@ -58,7 +62,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
     GearmanMessagePtr message = e.getMessage().smartPointer<GearmanMessage>();
     std::string  data;
     std::vector<std::string> params;
-    
+
     if (!message) {
         ctx.sendUpstream(e);
     }
@@ -87,7 +91,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
 
 
-        
+
         data = ChannelBuffers::hexDump(message->getData());
         std::cout<<"the work complete data is "<< data <<std::endl;
 

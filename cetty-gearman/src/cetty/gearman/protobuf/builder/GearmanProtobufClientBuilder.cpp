@@ -65,7 +65,7 @@ GearmanProtobufClientBuilder::~GearmanProtobufClientBuilder() {
 void GearmanProtobufClientBuilder::init() {
     pipeline = Channels::pipeline();
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024,8, 4, 0, 4));
     pipeline->addLast("gearmanDecoder", new GearmanDecoder());
     pipeline->addLast("gearmanEncoder", new GearmanEncoder());
     pipeline->addLast("gearmanClient", new GearmanClientHandler());

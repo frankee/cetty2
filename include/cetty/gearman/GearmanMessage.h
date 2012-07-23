@@ -121,28 +121,34 @@ public:
     GearmanMessage(int type, const std::string& param1, const std::string& param2);
     GearmanMessage(int type, const std::string& param1, const std::string& param2, const std::string& param3);
     GearmanMessage(int type, const std::string& param1, const std::string& param2, const ChannelBufferPtr& payload);
+    GearmanMessage(GearmanMessage& msg);
 
     ~GearmanMessage() {}
 
-    int getType() const { return type; }
-    const std::vector<std::string>& getParameters() const { return parameters; }
-    const std::string& getParamater(int index) { return parameters.at(index); }
-    const ChannelBufferPtr& getData()const { return data; }
+    GearmanMessagePtr clone() {
+        return GearmanMessagePtr(new GearmanMessage(*this));
+    }
 
     bool hasData() const { return data && data->readable(); }
 
+    const std::vector<std::string>& getParameters() const { return parameters; }
+    const std::string& getParamater(int index) { return parameters.at(index); }
+
+    const ChannelBufferPtr& getData()const { return data; }
+    void setData(const ChannelBufferPtr& data) {
+        this->data = data;
+    }
+
+    int getType() const { return type; }
     void setType(int type) { this->type = type; }
+
     std::string* addParameter() {
         parameters.resize(parameters.size()+1);
         return &parameters.back();
     }
 
-    void setData(const ChannelBufferPtr& data) {
-        this->data = data;
-    }
-
 private:
-    GearmanMessage(const GearmanMessage&);
+    //GearmanMessage(const GearmanMessage&);
     GearmanMessage& operator=(const GearmanMessage&);
 
 private:

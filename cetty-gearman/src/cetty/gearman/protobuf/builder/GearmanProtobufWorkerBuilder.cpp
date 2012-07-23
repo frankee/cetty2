@@ -37,14 +37,27 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 using namespace cetty::protobuf::service::handler;
 
+
+GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder() {
+    initDefaultPipeline();
+}
+
+
+GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(int threadCnt): GearmanWorkerBuilder(threadCnt) {
+    initDefaultPipeline();
+}
+
+GearmanProtobufWorkerBuilder::~GearmanProtobufWorkerBuilder() {}
+
+
 void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
-    pipeline = Channels::pipeline();
+    //pipeline = Channels::pipeline();
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
+    /* pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
 
-    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
-    pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
+     pipeline->addLast("gearmanDecoder", new GearmanDecoder());
+     pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+     pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());*/
     pipeline->addLast("gearmanProtobufFilter", new GearmanProtobufWorkerFilter());
     pipeline->addLast("protobufMessageHandler", new ProtobufServiceMessageHandler());
 }
@@ -52,24 +65,28 @@ void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
 GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
     const ProtobufServicePtr& service) {
 
-        if (!service) {
-            printf("");
-            return *this;
-        }
+    if (!service) {
+        printf("");
+        return *this;
+    }
+
+    //register service
+    ProtobufServiceRegister::instance().registerService(service);
 
     const ServiceDescriptor* descriptor = service->GetDescriptor();
     BOOST_ASSERT(descriptor);
 
-    std::string serviceName = descriptor->name();
+    std::string serviceName = descriptor->full_name();
     int methodCnt = descriptor->method_count();
 
     std::string functionName;
     WorkerFuncotr nullWorker;
-    for (int i = 0; i < methodCnt; ++i) {
-        functionName = serviceName;
-        const MethodDescriptor* method = descriptor->method(i);
-        functionName += method->name();
 
+    for (int i = 0; i < methodCnt; ++i) {
+        //functionName = serviceName;
+        const MethodDescriptor* method = descriptor->method(i);
+        functionName = method->name();
+        //register the worker function
         registerWorker(functionName, nullWorker);
     }
 }

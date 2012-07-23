@@ -113,7 +113,7 @@ ChannelPipelinePtr ProtobufServerBuilder::createProtobufHttpServicePipeline(
     // Remove the following line if you don't want automatic content compression.
     //pipeline.addLast("deflater", new HttpContentCompressor());
 
-    pipeline->addLast("protobufFilter", new ProtobufHttpMessageFilter(confCenter));
+    //pipeline->addLast("protobufFilter", new ProtobufHttpMessageFilter(confCenter));
 
     pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 

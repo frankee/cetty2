@@ -21,75 +21,83 @@
 
 #include <cetty/gearman/GearmanMessage.h>
 
-namespace cetty
-{
-namespace gearman
-{
+namespace cetty {
+namespace gearman {
 
 using namespace cetty::channel;
 
-GearmanDecoder::GearmanDecoder()
-{
+//this suzu is  store the param-size of  gearman-type
+//use a addtional value of 0  at first, so use  MessageMetaInfo[type] to get the param-size
+const int MessageMetaInfo[] = {
+    0,1,1,0,0,
+    0,0,2,1,0,
+    0,2,3,1,1,
+    1,0,0,2,2,
+    5,2,1,2,0,
+    1,1,1,1,1,
+    0,0,2,2,2,
+    2,2
+};
+
+GearmanDecoder::GearmanDecoder() {
 
 }
 
-GearmanDecoder::~GearmanDecoder()
-{
+GearmanDecoder::~GearmanDecoder() {
 
 }
 
-ChannelHandlerPtr GearmanDecoder::clone()
-{
+ChannelHandlerPtr GearmanDecoder::clone() {
     return ChannelHandlerPtr(new GearmanDecoder);
 }
 
-std::string GearmanDecoder::toString() const
-{
+std::string GearmanDecoder::toString() const {
     return "GearmanDecoder";
 }
 
 ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
                                       const ChannelPtr& channel,
-                                      const ChannelMessage& msg)
-{
-	//smartPointer得到具体message的类型
+                                      const ChannelMessage& msg) {
+    //smartPointer得到具体message的类型
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
-    if (buffer)
-    {
+    if (buffer) {
         GearmanMessagePtr message(new GearmanMessage);
         int type = buffer->readInt();
         int length = buffer->readInt();
-        while (length > 0)
-        {
+
+        int paramSize = 0;
+
+        while (length > 0) {
             int bytes = buffer->bytesBefore(0);
-            if (bytes > 0)
-            {
+
+            if (bytes > 0 && (paramSize < MessageMetaInfo[type])) {
+                paramSize++;
+
                 std::string* str = message->addParameter();
                 str->reserve(bytes);
-				//从buffer往str里写bytes+1个数据
+                //从buffer往str里写bytes+1个数据
                 buffer->readBytes(str, bytes);
                 buffer->skipBytes(1);
             }
-            else
-            {
-				//these types take the param as the last element
-				if(type == GearmanMessage::JOB_CREATED || type == GearmanMessage::STATUS_RES || type == GearmanMessage::OPTION_RES ||
-					type == GearmanMessage::WORK_STATUS || type == GearmanMessage::WORK_FAIL || type == GearmanMessage::ERROR)
-				{
-					std::string* str = message->addParameter();
-					int lastParamLen = buffer->readableBytes();
-					str->reserve(lastParamLen);
-					buffer->readBytes(str,lastParamLen);
-					break;
-				}
-				else if (buffer->readable())
-                {
+            else {
+                //these types take the param as the last element
+                if (type == GearmanMessage::JOB_CREATED || type == GearmanMessage::STATUS_RES || type == GearmanMessage::OPTION_RES ||
+                        type == GearmanMessage::WORK_STATUS || type == GearmanMessage::WORK_FAIL || type == GearmanMessage::ERROR) {
+                    std::string* str = message->addParameter();
+                    int lastParamLen = buffer->readableBytes();
+                    str->reserve(lastParamLen);
+                    buffer->readBytes(str,lastParamLen);
+                    break;
+                }
+                else if (buffer->readable()) {
                     message->setData(buffer);
                 }
+
                 break;
             }
         }
+
         message->setType(type);
 
         return ChannelMessage(message);

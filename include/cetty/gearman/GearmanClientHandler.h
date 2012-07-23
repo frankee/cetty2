@@ -45,7 +45,7 @@ public:
 
     void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
 private:
-    void submitJob(const GearmanMessagePtr& msg);
+    void submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e);
 
 private:
     ChannelPtr channel;
