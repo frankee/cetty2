@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGEDECODER_H)
 #define CETTY_HANDLER_CODEC_MESSAGETOMESSAGEDECODER_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -30,29 +31,37 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace handler { namespace codec { 
+namespace cetty {
+namespace handler {
+namespace codec {
 
 template<InboundInT, InboundOutT>
 class MessageToMessageDecoder : ChannelInboundMessageHandler<InboundInT> {
 public:
-    void inboundBufferUpdated(ChannelHandlerContext ctx) {
+    MessageToMessageDecoder() {}
+    virtual ~MessageToMessageDecoder() {}
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         MessageBuf<I> in = ctx.inboundMessageBuffer();
         boolean notify = false;
+
         for (;;) {
             try {
                 Object msg = in.poll();
+
                 if (msg == null) {
                     break;
                 }
+
                 if (!isDecodable(msg)) {
                     ctx.nextInboundMessageBuffer().add(msg);
                     notify = true;
                     continue;
                 }
 
-                @SuppressWarnings("unchecked")
                 I imsg = (I) msg;
                 O omsg = decode(ctx, imsg);
+
                 if (omsg == null) {
                     // Decoder consumed a message but returned null.
                     // Probably it needs more messages because it's an aggregator.
@@ -62,16 +71,17 @@ public:
                 if (CodecUtil.unfoldAndAdd(ctx, omsg, true)) {
                     notify = true;
                 }
-            } catch (Throwable t) {
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
-                } else {
-                    ctx.fireExceptionCaught(new DecoderException(t));
-                }
+            }
+            catch (const CodecException& e) {
+                ctx.fireExceptionCaught(e);
+            }
+            catch (Throwable t) {
+                ctx.fireExceptionCaught(new DecoderException(t));
             }
         }
+
         if (notify) {
-            ctx.fireInboundBufferUpdated();
+            ctx.fireMessageUpdated();
         }
     }
 
@@ -80,14 +90,17 @@ public:
      *
      * @param msg the message
      */
-    bool isDecodable(Object msg) {
+    bool isDecodable(const InboundInT& msg) {
         return true;
     }
 
-    virtual InboundOutT decode(ChannelHandlerContext& ctx, const InboundInT& msg) = 0;
+    virtual InboundOutT decode(ChannelHandlerContext& ctx,
+                               const InboundInT& msg) = 0;
 };
 
-}}}
+}
+}
+}
 
 #endif //#if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGEDECODER_H)
 

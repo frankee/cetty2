@@ -17,6 +17,7 @@
 #include <cetty/channel/ChannelPipeline.h>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelSink.h>
 
 #include <cetty/channel/ChannelEvent.h>
 #include <cetty/channel/MessageEvent.h>
@@ -24,6 +25,7 @@
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelOutboundHandler.h>
 
 #include <cetty/logging/InternalLogger.h>
 #include <cetty/logging/InternalLoggerFactory.h>
@@ -35,7 +37,7 @@ namespace channel {
 
 using namespace cetty::util;
 
-InternalLogger* DefaultChannelPipeline::logger = NULL;
+InternalLogger* ChannelPipeline::logger = NULL;
 
 class DiscardingChannelSink : public ChannelSink {
 public:
@@ -67,9 +69,76 @@ private:
     InternalLogger* logger;
 };
 
-ChannelSinkPtr DefaultChannelPipeline::discardingSink = new DiscardingChannelSink(DefaultChannelPipeline::getLogger());
+class HeadHandler : public ChannelOutboundHandler {
+public:
+    HeadHandler() : sink(NULL) {}
+    virtual ~HeadHandler() {}
 
-DefaultChannelPipeline::DefaultChannelPipeline()
+    void beforeAdd(ChannelHandlerContext& ctx) {
+        // NOOP
+    }
+
+    void afterAdd(ChannelHandlerContext& ctx) {
+        // NOOP
+    }
+
+    void beforeRemove(ChannelHandlerContext& ctx) {
+        // NOOP
+    }
+
+    void afterRemove(ChannelHandlerContext& ctx) {
+        // NOOP
+    }
+
+    void bind(ChannelHandlerContext& ctx, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+        if (sink) {
+            sink->bind(localAddress, future);
+        }
+    }
+
+    void connect(ChannelHandlerContext& ctx,
+        const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+            if (sink) {
+                sink->connect(remoteAddress, localAddress, future);
+            }
+    }
+
+    void disconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+        if (sink) {
+            sink->disconnect(future);
+        }
+    }
+
+    void close(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+        if (sink) {
+            sink->close(future);
+        }
+    }
+
+    void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+        if (sink) {
+            sink->flush(future);
+        }
+    }
+
+    void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause) {
+        ctx.fireExceptionCaught(cause);
+    }
+
+    void eventTriggered(ChannelHandlerContext& ctx, const ChannelEvent& evt) {
+        ctx.fireEventTriggered(evt);
+    }
+
+private:
+    ChannelSink* sink;
+};
+
+
+ChannelSinkPtr ChannelPipeline::discardingSink = new DiscardingChannelSink(ChannelPipeline::getLogger());
+
+ChannelPipeline::ChannelPipeline()
     : sink(discardingSink),
       channel(NULL),
       head(NULL),
@@ -77,11 +146,11 @@ DefaultChannelPipeline::DefaultChannelPipeline()
       inboundHead(NULL),
       outboundHead(NULL) {
     if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("DefaultChannelPipeline");
+        logger = InternalLoggerFactory::getInstance("ChannelPipeline");
     }
 }
 
-const ChannelPtr& DefaultChannelPipeline::getChannel() const {
+const ChannelPtr& ChannelPipeline::getChannel() const {
     if (!this->channel) {
         throw IllegalStateException("channel has not been attached");
     }
@@ -89,15 +158,15 @@ const ChannelPtr& DefaultChannelPipeline::getChannel() const {
     return this->channel;
 }
 
-const ChannelSinkPtr& DefaultChannelPipeline::getSink() const {
+const ChannelSinkPtr& ChannelPipeline::getSink() const {
     if (!this->sink) {
-        return DefaultChannelPipeline::discardingSink;
+        return ChannelPipeline::discardingSink;
     }
 
     return this->sink;
 }
 
-void DefaultChannelPipeline::attach(const ChannelPtr& channel, const ChannelSinkPtr& sink) {
+void ChannelPipeline::attach(const ChannelPtr& channel, const ChannelSinkPtr& sink) {
     if (!channel) {
         throw NullPointerException("channel");
     }
@@ -114,16 +183,16 @@ void DefaultChannelPipeline::attach(const ChannelPtr& channel, const ChannelSink
     this->sink = sink;
 }
 
-void DefaultChannelPipeline::detach() {
+void ChannelPipeline::detach() {
     this->channel = NULL;
     this->sink = NULL;
 }
 
-bool DefaultChannelPipeline::isAttached() const {
+bool ChannelPipeline::isAttached() const {
     return (sink != discardingSink && sink);
 }
 
-void DefaultChannelPipeline::addFirst(const std::string& name,
+void ChannelPipeline::addFirst(const std::string& name,
                                       const ChannelHandlerPtr& handler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
@@ -158,7 +227,7 @@ void DefaultChannelPipeline::addFirst(const std::string& name,
     }
 }
 
-void DefaultChannelPipeline::addLast(const std::string& name,
+void ChannelPipeline::addLast(const std::string& name,
                                      const ChannelHandlerPtr& handler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
@@ -193,7 +262,7 @@ void DefaultChannelPipeline::addLast(const std::string& name,
     }
 }
 
-void DefaultChannelPipeline::addBefore(const std::string& baseName,
+void ChannelPipeline::addBefore(const std::string& baseName,
                                        const std::string& name,
                                        const ChannelHandlerPtr& handler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
@@ -230,7 +299,7 @@ void DefaultChannelPipeline::addBefore(const std::string& baseName,
     }
 }
 
-void DefaultChannelPipeline::addAfter(const std::string& baseName,
+void ChannelPipeline::addAfter(const std::string& baseName,
                                       const std::string& name,
                                       const ChannelHandlerPtr& handler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
@@ -267,19 +336,19 @@ void DefaultChannelPipeline::addAfter(const std::string& baseName,
     }
 }
 
-void DefaultChannelPipeline::remove(const ChannelHandlerPtr& handler) {
+void ChannelPipeline::remove(const ChannelHandlerPtr& handler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
     remove(getContextOrDie(handler));
 }
 
 ChannelHandlerPtr
-DefaultChannelPipeline::remove(const std::string& name) {
+ChannelPipeline::remove(const std::string& name) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
     return remove(getContextOrDie(name));
 }
 
 ChannelHandlerPtr
-DefaultChannelPipeline::remove(DefaultChannelHandlerContext* ctx) {
+ChannelPipeline::remove(DefaultChannelHandlerContext* ctx) {
     if (head == tail) {
         head = tail = NULL;
         name2ctx.clear();
@@ -317,7 +386,7 @@ DefaultChannelPipeline::remove(DefaultChannelHandlerContext* ctx) {
     return ptr;
 }
 
-ChannelHandlerPtr DefaultChannelPipeline::removeFirst() {
+ChannelHandlerPtr ChannelPipeline::removeFirst() {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
     if (name2ctx.empty()) {
@@ -358,7 +427,7 @@ ChannelHandlerPtr DefaultChannelPipeline::removeFirst() {
     return ptr;
 }
 
-ChannelHandlerPtr DefaultChannelPipeline::removeLast() {
+ChannelHandlerPtr ChannelPipeline::removeLast() {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
     if (name2ctx.empty()) {
@@ -399,7 +468,7 @@ ChannelHandlerPtr DefaultChannelPipeline::removeLast() {
     return ptr;
 }
 
-void DefaultChannelPipeline::replace(const ChannelHandlerPtr& oldHandler,
+void ChannelPipeline::replace(const ChannelHandlerPtr& oldHandler,
                                      const std::string& newName,
                                      const ChannelHandlerPtr& newHandler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
@@ -407,7 +476,7 @@ void DefaultChannelPipeline::replace(const ChannelHandlerPtr& oldHandler,
 }
 
 ChannelHandlerPtr
-DefaultChannelPipeline::replace(const std::string& oldName,
+ChannelPipeline::replace(const std::string& oldName,
                                 const std::string& newName,
                                 const ChannelHandlerPtr& newHandler) {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
@@ -415,7 +484,7 @@ DefaultChannelPipeline::replace(const std::string& oldName,
 }
 
 ChannelHandlerPtr
-DefaultChannelPipeline::replace(DefaultChannelHandlerContext* ctx,
+ChannelPipeline::replace(DefaultChannelHandlerContext* ctx,
                                 const std::string& newName,
                                 const ChannelHandlerPtr& newHandler) {
     ChannelHandlerPtr replacedHandle;
@@ -512,7 +581,7 @@ DefaultChannelPipeline::replace(DefaultChannelHandlerContext* ctx,
     return replacedHandle;
 }
 
-ChannelHandlerPtr DefaultChannelPipeline::getFirst() const {
+ChannelHandlerPtr ChannelPipeline::getFirst() const {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
     DefaultChannelHandlerContext* head = this->head;
@@ -524,7 +593,7 @@ ChannelHandlerPtr DefaultChannelPipeline::getFirst() const {
     return head->getHandler();
 }
 
-ChannelHandlerPtr DefaultChannelPipeline::getLast() const {
+ChannelHandlerPtr ChannelPipeline::getLast() const {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
     DefaultChannelHandlerContext* tail = this->tail;
@@ -537,7 +606,7 @@ ChannelHandlerPtr DefaultChannelPipeline::getLast() const {
 }
 
 ChannelHandlerPtr
-DefaultChannelPipeline::get(const std::string& name) const {
+ChannelPipeline::get(const std::string& name) const {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
 
     ContextMap::const_iterator itr = name2ctx.find(name);
@@ -550,18 +619,18 @@ DefaultChannelPipeline::get(const std::string& name) const {
 }
 
 ChannelHandlerContext*
-DefaultChannelPipeline::getContext(const std::string& name) const {
+ChannelPipeline::getContext(const std::string& name) const {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
     return getContextNoLock(name);
 }
 
 ChannelHandlerContext*
-DefaultChannelPipeline::getContext(const ChannelHandlerPtr& handler) const {
+ChannelPipeline::getContext(const ChannelHandlerPtr& handler) const {
     boost::lock_guard<boost::recursive_mutex> guard(mutex);
     return getContextNoLock(handler);
 }
 
-ChannelPipeline::ChannelHandlers DefaultChannelPipeline::getChannelHandles() const {
+ChannelPipeline::ChannelHandlers ChannelPipeline::getChannelHandles() const {
     ChannelHandlers map;
 
     if (name2ctx.empty()) {
@@ -582,8 +651,8 @@ ChannelPipeline::ChannelHandlers DefaultChannelPipeline::getChannelHandles() con
     return map;
 }
 
-std::string DefaultChannelPipeline::toString() const {
-    std::string buf("DefaultChannelPipeline {");
+std::string ChannelPipeline::toString() const {
+    std::string buf("ChannelPipeline {");
     buf.reserve(1024);
 
     DefaultChannelHandlerContext* ctx = this->head;
@@ -608,7 +677,7 @@ std::string DefaultChannelPipeline::toString() const {
     return buf;
 }
 
-void DefaultChannelPipeline::notifyHandlerException(const ChannelEvent& evt, const Exception& e) {
+void ChannelPipeline::notifyHandlerException(const ChannelEvent& evt, const Exception& e) {
     const ExceptionEvent* exceptionEvt = dynamic_cast<const ExceptionEvent*>(&evt);
 
     if (exceptionEvt) {
@@ -628,7 +697,7 @@ void DefaultChannelPipeline::notifyHandlerException(const ChannelEvent& evt, con
     }
 }
 
-void DefaultChannelPipeline::callBeforeAdd(ChannelHandlerContext* ctx) {
+void ChannelPipeline::callBeforeAdd(ChannelHandlerContext* ctx) {
     LifeCycleAwareChannelHandler* h =
         dynamic_cast<LifeCycleAwareChannelHandler*>(ctx->getHandler().get());
 
@@ -645,7 +714,7 @@ void DefaultChannelPipeline::callBeforeAdd(ChannelHandlerContext* ctx) {
     }
 }
 
-void DefaultChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
+void ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
     LifeCycleAwareChannelHandlerPtr h =
         boost::dynamic_pointer_cast<LifeCycleAwareChannelHandler>(ctx->getHandler());
 
@@ -681,7 +750,7 @@ void DefaultChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
     }
 }
 
-void DefaultChannelPipeline::callBeforeRemove(ChannelHandlerContext* ctx) {
+void ChannelPipeline::callBeforeRemove(ChannelHandlerContext* ctx) {
     LifeCycleAwareChannelHandlerPtr h =
         boost::dynamic_pointer_cast<LifeCycleAwareChannelHandler>(ctx->getHandler());
 
@@ -696,7 +765,7 @@ void DefaultChannelPipeline::callBeforeRemove(ChannelHandlerContext* ctx) {
     }
 }
 
-void DefaultChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
+void ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     LifeCycleAwareChannelHandlerPtr h =
         boost::dynamic_pointer_cast<LifeCycleAwareChannelHandler>(ctx->getHandler());
 
@@ -711,7 +780,7 @@ void DefaultChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     }
 }
 
-void DefaultChannelPipeline::init(const std::string& name, const ChannelHandlerPtr& handler) {
+void ChannelPipeline::init(const std::string& name, const ChannelHandlerPtr& handler) {
     DefaultChannelHandlerContext* ctx =
         new DefaultChannelHandlerContext(*this, name, handler, NULL, NULL);
 
@@ -734,13 +803,13 @@ void DefaultChannelPipeline::init(const std::string& name, const ChannelHandlerP
     callAfterAdd(ctx);
 }
 
-void DefaultChannelPipeline::checkDuplicateName(const std::string& name) {
+void ChannelPipeline::checkDuplicateName(const std::string& name) {
     if (name2ctx.find(name) != name2ctx.end()) {
         throw InvalidArgumentException("Duplicate handler name.");
     }
 }
 
-DefaultChannelHandlerContext* DefaultChannelPipeline::getContextOrDie(const std::string& name) {
+DefaultChannelHandlerContext* ChannelPipeline::getContextOrDie(const std::string& name) {
     DefaultChannelHandlerContext* ctx = getContextNoLock(name);
 
     if (ctx == NULL) {
@@ -751,7 +820,7 @@ DefaultChannelHandlerContext* DefaultChannelPipeline::getContextOrDie(const std:
     }
 }
 
-DefaultChannelHandlerContext* DefaultChannelPipeline::getContextOrDie(const ChannelHandlerPtr& handler) {
+DefaultChannelHandlerContext* ChannelPipeline::getContextOrDie(const ChannelHandlerPtr& handler) {
     DefaultChannelHandlerContext* ctx = getContextNoLock(handler);
 
     if (ctx == NULL) {
@@ -762,7 +831,7 @@ DefaultChannelHandlerContext* DefaultChannelPipeline::getContextOrDie(const Chan
     }
 }
 
-DefaultChannelHandlerContext* DefaultChannelPipeline::getContextNoLock(const ChannelHandlerPtr& handler) const {
+DefaultChannelHandlerContext* ChannelPipeline::getContextNoLock(const ChannelHandlerPtr& handler) const {
     if (!handler) {
         throw NullPointerException("handler");
     }
@@ -788,7 +857,7 @@ DefaultChannelHandlerContext* DefaultChannelPipeline::getContextNoLock(const Cha
     return NULL;
 }
 
-DefaultChannelHandlerContext* DefaultChannelPipeline::getContextNoLock(const std::string& name) const {
+DefaultChannelHandlerContext* ChannelPipeline::getContextNoLock(const std::string& name) const {
     ContextMap::const_iterator itr = name2ctx.find(name);
 
     if (itr == name2ctx.end()) {
@@ -799,7 +868,7 @@ DefaultChannelHandlerContext* DefaultChannelPipeline::getContextNoLock(const std
 }
 
 
-void DefaultChannelPipeline::sendUpstream(const ChannelEvent& e) {
+void ChannelPipeline::sendUpstream(const ChannelEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->handleUpstream(*inboundHead, e);
@@ -819,7 +888,7 @@ void DefaultChannelPipeline::sendUpstream(const ChannelEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendUpstream(const MessageEvent& e) {
+void ChannelPipeline::sendUpstream(const MessageEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->messageReceived(*inboundHead, e);
@@ -839,7 +908,7 @@ void DefaultChannelPipeline::sendUpstream(const MessageEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendUpstream(const ExceptionEvent& e) {
+void ChannelPipeline::sendUpstream(const ExceptionEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->exceptionCaught(*inboundHead, e);
@@ -859,7 +928,7 @@ void DefaultChannelPipeline::sendUpstream(const ExceptionEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendUpstream(const WriteCompletionEvent& e) {
+void ChannelPipeline::sendUpstream(const WriteCompletionEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->writeCompleted(*inboundHead, e);
@@ -879,7 +948,7 @@ void DefaultChannelPipeline::sendUpstream(const WriteCompletionEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendUpstream(const ChannelStateEvent& e) {
+void ChannelPipeline::sendUpstream(const ChannelStateEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->channelStateChanged(*inboundHead, e);
@@ -899,7 +968,7 @@ void DefaultChannelPipeline::sendUpstream(const ChannelStateEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendUpstream(const ChildChannelStateEvent& e) {
+void ChannelPipeline::sendUpstream(const ChildChannelStateEvent& e) {
     if (inboundHead) {
         try {
             inboundHead->upstreamHandler->childChannelStateChanged(*inboundHead, e);
@@ -919,7 +988,7 @@ void DefaultChannelPipeline::sendUpstream(const ChildChannelStateEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendDownstream(const ChannelEvent& e) {
+void ChannelPipeline::sendDownstream(const ChannelEvent& e) {
     try {
         if (outboundHead) {
             outboundHead->downstreamHandler->handleDownstream(*outboundHead, e);
@@ -940,7 +1009,7 @@ void DefaultChannelPipeline::sendDownstream(const ChannelEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendDownstream(const MessageEvent& e) {
+void ChannelPipeline::sendDownstream(const MessageEvent& e) {
     try {
         if (outboundHead) {
             outboundHead->downstreamHandler->writeRequested(*outboundHead, e);
@@ -961,7 +1030,7 @@ void DefaultChannelPipeline::sendDownstream(const MessageEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::sendDownstream(const ChannelStateEvent& e) {
+void ChannelPipeline::sendDownstream(const ChannelStateEvent& e) {
     try {
         if (outboundHead) {
             outboundHead->downstreamHandler->stateChangeRequested(*outboundHead, e);
@@ -982,7 +1051,7 @@ void DefaultChannelPipeline::sendDownstream(const ChannelStateEvent& e) {
     }
 }
 
-void DefaultChannelPipeline::updateUpstreamList() {
+void ChannelPipeline::updateUpstreamList() {
     DefaultChannelHandlerContext* contextIndex = this->head;
     DefaultChannelHandlerContext* upstreamContextIndex = NULL;
     this->inboundHead = NULL;
@@ -1004,7 +1073,7 @@ void DefaultChannelPipeline::updateUpstreamList() {
     }
 }
 
-void DefaultChannelPipeline::updateDownstreamList() {
+void ChannelPipeline::updateDownstreamList() {
     DefaultChannelHandlerContext* contextIndex = this->tail;
     DefaultChannelHandlerContext* downstreamContextIndex = NULL;
     this->outboundHead = NULL;
@@ -1026,11 +1095,11 @@ void DefaultChannelPipeline::updateDownstreamList() {
     }
 }
 
-void DefaultChannelPipeline::setAttachment(const std::string& name, const boost::any& attachment) {
+void ChannelPipeline::setAttachment(const std::string& name, const boost::any& attachment) {
     attachments[name] = attachment;
 }
 
-boost::any DefaultChannelPipeline::getAttachment(const std::string& name) const {
+boost::any ChannelPipeline::getAttachment(const std::string& name) const {
     AttachmentMap::const_iterator itr = attachments.find(name);
 
     if (itr != attachments.end()) {

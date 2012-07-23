@@ -28,8 +28,9 @@
 #include <cetty/channel/ExceptionEvent.h>
 #include <cetty/channel/ChannelStateEvent.h>
 #include <cetty/channel/ChildChannelStateEvent.h>
-#include <cetty/channel/DefaultChannelPipeline.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/SimpleChannelUpstreamHandler.h>
 #include <cetty/channel/socket/ServerSocketChannelFactory.h>
 #include <cetty/channel/IpAddress.h>
@@ -44,6 +45,38 @@ namespace bootstrap {
 using namespace cetty::channel;
 using namespace cetty::channel::socket;
 using namespace cetty::util;
+
+class Acceptor : public cetty::channel::ChannelInboundMessageHandler<ChannelPtr> {
+public:
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        InboundMessageHandlerContext* context =
+            static_cast<InboundMessageHandlerContext*>(&ctx);
+
+        std::deque<ChannelPtr>& in = context->getInboundMessageQueue();
+        for (;;) {
+            Channel child = in.poll();
+            if (child == null) {
+                break;
+            }
+
+            for (Entry<ChannelOption<?>, Object> e: childOptions.entrySet()) {
+                try {
+                    if (!child.config().setOption((ChannelOption<Object>) e.getKey(), e.getValue())) {
+                        logger.warn("Unknown channel option: " + e);
+                    }
+                } catch (Throwable t) {
+                    logger.warn("Failed to set a channel option: " + child, t);
+                }
+            }
+
+            try {
+                childEventLoop.register(child);
+            } catch (Throwable t) {
+                logger.warn("Failed to register an accepted channel: " + child, t);
+            }
+        }
+    }
+};
 
 class Binder : public cetty::channel::SimpleChannelUpstreamHandler {
 public:
@@ -144,7 +177,7 @@ ChannelPtr ServerBootstrap::bind(const std::string& ip, int port) {
     return bind(SocketAddress(ip, port));
 }
 
-ChannelPtr ServerBootstrap::bind(const SocketAddress& localAddress) {
+ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     // bossPipeline's life cycle will be managed by the server channel.
     ChannelPipelinePtr bossPipeline = Channels::pipeline();
 
@@ -172,34 +205,10 @@ ChannelPtr ServerBootstrap::bind(const SocketAddress& localAddress) {
         return ChannelPtr();
     }
 
-    // Wait until the future is available.
-    Binder::FutureQueue& futureQueue = binder->getFutureQueue();
-    ChannelFuturePtr future;
+    ChannelFuturePtr future = channel->newFuture();
+    channel->bind(localAddress, future)->addListener(ChannelFutureListener::CLOSE_ON_FAILURE);
 
-    do {
-        if (!futureQueue.empty()) {
-            future = futureQueue.front();
-            futureQueue.pop_front();
-        }
-
-        boost::this_thread::yield();
-
-        if (boost::this_thread::interruption_requested()) {
-            return ChannelPtr();
-        }
-    }
-    while (!future);
-
-    // Wait for the future.
-    future->awaitUninterruptibly();
-
-    if (!future->isSuccess()) {
-        future->getChannel()->close()->awaitUninterruptibly();
-        LOG_ERROR(logger, "Failed to bind to: %s.", localAddress.toString().c_str());
-        return ChannelPtr();
-    }
-
-    return channel;
+    return future;
 }
 
 

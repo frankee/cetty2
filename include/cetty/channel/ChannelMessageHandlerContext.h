@@ -22,7 +22,7 @@
 namespace cetty {
 namespace channel {
 
-template<typename T>
+template<typename InT, typename OutT>
 class ChannelMessageHandlerContext : public ChannelHandlerContext {
 public:
     ChannelMessageHandlerContext();

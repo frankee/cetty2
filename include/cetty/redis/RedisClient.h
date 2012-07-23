@@ -19,6 +19,7 @@
 
 #include <map>
 #include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/service/ClientService.h>
 #include <cetty/redis/RedisServiceFuture.h>
 
 namespace cetty {
@@ -30,11 +31,13 @@ class RedisCommand;
 
 class RedisClient {
 public:
-    RedisClient() {}
+    RedisClient(const ClientServicePtr& clientService) {}
     ~RedisClient() {}
 
 public:
-    void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future);
+    void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future) {
+        callMethod(clientService, command, future);
+    }
 
     // Strings Command
     void set(const std::string& key, const std::string& value, const RedisServiceFuturePtr& future);

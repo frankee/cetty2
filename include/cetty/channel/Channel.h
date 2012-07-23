@@ -125,11 +125,8 @@ class ChannelMessage;
  * @enddot
  *
  */
-class Channel
-    : public ChannelInboundInvoker,
-    public ChannelOutboundInvoker,
+class Channel : public ChannelOutboundInvoker,
     public cetty::util::ReferenceCounter<Channel> {
-
 public:
     virtual ~Channel() {}
 
@@ -166,6 +163,9 @@ public:
      * associated with this channel.
      */
     virtual const ChannelPipelinePtr& getPipeline() const  = 0;
+
+
+    virtual ChannelSink& getSink() = 0;
 
     /**
      * Returns <tt>true</tt> if and only if this channel is open.
@@ -219,7 +219,30 @@ public:
     virtual const ChannelFuturePtr& getSucceededFuture() = 0;
 
     /**
-     * Compares the @link #getId() ID@endlink of the two channels.
+     * Sends a message to this channel asynchronously.    If this channel was
+     * created by a connectionless transport (e.g. {@link DatagramChannel})
+     * and is not connected yet, you have to call
+     * {@link #write(const ChannelMessage&, const SocketAddress&, bool)}
+     * instead.  Otherwise, the write request will fail with
+     * {@link NotYetConnectedException} and an <tt>'exceptionCaught'</tt> event
+     * will be triggered.
+     *
+     * @param message the message to write
+     * @param withFuture indicated whether to return a future or not
+     *
+     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
+     *         write request succeeds or fails
+     *
+     */
+    template<typename T>
+    ChannelFuturePtr write(const T& message) {
+        ChannelPipelinePtr pipeline = getPipeline();
+        //pipeline->
+        return pipeline->flush();
+    }
+
+    /**
+     * Compares the {@link #getId() ID} of the two channels.
      */
     virtual int compareTo(const ChannelPtr& c) const = 0;
 

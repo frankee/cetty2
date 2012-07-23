@@ -18,13 +18,66 @@
  */
 
 #include <cetty/channel/ChannelOutboundHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
 template<typename OutT>
 class ChannelOutboundMessageHandler : public ChannelOutboundHandler {
+public:
+    virtual void bind(ChannelHandlerContext& ctx,
+                      const SocketAddress& localAddress,
+                      const ChannelFuturePtr& future) {
+        ctx.bind(localAddress, future);
+    }
 
+    virtual void connect(ChannelHandlerContext& ctx,
+                         const SocketAddress& remoteAddress,
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future) {
+        ctx.connect(remoteAddress, localAddress, future);
+    }
+
+    virtual void disconnect(ChannelHandlerContext& ctx,
+                            const ChannelFuturePtr& future) {
+        ctx.disconnect(future);
+    }
+
+    virtual void close(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future) {
+        ctx.close(future);
+    }
+
+    virtual void flush(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future) {
+        ctx.flush(future);
+    }
+
+    virtual void beforeAdd(ChannelHandlerContext& ctx) {}
+
+    virtual void afterAdd(ChannelHandlerContext& ctx) {}
+
+    virtual void beforeRemove(ChannelHandlerContext& ctx) {}
+
+    virtual void afterRemove(ChannelHandlerContext& ctx) {}
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause) {
+        ctx.fireExceptionCaught(cause);
+    }
+
+    virtual void eventTriggered(ChannelHandlerContext& ctx,
+                                const ChannelEvent& evt) {
+        ctx.fireEventTriggered(evt);
+    }
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next) {
+        return new ChannelOutboundMessageHandlerContext<OutT>();
+    }
 };
 
 }

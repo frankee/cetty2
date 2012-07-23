@@ -66,7 +66,6 @@ public:
     AsioSocketChannel(const ChannelPtr& parent,
                       const ChannelFactoryPtr& factory,
                       const ChannelPipelinePtr& pipeline,
-                      const ChannelSinkPtr& sink,
                       const AsioServicePtr& ioService,
                       const boost::thread::id& id);
 
@@ -114,9 +113,15 @@ public:
     virtual bool setClosed();
 
     void internalWrite(const MessageEvent& evt);
-    void internalClose(const ChannelFuturePtr& future);
+    void doClose(const ChannelFuturePtr& future);
     void internalSetInterestOps(const ChannelFuturePtr& future, int interestOps);
     void cleanUpWriteBuffer();
+
+    void doConnect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& connectFuture);
+
+    void doFlush(const ChannelBufferPtr& buffer, const ChannelFuturePtr& future);
 
     void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
     void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);

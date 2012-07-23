@@ -303,7 +303,7 @@ void AsioServerSocketPipelineSink::closeAcceptChannel(
     const ChannelFuturePtr& future) {
 
     AsioSocketChannel* c = static_cast<AsioSocketChannel*>(channel);
-    c->internalClose(future);
+    c->doClose(future);
 
     //TODO should make sure thread safe, post to accept servicePtr
     //delete the channel.

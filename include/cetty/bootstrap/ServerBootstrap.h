@@ -256,7 +256,7 @@ public:
      *         if failed to create a new channel and
      *                      bind it to the local address, return null ChannelPtr
      */
-    virtual ChannelPtr bind(const SocketAddress& localAddress);
+    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
 private:
     ChannelHandlerPtr parentHandler;

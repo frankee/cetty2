@@ -268,6 +268,11 @@ public:
      */
     virtual ChannelHandlerPtr clone() = 0;
 
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next) = 0;
+
     /**
      * Returns a string representation of the ChannelHandler.
      */

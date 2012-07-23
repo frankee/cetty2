@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGEENCODER_H)
 #define CETTY_HANDLER_CODEC_MESSAGETOMESSAGEENCODER_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -41,7 +42,7 @@ namespace codec {
 template<OutboundInT, OutboundOutT>
 class MessageToMessageEncoder
         : public cetty::channel::ChannelOutboundMessageHandler<OutboundInT> {
-
+public:
     virtual void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
         MessageBuf<I> in = ctx.outboundMessageBuffer();
 
@@ -69,13 +70,11 @@ class MessageToMessageEncoder
 
                 CodecUtil.unfoldAndAdd(ctx, omsg, false);
             }
+            catch (const CodecException& e) {
+                ctx.fireExceptionCaught(e);
+            }
             catch (Throwable t) {
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
-                }
-                else {
-                    ctx.fireExceptionCaught(new EncoderException(t));
-                }
+                ctx.fireExceptionCaught(new EncoderException(t));
             }
         }
 
@@ -87,11 +86,12 @@ class MessageToMessageEncoder
      *
      * @param msg the message
      */
-    boolean isEncodable(Object msg) {
+    bool isEncodable(const OutboundInT& msg) {
         return true;
     }
 
-    virtual OutboundOutT encode(ChannelHandlerContext& ctx, I msg) = 0;
+    virtual OutboundOutT encode(ChannelHandlerContext& ctx,
+                                const OutboundInT& msg) = 0;
 };
 
 

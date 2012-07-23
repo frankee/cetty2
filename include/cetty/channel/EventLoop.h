@@ -21,30 +21,37 @@
 #include <boost/thread/thread.hpp>
 #include <cetty/util/ReferenceCounter.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
-    class EventLoop : public cetty::util::ReferenceCounter<EventLoop, int> {
-    public:
-        typename boost::function0<void> Functor;
+class EventLoop : public cetty::util::ReferenceCounter<EventLoop, int> {
+public:
+    typedef boost::function0<void> Functor;
 
-    public:
-        int getId() const;
-        const boost::thread::id& getThreadId() const;
+public:
+    EventLoop();
+    virtual ~EventLoop() {}
 
-        bool inLoopThread() const {
-            return threadId == boost::this_thread::get_id();
-        }
+    const boost::thread::id& getThreadId() const;
 
-        virtual void post(const Functor& handler) = 0;
+    bool inLoopThread() const {
+        return threadId == boost::this_thread::get_id();
+    }
 
-    private:
-        EventLoop(const EventLoop&);
-        EventLoop& operator=(const EventLoop&);
-    };
+    virtual void post(const Functor& handler) = 0;
 
-    typedef boost::intrusive_ptr<EventLoop> EventLoopPtr;
+private:
+    EventLoop(const EventLoop&);
+    EventLoop& operator=(const EventLoop&);
 
-}}
+private:
+    boost::thread::id threadId;
+};
+
+typedef boost::intrusive_ptr<EventLoop> EventLoopPtr;
+
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_EVENTLOOP_H)
 

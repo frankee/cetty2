@@ -30,18 +30,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
 
-namespace cetty { namespace handler { namespace codec { 
+namespace cetty {
+namespace handler {
+namespace codec {
 
 template<typename OutboundInT>
 class MessageToBufferEncoder : public ChannelOutboundMessageHandler<OutboundInT> {
 public:
-    void flush(ChannelHandlerContext& ctx, ChannelFuture future) {
+    void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
         MessageBuf<I> in = ctx.outboundMessageBuffer();
         ByteBuf out = ctx.nextOutboundByteBuffer();
 
         for (;;) {
             Object msg = in.poll();
+
             if (msg == null) {
                 break;
             }
@@ -52,12 +56,15 @@ public:
             }
 
             I imsg = (I) msg;
+
             try {
                 encode(ctx, imsg, out);
-            } catch (Throwable t) {
+            }
+            catch (Throwable t) {
                 if (t instanceof CodecException) {
                     ctx.fireExceptionCaught(t);
-                } else {
+                }
+                else {
                     ctx.fireExceptionCaught(new EncoderException(t));
                 }
             }
@@ -71,15 +78,19 @@ public:
      *
      * @param msg the message
      */
-    bool isEncodable(Object msg) {
+    virtual bool isEncodable(const OutboundInT& msg) {
         return true;
     }
 
-    virtual void encode(ChannelHandlerContext ctx, I msg, ByteBuf out) = 0;
+    virtual void encode(ChannelHandlerContext& ctx,
+                        const OutboundInT& msg,
+                        ChannelBufferPtr& out) = 0;
 };
 
 
-}}}
+}
+}
+}
 
 #endif //#if !defined(CETTY_HANDLER_CODEC_MESSAGETOBUFFERENCODER_H)
 

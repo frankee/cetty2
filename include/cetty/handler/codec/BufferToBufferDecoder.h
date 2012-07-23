@@ -105,7 +105,7 @@ private:
 
         if (out.readableBytes() > oldOutSize) {
             in.discardReadBytes();
-            ctx.fireInboundBufferUpdated();
+            ctx.fireMessageUpdated();
         }
     }
 };

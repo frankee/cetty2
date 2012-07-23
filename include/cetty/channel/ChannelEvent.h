@@ -199,20 +199,6 @@ public:
     virtual ~ChannelEvent() {}
 
     /**
-     * Returns the {@link Channel} which is associated with this event.
-     */
-    virtual const ChannelPtr& getChannel() const = 0;
-
-    /**
-     * Returns the {@link ChannelFuture const ChannelFuturePtr&} which is associated with this event.
-     * If this event is an upstream event, this method will always return a
-     * {@link SucceededChannelFuture} because the event has occurred already.
-     * If this event is a downstream event (i.e. I/O request), the returned
-     * future will be notified when the I/O request succeeds or fails.
-     */
-    virtual const ChannelFuturePtr& getFuture() const = 0;
-
-    /**
      * Constructs a string describing this Event.
      *
      * @return The specified string

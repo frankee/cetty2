@@ -291,7 +291,7 @@ cetty::channel::ChannelFuturePtr AsioSocketChannel::close() {
     return closeFuture;
 }
 
-void AsioSocketChannel::internalClose(const ChannelFuturePtr& future) {
+void AsioSocketChannel::doClose(const ChannelFuturePtr& future) {
     if (!isOpen() || !tcpSocket.is_open() || getCloseFuture()->isDone()) {
         LOG_INFO(logger, "close the socket channel, but the channel already closed.");
         return;
@@ -514,7 +514,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
     }
     else {
         cf->setFailure(ChannelException("failed to connect to remote server", error.value()));
-        internalClose(cf);
+        doClose(cf);
     }
 }
 
@@ -593,6 +593,64 @@ void AsioSocketChannel::setConnectedState() {
     }
     else {
         LOG_WARN(logger, "the channel is closed, can not open again.");
+    }
+}
+
+void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& connectFuture) {
+    const std::string& hostname = remoteAddress.hostName();
+    std::string port = Integer::toString(remoteAddress.port());
+
+    boost::asio::ip::tcp::resolver resolver(getService()->service());
+    boost::asio::ip::tcp::resolver::query query(hostname, port);
+
+    boost::system::error_code error;
+    boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query, error);
+
+    if (error) {
+        LOG_ERROR(logger, "boost asio can NOT resolve %s:%s, code=%d, msg=%s, then firing this exception.", error.value(), error.message().c_str());
+
+        ChannelException exception(error.message(), error.value());
+        cf->setFailure(exception);
+        Channels::fireExceptionCaught(channel, exception);
+
+        doClose(getCloseFuture());
+        return;
+    }
+
+    boost::asio::ip::tcp::endpoint endpoint = *iterator;
+    getSocket().async_connect(
+        endpoint,
+        boost::bind(&AsioSocketChannel::handleConnect,
+        this,
+        boost::asio::placeholders::error,
+        ++iterator,
+        cf));
+
+    if (needStartRunService) {
+        AsioClientSocketChannelFactory* factory
+            = dynamic_cast<AsioClientSocketChannelFactory*>(channel->getFactory().get());
+
+        if (factory) {
+            LOG_INFO(logger, "the asio service pool starting to run in main thread.");
+
+            if (factory->start()) {
+                LOG_INFO(logger, "the asio service pool started to running.");
+            }
+            else {
+                //TODO: may duplicated with the callback of AsioSocketChannel::handleConnect
+                LOG_ERROR(logger, "start the boost asio service error, and firing an exception.");
+                ChannelException e("the boost asio service can not be started.");
+                cf->setFailure(e);
+                Channels::fireExceptionCaught(channel, e);
+                socketChannel->doClose(channel->getCloseFuture());
+
+                //TODO: should terminate the program
+                std::terminate();
+            }
+        }
+        else {
+            LOG_ERROR(logger, "the asio service pool is in single thread mode, but the factory type is unknown.");
+        }
     }
 }
 

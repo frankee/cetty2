@@ -45,7 +45,11 @@ int main(int argc, char* argv[]) {
     builder.addConnection("127.0.0.1", 1980);
 
     ClientServicePtr service = builder.build();
-
+    echo::EchoService_Stub stub(service);
+    echo::EchoRequest* request = new echo::EchoRequest;
+    request->set_payload("0123456789ABCDEF");
+    echo::EchoServiceFuturePtr future = new echo::EchoServiceFuture();
+    stub.Echo(request, future);
     EchoClient client(service);
     client.sendRequest();
 

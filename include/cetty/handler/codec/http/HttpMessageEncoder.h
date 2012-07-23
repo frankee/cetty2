@@ -23,7 +23,7 @@
 
 #include <string>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 
 namespace cetty {
@@ -33,6 +33,7 @@ namespace http {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
+using namespace cetty::handler::codec;
 
 class HttpHeader;
 class HttpMessage;
@@ -58,8 +59,7 @@ class HttpMessage;
  * @apiviz.landmark
  */
 
-class HttpMessageEncoder
-        : public cetty::handler::codec::oneone::OneToOneEncoder {
+class HttpMessageEncoder : public MessageToBufferEncoder<HttpMessagePtr> {
 public:
     virtual ~HttpMessageEncoder();
 

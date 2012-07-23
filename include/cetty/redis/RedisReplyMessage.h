@@ -105,8 +105,6 @@ private:
     RedisReplyMessageValue value;
 };
 
-typedef boost::intrusive_ptr<RedisReplyMessage> RedisReplyMessagePtr;
-
 }
 }
 

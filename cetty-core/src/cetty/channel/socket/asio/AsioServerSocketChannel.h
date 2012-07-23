@@ -70,12 +70,54 @@ public:
 
     virtual bool setClosed();
 
+    virtual void writeRequested(const ChannelPipeline& pipeline,
+        const MessageEvent& e);
+
+    virtual void stateChangeRequested(const ChannelPipeline& pipeline,
+        const ChannelStateEvent& e);
+
+    boost::asio::ip::tcp::acceptor& getAcceptor() { return acceptor; }
+    const AsioServicePtr& getAcceptorService() { return acceptorService; }
+
 private:
+    void bind(
+        const ChannelPtr& channel,
+        const ChannelFuturePtr& future,
+        const SocketAddress& localAddress);
+
+    void accept(const ChannelPtr& channel);
+
+    void handleAccept(const boost::system::error_code& error,
+        ChannelPtr channel,
+        ChannelPtr serverChannel);
+
+    void handleServerChannelStateChange(const ChannelPtr& channel,
+        const ChannelStateEvent& evt);
+
+    void handleAcceptChannelStateChange(const ChannelPtr& channel,
+        const ChannelStateEvent& evt);
+
+    void closeServerChannel(const ChannelPtr& channel,
+        const ChannelFuturePtr& future);
+
+    void closeAcceptChannel(const ChannelPtr& channel,
+        const ChannelFuturePtr& future);
+
+private:
+    typedef std::map<int, ChannelPtr> ChildChannels;
+
     static InternalLogger* logger;
 
 private:
     AsioServicePtr ioService;
-    boost::asio::ip::tcp::acceptor& acceptor;
+
+    AsioServicePoolPtr ioServicePool;
+    AsioServicePtr acceptorService;
+
+    AsioHandlerAllocator<int> acceptAllocator;
+    boost::asio::ip::tcp::acceptor acceptor;
+
+    ChildChannels childChannels;
 
     DefaultAsioServerSocketChannelConfig config;
     mutable SocketAddress localAddress;

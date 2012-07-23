@@ -31,22 +31,27 @@
  * under the License.
  */
 
-namespace cetty { namespace handler { namespace codec {
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+
+namespace cetty {
+namespace handler {
+namespace codec {
 
 template<InboundOutT>
-class BufferToMessageDecoder : public ChannelInboundBufferHandler {
+class BufferToMessageDecoder : public cetty::channel::ChannelInboundBufferHandler {
 public:
-    virtual void beforeAdd(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
+    virtual void beforeAdd(ChannelHandlerContext&& ctx) {
+        this.ctx = &ctx;
         ChannelInboundBufferHandler::beforeAdd(ctx);
     }
 
-    virtual void inboundBufferUpdated(ChannelHandlerContext ctx) {
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx);
     }
 
-    virtual void channelInactive(ChannelHandlerContext ctx) {
+    virtual void channelInactive(ChannelHandlerContext& ctx) {
         ByteBuf in = ctx.inboundByteBuffer();
+
         if (in.readable()) {
             callDecode(ctx);
         }
@@ -56,10 +61,12 @@ public:
                 in.discardReadBytes();
                 ctx.fireInboundBufferUpdated();
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             if (t instanceof CodecException) {
                 ctx.fireExceptionCaught(t);
-            } else {
+            }
+            else {
                 ctx.fireExceptionCaught(new DecoderException(t));
             }
         }
@@ -67,40 +74,74 @@ public:
         ctx.fireChannelInactive();
     }
 
-    virtual MessageT decode(ChannelHandlerContext ctx, ByteBuf in) = 0;
+    virtual InboundOutT decode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in) = 0;
 
-    MessageT decodeLast(ChannelHandlerContext ctx, ByteBuf in) {
+    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in) {
         return decode(ctx, in);
     }
 
+    /**
+     * Replace this decoder in the {@link ChannelPipeline} with the given handler.
+     * All remaining bytes in the inbound buffer will be forwarded to the new handler's
+     * inbound buffer.
+     */
+    void replace(const std::string& newHandlerName, ChannelInboundByteHandler newHandler) {
+        if (!ctx.executor().inEventLoop()) {
+            throw new IllegalStateException("not in event loop");
+        }
+
+        // We do not use ChannelPipeline.replace() here so that the current context points
+        // the new handler.
+        ctx.pipeline().addAfter(ctx.name(), newHandlerName, newHandler);
+
+        ByteBuf in = ctx.inboundByteBuffer();
+
+        try {
+            if (in.readable()) {
+                ctx.nextInboundByteBuffer().writeBytes(ctx.inboundByteBuffer());
+                ctx.fireMessageUpdated();
+            }
+        } finally {
+            ctx.pipeline().remove(this);
+        }
+    }
+
 protected:
-    void callDecode(ChannelHandlerContext ctx) {
+    void callDecode(ChannelHandlerContext& ctx) {
         ByteBuf in = ctx.inboundByteBuffer();
 
         boolean decoded = false;
+
         for (;;) {
             try {
                 int oldInputLength = in.readableBytes();
                 MessageT o = decode(ctx, in);
+
                 if (o == null) {
                     if (oldInputLength == in.readableBytes()) {
                         break;
-                    } else {
+                    }
+                    else {
                         continue;
                     }
-                } else {
+                }
+                else {
                     if (oldInputLength == in.readableBytes()) {
                         throw new IllegalStateException(
-                                "decode() did not read anything but decoded a message.");
+                            "decode() did not read anything but decoded a message.");
                     }
                 }
 
                 if (CodecUtil.unfoldAndAdd(ctx, o, true)) {
                     decoded = true;
-                } else {
+                }
+                else {
                     break;
                 }
-            } catch (Throwable t) {
+            }
+            catch (Throwable t) {
                 if (decoded) {
                     decoded = false;
                     in.discardReadBytes();
@@ -109,7 +150,8 @@ protected:
 
                 if (t instanceof CodecException) {
                     ctx.fireExceptionCaught(t);
-                } else {
+                }
+                else {
                     ctx.fireExceptionCaught(new DecoderException(t));
                 }
             }
@@ -121,36 +163,13 @@ protected:
         }
     }
 
-    /**
-     * Replace this decoder in the {@link ChannelPipeline} with the given handler.
-     * All remaining bytes in the inbound buffer will be forwarded to the new handler's
-     * inbound buffer.
-     */
-    void replace(String newHandlerName, ChannelInboundByteHandler newHandler) {
-        if (!ctx.executor().inEventLoop()) {
-            throw new IllegalStateException("not in event loop");
-        }
-
-        // We do not use ChannelPipeline.replace() here so that the current context points
-        // the new handler.
-        ctx.pipeline().addAfter(ctx.name(), newHandlerName, newHandler);
-
-        ByteBuf in = ctx.inboundByteBuffer();
-        try {
-            if (in.readable()) {
-                ctx.nextInboundByteBuffer().writeBytes(ctx.inboundByteBuffer());
-                ctx.fireInboundBufferUpdated();
-            }
-        } finally {
-            ctx.pipeline().remove(this);
-        }
-    }
-
 private:
-    ChannelHandlerContext* ctx;
+    ChannelHandlerContext* context;
 };
 
-}}}
+}
+}
+}
 
 #endif //#if !defined(CETTY_HANDLER_CODEC_BUFFERTOMESSAGEDECODER_H)
 

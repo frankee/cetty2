@@ -254,9 +254,8 @@ public:
     virtual ~ChannelPipeline() {}
 
     virtual const ChannelPtr& getChannel() const;
-    virtual const ChannelSinkPtr& getSink() const;
 
-    virtual void attach(const ChannelPtr& channel, const ChannelSinkPtr& sink);
+    virtual void attach(const ChannelPtr& channel);
     virtual void detach();
 
     virtual bool isAttached() const;
@@ -473,7 +472,7 @@ public:
     virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress, const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& bind(
-        final DefaultChannelHandlerContext ctx, final SocketAddress localAddress, final const ChannelFuturePtr& future) {
+        final ChannelHandlerContext ctx, final SocketAddress localAddress, final const ChannelFuturePtr& future) {
             if (localAddress == null) {
                 throw new NullPointerException("localAddress");
             }
@@ -502,7 +501,7 @@ public:
     const ChannelFuturePtr& connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& connect(
-        final DefaultChannelHandlerContext ctx, final SocketAddress remoteAddress,
+        final ChannelHandlerContext ctx, final SocketAddress remoteAddress,
         final SocketAddress localAddress, final const ChannelFuturePtr& future) {
             if (remoteAddress == null) {
                 throw new NullPointerException("remoteAddress");
@@ -531,7 +530,7 @@ public:
 
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& disconnect(final DefaultChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
+    const ChannelFuturePtr& disconnect(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
         // Translate disconnect to close if the channel has no notion of disconnect-reconnect.
         // So far, UDP/IP is the only transport that has such behavior.
         if (!ctx.channel().metadata().hasDisconnect()) {
@@ -560,7 +559,7 @@ public:
 
     const ChannelFuturePtr& close(const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& close(final DefaultChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
+    const ChannelFuturePtr& close(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
         validateFuture(future);
         EventExecutor executor = ctx.executor();
         if (executor.inEventLoop()) {
@@ -583,7 +582,7 @@ public:
     
     const ChannelFuturePtr& flush(const const ChannelFuturePtr&& future);
 
-    const ChannelFuturePtr& flush(final DefaultChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
+    const ChannelFuturePtr& flush(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
         validateFuture(future);
         EventExecutor executor = ctx.executor();
         if (executor.inEventLoop()) {
@@ -600,7 +599,7 @@ public:
         return future;
     }
 
-    private void flush0(final DefaultChannelHandlerContext ctx, const ChannelFuturePtr& future) {
+    private void flush0(final ChannelHandlerContext ctx, const ChannelFuturePtr& future) {
         try {
             ctx.flushBridge();
             ((ChannelOperationHandler) ctx.handler()).flush(ctx, future);
@@ -618,7 +617,7 @@ public:
 
     const ChannelFuturePtr& write(Object message, const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& write(DefaultChannelHandlerContext ctx, final Object message, final const ChannelFuturePtr& future) {
+    const ChannelFuturePtr& write(ChannelHandlerContext ctx, final Object message, final const ChannelFuturePtr& future) {
         if (message == null) {
             throw new NullPointerException("message");
         }
@@ -655,7 +654,7 @@ public:
             flush0(ctx, future);
             return future;
         } else {
-            final DefaultChannelHandlerContext ctx0 = ctx;
+            final ChannelHandlerContext ctx0 = ctx;
             executor.execute(new Runnable() {
                 @Override
                     public void run() {
@@ -703,14 +702,14 @@ private:
 
     void checkDuplicateName(const std::string& name);
 
-    DefaultChannelHandlerContext* getContextNoLock(const std::string& name) const;
-    DefaultChannelHandlerContext* getContextNoLock(const ChannelHandlerPtr& handler) const;
+    ChannelHandlerContext* getContextNoLock(const std::string& name) const;
+    ChannelHandlerContext* getContextNoLock(const ChannelHandlerPtr& handler) const;
 
-    DefaultChannelHandlerContext* getContextOrDie(const std::string& name);
-    DefaultChannelHandlerContext* getContextOrDie(const ChannelHandlerPtr& handler);
+    ChannelHandlerContext* getContextOrDie(const std::string& name);
+    ChannelHandlerContext* getContextOrDie(const ChannelHandlerPtr& handler);
 
-    ChannelHandlerPtr remove(DefaultChannelHandlerContext* ctx);
-    ChannelHandlerPtr replace(DefaultChannelHandlerContext* ctx, const std::string& newName, const ChannelHandlerPtr& newHandler);
+    ChannelHandlerPtr remove(ChannelHandlerContext* ctx);
+    ChannelHandlerPtr replace(ChannelHandlerContext* ctx, const std::string& newName, const ChannelHandlerPtr& newHandler);
 
     // upstream & downstream list operators.
     void updateUpstreamList();
@@ -721,7 +720,7 @@ private:
     static ChannelSinkPtr discardingSink;
 
 private:
-    typedef std::map<std::string, DefaultChannelHandlerContext*> ContextMap;
+    typedef std::map<std::string, ChannelHandlerContext*> ContextMap;
     typedef std::map<std::string, boost::any> AttachmentMap;
 
     ContextMap name2ctx;

@@ -89,13 +89,13 @@ void AsioClientSocketPipelineSink::handleStateChange(const ChannelStateEvent& ev
 
     if (state == ChannelState::OPEN) {
         if (value.empty()) {
-            asioSocketChannel->internalClose(future);
+            asioSocketChannel->doClose(future);
             LOG_INFO(logger, "received a close channel event, so closed the channel.");
         }
     }
     else if (state == ChannelState::BOUND) {
         if (value.empty()) {
-            asioSocketChannel->internalClose(future);
+            asioSocketChannel->doClose(future);
             LOG_INFO(logger, "received an unbound channel event, so closed the channel.");
         }
         else {
@@ -115,7 +115,7 @@ void AsioClientSocketPipelineSink::handleStateChange(const ChannelStateEvent& ev
             }
         }
         else {
-            asioSocketChannel->internalClose(future);
+            asioSocketChannel->doClose(future);
             LOG_INFO(logger, "received an disconnect channel event, so closed the channel.");
         }
     }
@@ -151,7 +151,7 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
         cf->setFailure(exception);
         Channels::fireExceptionCaught(channel, exception);
 
-        socketChannel->internalClose(channel->getCloseFuture());
+        socketChannel->doClose(channel->getCloseFuture());
         return;
     }
 
@@ -180,7 +180,7 @@ void AsioClientSocketPipelineSink::connect(const ChannelPtr& channel,
                 ChannelException e("the boost asio service can not be started.");
                 cf->setFailure(e);
                 Channels::fireExceptionCaught(channel, e);
-                socketChannel->internalClose(channel->getCloseFuture());
+                socketChannel->doClose(channel->getCloseFuture());
 
                 //TODO: should terminate the program
                 std::terminate();

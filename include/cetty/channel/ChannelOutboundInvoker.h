@@ -98,7 +98,7 @@ public:
      *         write request succeeds or fails
      *
      */
-    virtual ChannelFuturePtr write(const ChannelMessage& message) = 0;
+    //virtual ChannelFuturePtr write(const ChannelMessage& message) = 0;
 
     /**
      *
@@ -137,8 +137,8 @@ public:
     /**
      *
      */
-    virtual const ChannelFuturePtr& write(const ChannelMessage& message,
-                                          const ChannelFuturePtr& future) = 0;
+    //virtual const ChannelFuturePtr& write(const ChannelMessage& message,
+    //                                      const ChannelFuturePtr& future) = 0;
 };
 
 }

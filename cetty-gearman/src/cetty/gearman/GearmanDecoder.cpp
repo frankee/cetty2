@@ -48,6 +48,16 @@ std::string GearmanDecoder::toString() const
     return "GearmanDecoder";
 }
 
+struct MessageMetaInfo {
+    int parameterCnt;
+    int hasData;
+};
+
+static const MessageMetaInfo[type-1] = {
+    {2, 0}, // 1
+    {}  // 2
+};
+
 ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
                                       const ChannelPtr& channel,
                                       const ChannelMessage& msg)

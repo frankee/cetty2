@@ -30,20 +30,11 @@
     <Filter Include="handler\codec\http\websocket">
       <UniqueIdentifier>{473e29d7-262c-4cbb-8b1e-842951ae226d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="handler\codec\frame">
-      <UniqueIdentifier>{c6af99c5-0997-4928-bb66-c9050c195a6c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="handler\codec\base64">
       <UniqueIdentifier>{a3d84f1a-1b27-4b4a-961b-a19dd42f4dab}</UniqueIdentifier>
     </Filter>
     <Filter Include="handler\codec\compression">
       <UniqueIdentifier>{d004f018-6aaa-470f-9448-671b9d28db05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="handler\codec\replay">
-      <UniqueIdentifier>{d1e8b13d-c954-48a4-bbe4-0c35ceec8ef6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="handler\codec\oneone">
-      <UniqueIdentifier>{405b7217-829d-4f3b-88f2-107b443e3c37}</UniqueIdentifier>
     </Filter>
     <Filter Include="handler\timeout">
       <UniqueIdentifier>{6ad9acea-4d1e-43bb-8f7c-65668317fc50}</UniqueIdentifier>
@@ -182,12 +173,6 @@
     <ClCompile Include="..\..\src\cetty\bootstrap\ServerBootstrap.cpp">
       <Filter>bootstrap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\oneone\OneToOneDecoder.cpp">
-      <Filter>handler\codec\oneone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\oneone\OneToOneEncoder.cpp">
-      <Filter>handler\codec\oneone</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\timeout\DefaultIdleStateEvent.cpp">
       <Filter>handler\timeout</Filter>
     </ClCompile>
@@ -311,24 +296,6 @@
     <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimerFactory.cpp">
       <Filter>util\internal\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\CorruptedFrameException.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\DelimiterBasedFrameDecoder.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\FrameDecoder.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\LengthFieldBasedFrameDecoder.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\LengthFieldPrepender.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\frame\TooLongFrameException.cpp">
-      <Filter>handler\codec\frame</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieHeaderNames.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
@@ -368,15 +335,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpVersion.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\replay\ReplayingDecoder.cpp">
-      <Filter>handler\codec\replay</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\replay\ReplayingDecoderBuffer.cpp">
-      <Filter>handler\codec\replay</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\replay\UnreplayableOperationException.cpp">
-      <Filter>handler\codec\replay</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\Cookie.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
@@ -415,6 +373,30 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipeline.cpp">
       <Filter>channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\CorruptedFrameException.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\DelimiterBasedFrameDecoder.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\LengthFieldBasedFrameDecoder.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\LengthFieldPrepender.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\TooLongFrameException.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoder.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\UnreplayableOperationException.cpp">
+      <Filter>handler\codec</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -607,12 +589,6 @@
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrap.h">
       <Filter>bootstrap</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\oneone\OneToOneDecoder.h">
-      <Filter>handler\codec\oneone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\oneone\OneToOneEncoder.h">
-      <Filter>handler\codec\oneone</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\timeout\DefaultIdleStateEvent.h">
       <Filter>handler\timeout</Filter>
     </ClInclude>
@@ -799,30 +775,6 @@
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioHandlerAllocator.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\CorruptedFrameException.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\DelimiterBasedFrameDecoder.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\Delimiters.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\FixedLengthFrameDecoder.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\FrameDecoder.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\LengthFieldBasedFrameDecoder.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\LengthFieldPrepender.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\frame\TooLongFrameException.h">
-      <Filter>handler\codec\frame</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\Cookie.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
@@ -912,18 +864,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\QueryStringEncoder.h">
       <Filter>handler\codec\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\replay\ReplayingDecoder.h">
-      <Filter>handler\codec\replay</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\replay\ReplayingDecoderBuffer.h">
-      <Filter>handler\codec\replay</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\replay\UnreplayableOperationException.h">
-      <Filter>handler\codec\replay</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\replay\UnsafeDynamicChannelBuffer.h">
-      <Filter>handler\codec\replay</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessageFwd.h">
       <Filter>handler\codec\http</Filter>
@@ -1036,9 +976,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1059,6 +996,60 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\CorruptedFrameException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\DelimiterBasedFrameDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\Delimiters.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\FixedLengthFrameDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\LengthFieldBasedFrameDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\LengthFieldPrepender.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\TooLongFrameException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\ReplayingDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\ReplayingDecoderBuffer.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannelSink.h">
+      <Filter>channel\socket\asio</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

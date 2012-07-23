@@ -1,3 +1,5 @@
+#if !defined(CETTY_HANDLER_CODEC_CODECUTIL_H)
+#define CETTY_HANDLER_CODEC_CODECUTIL_H
 /*
  * Copyright 2012 The Netty Project
  *
@@ -13,16 +15,29 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty.handler.codec;
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.NoSuchBufferException;
+namespace cetty { namespace handler { namespace codec { 
 
-final class CodecUtil {
-
-    static boolean unfoldAndAdd(
-            ChannelHandlerContext ctx, Object msg, boolean inbound) throws Exception {
+class CodecUtil {
+public:
+    template<typename T>
+    static bool unfoldAndAdd(
+            ChannelHandlerContext& ctx, const T& msg, bool inbound) {
         if (msg == null) {
             return false;
         }
@@ -58,7 +73,8 @@ final class CodecUtil {
                 altDst.writeBytes(src, src.readerIndex(), src.readableBytes());
                 return true;
             }
-        } else {
+        }
+        else {
             if (ctx.hasNextOutboundMessageBuffer()) {
                 ctx.nextOutboundMessageBuffer().add(msg);
                 return true;
@@ -75,7 +91,14 @@ final class CodecUtil {
         throw new NoSuchBufferException();
     }
 
-    private CodecUtil() {
-        // Unused
-    }
-}
+private:
+    CodecUtil() {}
+};
+
+}}}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_CODECUTIL_H)
+
+// Local Variables:
+// mode: c++
+// End:

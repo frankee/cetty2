@@ -25,8 +25,8 @@
 
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
-#include <cetty/handler/codec/replay/ReplayingDecoderBuffer.h>
-#include <cetty/handler/codec/replay/ReplayingDecoder.h>
+#include <cetty/handler/codec/ReplayingDecoderBuffer.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
 #include <cetty/util/SimpleString.h>
 
 namespace cetty {
@@ -37,7 +37,7 @@ namespace http {
 class HttpMessage;
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec::replay;
+using namespace cetty::handler::codec;
 using namespace cetty::util;
 
 /**
@@ -121,7 +121,7 @@ using namespace cetty::util;
  */
 
 class HttpMessageDecoder
-        : public cetty::handler::codec::replay::ReplayingDecoder {
+        : public cetty::handler::codec::ReplayingDecoder<HttpMessagePtr> {
 private:
     /**
      * The internal state of {@link HttpMessageDecoder}.
@@ -172,6 +172,8 @@ protected:
         int maxChunkSize);
 
 protected:
+    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx, const ChannelBufferPtr& buffer);
+
     virtual ChannelMessage decode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
                                   const ReplayingDecoderBufferPtr& buffer,
