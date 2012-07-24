@@ -35,12 +35,10 @@ using namespace cetty::handler::codec::frame;
 
 GearmanWorkerBuilder::GearmanWorkerBuilder()
     : ServerBuilder() {
-    initDefaultPipeline();
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
-    : ServerBuilder(threadCnt) {
-    initDefaultPipeline();
+    : ServerBuilder(threadCnt), pipeline() {
 }
 
 GearmanWorkerBuilder::~GearmanWorkerBuilder() {
@@ -66,6 +64,10 @@ const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
 }
 
 void GearmanWorkerBuilder::buildWorker(const AsioServicePtr& ioService) {
+    if (!pipeline) {
+        pipeline = getDefaultPipeline();
+    }
+
     //to connect to remote at this point
     GearmanWorkerPtr worker =
         new GearmanWorker(ioService, pipeline, connections);
@@ -82,18 +84,21 @@ const ChannelPipelinePtr& GearmanWorkerBuilder::getWorkerPipeline() {
     return this->pipeline;
 }
 
-void GearmanWorkerBuilder::initDefaultPipeline() {
-    pipeline = Channels::pipeline();
+ChannelPipelinePtr GearmanWorkerBuilder::getDefaultPipeline() {
+    ChannelPipelinePtr pipeline = Channels::pipeline();
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
-
     pipeline->addLast("gearmanDecoder", new GearmanDecoder());
     pipeline->addLast("gearmanEncoder", new GearmanEncoder());
     pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
+    return pipeline;
 }
 
 void GearmanWorkerBuilder::registerWorker(const std::string& functionName,
-        const WorkerFuncotr& worker) {
+        const WorkerFunctor& worker) {
+    if (!pipeline) {
+        pipeline = getDefaultPipeline();
+    }
 
     ChannelHandlerPtr handler = pipeline->get("gearmanWorker");
     GearmanWorkerHandlerPtr workerHandler =

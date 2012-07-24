@@ -21,11 +21,14 @@
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
 #include <cetty/handler/codec/frame/LengthFieldPrepender.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/protobuf/service/http/ProtobufHttpMessageFilter.h>
 
 namespace cetty {

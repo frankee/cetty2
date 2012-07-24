@@ -19,11 +19,6 @@
 
 #include <string>
 
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/UpstreamMessageEvent.h>
-#include <cetty/channel/DownstreamMessageEvent.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -50,54 +45,20 @@ std::string GearmanProtobufWorkerFilter::toString() const {
     return "GearmanProtobufWorkerFilter";
 }
 
-void GearmanProtobufWorkerFilter::messageReceived(ChannelHandlerContext& ctx,
-        const MessageEvent& e) {
-    ChannelMessage msg = e.getMessage();
-    GearmanMessagePtr req = msg.smartPointer<GearmanMessage>();
-
-    gearmanReqs.push(req->clone());
-    ChannelMessage protobufRep(filterReq(req));
-    //ctx.getChannel()->write(ChannelMessage(protobufRep));
-    UpstreamMessageEvent evt(e.getChannel(),
-                             protobufRep,e.getRemoteAddress());
-
-    ctx.sendUpstream(evt);
-}
-
-void GearmanProtobufWorkerFilter::writeRequested(ChannelHandlerContext& ctx,
-        const MessageEvent& e) {
-
-    ChannelMessage msg = e.getMessage();
-    ProtobufServiceMessagePtr rep = msg.smartPointer<ProtobufServiceMessage>();
-
-    //some type may not need record req, pay attention
-    GearmanMessagePtr req = gearmanReqs.top();
-
-    ChannelMessage gearmanReq(filterRep(req,rep));
-    DownstreamMessageEvent evt(e.getChannel(),e.getFuture(),
-                               gearmanReq,e.getRemoteAddress());
-
-    //ctx.getChannel()->write(ChannelMessage(gearmanReq));
-    ctx.sendDownstream(evt);
-}
-
 ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterReq(const GearmanMessagePtr& req) {
     //decode from GearmanMessage
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-
     ProtobufServiceMessageDecoder::decode(req->getData(),protoMsg);
     return protoMsg;
 }
 
 GearmanMessagePtr GearmanProtobufWorkerFilter::filterRep(const GearmanMessagePtr& req,
         const ProtobufServiceMessagePtr& rep) {
-
     std::string jobHandle = req->getParameters().front();
     ChannelBufferPtr buffer = ChannelBuffers::buffer(rep->getMessageSize()+8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
     ProtobufServiceMessageEncoder::encodeMessage(buffer,rep);
-
     return GearmanMessage::createWorkCompleteMessage(jobHandle,buffer);
 }
 }

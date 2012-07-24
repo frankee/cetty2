@@ -17,13 +17,19 @@
  * under the License.
  */
 
+#include <queue>
+
+#include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/MessageEvent.h>
+#include <cetty/channel/UpstreamMessageEvent.h>
+#include <cetty/channel/DownstreamMessageEvent.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
 * transformations to the input and output of that service:
@@ -47,23 +53,42 @@ using namespace cetty::channel;
 */
 
 template<typename ReqInT, typename RepOutT, typename ReqOutT = ReqInT, typename RepInT = RepOutT>
-class Filter : public cetty::channel::SimpleChannelHandler {
+class ServerFilter : public cetty::channel::SimpleChannelHandler {
 public:
-    virtual ~Filter() {}
+    virtual ~ServerFilter() {}
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
                                  const MessageEvent& e) {
+        ChannelMessage msg = e.getMessage();
+        ReqInT req = msg.value<ReqInT>();
+        reqs.push(req);
 
+        ChannelMessage reqMsg(filterReq(req));
+        UpstreamMessageEvent evt(e.getChannel(),
+                                 reqMsg,e.getRemoteAddress());
+        ctx.sendUpstream(evt);
     }
 
     virtual void writeRequested(ChannelHandlerContext& ctx,
                                 const MessageEvent& e) {
+        ChannelMessage msg = e.getMessage();
+        RepInT rep = msg.value<RepInT>();
 
+        ReqInT req = reqs.front();
+        ChannelMessage repMsg(filterRep(req,rep));
+        reqs.pop();
+
+        DownstreamMessageEvent evt(e.getChannel(),e.getFuture(),
+                                   repMsg,e.getRemoteAddress());
+        ctx.sendDownstream(evt);
     }
 
 protected:
     virtual ReqOutT filterReq(const ReqInT& req) = 0;
     virtual RepOutT filterRep(const ReqInT& req, const RepInT& rep) = 0;
+
+private:
+    std::queue<ReqInT>reqs;
 };
 
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/service/Filter.h>
+#include <cetty/service/ServerFilter.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 
 namespace cetty {
@@ -29,7 +29,7 @@ using namespace cetty::service;
 using namespace cetty::handler::codec::http;
 
 class HttpMessageFilter
-        : public cetty::service::Filter<HttpRequestPtr, HttpResponsePtr> {
+        : public cetty::service::ServerFilter<HttpRequestPtr, HttpResponsePtr> {
 public:
 
 protected:

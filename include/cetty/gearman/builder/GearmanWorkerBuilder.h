@@ -35,7 +35,7 @@ using namespace cetty::gearman;
 
 class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
 public:
-    typedef GearmanWorkerHandler::GrabJobCallback WorkerFuncotr;
+    typedef GearmanWorkerHandler::GrabJobCallback WorkerFunctor;
 
 public:
     GearmanWorkerBuilder();
@@ -44,25 +44,24 @@ public:
 
     void addConnection(const std::string& host, int port);
 
-    void registerWorker(const std::string& functionName, const WorkerFuncotr& worker);
+    void registerWorker(const std::string& functionName, const WorkerFunctor& worker);
 
     void setWorkerPipeline(const ChannelPipelinePtr& pipeline);
     const ChannelPipelinePtr& getWorkerPipeline();
 
     const std::vector<GearmanWorkerPtr>& buildWorkers();
 
-//protected:
-    virtual void initDefaultPipeline();
+protected:
+    virtual ChannelPipelinePtr getDefaultPipeline();
 
 private:
     void buildWorker(const AsioServicePtr& ioService);
 
-protected:
-    ChannelPipelinePtr pipeline;
-
 private:
     std::vector<Connection> connections;
     std::vector<GearmanWorkerPtr> workers;
+
+    ChannelPipelinePtr pipeline;
 };
 
 }

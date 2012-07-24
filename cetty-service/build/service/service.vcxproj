@@ -109,12 +109,13 @@
     <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ClientFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\Filter.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ServerFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\CookieTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\UriTemplate.h" />

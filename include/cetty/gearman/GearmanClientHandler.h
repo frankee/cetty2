@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <list>
+#include <queue>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SimpleChannelHandler.h>
@@ -33,23 +33,24 @@ public:
     GearmanClientHandler();
     virtual ~GearmanClientHandler();
 
-    //upstream
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-    //downstream
+
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
 
     virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
 
     virtual ChannelHandlerPtr clone();
+
     virtual std::string toString() const;
 
     void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
+
 private:
     void submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e);
 
 private:
     ChannelPtr channel;
-    std::list<GearmanMessagePtr> msgs;
+    std::queue<GearmanMessagePtr> msgs;
 };
 
 }

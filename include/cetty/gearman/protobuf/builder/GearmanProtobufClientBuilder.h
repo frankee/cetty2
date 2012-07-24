@@ -18,7 +18,7 @@
  */
 
 #include <cetty/service/builder/ClientBuilder.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace gearman {

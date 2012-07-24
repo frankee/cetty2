@@ -64,13 +64,6 @@ GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::s
     this->data = payload;
 }
 
-GearmanMessage::GearmanMessage(GearmanMessage& msg) {
-    this->type = msg.getType();
-    this->parameters = msg.getParameters();
-    this->data = msg.getData()->copy();
-}
-
-
 GearmanMessagePtr GearmanMessage::createEchoReqMessage(const ChannelBufferPtr& payload) {
     return GearmanMessagePtr(new GearmanMessage(GearmanMessage::ECHO_REQ,payload));
 }

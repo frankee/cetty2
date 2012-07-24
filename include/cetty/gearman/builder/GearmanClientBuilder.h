@@ -38,6 +38,8 @@ public:
     GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool);
     GearmanClientBuilder(const AsioServicePtr& ioService);
 
+    virtual ~GearmanClientBuilder(){}
+
 private:
     void init();
 

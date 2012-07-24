@@ -16,26 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <stack>
-
-#include <cetty/service/Filter.h>
+#include <cetty/service/ClientFilter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
 namespace protobuf {
 
+using namespace cetty::service;
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 using namespace cetty::gearman;
 
 class GearmanProtobufClientFilter
-    : public cetty::service::Filter<
-    GearmanMessagePtr,
-    GearmanMessagePtr,
+    : public cetty::service::ClientFilter<
     ProtobufServiceMessagePtr,
-        ProtobufServiceMessagePtr> {
+    ProtobufServiceMessagePtr,
+    GearmanMessagePtr,
+        GearmanMessagePtr > {
 public:
     GearmanProtobufClientFilter();
     virtual ~GearmanProtobufClientFilter();
@@ -43,22 +42,13 @@ public:
 public:
     typedef boost::intrusive_ptr<GearmanProtobufClientFilter> GearmanProtobufClientFilterPtr;
 
-
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const MessageEvent& e);
-
-    virtual void writeRequested(ChannelHandlerContext& ctx,
-                                const MessageEvent& e);
-
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterReq(const GearmanMessagePtr& req);
+    virtual GearmanMessagePtr filterReq(const ProtobufServiceMessagePtr& req);
 
-    virtual GearmanMessagePtr filterRep(const GearmanMessagePtr& req,const ProtobufServiceMessagePtr& rep);
-private:
-    //std::stack<GearmanMessagePtr>gearmanReqs;
+    virtual ProtobufServiceMessagePtr filterRep(const ProtobufServiceMessagePtr& req,const GearmanMessagePtr& rep);
 };
 
 }

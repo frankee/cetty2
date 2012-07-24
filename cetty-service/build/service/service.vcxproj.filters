@@ -62,9 +62,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\Filter.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
       <Filter>service</Filter>
     </ClInclude>
@@ -114,6 +111,12 @@
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServerFilter.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientFilter.h">
       <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>

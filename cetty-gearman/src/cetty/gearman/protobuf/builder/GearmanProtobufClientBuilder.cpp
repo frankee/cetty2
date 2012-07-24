@@ -34,6 +34,7 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::frame;
 using namespace cetty::gearman;
 using namespace cetty::gearman::protobuf;
+using namespace cetty::protobuf::service;
 
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder()

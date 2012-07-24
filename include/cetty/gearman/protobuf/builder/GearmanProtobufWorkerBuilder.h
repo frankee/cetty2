@@ -35,9 +35,11 @@ public:
     virtual ~GearmanProtobufWorkerBuilder();
     
     GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);
+    
 
 protected:
-    virtual void initDefaultPipeline();
+    virtual ChannelPipelinePtr getDefaultPipeline();
+
 };
 
 }

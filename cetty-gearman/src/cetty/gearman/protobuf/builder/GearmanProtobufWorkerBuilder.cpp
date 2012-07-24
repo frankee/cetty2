@@ -21,6 +21,7 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
 #include <cetty/protobuf/service/ProtobufService.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 #include <cetty/gearman/GearmanDecoder.h>
 #include <cetty/gearman/GearmanEncoder.h>
@@ -39,27 +40,28 @@ using namespace cetty::protobuf::service::handler;
 
 
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder() {
-    initDefaultPipeline();
 }
 
 
-GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(int threadCnt): GearmanWorkerBuilder(threadCnt) {
-    initDefaultPipeline();
+GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(int threadCnt)
+    : GearmanWorkerBuilder(threadCnt) {
 }
 
 GearmanProtobufWorkerBuilder::~GearmanProtobufWorkerBuilder() {}
 
 
-void GearmanProtobufWorkerBuilder::initDefaultPipeline() {
-    //pipeline = Channels::pipeline();
+ChannelPipelinePtr GearmanProtobufWorkerBuilder::getDefaultPipeline() {
+    ChannelPipelinePtr pipeline = Channels::pipeline();
 
-    /* pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
 
-     pipeline->addLast("gearmanDecoder", new GearmanDecoder());
-     pipeline->addLast("gearmanEncoder", new GearmanEncoder());
-     pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());*/
+    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
+    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+    pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
     pipeline->addLast("gearmanProtobufFilter", new GearmanProtobufWorkerFilter());
     pipeline->addLast("protobufMessageHandler", new ProtobufServiceMessageHandler());
+
+    return pipeline;
 }
 
 GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
@@ -80,7 +82,7 @@ GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
     int methodCnt = descriptor->method_count();
 
     std::string functionName;
-    WorkerFuncotr nullWorker;
+    WorkerFunctor nullWorker;
 
     for (int i = 0; i < methodCnt; ++i) {
         //functionName = serviceName;

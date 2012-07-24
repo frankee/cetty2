@@ -31,6 +31,7 @@
 #include <cetty/service/ClientServiceMessageHandler.h>
 #include <cetty/service/asio/AsioClientService.h>
 #include <cetty/service/asio/AsioClientServiceFactory.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace service {
@@ -42,6 +43,7 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::config;
 using namespace cetty::service;
 using namespace cetty::service::asio;
+
 
 class ClientBuilderConfig;
 

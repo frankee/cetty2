@@ -121,13 +121,8 @@ public:
     GearmanMessage(int type, const std::string& param1, const std::string& param2);
     GearmanMessage(int type, const std::string& param1, const std::string& param2, const std::string& param3);
     GearmanMessage(int type, const std::string& param1, const std::string& param2, const ChannelBufferPtr& payload);
-    GearmanMessage(GearmanMessage& msg);
 
     ~GearmanMessage() {}
-
-    GearmanMessagePtr clone() {
-        return GearmanMessagePtr(new GearmanMessage(*this));
-    }
 
     bool hasData() const { return data && data->readable(); }
 
@@ -148,7 +143,7 @@ public:
     }
 
 private:
-    //GearmanMessage(const GearmanMessage&);
+    GearmanMessage(const GearmanMessage&);
     GearmanMessage& operator=(const GearmanMessage&);
 
 private:

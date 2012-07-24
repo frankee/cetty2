@@ -40,15 +40,11 @@ GearmanClientHandler::GearmanClientHandler(): channel(0) {
 GearmanClientHandler::~GearmanClientHandler() {
 }
 
-
 void GearmanClientHandler::channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
     channel = ctx.getChannel();
 }
 
 void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e) {
-    /*if (channel) {
-    channel->write(ChannelMessage(msg));
-    }*/
     DownstreamMessageEvent message(e.getChannel(),e.getFuture(),ChannelMessage(msg),e.getRemoteAddress());
     ctx.sendDownstream(message);
 }
@@ -84,21 +80,16 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         //to monitor the Percent complete of job
         break;
 
-        //job handler来唯一标识一个job  定义一个 map<主job，vector<分job handler> >
+        //use job handler to identify a job  define a map<主job，vector<分job handler> > for split
     case GearmanMessage::WORK_COMPLETE:
         std::cout<<"the WORK_COMPLETE! "<< std::endl;
         params = message->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
 
-
-
         data = ChannelBuffers::hexDump(message->getData());
         std::cout<<"the work complete data is "<< data <<std::endl;
 
         handleRet(message,ctx,e);
-        //to send the response to client
-        //ctx.getChannel()->write(ChannelMessage(message->getData()));
-        //ctx.sendUpstream(e);
         break;
 
     case GearmanMessage::WORK_WARNING:
@@ -152,7 +143,7 @@ void GearmanClientHandler::writeRequested(ChannelHandlerContext& ctx, const Mess
     GearmanMessagePtr msg = e.getMessage().smartPointer<GearmanMessage>();
 
     if (msg) {
-        msgs.push_back(msg);
+        msgs.push(msg);
         Channels::write(ctx, e.getFuture(), ChannelMessage(msg));
     }
     else {
