@@ -14,8 +14,10 @@
 *.lib
 *.exe
 *.cmake
+
 CMakeCache.txt
 Debug/
 Release/
 ipch/
 CMakeFiles/
+.project
