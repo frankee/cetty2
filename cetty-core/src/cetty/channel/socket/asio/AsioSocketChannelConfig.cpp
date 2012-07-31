@@ -18,10 +18,6 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
-#include <cetty/channel/ReceiveBufferSizePredictor.h>
-#include <cetty/channel/ReceiveBufferSizePredictorFactory.h>
-#include <cetty/channel/AdaptiveReceiveBufferSizePredictorFactory.h>
-
 
 #include <cetty/util/internal/ConversionUtil.h>
 #include <cetty/util/Exception.h>
