@@ -40,7 +40,7 @@
 #include <google/protobuf/compiler/plugin.h>
 #include <google/protobuf/io/printer.h>
 
-#include <cetty/protobuf/service/cpp_service.h>
+#include <cetty/protobuf/service/generator/cpp_service.h>
 
 #include <stdio.h>
 #include <fstream>
@@ -163,10 +163,10 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Indent();
 
     printer->Print(vars_,
-        "$classname$_Stub(const ::cetty::protobuf::service::ProtobufClientServicePtr& service);\n"
+        "$classname$_Stub(const ::cetty::service::ClientServicePtr& service);\n"
                    "~$classname$_Stub();\n"
                    "\n"
-                   "inline const ::cetty::protobuf::service::ProtobufClientServicePtr& channel() {\n"
+                   "inline const ::cetty::service::ClientServicePtr& channel() {\n"
                    "    return channel_.getService();\n"
                    "}\n"
                    "\n"
@@ -249,7 +249,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-        "$classname$_Stub::$classname$_Stub(const cetty::protobuf::service::ProtobufClientServicePtr& service)\n"
+        "$classname$_Stub::$classname$_Stub(const cetty::service::ClientServicePtr& service)\n"
                    "  : channel_(service), owns_channel_(false) {\n"
                    "    static int init = 0;\n"
                    "    if (!init) {\n"

@@ -338,6 +338,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstrap->setOption("child.tcpNoDelay", boost::any(true));
 
     bootstrap->setPipeline(pipeline);
+
     if (host.empty()) {
         return bootstrap->bind(port);
     }
@@ -377,6 +378,7 @@ void ServerBuilder::deinit() {
 
 void ServerBuilder::stop() {
     std::map<std::string, ServerBootstrap*>::iterator itr;
+
     for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
 
     }
@@ -389,19 +391,20 @@ void ServerBuilder::waitingForExit() {
     else {
         //ChannelPtr c = bootstraps.begin()->second->getFactory()->;
         //if (c && c->isBound()) {
-            printf("Server is running...\n");
-            printf("To quit server, press 'q'.\n");
+        printf("Server is running...\n");
+        printf("To quit server, press 'q'.\n");
 
-            char input;
+        char input;
 
-            do {
-                input = getchar();
+        do {
+            input = getchar();
 
-                if (input == 'q') {
-                    stop();
-                }
+            if (input == 'q') {
+                stop();
             }
-            while (true);
+        }
+        while (true);
+
         //}
     }
 }
@@ -450,10 +453,20 @@ void ServerBuilder::unregisterPipeline(const std::string& name) {
 
 cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string& name) {
     std::map<std::string, ChannelPipelinePtr>::iterator itr = pipelines.find(name);
+
     if (itr != pipelines.end()) {
         return itr->second;
     }
+
     return ChannelPipelinePtr();
+}
+
+const AsioServicePoolPtr& ServerBuilder::getServicePool() {
+    if (!servicePool) {
+        servicePool = new AsioServicePool(config.threadCount);
+    }
+
+    return servicePool;
 }
 
 

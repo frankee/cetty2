@@ -96,9 +96,10 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ChannelHandlerContext& ctx,
         ProtobufServiceMessagePtr req,
         boost::int64_t id) {
-
-    ProtobufServiceMessagePtr message(
-        new ProtobufServiceMessage(RESPONSE, id, req->getService(), req->getMethod(), response));
+    
+    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE, 
+        id, req->getService(), req->getMethod(), response));
+    //DownstreamMessageEvent  evt(ctx.getChannel(),ctx.getChannel->getSucceededFuture(),message,ctx.getChannel()->getRemoteAddress());
     Channels::write(ctx.getChannel(), ChannelMessage(message));
 }
 

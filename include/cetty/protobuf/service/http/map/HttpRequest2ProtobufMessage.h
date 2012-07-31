@@ -17,9 +17,9 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
+#include <cetty/handler/codec/http/HttpMessageFwd.h>
 
 namespace google {
 namespace protobuf {

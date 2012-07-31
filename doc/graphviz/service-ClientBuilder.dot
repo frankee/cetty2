@@ -1,0 +1,35 @@
+﻿digraph G {
+
+edge [style=bold,color=black,fontname="Microsoft YaHei", fontsize=12];
+node [shape=plaintext, fontname="Microsoft YaHei", fontsize=12];
+
+m [label="ChannelMessage"];
+
+subgraph cluster_cs {
+  label="ClientService:Channel";
+  bgcolor="mintcream";
+  node [shape="Mrecord", color="skyblue", style="filled"];
+  
+  p0 [label="pipeline"];
+  
+  subgraph cluster_ch1 {
+    label="ClientChannel";
+	p1 [label="pipeline"];
+  };
+  subgraph cluster_ch2 {
+    label="ClientChannel";
+	p2 [label="pipeline"];
+  };
+};
+
+s1;
+s2;
+
+m -> p0;
+p0 -> p1;
+p0 -> p2;
+
+p1 -> s1;
+p2 -> s2;
+
+}

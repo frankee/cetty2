@@ -633,7 +633,7 @@ const ::google::protobuf::Message* EchoService::GetResponsePrototype(
   }
 }
 
-EchoService_Stub::EchoService_Stub(const cetty::protobuf::service::ProtobufClientServicePtr& service)
+EchoService_Stub::EchoService_Stub(const cetty::service::ClientServicePtr& service)
   : channel_(service), owns_channel_(false) {
     static int init = 0;
     if (!init) {

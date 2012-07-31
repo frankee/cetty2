@@ -19,6 +19,7 @@
 #include <boost/bind.hpp>
 #include <google/protobuf/descriptor.h>
 
+#include <cetty/service/ClientService.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
@@ -60,14 +61,12 @@ void ProtobufClientServiceAdaptor::CallMethod(
     callMethod(service, message, future);
 }
 
-ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ProtobufClientServicePtr& service)
+ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ClientServicePtr& service)
     : service(service) {
 }
 
 ProtobufClientServiceAdaptor::~ProtobufClientServiceAdaptor() {
 }
-
-
 
 }
 }

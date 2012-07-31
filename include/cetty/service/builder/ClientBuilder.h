@@ -31,6 +31,7 @@
 #include <cetty/service/ClientServiceMessageHandler.h>
 #include <cetty/service/asio/AsioClientService.h>
 #include <cetty/service/asio/AsioClientServiceFactory.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace service {
@@ -43,13 +44,14 @@ using namespace cetty::config;
 using namespace cetty::service;
 using namespace cetty::service::asio;
 
-template<typename ReqT, typename RepT>
+
+class ClientBuilderConfig;
+
+template<typename ReqT, typename RepT = ReqT>
 class ClientBuilder {
 public:
     typedef cetty::service::ClientServiceDispatcher<ReqT, RepT> DispatcherType;
     typedef cetty::service::ClientServiceMessageHandler<ReqT, RepT> MessageHandlerType;
-
-    typedef ClientService* ClientServicePtr;
 
 public:
     ClientBuilder()
@@ -69,9 +71,11 @@ public:
           asioService(ioService) {
     }
 
-    ClientBuilder(const ConfigCenter& confCenter);
-    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePoolPtr& ioServciePool);
-    ClientBuilder(const ConfigCenter& confCenter, const AsioServicePtr& ioService);
+    ClientBuilder(const ClientBuilderConfig& conf);
+    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePoolPtr& ioServciePool);
+    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePtr& ioService);
+
+    virtual ~ClientBuilder() {}
 
     void setPipeline(const ChannelPipelinePtr& pipeline) {
         clientPipeline = pipeline;

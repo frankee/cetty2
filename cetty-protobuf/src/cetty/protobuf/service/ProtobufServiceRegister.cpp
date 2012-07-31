@@ -12,11 +12,9 @@ ProtobufServicePtr ProtobufServiceRegister::nullService;
 
 
 ProtobufServiceRegister::ProtobufServiceRegister() {
-
 }
 
 ProtobufServiceRegister::~ProtobufServiceRegister() {
-
 }
 
 int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) {
@@ -134,19 +132,19 @@ ProtobufServiceRegister& ProtobufServiceRegister::instance() {
 }
 
 int ProtobufServiceRegister::registerResponsePrototype(const std::string& service,
-    const std::string& method,
-    const Message* proto) {
-     if (NULL == proto || service.empty() || method.empty()) {
-         return -1;
-     }
+        const std::string& method,
+        const Message* proto) {
+    if (NULL == proto || service.empty() || method.empty()) {
+        return -1;
+    }
 
-     // if duplicated, just override.
-     responsePrototypeMap[service + method] = proto;
-     return 0;
+    // if duplicated, just override.
+    responsePrototypeMap[service + method] = proto;
+    return 0;
 }
 
 void ProtobufServiceRegister::unregisterResponsePrototype(const std::string& service,
-    const std::string& method) {
+        const std::string& method) {
     ResponsePrototypeMap::iterator itr = responsePrototypeMap.find(service + method);
 
     if (itr != responsePrototypeMap.end()) {
@@ -155,7 +153,7 @@ void ProtobufServiceRegister::unregisterResponsePrototype(const std::string& ser
 }
 
 const Message* ProtobufServiceRegister::getRequestPrototype(const std::string& service,
-    const std::string& method) const {
+        const std::string& method) const {
     ServiceMap::const_iterator itr = serviceMap.find(service);
 
     if (itr != serviceMap.end()) {
@@ -166,7 +164,7 @@ const Message* ProtobufServiceRegister::getRequestPrototype(const std::string& s
 }
 
 const Message* ProtobufServiceRegister::getResponsePrototype(const std::string& service,
-    const std::string& method) const {
+        const std::string& method) const {
     std::string key(service);
     ResponsePrototypeMap::const_iterator repItr = responsePrototypeMap.find(service + method);
 

@@ -22,6 +22,7 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/util/StringUtil.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>

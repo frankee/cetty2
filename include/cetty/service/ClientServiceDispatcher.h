@@ -29,23 +29,16 @@
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
+#include <cetty/service/Connection.h>
+#include <cetty/service/pool/ConnectionPool.h>
+
 namespace cetty {
 namespace service {
 
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
-
-struct Connection {
-    int port;
-    int limited;
-    std::string host;
-
-    Connection(const std::string& host, int port, int limited)
-        : port(port), limited(limited), host(host) {}
-    Connection(int port, int limited)
-        : port(port), limited(limited) {}
-};
+using namespace cetty::service::pool;
 
 template<typename ReqT, typename RepT>
 class ClientServiceDispatcher : public cetty::channel::SimpleChannelHandler {
@@ -57,10 +50,11 @@ public:
     typedef boost::intrusive_ptr<OutstandingCallType> OutstandingCallPtr;
 
 public:
-    ClientServiceDispatcher(const std::vector<Connection>& connections,
+    ClientServiceDispatcher(const Connections& connections,
                             const ChannelPipelinePtr& pipeline,
                             const AsioServicePtr& asioService)
         : connections(connections),
+          pool(connections),
           defaultPipeline(pipeline),
           asioService(asioService) {
     }
@@ -72,8 +66,9 @@ public:
         ChannelPipelinePtr pipeline = Channels::pipelineFactory(defaultPipeline)->getPipeline();
         pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
 
-        bootstrap.setPipeline(pipeline);
-        bootstrap.setFactory(new AsioClientSocketChannelFactory(asioService));
+        pool.getBootstrap().setPipeline(pipeline);
+        pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(asioService));
+
     }
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
@@ -86,27 +81,25 @@ public:
                                 const MessageEvent& e) {
         OutstandingCallPtr call = e.getMessage().smartPointer<OutstandingCallType>();
 
-        if (channels.empty()) {
-            ChannelFuturePtr future =
-                bootstrap.connect(connections[0].host, connections[0].port);
-            future->addListener(boost::bind(
-                                    &ClientServiceDispatcherType::connectedCallback, this, _1));
+        ChannelPtr ch = pool.getChannel(ConnectionPool::ConnectedCallback());
 
-            bufferingCalls.push_back(call);
+        if (ch) {
+            ch->write(e.getMessage());
+            outStandingCalls.insert(std::make_pair(call->getId(), call));
         }
         else {
-            getChannel()->write(e.getMessage());
-            outStandingCalls.insert(std::make_pair(call->getId(), call));
+            bufferingCalls.push_back(call);
+            pool.getChannel(boost::bind(
+                                &ClientServiceDispatcherType::connectedCallback, this, _1));
         }
     }
 
-    void connectedCallback(ChannelFuture& future) {
-        ChannelPtr ch = future.getChannel();
-        channels[ch->getId()] = ch;
+    void connectedCallback(const ChannelPtr& channel) {
+        BOOST_ASSERT(channel);
 
         while (!bufferingCalls.empty()) {
             const OutstandingCallPtr& call = bufferingCalls.front();
-            getChannel()->write(ChannelMessage(call));
+            channel->write(ChannelMessage(call));
             outStandingCalls.insert(std::make_pair(call->getId(), call));
 
             bufferingCalls.pop_front();
@@ -123,17 +116,11 @@ public:
     virtual std::string toString() { return "ClientServiceDispatcherType"; }
 
 private:
-    ChannelPtr getChannel() {
-        return channels.begin()->second;
-    }
-
-private:
     AsioServicePtr asioService;
     ChannelPipelinePtr defaultPipeline;
-    const std::vector<Connection>& connections;
 
-    ClientBootstrap bootstrap;
-    std::map<int, ChannelPtr> channels;
+    Connections connections;
+    ConnectionPool pool;
 
     std::deque<OutstandingCallPtr> bufferingCalls;
     std::map<boost::int64_t, OutstandingCallPtr> outStandingCalls;

@@ -55,10 +55,10 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <boost/bind.hpp>
-#include <cetty/protobuf/service/ProtobufServiceFuture.h>
-#include <cetty/protobuf/service/ProtobufClientService.h>
-#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/service/ClientServicePtr.h>
 #include <cetty/service/TypeCastServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufServiceFuture.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace google {
 namespace protobuf {
@@ -100,7 +100,7 @@ using namespace cetty::service;
 //
 class ProtobufClientServiceAdaptor {
 public:
-    ProtobufClientServiceAdaptor(const ProtobufClientServicePtr& service);
+    ProtobufClientServiceAdaptor(const ClientServicePtr& service);
     ~ProtobufClientServiceAdaptor();
 
     // Call the given method of the remote service.  The signature of this
@@ -128,12 +128,12 @@ public:
                                boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<RepT>, this, _1))));
     }
 
-    const ProtobufClientServicePtr& getService() {
+    const ClientServicePtr& getService() {
         return service;
     }
 
 private:
-    ProtobufClientServicePtr service;
+    ClientServicePtr service;
 };
 
 }

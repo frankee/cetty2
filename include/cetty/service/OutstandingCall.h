@@ -30,8 +30,8 @@ public:
     typedef boost::intrusive_ptr<ServiceFuture<RepT> > ServiceFuturePtr;
 
 public:
-    void setId(boost::int64_t id);
-    boost::int64_t getId() const;
+    void setId(boost::int64_t id) { this->id = id; }
+    boost::int64_t getId() const { return id; }
 
 public:
     ReqT request;

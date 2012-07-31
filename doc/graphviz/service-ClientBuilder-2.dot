@@ -1,0 +1,114 @@
+﻿digraph G {
+
+edge [style=bold,color=black,fontname="Microsoft YaHei", fontsize=12];
+node [shape=plaintext, fontname="Microsoft YaHei", fontsize=12];
+
+m [label="ChannelMessage"];
+
+subgraph cluster_cs {
+  label="ClientService:Channel";
+  bgcolor="mintcream";
+  node [shape="Mrecord", color="skyblue", style="filled"];
+  
+  subgraph cluster_p0 {
+	label="pipeline";
+	
+	p0_h1 [label="ClientServiceMessageHandler"];
+	p0_h2 [label="dispatcher"];
+	
+  }
+  
+  subgraph cluster_ch1 {
+    label="ClientChannel";
+	
+	subgraph cluster_ch1_p {
+		label="pipeline";
+		
+		p1_h1 [label="GearmanClientRequestHandler"];
+		p1_h2 [label="GearmanClientHandler"]
+		p1_h3 [label="<d>GearmanDecoder | <e>GearmanEncoder"];
+		p1_h4 [label="frameDecoder"];
+	}
+  };
+  
+  subgraph cluster_ch2 {
+    label="ClientChannel";
+	
+	subgraph cluster_ch2_p {
+		label="pipeline";
+		
+		p2_h1 [label="GearmanClientRequestHandler"];
+		p2_h2 [label="GearmanClientHandler"]
+		p2_h3 [label="<d>GearmanDecoder | <e>GearmanEncoder"];
+		p2_h4 [label="frameDecoder"];
+	}
+  };
+};
+
+subgraph cluster_s {
+  label="ServerChannel";
+  bgcolor="mintcream";
+  node [shape="Mrecord", color="skyblue", style="filled"];
+  
+
+  subgraph cluster_s1 {
+  label="AcceptedChannel";
+  bgcolor="mintcream";
+  node [shape="Mrecord", color="skyblue", style="filled"];
+  
+	  subgraph cluster_s1_p {
+		label="pipeline";
+		s1_h1 [label="pipeline"];
+	  };
+  };
+  
+  subgraph cluster_s2 {
+  label="AcceptedChanne2";
+  bgcolor="mintcream";
+  node [shape="Mrecord", color="skyblue", style="filled"];
+  
+	  subgraph cluster_s2_p {
+		label="pipeline";
+		s2_h1 [label="pipeline"];
+	  };
+  };
+};
+
+// send
+m -> p0_h1;
+p0_h1 -> p0_h2;
+
+p0_h2 -> p1_h1;
+p1_h1 -> p1_h2;
+p1_h2 -> p1_h3:d;
+//p1_h3 -> p1_h4;
+
+p0_h2 -> p2_h1;
+p2_h1 -> p2_h2;
+p2_h2 -> p2_h3:d;
+//p2_h3 -> p2_h4;
+
+p1_h3 -> s1_h1;
+p2_h3 -> s2_h1;
+
+// receive
+s1_h1 -> p1_h4;
+
+p1_h4 -> p1_h3:e;
+p1_h3 -> p1_h2;
+p1_h2 -> p1_h1;
+
+p1_h1 -> p0_h2;
+p0_h2 -> p0_h1;
+
+s2_h1 -> p2_h4;
+
+p2_h4 -> p2_h3:e;
+p2_h3 -> p2_h2;
+p2_h2 -> p2_h1;
+
+p2_h1 -> p0_h2;
+p0_h2 -> p0_h1;
+
+
+}

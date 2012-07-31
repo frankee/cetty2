@@ -13,6 +13,9 @@
     <Filter Include="service\http">
       <UniqueIdentifier>{d5db2292-1775-4bbb-bed9-6afc0decf835}</UniqueIdentifier>
     </Filter>
+    <Filter Include="service\pool">
+      <UniqueIdentifier>{ad175927-9f05-48a5-8694-a2b0e4dee273}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp">
@@ -33,6 +36,15 @@
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\http\UriTemplate.cpp">
       <Filter>service\http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\CachingConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\WatermarkConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">
@@ -48,9 +60,6 @@
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\Filter.h">
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
@@ -88,6 +97,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\http\UriTemplate.h">
       <Filter>service\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\Connection.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServerFilter.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ClientFilter.h">
+      <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

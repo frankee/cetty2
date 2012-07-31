@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/service/Filter.h>
+#include <cetty/service/ServerFilter.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>
@@ -41,7 +41,7 @@ using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::http::map;
 
 class ProtobufHttpMessageFilter
-        : public cetty::service::Filter<HttpRequestPtr, HttpResponsePtr, ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
+        : public cetty::service::ServerFilter<HttpRequestPtr, HttpResponsePtr, ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
 
 public:
     ProtobufHttpMessageFilter(const ConfigCenter& config);
