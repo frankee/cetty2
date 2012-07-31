@@ -1,3 +1,5 @@
+#if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGECODEC_H)
+#define CETTY_HANDLER_CODEC_MESSAGETOMESSAGECODEC_H
 /*
  * Copyright 2012 The Netty Project
  *
@@ -14,11 +16,51 @@
  * under the License.
  */
 
+#include <cetty/handler/codec/MessageToMessageEncoder.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
+
+namespace cetty {
+namespace handler {
+namespace codec {
+
 template<InboundInT, InboundOutT, OutboundInT, OutboundOutT>
 class MessageToMessageCodec
-    : public ChannelInboundMessageHandler<InboundInT>,
-      public ChannelOutboundMessageHandler<OutboundInT> {
+    : public MessageToMessageDecoder<InboundInT, InboundOutT>,
+      public MessageToMessageEncoder<OutboundInT, OutboundOutT> {
+
 public:
     MessageToMessageCodec() {}
     virtual ~MessageToMessageCodec() {}
+
+    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    virtual void afterAdd(ChannelHandlerContext& ctx);
+    virtual void beforeRemove(ChannelHandlerContext& ctx);
+    virtual void afterRemove(ChannelHandlerContext& ctx);
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause);
+
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+        const UserEvent& evt);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
 };
+
+}
+}
+}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGECODEC_H)
+
+// Local Variables:
+// mode: c++
+// End:

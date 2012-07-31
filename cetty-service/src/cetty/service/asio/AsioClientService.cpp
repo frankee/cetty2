@@ -34,8 +34,8 @@ AsioClientService::AsioClientService(const ChannelFactoryPtr& factory,
       threadId(ioService->getThreadId()),
       ioService(ioService) {
 
-    Channels::fireChannelOpen(this);
-    Channels::fireChannelConnected(this, SocketAddress::NULL_ADDRESS);
+    ChannelPipelines::fireChannelOpen(this);
+    ChannelPipelines::fireChannelConnected(this, SocketAddress::NULL_ADDRESS);
 }
 
 }

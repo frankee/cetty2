@@ -19,16 +19,66 @@
 
 #include <cetty/channel/ChannelOutboundHandler.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
+
+class ChannelOutboundBufferHandlerContext;
 
 class ChannelOutboundBufferHandler : public ChannelOutboundHandler {
 public:
     ChannelOutboundBufferHandler();
-    virtual ~ChannelOutboundBufferHandler() {}
+    virtual ~ChannelOutboundBufferHandler();
 
+    virtual void bind(ChannelHandlerContext& ctx,
+                      const SocketAddress& localAddress,
+                      const ChannelFuturePtr& future);
+
+    virtual void connect(ChannelHandlerContext& ctx,
+                         const SocketAddress& remoteAddress,
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future);
+
+    virtual void disconnect(ChannelHandlerContext& ctx,
+                            const ChannelFuturePtr& future);
+
+    virtual void close(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future);
+
+    virtual void flush(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future);
+
+    virtual void beforeAdd(ChannelHandlerContext& ctx);
+
+    virtual void afterAdd(ChannelHandlerContext& ctx);
+
+    virtual void beforeRemove(ChannelHandlerContext& ctx);
+
+    virtual void afterRemove(ChannelHandlerContext& ctx);
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause);
+
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+                                    const UserEvent& evt);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            const EventLoopPtr& eventLoop,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next);
+
+protected:
+    virtual void flush(ChannelOutboundBufferHandlerContext& ctx,
+                       const ChannelFuturePtr& future);
 };
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDBUFFERHANDLER_H)
 

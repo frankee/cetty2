@@ -1,3 +1,5 @@
+#if !defined(CETTY_HANDLER_CODEC_BUFFERTOBUFFERENCODER_H)
+#define CETTY_HANDLER_CODEC_BUFFERTOBUFFERENCODER_H
 /*
  * Copyright 2012 The Netty Project
  *
@@ -13,38 +15,60 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
+#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/channel/ChannelOutboundBufferHandler.h>
+
+namespace cetty {
+namespace channel {
+class ChannelOutboundBufferHandlerContext;
+}
+}
+
+namespace cetty {
+namespace handler {
+namespace codec {
+
+using namespace cetty::buffer;
+using namespace cetty::channel;
 
 class BufferToBufferEncoder : public ChannelOutboundBufferHandler {
+public:
+    typedef ChannelOutboundBufferHandlerContext BufferContext;
 
-    @Override
-    public void flush(ChannelHandlerContext& ctx, ChannelFuture future) {
-        ByteBuf in = ctx.outboundByteBuffer();
-        ByteBuf out = ctx.nextOutboundByteBuffer();
+public:
+    BufferToBufferEncoder();
+    virtual ~BufferToBufferEncoder();
 
-        int oldOutSize = out.readableBytes();
-        while (in.readable()) {
-            int oldInSize = in.readableBytes();
-            try {
-                encode(ctx, in, out);
-            } catch (Throwable t) {
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
-                } else {
-                    ctx.fireExceptionCaught(new EncoderException(t));
-                }
-            }
-            if (oldInSize == in.readableBytes()) {
-                break;
-            }
-        }
+    virtual void flush(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future);
 
-        if (out.readableBytes() > oldOutSize) {
-            in.discardReadBytes();
-        }
+protected:
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                                    const ChannelBufferPtr& in) = 0;
+};
 
-        ctx.flush(future);
-    }
-
-    public abstract void encode(ChannelHandlerContext ctx, ByteBuf in, ByteBuf out) throws Exception;
 }
+}
+}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_BUFFERTOBUFFERENCODER_H)
+
+// Local Variables:
+// mode: c++
+// End:

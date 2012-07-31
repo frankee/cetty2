@@ -34,7 +34,7 @@ namespace service {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 using namespace cetty::handler::codec::http;
 using namespace cetty::service;
 using namespace cetty::config;
@@ -83,7 +83,7 @@ void ProtobufServerBuilder::init() {
 }
 
 ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
-    ChannelPipelinePtr pipeline = Channels::pipeline();
+    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
     pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));
@@ -98,7 +98,7 @@ ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
 
 ChannelPipelinePtr ProtobufServerBuilder::createProtobufHttpServicePipeline(
     const ConfigCenter& confCenter) {
-    ChannelPipelinePtr pipeline = Channels::pipeline();
+    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
     //if (ssl) {
     //}

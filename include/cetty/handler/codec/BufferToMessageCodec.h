@@ -1,3 +1,5 @@
+#if !defined(CETTY_HANDLER_CODEC_BUFFERTOMESSAGECODEC_H)
+#define CETTY_HANDLER_CODEC_BUFFERTOMESSAGECODEC_H
 /*
  * Copyright 2012 The Netty Project
  *
@@ -13,58 +15,67 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
 
-template<InboundOutT, OutboundInT>
-class BufferToMessageCodec : public ChannelInboundBufferHandler,
-    public ChannelOutboundMessageHandler<OutboundInT> {
+namespace cetty {
+namespace handler {
+namespace codec {
 
-    private final MessageToByteEncoder<OUTBOUND_IN> encoder =
-            new MessageToByteEncoder<OUTBOUND_IN>() {
-        @Override
-        public void encode(
-                ChannelHandlerContext ctx,
-                OUTBOUND_IN msg, ByteBuf out) throws Exception {
-            ByteToMessageCodec.this.encode(ctx, msg, out);
-        }
-    };
+template<typename InboundOutT, typename OutboundInT>
+class BufferToMessageCodec
+    : public BufferToMessageDecoder<InboundOutT>,
+    public MessageToBufferEncoder<OutboundInT> {
 
-    private final ByteToMessageDecoder<INBOUND_OUT> decoder =
-            new ByteToMessageDecoder<INBOUND_OUT>() {
-        @Override
-        public INBOUND_OUT decode(
-                ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-            return ByteToMessageCodec.this.decode(ctx, in);
-        }
-    };
+public:
+    BufferToMessageCodec() {}
+    virtual ~BufferToMessageCodec() {}
 
-    @Override
-    public ByteBuf newInboundBuffer(
-            ChannelHandlerContext ctx) throws Exception {
-        return decoder.newInboundBuffer(ctx);
-    }
+    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    virtual void afterAdd(ChannelHandlerContext& ctx);
+    virtual void beforeRemove(ChannelHandlerContext& ctx);
+    virtual void afterRemove(ChannelHandlerContext& ctx);
 
-    @Override
-    public void inboundBufferUpdated(ChannelHandlerContext ctx) throws Exception {
-        decoder.inboundBufferUpdated(ctx);
-    }
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause);
 
-    @Override
-    public MessageBuf<OUTBOUND_IN> newOutboundBuffer(
-            ChannelHandlerContext ctx) throws Exception {
-        return encoder.newOutboundBuffer(ctx);
-    }
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+        const UserEvent& evt);
 
-    @Override
-    public void flush(
-            ChannelHandlerContext ctx, ChannelFuture future) throws Exception {
-        encoder.flush(ctx, future);
-    }
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
 
-    public abstract void encode(
-            ChannelHandlerContext ctx,
-            OUTBOUND_IN msg, ByteBuf out) throws Exception;
-
-    public abstract INBOUND_OUT decode(
-            ChannelHandlerContext ctx, ByteBuf in) throws Exception;
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
 };
+
+}
+}
+}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_BUFFERTOMESSAGECODEC_H)
+
+// Local Variables:
+// mode: c++
+// End:

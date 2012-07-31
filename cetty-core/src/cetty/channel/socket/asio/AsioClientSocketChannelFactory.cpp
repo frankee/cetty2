@@ -14,12 +14,12 @@
  * under the License.
  */
 
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannel.h>
-#include <cetty/channel/socket/asio/AsioClientSocketPipelineSink.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/socket/asio/AsioSocketChannel.h>
 #include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
 #include <cetty/util/Exception.h>
 
@@ -63,8 +63,6 @@ AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
 }
 
 void AsioClientSocketChannelFactory::init() {
-    sink = new AsioClientSocketPipelineSink(needManuallyStartAsioService());
-
     if (!TimerFactory::hasFactory()) {
         if (ioServicePool) {
             timerFactory = new AsioDeadlineTimerFactory(ioServicePool);
@@ -115,17 +113,15 @@ void AsioClientSocketChannelFactory::deinit() {
 ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
     const AsioServicePtr& service = ioServicePool ? ioServicePool->getService() : ioService;
     ChannelPtr client =
-        new AsioClientSocketChannel(shared_from_this(),
-                                    pipeline,
-                                    sink,
-                                    service,
-                                    service->getThreadId());
+        new AsioSocketChannel(service,
+                              shared_from_this(),
+                              pipeline);
 
     clientChannels.push_back(client);
     return client;
 }
 
-void AsioClientSocketChannelFactory::releaseExternalResources() {
+void AsioClientSocketChannelFactory::shutdown() {
     if (ioServicePool) {
         ioServicePool->stop();
         ioServicePool->waitForExit();

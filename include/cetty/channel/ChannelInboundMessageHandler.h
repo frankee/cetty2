@@ -23,10 +23,10 @@
 namespace cetty {
 namespace channel {
 
-template<typename InT>
+template<typename InboundInT>
 class ChannelInboundMessageHandler : public ChannelInboundHandler {
 public:
-    typedef ChannelInboundMessageHandlerContext<InT> InboundMessageHandlerContext;
+    typedef ChannelInboundMessageHandlerContext<InboundInT> MessageContext;
 
 public:
     ChannelInboundMessageHandler() {}
@@ -44,36 +44,20 @@ public:
         ctx.fireChannelInactive();
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        InboundMessageHandlerContext* context =
-            static_cast<InboundMessageHandlerContext*>(&ctx);
-
-        std::deque<InT> in = context->getInboundMessageQueue();
-
-        for (;;) {
-            I msg = in.poll();
-
-            if (msg == null) {
-                break;
-            }
-
-            try {
-                messageReceived(ctx, msg);
-            }
-            catch (Throwable t) {
-                ctx.fireExceptionCaught(t);
-            }
-        }
+    virtual void writeCompleted(ChannelHandlerContext& ctx) {
+        ctx.fireWriteCompleted();
     }
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const InT& msg) = 0;
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        MessageContext* context = 
+            ctx.inboundMessageHandlerContext<MessageContext>();
+
+        messageUpdated(*context);
+    }
 
     virtual void beforeAdd(ChannelHandlerContext& ctx) {}
-
     virtual void afterAdd(ChannelHandlerContext& ctx) {}
-
     virtual void beforeRemove(ChannelHandlerContext& ctx) {}
-
     virtual void afterRemove(ChannelHandlerContext& ctx) {}
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx,
@@ -81,16 +65,63 @@ public:
         ctx.fireExceptionCaught(cause);
     }
 
-    virtual void eventTriggered(ChannelHandlerContext& ctx,
-                                const ChannelEvent& evt) {
-        ctx.fireEventTriggered(evt);
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+                                    const UserEvent& evt) {
+        ctx.fireUserEventTriggered(evt);
     }
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelInboundMessageHandlerContext<InT>();
+        return new MessageContext(name,
+                pipeline,
+                shared_from_this(),
+                prev,
+                next);
+    }
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            const EventLoopPtr& eventLoop,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next) {
+        return new MessageContext(name,
+                eventLoop,
+                pipeline,
+                shared_from_this(),
+                prev,
+                next);
+    }
+
+protected:
+    virtual void messageUpdated(MessageContext& ctx) {
+        MessageContext::MessageQueue in = ctx.getInboundMessageQueue();
+
+        while (!in.empty()) {
+            InboundInT msg = in.front();
+
+            if (!msg) {
+                break;
+            }
+
+            try {
+                messageReceived(ctx, msg);
+            }
+            catch (const ChannelException& e) {
+                ctx.fireExceptionCaught(e);
+            }
+            catch (const std::exception& e) {
+                ctx.fireExceptionCaught(ChannelException(e.what()));
+            }
+
+            in.pop_front();
+        }
+    }
+
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const InboundInT& msg) {
+            throw ChannelException("you must implement the messageReceived method.");
     }
 };
 

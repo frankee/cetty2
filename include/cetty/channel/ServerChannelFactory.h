@@ -38,6 +38,9 @@ namespace channel {
 class ServerChannelFactory : public ChannelFactory {
 public:
     virtual ~ServerChannelFactory() {}
+
+    virtual void setChildChannelPipeline(const ChannelPipelinePtr& pipeline) = 0;
+    virtual const ChannelPipelinePtr& getChildChannelPipeline() const = 0;
 };
 
 }

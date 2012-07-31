@@ -50,7 +50,7 @@ void callMethod(const ChannelPtr& channel,
     if (channel) {
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
             new OutstandingCall<ReqT, RepT>(request, future));
-        channel->write(ChannelMessage(outstanding));
+        channel->write(UserEvent(outstanding));
     }
 }
 

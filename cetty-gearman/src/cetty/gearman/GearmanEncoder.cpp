@@ -41,9 +41,9 @@ std::string GearmanEncoder::toString() const {
     return "GearmanEncoder";
 }
 
-ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
+UserEvent GearmanEncoder::encode(ChannelHandlerContext& ctx,
                                       const ChannelPtr& channel,
-                                      const ChannelMessage& msg) {
+                                      const UserEvent& msg) {
 
     GearmanMessagePtr message = msg.smartPointer<GearmanMessage>();
 
@@ -70,7 +70,7 @@ ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
                 //to check the data
                 std::string ret = ChannelBuffers::hexDump(data);
                 std::cout<<"the send data is "<<ret<<std::endl;
-                return ChannelMessage(data);
+                return UserEvent(data);
             }
             else {
                 //如果不够就重新创建个channelbuffer
@@ -87,7 +87,7 @@ ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
                 //to check the data
                 std::string ret = ChannelBuffers::hexDump(buffer);
                 std::cout<<"the send data is "<<ret<<std::endl;
-                return ChannelMessage(buffer);
+                return UserEvent(buffer);
             }
         }
         else {
@@ -115,7 +115,7 @@ ChannelMessage GearmanEncoder::encode(ChannelHandlerContext& ctx,
             //to check the data
             std::string ret = ChannelBuffers::hexDump(buffer);
             std::cout<<"the send data is "<<ret<<std::endl;
-            return ChannelMessage(buffer);
+            return UserEvent(buffer);
         }
     }
     else {

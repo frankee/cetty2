@@ -17,12 +17,16 @@
  * under the License.
  */
 
-namespace cetty { namespace channel {
+#include <boost/intrusive_ptr.hpp>
+
+namespace cetty {
+namespace channel {
 
 class ChannelPipeline;
-typedef ChannelPipeline* ChannelPipelinePtr;
+typedef boost::intrusive_ptr<ChannelPipeline> ChannelPipelinePtr;
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_CHANNELPIPELINEFWD_H)
 

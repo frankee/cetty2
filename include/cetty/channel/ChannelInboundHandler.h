@@ -18,6 +18,7 @@
  */
 
 #include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/ChannelInboundHandlerPtr.h>
 
 namespace cetty {
 namespace channel {
@@ -45,6 +46,11 @@ public:
      *
      */
     virtual void messageUpdated(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void writeCompleted(ChannelHandlerContext& ctx) = 0;
 };
 
 }

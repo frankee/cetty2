@@ -11,13 +11,13 @@ const ChannelOutboundHandlerPtr&  NullChannelContext::getOutboundHandler()const 
 
 bool  NullChannelContext::canHandleInboundMessage()const {return true;}
 bool  NullChannelContext::canHandleOutboundMessage()const {return true;}
-void  NullChannelContext::sendUpstream(const ChannelEvent& e) {return;}
+void  NullChannelContext::sendUpstream(const UserEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const MessageEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const ChannelStateEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const ChildChannelStateEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const WriteCompletionEvent& e) {return;}
 void  NullChannelContext::sendUpstream(const ExceptionEvent& e) {return;}
-void  NullChannelContext::sendDownstream(const ChannelEvent& e) {return;}
+void  NullChannelContext::sendDownstream(const UserEvent& e) {return;}
 void  NullChannelContext::sendDownstream(const MessageEvent& e) {return;}
 void  NullChannelContext::sendDownstream(const ChannelStateEvent& e) {return;}
 void* NullChannelContext::getAttachment() {return NULL;}

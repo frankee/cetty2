@@ -24,98 +24,20 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-    class AsioSocketChannel;
+class AsioSocketChannel;
 
 class AsioSocketChannelSink : public cetty::channel::AbstractChannelSink {
 public:
-    AsioSocketChannelSink(AsioSocketChannel& channel) {}
+    AsioSocketChannelSink(AsioSocketChannel& channel);
     virtual ~AsioSocketChannelSink() {}
 
 public:
     virtual void connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
-        const ChannelFuturePtr& future) {
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future);
 
-                if (eventLoop().inEventLoop()) {
-                    if (!ensureOpen(future)) {
-                        return;
-                    }
-
-                    try {
-                        if (connectFuture != null) {
-                            throw new IllegalStateException("connection attempt already made");
-                        }
-                        connectFuture = future;
-
-                        channel.doConnect(remoteAddress, localAddress, future);
-
-                        // Schedule connect timeout.
-                        int connectTimeoutMillis = config().getConnectTimeoutMillis();
-                        if (connectTimeoutMillis > 0) {
-                            connectTimeoutFuture = eventLoop().schedule(new Runnable() {
-                                @Override
-                                    public void run() {
-                                        if (connectTimeoutException == null) {
-                                            connectTimeoutException = new ConnectException("connection timed out");
-                                        }
-                                        ChannelFuture connectFuture = AbstractAioChannel.this.connectFuture;
-                                        if (connectFuture != null &&
-                                            connectFuture.setFailure(connectTimeoutException)) {
-                                                pipeline().fireExceptionCaught(connectTimeoutException);
-                                                close(voidFuture());
-                                        }
-                                }
-                            }, connectTimeoutMillis, TimeUnit.MILLISECONDS);
-                        }
-
-                    } catch (Throwable t) {
-                        future.setFailure(t);
-                        pipeline().fireExceptionCaught(t);
-                        closeIfClosed();
-                    }
-                }
-                else {
-                    eventLoop().execute(new Runnable() {
-                        @Override
-                            public void run() {
-                                connect(remoteAddress, localAddress, future);
-                        }
-                    });
-                }
-        }
-
-    virtual void flush(const ChannelFuturePtr& future) {
-
-    }
-
-private:
-        void connectFailed(Throwable t) {
-            connectFuture.setFailure(t);
-            pipeline().fireExceptionCaught(t);
-            closeIfClosed();
-        }
-
-        void connectSuccess() {
-            assert eventLoop().inEventLoop();
-            assert connectFuture != null;
-            try {
-                boolean wasActive = isActive();
-                connectFuture.setSuccess();
-                if (!wasActive && isActive()) {
-                    pipeline().fireChannelActive();
-                }
-            } catch (Throwable t) {
-                connectFuture.setFailure(t);
-                pipeline().fireExceptionCaught(t);
-                closeIfClosed();
-            } finally {
-                connectTimeoutFuture.cancel(false);
-                connectFuture = null;
-            }
-        }
-    }
-
-    virtual void flush(const ChannelFuturePtr& future) = 0;
+    virtual void flush(const ChannelBufferPtr& buffer,
+                       const ChannelFuturePtr& future);
 
 private:
     AsioSocketChannel& channel;

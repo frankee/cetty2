@@ -20,7 +20,7 @@
 namespace cetty {
 namespace channel {
 
-class ChannelEvent;
+class UserEvent;
 class ChannelException;
 
 class ChannelInboundInvoker {
@@ -50,12 +50,17 @@ public:
     /**
      *
      */
-    virtual void fireEventTriggered(const ChannelEvent& event) = 0;
+    virtual void fireUserEventTriggered(const UserEvent& event) = 0;
 
     /**
      *
      */
     virtual void fireMessageUpdated() = 0;
+
+    /**
+     *
+     */
+    virtual void fireWriteCompleted() = 0;
 };
 
 }

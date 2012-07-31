@@ -83,8 +83,8 @@ public:
     LengthFieldPrepender(int lengthFieldLength);
 
     LengthFieldPrepender(int lengthFieldLength,
-        int checksumFieldLength,
-        const ChecksumFunction& checksum);
+                         int checksumFieldLength,
+                         const ChecksumFunction& checksum);
 
     /**
      * Creates a new instance.
@@ -100,49 +100,28 @@ public:
      *         if <tt>lengthFieldLength</tt> is not 1, 2, 4, or 8
      */
     LengthFieldPrepender(int lengthFieldLength,
-        const std::string& header1);
+                         const std::string& header);
 
     LengthFieldPrepender(int lengthFieldLength,
-        const std::string& header1,
-        int checksumFieldLength,
-        const ChecksumFunction& checksum);
+                         const std::string& header,
+                         int checksumFieldLength,
+                         const ChecksumFunction& checksum);
 
     LengthFieldPrepender(int lengthFieldLength,
-        int lengthFieldOffset,
-        const std::string& header1);
+                         int lengthFieldOffset,
+                         const std::string& header);
 
     LengthFieldPrepender(int lengthFieldLength,
-        int lengthFieldOffset,
-        int lengthAdjustment,
-        const std::string& header1);
-
-    LengthFieldPrepender(
-        int lengthFieldLength,
-        int lengthFieldOffset,
-        int lengthAdjustment,
-        int checksumFieldLength,
-        const std::string& header1,
-        ChecksumFunction checksumFunction);
+                         int lengthFieldOffset,
+                         int lengthAdjustment,
+                         const std::string& header);
 
     LengthFieldPrepender(int lengthFieldLength,
-        int lengthFieldOffset,
-        int lengthAdjustment,
-        const std::string& header1,
-        const std::string& header2);
-
-    LengthFieldPrepender(
-        int lengthFieldLength,
-        int lengthFieldOffset,
-        int lengthAdjustment,
-        int checksumFieldLength,
-        int checksumCalcOffset,
-        const std::string& header1,
-        const std::string& header2,
-        ChecksumFunction checksumFunction);
-
-    virtual void encode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& msg,
-        ChannelBufferPtr& out);
+                         int lengthFieldOffset,
+                         int lengthAdjustment,
+                         int checksumFieldLength,
+                         const std::string& header,
+                         ChecksumFunction checksumFunction);
 
     virtual ChannelHandlerPtr clone() {
         return shared_from_this();
@@ -150,16 +129,31 @@ public:
 
     virtual std::string toString() const { return "LengthFieldPrepender"; }
 
+protected:
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                                    const ChannelBufferPtr& msg,
+                                    const ChannelBufferPtr& out);
+
+
+
 private:
     void validateParameters();
+
+    void writeHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
+    void preWriteHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
+
+    const ChannelBufferPtr& writeMessage(const ChannelBufferPtr& out,
+                                         const ChannelBufferPtr& msg,
+                                         int contentLength,
+                                         int headerPos,
+                                         boost::uint32_t cs);
 
 private:
     int  lengthFieldOffset;
     int  lengthFieldLength;
     int  lengthAdjustment;
 
-    std::string header1;
-    std::string header2;
+    std::string header;
 
     int  checksumFieldLength;
     int  checksumCalcOffset;

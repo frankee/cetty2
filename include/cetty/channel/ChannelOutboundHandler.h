@@ -17,8 +17,9 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelHandler.h>
 #include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/ChannelOutboundHandler.h>
 
 namespace cetty {
 namespace channel {

@@ -63,7 +63,7 @@ public:
     virtual void channelConnected(ChannelHandlerContext& ctx,
                                   const ChannelStateEvent& e) {
         ChannelPtr ch = e.getChannel();
-        ChannelPipelinePtr pipeline = Channels::pipelineFactory(defaultPipeline)->getPipeline();
+        ChannelPipelinePtr pipeline = ChannelPipelines::pipelineFactory(defaultPipeline)->getPipeline();
         pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
 
         pool.getBootstrap().setPipeline(pipeline);
@@ -98,7 +98,7 @@ public:
 
         while (!bufferingCalls.empty()) {
             const OutstandingCallPtr& call = bufferingCalls.front();
-            channel->write(ChannelMessage(call));
+            channel->write(UserEvent(call));
             outStandingCalls.insert(std::make_pair(call->getId(), call));
 
             bufferingCalls.pop_front();

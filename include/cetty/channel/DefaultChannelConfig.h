@@ -45,25 +45,15 @@ public:
     DefaultChannelConfig();
     virtual ~DefaultChannelConfig() {}
 
-    virtual void setOptions(const std::map<std::string, boost::any>& options);
-    virtual bool setOption(const std::string& key, const boost::any& value);
-
-    virtual const ChannelBufferFactoryPtr& getBufferFactory() const;
-    virtual void setBufferFactory(const ChannelBufferFactoryPtr& bufferFactory);
-
-    virtual const ChannelPipelineFactoryPtr& getPipelineFactory() const;
-    virtual void setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory);
+    virtual void setOptions(const ChannelOption::Options& options);
+    virtual bool setOption(const ChannelOption& option,
+                           const ChannelOption::Variant& value);
 
     virtual int getConnectTimeout() const;
     virtual void setConnectTimeout(int connectTimeoutMillis);
 
-    virtual bool channelHasReaderBuffer() const;
-
 private:
     int connectTimeoutMillis; // 10 seconds
-
-    ChannelBufferFactoryPtr bufferFactory;
-    ChannelPipelineFactoryPtr pipelineFactory;
 };
 
 }

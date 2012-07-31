@@ -14,28 +14,117 @@
  * under the License.
  */
 
-#include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelEvent.h>
+#include <cetty/channel/AbstractChannelSink.h>
+
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/AbstractChannel.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipelineException.h>
-#include <cetty/channel/Channels.h>
-
-#include <cetty/channel/AbstractChannelSink.h>
 
 namespace cetty {
 namespace channel {
 
-AbstractChannelSink::AbstractChannelSink() {
+AbstractChannelSink::AbstractChannelSink(AbstractChannel& channel)
+    : channel(channel) {
 }
 
-void AbstractChannelSink::eventSunk(const ChannelPipeline& pipeline,
-                                    const ChannelEvent& e) {
+AbstractChannelSink::~AbstractChannelSink() {
 }
 
-void AbstractChannelSink::exceptionCaught(const ChannelPipeline& pipeline,
-        const ChannelEvent& e,
-        const ChannelPipelineException& cause) {
-    Channels::fireExceptionCaught(e.getChannel(), cause);
+void AbstractChannelSink::bind(const SocketAddress& localAddress,
+                               const ChannelFuturePtr& future) {
+    if (!ensureOpen(future)) {
+        return;
+    }
+
+    try {
+        bool wasActive = channel.isActive();
+        channel.doBind(localAddress);
+        future->setSuccess();
+
+        if (!wasActive && channel.isActive()) {
+            channel.pipeline->fireChannelActive();
+        }
+    }
+    catch (const std::exception& e) {
+        //future->setFailure(e);
+        //channel.pipeline->fireExceptionCaught(t);
+        closeIfClosed();
+    }
+}
+
+void AbstractChannelSink::disconnect(const ChannelFuturePtr& future) {
+    try {
+        bool wasActive = channel.isActive();
+        channel.doDisconnect();
+        future->setSuccess();
+
+        if (wasActive && !channel.isActive()) {
+            channel.pipeline->fireChannelInactive();
+        }
+    }
+    catch (const std::exception& e) {
+        //future.setFailure(t);
+        closeIfClosed();
+    }
+}
+
+void AbstractChannelSink::close(const ChannelFuturePtr& future) {
+    bool wasActive = channel.isActive();
+
+    if (channel.setClosed()) {
+        try {
+            channel.doClose();
+            future->setSuccess();
+        }
+        catch (const std::exception& e) {
+            //future->setFailure(t);
+        }
+
+        //if (closedChannelException != null) {
+        //    closedChannelException = new ClosedChannelException();
+        //}
+
+        //notifyFlushFutures(closedChannelException);
+
+        if (wasActive && !channel.isActive()) {
+            //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
+            channel.pipeline->fireChannelInactive();
+        }
+    }
+    else {
+        // Closed already.
+        future->setSuccess();
+    }
+}
+
+bool AbstractChannelSink::ensureOpen(const ChannelFuturePtr& future) {
+    if (channel.isOpen()) {
+        return true;
+    }
+
+    //Exception e = new ClosedChannelException();
+    //future.setFailure(e);
+    //pipeline.fireExceptionCaught(e);
+    return false;
+}
+
+void AbstractChannelSink::closeIfClosed() {
+    if (channel.isOpen()) {
+        return;
+    }
+
+    //close(voidFuture());
+}
+
+void AbstractChannelSink::connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+    throw ChannelException("has not implement this method.");
+}
+
+void AbstractChannelSink::flush(const ChannelBufferPtr& buffer,
+                                const ChannelFuturePtr& future) {
+    throw ChannelException("has not implement this method.");
 }
 
 }

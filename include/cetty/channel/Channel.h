@@ -22,20 +22,24 @@
  */
 
 #include <string>
+#include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelFwd.h>
 #include <cetty/channel/ChannelFutureFwd.h>
 #include <cetty/channel/ChannelFactoryFwd.h>
 #include <cetty/channel/ChannelPipelineFwd.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/util/Exception.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
 
+    using namespace cetty::util;
+
 class SocketAddress;
 class ChannelConfig;
-class ChannelMessage;
+class ChannelSink;
 
 /**
  * A nexus to a network socket or a component which is capable of I/O
@@ -125,8 +129,7 @@ class ChannelMessage;
  * @enddot
  *
  */
-class Channel : public ChannelOutboundInvoker,
-    public cetty::util::ReferenceCounter<Channel> {
+class Channel : public ChannelOutboundInvoker, public ReferenceCounter<Channel> {
 public:
     virtual ~Channel() {}
 
@@ -134,6 +137,8 @@ public:
      * Returns the unique integer ID of this channel.
      */
     virtual int getId() const = 0;
+
+    virtual const EventLoopPtr& getEventLoop() const = 0;
 
     /**
      * Returns the parent of this channel.
@@ -202,21 +207,21 @@ public:
      */
     virtual const SocketAddress& getRemoteAddress() const = 0;
     
-    virtual ChannelFuturePtr newFuture() const = 0;
-    virtual ChannelFuturePtr newFailedFuture() const = 0;
-
-    /**
-     * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
-     * channel is closed.  This method always returns the same future instance.
-     */
-    virtual const ChannelFuturePtr&  getCloseFuture() = 0;
+    virtual ChannelFuturePtr newFuture() = 0;
+    virtual ChannelFuturePtr newFailedFuture(const Exception& e) = 0;
 
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which is already succeeded.
      * This method always returns the same future instance, which is cached
      * for easy use.
      */
-    virtual const ChannelFuturePtr& getSucceededFuture() = 0;
+    virtual ChannelFuturePtr newSucceededFuture() = 0;
+
+    /**
+     * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
+     * channel is closed.  This method always returns the same future instance.
+     */
+    virtual const ChannelFuturePtr&  getCloseFuture() = 0;
 
     /**
      * Sends a message to this channel asynchronously.    If this channel was
@@ -236,9 +241,23 @@ public:
      */
     template<typename T>
     ChannelFuturePtr write(const T& message) {
-        ChannelPipelinePtr pipeline = getPipeline();
-        //pipeline->
-        return pipeline->flush();
+        if (isActive()) {
+            return getPipeline()->write(message);
+        }
+        else {
+            return newFailedFuture(ChannelException("write message before channel is Active."));
+        }
+    }
+
+    template<typename T>
+    const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
+        if (isActive()) {
+            return getPipeline()->write(message, future);
+        }
+        else {
+            ChannelException e("channel is not active, do nothing with the write.");
+            return future->setFailure(e);
+        }
     }
 
     /**

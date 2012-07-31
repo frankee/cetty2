@@ -115,11 +115,11 @@ private:
 
         ChannelHandlerPtr messageHandler(new MessageHandlerType);
 
-        ChannelPipelinePtr pipeline = Channels::pipeline();
+        ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
         pipeline->addLast("dispatcher", dispatcher);
         pipeline->addLast("message", messageHandler);
 
-        return Channels::pipelineFactory(pipeline);
+        return ChannelPipelines::pipelineFactory(pipeline);
     }
 
 private:

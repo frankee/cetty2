@@ -21,11 +21,15 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
+
 namespace cetty {
 namespace channel {
 
-class ChannelPipeline;
-class ChannelPipelineException;
+class SocketAddress;
+
+using namespace cetty::buffer;
 
 /**
  * Receives and processes the terminal downstream {@link ChannelEvent}s.
@@ -57,7 +61,8 @@ public:
 
     virtual void close(const ChannelFuturePtr& future) = 0;
 
-    virtual void flush(const ChannelFuturePtr& future) = 0;
+    virtual void flush(const ChannelBufferPtr& buffer,
+        const ChannelFuturePtr& future) = 0;
 };
 
 }

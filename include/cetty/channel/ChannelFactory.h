@@ -61,8 +61,7 @@ namespace channel {
  */
 
 class ChannelFactory
-    : public cetty::util::ReferenceCounter<ChannelFactory, int>,
-      public cetty::util::ExternalResourceReleasable {
+    : public cetty::util::ReferenceCounter<ChannelFactory, int> {
 public:
     ChannelFactory() {}
     virtual ~ChannelFactory() {}
@@ -79,17 +78,7 @@ public:
      */
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline) = 0;
 
-    /**
-     * Releases the external resources that this factory depends on to function.
-     * An external resource is a resource that this factory didn't create by
-     * itself.  For example, {@link Executor}s that you specified in the factory
-     * constructor are external resources.  You can call this method to release
-     * all external resources conveniently when the resources are not used by
-     * this factory or any other part of your application.  An unexpected
-     * behavior will be resulted in if the resources are released when there's
-     * an open channel which is managed by this factory.
-     */
-    virtual void releaseExternalResources() = 0;
+    virtual void shutdown() = 0;
 
 private:
     ChannelFactory(const ChannelFactory&);

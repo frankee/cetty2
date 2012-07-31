@@ -15,29 +15,28 @@
  */
 #include <string>
 
-#include "boost/assert.hpp"
-#include "boost/any.hpp"
+#include <boost/assert.hpp>
+#include <boost/any.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
-#include "cetty/buffer/ChannelBuffer.h"
-#include "cetty/buffer/ChannelBuffers.h"
-#include "cetty/util/Exception.h"
-#include "cetty/util/Timer.h"
-#include "cetty/util/Timeout.h"
-#include "cetty/util/TimerFactory.h"
-#include "cetty/logging/InternalLogger.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelException.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/util/Exception.h>
+#include <cetty/util/Timer.h>
+#include <cetty/util/Timeout.h>
+#include <cetty/util/TimerFactory.h>
+#include <cetty/logging/InternalLogger.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
+using namespace cetty::logging;
 
 /**
  * Handler implementation for the echo client.  It initiates the ping-pong
@@ -49,7 +48,7 @@ using namespace cetty::util;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoClientHandler : public SimpleChannelUpstreamHandler {
+class EchoClientHandler : public ChannelInboundBufferHandler {
 public:
     /**
      * Creates a client-side handler.
@@ -78,24 +77,16 @@ public:
         return transferredBytes;
     }
 
-    virtual void channelConnected(
-            ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        // Send the first message.  Server will not send anything here
-        // because the firstMessage's capacity is 0.
-        timer = TimerFactory::getFactory().getTimer(e.getChannel());
-        e.getChannel()->write(ChannelMessage(firstMessage));
-    }
+    virtual void channelActive(ChannelHandlerContext& ctx);
 
-    virtual void messageReceived(
-            ChannelHandlerContext& ctx, const MessageEvent& e);
+    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
 
-    virtual void exceptionCaught(
-            ChannelHandlerContext& ctx, const ExceptionEvent& e) {
+    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
         // Close the connection when an exception is raised.
         logger->warn(
                 "Unexpected exception from downstream.",
-                e.getCause());
-        e.getChannel()->close();
+                e);
+        ctx.close();
     }
 
     virtual ChannelHandlerPtr clone() {
@@ -112,7 +103,8 @@ public:
 
 private:
     static InternalLogger* logger;
-
+    
+private:
     int firstMessageSize;
     int intervalTime;
 

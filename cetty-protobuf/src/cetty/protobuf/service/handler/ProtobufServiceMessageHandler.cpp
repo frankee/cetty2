@@ -99,7 +99,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
 
     ProtobufServiceMessagePtr message(
         new ProtobufServiceMessage(RESPONSE, id, req->getService(), req->getMethod(), response));
-    Channels::write(ctx.getChannel(), ChannelMessage(message));
+    ChannelPipelines::write(ctx.getChannel(), UserEvent(message));
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {

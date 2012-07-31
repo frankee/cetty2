@@ -82,7 +82,7 @@ const ChannelPipelinePtr& GearmanWorkerBuilder::getWorkerPipeline() {
 }
 
 void GearmanWorkerBuilder::initDefaultPipeline() {
-    pipeline = Channels::pipeline();
+    pipeline = ChannelPipelines::pipeline();
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
 

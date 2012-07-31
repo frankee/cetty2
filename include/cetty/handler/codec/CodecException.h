@@ -17,13 +17,14 @@
  * under the License.
  */
 
-#include <cetty/util/Exception.h>
+#include <cetty/channel/ChannelException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
 using namespace cetty::util;
+using namespace cetty::channel;
 
 /**
  * An {@link Exception} which is thrown when a user calls an unsupported
@@ -35,7 +36,7 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-CETTY_DECLARE_EXCEPTION(CodecException, CodecException)
+CETTY_DECLARE_EXCEPTION(CodecException, ChannelException)
 
 }
 }

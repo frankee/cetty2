@@ -32,7 +32,7 @@ void test4Echo(ChannelPtr& c)
 	
 	task->request = GearmanMessage::createEchoReqMessage(buffer);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void test4submitJob(ChannelPtr& c)
@@ -46,7 +46,7 @@ void test4submitJob(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createsubmitJobMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void test4submitJobHigh(ChannelPtr& c)
@@ -61,7 +61,7 @@ void test4submitJobHigh(ChannelPtr& c)
 
 	task->request = GearmanMessage::createsubmitJobHighMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void test4submitJobLow(ChannelPtr& c)
@@ -75,7 +75,7 @@ void test4submitJobLow(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createsubmitJobLowMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -90,7 +90,7 @@ void test4submitJobBG(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createsubmitJobBGMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -105,7 +105,7 @@ void test4submitJobHighBG(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createsubmitJobHighBGMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -120,7 +120,7 @@ void test4submitJobLowBG(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createsubmitJobLowBGMessage(functionName,uniqueId,payload);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void test4GetStatus(ChannelPtr& c)
@@ -129,7 +129,7 @@ void test4GetStatus(ChannelPtr& c)
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createGetStatusMessage(jobHandle);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void test4OptionReq(ChannelPtr& c)
@@ -142,7 +142,7 @@ void test4OptionReq(ChannelPtr& c)
 	}
 	task->request = GearmanMessage::createOptionReqMessage(option);
 	//writedown   往gearman写数据
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 /*const std::vector<const std::string&> params;

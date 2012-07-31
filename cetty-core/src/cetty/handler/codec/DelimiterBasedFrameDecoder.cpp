@@ -14,20 +14,18 @@
  * under the License.
  */
 
+#include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
 
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
-#include <cetty/handler/codec/frame/DelimiterBasedFrameDecoder.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 using namespace cetty::util;
 using namespace cetty::channel;
@@ -83,16 +81,13 @@ DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
     initdelimiters(delimiters);
 }
 
-cetty::channel::ChannelMessage
-DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
-                                   const ChannelPtr& channel,
-                                   const ChannelBufferPtr& buffer) {
+ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx, const ChannelBufferPtr& in) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
     int minFrameLength = Integer::MAX_VALUE;
     ChannelBufferPtr minDelim;
 
     for (size_t i = 0; i < delimiters.size(); ++i) {
-        int frameLength = indexOf(buffer, delimiters[i]);
+        int frameLength = indexOf(in, delimiters[i]);
 
         if (frameLength >= 0 && frameLength < minFrameLength) {
             minFrameLength = frameLength;
@@ -108,49 +103,49 @@ DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
             // We've just finished discarding a very large frame.
             // Go back to the initial state.
             discardingTooLongFrame = false;
-            buffer->skipBytes(minFrameLength + minDelimLength);
+            in->skipBytes(minFrameLength + minDelimLength);
 
             // TODO Let user choose when the exception should be raised - early or late?
             //      If early, fail() should be called when discardingTooLongFrame is set to true.
             int tooLongFrameLength = this->tooLongFrameLength;
             this->tooLongFrameLength = 0;
             fail(ctx, tooLongFrameLength);
-            return ChannelMessage::EMPTY_MESSAGE;
+            return ChannelBufferPtr();
         }
 
         if (minFrameLength > maxFrameLength) {
             // Discard read frame.
-            buffer->skipBytes(minFrameLength + minDelimLength);
+            in->skipBytes(minFrameLength + minDelimLength);
             fail(ctx, minFrameLength);
-            return ChannelMessage::EMPTY_MESSAGE;
+            return ChannelBufferPtr();
         }
 
         if (stripDelimiter) {
-            frame = buffer->readBytes(minFrameLength);
-            buffer->skipBytes(minDelimLength);
+            frame = in->readBytes(minFrameLength);
+            in->skipBytes(minDelimLength);
         }
         else {
-            frame = buffer->readBytes(minFrameLength + minDelimLength);
+            frame = in->readBytes(minFrameLength + minDelimLength);
         }
 
-        return ChannelMessage(frame);
+        return frame;
     }
     else {
         if (!discardingTooLongFrame) {
-            if (buffer->readableBytes() > maxFrameLength) {
+            if (in->readableBytes() > maxFrameLength) {
                 // Discard the content of the buffer until a delimiter is found.
-                tooLongFrameLength = buffer->readableBytes();
-                buffer->skipBytes(buffer->readableBytes());
+                tooLongFrameLength = in->readableBytes();
+                in->skipBytes(in->readableBytes());
                 discardingTooLongFrame = true;
             }
         }
         else {
             // Still discarding the buffer since a delimiter is not found.
-            tooLongFrameLength += buffer->readableBytes();
-            buffer->skipBytes(buffer->readableBytes());
+            tooLongFrameLength += in->readableBytes();
+            in->skipBytes(in->readableBytes());
         }
 
-        return ChannelMessage::EMPTY_MESSAGE;
+        return ChannelBufferPtr();
     }
 }
 
@@ -165,16 +160,14 @@ void DelimiterBasedFrameDecoder::fail(ChannelHandlerContext& ctx, long frameLeng
         Integer::appendString(frameLength, &msg);
         msg.append(" - discarded");
 
-        Channels::fireExceptionCaught(ctx.getChannel(),
-                                      TooLongFrameException(msg));
+        ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
         msg.append("frame length exceeds ");
         Integer::appendString(maxFrameLength, &msg);
         msg.append(" - discarded");
 
-        Channels::fireExceptionCaught(ctx.getChannel(),
-                                      TooLongFrameException(msg));
+        ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
 }
 
@@ -238,7 +231,6 @@ void DelimiterBasedFrameDecoder::initdelimiters(
     }
 }
 
-}
 }
 }
 }

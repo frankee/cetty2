@@ -45,7 +45,7 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 
 //static const char REDIS_WHITESPACE                " \f\n\r\t\v"
 
-ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
+UserEvent RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
                              Channel& channel,
                              const ChannelBufferPtr& buffer) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
@@ -89,7 +89,7 @@ ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
                     reply->setValue(SimpleString(data.data(), strSize));
                 }
                 else {
-                    return ChannelMessage::EMPTY_MESSAGE;
+                    return UserEvent::EMPTY_EVENT;
                 }
             }
             else {
@@ -141,7 +141,7 @@ ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
                 }
 
                 if (stringArray.size() < arrayCount) {
-                    return ChannelMessage::EMPTY_MESSAGE;
+                    return UserEvent::EMPTY_EVENT;
                 }
                 else {
                     reply->setValue(stringArray);
@@ -153,7 +153,7 @@ ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
             }
         }
 
-        return ChannelMessage(reply);
+        return UserEvent(reply);
     }
     else {
         if (!discardingTooLongFrame) {
@@ -170,7 +170,7 @@ ChannelMessage RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
             buffer->skipBytes(buffer->readableBytes());
         }
 
-        return ChannelMessage::EMPTY_MESSAGE;
+        return UserEvent::EMPTY_EVENT;
     }
 }
 
@@ -185,7 +185,7 @@ void RedisReplyDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
         Integer::appendString(frameLength, &msg);
         msg.append(" - discarded");
 
-        Channels::fireExceptionCaught(ctx.getChannel(),
+        ChannelPipelines::fireExceptionCaught(ctx.getChannel(),
                                       TooLongFrameException(msg));
     }
     else {
@@ -193,7 +193,7 @@ void RedisReplyDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
         Integer::appendString(maxFrameLength, &msg);
         msg.append(" - discarded");
 
-        Channels::fireExceptionCaught(ctx.getChannel(),
+        ChannelPipelines::fireExceptionCaught(ctx.getChannel(),
                                       TooLongFrameException(msg));
     }
 }

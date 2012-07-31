@@ -24,12 +24,14 @@
 #include <string>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/ChannelHandlerFwd.h>
+#include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {
 namespace channel {
 
-class ChannelEvent;
+class UserEvent;
 class ChannelException;
+class ChannelPipeline;
 class ChannelHandlerContext;
 
 /**
@@ -247,8 +249,25 @@ public:
     /**
      *
      */
-    virtual void eventTriggered(ChannelHandlerContext& ctx,
-                                const ChannelEvent& evt) = 0;
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+                                const UserEvent& evt) = 0;
+
+    /**
+     *
+     */
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next) = 0;
+
+    /**
+     *
+     */
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next) = 0;
 
     /**
      * Clone the instance of {@link ChannelHandler this}.
@@ -268,16 +287,10 @@ public:
      */
     virtual ChannelHandlerPtr clone() = 0;
 
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next) = 0;
-
     /**
      * Returns a string representation of the ChannelHandler.
      */
     virtual std::string toString() const = 0;
-
 };
 
 }

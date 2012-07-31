@@ -61,7 +61,7 @@ public:
             }
 
             if (parent) {
-                Channels::fireMessageReceived(parent, ChannelMessage(out));
+                ChannelPipelines::fireMessageReceived(parent, UserEvent(out));
             }
             outMessages.pop_front();
         }
@@ -73,7 +73,7 @@ public:
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
         OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingCallType>();
         outMessages.push_back(msg);
-        Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
+        ChannelPipelines::write(ctx, ChannelPipelines::future(ctx.getChannel()), UserEvent(msg->request));
     }
 
     virtual ChannelHandlerPtr clone() {

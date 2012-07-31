@@ -64,7 +64,7 @@ public:
         msg->setId(++id);
         outMessages.push_back(msg);
 
-        Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg));
+        ChannelPipelines::write(ctx, ChannelPipelines::future(ctx.getChannel()), UserEvent(msg));
     }
 
     virtual ChannelHandlerPtr clone() {

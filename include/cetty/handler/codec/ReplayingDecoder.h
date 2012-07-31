@@ -23,7 +23,6 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/handler/codec/BufferToMessageDecoder.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 
@@ -304,7 +303,10 @@ using namespace cetty::logging;
  */
 
 template<typename InboundOutT>
-class ReplayingDecoder : public BufferToMessageDecoder<InboundOutT> {
+class ReplayingDecoder : public cetty::channel::ChannelInboundBufferHandler {
+public:
+    typedef ChannelInboundBufferHandlerContext Context;
+
 public:
     virtual ~ReplayingDecoder() {}
 
@@ -313,22 +315,22 @@ protected:
      * Creates a new instance with no initial state (i.e: <tt>null</tt>).
      */
     ReplayingDecoder()
-        : channelOwnBuffer(false), unfold(false), state(-1), checkedPoint(-1) {
+        : unfold(false), state(-1), checkedPoint(-1) {
     }
 
     ReplayingDecoder(bool unfold)
-        : channelOwnBuffer(false), unfold(unfold), state(-1), checkedPoint(-1) {
+        : unfold(unfold), state(-1), checkedPoint(-1) {
     }
 
     /**
      * Creates a new instance with the specified initial state.
      */
     ReplayingDecoder(int initialState)
-        : channelOwnBuffer(false), unfold(false), state(initialState), checkedPoint(-1) {
+        : unfold(false), state(initialState), checkedPoint(-1) {
     }
 
     ReplayingDecoder(int initialState, bool unfold)
-        : channelOwnBuffer(false), unfold(unfold), state(initialState), checkedPoint(-1) {
+        : unfold(unfold), state(initialState), checkedPoint(-1) {
     }
 
     /**
@@ -385,7 +387,125 @@ protected:
      * do not need to access the internal buffer directly to write a decoder.
      * Use it only when you must use it at your own risk.
      */
-    const ChannelBufferPtr& internalBuffer() const;
+    const ChannelBufferPtr& internalBuffer() const {
+        if (!cumulation) {
+            return ChannelBuffers::EMPTY_BUFFER;
+        }
+
+        return cumulation;
+    }
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        callDecode(ctx);
+    }
+
+    virtual void channelInactive(ChannelHandlerContext& ctx) {
+        replayable->terminate();
+
+        ChannelBufferPtr in = this->cumulation;
+        this->cumulation.reset();
+
+        if (!in) {
+            return;
+        }
+
+        if (in->readable()) {
+            callDecode(ctx);
+        }
+
+        try {
+            if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx,
+                    decodeLast(ctx, replayable),
+                    true)) {
+                fireInboundBufferUpdated(ctx, in);
+            }
+        }
+        catch (const CodecException& e) {
+            ctx.fireExceptionCaught(t);
+        }
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(DecoderException(e.what()));
+        }
+
+        ctx.fireChannelInactive();
+    }
+
+protected:
+    void callDecode(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& in = getCumulation();
+        bool decoded = false;
+
+        while (in->readable()) {
+            int oldReaderIndex = checkpoint = in->readerIndex();
+            InboundOutT result();
+            int oldState = state;
+
+            try {
+                result = decode(ctx, replayable, state);
+
+                if (!result) {
+                    if (replayable->needMoreBytes()) {
+                        // Return to the checkpoint (or oldPosition) and retry.
+                        if (checkedPoint >= 0) {
+                            cumulation->readerIndex(checkedPoint);
+                        }
+                        else {
+                            // Called by cleanup() - no need to maintain the readerIndex
+                            // anymore because the buffer has been released already.
+                        }
+
+                        // Seems like more data is required.
+                        // Let us wait for the next notification.
+                        break;
+                    }
+                    else if (oldReaderIndex == in->readerIndex() && oldState == state) {
+                        throw IllegalStateException(
+                            "null cannot be returned if no data is consumed and state didn't change.");
+                    }
+                    else {
+                        // Previous data has been discarded or caused state transition.
+                        // Probably it is reading on.
+                        continue;
+                    }
+                }
+
+                if (oldReaderIndex == in->readerIndex() && oldState == state) {
+                    throw IllegalStateException(
+                        std::string("decode() method must consume at least one byte \
+                                    if it returned a decoded message (caused by: ") +
+                        typeid(*this).name() +
+                        std::string(")"));
+                }
+
+                replayable->syncIndex();
+
+                // A successful decode
+                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, result, true)) {
+                    decoded = true;
+                }
+            }
+            catch (const CodecException& e) {
+                if (decoded) {
+                    decoded = false;
+                    fireInboundBufferUpdated(ctx, in);
+                }
+
+                ctx.fireExceptionCaught(t);
+            }
+            catch (const std::exception& e) {
+                if (decoded) {
+                    decoded = false;
+                    fireInboundBufferUpdated(ctx, in);
+                }
+
+                ctx.fireExceptionCaught(DecoderException(e.what()));
+            }
+        }
+
+        if (decoded) {
+            fireInboundBufferUpdated(ctx, in);
+        }
+    }
 
     /**
      * Decodes the received packets so far into a frame.
@@ -400,11 +520,9 @@ protected:
      *
      * @return the decoded frame
      */
-
-    virtual ChannelMessage decode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const ReplayingDecoderBufferPtr& buffer,
-                                  int state) = 0;
+    virtual InboundOutT decode(ChannelHandlerContext& ctx,
+                               const ReplayingDecoderBufferPtr& buffer,
+                               int state) = 0;
 
     /**
      * Decodes the received data so far into a frame when the channel is
@@ -420,26 +538,36 @@ protected:
      *
      * @return the decoded frame
      */
-    virtual ChannelMessage decodeLast(ChannelHandlerContext& ctx,
-                                      const ChannelPtr& channel,
-                                      const ReplayingDecoderBufferPtr& buffer,
-                                      int state) {
-        return decode(ctx, channel, buffer, state);
+    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
+                                   const ReplayingDecoderBufferPtr& buffer,
+                                   int state) {
+        return decode(ctx, buffer, state);
     }
 
 private:
-    void callDecode(ChannelHandlerContext& context,
-                    const ChannelPtr& channel,
-                    const ChannelBufferPtr& cumulation,
-                    const SocketAddress& remoteAddress);
+    void fireInboundBufferUpdated(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in) {
+        checkedPoint -= in->readerIndex();
+        in->discardReadBytes();
+        ctx.fireInboundBufferUpdated();
+    }
 
-    void unfoldAndfireMessageReceived(ChannelHandlerContext& context,
-                                      ChannelMessage& result,
-                                      const SocketAddress& remoteAddress);
+    const ChannelBufferPtr& getCumulation(const ChannelBufferPtr& input) {
+        if (!cumulation) { // only first time will enter.
+            cumulation = input;
+            replayable =
+                ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(cumulation));
+        }
 
-    void cleanup(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+        // input buffer changes (may re allocate memory) which channel owns buffer
+        if (cumulation.get() != input.get()) {
+            cumulation = input;
+            replayable =
+                ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(input));
+        }
 
-    const ChannelBufferPtr& getCumulation(ChannelHandlerContext& ctx, const ChannelBufferPtr& input);
+        return cumulation;
+    }
 
 private:
     static InternalLogger* logger;

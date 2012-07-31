@@ -36,7 +36,7 @@ public:
     virtual std::string toString() const { return "RedisResponseDecoder"; }
 
 protected:
-    virtual ChannelMessage decode(
+    virtual UserEvent decode(
         ChannelHandlerContext& ctx, Channel& channel, const ChannelBufferPtr& buffer);
 
 private:

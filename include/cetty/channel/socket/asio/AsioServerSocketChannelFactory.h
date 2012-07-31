@@ -1,4 +1,5 @@
 #if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSERVERSOCKETCHANNELFACTORY_H)
+#define CETTY_CHANNEL_SOCKET_ASIO_ASIOSERVERSOCKETCHANNELFACTORY_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -26,9 +27,9 @@
 #include <cetty/util/TimerFwd.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
+}
 }
 
 namespace cetty {
@@ -112,12 +113,16 @@ public:
      * @throws IOException
      *         if catch the exception, when open the acceptor.
      */
-    AsioServerSocketChannelFactory(int threadCnt);
+    AsioServerSocketChannelFactory(int parentThreadCnt, int childThreadCnt = 0);
+    AsioServerSocketChannelFactory(const AsioServicePoolPtr& parentPool, const AsioServicePoolPtr& childPool);
     AsioServerSocketChannelFactory(const AsioServicePoolPtr& pool);
     virtual ~AsioServerSocketChannelFactory();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
-    virtual void releaseExternalResources();
+    virtual void shutdown();
+
+    virtual void setChildChannelPipeline(const ChannelPipelinePtr& pipeline);
+    virtual const ChannelPipelinePtr& getChildChannelPipeline() const;
 
 private:
     void init();
@@ -127,14 +132,16 @@ private:
     static InternalLogger* logger;
 
 private:
-    AsioServicePoolPtr ioServicePool;
+    AsioServicePoolPtr serverServicePool;
+    AsioServicePoolPtr childServicePool;
 
     TimerFactoryPtr timerFactory; // keep the life cycle.
 
     AsioTcpSocketAddressImplFactory* socketAddressFactory;
     AsioIpAddressImplFactory* ipAddressFactory;
 
-    std::vector<ChannelPtr> channels;
+    ChannelPipelinePtr childPipeline;
+    std::vector<ChannelPtr> serverChannels;
 };
 
 }

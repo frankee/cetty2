@@ -31,17 +31,29 @@
  * under the License.
  */
 
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/handler/codec/DecoderException.h>
+#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
-template<InboundOutT>
+using namespace cetty::buffer;
+using namespace cetty::util;
+
+template<typename InboundOutT>
 class BufferToMessageDecoder : public cetty::channel::ChannelInboundBufferHandler {
 public:
-    virtual void beforeAdd(ChannelHandlerContext&& ctx) {
-        this.ctx = &ctx;
+    typedef ChannelInboundBufferHandlerContext Context;
+
+public:
+    virtual void beforeAdd(ChannelHandlerContext& ctx) {
+        this->context = &ctx;
         ChannelInboundBufferHandler::beforeAdd(ctx);
     }
 
@@ -50,38 +62,38 @@ public:
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
-        ByteBuf in = ctx.inboundByteBuffer();
+        Context* context = ctx.downcast<Context>();
+        const ChannelBufferPtr& in = context->getInboundChannelBuffer();
 
-        if (in.readable()) {
-            callDecode(ctx);
+        if (in && in->readable()) {
+            callDecode(*context);
         }
 
         try {
-            if (CodecUtil.unfoldAndAdd(ctx, decodeLast(ctx, in), true)) {
-                in.discardReadBytes();
-                ctx.fireInboundBufferUpdated();
+            if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, decodeLast(ctx, in), true)) {
+                in->discardReadBytes();
+                ctx.fireMessageUpdated();
             }
         }
-        catch (Throwable t) {
-            if (t instanceof CodecException) {
-                ctx.fireExceptionCaught(t);
-            }
-            else {
-                ctx.fireExceptionCaught(new DecoderException(t));
-            }
+        catch (const CodecException& e) {
+            ctx.fireExceptionCaught(e);
+        }
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(DecoderException(e.what()));
         }
 
         ctx.fireChannelInactive();
     }
 
     virtual InboundOutT decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in) = 0;
+                               const ChannelBufferPtr& in) = 0;
 
     virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in) {
+                                   const ChannelBufferPtr& in) {
         return decode(ctx, in);
     }
 
+#if 0
     /**
      * Replace this decoder in the {@link ChannelPipeline} with the given handler.
      * All remaining bytes in the inbound buffer will be forwarded to the new handler's
@@ -99,28 +111,31 @@ public:
         ByteBuf in = ctx.inboundByteBuffer();
 
         try {
-            if (in.readable()) {
+            if (in->readable()) {
                 ctx.nextInboundByteBuffer().writeBytes(ctx.inboundByteBuffer());
                 ctx.fireMessageUpdated();
             }
         } finally {
+
             ctx.pipeline().remove(this);
         }
     }
+#endif
 
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
-        ByteBuf in = ctx.inboundByteBuffer();
+        Context* context = ctx.downcast<Context>();
+        const ChannelBufferPtr& in = context->getInboundChannelBuffer();
 
-        boolean decoded = false;
+        bool decoded = false;
 
         for (;;) {
             try {
-                int oldInputLength = in.readableBytes();
-                MessageT o = decode(ctx, in);
+                int oldInputLength = in->readableBytes();
+                InboundOutT o = decode(ctx, in);
 
-                if (o == null) {
-                    if (oldInputLength == in.readableBytes()) {
+                if (!o) {
+                    if (oldInputLength == in->readableBytes()) {
                         break;
                     }
                     else {
@@ -128,38 +143,42 @@ protected:
                     }
                 }
                 else {
-                    if (oldInputLength == in.readableBytes()) {
-                        throw new IllegalStateException(
+                    if (oldInputLength == in->readableBytes()) {
+                        throw IllegalStateException(
                             "decode() did not read anything but decoded a message.");
                     }
                 }
 
-                if (CodecUtil.unfoldAndAdd(ctx, o, true)) {
+                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, o, true)) {
                     decoded = true;
                 }
                 else {
                     break;
                 }
             }
-            catch (Throwable t) {
+            catch (const CodecException& e) {
                 if (decoded) {
                     decoded = false;
-                    in.discardReadBytes();
-                    ctx.fireInboundBufferUpdated();
+                    in->discardReadBytes();
+                    ctx.fireMessageUpdated();
                 }
 
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
+                ctx.fireExceptionCaught(e);
+            }
+            catch (const std::exception& e) {
+                if (decoded) {
+                    decoded = false;
+                    in->discardReadBytes();
+                    ctx.fireMessageUpdated();
                 }
-                else {
-                    ctx.fireExceptionCaught(new DecoderException(t));
-                }
+
+                ctx.fireExceptionCaught(DecoderException(e.what()));
             }
         }
 
         if (decoded) {
-            in.discardReadBytes();
-            ctx.fireInboundBufferUpdated();
+            in->discardReadBytes();
+            ctx.fireMessageUpdated();
         }
     }
 

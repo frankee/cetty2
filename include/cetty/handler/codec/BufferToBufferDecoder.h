@@ -32,82 +32,45 @@
  */
 
 #include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
+
+namespace cetty {
+namespace channel {
+class ChannelHandlerContext;
+class ChannelInboundBufferHandlerContext;
+}
+}
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
+using namespace cetty::channel;
+using namespace cetty::buffer;
+
 class BufferToBufferDecoder : public cetty::channel::ChannelInboundBufferHandler {
 public:
-    virtual void messageUpdated(ChannelHandlerContext& ctx, const ChannelBufferPtr& in) {
-        callDecode(ctx, in, ctx.nextOutboundByteBuffer());
+    typedef ChannelInboundBufferHandlerContext BufferContext;
+
+public:
+    BufferToBufferDecoder();
+    virtual ~BufferToBufferDecoder();
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx, const ChannelBufferPtr& in);
+
+    virtual void channelInactive(ChannelHandlerContext& ctx);
+
+    ChannelBufferPtr decodeLast(ChannelHandlerContext& ctx,
+                                      const ChannelBufferPtr& in) {
+        return decode(ctx, in);
     }
 
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
-        ByteBuf in = ctx.inboundByteBuffer();
-        ByteBuf out = ctx.nextInboundByteBuffer();
-
-        if (!in.readable()) {
-            callDecode(ctx, in, out);
-        }
-
-        int oldOutSize = out.readableBytes();
-
-        try {
-            decodeLast(ctx, in, out);
-        }
-        catch (Throwable t) {
-            if (t instanceof CodecException) {
-                ctx.fireExceptionCaught(t);
-            }
-            else {
-                ctx.fireExceptionCaught(new DecoderException(t));
-            }
-        }
-
-        if (out.readableBytes() > oldOutSize) {
-            in.discardReadBytes();
-            ctx.fireInboundBufferUpdated();
-        }
-
-        ctx.fireChannelInactive();
-    }
-
-    void decodeLast(ChannelHandlerContext& ctx, ByteBuf in, ByteBuf out) {
-        decode(ctx, in, out);
-    }
-
-    virtual void decode(ChannelHandlerContext& ctx, ByteBuf in, ByteBuf out) = 0;
+    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+                                    const ChannelBufferPtr& in) = 0;
 
 private:
-    void callDecode(ChannelHandlerContext& ctx, ByteBuf in, ByteBuf out) {
-        int oldOutSize = out.readableBytes();
-
-        while (in.readable()) {
-            int oldInSize = in.readableBytes();
-
-            try {
-                decode(ctx, in, out);
-            }
-            catch (Throwable t) {
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
-                }
-                else {
-                    ctx.fireExceptionCaught(new DecoderException(t));
-                }
-            }
-
-            if (oldInSize == in.readableBytes()) {
-                break;
-            }
-        }
-
-        if (out.readableBytes() > oldOutSize) {
-            in.discardReadBytes();
-            ctx.fireMessageUpdated();
-        }
-    }
+    ChannelBufferPtr callDecode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in);
 };
 
 }

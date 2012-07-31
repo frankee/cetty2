@@ -27,8 +27,9 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/mpl/size_t.hpp>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
-#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace logging {
@@ -47,7 +48,7 @@ using namespace cetty::logging;
  *
  *
  */
-class AsioService : public cetty::util::ReferenceCounter<AsioService> {
+class AsioService : public cetty::channel::EventLoop {
 public:
     AsioService(int index) : poolIndex(index) {}
 
@@ -59,16 +60,12 @@ public:
     boost::asio::io_service& service() { return ioService; }
     operator boost::asio::io_service& () { return ioService; }
 
-    void setThreadId(const boost::thread::id& id) { threadId = id; }
-    const boost::thread::id& getThreadId() const { return threadId; }
-
-private:
-    AsioService(const AsioService&);
-    AsioService& operator=(const AsioService&);
+    virtual void post(const Functor& handler) {
+        ioService.post(handler);
+    }
 
 private:
     int                     poolIndex;
-    boost::thread::id       threadId;
     boost::asio::io_service ioService;
 };
 

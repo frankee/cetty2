@@ -26,6 +26,9 @@ namespace channel {
 template<typename OutT>
 class ChannelOutboundMessageHandler : public ChannelOutboundHandler {
 public:
+    ChannelOutboundMessageHandler() {}
+    virtual~ ChannelOutboundMessageHandler() {}
+
     virtual void bind(ChannelHandlerContext& ctx,
                       const SocketAddress& localAddress,
                       const ChannelFuturePtr& future) {
@@ -67,16 +70,33 @@ public:
         ctx.fireExceptionCaught(cause);
     }
 
-    virtual void eventTriggered(ChannelHandlerContext& ctx,
-                                const ChannelEvent& evt) {
-        ctx.fireEventTriggered(evt);
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+                                const UserEvent& evt) {
+        ctx.fireUserEventTriggered(evt);
     }
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelOutboundMessageHandlerContext<OutT>();
+        return new ChannelOutboundMessageHandlerContext<OutT>(name,
+                pipeline,
+                shared_from_this(),
+                prev,
+                next);
+    }
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next) {
+            return new ChannelOutboundMessageHandlerContext<OutT>(name,
+                eventLoop,
+                pipeline,
+                shared_from_this(),
+                prev,
+                next);
     }
 };
 

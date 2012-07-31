@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/util/Exception.h>
+#include <cetty/handler/codec/CodecException.h>
 
 namespace cetty {
 namespace handler {
@@ -37,7 +37,7 @@ using namespace cetty::util;
  * @apiviz.hidden
  */
 
-CETTY_DECLARE_EXCEPTION(TooLongFrameException, RuntimeException)
+CETTY_DECLARE_EXCEPTION(TooLongFrameException, CodecException)
 
 }
 }

@@ -31,43 +31,87 @@
  * under the License.
  */
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
+#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
+using namespace cetty::buffer;
+using namespace cetty::channel;
+
 template<typename OutboundInT>
 class MessageToBufferEncoder : public ChannelOutboundMessageHandler<OutboundInT> {
 public:
+    typedef ChannelOutboundMessageHandlerContext<OutboundInT> MessageContext;
+    typedef ChannelOutboundBufferHandlerContext BufferContext;
+    typedef typename MessageContext::MessageQueue MessageQueue;
+
+public:
+    MessageToBufferEncoder() : hasOutBuffer(false), initBufferSize(0) {}
+    MessageToBufferEncoder(int initBufferSize)
+        : hasOutBuffer(true),
+          initBufferSize(initBufferSize <= 0 ? 8*1024 : initBufferSize) {
+    }
+
+    virtual ~MessageToBufferEncoder() {}
+
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        MessageBuf<I> in = ctx.outboundMessageBuffer();
-        ByteBuf out = ctx.nextOutboundByteBuffer();
+        MessageContext* context = ctx.downcast<MessageContext>();
+        BufferContext* nextContxt = ctx.nextOutboundBufferHandlerContext();
+        BOOST_ASSERT(context && nextContxt);
 
-        for (;;) {
-            Object msg = in.poll();
+        MessageQueue& queue = context->getOutboundMessageQueue();
 
-            if (msg == null) {
+        ChannelBufferPtr out;
+
+        if (hasOutBuffer) {
+            out = ChannelBuffers::dynamicBuffer(initBufferSize);
+        }
+
+        while (!queue.empty()) {
+            OutboundInT& msg = queue.front();
+
+            if (!msg) {
                 break;
             }
 
-            if (!isEncodable(msg)) {
-                ctx.nextOutboundMessageBuffer().add(msg);
-                continue;
-            }
-
-            I imsg = (I) msg;
+            //             if (!isEncodable(msg)) {
+            //                 MessageContext* nextMsgCtx = ctx.nextOutboundMessageHandlerContext();
+            //                 if (nextMsgCtx) {
+            //                     nextMsgCtx->addOutboundMessage(msg);
+            //                 }
+            //                 continue;
+            //             }
 
             try {
-                encode(ctx, imsg, out);
-            }
-            catch (Throwable t) {
-                if (t instanceof CodecException) {
-                    ctx.fireExceptionCaught(t);
+                if (hasOutBuffer) {
+                    encode(ctx, msg, out);
                 }
                 else {
-                    ctx.fireExceptionCaught(new EncoderException(t));
+                    ChannelBufferPtr decodedBuf = encode(ctx, msg, out);
+
+                    if (decodedBuf) {
+                        nextContxt->setOutboundChannelBuffer(decodedBuf);
+                        nextContxt->flush(future);
+                    }
                 }
             }
+            catch (const CodecException& e) {
+                ctx.fireExceptionCaught(e);
+            }
+            catch (const std::exception& e) {
+                ctx.fireExceptionCaught(EncoderException(e.what()));
+            }
+
+            queue.pop_front();
+        }
+
+        if (hasOutBuffer) {
+            nextContxt->setOutboundChannelBuffer(out);
         }
 
         ctx.flush(future);
@@ -82,9 +126,13 @@ public:
         return true;
     }
 
-    virtual void encode(ChannelHandlerContext& ctx,
-                        const OutboundInT& msg,
-                        ChannelBufferPtr& out) = 0;
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                                    const OutboundInT& msg,
+                                    const ChannelBufferPtr& out) = 0;
+
+private:
+    bool hasOutBuffer;
+    int  initBufferSize;
 };
 
 

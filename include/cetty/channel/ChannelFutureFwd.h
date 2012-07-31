@@ -19,10 +19,14 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace cetty { namespace channel { 
-    class ChannelFuture;
-    typedef boost::intrusive_ptr<ChannelFuture> ChannelFuturePtr;
-}}
+namespace cetty {
+namespace channel {
+
+class ChannelFuture;
+typedef boost::intrusive_ptr<ChannelFuture> ChannelFuturePtr;
+
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_CHANNELFUTUREFWD_H)
 

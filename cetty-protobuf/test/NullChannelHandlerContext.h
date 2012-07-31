@@ -21,7 +21,7 @@ using namespace cetty::channel;
 
 namespace cetty {
 namespace channel {
-class ChannelEvent;
+class UserEvent;
 class MessageEvent;
 class ExceptionEvent;
 class ChannelStateEvent;
@@ -45,13 +45,13 @@ public:
     const ChannelOutboundHandlerPtr& getOutboundHandler()const;
     bool canHandleInboundMessage()const;
     bool canHandleOutboundMessage()const;
-    void sendUpstream(const ChannelEvent& e);
+    void sendUpstream(const UserEvent& e);
     void sendUpstream(const MessageEvent& e);
     void sendUpstream(const ChannelStateEvent& e);
     void sendUpstream(const ChildChannelStateEvent& e);
     void sendUpstream(const WriteCompletionEvent& e);
     void sendUpstream(const ExceptionEvent& e);
-    void sendDownstream(const ChannelEvent& e);
+    void sendDownstream(const UserEvent& e);
     void sendDownstream(const MessageEvent& e);
     void sendDownstream(const ChannelStateEvent& e);
     void* getAttachment();

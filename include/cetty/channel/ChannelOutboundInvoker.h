@@ -23,7 +23,7 @@ namespace cetty {
 namespace channel {
 
 class SocketAddress;
-class ChannelMessage;
+class UserEvent;
 
 class ChannelOutboundInvoker {
 public:

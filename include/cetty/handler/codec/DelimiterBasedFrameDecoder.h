@@ -21,12 +21,11 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/handler/codec/frame/FrameDecoder.h>
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 /**
  * A decoder that splits the received {@link ChannelBuffer}s by one or more
@@ -71,7 +70,7 @@ namespace frame {
  * @apiviz.uses org.jboss.netty.handler.codec.frame.Delimiters - - useful
  */
 
-class DelimiterBasedFrameDecoder : public FrameDecoder {
+class DelimiterBasedFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
 public:
     /**
      * Creates a new instance.
@@ -81,7 +80,8 @@ public:
      *                        the length of the frame exceeds this value.
      * @param delimiter  the delimiter
      */
-    DelimiterBasedFrameDecoder(int maxFrameLength, const ChannelBufferPtr& delimiter);
+    DelimiterBasedFrameDecoder(int maxFrameLength,
+        const ChannelBufferPtr& delimiter);
 
     /**
      * Creates a new instance.
@@ -93,8 +93,9 @@ public:
      *                        delimiter or not
      * @param delimiter  the delimiter
      */
-    DelimiterBasedFrameDecoder(
-        int maxFrameLength, bool stripDelimiter, const ChannelBufferPtr& delimiter);
+    DelimiterBasedFrameDecoder(int maxFrameLength,
+        bool stripDelimiter,
+        const ChannelBufferPtr& delimiter);
 
     /**
      * Creates a new instance.
@@ -104,7 +105,8 @@ public:
      *                        the length of the frame exceeds this value.
      * @param delimiters  the delimiters
      */
-    DelimiterBasedFrameDecoder(int maxFrameLength, const std::vector<ChannelBufferPtr>& delimiters);
+    DelimiterBasedFrameDecoder(int maxFrameLength,
+        const std::vector<ChannelBufferPtr>& delimiters);
 
     /**
      * Creates a new instance.
@@ -116,8 +118,9 @@ public:
      *                        delimiter or not
      * @param delimiters  the delimiters
      */
-    DelimiterBasedFrameDecoder(
-        int maxFrameLength, bool stripDelimiter, const std::vector<ChannelBufferPtr>& delimiters);
+    DelimiterBasedFrameDecoder(int maxFrameLength,
+        bool stripDelimiter,
+        const std::vector<ChannelBufferPtr>& delimiters);
 
     virtual ~DelimiterBasedFrameDecoder() {}
 
@@ -129,7 +132,10 @@ public:
     virtual std::string toString() const { return "FixedLengthFrameDecoder"; }
 
 protected:
-    virtual ChannelMessage decode(
+    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in);
+
+    virtual UserEvent decode(
         ChannelHandlerContext& ctx, const ChannelPtr& channel, const ChannelBufferPtr& buffer);
 
 private:
@@ -156,7 +162,6 @@ private:
 };
 
 
-}
 }
 }
 }

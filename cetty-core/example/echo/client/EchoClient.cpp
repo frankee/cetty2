@@ -2,19 +2,19 @@
 //
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-
-#include "EchoClientHandler.h"
-
-#include "cetty/bootstrap/ClientBootstrap.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include "cetty/channel/IpAddress.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/ChannelFuture.h"
-
 #include <boost/smart_ptr.hpp>
 #include <boost/smart_ptr/enable_shared_from_this2.hpp>
+
+#include <cetty/bootstrap/ClientBootstrap.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/IpAddress.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelFuture.h>
+
+#include "EchoClientHandler.h"
 
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
@@ -64,11 +64,11 @@ int main(int argc, char* argv[]) {
 
     // Set up the pipeline factory.
     bootstrap.setPipeline(
-        Channels::pipeline(
+        ChannelPipelines::pipeline(
             new EchoClientHandler(firstMessageSize, sendIntervals)));
 
     // Start the connection attempt.
-    std::vector<Channel*> clientChannels;
+    std::vector<ChannelPtr> clientChannels;
 
     for (int i = 0; i < clientCount; ++i) {
         ChannelFuturePtr future = bootstrap.connect(host, port);
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Shut down thread pools to exit.
-    bootstrap.releaseExternalResources();
+    bootstrap.shutdown();
 
     return 0;
 }

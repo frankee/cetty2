@@ -126,7 +126,7 @@ void GearmanClientHandler::writeRequested(ChannelHandlerContext& ctx, const Mess
 
     if (msg) {
         msgs.push_back(msg);
-        Channels::write(ctx, e.getFuture(), ChannelMessage(msg));
+        ChannelPipelines::write(ctx, e.getFuture(), UserEvent(msg));
     }
     else {
         ctx.sendDownstream(e);

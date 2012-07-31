@@ -17,18 +17,28 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InT, typename OutT>
-class ChannelMessageHandlerContext : public ChannelHandlerContext {
+template<typename InboundInT, typename OutboundInT>
+class ChannelMessageHandlerContext
+    : public ChannelInboundMessageHandlerContext<InboundInT>,
+      public ChannelOutboundMessageHandlerContext<OutboundInT> {
 public:
-    ChannelMessageHandlerContext();
+    typedef std::deque<InboundInT> MessageQueue;
+
+public:
+    ChannelMessageHandlerContext() {}
     virtual ~ChannelMessageHandlerContext() {}
 
-
+protected:
+    virtual bool isInboundBufferHandler() const { return false; }
+    virtual bool isInboundMessageHandler() const { return true; }
+    virtual bool isOutboundBufferHandler() const { return false; }
+    virtual bool isOutboundMessageHandler() const { return true; }
 };
 
 }

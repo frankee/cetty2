@@ -28,9 +28,12 @@ public:
     virtual ~NullChannel() {}
 
     virtual int getId() const;
-    virtual int hashCode() const;
 
     virtual const ChannelPtr& getParent() const;
+
+    virtual ChannelSink& getSink();
+
+    virtual const EventLoopPtr& getEventLoop() const;
 
     virtual const ChannelFactoryPtr&  getFactory() const;
     virtual const ChannelPipelinePtr& getPipeline() const;
@@ -41,36 +44,38 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
-    virtual ChannelFuturePtr write(const ChannelMessage& message);
-    virtual void write(const ChannelMessage& message,
-                        ChannelFuturePtr* future);
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message,
-                                   const SocketAddress& remoteAddress);
-
-    virtual void write(const ChannelMessage& message,
-                        const SocketAddress& remoteAddress,
-                        ChannelFuturePtr* future);
-
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
+
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
+
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress);
+
     virtual ChannelFuturePtr disconnect();
-    virtual ChannelFuturePtr unbind();
     virtual ChannelFuturePtr close();
+    virtual ChannelFuturePtr flush();
 
-    virtual ChannelFuturePtr setInterestOps(int interestOps);
-    virtual ChannelFuturePtr setReadable(bool readable);
+    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+        const ChannelFuturePtr& future);
 
-    virtual ChannelFuturePtr& getCloseFuture();
-    virtual ChannelFuturePtr& getSucceededFuture();
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+        const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
     virtual bool isOpen() const;
-    virtual bool isBound() const;
-    virtual bool isConnected() const;
+    virtual bool isActive() const;
 
-    virtual int  getInterestOps() const;
-    virtual bool isReadable() const;
-    virtual bool isWritable() const;
+    virtual ChannelFuturePtr newFuture();
+    virtual ChannelFuturePtr newFailedFuture(const Exception& e);
+    virtual ChannelFuturePtr newSucceededFuture();
+    virtual const ChannelFuturePtr& getCloseFuture();
 
     virtual std::string toString() const;
 
@@ -84,6 +89,9 @@ private:
     static ChannelPtr nullChannel;
 
 private:
+    EventLoopPtr eventLoop;
+    ChannelSink* sink;
+
     ChannelPtr fatherChannel;
 };
 

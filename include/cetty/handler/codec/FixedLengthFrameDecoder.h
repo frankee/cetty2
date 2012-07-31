@@ -78,13 +78,13 @@ protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& in) {
         if (in->readableBytes() < frameLength) {
-            return ChannelMessage::EMPTY_MESSAGE;
+            return UserEvent::EMPTY_EVENT;
         }
         else {
             ChannelBufferPtr sub = buffer->slice(buffer->readerIndex(), frameLength);
             buffer->readerIndex(buffer->readerIndex() + frameLength);
 
-            return ChannelMessage(sub);
+            return UserEvent(sub);
         }
     }
 

@@ -17,17 +17,35 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-class ChannelBufferHandlerContext : public ChannelHandlerContext {
+class ChannelBufferHandlerContext
+    : public ChannelInboundBufferHandlerContext,
+      public ChannelOutboundBufferHandlerContext {
+
 public:
-    ChannelBufferHandlerContext();
+    ChannelBufferHandlerContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        const ChannelHandlerPtr& handler,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+
+    ChannelBufferHandlerContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        const ChannelHandlerPtr& handler,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+
     virtual ~ChannelBufferHandlerContext();
 
-
+protected:
+    virtual bool isInboundBufferHandler() const { return true; }
+    virtual bool isOutboundBufferHandler() const { return true; }
 };
 
 }

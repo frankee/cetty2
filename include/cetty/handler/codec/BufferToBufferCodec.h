@@ -1,75 +1,64 @@
+#if !defined(CETTY_HANDLER_CODEC_BUFFERTOBUFFERCODEC_H)
+#define CETTY_HANDLER_CODEC_BUFFERTOBUFFERCODEC_H
+
 /*
- * Copyright 2012 The Netty Project
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
- * The Netty Project licenses this file to you under the Apache License,
- * version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at:
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty.handler.codec;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundByteHandler;
-import io.netty.channel.ChannelOutboundByteHandler;
+#include <cetty/handler/codec/BufferToBufferDecoder.h>
+#include <cetty/handler/codec/BufferToBufferEncoder.h>
 
-public abstract class ByteToByteCodec
-        extends ChannelHandlerAdapter
-        implements ChannelInboundByteHandler, ChannelOutboundByteHandler {
+namespace cetty {
+namespace handler {
+namespace codec {
 
-    private final ByteToByteEncoder encoder = new ByteToByteEncoder() {
-        @Override
-        public void encode(
-                ChannelHandlerContext ctx,
-                ByteBuf in, ByteBuf out) throws Exception {
-            ByteToByteCodec.this.encode(ctx, in, out);
-        }
-    };
+class BufferToBufferCodec
+    : public BufferToBufferDecoder,
+      public BufferToBufferEncoder {
+public:
+    virtual~ BufferToBufferCodec() {}
 
-    private final ByteToByteDecoder decoder = new ByteToByteDecoder() {
-        @Override
-        public void decode(
-                ChannelHandlerContext ctx,
-                ByteBuf in, ByteBuf out) throws Exception {
-            ByteToByteCodec.this.decode(ctx, in, out);
-        }
-    };
+    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    virtual void afterAdd(ChannelHandlerContext& ctx);
+    virtual void beforeRemove(ChannelHandlerContext& ctx);
+    virtual void afterRemove(ChannelHandlerContext& ctx);
 
-    @Override
-    public ByteBuf newInboundBuffer(ChannelHandlerContext ctx) throws Exception {
-        return decoder.newInboundBuffer(ctx);
-    }
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause);
 
-    @Override
-    public void inboundBufferUpdated(ChannelHandlerContext ctx) throws Exception {
-        decoder.inboundBufferUpdated(ctx);
-    }
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+        const UserEvent& evt);
 
-    @Override
-    public ByteBuf newOutboundBuffer(ChannelHandlerContext ctx) throws Exception {
-        return encoder.newOutboundBuffer(ctx);
-    }
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
 
-    @Override
-    public void flush(
-            ChannelHandlerContext ctx, ChannelFuture future) throws Exception {
-        encoder.flush(ctx, future);
-    }
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+};
 
-    public abstract void encode(
-            ChannelHandlerContext ctx,
-            ByteBuf in, ByteBuf out) throws Exception;
-
-    public abstract void decode(
-            ChannelHandlerContext ctx,
-            ByteBuf in, ByteBuf out) throws Exception;
 }
+}
+}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_BUFFERTOBUFFERCODEC_H)
+
+// Local Variables:
+// mode: c++
+// End:

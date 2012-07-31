@@ -16,7 +16,6 @@
 
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/util/Integer.h>
@@ -40,11 +39,11 @@ ChannelHandlerPtr LengthFieldBasedFrameDecoder::clone() {
 }
 
 ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& in) {
+        const ChannelBufferPtr& in) {
     if (discardingTooLongFrame) {
         int bytesToDiscard = this->bytesToDiscard;
-        int localBytesToDiscard = std::min(bytesToDiscard, buffer->readableBytes());
-        buffer->skipBytes(localBytesToDiscard);
+        int localBytesToDiscard = std::min(bytesToDiscard, in->readableBytes());
+        in->skipBytes(localBytesToDiscard);
         bytesToDiscard -= localBytesToDiscard;
         this->bytesToDiscard = bytesToDiscard;
 
@@ -61,32 +60,32 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
             // Keep discarding.
         }
 
-        return ChannelMessage::EMPTY_MESSAGE;
+        return ChannelBufferPtr();
     }
 
-    if (buffer->readableBytes() < lengthFieldEndOffset) {
-        return ChannelMessage::EMPTY_MESSAGE;
+    if (in->readableBytes() < lengthFieldEndOffset) {
+        return ChannelBufferPtr();
     }
 
-    int actualLengthFieldOffset = buffer->readerIndex() + lengthFieldOffset;
+    int actualLengthFieldOffset = in->readerIndex() + lengthFieldOffset;
 
     int frameLength;
 
     switch (lengthFieldLength) {
     case 1:
-        frameLength = buffer->getUnsignedByte(actualLengthFieldOffset);
+        frameLength = in->getUnsignedByte(actualLengthFieldOffset);
         break;
 
     case 2:
-        frameLength = buffer->getUnsignedShort(actualLengthFieldOffset);
+        frameLength = in->getUnsignedShort(actualLengthFieldOffset);
         break;
 
     case 4:
-        frameLength = (int)buffer->getUnsignedInt(actualLengthFieldOffset);
+        frameLength = (int)in->getUnsignedInt(actualLengthFieldOffset);
         break;
 
     case 8:
-        frameLength = (int)buffer->getLong(actualLengthFieldOffset);
+        frameLength = (int)in->getLong(actualLengthFieldOffset);
         break;
 
     default:
@@ -94,41 +93,40 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     }
 
     if (frameLength < 0) {
-        buffer->skipBytes(lengthFieldEndOffset);
+        in->skipBytes(lengthFieldEndOffset);
         throw CorruptedFrameException(
-            std::string("negative pre-adjustment length field: ") +
-            Integer::toString(frameLength));
+            StringUtil::strprintf("negative pre-adjustment length field: %d", frameLength));
     }
 
     frameLength += lengthAdjustment + lengthFieldEndOffset;
 
     if (frameLength < lengthFieldEndOffset) {
-        buffer->skipBytes(lengthFieldEndOffset);
+        in->skipBytes(lengthFieldEndOffset);
         throw CorruptedFrameException(
-            std::string("Adjusted frame length (") +
-            Integer::toString(frameLength) +
-            std::string(") is less than lengthFieldEndOffset: ") +
-            Integer::toString(lengthFieldEndOffset));
+            StringUtil::strprintf(
+                "Adjusted frame length (%d)  is less than lengthFieldEndOffset: %d",
+                frameLength,
+                lengthFieldEndOffset));
     }
 
     if (frameLength > maxFrameLength) {
         // Enter the discard mode and discard everything received so far.
         discardingTooLongFrame = true;
         tooLongFrameLength = frameLength;
-        bytesToDiscard = frameLength - buffer->readableBytes();
-        buffer->skipBytes(buffer->readableBytes());
-        return ChannelMessage::EMPTY_MESSAGE;
+        bytesToDiscard = frameLength - in->readableBytes();
+        in->skipBytes(in->readableBytes());
+        return ChannelBufferPtr();
     }
 
     // never overflows because it's less than maxFrameLength
     int frameLengthInt = (int) frameLength;
 
-    if (buffer->readableBytes() < frameLengthInt) {
-        return ChannelMessage::EMPTY_MESSAGE;
+    if (in->readableBytes() < frameLengthInt) {
+        return ChannelBufferPtr();
     }
 
     if (initialBytesToStrip > frameLengthInt) {
-        buffer->skipBytes(frameLengthInt);
+        in->skipBytes(frameLengthInt);
         std::string msg;
         StringUtil::strprintf(&msg,
                               "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
@@ -136,14 +134,14 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
         throw CorruptedFrameException(msg);
     }
 
-    buffer->skipBytes(initialBytesToStrip);
+    in->skipBytes(initialBytesToStrip);
 
     // extract frame
-    int readerIndex = buffer->readerIndex();
+    int readerIndex = in->readerIndex();
     int actualFrameLength = frameLengthInt - initialBytesToStrip;
-    ChannelBufferPtr frame = extractFrame(buffer, readerIndex, actualFrameLength);
-    buffer->readerIndex(readerIndex + actualFrameLength);
-    return ChannelMessage(frame);
+    ChannelBufferPtr frame = extractFrame(in, readerIndex, actualFrameLength);
+    in->readerIndex(readerIndex + actualFrameLength);
+    return frame;
 }
 
 ChannelBufferPtr
@@ -160,11 +158,11 @@ void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx, int frameLen
         StringUtil::strprintf(&msg,
                               "Adjusted frame length exceeds %d: % - discarded.",
                               maxFrameLength, frameLength);
-        Channels::fireExceptionCaught(ctx.getChannel(), TooLongFrameException(msg));
+        ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
         StringUtil::strprintf("Adjusted frame length exceeds %d - discarded.", maxFrameLength);
-        Channels::fireExceptionCaught(ctx.getChannel(), TooLongFrameException(msg));
+        ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
 }
 

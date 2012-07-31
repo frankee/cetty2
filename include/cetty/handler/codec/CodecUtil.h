@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_CODEC_CODECUTIL_H)
 #define CETTY_HANDLER_CODEC_CODECUTIL_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -31,71 +32,126 @@
  * under the License.
  */
 
-namespace cetty { namespace handler { namespace codec { 
+#include <vector>
+#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
 
+namespace cetty {
+namespace handler {
+namespace codec {
+
+using namespace cetty::buffer;
+using namespace cetty::channel;
+
+template<typename T>
 class CodecUtil {
 public:
-    template<typename T>
-    static bool unfoldAndAdd(
-            ChannelHandlerContext& ctx, const T& msg, bool inbound) {
-        if (msg == null) {
+    typedef ChannelInboundMessageHandlerContext<T> InboundContext;
+    typedef ChannelOutboundMessageHandlerContext<T> OutboundContext;
+
+public:
+    static bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg, bool inbound) {
+        if (!msg) {
             return false;
         }
 
-        // Note we only recognize Object[] because Iterable is often implemented by user messages.
-        if (msg instanceof Object[]) {
-            Object[] array = (Object[]) msg;
-            if (array.length == 0) {
-                return false;
-            }
-
-            boolean added = false;
-            for (Object m: array) {
-                if (m == null) {
-                    break;
-                }
-                if (unfoldAndAdd(ctx, m, inbound)) {
-                    added = true;
-                }
-            }
-            return added;
-        }
-
         if (inbound) {
-            if (ctx.hasNextInboundMessageBuffer()) {
-                ctx.nextInboundMessageBuffer().add(msg);
-                return true;
+            InboundContext* nextCtx =
+                ctx.nextInboundMessageHandlerContext<InboundContext>();
+
+            if (nextCtx) {
+                nextCtx->addInboundMessage(msg);
             }
 
-            if (msg instanceof ByteBuf && ctx.hasNextInboundByteBuffer()) {
-                ByteBuf altDst = ctx.nextInboundByteBuffer();
-                ByteBuf src = (ByteBuf) msg;
-                altDst.writeBytes(src, src.readerIndex(), src.readableBytes());
-                return true;
-            }
+            return true;
         }
         else {
-            if (ctx.hasNextOutboundMessageBuffer()) {
-                ctx.nextOutboundMessageBuffer().add(msg);
-                return true;
+            Traits::OutboundContext* nextCtx =
+                ctx.nextInboundMessageHandlerContext<OutboundContext>();
+
+            if (nextCtx) {
+                nextCtx->addOutboundMessage(msg);
             }
 
-            if (msg instanceof ByteBuf && ctx.hasNextOutboundByteBuffer()) {
-                ByteBuf altDst = ctx.nextOutboundByteBuffer();
-                ByteBuf src = (ByteBuf) msg;
-                altDst.writeBytes(src, src.readerIndex(), src.readableBytes());
-                return true;
-            }
+            return true;
         }
 
-        throw new NoSuchBufferException();
+        return false;
     }
 
 private:
     CodecUtil() {}
 };
 
-}}}
+template<typename T>
+class CodecUtil<std::vector<T> > {
+public:
+    static bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg, bool inbound) {
+        if (msg.empty()) {
+            return false;
+        }
+
+        bool added = false;
+
+        std::size_t j = msg.size();
+
+        for (std::size_t i = 0; i < j; ++i) {
+            if (CodecUtil<T>::unfoldAndAdd(ctx, msg[i], inbound)) {
+                added = true;
+            }
+        }
+
+        return added;
+    }
+
+private:
+    CodecUtil() {}
+};
+
+template<>
+class CodecUtil<ChannelBufferPtr> {
+public:
+    typedef ChannelInboundBufferHandlerContext InboundContext;
+    typedef ChannelOutboundBufferHandlerContext OutboundContext;
+
+public:
+    static bool unfoldAndAdd(ChannelHandlerContext& ctx, const ChannelBufferPtr& msg, bool inbound) {
+        if (!msg) {
+            return false;
+        }
+
+        if (inbound) {
+            InboundContext* nextCtx = ctx.nextInboundBufferHandlerContext();
+
+            if (nextCtx) {
+                nextCtx->setInboundChannelBuffer(msg);
+            }
+
+            return true;
+        }
+        else {
+            OutboundContext* nextCtx = ctx.nextOutboundBufferHandlerContext();
+
+            if (nextCtx) {
+                nextCtx->setOutboundChannelBuffer(msg);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+private:
+    CodecUtil() {}
+};
+
+}
+}
+}
 
 #endif //#if !defined(CETTY_HANDLER_CODEC_CODECUTIL_H)
 

@@ -19,46 +19,14 @@
 namespace cetty {
 namespace channel {
 
-
-AbstractServerChannel::AbstractServerChannel(const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink) : AbstractChannel(ChannelPtr(), factory, pipeline, sink) {
-
+AbstractServerChannel::AbstractServerChannel(const EventLoopPtr& eventLoop,
+    const ChannelFactoryPtr& factory,
+    const ChannelPipelinePtr& pipeline)
+    : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {
 }
 
 AbstractServerChannel::~AbstractServerChannel() {
 
 }
-
-cetty::channel::ChannelFuturePtr AbstractServerChannel::connect(const SocketAddress& remoteAddress) {
-    return AbstractChannel::getUnsupportedOperationFuture();
-}
-
-cetty::channel::ChannelFuturePtr AbstractServerChannel::disconnect() {
-    return AbstractChannel::getUnsupportedOperationFuture();
-}
-
-int AbstractServerChannel::getInterestOps() {
-    return OP_NONE;
-}
-
-cetty::channel::ChannelFuturePtr AbstractServerChannel::setInterestOps(int interestOps) {
-    return AbstractChannel::getUnsupportedOperationFuture();
-}
-
-cetty::channel::ChannelFuturePtr AbstractServerChannel::write(const ChannelMessage& message) {
-    return AbstractChannel::getUnsupportedOperationFuture();
-}
-
-cetty::channel::ChannelFuturePtr AbstractServerChannel::write(const ChannelMessage& message, const SocketAddress& remoteAddress) {
-    return AbstractChannel::getUnsupportedOperationFuture();
-}
-
-bool AbstractServerChannel::isConnected() const {
-    return false;
-}
-
-void AbstractServerChannel::setInterestOpsNow(int interestOps) {
-    // Ignore.
-}
-
 }
 }

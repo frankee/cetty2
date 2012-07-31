@@ -19,9 +19,45 @@
 
 #include <cetty/channel/ChannelInboundHandler.h>
 
-namespace cetty { namespace channel { 
+namespace cetty { namespace channel {
+
+    class ChannelInboundBufferHandlerContext;
 
 class ChannelInboundBufferHandler : public ChannelInboundHandler {
+public:
+    ChannelInboundBufferHandler();
+    virtual ~ChannelInboundBufferHandler();
+
+    virtual void channelCreated(ChannelHandlerContext& ctx);
+    virtual void channelActive(ChannelHandlerContext& ctx);
+    virtual void channelInactive(ChannelHandlerContext& ctx);
+    virtual void messageUpdated(ChannelHandlerContext& ctx);
+    virtual void writeCompleted(ChannelHandlerContext& ctx);
+
+    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    virtual void afterAdd(ChannelHandlerContext& ctx);
+    virtual void beforeRemove(ChannelHandlerContext& ctx);
+    virtual void afterRemove(ChannelHandlerContext& ctx);
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause);
+
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+        const UserEvent& evt);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next);
+
+protected:
+    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
 };
 
 }}

@@ -57,10 +57,10 @@ namespace codec {
  * initialBytesToStrip = 0 (= do not strip header)
  *
  * BEFORE DECODE (14 bytes)         AFTER DECODE (14 bytes)
- * +--------+----------------+----------+      +--------+----------------+
- * | Length | Actual Content | CheckSum  ----->| Length | Actual Content |
- * | 0x000C | "HELLO, WORLD" |                 | 0x000C | "HELLO, WORLD" |
- * +--------+----------------+----------+      +--------+----------------+
+ * +--------+----------------+----------+       +--------+----------------+
+ * | Length | Actual Content | CheckSum | ----->| Length | Actual Content |
+ * | 0x000C | "HELLO, WORLD" |          |       | 0x000C | "HELLO, WORLD" |
+ * +--------+----------------+----------+       +--------+----------------+
  * </pre>
  *
  * <h3>2 bytes length field at offset 0, strip header</h3>

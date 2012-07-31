@@ -23,18 +23,32 @@ namespace cetty {
 namespace channel {
 
 template<typename OutT>
-class ChannelOutboundMessageHandlerContext : public ChannelHandlerContext {
+class ChannelOutboundMessageHandlerContext : public virtual ChannelHandlerContext {
 public:
     typedef std::deque<OutT> MessageQueue;
 
 public:
-    ChannelOutboundMessageHandlerContext();
+    ChannelOutboundMessageHandlerContext(const std::string& name,
+                                         ChannelPipeline& pipeline,
+                                         const ChannelHandlerPtr& handler,
+                                         ChannelHandlerContext* prev,
+                                         ChannelHandlerContext* next)
+        : ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+
+    ChannelOutboundMessageHandlerContext(const std::string& name,
+                                         const EventLoopPtr& eventLoop,
+                                         ChannelPipeline& pipeline,
+                                         const ChannelHandlerPtr& handler,
+                                         ChannelHandlerContext* prev,
+                                         ChannelHandlerContext* next)
+        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+
     virtual ~ChannelOutboundMessageHandlerContext() {}
 
-    virtual bool hasMessageQueue() const { return true; }
+    MessageQueue& getOutboundMessageQueue() { return queue; }
+    void addOutboundMessage(const OutT& message) { queue.push_back(message); }
 
-    MessageQueue& getMessageQueue() { return queue; }
-    void addMessage(const OutT& message) { queue.push_back(message); }
+protected:
 
 private:
     MessageQueue queue;

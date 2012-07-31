@@ -43,7 +43,7 @@ public:
     AsioClientServiceSink() {}
     virtual ~AsioClientServiceSink() {}
 
-    virtual void eventSunk(const ChannelPipeline& pipeline, const ChannelEvent& e) {}
+    virtual void eventSunk(const ChannelPipeline& pipeline, const UserEvent& e) {}
     virtual void writeRequested(const ChannelPipeline& pipeline, const MessageEvent& e) {}
     virtual void stateChangeRequested(const ChannelPipeline& pipeline, const ChannelStateEvent& e) {
         const ChannelFuturePtr& future = e.getFuture();
@@ -105,7 +105,7 @@ public:
 #endif
     }
 
-    virtual void exceptionCaught(const ChannelPipeline& pipeline, const ChannelEvent& e, const ChannelPipelineException& cause) {}
+    virtual void exceptionCaught(const ChannelPipeline& pipeline, const UserEvent& e, const ChannelPipelineException& cause) {}
 };
 
 AsioClientServiceFactory::AsioClientServiceFactory(const AsioServicePtr& ioService,

@@ -22,13 +22,19 @@
  */
 
 #include <map>
+#include <vector>
 #include <string>
+#include <boost/any.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelSink.h>
+#include <cetty/channel/ChannelHandlerFwd.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
@@ -46,13 +52,15 @@ class InternalLogger;
 namespace cetty {
 namespace channel {
 
+using namespace cetty::buffer;
 using namespace cetty::util;
 using namespace cetty::logging;
 
 class Channel;
-class ChannelEvent;
+class UserEvent;
 class ChannelHandlerContext;
 class ChannelPipelineException;
+class AdaptiveReceiveBuffer;
 
 /**
  * A list of {@link ChannelHandler}s which handles or intercepts
@@ -239,7 +247,7 @@ class ChannelPipelineException;
  */
 class ChannelPipeline
     : public ChannelInboundInvoker,
-      public ChannelOutboundInvoker,
+  public ChannelOutboundInvoker,
       public cetty::util::ReferenceCounter<ChannelPipeline> {
 
 public:
@@ -253,12 +261,16 @@ public:
 
     virtual ~ChannelPipeline() {}
 
-    virtual const ChannelPtr& getChannel() const;
+    const ChannelPtr& getChannel() const;
 
-    virtual void attach(const ChannelPtr& channel);
-    virtual void detach();
+    const EventLoopPtr& getEventLoop() const {
+        return this->eventLoop;
+    }
 
-    virtual bool isAttached() const;
+    void attach(const ChannelPtr& channel);
+    void detach();
+
+    bool isAttached() const;
 
     /**
      * Inserts a {@link ChannelHandler} at the first position of this pipeline.
@@ -271,7 +283,7 @@ public:
      * @throws NullPointerException
      *         if the specified name or handler is <tt>NULL</tt>
      */
-    virtual void addFirst(const std::string& name, const ChannelHandlerPtr& handler);
+    void addFirst(const std::string& name, const ChannelHandlerPtr& handler);
 
     /**
      * Appends a {@link ChannelHandler} at the last position of this pipeline.
@@ -284,7 +296,7 @@ public:
      * @throws NullPointerException
      *         if the specified name or handler is <tt>NULL</tt>
      */
-    virtual void addLast(const std::string& name, const ChannelHandlerPtr& handler);
+    void addLast(const std::string& name, const ChannelHandlerPtr& handler);
 
     /**
      * Inserts a {@link ChannelHandler} before an existing handler of this
@@ -301,7 +313,9 @@ public:
      * @throws NullPointerException
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
-    virtual void addBefore(const std::string& baseName, const std::string& name, const ChannelHandlerPtr& handler);
+    void addBefore(const std::string& baseName,
+                           const std::string& name,
+                           const ChannelHandlerPtr& handler);
 
     /**
      * Inserts a {@link ChannelHandler} after an existing handler of this
@@ -318,9 +332,9 @@ public:
      * @throws NullPointerException
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
-    virtual void addAfter(const std::string& baseName,
-        const std::string& name,
-        const ChannelHandlerPtr& handler);
+    void addAfter(const std::string& baseName,
+                          const std::string& name,
+                          const ChannelHandlerPtr& handler);
 
     /**
      * Removes the specified {@link ChannelHandler} from this pipeline.
@@ -330,7 +344,7 @@ public:
      * @throws NullPointerException
      *         if the specified handler is <tt>NULL</tt>
      */
-    virtual void remove(const ChannelHandlerPtr& handler);
+    void remove(const ChannelHandlerPtr& handler);
 
     /**
      * Removes the {@link ChannelHandler} with the specified name from this
@@ -343,7 +357,7 @@ public:
      * @throws NullPointerException
      *         if the specified name is <tt>NULL</tt>
      */
-    virtual ChannelHandlerPtr remove(const std::string& name);
+    ChannelHandlerPtr remove(const std::string& name);
 
     /**
      * Removes the first {@link ChannelHandler} in this pipeline.
@@ -353,7 +367,7 @@ public:
      * @throws NoSuchElementException
      *         if this pipeline is empty
      */
-    virtual ChannelHandlerPtr removeFirst();
+    ChannelHandlerPtr removeFirst();
 
     /**
      * Removes the last {@link ChannelHandler} in this pipeline.
@@ -363,7 +377,7 @@ public:
      * @throws NoSuchElementException
      *         if this pipeline is empty
      */
-    virtual ChannelHandlerPtr removeLast();
+    ChannelHandlerPtr removeLast();
 
     /**
      * Replaces the specified {@link ChannelHandler} with a new handler in
@@ -378,9 +392,9 @@ public:
      *         if the specified old handler, new name, or new handler is
      *         <tt>NULL</tt>
      */
-    virtual void replace(const ChannelHandlerPtr& oldHandler,
-        const std::string& newName,
-        const ChannelHandlerPtr& newHandler);
+    void replace(const ChannelHandlerPtr& oldHandler,
+                         const std::string& newName,
+                         const ChannelHandlerPtr& newHandler);
 
     /**
      * Replaces the {@link ChannelHandler} of the specified name with a new
@@ -397,23 +411,23 @@ public:
      *         if the specified old handler, new name, or new handler is
      *         <tt>NULL</tt>
      */
-    virtual ChannelHandlerPtr replace(const std::string& oldName,
-        const std::string& newName,
-        const ChannelHandlerPtr& newHandler);
+    ChannelHandlerPtr replace(const std::string& oldName,
+                                      const std::string& newName,
+                                      const ChannelHandlerPtr& newHandler);
 
     /**
      * Returns the first {@link ChannelHandler} in this pipeline.
      *
      * @return the first handler.  <tt>NULL</tt> if this pipeline is empty.
      */
-    virtual ChannelHandlerPtr getFirst() const;
+    ChannelHandlerPtr getFirst() const;
 
     /**
      * Returns the last {@link ChannelHandler} in this pipeline.
      *
      * @return the last handler.  <tt>NULL</tt> if this pipeline is empty.
      */
-    virtual ChannelHandlerPtr getLast() const;
+    ChannelHandlerPtr getLast() const;
 
     /**
      * Returns the {@link ChannelHandler} with the specified name in this
@@ -422,7 +436,7 @@ public:
      * @return the handler with the specified name.
      *         <tt>NULL</tt> if there's no such handler in this pipeline.
      */
-    virtual ChannelHandlerPtr get(const std::string& name) const;
+    ChannelHandlerPtr get(const std::string& name) const;
 
     /**
      * Returns the context object of the specified {@link ChannelHandler} in
@@ -431,7 +445,7 @@ public:
      * @return the context object of the specified handler.
      *         <tt>NULL</tt> if there's no such handler in this pipeline.
      */
-    virtual ChannelHandlerContext* getContext(const ChannelHandlerPtr& handler) const;
+    ChannelHandlerContext* getContext(const ChannelHandlerPtr& handler) const;
 
     /**
      * Returns the context object of the {@link ChannelHandler} with the
@@ -440,234 +454,83 @@ public:
      * @return the context object of the handler with the specified name.
      *         <tt>NULL</tt> if there's no such handler in this pipeline.
      */
-    virtual ChannelHandlerContext* getContext(const std::string& name) const;
+    ChannelHandlerContext* getContext(const std::string& name) const;
 
     /**
      * Converts this pipeline into an ordered {@link Map} whose keys are
      * handler names and whose values are handlers.
      */
-    virtual ChannelHandlers getChannelHandles() const;
+    ChannelHandlers getChannelHandles() const;
 
     /**
      * Returns the {@link std::string} representation of this pipeline.
      */
     std::string toString() const;
 
+    AdaptiveReceiveBuffer& getReceiveBuffer() {
+        return *receiveBuffer;
+    }
+
+    void updateReceiveBuffer();
+
+    template<typename T>
+    void addInboundMessage(const T& message) {
+        if (inboundHead) {
+            inboundHead->inboundMessageHandlerContext<ChannelInboundMessageHandlerContext<T> >()->addInboundMessage(message);
+        }
+    }
+
+    template<typename T>
+    void addOutboundMessage(const T& message) {
+        //outboundHead->
+    }
+
+    void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
+    
     virtual void fireChannelCreated();
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
     virtual void fireExceptionCaught(const ChannelException& cause);
-    virtual void fireEventTriggered(const ChannelEvent& event);
+    virtual void fireUserEventTriggered(const UserEvent& event);
     virtual void fireMessageUpdated();
+    virtual void fireWriteCompleted();
 
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress);
+                                     const SocketAddress& localAddress);
     virtual ChannelFuturePtr disconnect();
     virtual ChannelFuturePtr close();
     virtual ChannelFuturePtr flush();
-    virtual ChannelFuturePtr write(const ChannelMessage& message);
 
-    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress, const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+                                         const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const SocketAddress& localAddress,
+                                            const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& bind(
-        final ChannelHandlerContext ctx, final SocketAddress localAddress, final const ChannelFuturePtr& future) {
-            if (localAddress == null) {
-                throw new NullPointerException("localAddress");
-            }
-            validateFuture(future);
-
-            EventExecutor executor = ctx.executor();
-            if (executor.inEventLoop()) {
-                try {
-                    ((ChannelOperationHandler) ctx.handler()).bind(ctx, localAddress, future);
-                } catch (Throwable t) {
-                    notifyHandlerException(t);
-                }
-            } else {
-                executor.execute(new Runnable() {
-                    @Override
-                        public void run() {
-                            bind(ctx, localAddress, future);
-                    }
-                });
-            }
-            return future;
+    template<typename T>
+    ChannelFuturePtr write(const T& message) {
+        return write(message, channel->newFuture());
     }
 
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress, const ChannelFuturePtr& future);
-
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future);
-
-    const ChannelFuturePtr& connect(
-        final ChannelHandlerContext ctx, final SocketAddress remoteAddress,
-        final SocketAddress localAddress, final const ChannelFuturePtr& future) {
-            if (remoteAddress == null) {
-                throw new NullPointerException("remoteAddress");
-            }
-            validateFuture(future);
-
-            EventExecutor executor = ctx.executor();
-            if (executor.inEventLoop()) {
-                try {
-                    ((ChannelOperationHandler) ctx.handler()).connect(ctx, remoteAddress, localAddress, future);
-                } catch (Throwable t) {
-                    notifyHandlerException(t);
-                }
-            }
-            else {
-                executor.execute(new Runnable() {
-                    @Override
-                        public void run() {
-                            connect(ctx, remoteAddress, localAddress, future);
-                    }
-                });
-            }
-
-            return future;
-    }
-
-    const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
-
-    const ChannelFuturePtr& disconnect(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
-        // Translate disconnect to close if the channel has no notion of disconnect-reconnect.
-        // So far, UDP/IP is the only transport that has such behavior.
-        if (!ctx.channel().metadata().hasDisconnect()) {
-            return close(ctx, future);
-        }
-
-        validateFuture(future);
-        EventExecutor executor = ctx.executor();
-        if (executor.inEventLoop()) {
-            try {
-                ((ChannelOperationHandler) ctx.handler()).disconnect(ctx, future);
-            } catch (Throwable t) {
-                notifyHandlerException(t);
-            }
-        } else {
-            executor.execute(new Runnable() {
-                @Override
-                    public void run() {
-                        disconnect(ctx, future);
-                }
-            });
-        }
-
-        return future;
-    }
-
-    const ChannelFuturePtr& close(const ChannelFuturePtr& future);
-
-    const ChannelFuturePtr& close(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
-        validateFuture(future);
-        EventExecutor executor = ctx.executor();
-        if (executor.inEventLoop()) {
-            try {
-                ((ChannelOperationHandler) ctx.handler()).close(ctx, future);
-            } catch (Throwable t) {
-                notifyHandlerException(t);
-            }
-        } else {
-            executor.execute(new Runnable() {
-                @Override
-                    public void run() {
-                        close(ctx, future);
-                }
-            });
-        }
-
-        return future;
-    }
-    
-    const ChannelFuturePtr& flush(const const ChannelFuturePtr&& future);
-
-    const ChannelFuturePtr& flush(final ChannelHandlerContext ctx, final const ChannelFuturePtr& future) {
-        validateFuture(future);
-        EventExecutor executor = ctx.executor();
-        if (executor.inEventLoop()) {
-            flush0(ctx, future);
-        } else {
-            executor.execute(new Runnable() {
-                @Override
-                    public void run() {
-                        flush(ctx, future);
-                }
-            });
-        }
-
-        return future;
-    }
-
-    private void flush0(final ChannelHandlerContext ctx, const ChannelFuturePtr& future) {
-        try {
-            ctx.flushBridge();
-            ((ChannelOperationHandler) ctx.handler()).flush(ctx, future);
-        } catch (Throwable t) {
-            notifyHandlerException(t);
-        } finally {
-            if (ctx.outByteBuf != null) {
-                ByteBuf buf = ctx.outByteBuf;
-                if (!buf.readable()) {
-                    buf.discardReadBytes();
-                }
-            }
-        }
-    }
-
-    const ChannelFuturePtr& write(Object message, const ChannelFuturePtr& future);
-
-    const ChannelFuturePtr& write(ChannelHandlerContext ctx, final Object message, final const ChannelFuturePtr& future) {
-        if (message == null) {
-            throw new NullPointerException("message");
-        }
-        validateFuture(future);
-
-        EventExecutor executor;
-        boolean msgBuf = false;
-        for (;;) {
-            if (ctx == null) {
-                throw new NoSuchBufferException();
-            }
-
-            if (ctx.hasOutboundMessageBuffer()) {
-                msgBuf = true;
-                executor = ctx.executor();
-                break;
-            }
-
-            if (message instanceof ByteBuf && ctx.hasOutboundByteBuffer()) {
-                executor = ctx.executor();
-                break;
-            }
-
-            ctx = ctx.prev;
-        }
-
-        if (executor.inEventLoop()) {
-            if (msgBuf) {
-                ctx.outMsgBuf.add(message);
-            } else {
-                ByteBuf buf = (ByteBuf) message;
-                ctx.outByteBuf.writeBytes(buf, buf.readerIndex(), buf.readableBytes());
-            }
-            flush0(ctx, future);
-            return future;
-        } else {
-            final ChannelHandlerContext ctx0 = ctx;
-            executor.execute(new Runnable() {
-                @Override
-                    public void run() {
-                        write(ctx0, message, future);
-                }
-            });
+    template<typename T>
+    const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
+        // TODO: find proper handler (BufferHandler or MessageHandler)
+        if (outboundHead) {
+            return outboundHead->write(*outboundHead, message, future);
         }
 
         return future;
     }
 
     /**
-     * Retrieves a boost::any which is 
+     * Retrieves a boost::any which is
      * {@link #setAttachment(const std::string&, const boost::any&) attached} to
      * this context.
      *
@@ -686,7 +549,7 @@ public:
      */
     virtual void setAttachment(const std::string& name, const boost::any& attachment);
 
-    virtual void notifyHandlerException(const ChannelEvent& evt, const Exception& e);
+    virtual void notifyHandlerException(const Exception& e);
 
 public:
     static InternalLogger* getLogger() { return logger; }
@@ -709,24 +572,29 @@ private:
     ChannelHandlerContext* getContextOrDie(const ChannelHandlerPtr& handler);
 
     ChannelHandlerPtr remove(ChannelHandlerContext* ctx);
-    ChannelHandlerPtr replace(ChannelHandlerContext* ctx, const std::string& newName, const ChannelHandlerPtr& newHandler);
+    ChannelHandlerPtr replace(ChannelHandlerContext* ctx,
+                              const std::string& newName,
+                              const ChannelHandlerPtr& newHandler);
 
     // upstream & downstream list operators.
-    void updateUpstreamList();
-    void updateDownstreamList();
+    void updateInboundHandlerContextList();
+    void updateOutboundHandlerContextList();
 
 private:
     static InternalLogger* logger;
-    static ChannelSinkPtr discardingSink;
 
 private:
     typedef std::map<std::string, ChannelHandlerContext*> ContextMap;
     typedef std::map<std::string, boost::any> AttachmentMap;
 
+private:
+    bool firedChannelActive;
+    bool fireInboundBufferUpdatedOnActivation;
+
     ContextMap name2ctx;
 
     ChannelPtr channel;
-    ChannelSinkPtr sink;
+    EventLoopPtr eventLoop;
 
     mutable boost::recursive_mutex mutex;
 
@@ -735,7 +603,9 @@ private:
 
     ChannelHandlerContext* inboundHead; //< upstream single list.
     ChannelHandlerContext* outboundHead; //< downstream single list.
-    
+
+    AdaptiveReceiveBuffer* receiveBuffer;
+
     AttachmentMap attachments;
 };
 

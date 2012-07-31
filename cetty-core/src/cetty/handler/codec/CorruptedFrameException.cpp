@@ -22,7 +22,7 @@ namespace codec {
 
 using namespace cetty::util;
 
-CETTY_IMPLEMENT_EXCEPTION(CorruptedFrameException, RuntimeException, "Frame data undecodedable")
+CETTY_IMPLEMENT_EXCEPTION(CorruptedFrameException, CodecException, "Frame data undecodedable")
 
 }
 }

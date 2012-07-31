@@ -19,15 +19,19 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace cetty { namespace channel { 
-    class ChannelHandler;
-    class ChannelUpstreamHandler;
-    class ChannelDownstreamHandler;
+namespace cetty {
+namespace channel {
 
-    typedef boost::intrusive_ptr<ChannelHandler> ChannelHandlerPtr;
-    typedef boost::intrusive_ptr<ChannelUpstreamHandler> ChannelInboundHandlerPtr;
-    typedef boost::intrusive_ptr<ChannelDownstreamHandler> ChannelOutboundHandlerPtr;
-}}
+class ChannelHandler;
+class ChannelInboundHandler;
+class ChannelOutboundHandler;
+
+typedef boost::intrusive_ptr<ChannelHandler> ChannelHandlerPtr;
+typedef boost::intrusive_ptr<ChannelInboundHandler> ChannelInboundHandlerPtr;
+typedef boost::intrusive_ptr<ChannelOutboundHandler> ChannelOutboundHandlerPtr;
+
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_CHANNELHANDLERFWD_H)
 

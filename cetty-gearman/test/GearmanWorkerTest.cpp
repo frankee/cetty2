@@ -23,7 +23,7 @@ void testForCando(ChannelPtr&  c)
 	const std::string functionName = "hello";
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createCandoMessage(functionName);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void testForCandoTimeout(ChannelPtr&  c)
@@ -32,7 +32,7 @@ void testForCandoTimeout(ChannelPtr&  c)
 	int timeout;
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createCandoTimeoutMessage(functionName,timeout);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void testForCantdo(ChannelPtr&  c)
@@ -40,7 +40,7 @@ void testForCantdo(ChannelPtr&  c)
 	const std::string functionName = "hello";
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createCantdoMessage(functionName);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -48,7 +48,7 @@ void testForResetAbilities(ChannelPtr&  c)
 {
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createResetAbilitiesMessage();
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -56,7 +56,7 @@ void testForPreSleep(ChannelPtr&  c)
 {
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createPreSleepMessage();
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -64,7 +64,7 @@ void testForGrabJob(ChannelPtr&  c)
 {
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createGrabJobMessage();
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -72,7 +72,7 @@ void testForGrabJobUniq(ChannelPtr&  c)
 {
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createGrabJobUniqMessage();
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -84,7 +84,7 @@ void testForWorkStauts(ChannelPtr&  c)
 	int denominator = 100;
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkStautsMessage(jobHandle,numerator,denominator);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 void testForWorkComplete(ChannelPtr&  c)
@@ -95,7 +95,7 @@ void testForWorkComplete(ChannelPtr&  c)
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkCompleteMessage(jobHandle,payload);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -104,7 +104,7 @@ void testForWorkFail(ChannelPtr&  c)
 	const std::string jobHandle = "hd:112";
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkFailMessage(jobHandle);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -116,7 +116,7 @@ void testForWorkWarning(ChannelPtr&  c)
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkWarningMessage(jobHandle,payload);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -128,7 +128,7 @@ void testForWorkException(ChannelPtr&  c)
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkExceptionMessage(jobHandle,payload);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -140,7 +140,7 @@ void testForWorkData(ChannelPtr&  c)
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createWorkDataMessage(jobHandle,payload);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 
@@ -150,7 +150,7 @@ void testForSetClientId(ChannelPtr&  c)
 
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createSetClientIdMessage(clientId);
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 //not implement yet
@@ -158,7 +158,7 @@ void testForAllYoursMessage(ChannelPtr&  c)
 {
 	GearmanTaskPtr task(new GearmanTask);
 	task->request = GearmanMessage::createAllYoursMessage();
-	c->write(ChannelMessage(task));
+	c->write(UserEvent(task));
 }
 
 int main()
@@ -194,7 +194,7 @@ int main()
 	c->getCloseFuture()->awaitUninterruptibly();
 
 	// Shut down thread pools to exit.
-	bootstrap.releaseExternalResources();
+	bootstrap.shutdown();
 
 	return 0;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/util/Exception.h>
+#include <cetty/handler/codec/CodecException.h>
 
 namespace cetty {
 namespace handler {
@@ -35,7 +35,7 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-CETTY_DECLARE_EXCEPTION(DecoderException, DecoderException)
+CETTY_DECLARE_EXCEPTION(DecoderException, CodecException)
 
 }
 }

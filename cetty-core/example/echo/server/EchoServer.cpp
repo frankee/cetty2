@@ -8,7 +8,7 @@
 
 #include "cetty/bootstrap/ServerBootstrap.h"
 
-#include "cetty/channel/Channels.h"
+#include "cetty/channel/ChannelPipelines.h"
 #include "cetty/channel/IpAddress.h"
 #include "cetty/channel/SocketAddress.h"
 #include <cetty/channel/ChannelPipeline.h>
@@ -31,36 +31,32 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(
-        new AsioServicePool(threadCount));
-    ServerBootstrap bootstrap(factory);
-    bootstrap.setPipeline(Channels::pipeline(ChannelHandlerPtr(new EchoServerHandler)));
+    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
 
-    bootstrap.setOption("child.tcpNoDelay", boost::any(true));
-    bootstrap.setOption("reuseAddress", boost::any(true));
-    bootstrap.setOption("backlog", boost::any(4096));
+    ServerBootstrap bootstrap(factory);
+
+    bootstrap.setPipeline(ChannelPipelines::pipeline(new EchoServerHandler))
+    .setOption(ChannelOption::CO_TCP_NODELAY, true)
+    .setOption(ChannelOption::CO_SO_REUSEADDR, true)
+    .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
 
     // Bind and start to accept incoming connections.
-    ChannelPtr c = bootstrap.bind(1980);
+    ChannelFuturePtr f = bootstrap.bind(1980)->await();
 
-    if (c && c->isBound()) {
-        printf("Server is running...\n");
-        printf("To quit server, press 'q'.\n");
+    printf("Server is running...\n");
+    printf("To quit server, press 'q'.\n");
 
-        char input;
+    char input;
 
-        do {
-            input = getchar();
+    do {
+        input = getchar();
 
-            if (input == 'q') {
-                c->close()->awaitUninterruptibly();
-                bootstrap.releaseExternalResources();
-                return 0;
-            }
+        if (input == 'q') {
+            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            return 0;
         }
-        while (true);
     }
+    while (true);
 
-    bootstrap.releaseExternalResources();
     return -1;
 }

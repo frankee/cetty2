@@ -17,12 +17,12 @@
 #include <cetty/handler/codec/LengthFieldPrepender.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace handler {
@@ -30,68 +30,32 @@ namespace codec {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
+using namespace cetty::util;
 
-void LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& msg,
-    ChannelBufferPtr& out) {
-    ChannelBufferPtr body = msg.smartPointer<ChannelBuffer>();
+enum {
+    HEADER_FIELD_NONE  = 0,
+    HEADER_FIELD_FIRST = 1,
+    HEADER_FIELD_LAST  = 2
+};
 
-    if (!body) {
-        return msg;
-    }
+ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg,
+        const ChannelBufferPtr& out) {
 
-    int preHeaderFieldLength = (int)header1.size();
-    int headerLength = lengthFieldLength + preHeaderFieldLength;
+    BOOST_ASSERT(msg);
 
-    ChannelBufferPtr header = channel->getConfig().getBufferFactory()->getBuffer(body->order(), headerLength);
+    bool hasOutBuffer = !!out;
+    int headerFieldLength = (int)header.size();
+    int headerLength = lengthFieldLength + headerFieldLength;
 
-    int length = body->readableBytes() + checksumFieldLength;
+    int msgLength = headerLength + msg->readableBytes() + checksumFieldLength;
+    int contentLength = msgLength - (lengthFieldOffset + lengthFieldLength - lengthAdjustment);
 
-    //if (lengthIncludesLengthFieldLength) {
-    //    length += headerLength - lengthFieldOffset;
-    //}
-
-    if (preHeaderFieldLength > 0) {
-        header->writeBytes(header1);
-    }
-
-    switch (lengthFieldLength) {
-    case 1:
-        if (length >= 256) {
-            throw InvalidArgumentException(
-                std::string("length does not fit into a byte: ") + Integer::toString(length));
-        }
-
-        header->writeByte(length);
-        break;
-
-    case 2:
-        if (length >= 65536) {
-            throw InvalidArgumentException(
-                std::string("length does not fit into a short integer: ") + Integer::toString(length));
-        }
-
-        header->writeShort(length);
-        break;
-
-    case 4:
-        header->writeInt(length);
-        break;
-
-    case 8:
-        header->writeLong(length);
-        break;
-
-    default:
-        throw RuntimeException("should not reach here");
-    }
-
-    ChannelBufferPtr checksum;
+    boost::uint32_t cs = 0;
 
     if (checksumFieldLength > 0) {
-        boost::uint32_t cs = 0;
         Array arry;
-        body->readableBytes(&arry);
+        msg->readableBytes(&arry);
         BOOST_ASSERT(!arry.empty());
 
         if (checksumCalcOffset == headerLength) {
@@ -100,34 +64,34 @@ void LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
         else {
             //TODO
         }
-
-        if (body->writableBytes() >= checksumFieldLength) {
-            if (2 == checksumFieldLength) {
-                body->writeShort(cs);
-            }
-            else if (4 == checksumFieldLength) {
-                body->writeInt(cs);
-            }
-            else {
-                throw RuntimeException("should not reach here");
-            }
-        }
-        else {
-            checksum = channel->getConfig().getBufferFactory()->getBuffer(body->order(), checksumFieldLength);
-
-            if (2 == checksumFieldLength) {
-                checksum->writeShort(cs);
-            }
-            else if (4 == checksumFieldLength) {
-                checksum->writeInt(cs);
-            }
-            else {
-                throw RuntimeException("should not reach here");
-            }
-        }
     }
 
-    return ChannelMessage(ChannelBuffers::wrappedBuffer(header, body, checksum));
+    int headerPos = headerFieldLength ?
+                    (lengthFieldOffset ? HEADER_FIELD_FIRST : HEADER_FIELD_LAST)
+                        : HEADER_FIELD_NONE;
+
+    if (hasOutBuffer) {
+        return writeMessage(out, msg, contentLength, headerPos, cs);
+    }
+    else {
+        if (msg->aheadWritableBytes() >= headerLength &&
+                (checksumFieldLength ? msg->writableBytes() >= checksumFieldLength : true)) {
+            preWriteHeader(msg, contentLength, headerPos);
+
+            if (2 == checksumFieldLength) {
+                msg->writeShort(cs);
+            }
+            else if (4 == checksumFieldLength) {
+                msg->writeInt(cs);
+            }
+
+            return msg;
+        }
+        else {
+            ChannelBufferPtr buffer = ChannelBuffers::buffer(msgLength);
+            return writeMessage(buffer, msg, contentLength, headerPos, cs);
+        }
+    }
 }
 
 void LengthFieldPrepender::validateParameters() {
@@ -144,7 +108,7 @@ void LengthFieldPrepender::validateParameters() {
             Integer(checksumFieldLength).toString());
     }
 
-    int preHeaderFieldLength = (int)header1.size();
+    int preHeaderFieldLength = (int)header.size();
 
     if (lengthFieldOffset != 0 && lengthFieldOffset != preHeaderFieldLength
             && lengthFieldOffset != (preHeaderFieldLength + lengthFieldLength)) {
@@ -168,52 +132,183 @@ void LengthFieldPrepender::validateParameters() {
     }
 }
 
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength) : lengthFieldLength(lengthFieldLength),
-    lengthFieldOffset(0),
-    lengthAdjustment(lengthFieldLength),
-    checksumFieldLength(0),
-    checksumCalcOffset(0) {
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(0),
+      lengthAdjustment(0),
+      checksumFieldLength(0),
+      checksumCalcOffset(0) {
     validateParameters();
 }
 
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, const std::string& header1) : lengthFieldLength(lengthFieldLength),
-    lengthFieldOffset(lengthFieldOffset),
-    lengthAdjustment(0),
-    header1(header1),
-    checksumFieldLength(0),
-    checksumCalcOffset(0) {
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
+        int lengthFieldOffset,
+        const std::string& header)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(lengthFieldOffset),
+      lengthAdjustment(lengthFieldOffset ? 0 : header.size()),
+      header(header),
+      checksumFieldLength(0),
+      checksumCalcOffset(0) {
     validateParameters();
 }
 
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, const std::string& header1) : lengthFieldLength(lengthFieldLength),
-    lengthFieldOffset(lengthFieldLength + header1.size()),
-    lengthAdjustment(0),
-    header1(header1),
-    checksumFieldLength(0),
-    checksumCalcOffset(0) {
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
+        const std::string& header)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(header.size()),
+      lengthAdjustment(0),
+      header(header),
+      checksumFieldLength(0),
+      checksumCalcOffset(0) {
     validateParameters();
 }
 
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, int lengthAdjustment, const std::string& header1) {
-
-}
-
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldLengthOffset, int lengthAdjustment, const std::string& header1, const std::string& header2) :   lengthFieldLength(lengthFieldLength),
-    lengthFieldOffset(lengthFieldOffset),
-    lengthAdjustment(lengthAdjustment),
-    header1(header1),
-    header2(header2),
-    checksumFieldLength(0),
-    checksumCalcOffset(0) {
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
+        int lengthFieldOffset,
+        int lengthAdjustment,
+        const std::string& header)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(lengthFieldOffset),
+      lengthAdjustment(lengthAdjustment),
+      header(header),
+      checksumFieldLength(0),
+      checksumCalcOffset(0) {
     validateParameters();
 }
 
-LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength, int lengthFieldOffset, int lengthAdjustment, int checksumFieldLength, int checksumCalcOffset, const std::string& header1, const std::string& header2, ChecksumFunction checksumFunction) :   lengthFieldLength(lengthFieldLength),
-    lengthFieldOffset(lengthFieldOffset),
-    checksumFieldLength(checksumFieldLength),
-    checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
-    checksumFunction(checksumFunction) {
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
+        const std::string& header,
+        int checksumFieldLength,
+        const ChecksumFunction& checksum)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(header.size()),
+      lengthAdjustment(0),
+      header(header),
+      checksumFieldLength(checksumFieldLength),
+      checksumCalcOffset(0),
+      checksumFunction(checksumFunction) {
     validateParameters();
+}
+
+LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
+        int lengthFieldOffset,
+        int lengthAdjustment,
+        int checksumFieldLength,
+        const std::string& header,
+        ChecksumFunction checksumFunction)
+    : lengthFieldLength(lengthFieldLength),
+      lengthFieldOffset(lengthFieldOffset),
+      lengthAdjustment(lengthAdjustment),
+      header(header),
+      checksumFieldLength(checksumFieldLength),
+      checksumCalcOffset(0),
+      checksumFunction(checksumFunction) {
+    validateParameters();
+}
+
+void LengthFieldPrepender::writeHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos) {
+    if (HEADER_FIELD_FIRST == headerPos) {
+        msg->writeBytes(header);
+    }
+
+    switch (lengthFieldLength) {
+    case 1:
+        if (contentLength >= 256) {
+            throw InvalidArgumentException(
+                StringUtil::strprintf("length does not fit into a byte: %d",
+                                      contentLength));
+        }
+
+        msg->writeByte(contentLength);
+        break;
+
+    case 2:
+        if (contentLength >= 65536) {
+            throw InvalidArgumentException(
+                StringUtil::strprintf("length does not fit into a short integer: %d",
+                                      contentLength));
+        }
+
+        msg->writeShort(contentLength);
+        break;
+
+    case 4:
+        msg->writeInt(contentLength);
+        break;
+
+    case 8:
+        msg->writeLong(contentLength);
+        break;
+
+    default:
+        throw RuntimeException("should not reach here");
+    }
+
+    if (HEADER_FIELD_LAST == headerPos) {
+        msg->writeBytes(header);
+    }
+}
+
+void LengthFieldPrepender::preWriteHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos) {
+    if (HEADER_FIELD_LAST == headerPos) {
+        msg->writeBytesAhead(header);
+    }
+
+    switch (lengthFieldLength) {
+    case 1:
+        if (contentLength >= 256) {
+            throw InvalidArgumentException(
+                StringUtil::strprintf("length does not fit into a byte: %d",
+                                      contentLength));
+        }
+
+        msg->writeByteAhead(contentLength);
+        break;
+
+    case 2:
+        if (contentLength >= 65536) {
+            throw InvalidArgumentException(
+                StringUtil::strprintf("length does not fit into a short integer: %d",
+                                      contentLength));
+        }
+
+        msg->writeShortAhead(contentLength);
+        break;
+
+    case 4:
+        msg->writeIntAhead(contentLength);
+        break;
+
+    case 8:
+        msg->writeLongAhead(contentLength);
+        break;
+
+    default:
+        throw RuntimeException("should not reach here");
+    }
+
+    if (HEADER_FIELD_FIRST == headerPos) {
+        msg->writeBytesAhead(header);
+    }
+}
+
+const ChannelBufferPtr& LengthFieldPrepender::writeMessage(const ChannelBufferPtr& out,
+        const ChannelBufferPtr& msg,
+        int contentLength,
+        int headerPos,
+        boost::uint32_t cs) {
+    writeHeader(out, contentLength, headerPos);
+    msg->readBytes(out);
+
+    if (2 == checksumFieldLength) {
+        out->writeShort(cs);
+    }
+    else if (4 == checksumFieldLength) {
+        out->writeInt(cs);
+    }
+
+    return out;
 }
 
 }

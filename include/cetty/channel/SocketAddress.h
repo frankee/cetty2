@@ -53,6 +53,8 @@ class IpAddress;
 class SocketAddressImpl;
 class SocketAddressImplFactory;
 
+typedef boost::intrusive_ptr<SocketAddressImpl> SocketAddressImplPtr;
+
 /**
  * This class represents an internet (IP) endpoint/socket
  * address. The address can belong either to the

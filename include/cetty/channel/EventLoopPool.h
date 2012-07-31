@@ -17,15 +17,27 @@
  * under the License.
  */
 
-#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/util/ReferenceCounter.h>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
-    class EventLoopPool {
+class EventLoopPool : public cetty::util::ReferenceCounter<EventLoopPool> {
+public:
+    EventLoopPool(int threadCnt) {}
+    virtual ~EventLoopPool() {}
 
-    };
+    void start();
+    const EventLoopPtr& getNextLoop();
 
-}}
+private:
+    bool started;
+    int threadCnt;
+};
+
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_EVENTLOOPPOOL_H)
 

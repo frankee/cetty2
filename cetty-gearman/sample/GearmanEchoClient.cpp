@@ -22,7 +22,7 @@ public:
         ChannelBufferPtr buf = ChannelBuffers::buffer(10);
         buf->writeBytes("hello");
 
-        service->write(ChannelMessage(
+        service->write(UserEvent(
             GearmanMessage::createsubmitJobMessage("test","1234",buf)));
     }
 

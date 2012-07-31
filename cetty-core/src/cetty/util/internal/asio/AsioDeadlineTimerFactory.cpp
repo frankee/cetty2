@@ -99,8 +99,8 @@ const TimerPtr& AsioDeadlineTimerFactory::getTimer(const ChannelPtr& channel) {
         return timers.begin()->second;
     }
 
-    AsioSocketChannel* socketChannel =
-        dynamic_cast<AsioSocketChannel*>(channel);
+    boost::intrusive_ptr<AsioSocketChannel> socketChannel =
+        boost::dynamic_pointer_cast<AsioSocketChannel>(channel);
 
     if (socketChannel) {
         return timers[socketChannel->getService()->getId()];

@@ -160,8 +160,6 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    ChannelFuturePtr connect();
-
     ChannelFuturePtr connect(const std::string& host, int port);
 
     /**

@@ -20,18 +20,16 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <string>
-#include <map>
-
-#include <boost/any.hpp>
+#include <cetty/channel/ChannelOption.h>
 #include <cetty/channel/ChannelFactoryFwd.h>
 #include <cetty/channel/ChannelPipelineFwd.h>
 #include <cetty/channel/ChannelPipelineFactoryFwd.h>
-#include <cetty/util/ExternalResourceReleasable.h>
 
-namespace cetty { namespace logging {
-    class InternalLogger;
-}}
+namespace cetty {
+namespace logging {
+class InternalLogger;
+}
+}
 
 
 namespace cetty {
@@ -56,7 +54,7 @@ using namespace cetty::logging;
  * @apiviz.uses cetty::channel::ChannelFactory
  */
 
-class Bootstrap : public cetty::util::ExternalResourceReleasable {
+class Bootstrap {
 public:
     virtual ~Bootstrap();
 
@@ -82,7 +80,7 @@ public:
      * @throws NullPointerException
      *         if the factory is null
      */
-    virtual void setFactory(const ChannelFactoryPtr& factory);
+    virtual Bootstrap& setFactory(const ChannelFactoryPtr& factory);
 
     /**
     * Returns the default {@link ChannelPipeline} which is cloned when a new
@@ -107,48 +105,28 @@ public:
      * internal {@link ChannelPipelineFactory} implementation which returns
      * a shallow copy of the specified pipeline.
      */
-    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
-
-    /**
-     * Returns the {@link ChannelPipelineFactory} which creates a new
-     * {@link ChannelPipeline} for each new {@link Channel}.
-     *
-     * @see #getPipeline()
-     */
-    const ChannelPipelineFactoryPtr& getPipelineFactory();
-
-    /**
-     * Sets the {@link ChannelPipelineFactory} which creates a new
-     * {@link ChannelPipeline} for each new {@link Channel}.  Calling this
-     * method invalidates the current <tt>pipeline</tt> property of this
-     * bootstrap.  Subsequent {@link #getPipeline()} and {@link #getPipelineAsMap()}
-     * calls will raise {@link IllegalStateException}.
-     *
-     * @see #setPipeline(ChannelPipeline*)
-     * @see #setPipelineAsMap(const ChannelPipeline::ChannelHandlers&)
-     */
-    virtual void setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory);
+    virtual Bootstrap& setPipeline(const ChannelPipelinePtr& pipeline);
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    const std::map<std::string, boost::any>& getOptions() const;
+    const ChannelOption::Options& getOptions() const;
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    std::map<std::string, boost::any>& getOptions();
+    ChannelOption::Options& getOptions();
 
     /**
      * Sets the options which configures a new {@link Channel} and its child
      * {@link Channel}s.  To set the options of a child {@link Channel}, prefixed
      * <tt>"child."</tt> to the option name (e.g. <tt>"child.keepAlive"</tt>).
      */
-    void setOptions(const std::map<std::string, boost::any>& options);
+    Bootstrap& setOptions(const ChannelOption::Options& options);
 
     /**
      * Returns the value of the option with the specified key.  To retrieve
@@ -160,32 +138,7 @@ public:
      * @return the option value if the option is found.
      *         <tt>empty boost::any</tt> otherwise.
      */
-    boost::any getOption(const std::string& key) const;
-
-    /**
-     * Returns the value of the option with the specified key.  To retrieve
-     * the option value of a child {@link Channel}, prefixed <tt>"child."</tt>
-     * to the option name (e.g. <tt>"child.keepAlive"</tt>).
-     *
-     * @param key  the option name
-     *
-     * @return the pointer of the option value if the option is found.
-     *         <tt>NULL</tt> otherwise.
-     */
-    template<typename T>
-    const T* getTypedOption(const std::string& key) const {
-        boost::any a = getOption(key);
-
-        if (!a.empty()) {
-            const T* t = boost::any_cast<T>(&a);
-
-            if (NULL == t) { return NULL; }
-
-            return t;
-        }
-
-        return NULL;
-    }
+    ChannelOption::Variant getOption(const ChannelOption& option) const;
 
     /**
      * Sets an option with the specified key and value.  If there's already
@@ -198,7 +151,8 @@ public:
      * @param key    the option name
      * @param value  the option value
      */
-    virtual void setOption(const std::string& key, const boost::any& value);
+    virtual Bootstrap& setOption(const ChannelOption& option,
+                                 const ChannelOption::Variant& value);
 
     /**
      * {@inheritDoc}  This method simply delegates the call to
@@ -206,7 +160,7 @@ public:
      * and delete the ChannelFactory, but the ChannelPipeline or
      * the ChannelPipelineFactory which set by user.
      */
-    virtual void releaseExternalResources();
+    virtual void shutdown();
 
 protected:
     /**
@@ -225,14 +179,10 @@ protected:
     static InternalLogger* logger;
 
 private:
-    // indicate whether PipelineFactory is set by external or not.
-    bool externalSetPipelineFactory;
-
-    std::map<std::string, boost::any> options;
+    ChannelOption::Options options;
 
     ChannelPipelinePtr pipeline;
     ChannelFactoryPtr  factory;
-    ChannelPipelineFactoryPtr pipelineFactory;
 };
 
 }

@@ -58,9 +58,9 @@ static const MessageMetaInfo[type-1] = {
     {}  // 2
 };
 
-ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
+UserEvent GearmanDecoder::decode(ChannelHandlerContext& ctx,
                                       const ChannelPtr& channel,
-                                      const ChannelMessage& msg)
+                                      const UserEvent& msg)
 {
 	//smartPointer得到具体message的类型
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
@@ -101,10 +101,10 @@ ChannelMessage GearmanDecoder::decode(ChannelHandlerContext& ctx,
         }
         message->setType(type);
 
-        return ChannelMessage(message);
+        return UserEvent(message);
     }
 
-    return ChannelMessage::EMPTY_MESSAGE;
+    return UserEvent::EMPTY_EVENT;
 }
 
 }

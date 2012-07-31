@@ -17,21 +17,46 @@
  * under the License.
  */
 
+#include <deque>
 #include <cetty/channel/ChannelHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InT>
-class ChannelInboundMessageHandlerContext : public ChannelHandlerContext {
+template<typename InboundInT>
+class ChannelInboundMessageHandlerContext : public virtual ChannelHandlerContext {
 public:
-    typedef std::deque<InT> MessageQueue;
+    typedef std::deque<InboundInT> MessageQueue;
 
 public:
-    ChannelInboundMessageHandlerContext();
+    ChannelInboundMessageHandlerContext(const std::string& name,
+                                        ChannelPipeline& pipeline,
+                                        const ChannelHandlerPtr& handler,
+                                        ChannelHandlerContext* prev,
+                                        ChannelHandlerContext* next)
+        : ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+
+    ChannelInboundMessageHandlerContext(const std::string& name,
+                                        const EventLoopPtr& eventLoop,
+                                        ChannelPipeline& pipeline,
+                                        const ChannelHandlerPtr& handler,
+                                        ChannelHandlerContext* prev,
+                                        ChannelHandlerContext* next)
+        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+
     virtual ~ChannelInboundMessageHandlerContext() {}
 
-    MessageQueue& getInboundMessageQueue();
+    MessageQueue& getInboundMessageQueue() { return queue; }
+
+    void addInboundMessage(const InboundInT& message) {
+        queue.push_back(message);
+    }
+
+protected:
+    virtual bool isInboundMessageHandler() const { return true; }
+
+private:
+    MessageQueue queue;
 };
 
 }

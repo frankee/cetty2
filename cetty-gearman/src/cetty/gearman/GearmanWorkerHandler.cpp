@@ -86,17 +86,17 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
 void GearmanWorkerHandler::grabJob() {
     GearmanMessagePtr msg(GearmanMessage::createGrabJobMessage());
-    channel->write(ChannelMessage(msg));
+    channel->write(UserEvent(msg));
 }
 
 void GearmanWorkerHandler::grabJobUnique() {
     GearmanMessagePtr msg(GearmanMessage::createGrabJobUniqMessage());
-    channel->write(ChannelMessage(msg));
+    channel->write(UserEvent(msg));
 }
 
 void GearmanWorkerHandler::preSleep() {
     GearmanMessagePtr msg(GearmanMessage::createPreSleepMessage());
-    channel->write(ChannelMessage(msg));
+    channel->write(UserEvent(msg));
 }
 
 void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,

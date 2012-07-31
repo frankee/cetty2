@@ -22,7 +22,7 @@ namespace codec {
 
 using namespace cetty::util;
 
-CETTY_IMPLEMENT_EXCEPTION(TooLongFrameException, RuntimeException, "Frame length greater than the maximum")
+CETTY_IMPLEMENT_EXCEPTION(TooLongFrameException, CodecException, "Frame length greater than the maximum")
 
 }
 }

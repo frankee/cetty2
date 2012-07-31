@@ -16,7 +16,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -39,7 +38,7 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-template<OutboundInT, OutboundOutT>
+template<typename OutboundInT, typename OutboundOutT>
 class MessageToMessageEncoder
         : public cetty::channel::ChannelOutboundMessageHandler<OutboundInT> {
 public:
@@ -86,7 +85,7 @@ public:
      *
      * @param msg the message
      */
-    bool isEncodable(const OutboundInT& msg) {
+    virtual bool isEncodable(const OutboundInT& msg) {
         return true;
     }
 
