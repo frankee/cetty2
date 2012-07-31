@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="gearman">
+      <UniqueIdentifier>{b005ee18-0ea8-4697-b137-111f96e27063}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gearman\builder">
+      <UniqueIdentifier>{55446041-c785-4345-9e30-e89f601cdf65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gearman\protobuf">
+      <UniqueIdentifier>{450a4a06-9eec-4a96-a9eb-88e245d591c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gearman\protobuf\builder">
+      <UniqueIdentifier>{1d99c92f-a48d-4f06-aa2a-73f3e2bf0fa9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanDecoder.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientRequestHandler.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerHandler.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanClientBuilder.h">
+      <Filter>gearman\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessagePtr.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanWorkerBuilder.h">
+      <Filter>gearman\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufClientFilter.h">
+      <Filter>gearman\protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.h">
+      <Filter>gearman\protobuf\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.h">
+      <Filter>gearman\protobuf\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.h">
+      <Filter>gearman\protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientHandler.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>gearman\protobuf</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp">
+      <Filter>gearman\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.cpp">
+      <Filter>gearman\protobuf\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanWorkerBuilder.cpp">
+      <Filter>gearman\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufClientFilter.cpp">
+      <Filter>gearman\protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.cpp">
+      <Filter>gearman\protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp">
+      <Filter>gearman\protobuf\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
