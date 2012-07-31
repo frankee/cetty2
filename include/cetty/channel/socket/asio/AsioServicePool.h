@@ -194,7 +194,6 @@ private:
             }
         }
     };
-
 private:
     AsioServicePool(const AsioServicePool&);
     AsioServicePool& operator=(const AsioServicePool&);
