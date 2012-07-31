@@ -32,9 +32,15 @@
  * under the License.
  */
 
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/handler/codec/DecoderException.h>
+
 namespace cetty {
 namespace handler {
 namespace codec {
+
+    using namespace cetty::channel;
 
 template<typename InboundInT, typename InboundOutT>
 class MessageToMessageDecoder : ChannelInboundMessageHandler<InboundInT> {
@@ -42,42 +48,42 @@ public:
     MessageToMessageDecoder() {}
     virtual ~MessageToMessageDecoder() {}
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        MessageBuf<I> in = ctx.inboundMessageBuffer();
-        boolean notify = false;
+protected:
+    virtual void messageUpdated(MessageContext& ctx) {
+        MessageContext::MessageQueue in = ctx.getInboundMessageQueue();
+        bool notify = false;
 
-        for (;;) {
+        while (!in.empty()) {
             try {
-                Object msg = in.poll();
+                InboundInT& msg = in.front();
 
-                if (msg == null) {
+                if (!msg) {
                     break;
                 }
 
                 if (!isDecodable(msg)) {
-                    ctx.nextInboundMessageBuffer().add(msg);
+                    //ctx.nextInboundMessageBuffer().add(msg);
                     notify = true;
                     continue;
                 }
 
-                I imsg = (I) msg;
-                O omsg = decode(ctx, imsg);
+                InboundOutT omsg = decode(ctx, msg);
 
-                if (omsg == null) {
+                if (!omsg) {
                     // Decoder consumed a message but returned null.
                     // Probably it needs more messages because it's an aggregator.
                     continue;
                 }
 
-                if (CodecUtil.unfoldAndAdd(ctx, omsg, true)) {
+                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, omsg, true)) {
                     notify = true;
                 }
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);
             }
-            catch (Throwable t) {
-                ctx.fireExceptionCaught(new DecoderException(t));
+            catch (const std::exception& e) {
+                ctx.fireExceptionCaught(DecoderException(e.what()));
             }
         }
 

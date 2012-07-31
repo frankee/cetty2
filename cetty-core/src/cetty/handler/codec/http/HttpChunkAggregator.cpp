@@ -15,20 +15,17 @@
  */
 
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
+
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/MessageEvent.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/Integer.h>
 
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
-
+#include <cetty/handler/codec/TooLongFrameException.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
@@ -42,7 +39,7 @@ namespace http {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 
 HttpChunkAggregator::HttpChunkAggregator(int maxContentLength)
     : maxContentLength(maxContentLength) {
@@ -53,43 +50,39 @@ HttpChunkAggregator::HttpChunkAggregator(int maxContentLength)
     }
 }
 
-void HttpChunkAggregator::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    HttpMessagePtr m = e.getMessage().smartPointer<HttpMessage>();
+HttpMessagePtr HttpChunkAggregator::decode(ChannelHandlerContext& ctx,
+    const HttpMessagePtr& msg) {
+        HttpMessagePtr& currentMessage = this->currentMessage;
 
-    if (m) {
+    if (msg) {
         // Handle the 'Expect: 100-continue' header if necessary.
         // TODO: Respond with 413 Request Entity Too Large
         //   and discard the traffic or close the connection.
         //       No need to notify the upstream handlers - just log.
         //       If decoding a response, just throw an exception.
-        if (HttpHeaders::is100ContinueExpected(*m)) {
+        if (HttpHeaders::is100ContinueExpected(*msg)) {
             //Channels::write(ctx, Channels::succeededFuture(ctx.getChannel()), CONTINUE.duplicate());
         }
 
-        if (m->isChunked()) {
-            ChannelBufferFactoryPtr bufferFactory =
-                e.getChannel()->getConfig().getBufferFactory();
-            BOOST_ASSERT(bufferFactory);
-
+        if (msg->isChunked()) {
             // A chunked message - remove 'Transfer-Encoding' header,
             // initialize the cumulative buffer, and wait for incoming chunks.
-            m->removeHeader(HttpHeaders::Names::TRANSFER_ENCODING, HttpHeaders::Values::CHUNKED);
-            m->setChunked(false);
-            m->setContent(ChannelBuffers::dynamicBuffer(*bufferFactory));
+            msg->removeHeader(HttpHeaders::Names::TRANSFER_ENCODING, HttpHeaders::Values::CHUNKED);
+            msg->setChunked(false);
+            msg->setContent(ChannelBuffers::dynamicBuffer());
 
             currentMessage.reset();
-            currentMessage = m;
+            currentMessage = msg;
+            return HttpMessagePtr();
         }
         else {
             // Not a chunked message - pass through.
             currentMessage.reset();
-            ctx.sendUpstream(e);
+            return msg;
         }
-
-        return;
     }
 
-    HttpChunkPtr chunk = e.getMessage().smartPointer<HttpChunk, HttpMessage>();
+    HttpChunkPtr chunk = boost::dynamic_pointer_cast<HttpChunk>(msg);
 
     if (chunk) {
         // Sanity check
@@ -111,11 +104,11 @@ void HttpChunkAggregator::messageReceived(ChannelHandlerContext& ctx, const Mess
                 std::string(" bytes."));
         }
 
-        ChannelBufferPtr chunkBuff = chunk->getContent();
-        content->writeBytes(chunkBuff);
+        // Append the content of the chunk
+        appendToCumulation(chunk->getContent());
 
         if (chunk->isLast()) {
-            currentMessage.reset();
+            this->currentMessage.reset();
 
             // Merge trailing headers into the message.
             HttpChunkTrailerPtr trailer =
@@ -136,13 +129,40 @@ void HttpChunkAggregator::messageReceived(ChannelHandlerContext& ctx, const Mess
                 Integer::toString(content->readableBytes()));
 
             // All done - generate the event.
-            Channels::fireMessageReceived(ctx, ChannelMessage(currentMessage), e.getRemoteAddress());
+            return currentMessage;
+        }
+        else {
+            return HttpMessagePtr();
         }
     }
     else {
         // Neither HttpMessage or HttpChunk
-        ctx.sendUpstream(e);
+        throw IllegalStateException(
+            "Only HttpMessage and HttpChunk are accepted.");
     }
+}
+
+void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
+    const ChannelBufferPtr& cumulation = currentMessage->getContent();
+#if 0
+    if (cumulation instanceof CompositeByteBuf) {
+        // Make sure the resulting cumulation buffer has no more than 4 components.
+        CompositeByteBuf composite = (CompositeByteBuf) cumulation;
+        if (composite.numComponents() >= maxCumulationBufferComponents) {
+            currentMessage.setContent(Unpooled.wrappedBuffer(composite.copy(), input));
+        } else {
+            List<ByteBuf> decomposed = composite.decompose(0, composite.readableBytes());
+            ByteBuf[] buffers = decomposed.toArray(new ByteBuf[decomposed.size() + 1]);
+            buffers[buffers.length - 1] = input;
+
+            currentMessage.setContent(Unpooled.wrappedBuffer(buffers));
+        }
+    }
+    else {
+        currentMessage.setContent(Unpooled.wrappedBuffer(cumulation, input));
+    }
+#endif
+    currentMessage->setContent(ChannelBuffers::wrappedBuffer(cumulation, input));
 }
 
 }

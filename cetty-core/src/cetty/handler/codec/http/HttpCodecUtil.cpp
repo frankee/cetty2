@@ -18,7 +18,6 @@
 
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
-#include <cetty/handler/codec/http/HttpHeader.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/util/Exception.h>
 

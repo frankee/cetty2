@@ -18,13 +18,16 @@
  */
 
 #include <cetty/channel/ChannelOutboundHandler.h>
-#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename OutT>
+template<typename OutboundInT>
 class ChannelOutboundMessageHandler : public ChannelOutboundHandler {
+public:
+    typedef ChannelOutboundMessageHandlerContext<OutboundInT> OutboundMessageContext;
+
 public:
     ChannelOutboundMessageHandler() {}
     virtual~ ChannelOutboundMessageHandler() {}
@@ -54,7 +57,15 @@ public:
 
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        ctx.flush(future);
+        OutboundMessageContext* context =
+            ctx.outboundMessageHandlerContext<OutboundMessageContext>();
+
+        if (context) {
+            flush(*context, future);
+        }
+        else {
+            ctx.flush(future);
+        }
     }
 
     virtual void beforeAdd(ChannelHandlerContext& ctx) {}
@@ -79,7 +90,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelOutboundMessageHandlerContext<OutT>(name,
+        return new ChannelOutboundMessageHandlerContext<OutboundInT>(name,
                 pipeline,
                 shared_from_this(),
                 prev,
@@ -91,12 +102,18 @@ public:
         ChannelPipeline& pipeline,
         ChannelHandlerContext* prev,
         ChannelHandlerContext* next) {
-            return new ChannelOutboundMessageHandlerContext<OutT>(name,
+            return new ChannelOutboundMessageHandlerContext<OutboundInT>(name,
                 eventLoop,
                 pipeline,
                 shared_from_this(),
                 prev,
                 next);
+    }
+
+protected:
+    virtual void flush(OutboundMessageContext& ctx,
+        const ChannelFuturePtr& future) {
+            ctx.flush(future);
     }
 };
 

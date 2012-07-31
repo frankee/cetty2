@@ -60,8 +60,8 @@ public:
         return "Acceptor";
     }
 
-    virtual void messageUpdated(MessageContext& ctx) {
-        MessageContext::MessageQueue& in = ctx.getInboundMessageQueue();
+    virtual void messageUpdated(InboundMessageContext& ctx) {
+        InboundMessageContext::MessageQueue& in = ctx.getInboundMessageQueue();
 
         while (!in.empty()) {
             const ChannelPtr& child = in.front();

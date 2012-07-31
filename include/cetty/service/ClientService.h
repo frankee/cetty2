@@ -38,9 +38,8 @@ public:
 
 protected:
     ClientService(const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink)
-        : AbstractChannel(ChannelPtr(), factory, pipeline, sink) {}
+        const ChannelPipelinePtr& pipeline)
+        : AbstractChannel(ChannelPtr(), factory, pipeline) {}
 };
 
 template<typename ReqT, typename RepT>

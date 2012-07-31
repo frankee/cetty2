@@ -395,8 +395,8 @@ protected:
         return cumulation;
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        callDecode(ctx);
+    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
+        callDecode(ctx, ctx.getInboundChannelBuffer());
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
@@ -410,18 +410,18 @@ protected:
         }
 
         if (in->readable()) {
-            callDecode(ctx);
+            callDecode(ctx, in);
         }
 
         try {
             if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx,
-                    decodeLast(ctx, replayable),
+                    decodeLast(ctx, replayable, state),
                     true)) {
                 fireInboundBufferUpdated(ctx, in);
             }
         }
         catch (const CodecException& e) {
-            ctx.fireExceptionCaught(t);
+            ctx.fireExceptionCaught(e);
         }
         catch (const std::exception& e) {
             ctx.fireExceptionCaught(DecoderException(e.what()));
@@ -431,13 +431,13 @@ protected:
     }
 
 protected:
-    void callDecode(ChannelHandlerContext& ctx) {
-        const ChannelBufferPtr& in = getCumulation();
+    void callDecode(ChannelHandlerContext& ctx, const ChannelBufferPtr& in) {
+        updateReplayable(in);
         bool decoded = false;
 
         while (in->readable()) {
-            int oldReaderIndex = checkpoint = in->readerIndex();
-            InboundOutT result();
+            int oldReaderIndex = checkedPoint = in->readerIndex();
+            InboundOutT result;
             int oldState = state;
 
             try {
@@ -490,7 +490,7 @@ protected:
                     fireInboundBufferUpdated(ctx, in);
                 }
 
-                ctx.fireExceptionCaught(t);
+                ctx.fireExceptionCaught(e);
             }
             catch (const std::exception& e) {
                 if (decoded) {
@@ -549,10 +549,10 @@ private:
         const ChannelBufferPtr& in) {
         checkedPoint -= in->readerIndex();
         in->discardReadBytes();
-        ctx.fireInboundBufferUpdated();
+        ctx.fireMessageUpdated();
     }
 
-    const ChannelBufferPtr& getCumulation(const ChannelBufferPtr& input) {
+    void updateReplayable(const ChannelBufferPtr& input) {
         if (!cumulation) { // only first time will enter.
             cumulation = input;
             replayable =
@@ -565,8 +565,6 @@ private:
             replayable =
                 ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(input));
         }
-
-        return cumulation;
     }
 
 private:

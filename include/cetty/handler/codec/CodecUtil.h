@@ -69,7 +69,7 @@ public:
             return true;
         }
         else {
-            Traits::OutboundContext* nextCtx =
+            OutboundContext* nextCtx =
                 ctx.nextInboundMessageHandlerContext<OutboundContext>();
 
             if (nextCtx) {

@@ -17,9 +17,7 @@
  * under the License.
  */
 #include <boost/cstdint.hpp>
-#include <cetty/channel/SimpleChannelHandler.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/OutstandingCall.h>
@@ -28,7 +26,9 @@ namespace cetty {
 namespace service {
 
 template<typename ReqT, typename RepT>
-class ClientServiceMessageHandler : public cetty::channel::SimpleChannelHandler {
+class ClientServiceMessageHandler
+    : public cetty::channel::ChannelMessageHandler<ReqT, RepT> {
+
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;

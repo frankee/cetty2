@@ -22,6 +22,7 @@
  */
 
 #include <vector>
+#include <boost/variant.hpp>
 
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
@@ -35,6 +36,7 @@ namespace codec {
 namespace http {
 
 class HttpMessage;
+typedef boost::variant<HttpMessagePtr, HttpChunkPtr> HttpPackage;
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
@@ -172,12 +174,9 @@ protected:
         int maxChunkSize);
 
 protected:
-    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx, const ChannelBufferPtr& buffer);
-
-    virtual ChannelMessage decode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const ReplayingDecoderBufferPtr& buffer,
-                                  int state);
+    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
+        const ReplayingDecoderBufferPtr& buffer,
+        int state);
 
     bool isContentAlwaysEmpty(const HttpMessage& msg) const;
 
@@ -189,7 +188,7 @@ protected:
                                          const char* str3) = 0;
 
 private:
-    ChannelMessage reset();
+    HttpMessagePtr reset();
 
     bool skipControlCharacters(const ReplayingDecoderBufferPtr& buffer) const;
     bool readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer);

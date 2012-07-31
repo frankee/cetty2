@@ -26,7 +26,7 @@ namespace channel {
 template<typename InboundInT>
 class ChannelInboundMessageHandler : public ChannelInboundHandler {
 public:
-    typedef ChannelInboundMessageHandlerContext<InboundInT> MessageContext;
+    typedef ChannelInboundMessageHandlerContext<InboundInT> InboundMessageContext;
 
 public:
     ChannelInboundMessageHandler() {}
@@ -49,8 +49,8 @@ public:
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        MessageContext* context = 
-            ctx.inboundMessageHandlerContext<MessageContext>();
+        InboundMessageContext* context = 
+            ctx.inboundMessageHandlerContext<InboundMessageContext>();
 
         messageUpdated(*context);
     }
@@ -74,7 +74,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new MessageContext(name,
+        return new InboundMessageContext(name,
                 pipeline,
                 shared_from_this(),
                 prev,
@@ -86,7 +86,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new MessageContext(name,
+        return new InboundMessageContext(name,
                 eventLoop,
                 pipeline,
                 shared_from_this(),
@@ -95,8 +95,8 @@ public:
     }
 
 protected:
-    virtual void messageUpdated(MessageContext& ctx) {
-        MessageContext::MessageQueue in = ctx.getInboundMessageQueue();
+    virtual void messageUpdated(InboundMessageContext& ctx) {
+        InboundMessageContext::MessageQueue in = ctx.getInboundMessageQueue();
 
         while (!in.empty()) {
             InboundInT msg = in.front();

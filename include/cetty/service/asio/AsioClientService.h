@@ -34,12 +34,9 @@ class AsioClientService : public cetty::service::ClientService {
 public:
     AsioClientService(const ChannelFactoryPtr& factory,
                       const ChannelPipelinePtr& pipeline,
-                      const ChannelSinkPtr& sink,
                       const AsioServicePtr& ioService);
 
     virtual ~AsioClientService() {}
-
-    //virtual void invoke(const OutstandingCallPtr& call);
 
     virtual ChannelConfig& getConfig() { return this->config; }
     virtual const ChannelConfig& getConfig() const { return this->config; }
@@ -50,7 +47,6 @@ public:
 
     virtual const SocketAddress& getLocalAddress() const { return SocketAddress::NULL_ADDRESS ; }
     virtual const SocketAddress& getRemoteAddress() const { return SocketAddress::NULL_ADDRESS; }
-
     
     virtual bool isOpen() const { return true; }
     virtual bool isBound() const { return true; }
@@ -78,14 +74,6 @@ protected:
     AsioServicePtr  ioService;
 
     DefaultChannelConfig config;
-
-private:
-    static const int CHANNEL_ST_OPEN      =  0;
-    static const int CHANNEL_ST_BOUND     =  1;
-    static const int CHANNEL_ST_CONNECTED =  2;
-    static const int CHANNEL_ST_CLOSED    = -1;
-
-    int state;
 };
 }
 }

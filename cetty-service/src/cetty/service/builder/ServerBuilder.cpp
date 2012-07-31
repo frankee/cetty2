@@ -22,7 +22,6 @@
 #include <cetty/logging/Log4cplusLoggerFactory.h>
 #include <cetty/config/ConfigCenter.h>
 
-
 #if (defined(linux) || defined(__linux) || defined(__linux__))
 
 #include <sys/types.h>
@@ -286,23 +285,17 @@ static void createPidFile(const char* pidfile) {}
 
 #endif
 
-ServerBuilder::ServerBuilder() : confCenter(NULL) {
+ServerBuilder::ServerBuilder() {
     init();
 }
 
-ServerBuilder::ServerBuilder(int threadCnt) : confCenter(NULL) {
-    config.threadCount = threadCnt;
-    init();
-}
-
-ServerBuilder::ServerBuilder(const ConfigCenter& confCenter)
-    : confCenter(&confCenter) {
-    confCenter.configure(&config);
+ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
+    //config.threadCount = threadCnt;
     init();
 }
 
 ServerBuilder::ServerBuilder(const ServerBuilderConfig& config)
-    : confCenter(NULL), config(config) {
+    : config(config) {
     init();
 }
 
@@ -333,16 +326,24 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         new AsioServerSocketChannelFactory(servicePool));
     bootstraps.insert(std::make_pair(name, bootstrap));
 
-    bootstrap->setOption("soLinger", boost::any(0));
-    bootstrap->setOption("reuseAddress", boost::any(true));
-    bootstrap->setOption("child.tcpNoDelay", boost::any(true));
-
+    bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+    bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     bootstrap->setPipeline(pipeline);
+
+    ChannelFuturePtr future;
     if (host.empty()) {
-        return bootstrap->bind(port);
+        future = bootstrap->bind(port);
     }
     else {
-        return bootstrap->bind(host, port);
+        future = bootstrap->bind(host, port);
+    }
+
+    if (future->await()->isSuccess()) {
+        return future->getChannel();
+    }
+    else {
+        return ChannelPtr();
     }
 }
 
@@ -362,10 +363,10 @@ int ServerBuilder::init() {
     }
 
     if (config.logger == "log4cplus") {
-        if (confCenter) {
+        //if (confCenter) {
             //InternalLoggerFactory::setDefaultFactory(
             //    new Log4cplusLoggerFactory(*confCenter));
-        }
+        //}
     }
 
     return 0;
@@ -455,7 +456,6 @@ cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string&
     }
     return ChannelPipelinePtr();
 }
-
 
 }
 }

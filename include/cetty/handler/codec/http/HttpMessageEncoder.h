@@ -69,9 +69,9 @@ protected:
      */
     HttpMessageEncoder();
 
-    virtual ChannelMessage encode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const ChannelMessage& msg);
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+        const HttpMessagePtr& msg,
+        const ChannelBufferPtr& out);
 
 protected:
     virtual void encodeInitialLine(ChannelBuffer& buf,

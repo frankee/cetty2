@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
 #include <cetty/handler/codec/http/HttpMessageFwd.h>
 
 namespace cetty {
@@ -29,7 +29,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-using namespace cetty::channel;
+using namespace cetty::handler::codec;
 
 /**
  * A {@link ChannelHandler} that aggregates an {@link HttpMessage}
@@ -55,7 +55,8 @@ using namespace cetty::channel;
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpChunk oneway - - filters out
  */
 
-class HttpChunkAggregator : public cetty::channel::SimpleChannelUpstreamHandler {
+class HttpChunkAggregator
+    : public MessageToMessageDecoder<HttpMessagePtr, HttpMessagePtr> {
 public:
     /**
      * Creates a new instance.
@@ -69,7 +70,11 @@ public:
 
     virtual ~HttpChunkAggregator() {}
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+protected:
+    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
+        const HttpMessagePtr& msg);
+
+    void appendToCumulation(const ChannelBufferPtr& input);
 
 private:
     int maxContentLength;

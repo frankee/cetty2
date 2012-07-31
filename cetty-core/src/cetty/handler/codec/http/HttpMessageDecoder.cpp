@@ -23,7 +23,6 @@
 #include <cetty/util/SimpleString.h>
 
 #include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpHeader.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
@@ -31,7 +30,7 @@
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 
 
 namespace cetty {
@@ -42,7 +41,7 @@ namespace http {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 
 const int HttpMessageDecoder::MAX_INITIAL_LINE_LENGTH = 4096;
 const int HttpMessageDecoder::MAX_HEADER_SIZE = 8192;
@@ -79,10 +78,9 @@ HttpMessageDecoder::HttpMessageDecoder(int maxInitialLineLength,
     }
 }
 
-ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
-        const ChannelPtr& channel,
-        const ReplayingDecoderBufferPtr& buffer,
-        int state) {
+HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
+    const ReplayingDecoderBufferPtr& buffer,
+    int state) {
     switch (state) {
     case SKIP_CONTROL_CHARS: {
         if (skipControlCharacters(buffer)) {
@@ -134,14 +132,14 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             message->setChunked(true);
 
             // Generate HttpMessage first.  HttpChunks will follow.
-            return ChannelMessage(message);
+            return message;
         }
         else if (nextState == SKIP_CONTROL_CHARS) {
             // No content is expected.
             // Remove the headers which are not supposed to be present not
             // to confuse subsequent handlers.
             message->removeHeader(HttpHeaders::Names::TRANSFER_ENCODING);
-            return ChannelMessage(message);
+            return message;
         }
         else {
             int contentLength = HttpHeaders::getContentLength(*message, -1);
@@ -161,7 +159,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
                     // chunkSize will be decreased as the READ_FIXED_LENGTH_CONTENT_AS_CHUNKS
                     // state reads data chunk by chunk.
                     chunkSize = HttpHeaders::getContentLength(*message, -1);
-                    return ChannelMessage(message);
+                    return message;
                 }
 
                 break;
@@ -172,7 +170,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
                     // Generate HttpMessage first.  HttpChunks will follow.
                     checkpoint(READ_VARIABLE_LENGTH_CONTENT_AS_CHUNKS);
                     message->setChunked(true);
-                    return ChannelMessage(message);
+                    return message;
                 }
 
                 break;
@@ -185,14 +183,14 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         // We return null here, this forces decode to be called again where we will decode the content
-        return ChannelMessage::EMPTY_MESSAGE;
+        return HttpMessagePtr();
     }
 
     case READ_VARIABLE_LENGTH_CONTENT: {
         content = buffer->readSlice(buffer->readableBytes());
 
         if (buffer->needMoreBytes()) {
-            return ChannelMessage::EMPTY_MESSAGE;
+            return HttpMessagePtr();
         }
 
         return reset();
@@ -204,7 +202,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         ChannelBufferPtr buff = buffer->readSlice(chunkSize);
 
         if (buffer->needMoreBytes()) {
-            return ChannelMessage::EMPTY_MESSAGE;
+            return HttpMessagePtr();
         }
 
         HttpChunkPtr chunk = new HttpChunk(buff);
@@ -215,12 +213,12 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
             if (!chunk->isLast()) {
                 // Append the last chunk.
-                return ChannelMessage(ChannelMessage(chunk),
-                                      ChannelMessage(HttpChunk::LAST_CHUNK));
+                //return ChannelMessage(ChannelMessage(chunk),
+                //                      ChannelMessage(HttpChunk::LAST_CHUNK));
             }
         }
 
-        return ChannelMessage(chunk);
+        //return ChannelMessage(chunk);
     }
 
     case READ_FIXED_LENGTH_CONTENT: {
@@ -229,7 +227,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             return reset();
         }
 
-        return ChannelMessage::EMPTY_MESSAGE;
+        return HttpMessagePtr();
     }
 
     case READ_FIXED_LENGTH_CONTENT_AS_CHUNKS: {
@@ -241,7 +239,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             buff = buffer->readSlice(maxChunkSize);
 
             if (buffer->needMoreBytes()) {
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
 
             chunkSize -= maxChunkSize;
@@ -251,7 +249,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             buff = buffer->readSlice(chunkSize);
 
             if (buffer->needMoreBytes()) {
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
 
             chunkSize = 0;
@@ -266,12 +264,12 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
             if (!chunk->isLast()) {
                 // Append the last chunk.
-                return ChannelMessage(ChannelMessage(chunk),
-                                      ChannelMessage(HttpChunk::LAST_CHUNK));
+                //return ChannelMessage(ChannelMessage(chunk),
+                //                      ChannelMessage(HttpChunk::LAST_CHUNK));
             }
         }
 
-        return ChannelMessage(chunk);
+        //return chunk;
     }
 
     /**
@@ -282,14 +280,14 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         SimpleString line = readLine(buffer, maxInitialLineLength);
 
         if (buffer->needMoreBytes()) {
-            return ChannelMessage::EMPTY_MESSAGE;
+            return HttpMessagePtr();
         }
 
         chunkSize = getChunkSize(line);
 
         if (chunkSize == 0) {
             checkpoint(READ_CHUNK_FOOTER);
-            return ChannelMessage::EMPTY_MESSAGE;
+            return HttpMessagePtr();
         }
         else if (chunkSize > maxChunkSize) {
             // A chunk is too large. Split them into multiple chunks again.
@@ -307,12 +305,12 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         ChannelBufferPtr buff = buffer->readSlice(chunkSize);
 
         if (buffer->needMoreBytes()) {
-            return ChannelMessage::EMPTY_MESSAGE;
+            return HttpMessagePtr();
         }
 
         HttpChunkPtr chunk = HttpChunkPtr(new HttpChunk(buff));
         checkpoint(READ_CHUNK_DELIMITER);
-        return ChannelMessage(chunk);
+        //return (chunk);
     }
 
     case READ_CHUNKED_CONTENT_AS_CHUNKS: {
@@ -324,7 +322,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             buff = buffer->readSlice(maxChunkSize);
 
             if (buffer->needMoreBytes()) {
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
 
             chunkSize -= maxChunkSize;
@@ -334,7 +332,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             buff = buffer->readSlice(chunkSize);
 
             if (buffer->needMoreBytes()) {
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
 
             chunkSize = 0;
@@ -349,7 +347,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         if (!chunk->isLast()) {
-            return ChannelMessage(chunk);
+            //return (chunk);
         }
 
         break;
@@ -360,22 +358,22 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             boost::int8_t next = buffer->readByte();
 
             if (buffer->needMoreBytes()) {
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
 
             if (next == HttpCodecUtil::CR) {
                 if (buffer->readByte() == HttpCodecUtil::LF) {
                     checkpoint(READ_CHUNK_SIZE);
-                    return ChannelMessage::EMPTY_MESSAGE;
+                    return HttpMessagePtr();
                 }
 
                 if (buffer->needMoreBytes()) {
-                    return ChannelMessage::EMPTY_MESSAGE;
+                    return HttpMessagePtr();
                 }
             }
             else if (next == HttpCodecUtil::LF) {
                 checkpoint(READ_CHUNK_SIZE);
-                return ChannelMessage::EMPTY_MESSAGE;
+                return HttpMessagePtr();
             }
         }
 
@@ -392,7 +390,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         else {
             reset();
             // The last chunk, which is empty
-            return ChannelMessage(trailer);
+            //return ChannelMessage(trailer);
         }
     }
 
@@ -401,7 +399,7 @@ ChannelMessage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
     }
 
-    return ChannelMessage::EMPTY_MESSAGE;
+    return HttpMessagePtr();
 }
 
 bool HttpMessageDecoder::isContentAlwaysEmpty(const HttpMessage& msg) const {
@@ -423,7 +421,7 @@ bool HttpMessageDecoder::isContentAlwaysEmpty(const HttpMessage& msg) const {
     return false;
 }
 
-cetty::channel::ChannelMessage HttpMessageDecoder::reset() {
+HttpMessagePtr HttpMessageDecoder::reset() {
     HttpMessagePtr message = this->message;
     ChannelBufferPtr content = this->content;
 
@@ -435,7 +433,7 @@ cetty::channel::ChannelMessage HttpMessageDecoder::reset() {
     this->message.reset();
 
     checkpoint(SKIP_CONTROL_CHARS);
-    return ChannelMessage(message);
+    return message;
 }
 
 bool HttpMessageDecoder::skipControlCharacters(const ReplayingDecoderBufferPtr& buffer) const {

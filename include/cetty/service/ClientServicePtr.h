@@ -17,11 +17,13 @@
  * under the License.
  */
 
+#include <boost/intrusive_ptr.hpp>
+
 namespace cetty {
 namespace service {
 
 class ClientService;
-typedef ClientService* ClientServicePtr;
+typedef boost::intrusive_ptr<ClientService> ClientServicePtr;
 
 }
 }

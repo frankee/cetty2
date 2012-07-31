@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
     c->getCloseFuture()->awaitUninterruptibly();
 
     // Shut down thread pools to exit.
-    bootstrap.releaseExternalResources();
+    bootstrap.shutdown();
 
     return 0;
 }

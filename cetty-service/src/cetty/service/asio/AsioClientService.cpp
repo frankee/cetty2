@@ -28,14 +28,10 @@ using namespace cetty::channel;
 
 AsioClientService::AsioClientService(const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline,
-                                     const ChannelSinkPtr& sink,
                                      const AsioServicePtr& ioService)
     : ClientService(factory, pipeline, sink),
-      threadId(ioService->getThreadId()),
       ioService(ioService) {
 
-    ChannelPipelines::fireChannelOpen(this);
-    ChannelPipelines::fireChannelConnected(this, SocketAddress::NULL_ADDRESS);
 }
 
 }

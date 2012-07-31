@@ -129,14 +129,15 @@ AsioClientServiceFactory::~AsioClientServiceFactory() {
 cetty::channel::ChannelPtr AsioClientServiceFactory::newChannel(const ChannelPipelinePtr& pipeline) {
     if (ioService) {
         return new AsioClientService(shared_from_this(),
-                                     pipeline, sink, ioService);
+                                     pipeline,
+                                     ioService);
     }
     else {
         return ChannelPtr();
     }
 }
 
-void AsioClientServiceFactory::releaseExternalResources() {
+void AsioClientServiceFactory::shutdown() {
 
 }
 
