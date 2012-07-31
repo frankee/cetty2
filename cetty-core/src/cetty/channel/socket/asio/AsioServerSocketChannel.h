@@ -25,9 +25,17 @@
 
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/socket/ServerSocketChannel.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
-#include <cetty/channel/socket/asio/DefaultAsioServerSocketChannelConfig.h>
 
+#include <cetty/channel/socket/asio/AsioSocketChannel.h>
+#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioHandlerAllocator.h>
+#include <cetty/channel/socket/asio/AsioServerSocketChannelConfig.h>
+
+namespace cetty {
+namespace channel {
+class AbstractChannelSink;
+}
+}
 
 namespace cetty {
 namespace logging {
@@ -40,6 +48,8 @@ namespace channel {
 namespace socket {
 namespace asio {
 
+class AsioSocketChannel;
+
 using namespace cetty::logging;
 using namespace cetty::channel;
 using namespace cetty::channel::socket;
@@ -47,18 +57,13 @@ using namespace cetty::channel::socket;
 // only response to bind port, open and close.
 class AsioServerSocketChannel : public cetty::channel::socket::ServerSocketChannel {
 public:
-    AsioServerSocketChannel(
-        boost::asio::ip::tcp::acceptor& acceptor,
-        const AsioServicePtr& ioService,
-        const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink);
+    AsioServerSocketChannel(const AsioServicePtr& ioService,
+                            const ChannelFactoryPtr& factory,
+                            const ChannelPipelinePtr& pipeline,
+                            const ChannelPipelinePtr& childPipeline,
+                            const AsioServicePoolPtr& childServicePool);
 
     virtual ~AsioServerSocketChannel();
-
-    boost::asio::ip::tcp::acceptor& getAcceptor() {
-        return acceptor;
-    }
 
     virtual ChannelConfig& getConfig();
     virtual const ChannelConfig& getConfig() const;
@@ -66,18 +71,40 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
-    virtual bool isBound() const;
+    virtual ChannelSink& getSink();
 
+    virtual bool isActive() const;
+
+protected:
     virtual bool setClosed();
 
+    virtual void doBind(const SocketAddress& localAddress);
+    virtual void doDisconnect();
+    virtual void doClose();
+
 private:
+    void accept();
+    void handleAccept(const boost::system::error_code& error,
+                      AsioSocketChannelPtr channel);
+
+private:
+    typedef std::map<int, ChannelPtr> ChildChannels;
+
     static InternalLogger* logger;
 
 private:
     AsioServicePtr ioService;
-    boost::asio::ip::tcp::acceptor& acceptor;
 
-    DefaultAsioServerSocketChannelConfig config;
+    AsioHandlerAllocator<int> acceptAllocator;
+    boost::asio::ip::tcp::acceptor acceptor;
+
+    AbstractChannelSink* sink;
+
+    AsioServicePoolPtr childServicePool;
+    ChannelPipelinePtr childPipeline;
+    ChildChannels childChannels;
+
+    AsioServerSocketChannelConfig config;
     mutable SocketAddress localAddress;
 };
 

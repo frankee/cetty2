@@ -24,9 +24,15 @@
 #include <string>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/ChannelHandlerFwd.h>
+#include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {
 namespace channel {
+
+class UserEvent;
+class ChannelException;
+class ChannelPipeline;
+class ChannelHandlerContext;
 
 /**
  * Handles or intercepts a {@link ChannelEvent}, and sends a
@@ -213,6 +219,55 @@ namespace channel {
 class ChannelHandler : public cetty::util::ReferenceCounter<ChannelHandler, int> {
 public:
     virtual ~ChannelHandler() {}
+
+    /**
+     *
+     */
+    virtual void beforeAdd(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void afterAdd(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void beforeRemove(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void afterRemove(ChannelHandlerContext& ctx) = 0;
+
+    /**
+     *
+     */
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause) = 0;
+
+    /**
+     *
+     */
+    virtual void userEventTriggered(ChannelHandlerContext& ctx,
+                                const UserEvent& evt) = 0;
+
+    /**
+     *
+     */
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next) = 0;
+
+    /**
+     *
+     */
+    virtual ChannelHandlerContext* createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next) = 0;
 
     /**
      * Clone the instance of {@link ChannelHandler this}.

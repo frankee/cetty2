@@ -74,7 +74,7 @@ public:
         return buffers;
     }
 
-    void mergeFrom(const MessageEvent& evt);
+    void mergeFrom(const ChannelBufferPtr& buffer);
 
 private:
     mutable int byteSize;

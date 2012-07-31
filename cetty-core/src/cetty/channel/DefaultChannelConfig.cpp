@@ -27,13 +27,11 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 DefaultChannelConfig::DefaultChannelConfig()
-    : connectTimeoutMillis(10000/*ms*/),
-      bufferFactory(&(HeapChannelBufferFactory::getInstance())) {
+    : connectTimeoutMillis(10000/*ms*/) {
 }
 
-void DefaultChannelConfig::setOptions(const std::map<std::string, boost::any>& options) {
-    std::map<std::string, boost::any>::const_iterator itr =
-        options.begin();
+void DefaultChannelConfig::setOptions(const ChannelOption::Options& options) {
+    ChannelOption::Options::const_iterator itr = options.begin();
 
     while (itr != options.end()) {
         setOption(itr->first, itr->second);
@@ -41,16 +39,11 @@ void DefaultChannelConfig::setOptions(const std::map<std::string, boost::any>& o
     }
 }
 
-bool DefaultChannelConfig::setOption(const std::string& key, const boost::any& value) {
+bool DefaultChannelConfig::setOption(const ChannelOption& option,
+    const ChannelOption::Variant& value) {
     try {
-        if (key == "pipelineFactory") {
-            setPipelineFactory(boost::any_cast<ChannelPipelineFactoryPtr>(value));
-        }
-        else if (key == "connectTimeoutMillis") {
-            setConnectTimeout(boost::any_cast<int>(value));
-        }
-        else if (key == "bufferFactory") {
-            setBufferFactory(boost::any_cast<ChannelBufferFactoryPtr>(value));
+        if (option == ChannelOption::CONNECT_TIMEOUT_MILLIS) {
+            setConnectTimeout(boost::get<int>(value));
         }
         else {
             return false;
@@ -63,14 +56,6 @@ bool DefaultChannelConfig::setOption(const std::string& key, const boost::any& v
     }
 }
 
-void DefaultChannelConfig::setBufferFactory(const ChannelBufferFactoryPtr& bufferFactory) {
-    if (!bufferFactory) {
-        throw NullPointerException("bufferFactory");
-    }
-
-    this->bufferFactory = bufferFactory;
-}
-
 void DefaultChannelConfig::setConnectTimeout(int connectTimeoutMillis) {
     if (connectTimeoutMillis < 0) {
         throw InvalidArgumentException("connectTimeoutMillis is negative.");
@@ -79,24 +64,8 @@ void DefaultChannelConfig::setConnectTimeout(int connectTimeoutMillis) {
     this->connectTimeoutMillis = connectTimeoutMillis;
 }
 
-const ChannelBufferFactoryPtr& DefaultChannelConfig::getBufferFactory() const {
-    return bufferFactory;
-}
-
-const ChannelPipelineFactoryPtr& DefaultChannelConfig::getPipelineFactory() const {
-    return pipelineFactory;
-}
-
-void DefaultChannelConfig::setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory) {
-    // Unused
-}
-
 int DefaultChannelConfig::getConnectTimeout() const {
     return this->connectTimeoutMillis;
-}
-
-bool DefaultChannelConfig::channelHasReaderBuffer() const {
-    return true;
 }
 
 }

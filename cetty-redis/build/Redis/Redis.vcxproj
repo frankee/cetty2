@@ -12,16 +12,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisMessageHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisReplyDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessageDecoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
     <ClInclude Include="..\..\..\include\cetty\redis\RedisCommand.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessageDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessagePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\redis\RedisServiceFuture.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

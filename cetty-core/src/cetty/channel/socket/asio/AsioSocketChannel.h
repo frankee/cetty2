@@ -34,20 +34,14 @@
 #include <cetty/channel/socket/SocketChannel.h>
 #include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
 #include <cetty/channel/socket/asio/AsioHandlerAllocator.h>
-#include <cetty/channel/socket/asio/DefaultAsioSocketChannelConfig.h>
+#include <cetty/channel/socket/asio/AsioSocketChannelConfig.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
 }
-
-namespace cetty {
-    namespace channel {
-        class MessageEvent;
-    }
 }
 
 namespace cetty {
@@ -59,21 +53,33 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::logging;
 
+class AsioSocketChannelSink;
 class AsioWriteOperationQueue;
+class AsioServerSocketChannel;
+
+class AsioSocketChannel;
+typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
 
 class AsioSocketChannel : public cetty::channel::socket::SocketChannel {
 public:
     AsioSocketChannel(const ChannelPtr& parent,
-                      const ChannelFactoryPtr& factory,
-                      const ChannelPipelinePtr& pipeline,
-                      const ChannelSinkPtr& sink,
                       const AsioServicePtr& ioService,
-                      const boost::thread::id& id);
+                      const ChannelFactoryPtr& factory,
+                      const ChannelPipelinePtr& pipeline);
+
+    AsioSocketChannel(const AsioServicePtr& ioService,
+                      const ChannelFactoryPtr& factory,
+                      const ChannelPipelinePtr& pipeline);
+
+    
+
 
     virtual ~AsioSocketChannel();
 
-    virtual ChannelConfig& getConfig() { return this->config; }
-    virtual const ChannelConfig& getConfig() const { return this->config; }
+    virtual ChannelConfig& getConfig();
+    virtual const ChannelConfig& getConfig() const;
+
+    virtual ChannelSink& getSink();
 
     boost::asio::ip::tcp::socket& getSocket() {
         return this->tcpSocket;
@@ -83,40 +89,30 @@ public:
         return ioService;
     }
 
+    void setMainThreadMode(bool mainThreadMode) {
+        this->mainThreadMode = mainThreadMode;
+    }
+    bool isMainThreadMode() const { return mainThreadMode; }
+
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
-    virtual bool isOpen() const;
-    virtual bool isBound() const;
-    virtual bool isConnected() const;
-    
-    virtual int getInterestOps() const;
-    int getRawInterestOps() const {
-        return AbstractChannel::getInterestOps();
-    }
-    void setRawInterestOpsNow(int interestOps) {
-        AbstractChannel::setInterestOpsNow(interestOps);
-    }
+    virtual bool isActive() const;
 
-    void setClosedState();
-    void setBoundState();
-    void setConnectedState();
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message);
-    virtual ChannelFuturePtr write(const ChannelMessage& message,
-                                   const SocketAddress& remoteAddress);
-
-    virtual ChannelFuturePtr unbind();
-    virtual ChannelFuturePtr close();
-    virtual ChannelFuturePtr disconnect();
-    virtual ChannelFuturePtr setInterestOps(int interestOps);
-
+protected:
     virtual bool setClosed();
 
-    void internalWrite(const MessageEvent& evt);
-    void internalClose(const ChannelFuturePtr& future);
-    void internalSetInterestOps(const ChannelFuturePtr& future, int interestOps);
-    void cleanUpWriteBuffer();
+    virtual void doBind(const SocketAddress& localAddress);
+    virtual void doDisconnect();
+    virtual void doClose();
+
+    void doConnect(const SocketAddress& remoteAddress,
+                   const SocketAddress& localAddress,
+                   const ChannelFuturePtr& connectFuture);
+
+    void doFlush(const ChannelBufferPtr& buffer, const ChannelFuturePtr& future);
+
+    void beginRead();
 
     void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
     void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);
@@ -125,12 +121,15 @@ public:
                        boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
                        const ChannelFuturePtr& cf);
 
-private:
-    void handleAtHighWaterMark();
-    void handleAtLowWaterMark();
+    void cleanUpWriteBuffer();
 
 private:
+    void init(const ChannelPipelinePtr& pipeline);
+
+private:
+    friend class AsioSocketChannelSink;
     friend class AsioWriteOperationQueue;
+    friend class AsioServerSocketChannel;
 
 protected:
     static InternalLogger* logger;
@@ -139,31 +138,23 @@ protected:
     bool isWriting;
     int  highWaterMarkCounter;
 
-    boost::thread::id threadId;
-
     AsioServicePtr  ioService;
     boost::asio::ip::tcp::socket tcpSocket;
 
-    ChannelBufferPtr         readBuffer;
+    AsioSocketChannelSink* sink;
+
     boost::scoped_ptr<AsioWriteOperationQueue> writeQueue;
 
-    DefaultAsioSocketChannelConfig config;
+    AsioSocketChannelConfig config;
 
     AsioHandlerAllocator<int> readAllocator;
     AsioHandlerAllocator<int> writeAllocator;
-    AsioHandlerAllocator<boost::detail::atomic_count> ipcWriteAllocator;
-    AsioHandlerAllocator<boost::detail::atomic_count> ipcStateChangeAllocator;
 
     mutable SocketAddress localAddress;
     mutable SocketAddress remoteAddress;
 
 private:
-    static const int CHANNEL_ST_OPEN      =  0;
-    static const int CHANNEL_ST_BOUND     =  1;
-    static const int CHANNEL_ST_CONNECTED =  2;
-    static const int CHANNEL_ST_CLOSED    = -1;
-
-    int state;
+    bool mainThreadMode;
 };
 
 }

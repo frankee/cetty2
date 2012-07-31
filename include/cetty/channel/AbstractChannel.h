@@ -23,12 +23,12 @@
 
 #include <string>
 #include <map>
-
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelSinkFwd.h>
+#include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {
 namespace channel {
+    class AbstractChannelSink;
 
 /**
  * A skeletal {@link Channel} implementation.
@@ -46,56 +46,50 @@ public:
 
     virtual int getId() const;
 
+    virtual const EventLoopPtr& getEventLoop() const;
+
     virtual const ChannelPtr& getParent() const;
 
     virtual const ChannelFactoryPtr& getFactory() const;
 
     virtual const ChannelPipelinePtr& getPipeline() const;
 
-    /**
-     * Returns the {@link System#identityHashCode(Object) identity hash code}
-     * of this channel.
-     */
-    virtual int hashCode() const;
-
-    /**
-     * Compares the {@link #getId() ID} of the two channels.
-     */
-    virtual int compareTo(const ChannelPtr& c) const;
-
     virtual bool isOpen() const;
 
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
-    virtual ChannelFuturePtr unbind();
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
 
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
+                                     const SocketAddress& localAddress);
+
+    virtual ChannelFuturePtr disconnect();
     virtual ChannelFuturePtr close();
+    virtual ChannelFuturePtr flush();
+
+    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+                                         const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const SocketAddress& localAddress,
+                                            const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
     virtual ChannelFuturePtr& getCloseFuture();
+
+    virtual ChannelFuturePtr newFuture();
+    virtual ChannelFuturePtr newFailedFuture(const Exception& e);
 
     /**
      * Returns the cached {@link SucceededChannelFuture} instance.
      */
-    virtual ChannelFuturePtr& getSucceededFuture();
-
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
-
-    virtual ChannelFuturePtr disconnect();
-
-    virtual int getInterestOps() const;
-
-    virtual ChannelFuturePtr setInterestOps(int interestOps);
-
-    virtual bool isReadable() const;
-
-    virtual bool isWritable() const;
-
-    virtual ChannelFuturePtr setReadable(bool readable);
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message);
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message,
-                                   const SocketAddress& remoteAddress);
+    virtual ChannelFuturePtr newSucceededFuture();
 
     /**
      * Returns the {@link std::string} representation of this channel.  The returned
@@ -105,8 +99,15 @@ public:
      */
     std::string toString() const;
 
+    /**
+     * Compares the {@link #getId() ID} of the two channels.
+     */
+    virtual int compareTo(const ChannelPtr& c) const;
+
     //TODO: should use a concurrent hash map.
     typedef std::map<int, ChannelPtr> ChannelMap;
+
+    virtual void doPreClose() {} // NOOP by default
 
 protected:
     /**
@@ -122,10 +123,10 @@ protected:
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
      */
-    AbstractChannel(const ChannelPtr& parent,
+    AbstractChannel(const EventLoopPtr& eventLoop,
+                    const ChannelPtr& parent,
                     const ChannelFactoryPtr& factory,
-                    const ChannelPipelinePtr& pipeline,
-                    const ChannelSinkPtr& sink);
+                    const ChannelPipelinePtr& pipeline);
 
     /**
      * (Internal use only) Creates a new temporary instance with the specified
@@ -140,12 +141,17 @@ protected:
      * @param sink
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
-     */
+
+    */
     AbstractChannel(int id,
+                    const EventLoopPtr& eventLoop,
                     const ChannelPtr& parent,
                     const ChannelFactoryPtr& factory,
-                    const ChannelPipelinePtr& pipeline,
-                    const ChannelSinkPtr& sink);
+                    const ChannelPipelinePtr& pipeline);
+
+    virtual void doBind(const SocketAddress& localAddress) = 0;
+    virtual void doDisconnect() = 0;
+    virtual void doClose() = 0;
 
     /**
      * Marks this channel as closed.  This method is intended to be called by
@@ -153,7 +159,9 @@ protected:
      * are doing.
      *
      * @return <tt>true</tt> if and only if this channel was not marked as
-     *                      closed yet
+
+
+    *                      closed yet
      */
     virtual bool setClosed();
 
@@ -163,34 +171,28 @@ protected:
      */
     virtual ChannelFuturePtr getUnsupportedOperationFuture();
 
-    /**
-     * Sets the {@link #getInterestOps() interestOps} property of this channel
-     * immediately.  This method is intended to be called by an internal
-     * component - please do not call it unless you know what you are doing.
-     */
-    virtual void setInterestOpsNow(int interestOps);
+    void setPipeline(const ChannelPipelinePtr& pipeline);
 
 private:
     void idDeallocatorCallback(ChannelFuture& future);
-    int allocateId(const ChannelPtr& channel);
+    int  allocateId(const ChannelPtr& channel);
 
 private:
-    void init(const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink);
+    friend class AbstractChannelSink;
 
-private:
     static ChannelMap allChannels;
 
 protected:
+    bool active;
     int id;
 
+    EventLoopPtr eventLoop;
     ChannelPtr parent; // just reference, do not maintenance it's life cycle
     ChannelFactoryPtr  factory; // just reference.
-    ChannelPipelinePtr pipeline; // own pipeline, and maintenance life cycle.
+    ChannelPipelinePtr pipeline;
 
     ChannelFuturePtr succeededFuture;
     ChannelFuturePtr closeFuture;
-
-    int interestOps;
 
     /** Cache for the string representation of this channel */
     mutable std::string strVal;

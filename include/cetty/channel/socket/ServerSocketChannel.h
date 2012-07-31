@@ -53,10 +53,10 @@ protected:
      *        and send upstream events to the pipeline
      */
     ServerSocketChannel(
+        const EventLoopPtr& eventLoop,
         const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink) 
-        : AbstractServerChannel(factory, pipeline, sink) {
+        const ChannelPipelinePtr& pipeline) 
+        : AbstractServerChannel(eventLoop, factory, pipeline) {
     }
 
     virtual ~ServerSocketChannel() {}

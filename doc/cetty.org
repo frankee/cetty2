@@ -40,7 +40,7 @@ ServerBootstrap watchdog(factory);
 ** logging
 ** timer
 ** SSL/TSL
-
+   
 * 框架运行流程说明
 ** 服务器端启动流程
 ** 服务器端退出流程
@@ -51,35 +51,62 @@ ServerBootstrap watchdog(factory);
 ** 客户端退出流程
 
 * 配置系统
+** 说明
+   cetty config是用来提供应用开发者方便的配置系统。通常的使用流程包含：
+   1. 定义{模块名称}.conf.proto文件；
+   2. 使用ConfigGenerator生成对应的{模块名称}Config.h/cpp, {模块名称}.yml, {模块名称}Cmdline.h/cpp
+      1) {模块名称}Config.h/cpp是模块的配置类（struct），用户可以直接操作配置类进行程序的配置，同时该类会将配置的Meta信息（Description、Reflection）注册到到全局的Meta信息中心，以供程序自动从{模块名称}.yml文件中读取并配置{模块名称}Config。
+      2) {模块名称}.yml是对应的配置文件模板，对于没有default值的field会处于注释状态，具有的option有：
+         1. field的option：mark=true/false来设置是否默认注释该field。
+         2. field的option：comment，用来设置配置项的说明，对于的message、file的option也有comment。
+         3. file的option：include，指定要包含的其他的yml配置文件，在使用server框架的情况下，通常是在ServerBuilder.yml中指定。
+      3) {模块名称}Cmdline.h/cpp是用来处理命令行参数的获取。默认有的配置有--conf指定对于的yml配置文件（可以包含多个yml文件），在不使用yml的情况下也可以使用cmdline的program option来获取相关的配置项。且cmdline的配置项优先级高于yml的配置项。
+   3. 接下来将{模块名称}Config.h/cpp以及{模块名称}Cmdline.h/cpp编译进工程，并修改相应的{模块名称}.yml。
+   4. 默认情况的所有的{模块名称}.yml的配置文件都存放于project相应的conf目录。
+
+   其实本系统可以直接使用protoc将{模块名称}.conf.proto文件生成{模块名称}Config.h/cpp，但是所生成的文件size实在太大。所以最终选择实现一个简版的protoc。
+   系统所使用的技术包含：
+   - google protobuf
+   - yaml （yaml-cpp）
+   - boost program_options
+
+   系统设计的基本思想与原则：
+   1. 各个模块的配置文件应该具有独立性；
+   2. 整个系统（服务器）可以通过include选项包含所需要的模块配置文件，支持语法有：
+      - #include path/to/module.yml
+      - #inlcude path/to/*.yml
+   3. 配置文件与命令行可以同时使用；
+   4. 使用上尽可能少写代码或是重复文本，配置对象直接编译进系统，不需要通过字符串名称来获取；
+   5. 配置系统不依赖于具体的文件格式，可以选择支持yml，json，xml，ini（在表达顺序容器的时候比较ugly）。
+
+** 使用
+#+BEGIN_EXAMPLE
+int main(int argc, char* argv[]) {
+    ConfigureCenter::instance().load(argc, argv);
+    ProtobufServerBuilder builder(ConfigureCenter::instance());
+    //or like this:
+    //ProtobufServerBuilderConfig config;
+    //ConfigureCenter::instance().configure(&config);
+}
+#+END_EXAMPLE
+
 * 基于Google Protobuf的Service栈
   支持Protobuf RPC，REST，SOAP1.1
 ** 简要说明
-   
-   service_stub ---> ProtobufClientServiceAdaptor ---> ProtobufClientServicePtr
-                                                            OutStandingCall
-                                                            
-                                                            dispatcher                      ----
-                                                            (OutStandingCall)
-                                                                                            (OutStandingCall)
-                                                            ServiceRequestHandler           ----
-                                                            (request)                       
-                                                                                             (response)  
-                                                            RequestEncoder                   ResponseDecoder
-   
-
-
 ** Protobuf RPC
 *** 服务器端
 *** 客户端
     其他语言的实现Java、Ruby、Python
 ** REST
 *** request输入方式
-    1. route模板
-    2. GET query string输入
-    3. GET query string的
-    4. POST
+    1. 通过Uri模板获取获取service、mothod以及相应的参数；
+    2. 通过POST的content获取相应的参数；
+    3. 通过http header的cookie获取相应的参数，主要认证及鉴权相关参数。
+
 ** SOAP1.1
 ** Service框架代码的自动生成
+   1. proto文件自动生成 {服务}.pb.h/cc {服务}Impl.h/cpp {服务}Server.cpp
+
 ** Service的开发示例
 
 * 框架运维
@@ -90,16 +117,9 @@ ServerBootstrap watchdog(factory);
 ** 连接数的限制
 ** 空闲连接的处理
 ** DDOS的防范
-** Backpressure
+
 * 服务群集管理
-** 服务的注册 Service Registration （Zookeeper）
-** 连接管理 Connection Management
-*** 连接池（Connection Pooling）
-*** 自动管理链接（auto reconnecting）
-*** 负载均衡（Load Balancing）
-*** 错误检测，重试（Failure Detection、Failover/Retry）
-** 服务的发现（Service Discovery Zookeeper）
-** Rich Statistics
+** 服务的查找 NameService （Zookeeper）
 
 * 框架高级使用模式
 ** 多种服务器（TCP、HTTP）共用asio线程池
@@ -131,14 +151,13 @@ ServerBootstrap watchdog(factory);
 
 * 基于cetty的应用
 ** 基于cetty的消息队列
-** 基于cetty及gearman的任务分发系统
+** 基于cetty及gearman的分布式RPC系统
    - Tile Map静态渲染处理
    - Tile Map循环渲染处理
    - Tile Map动态实时渲染处理
      1. 客户端发送task请求 --> gearman存入队列
    - Tile Map混合渲染处理（部分静态、部分动态）
-     
-   
+
 ** 基于cetty及levelDB的noSql分布式数据库
 
 * 安全

@@ -23,7 +23,6 @@
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
-#include <cetty/handler/codec/http/HttpHeader.h>
 
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>

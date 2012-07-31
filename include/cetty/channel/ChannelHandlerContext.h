@@ -21,19 +21,27 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelFwd.h>
+#include <boost/bind.hpp>
+
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/ChannelInboundHandler.h>
+#include <cetty/channel/ChannelOutboundHandler.h>
 #include <cetty/channel/ChannelHandlerFwd.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelInboundInvoker.h>
+#include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/channel/ChannelException.h>
+#include <cetty/buffer/ChannelBuffer.h>
 
 namespace cetty {
-	namespace channel {
+namespace channel {
 
-		class ChannelEvent;
-		class MessageEvent;
-		class ExceptionEvent;
-		class ChannelStateEvent;
-		class WriteCompletionEvent;
-		class ChildChannelStateEvent;
+using namespace cetty::buffer;
+
+class ChannelPipeline;
+class ChannelInboundBufferHandlerContext;
+class ChannelOutboundBufferHandlerContext;
 
 /**
  * Enables a {@link ChannelHandler} to interact with its {@link ChannelPipeline}
@@ -141,8 +149,25 @@ namespace cetty {
  *
  */
 
-class ChannelHandlerContext {
+class ChannelHandlerContext
+        : public ChannelOutboundInvoker, public ChannelInboundInvoker {
+private:
+    friend class ChannelPipeline;
+
 public:
+    ChannelHandlerContext(const std::string& name,
+                          ChannelPipeline& pipeline,
+                          const ChannelHandlerPtr& handler,
+                          ChannelHandlerContext* prev,
+                          ChannelHandlerContext* next);
+
+    ChannelHandlerContext(const std::string& name,
+                          const EventLoopPtr& eventLoop,
+                          ChannelPipeline& pipeline,
+                          const ChannelHandlerPtr& handler,
+                          ChannelHandlerContext* prev,
+                          ChannelHandlerContext* next);
+
     virtual ~ChannelHandlerContext() {}
 
     /**
@@ -150,161 +175,297 @@ public:
      * This method is a shortcut to <tt>getPipeline().getChannel()</tt>.
      * @return ChannelPtr which will not be NULL.
      */
-    virtual const ChannelPtr& getChannel() const = 0;
+    const ChannelPtr& getChannel() const;
 
     /**
      * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
      * belongs to.
      * @return ChannelPipelinePtr which will not be NULL.
      */
-    virtual const ChannelPipelinePtr& getPipeline() const = 0;
+    const ChannelPipeline& getPipeline() const {
+        return pipeline;
+    }
+
+    ChannelPipeline& getPipeline() {
+        return pipeline;
+    }
+
+    const EventLoopPtr& getEventLoop() const {
+        return eventloop;
+    }
 
     /**
      * Returns the name of the {@link ChannelHandler} in the
      * {@link ChannelPipeline}.
      */
-    virtual const std::string& getName() const = 0;
+    const std::string& getName() const {
+        return this->name;
+    }
 
     /**
      * Returns the {@link ChannelHandler} that this context object is
      * serving.
      */
-    virtual const ChannelHandlerPtr& getHandler() const = 0;
+    const ChannelHandlerPtr& getHandler() const;
 
     /**
      * Returns the {@link ChannelUpstreamHandler} that this context object is
      * actually serving. If the context object serving is not ChannelUpstreamHandler,
      * then return an empty ChannelUpstreamHandlerPtr.
      */
-    virtual const ChannelUpstreamHandlerPtr& getUpstreamHandler() const = 0;
+    const ChannelInboundHandlerPtr& getInboundHandler() const;
 
     /**
      * Returns the {@link ChannelDownstreamHandler} that this context object is
      * actually serving. If the context object serving is not ChannelDownstreamHandler,
      * then return an empty ChannelDownstreamHandlerPtr.
      */
-    virtual const ChannelDownstreamHandlerPtr& getDownstreamHandler() const = 0;
+    const ChannelOutboundHandlerPtr& getOutboundHandler() const;
+
+    ChannelHandlerContext* nextInboundHandlerContext();
+    ChannelHandlerContext* nextOutboundHandlerContext();
+
+    ChannelInboundBufferHandlerContext* inboundBufferHandlerContext();
+    ChannelOutboundBufferHandlerContext* outboundBufferHandlerContext();
+
+    template<typename T>
+    T* inboundMessageHandlerContext() {
+        return dynamic_cast<T*>(this);
+    }
+
+    template<typename T>
+    T* outboundMessageHandlerContext() {
+        return dynamic_cast<T*>(this);
+    }
+
+    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext();
+    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext();
+
+    template<typename T>
+    T* nextInboundMessageHandlerContext() {
+        ChannelHandlerContext* next = nextInboundContext;
+        if (!next) {
+            return (T*)NULL;
+        }
+
+        if (next->isInboundMessageHandler()) {
+            return dynamic_cast<T*>(next);
+        }
+
+        next = next->nextInboundContext;
+
+        while (true) {
+            if (!next) {
+                return (T*)NULL;
+            }
+
+            if (next->isInboundMessageHandler()) {
+                return dynamic_cast<T*>(next);
+            }
+
+            next = next->nextInboundContext;
+        }
+    }
+
+    template<typename T>
+    T* nextOutboundMessageHandlerContext() {
+        ChannelHandlerContext* next = nextOutboundContext;
+
+        if (!next) {
+            return (T*)NULL;
+        }
+
+        if (next->isOutboundMessageHandler()) {
+            return dynamic_cast<T*>(next);
+        }
+
+        next = next->nextInboundContext;
+
+        while (true) {
+            if (!next) {
+                return (T*)NULL;
+            }
+
+            if (next->isOutboundMessageHandler()) {
+                return dynamic_cast<T*>(next);
+            }
+
+            next = next->nextInboundContext;
+        }
+    }
+
+    template<typename T>
+    T* downcast() {
+        return dynamic_cast<T*>(this);
+    }
 
     /**
      * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
      * instance of {@link ChannelUpstreamHandler}.
      */
-    virtual bool canHandleUpstream() const = 0;
+    bool canHandleInboundMessage() const { return canHandleInbound; }
 
     /**
      * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
      * instance of {@link ChannelDownstreamHandler}.
      */
-    virtual bool canHandleDownstream() const = 0;
+    bool canHandleOutboundMessage() const { return canHandleOutbound; }
 
-    /**
-     * Sends the specified {@link ChannelEvent}, except {@MessageEvent},
-     * {@ChannelStateEvent}, {@ChildChannelStateEvent},
-     * {@WriteCompletionEvent} and {@ExceptionEvent}, to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const ChannelEvent& e) = 0;
+    virtual void fireChannelCreated();
+    virtual void fireChannelActive();
+    virtual void fireChannelInactive();
+    virtual void fireExceptionCaught(const ChannelException& cause);
+    virtual void fireUserEventTriggered(const UserEvent& event);
+    virtual void fireMessageUpdated();
+    virtual void fireWriteCompleted();
 
-    /**
-     * Sends the specified {@link MessageEvent} to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const MessageEvent& e) = 0;
+    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
-    /**
-     * Sends the specified {@link ChannelStateEvent} to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const ChannelStateEvent& e) = 0;
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
 
-    /**
-     * Sends the specified {@link ChildChannelStateEvent} to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const ChildChannelStateEvent& e) = 0;
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
+                                     const SocketAddress& localAddress);
 
-    /**
-     * Sends the specified {@link WriteCompletionEvent} to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const WriteCompletionEvent& e) = 0;
+    virtual ChannelFuturePtr disconnect();
 
-    /**
-     * Sends the specified {@link ExceptionEvent} to the
-     * {@link ChannelUpstreamHandler} which is placed in the closest upstream
-     * from the handler associated with this context.  It is recommended to use
-     * the shortcut methods in {@link Channels} rather than calling this method
-     * directly.
-     */
-    virtual void sendUpstream(const ExceptionEvent& e) = 0;
+    virtual ChannelFuturePtr close();
 
-    /**
-     * Sends the specified {@link ChannelEvent}, except {@MessageEvent}
-     * and {@ChannelStateEvent} to the
-     * {@link ChannelDownstreamHandler} which is placed in the closest
-     * downstream from the handler associated with this context.  It is
-     * recommended to use the shortcut methods in {@link Channels} rather than
-     * calling this method directly.
-     */
-    virtual void sendDownstream(const ChannelEvent& e) = 0;
+    virtual ChannelFuturePtr flush();
 
-    /**
-     * Sends the specified {@link MessageEvent} to the
-     * {@link ChannelDownstreamHandler} which is placed in the closest
-     * downstream from the handler associated with this context.  It is
-     * recommended to use the shortcut methods in {@link Channels} rather than
-     * calling this method directly.
-     */
-    virtual void sendDownstream(const MessageEvent& e) = 0;
+    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+                                         const ChannelFuturePtr& future);
 
-    /**
-     * Sends the specified {@link ChannelStateEvent} to the
-     * {@link ChannelDownstreamHandler} which is placed in the closest
-     * downstream from the handler associated with this context.  It is
-     * recommended to use the shortcut methods in {@link Channels} rather than
-     * calling this method directly.
-     */
-    virtual void sendDownstream(const ChannelStateEvent& e) = 0;
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const ChannelFuturePtr& future);
 
-    /**
-     * Retrieves an pointer which is {@link #setAttachment(void* attachment) attached} to
-     * this context.
-     *
-     * @return <tt>NULL</tt> if no pointer was attached or
-     *                      <tt>NULL</tt> was attached
-     */
-    virtual void* getAttachment() = 0;
+    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                            const SocketAddress& localAddress,
+                                            const ChannelFuturePtr& future);
 
-    /**
-     * Retrieves an pointer which is {@link #setAttachment(void* attachment) attached} to
-     * this context.
-     *
-     * @return <tt>NULL</tt> if no pointer was attached or
-     *                      <tt>NULL</tt> was attached
-     */
-    virtual const void* getAttachment() const = 0;
+    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
 
-    /**
-     * Attaches an object to this context to store a stateful information
-     * specific to the {@link ChannelHandler} which is associated with this
-     * context.
-     */
-    virtual void setAttachment(void* attachment) = 0;
+    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+
+    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
+
+    template<typename T>
+    const ChannelFuturePtr& write(const T& message,
+                                  const ChannelFuturePtr& future) {
+        if (nextOutboundContext) {
+            return write(*nextOutboundContext, message, future);
+        }
+    }
+
+    void fireChannelCreated(ChannelHandlerContext& ctx);
+    void fireChannelActive(ChannelHandlerContext& ctx);
+    void fireChannelInactive(ChannelHandlerContext& ctx);
+    void fireMessageUpdated(ChannelHandlerContext& ctx);
+    void fireWriteCompleted(ChannelHandlerContext& ctx);
+    void fireExceptionCaught(ChannelHandlerContext& ctx,
+                             const ChannelException& cause);
+    void fireUserEventTriggered(ChannelHandlerContext& ctx,
+                                const UserEvent& event);
+
+
+    const ChannelFuturePtr& bind(ChannelHandlerContext& ctx,
+                                 const SocketAddress& localAddress,
+                                 const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& connect(ChannelHandlerContext& ctx,
+                                    const SocketAddress& remoteAddress,
+                                    const SocketAddress& localAddress,
+                                    const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& disconnect(ChannelHandlerContext& ctx,
+                                       const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& close(ChannelHandlerContext& ctx,
+                                  const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
+                                  const ChannelFuturePtr& future);
+    const ChannelFuturePtr& write(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& message,
+        const ChannelFuturePtr& future);
+
+    template<typename T>
+    const ChannelFuturePtr& write(ChannelHandlerContext& ctx,
+                                  const T& message,
+                                  const ChannelFuturePtr& future) {
+        if (!eventloop) {
+            try {
+                //ctx.outMsgBuf.add(message);
+                ctx.outboundHandler->flush(ctx, future);
+            }
+            catch (const Exception& e) {
+                //logger.warn(
+                //    "An exception was thrown by a user handler's " +
+                //    "exceptionCaught() method while handling the following exception:", cause);
+            }
+            catch (const std::exception& e) {
+                notifyHandlerException(e);
+            }
+            catch (...) {
+                // clear the outbound ChannelBuffer
+                //if (ctx.outByteBuf != null) {
+                //    ByteBuf buf = ctx.outByteBuf;
+
+                //   if (!buf.readable()) {
+                //       buf.discardReadBytes();
+                //   }
+                //}
+            }
+        }
+        else {
+            eventloop->post(boost::bind(&ChannelHandlerContext::write<T>,
+                                        this,
+                                        boost::ref(ctx),
+                                        message,
+                                        future));
+        }
+
+        return future;
+    }
+
+protected:
+    virtual bool isInboundBufferHandler() const { return false; }
+    virtual bool isInboundMessageHandler() const { return false; }
+    virtual bool isOutboundBufferHandler() const { return false; }
+    virtual bool isOutboundMessageHandler() const { return false; }
+
+private:
+    void init(const ChannelHandlerPtr& handler);
+
+    void attach();
+    void detach();
+
+    ChannelFuturePtr newFuture();
+    ChannelFuturePtr newSucceededFuture();
+    ChannelFuturePtr newFailedFuture(const ChannelException& cause);
+
+    void notifyHandlerException();
+    void notifyHandlerException(const std::exception& e);
+    void notifyHandlerException(const Exception& e);
+
+protected:
+    bool canHandleInbound;
+    bool canHandleOutbound;
+
+    ChannelHandlerPtr         handler;
+    ChannelInboundHandlerPtr  inboundHandler;
+    ChannelOutboundHandlerPtr outboundHandler;
+
+    ChannelHandlerContext* next;
+    ChannelHandlerContext* prev;
+
+    ChannelHandlerContext* nextInboundContext;
+    ChannelHandlerContext* nextOutboundContext;
+
+    std::string name;
+
+    ChannelPipeline& pipeline;
+    EventLoopPtr eventloop;
+    ChannelPtr channel;
 };
 
 }

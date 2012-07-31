@@ -18,7 +18,7 @@
  */
 
 #include <cetty/service/ServiceFuture.h>
-#include <cetty/redis/RedisReplyMessage.h>
+#include <cetty/redis/RedisReplyMessagePtr.h>
 
 namespace cetty {
 namespace redis {

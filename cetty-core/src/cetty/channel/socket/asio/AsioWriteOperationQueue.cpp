@@ -21,11 +21,9 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
 
 namespace cetty {
@@ -39,6 +37,7 @@ using namespace cetty::buffer;
 void AsioWriteOperationQueue::plusWriteBufferSize(int messageSize) {
     writeBufferSize += messageSize;
 
+#if 0
     int highWaterMark = channel.config.getWriteBufferHighWaterMark();
 
     if (writeBufferSize >= highWaterMark) {
@@ -46,11 +45,13 @@ void AsioWriteOperationQueue::plusWriteBufferSize(int messageSize) {
             channel.handleAtHighWaterMark();
         }
     }
+#endif
 }
 
 void AsioWriteOperationQueue::minusWriteBufferSize(int messageSize) {
     writeBufferSize -= messageSize;
 
+#if 0
     int lowWaterMark = channel.config.getWriteBufferLowWaterMark();
 
     if (writeBufferSize == 0 || writeBufferSize < lowWaterMark) {
@@ -58,6 +59,7 @@ void AsioWriteOperationQueue::minusWriteBufferSize(int messageSize) {
             channel.handleAtLowWaterMark();
         }
     }
+#endif
 }
 
 }

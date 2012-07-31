@@ -19,13 +19,13 @@
 #include <boost/assert.hpp>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/socket/ClientSocketChannelFactory.h>
@@ -48,32 +48,12 @@ ClientBootstrap::ClientBootstrap(const ChannelFactoryPtr& channelFactory)
     : Bootstrap(channelFactory) {
 }
 
-ChannelFuturePtr ClientBootstrap::connect() {
-    const SocketAddress* remoteAddress = getTypedOption<SocketAddress>("remoteAddress");
-
-    if (remoteAddress == NULL) {
-        LOG_ERROR(logger, "has not set the remoteAddress, connect failed.");
-        return Channels::failedFuture(
-                   NullChannel::getInstance(),
-                   IllegalStateException("remoteAddress option is not set."));
-    }
-
-    return connect(*remoteAddress);
-}
-
 cetty::channel::ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
     SocketAddress remote(host, port);
     return connect(remote);
 }
 
 ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress) {
-    const SocketAddress* localAddress =
-        getTypedOption<SocketAddress>("localAddress");
-
-    if (localAddress) {
-        return connect(remoteAddress, *localAddress);
-    }
-
     return connect(remoteAddress, SocketAddress::NULL_ADDRESS);
 }
 
@@ -81,28 +61,15 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     ChannelPipelinePtr pipeline;
     ChannelPtr ch;
 
-    // FIXME:
-    // for some reason, the pointer address of the impl int the remoteAddress
-    // will be changed after getFactory()->newChannel(pipeline) under msvc8.
     SocketAddress remote = remoteAddress;
     SocketAddress local  = localAddress;
 
-    const ChannelPipelineFactoryPtr& factory = getPipelineFactory();
-
-    if (!factory) {
-        LOG_ERROR(logger, "has not set the pipeline factory, then return a failed future.");
-        return Channels::failedFuture(
-                   NullChannel::getInstance(),
-                   ChannelPipelineException("has not set the pipeline factory."));
-    }
-
     try {
-        pipeline = factory->getPipeline();
+        pipeline = ChannelPipelines::pipeline(getPipeline());
     }
     catch (...) {
         LOG_ERROR(logger, "has an exception when get pipeline from factory, then return a failed future.");
-        return Channels::failedFuture(
-                   NullChannel::getInstance(),
+        return NullChannel::getInstance()->newFailedFuture(
                    ChannelPipelineException("Failed to initialize a pipeline."));
     }
 
@@ -110,8 +77,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
 
     if (!ch) {
         LOG_ERROR(logger, "failed to create a new channel from the factory, then return a failed future.");
-        return Channels::failedFuture(
-                   NullChannel::getInstance(),
+        return NullChannel::getInstance()->newFailedFuture(
                    ChannelPipelineException("Failed to create a new channel."));
     }
 

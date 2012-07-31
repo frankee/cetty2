@@ -21,17 +21,15 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelSinkFwd.h>
+#include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/buffer/ChannelBufferFwd.h>
 
 namespace cetty {
 namespace channel {
 
-class ChannelEvent;
-class MessageEvent;
-class ChannelStateEvent;
+class SocketAddress;
 
-class ChannelPipeline;
-class ChannelPipelineException;
+using namespace cetty::buffer;
 
 /**
  * Receives and processes the terminal downstream {@link ChannelEvent}s.
@@ -52,35 +50,19 @@ class ChannelSink {
 public:
     virtual ~ChannelSink() {}
 
-    /**
-     * Invoked by {@link ChannelPipeline} when a downstream {@link ChannelEvent},
-     * except the {@link MessageEvent} and {@link ChannelStateEvent},
-     * has reached its terminal (the head of the pipeline).
-     */
-    virtual void eventSunk(const ChannelPipeline& pipeline,
-                            const ChannelEvent& e) = 0;
+    virtual void bind(const SocketAddress& localAddress,
+                      const ChannelFuturePtr& future) = 0;
 
-    /**
-     * Invoked by {@link ChannelPipeline} when a downstream {@link MessageEvent}
-     * has reached its terminal (the head of the pipeline).
-     */
-    virtual void writeRequested(const ChannelPipeline& pipeline,
-                                 const MessageEvent& e) = 0;
+    virtual void connect(const SocketAddress& remoteAddress,
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future) = 0;
 
-    /**
-     * Invoked by {@link ChannelPipeline} when a downstream {@link ChannelStateEvent}
-     * has reached its terminal (the head of the pipeline).
-     */
-    virtual void stateChangeRequested(const ChannelPipeline& pipeline,
-                                       const ChannelStateEvent& e) = 0;
+    virtual void disconnect(const ChannelFuturePtr& future) = 0;
 
-    /**
-     * Invoked by {@link ChannelPipeline} when an exception was raised while
-     * one of its {@link ChannelHandler}s process a {@link ChannelEvent}.
-     */
-    virtual void exceptionCaught(const ChannelPipeline& pipeline,
-                                  const ChannelEvent& e,
-                                  const ChannelPipelineException& cause) = 0;
+    virtual void close(const ChannelFuturePtr& future) = 0;
+
+    virtual void flush(const ChannelBufferPtr& buffer,
+        const ChannelFuturePtr& future) = 0;
 };
 
 }

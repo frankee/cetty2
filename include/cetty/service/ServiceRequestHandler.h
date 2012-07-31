@@ -18,10 +18,7 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/SimpleChannelHandler.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/service/OutstandingCall.h>
 
@@ -31,7 +28,8 @@ namespace service {
 using namespace cetty::channel;
 
 template<typename ReqT, typename RepT>
-class ServiceRequestHandler : public cetty::channel::SimpleChannelHandler {
+class ServiceRequestHandler
+    : public cetty::channel::ChannelMessageHandler<ReqT, RepT> {
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
@@ -61,7 +59,7 @@ public:
             }
 
             if (parent) {
-                Channels::fireMessageReceived(parent, ChannelMessage(out));
+                ChannelPipelines::fireMessageReceived(parent, UserEvent(out));
             }
             outMessages.pop_front();
         }
@@ -73,7 +71,7 @@ public:
     virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
         OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingCallType>();
         outMessages.push_back(msg);
-        Channels::write(ctx, Channels::future(ctx.getChannel()), ChannelMessage(msg->request));
+        ChannelPipelines::write(ctx, ChannelPipelines::future(ctx.getChannel()), UserEvent(msg->request));
     }
 
     virtual ChannelHandlerPtr clone() {

@@ -16,7 +16,8 @@
 
 #include <cetty/bootstrap/Bootstrap.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelHandler.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
@@ -35,16 +36,13 @@ using namespace cetty::logging;
 
 InternalLogger* Bootstrap::logger = NULL;
 
-Bootstrap::Bootstrap()
-    : externalSetPipelineFactory(false), pipeline(NULL), factory(NULL) {
-
+Bootstrap::Bootstrap() {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("Bootstrap");
     }
 }
 
-Bootstrap::Bootstrap(const ChannelFactoryPtr& channelFactory)
-    : externalSetPipelineFactory(false), pipeline(NULL), factory(NULL) {
+Bootstrap::Bootstrap(const ChannelFactoryPtr& channelFactory) {
     setFactory(channelFactory);
 
     if (NULL == logger) {
@@ -63,7 +61,7 @@ const ChannelFactoryPtr& Bootstrap::getFactory() {
     return factory;
 }
 
-void Bootstrap::setFactory(const ChannelFactoryPtr& factory) {
+Bootstrap& Bootstrap::setFactory(const ChannelFactoryPtr& factory) {
     if (factory) {
         if (this->factory) {
             LOG_WARN(logger, "setFactory, override the orignial channel facotry.");
@@ -74,91 +72,80 @@ void Bootstrap::setFactory(const ChannelFactoryPtr& factory) {
     else {
         LOG_WARN(logger, "setFactory, but the factory is NULL, do nothing.");
     }
+
+    return *this;
 }
 
 const ChannelPipelinePtr& Bootstrap::getPipeline() {
     if (!pipeline) {
-        if (externalSetPipelineFactory) {
-            LOG_WARN(logger, "pipelineFactory has already set, NULL pipeline returned.");
-        }
-        else {
-            LOG_WARN(logger, "pipeline has not set yet.");
-        }
+        LOG_WARN(logger, "pipeline has not set yet.");
     }
 
     return this->pipeline;
 }
 
-void Bootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
+Bootstrap& Bootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
     if (!pipeline) {
         LOG_WARN(logger, "the pipeline set is NULL, do nothing.");
-        return;
+        return *this;
     }
 
-    if (externalSetPipelineFactory) {
-        LOG_WARN(logger, "pipelineFactory has already set, do nothing.");
-        return;
+    if (this->pipeline) {
+        LOG_WARN(logger, "pipeline has already set, will override.");
     }
 
     this->pipeline = pipeline;
-    pipelineFactory = Channels::pipelineFactory(pipeline);
-    externalSetPipelineFactory = false;
+
+    return *this;
 }
 
-void Bootstrap::setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory) {
-    if (pipelineFactory) {
-        this->pipelineFactory = pipelineFactory;
-        externalSetPipelineFactory = true;
-    }
-    else {
-        LOG_WARN(logger, "pipelineFactory set is NULL, do nothing.");
-    }
-}
+ChannelOption::Variant Bootstrap::getOption(const ChannelOption& option) const {
 
-boost::any Bootstrap::getOption(const std::string& key) const {
-    std::map<std::string, boost::any>::const_iterator itr = options.find(key);
+    ChannelOption::Options::const_iterator itr = options.find(option);
 
     if (itr == options.end()) {
-        LOG_WARN(logger, "can not get the option of %s.", key.c_str());
-        return boost::any();
+        LOG_WARN(logger, "can not get the option of %s.", option.getName().c_str());
+        return ChannelOption::Variant();
     }
 
     return itr->second;
 }
 
-void Bootstrap::setOption(const std::string& key, const boost::any& value) {
+Bootstrap& Bootstrap::setOption(const ChannelOption& option,
+                          const ChannelOption::Variant& value) {
     if (value.empty()) {
-        options.erase(key);
-        LOG_WARN(logger, "setOption, the key (%s) is empty value, remove from the options.", key.c_str());
+        options.erase(option);
+        LOG_WARN(logger, "setOption, the key (%s) is empty value, remove from the options.", option.getName().c_str());
     }
     else {
-        LOG_INFO(logger, "set Option, the key is %s.", key.c_str());
-        options.insert(std::make_pair(key, value));
+        LOG_INFO(logger, "set Option, the key is %s.", option.getName().c_str());
+        options.insert(std::make_pair(option, value));
     }
+
+    return *this;
 }
 
-void Bootstrap::releaseExternalResources() {
-    if (factory) {
-        factory->releaseExternalResources();
-    }
-}
-
-const ChannelPipelineFactoryPtr& Bootstrap::getPipelineFactory() {
-    return this->pipelineFactory;
-}
-
-const std::map<std::string, boost::any>& Bootstrap::getOptions() const {
+const ChannelOption::Options& Bootstrap::getOptions() const {
     return this->options;
 }
 
-std::map<std::string, boost::any>& Bootstrap::getOptions() {
+ChannelOption::Options& Bootstrap::getOptions() {
     return this->options;
 }
 
-void Bootstrap::setOptions(const std::map<std::string, boost::any>& options) {
+Bootstrap& Bootstrap::setOptions(const ChannelOption::Options& options) {
     LOG_INFO(logger, "set options using map, will reset the original options.");
     this->options = options;
+
+    return *this;
 }
+
+void Bootstrap::shutdown() {
+    if (factory) {
+        factory->shutdown();
+    }
+}
+
 
 }
 }

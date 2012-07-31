@@ -18,15 +18,12 @@
 #include <boost/crc.hpp>
 #include <boost/bind.hpp>
 
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelSink.h>
-#include <cetty/channel/ChannelState.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/DownstreamMessageEvent.h>
-#include <cetty/channel/DownstreamChannelStateEvent.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelFutureListener.h>
 
 #include <cetty/channel/SucceededChannelFuture.h>
@@ -58,85 +55,53 @@ public:
     }
 
     bool setClosed() {
+        if (channel) {
+            channel->doPreClose();
+        }
+
         return DefaultChannelFuture::setSuccess();
     }
+
+private:
+    boost::intrusive_ptr<AbstractChannel> channel;
 };
 
-AbstractChannel::AbstractChannel(const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink)
-    : parent(parent), factory(factory), pipeline(pipeline), interestOps(OP_READ) {
-    BOOST_ASSERT(factory && pipeline && sink && "input must not to be NULL!");
-    init(pipeline, sink);
-    id = allocateId(this);
+AbstractChannel::AbstractChannel(const EventLoopPtr& eventLoop,
+                                 const ChannelPtr& parent,
+                                 const ChannelFactoryPtr& factory,
+                                 const ChannelPipelinePtr& pipeline)
+    : id(),
+      eventLoop(eventLoop),
+      parent(parent),
+      factory(factory),
+      pipeline(pipeline) {
+    BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
 }
 
-AbstractChannel::AbstractChannel(int id, const ChannelPtr& parent, const ChannelFactoryPtr& factory, const ChannelPipelinePtr& pipeline, const ChannelSinkPtr& sink)
-    : id(id), parent(parent), factory(factory), pipeline(pipeline), interestOps(OP_READ) {
-    BOOST_ASSERT(factory && pipeline && sink && "input must not to be NULL!");
-    init(pipeline, sink);
+AbstractChannel::AbstractChannel(int id,
+                                 const EventLoopPtr& eventLoop,
+                                 const ChannelPtr& parent,
+                                 const ChannelFactoryPtr& factory,
+                                 const ChannelPipelinePtr& pipeline)
+    : id(id),
+      eventLoop(eventLoop),
+      parent(parent),
+      factory(factory),
+      pipeline(pipeline) {
+    BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
 }
 
 AbstractChannel::~AbstractChannel() {
-
 }
 
-ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message) {
-    return AbstractChannel::write(message, getRemoteAddress());
-}
+void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
+    pipeline->attach(shared_from_this());
+    succeededFuture = new SucceededChannelFuture(shared_from_this());
+    closeFuture = new ChannelCloseFuture(shared_from_this());
 
-ChannelFuturePtr AbstractChannel::write(const ChannelMessage& message,
-                                        const SocketAddress& remoteAddress) {
-    ChannelFuturePtr future;
-    future = Channels::future(this);
-	DownstreamMessageEvent evt(this, future, message, remoteAddress);
-    pipeline->sendDownstream(evt);
-
-    return future;
-}
-
-ChannelFuturePtr AbstractChannel::unbind() {
-    ChannelFuturePtr future = Channels::future(this);
-	DownstreamChannelStateEvent evt(
-		this, future, ChannelState::BOUND);
-    pipeline->sendDownstream(evt);
-
-    return future;
-}
-
-ChannelFuturePtr AbstractChannel::close() {
-    if (closeFuture->isDone()) {
-        return closeFuture;
+    if (!id) {
+        id = allocateId(this);
     }
-	DownstreamChannelStateEvent evt(
-		this, closeFuture, ChannelState::OPEN);
-    pipeline->sendDownstream(evt);
-
-    return closeFuture;
-}
-
-ChannelFuturePtr AbstractChannel::disconnect() {
-    ChannelFuturePtr future = Channels::future(this);
-	DownstreamChannelStateEvent evt(
-		this, future, ChannelState::CONNECTED);
-    pipeline->sendDownstream(evt);
-
-    return future;
-}
-
-ChannelFuturePtr AbstractChannel::setInterestOps(int interestOps) {
-    interestOps = Channels::validateAndFilterDownstreamInteresOps(interestOps);
-
-    ChannelFuturePtr future = Channels::future(this);
-	DownstreamChannelStateEvent evt(
-		this, future, ChannelState::INTEREST_OPS, boost::any(interestOps));
-    pipeline->sendDownstream(evt);
-    return future;
-}
-
-void AbstractChannel::init(const ChannelPipelinePtr& pipeline,
-                           const ChannelSinkPtr& sink) {
-    pipeline->attach(this, sink);
-    succeededFuture = new SucceededChannelFuture(this);
-    closeFuture = new ChannelCloseFuture(this);
 
     closeFuture->addListener(
         boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
@@ -144,6 +109,10 @@ void AbstractChannel::init(const ChannelPipelinePtr& pipeline,
 
 int AbstractChannel::getId() const {
     return id;
+}
+
+const EventLoopPtr& AbstractChannel::getEventLoop() const {
+    return eventLoop;
 }
 
 const ChannelPtr& AbstractChannel::getParent() const {
@@ -162,54 +131,17 @@ bool AbstractChannel::isOpen() const {
     return !closeFuture->isDone();
 }
 
-cetty::channel::ChannelFuturePtr AbstractChannel::bind(const SocketAddress& localAddress) {
-    return Channels::bind(this, localAddress);
-}
-
 ChannelFuturePtr& AbstractChannel::getCloseFuture() {
     return this->closeFuture;
-}
-
-ChannelFuturePtr& AbstractChannel::getSucceededFuture() {
-    return this->succeededFuture;
-}
-
-cetty::channel::ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress) {
-    return Channels::connect(this, remoteAddress);
-}
-
-int AbstractChannel::getInterestOps() const {
-    return this->interestOps;
-}
-
-bool AbstractChannel::isReadable() const {
-    return (getInterestOps() & OP_READ) != 0;
-}
-
-bool AbstractChannel::isWritable() const {
-    return (getInterestOps() & OP_WRITE) == 0;
-}
-
-cetty::channel::ChannelFuturePtr AbstractChannel::setReadable(bool readable) {
-    if (readable) {
-        return setInterestOps(getInterestOps() | OP_READ);
-    }
-    else {
-        return setInterestOps(getInterestOps() & (~OP_READ));
-    }
 }
 
 bool AbstractChannel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
 }
 
-cetty::channel::ChannelFuturePtr AbstractChannel::getUnsupportedOperationFuture() {
-    return ChannelFuturePtr(
-               new FailedChannelFuture(this, UnsupportedOperationException()));
-}
-
-void AbstractChannel::setInterestOpsNow(int interestOps) {
-    this->interestOps = interestOps;
+ChannelFuturePtr AbstractChannel::getUnsupportedOperationFuture() {
+    return new FailedChannelFuture(shared_from_this(),
+                                   UnsupportedOperationException());
 }
 
 void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
@@ -222,7 +154,9 @@ void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
 }
 
 int AbstractChannel::allocateId(const ChannelPtr& channel) {
-    int id = channel->hashCode();
+    boost::crc_32_type crc32;
+    crc32.process_bytes((void const*)this, sizeof(this));
+    int id = crc32.checksum();
 
     for (;;) {
         // Loop until a unique ID is acquired.
@@ -238,18 +172,12 @@ int AbstractChannel::allocateId(const ChannelPtr& channel) {
     }
 }
 
-int AbstractChannel::hashCode() const {
-    boost::crc_32_type crc32;
-    crc32.process_bytes((void const*)this, sizeof(this));
-    return crc32.checksum();
-}
-
 std::string AbstractChannel::toString() const {
     char buf[512] = {0};
 
-    bool connected = isConnected();
+    bool active = isActive();
 
-    if (connected && !strVal.empty()) {
+    if (active && !strVal.empty()) {
         return strVal;
     }
 
@@ -276,7 +204,7 @@ std::string AbstractChannel::toString() const {
         sprintf(buf, "[id: 0x%08x]", getId());
     }
 
-    if (connected) {
+    if (active) {
         strVal = (const char*)buf;
     }
     else {
@@ -292,6 +220,71 @@ int AbstractChannel::compareTo(const ChannelPtr& c) const {
     }
 
     return 1;
+}
+
+ChannelFuturePtr AbstractChannel::bind(const SocketAddress& localAddress) {
+    return pipeline->bind(localAddress);
+}
+
+const ChannelFuturePtr& AbstractChannel::bind(const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+    return pipeline->bind(localAddress, future);
+}
+
+ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress) {
+    return pipeline->connect(remoteAddress);
+}
+
+ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress) {
+    return pipeline->connect(remoteAddress, localAddress);
+}
+
+const ChannelFuturePtr& AbstractChannel::connect(const SocketAddress& remoteAddress,
+        const ChannelFuturePtr& future) {
+    return pipeline->connect(remoteAddress, future);
+}
+
+const ChannelFuturePtr& AbstractChannel::connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+    return pipeline->connect(remoteAddress, localAddress, future);
+}
+
+ChannelFuturePtr AbstractChannel::disconnect() {
+    return pipeline->disconnect();
+}
+
+const ChannelFuturePtr& AbstractChannel::disconnect(const ChannelFuturePtr& future) {
+    return pipeline->disconnect(future);
+}
+
+ChannelFuturePtr AbstractChannel::close() {
+    return pipeline->close();
+}
+
+const ChannelFuturePtr& AbstractChannel::close(const ChannelFuturePtr& future) {
+    return pipeline->close(future);
+}
+
+ChannelFuturePtr AbstractChannel::flush() {
+    return pipeline->flush();
+}
+
+const ChannelFuturePtr& AbstractChannel::flush(const ChannelFuturePtr& future) {
+    return pipeline->flush(future);
+}
+
+ChannelFuturePtr AbstractChannel::newFuture() {
+    return new DefaultChannelFuture(shared_from_this(), false);
+}
+
+ChannelFuturePtr AbstractChannel::newFailedFuture(const Exception& e) {
+    return new FailedChannelFuture(shared_from_this(), e);
+}
+
+ChannelFuturePtr AbstractChannel::newSucceededFuture() {
+    return succeededFuture;
 }
 
 }

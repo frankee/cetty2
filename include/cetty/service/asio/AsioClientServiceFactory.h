@@ -51,12 +51,13 @@ using namespace cetty::util;
 
 class AsioClientServiceFactory : public cetty::channel::ChannelFactory {
 public:
-    AsioClientServiceFactory(const AsioServicePtr& ioService, const AsioServicePoolPtr& pool);
+    AsioClientServiceFactory(const AsioServicePtr& ioService,
+        const AsioServicePoolPtr& pool);
 
     virtual ~AsioClientServiceFactory();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
-    virtual void releaseExternalResources();
+    virtual void shutdown();
 
 private:
     void init(const AsioServicePoolPtr& pool);
@@ -67,7 +68,6 @@ private:
 
 private:
     AsioServicePtr ioService;
-    ChannelSinkPtr sink;
     std::vector<ChannelPtr> channels;
 
     TimerFactoryPtr timerFactory; // keep the life cycle

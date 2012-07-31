@@ -16,8 +16,6 @@
 
 #include <cetty/channel/socket/asio/AsioGatheringBuffer.h>
 #include <boost/assert.hpp>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 
@@ -66,15 +64,11 @@ std::pair<char*, int> AsioGatheringBuffer::at(int index) {
                (int)boost::asio::buffer_size(buffer));
 }
 
-void AsioGatheringBuffer::mergeFrom(const MessageEvent& evt) {
-    const ChannelMessage& message = evt.getMessage();
-
-    if (message.isChannelBuffer()) {
-        const ChannelBufferPtr& cb = message.value<ChannelBufferPtr>();
-
+void AsioGatheringBuffer::mergeFrom(const ChannelBufferPtr& buffer) {
+    if (buffer) {
         clear();
-        cb->readSlice(this);
-        this->channelBuffer = cb;
+        buffer->readSlice(this);
+        this->channelBuffer = buffer;
     }
 }
 

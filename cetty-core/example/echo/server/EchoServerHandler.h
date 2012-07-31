@@ -18,15 +18,12 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 #include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelMessage.h"
 #include "cetty/channel/ChannelConfig.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ExceptionEvent.h"
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include "cetty/buffer/ChannelBuffer.h"
 #include "cetty/buffer/ChannelBuffers.h"
 #include "cetty/buffer/ChannelBufferFactory.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -39,7 +36,7 @@ using namespace cetty::buffer;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoServerHandler : public SimpleChannelUpstreamHandler {
+class EchoServerHandler : public ChannelInboundBufferHandler {
 public:
     EchoServerHandler() : transferredBytes(0) {
         out = ChannelBuffers::buffer(4096);
@@ -50,12 +47,8 @@ public:
         return transferredBytes;
     }
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        // Send back the received message to the remote peer.
-        //transferredBytes.addAndGet(((ChannelBuffer) e.getMessage()).readableBytes());
-        //transferredBytes += e.getMessage()
-
-        ChannelBufferPtr& buffer = e.getMessage().value<ChannelBufferPtr>();
+    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
+        ChannelBufferPtr buffer = ctx.getInboundChannelBuffer();
         if (buffer) {
             static int readableBytes = buffer->readableBytes();
 
@@ -63,25 +56,8 @@ public:
             //out.swap(buffer);
             buffer->clear();
             out->setIndex(0, readableBytes);
-            e.getChannel()->write(ChannelMessage(out));
-            
-//             ChannelBufferPtr tmp = buffer->readBytes(readableBytes);
-//             buffer->clear();
-//             e.getChannel().write(tmp, false);
+            ctx.getChannel()->write(out);
         }
-    }
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        // Close the connection when an exception is raised.
-//         logger.log(
-//                 Level.WARNING,
-//                 "Unexpected exception from downstream.",
-//                 e.getCause());
-        e.getChannel()->close();
-    }
-
-    virtual void writeCompleted(ChannelHandlerContext& ctx, const WriteCompletionEvent& e) {
-
     }
 
     virtual ChannelHandlerPtr clone() {

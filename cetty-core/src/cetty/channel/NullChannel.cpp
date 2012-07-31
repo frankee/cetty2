@@ -19,7 +19,7 @@
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 #include <cetty/channel/DefaultChannelConfig.h>
-#include <cetty/channel/DefaultChannelPipeline.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/FailedChannelFuture.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
@@ -39,30 +39,59 @@ public:
         return NullChannel::getInstance();
     }
 
-    virtual void releaseExternalResources() {
+    virtual void shutdown() {
+    }
+};
+
+class NullChannelSink : public ChannelSink {
+public:
+    NullChannelSink() {}
+    virtual ~NullChannelSink() {}
+
+    virtual void bind(const SocketAddress& localAddress,
+                      const ChannelFuturePtr& future) {
+        // NOOP
+    }
+
+    virtual void connect(const SocketAddress& remoteAddress,
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future) {
+        // NOOP
+    }
+
+    virtual void disconnect(const ChannelFuturePtr& future) {
+        // NOOP
+    }
+
+    virtual void close(const ChannelFuturePtr& future) {
+        // NOOP
+    }
+
+    virtual void flush(const ChannelBufferPtr& buffer,
+                       const ChannelFuturePtr& future) {
+        // NOOP
     }
 };
 
 static const Exception exception("NullChannel");
+
 static DefaultChannelConfig channelConfig;
-static ChannelPipelinePtr channelPipeline = new DefaultChannelPipeline;
+static ChannelPipelinePtr channelPipeline = new ChannelPipeline;
 static ChannelFactoryPtr nullChannelFactory = new NullChannelFactory;
 
 ChannelPtr NullChannel::nullChannel = new NullChannel;
-cetty::channel::ChannelFuturePtr NullChannel::failedFuture;
+ChannelFuturePtr NullChannel::failedFuture;
 
 NullChannel::NullChannel() {
     if (!failedFuture) {
         failedFuture = new FailedChannelFuture(this, exception);
     }
+
+    sink = new NullChannelSink;
 }
 
 int NullChannel::getId() const {
     return -1;
-}
-
-int NullChannel::hashCode() const {
-    return 0;
 }
 
 const ChannelFactoryPtr& NullChannel::getFactory() const {
@@ -89,62 +118,6 @@ const SocketAddress& NullChannel::getRemoteAddress() const {
     return SocketAddress::NULL_ADDRESS;
 }
 
-ChannelFuturePtr NullChannel::write(const ChannelMessage& message) {
-    return failedFuture;
-}
-
-ChannelFuturePtr NullChannel::write(const ChannelMessage& message,
-                                    const SocketAddress& remoteAddress) {
-    return failedFuture;
-}
-
-void NullChannel::write(const ChannelMessage& message,
-                        ChannelFuturePtr* future) {
-
-}
-
-void NullChannel::write(const ChannelMessage& message,
-                        const SocketAddress& remoteAddress,
-                        ChannelFuturePtr* future) {
-
-}
-
-ChannelFuturePtr NullChannel::bind(const SocketAddress& localAddress) {
-    return failedFuture;
-}
-
-ChannelFuturePtr NullChannel::connect(const SocketAddress& remoteAddress) {
-    return failedFuture;
-}
-
-ChannelFuturePtr NullChannel::disconnect() {
-    return failedFuture;
-}
-
-ChannelFuturePtr NullChannel::unbind() {
-    return failedFuture;
-}
-
-ChannelFuturePtr NullChannel::close() {
-    return failedFuture;
-}
-
-ChannelFuturePtr& NullChannel::getCloseFuture() {
-    return failedFuture;
-}
-
-ChannelFuturePtr& NullChannel::getSucceededFuture() {
-    return failedFuture;
-}
-
-cetty::channel::ChannelFuturePtr NullChannel::setInterestOps(int interestOps) {
-    return failedFuture;
-}
-
-cetty::channel::ChannelFuturePtr NullChannel::setReadable(bool readable) {
-    return failedFuture;
-}
-
 const ChannelPtr& NullChannel::getParent() const {
     return fatherChannel;
 }
@@ -161,23 +134,7 @@ bool NullChannel::isOpen() const {
     return false;
 }
 
-bool NullChannel::isBound() const {
-    return false;
-}
-
-bool NullChannel::isConnected() const {
-    return false;
-}
-
-int NullChannel::getInterestOps() const {
-    return OP_NONE;
-}
-
-bool NullChannel::isReadable() const {
-    return false;
-}
-
-bool NullChannel::isWritable() const {
+bool NullChannel::isActive() const {
     return false;
 }
 
@@ -187,6 +144,83 @@ int NullChannel::compareTo(const ChannelPtr& c) const {
     }
 
     return 1;
+}
+
+ChannelSink& NullChannel::getSink() {
+    return *sink;
+}
+
+const EventLoopPtr& NullChannel::getEventLoop() const {
+    return eventLoop;
+}
+
+ChannelFuturePtr NullChannel::bind(const SocketAddress& localAddress) {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::bind(const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+    return future;
+}
+
+ChannelFuturePtr NullChannel::connect(const SocketAddress& remoteAddress) {
+    return failedFuture;
+}
+
+ChannelFuturePtr NullChannel::connect(const SocketAddress& remoteAddress,
+                                      const SocketAddress& localAddress) {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::connect(const SocketAddress& remoteAddress,
+        const ChannelFuturePtr& future) {
+    return future;
+}
+
+const ChannelFuturePtr& NullChannel::connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+    return future;
+}
+
+ChannelFuturePtr NullChannel::disconnect() {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::disconnect(const ChannelFuturePtr& future) {
+    return future;
+}
+
+ChannelFuturePtr NullChannel::close() {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::close(const ChannelFuturePtr& future) {
+    return future;
+}
+
+ChannelFuturePtr NullChannel::flush() {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::flush(const ChannelFuturePtr& future) {
+    return future;
+}
+
+ChannelFuturePtr NullChannel::newFuture() {
+    return failedFuture;
+}
+
+ChannelFuturePtr NullChannel::newFailedFuture(const Exception& e) {
+    return failedFuture;
+}
+
+ChannelFuturePtr NullChannel::newSucceededFuture() {
+    return failedFuture;
+}
+
+const ChannelFuturePtr& NullChannel::getCloseFuture() {
+    return failedFuture;
 }
 
 }

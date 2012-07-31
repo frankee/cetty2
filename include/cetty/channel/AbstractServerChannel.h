@@ -26,7 +26,7 @@
 
 #include <cetty/channel/ServerChannel.h>
 #include <cetty/channel/AbstractChannel.h>
-#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipelineFwd.h>
 
 namespace cetty {
 namespace channel {
@@ -55,20 +55,7 @@ class ChannelSink;
 
 class AbstractServerChannel : public AbstractChannel, public ServerChannel {
 public:
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
-
-    virtual ChannelFuturePtr disconnect();
-
-    virtual int getInterestOps();
-
-    virtual ChannelFuturePtr setInterestOps(int interestOps);
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message);
-
-    virtual ChannelFuturePtr write(const ChannelMessage& message,
-                                   const SocketAddress& remoteAddress);
-
-    virtual bool isConnected() const;
+    virtual ~AbstractServerChannel();
 
 protected:
     /**
@@ -82,15 +69,9 @@ protected:
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
      */
-    AbstractServerChannel(
+    AbstractServerChannel(const EventLoopPtr& eventLoop,
         const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink);
-
-    virtual ~AbstractServerChannel();
-
-    virtual void setInterestOpsNow(int interestOps);
-
+        const ChannelPipelinePtr& pipeline);
 };
 
 }

@@ -40,9 +40,9 @@ std::string ProtobufServiceMessageEncoder::toString() const {
     return "ProtobufServiceMessageEncoder";
 }
 
-ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
+UserEvent ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
-        const ChannelMessage& msg) {
+        const UserEvent& msg) {
 
     ProtobufServiceMessagePtr message = msg.smartPointer<ProtobufServiceMessage>();
 
@@ -51,7 +51,7 @@ ChannelMessage ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
         ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize + 8);
         encodeMessage(buffer, message);
 
-        return ChannelMessage(buffer);
+        return UserEvent(buffer);
     }
     else {
         return msg;

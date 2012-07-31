@@ -22,7 +22,6 @@
 #include <cetty/logging/Log4cplusLoggerFactory.h>
 #include <cetty/config/ConfigCenter.h>
 
-
 #if (defined(linux) || defined(__linux) || defined(__linux__))
 
 #include <sys/types.h>
@@ -286,23 +285,17 @@ static void createPidFile(const char* pidfile) {}
 
 #endif
 
-ServerBuilder::ServerBuilder() : confCenter(NULL) {
+ServerBuilder::ServerBuilder() {
     init();
 }
 
-ServerBuilder::ServerBuilder(int threadCnt) : confCenter(NULL) {
-    config.threadCount = threadCnt;
-    init();
-}
-
-ServerBuilder::ServerBuilder(const ConfigCenter& confCenter)
-    : confCenter(&confCenter) {
-    confCenter.configure(&config);
+ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
+    //config.threadCount = threadCnt;
     init();
 }
 
 ServerBuilder::ServerBuilder(const ServerBuilderConfig& config)
-    : confCenter(NULL), config(config) {
+    : config(config) {
     init();
 }
 
@@ -333,17 +326,24 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         new AsioServerSocketChannelFactory(servicePool));
     bootstraps.insert(std::make_pair(name, bootstrap));
 
-    bootstrap->setOption("soLinger", boost::any(0));
-    bootstrap->setOption("reuseAddress", boost::any(true));
-    bootstrap->setOption("child.tcpNoDelay", boost::any(true));
-
+    bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+    bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     bootstrap->setPipeline(pipeline);
 
+    ChannelFuturePtr future;
     if (host.empty()) {
-        return bootstrap->bind(port);
+        future = bootstrap->bind(port);
     }
     else {
-        return bootstrap->bind(host, port);
+        future = bootstrap->bind(host, port);
+    }
+
+    if (future->await()->isSuccess()) {
+        return future->getChannel();
+    }
+    else {
+        return ChannelPtr();
     }
 }
 
@@ -363,10 +363,10 @@ int ServerBuilder::init() {
     }
 
     if (config.logger == "log4cplus") {
-        if (confCenter) {
+        //if (confCenter) {
             //InternalLoggerFactory::setDefaultFactory(
             //    new Log4cplusLoggerFactory(*confCenter));
-        }
+        //}
     }
 
     return 0;
@@ -378,7 +378,6 @@ void ServerBuilder::deinit() {
 
 void ServerBuilder::stop() {
     std::map<std::string, ServerBootstrap*>::iterator itr;
-
     for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
 
     }
@@ -391,20 +390,19 @@ void ServerBuilder::waitingForExit() {
     else {
         //ChannelPtr c = bootstraps.begin()->second->getFactory()->;
         //if (c && c->isBound()) {
-        printf("Server is running...\n");
-        printf("To quit server, press 'q'.\n");
+            printf("Server is running...\n");
+            printf("To quit server, press 'q'.\n");
 
-        char input;
+            char input;
 
-        do {
-            input = getchar();
+            do {
+                input = getchar();
 
-            if (input == 'q') {
-                stop();
+                if (input == 'q') {
+                    stop();
+                }
             }
-        }
-        while (true);
-
+            while (true);
         //}
     }
 }
@@ -453,22 +451,11 @@ void ServerBuilder::unregisterPipeline(const std::string& name) {
 
 cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string& name) {
     std::map<std::string, ChannelPipelinePtr>::iterator itr = pipelines.find(name);
-
     if (itr != pipelines.end()) {
         return itr->second;
     }
-
     return ChannelPipelinePtr();
 }
-
-const AsioServicePoolPtr& ServerBuilder::getServicePool() {
-    if (!servicePool) {
-        servicePool = new AsioServicePool(config.threadCount);
-    }
-
-    return servicePool;
-}
-
 
 }
 }

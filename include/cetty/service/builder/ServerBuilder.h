@@ -42,8 +42,7 @@ using namespace cetty::config;
 class ServerBuilder {
 public:
     ServerBuilder();
-    ServerBuilder(int threadCnt);
-    ServerBuilder(const ConfigCenter& confCenter);
+    ServerBuilder(int parentThreadCnt, int childThreadCnt = 0);
     ServerBuilder(const ServerBuilderConfig& config);
 
     virtual ~ServerBuilder();
@@ -81,7 +80,6 @@ private:
     void deinit();
 
 private:
-    const ConfigCenter* confCenter;
     ServerBuilderConfig config;
 
     AsioServicePoolPtr servicePool;

@@ -28,7 +28,6 @@
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelHandler.h>
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
 
 #include <cetty/bootstrap/Bootstrap.h>
 
@@ -168,18 +167,19 @@ public:
     /**
      * Creates a new instance with the specified initial {@link ChannelFactory}.
      */
-    ServerBootstrap(const ChannelFactoryPtr& channelFactory) : Bootstrap(channelFactory) {
+    ServerBootstrap(const ChannelFactoryPtr& channelFactory)
+        : Bootstrap(channelFactory) {
     }
 
     virtual ~ServerBootstrap() {}
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws InvalidArgumentException
-     *         if the specified <tt>factory</tt> is NULL
-     */
-    virtual void setFactory(const ChannelFactoryPtr& factory);
+    virtual ServerBootstrap& setFactory(const ChannelFactoryPtr& factory);
+    virtual ServerBootstrap& setPipeline(const ChannelPipelinePtr& pipeline);
+
+    ServerBootstrap& setChildOption(const ChannelOption& option,
+        const ChannelOption::Variant& value);
+
+    const ChannelOption::Options& getChildOptions() const;
 
     /**
      * Returns an optional {@link ChannelHandler} which intercepts an event
@@ -198,24 +198,7 @@ public:
      *        the parent channel handler.
      *        <tt>NULL</tt> to unset the current parent channel handler.
      */
-    void setParentHandler(const ChannelHandlerPtr& parentHandler);
-
-    /**
-     * Creates a new channel which is bound to the local address which was
-     * specified in the current <tt>"localAddress"</tt> option.  This method is
-     * similar to the following code:
-     *
-     * <pre>
-     * {@link ServerBootstrap} b = ...;
-     * b.bind(b.getOption("localAddress"));
-     * </pre>
-     *
-     * @return a new bound channel which accepts incoming connections
-     *         if failed to create a new channel and
-     *                      bind it to the local address, return null ChannelPtr
-     *
-     */
-    virtual ChannelPtr bind();
+    ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -231,7 +214,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelPtr bind(int port);
+    virtual ChannelFuturePtr bind(int port);
 
     /**
      * Creates a new channel which is bound to the ip and port.  This method is
@@ -247,7 +230,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelPtr bind(const std::string& ip, int port);
+    virtual ChannelFuturePtr bind(const std::string& ip, int port);
 
     /**
      * Creates a new channel which is bound to the specified local address.
@@ -256,10 +239,11 @@ public:
      *         if failed to create a new channel and
      *                      bind it to the local address, return null ChannelPtr
      */
-    virtual ChannelPtr bind(const SocketAddress& localAddress);
+    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
 private:
     ChannelHandlerPtr parentHandler;
+    ChannelOption::Options childOptions;
 };
 
 }

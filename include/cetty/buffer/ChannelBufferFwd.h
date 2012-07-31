@@ -19,11 +19,15 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace cetty { namespace buffer { 
-    class ChannelBuffer;
-    typedef boost::intrusive_ptr<ChannelBuffer> ChannelBufferPtr;
-    typedef boost::intrusive_ptr<ChannelBuffer const> ConstChannelBufferPtr;
-}}
+namespace cetty {
+namespace buffer {
+
+class ChannelBuffer;
+typedef boost::intrusive_ptr<ChannelBuffer> ChannelBufferPtr;
+typedef boost::intrusive_ptr<ChannelBuffer const> ConstChannelBufferPtr;
+
+}
+}
 
 #endif //#if !defined(CETTY_BUFFER_CHANNELBUFFERFWD_H)
 

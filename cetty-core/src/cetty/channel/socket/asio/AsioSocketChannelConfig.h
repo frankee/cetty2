@@ -21,9 +21,17 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ReceiveBufferSizePredictorFwd.h>
-#include <cetty/channel/ReceiveBufferSizePredictorFactoryFwd.h>
+#include <boost/optional.hpp>
+#include <boost/asio/ip/tcp.hpp>
+
+#include <cetty/channel/DefaultChannelConfig.h>
 #include <cetty/channel/socket/SocketChannelConfig.h>
+
+namespace cetty {
+namespace logging {
+class InternalLogger;
+}
+}
 
 namespace cetty {
 namespace channel  {
@@ -31,6 +39,7 @@ namespace socket {
 namespace asio {
 
 using namespace cetty::channel;
+using namespace cetty::logging;
 
 /**
  * A {@link SocketChannelConfig} for a NIO TCP/IP {@link SocketChannel}.
@@ -62,75 +71,77 @@ using namespace cetty::channel;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
+class AsioSocketChannelConfig : public cetty::channel::DefaultChannelConfig,
+    public cetty::channel::socket::SocketChannelConfig {
 
-class AsioSocketChannelConfig : public cetty::channel::socket::SocketChannelConfig {
 public:
-    virtual ~AsioSocketChannelConfig() {}
+    typedef boost::asio::ip::tcp::socket TcpSocket;
 
-    /**
-     *
-     */
-    virtual int  getWriteBufferHighWaterMark() const = 0;
+public:
+    AsioSocketChannelConfig(TcpSocket& socket);
 
-    /**
-     *
-     */
-    virtual void setWriteBufferHighWaterMark(int writeBufferHighWaterMark) = 0;
+    virtual bool setOption(const ChannelOption& option,
+                           const ChannelOption::Variant& value);
+
+    virtual const boost::optional<int>& getReceiveBufferSize() const;
+    virtual const boost::optional<int>& getSendBufferSize() const;
+    virtual const boost::optional<int>& getSoLinger() const;
+
+    virtual const boost::optional<bool>& isKeepAlive() const;
+    virtual const boost::optional<bool>& isReuseAddress() const;
+    virtual const boost::optional<bool>& isTcpNoDelay() const;
+
+    virtual void setKeepAlive(bool keepAlive);
+    virtual void setPerformancePreferences(int connectionTime, int latency, int bandwidth);
+    virtual void setReceiveBufferSize(int receiveBufferSize);
+    virtual void setReuseAddress(bool reuseAddress);
+    virtual void setSendBufferSize(int sendBufferSize);
+    virtual void setSoLinger(int soLinger);
+    virtual void setTcpNoDelay(bool tcpNoDelay);
+
+
+    virtual int  getWriteBufferHighWaterMark() const;
+    virtual void setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
 
     /**
      * Gets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    virtual int  getWriteBufferLowWaterMark() const = 0;
+    virtual int  getWriteBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    virtual void setWriteBufferLowWaterMark(int writeBufferLowWaterMark) = 0;
+    virtual void setWriteBufferLowWaterMark(int writeBufferLowWaterMark);
 
     /**
      * Gets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    virtual int  getReceiveBufferLowWaterMark() const = 0;
+    virtual int  getReceiveBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    virtual void setReceiveBufferLowWaterMark(int receiveBufferLowWaterMark) = 0;
+    virtual void setReceiveBufferLowWaterMark(int receiveBufferLowWaterMark);
 
-    /**
-     * Returns the {@link ReceiveBufferSizePredictor} which predicts the
-     * number of readable bytes in the socket receive buffer.  The default
-     * predictor is <tt>{@link AdaptiveReceiveBufferSizePredictor}(64, 1024, 65536)</tt>.
-     */
-    virtual const ReceiveBufferSizePredictorPtr& getReceiveBufferSizePredictor() = 0;
+private:
+    static const int DEFAULT_WRITE_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
+    static const int DEFAULT_WRITE_BUFFER_LOW_WATERMARK  = 2 * 1024;
 
-    /**
-     * Sets the {@link ReceiveBufferSizePredictor} which predicts the
-     * number of readable bytes in the socket receive buffer.  The default
-     * predictor is <tt>{@link AdaptiveReceiveBufferSizePredictor}(64, 1024, 65536)</tt>.
-     */
-    virtual void setReceiveBufferSizePredictor(const ReceiveBufferSizePredictorPtr& predictor) = 0;
+private:
+    static InternalLogger* logger;
 
-    /**
-     * Returns the {@link ReceiveBufferSizePredictorFactory} which creates a new
-     * {@link ReceiveBufferSizePredictor} when a new channel is created and
-     * no {@link ReceiveBufferSizePredictor} was set.  If no predictor was set
-     * for the channel, {@link #setReceiveBufferSizePredictor(ReceiveBufferSizePredictor)}
-     * will be called with the new predictor.  The default factory is
-     * <tt>{@link AdaptiveReceiveBufferSizePredictorFactory}(64, 1024, 65536)</tt>.
-     */
-    virtual const ReceiveBufferSizePredictorFactoryPtr& getReceiveBufferSizePredictorFactory() const = 0;
+private:
+    TcpSocket& socket;
 
-    /**
-     * Sets the {@link ReceiveBufferSizePredictor} which creates a new
-     * {@link ReceiveBufferSizePredictor} when a new channel is created and
-     * no {@link ReceiveBufferSizePredictor} was set.  If no predictor was set
-     * for the channel, {@link #setReceiveBufferSizePredictor(ReceiveBufferSizePredictor)}
-     * will be called with the new predictor.  The default factory is
-     * <tt>{@link AdaptiveReceiveBufferSizePredictorFactory}(64, 1024, 65536)</tt>.
-     */
-    virtual void setReceiveBufferSizePredictorFactory(
-        const ReceiveBufferSizePredictorFactoryPtr& predictorFactory) = 0;
+    mutable boost::optional<bool> keepAlive;
+    mutable boost::optional<bool> reuseAddress;
+    mutable boost::optional<bool> tcpNoDelay;
+    mutable boost::optional<int>  receiveBufferSize;
+    mutable boost::optional<int>  sendBufferSize;
+    mutable boost::optional<int>  soLinger;
+
+    mutable int writeBufferLowWaterMark;
+    int writeBufferHighWaterMark;
 };
 
 }
@@ -138,5 +149,8 @@ public:
 }
 }
 
-
 #endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELCONFIG_H)
+
+// Local Variables:
+// mode: c++
+// End:

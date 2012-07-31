@@ -65,7 +65,7 @@ public:
 
 private:
     void init() {
-        pipeline = Channels::pipeline();
+        pipeline = ChannelPipelines::pipeline();
 
         pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
         pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));

@@ -46,6 +46,7 @@ public:
         }
 
         ConfigObject* create() const { return new Server; }
+		void copyFrom(const Server& server);
     };
 
     class Limit : public ConfigObject {
@@ -86,9 +87,9 @@ public:
     int backlog;
     std::string logger;
 
-    Limit limit;
-    Timeout timeout;
-
+    Limit* limit;
+    Timeout* timeout;
+	
 public:
     ServerBuilderConfig() : deamonize(0) {
         CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig",

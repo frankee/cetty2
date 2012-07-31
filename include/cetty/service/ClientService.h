@@ -38,9 +38,8 @@ public:
 
 protected:
     ClientService(const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink)
-        : AbstractChannel(ChannelPtr(), factory, pipeline, sink) {}
+        const ChannelPipelinePtr& pipeline)
+        : AbstractChannel(ChannelPtr(), factory, pipeline) {}
 };
 
 template<typename ReqT, typename RepT>
@@ -50,7 +49,7 @@ void callMethod(const ChannelPtr& channel,
     if (channel) {
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
             new OutstandingCall<ReqT, RepT>(request, future));
-        channel->write(ChannelMessage(outstanding));
+        channel->write(UserEvent(outstanding));
     }
 }
 

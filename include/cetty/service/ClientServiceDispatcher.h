@@ -23,8 +23,7 @@
 
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelStateEvent.h>
-#include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
@@ -41,7 +40,8 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::service::pool;
 
 template<typename ReqT, typename RepT>
-class ClientServiceDispatcher : public cetty::channel::SimpleChannelHandler {
+class ClientServiceDispatcher
+    : public cetty::channel::ChannelMessageHandler<ReqT, RepT> {
 public:
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
     typedef ServiceRequestHandler<ReqT, RepT> ServiceRequestHandlerType;
@@ -60,10 +60,9 @@ public:
     }
 
 public:
-    virtual void channelConnected(ChannelHandlerContext& ctx,
-                                  const ChannelStateEvent& e) {
+    virtual void channelActive(ChannelHandlerContext& ctx) {
         ChannelPtr ch = e.getChannel();
-        ChannelPipelinePtr pipeline = Channels::pipelineFactory(defaultPipeline)->getPipeline();
+        ChannelPipelinePtr pipeline = ChannelPipelines::getPipeline(defaultPipeline);
         pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
 
         pool.getBootstrap().setPipeline(pipeline);
@@ -71,15 +70,13 @@ public:
 
     }
 
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const MessageEvent& e) {
+    virtual void messageUpdated(InboundMessageContext& ctx) {
         //OutstandingCallPtr call = e.getMessage().smartPointer<OutstandingCallType>();
-        ctx.sendUpstream(e);
+        //ctx.sendUpstream(e);
     }
 
-    virtual void writeRequested(ChannelHandlerContext& ctx,
-                                const MessageEvent& e) {
-        OutstandingCallPtr call = e.getMessage().smartPointer<OutstandingCallType>();
+    virtual void flush(OutboundMessageContext& ctx) {
+        OutboundMessageContext::MessageQueue queue = ctx.getOutboundMessageQueue();
 
         ChannelPtr ch = pool.getChannel(ConnectionPool::ConnectedCallback());
 
@@ -99,7 +96,7 @@ public:
 
         while (!bufferingCalls.empty()) {
             const OutstandingCallPtr& call = bufferingCalls.front();
-            channel->write(ChannelMessage(call));
+            channel->write(UserEvent(call));
             outStandingCalls.insert(std::make_pair(call->getId(), call));
 
             bufferingCalls.pop_front();

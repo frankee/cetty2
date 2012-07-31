@@ -42,12 +42,11 @@ namespace socket {
 
 class SocketChannel : public cetty::channel::AbstractChannel {
 protected:
-    SocketChannel(
+    SocketChannel(const EventLoopPtr& eventLoop,
         const ChannelPtr& parent,
         const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline,
-        const ChannelSinkPtr& sink)
-        : AbstractChannel(parent, factory, pipeline, sink) {}
+        const ChannelPipelinePtr& pipeline)
+        : AbstractChannel(eventLoop, parent, factory, pipeline) {}
 
     virtual ~SocketChannel() {}
 };

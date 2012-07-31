@@ -21,11 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <map>
-#include <string>
-#include <boost/any.hpp>
-#include <cetty/buffer/ChannelBufferFactoryFwd.h>
+#include <cetty/channel/ChannelOption.h>
 #include <cetty/channel/ChannelPipelineFactoryFwd.h>
+#include <cetty/buffer/ChannelBufferFactoryFwd.h>
 
 namespace cetty {
 namespace channel {
@@ -84,7 +82,7 @@ public:
      *
      * @throws InvalidArgumentException if there is invalid value.
      */
-    virtual void setOptions(const std::map<std::string, boost::any>& options) = 0;
+    virtual void setOptions(const ChannelOption::Options& options) = 0;
 
     /**
      * Sets a configuration property with the specified name and value.
@@ -108,44 +106,8 @@ public:
      *
      * @throws InvalidArgumentException if the value is invalid.
      */
-    virtual bool setOption(const std::string& key, const boost::any& value) = 0;
-
-    /**
-     * Returns the default {@link ChannelBufferFactory ChannelBufferFactory*} used to create a new
-     * {@link ChannelBuffer}.  The default is {@link HeapChannelBufferFactory}.
-     * You can specify a different factory to change the default
-     * {@link ByteOrder} for example.
-     */
-    virtual const ChannelBufferFactoryPtr& getBufferFactory() const = 0;
-
-    /**
-     * Sets the default {@link ChannelBufferFactory ChannelBufferFactory*} used to create a new
-     * {@link ChannelBuffer}.  The default is {@link HeapChannelBufferFactory}.
-     * You can specify a different factory to change the default
-     * {@link ByteOrder} for example.
-     *
-     * @throws NullPointerException
-     */
-    virtual void setBufferFactory(const ChannelBufferFactoryPtr& bufferFactory) = 0;
-
-    /**
-     * Returns the {@link ChannelPipelineFactory} which will be used when
-     * a child channel is created.  If the {@link Channel} does not create
-     * a child channel, this property is not used at all, and therefore will
-     * be ignored.
-     */
-    virtual const ChannelPipelineFactoryPtr& getPipelineFactory() const = 0;
-
-    /**
-     * Sets the {@link ChannelPipelineFactory} which will be used when
-     * a child channel is created.  If the {@link Channel} does not create
-     * a child channel, this property is not used at all, and therefore will
-     * be ignored.
-     *
-     * @throws NullPointerException
-     *
-     */
-    virtual void setPipelineFactory(const ChannelPipelineFactoryPtr& pipelineFactory) = 0;
+    virtual bool setOption(const ChannelOption& option,
+                           const ChannelOption::Variant& value) = 0;
 
     /**
      * Returns the connect timeout of the channel in milliseconds.  If the
@@ -165,20 +127,6 @@ public:
      *                             <tt>0</tt> to disable.
      */
     virtual void setConnectTimeout(int connectTimeoutMillis) = 0;
-
-    /**
-     * Return whether the Channel owns private ChannelBuffer nor not.
-     * If the {@link Channel} owns private ChannelBuffer, the count of the
-     * {@link ChannelBuffer} is the same as {@link Channel}, that is to say,
-     * every Channel has a separated ChannelBuffer.
-     * If not, all {@link Channel}s will share some number of {@link ChannelBuffer}s;
-     *
-     * Generally, in the proactor patten, {@link Channel} owns private {@link ChannelBuffer},
-     * and in the reactor patten,  {@link Channel} dost NOT own private {@link ChannelBuffer}.
-     *
-     * the flag is readable only for user.
-     */
-    virtual bool channelHasReaderBuffer() const = 0;
 };
 
 }

@@ -45,8 +45,8 @@ TEST(ProtobufServiceMessageCodecTest, encode)
 	protoMsg->setPayload(msg);
 	ProtobufServiceMessageEncoder encoder;
 
-	ChannelMessage channelMsg = encoder.encode(NullChannelContext::getInstance(),
-		NullChannel::getInstance(), ChannelMessage(protoMsg));
+	UserEvent channelMsg = encoder.encode(NullChannelContext::getInstance(),
+		NullChannel::getInstance(), UserEvent(protoMsg));
 
 	ChannelBufferPtr channelbuffer = channelMsg.smartPointer<ChannelBuffer>();
 	
@@ -106,8 +106,8 @@ TEST(ProtobufServiceMessageCodecTest2,decode)
 
 
 	ProtobufServiceMessageDecoder decoder;
-	ChannelMessage channelMsg2 = decoder.decode(NullChannelContext::getInstance(),
-		NullChannel::getInstance(), ChannelMessage(channelbuffer));
+	UserEvent channelMsg2 = decoder.decode(NullChannelContext::getInstance(),
+		NullChannel::getInstance(), UserEvent(channelbuffer));
 
 	ProtobufServiceMessagePtr decodedMsg = channelMsg2.smartPointer<ProtobufServiceMessage>();
 	if(decodedMsg)

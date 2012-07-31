@@ -58,9 +58,9 @@ public:
 public:
     AsioWriteOperation()  {}
 
-    AsioWriteOperation(const MessageEvent& evt, const ChannelFuturePtr& f)
+    AsioWriteOperation(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f)
         : future(f) {
-            gathering.mergeFrom(evt);
+            gathering.mergeFrom(buffer);
     }
 
     AsioWriteOperation(const AsioWriteOperation& op)
@@ -126,8 +126,8 @@ public:
         return polledOp;
     }
 
-    AsioWriteOperation& offer(const MessageEvent& evt, const ChannelFuturePtr& f) {
-        ops.push_back(AsioWriteOperation(evt, f));
+    AsioWriteOperation& offer(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f) {
+        ops.push_back(AsioWriteOperation(buffer, f));
         plusWriteBufferSize(ops.back().writeBufferSize());
 		return ops.back();
     }

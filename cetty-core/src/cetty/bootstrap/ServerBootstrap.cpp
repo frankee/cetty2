@@ -20,17 +20,17 @@
 #include <boost/thread.hpp>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ServerChannelFactory.h>
-#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/ExceptionEvent.h>
-#include <cetty/channel/ChannelStateEvent.h>
-#include <cetty/channel/ChildChannelStateEvent.h>
-#include <cetty/channel/DefaultChannelPipeline.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/socket/ServerSocketChannelFactory.h>
 #include <cetty/channel/IpAddress.h>
 
@@ -45,166 +45,149 @@ using namespace cetty::channel;
 using namespace cetty::channel::socket;
 using namespace cetty::util;
 
-class Binder : public cetty::channel::SimpleChannelUpstreamHandler {
+class Acceptor : public cetty::channel::ChannelInboundMessageHandler<ChannelPtr> {
 public:
-    typedef std::deque<ChannelFuturePtr> FutureQueue;
-    typedef std::map<std::string, boost::any> OptionsMap;
-
-public:
-    Binder(const SocketAddress& localAddress, ServerBootstrap& bootstrap)
-        : localAddress(localAddress), bootstrap(bootstrap) {
+    Acceptor(ServerBootstrap& bootstrap) : bootstrap(bootstrap) {
     }
-    virtual ~Binder() {}
 
-    virtual ChannelHandlerPtr clone() { return shared_from_this(); }
-    virtual std::string toString() const { return "Binder"; }
+    virtual ~Acceptor() {}
 
-    FutureQueue& getFutureQueue() { return futureQueue; }
+    virtual ChannelHandlerPtr clone() {
+        return shared_from_this();
+    }
 
-    void channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        if (bootstrap.getPipelineFactory()) {
-            e.getChannel()->getConfig().setPipelineFactory(
-                bootstrap.getPipelineFactory());
-        }
+    virtual std::string toString() const {
+        return "Acceptor";
+    }
 
-        // Split options into two categories: parent and child.
-        OptionsMap& allOptions = bootstrap.getOptions();
+    virtual void messageUpdated(InboundMessageContext& ctx) {
+        InboundMessageContext::MessageQueue& in = ctx.getInboundMessageQueue();
 
-        for (OptionsMap::iterator itr = allOptions.begin(); itr != allOptions.end(); ++itr) {
-            if (itr->first.find("child.") == 0) {
-                childOptions.insert(std::make_pair(itr->first.substr(6), itr->second));
+        while (!in.empty()) {
+            const ChannelPtr& child = in.front();
+
+            if (!child) {
+                break;
             }
-            else if (itr->first.compare("pipelineFactory") != 0) {
-                parentOptions.insert(std::make_pair(itr->first, itr->second));
+
+            const ChannelOption::Options& childOptions = bootstrap.getChildOptions();
+            ChannelOption::Options::const_iterator itr = childOptions.begin();
+            for (; itr != childOptions.end(); ++itr) {
+                if (!child->getConfig().setOption(itr->first, itr->second)) {
+                    //logger.warn("Unknown channel option: " + e);
+                }
             }
+
+            in.pop_front();
         }
-
-        // Apply parent options.
-        e.getChannel()->getConfig().setOptions(parentOptions);
-        ctx.sendUpstream(e);
-
-        futureQueue.push_front(e.getChannel()->bind(localAddress));
-    }
-
-    void childChannelOpen(ChannelHandlerContext& ctx, const ChildChannelStateEvent& e) {
-        // Apply child options.
-        e.getChildChannel()->getConfig().setOptions(childOptions);
-        ctx.sendUpstream(e);
-    }
-
-    void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        futureQueue.push_front(Channels::failedFuture(e.getChannel(), e.getCause()));
-        ctx.sendUpstream(e);
     }
 
 private:
-    SocketAddress localAddress;
     ServerBootstrap& bootstrap;
-
-    FutureQueue futureQueue;
-    OptionsMap parentOptions;
-    OptionsMap  childOptions;
 };
-
-typedef boost::intrusive_ptr<Binder> BinderPtr;
-
-void ServerBootstrap::setFactory(const ChannelFactoryPtr& factory) {
-    if (dynamic_cast<ServerChannelFactory*>(factory.get())) {
-        Bootstrap::setFactory(factory);
-    }
-    else {
-        throw InvalidArgumentException(
-            "factory must be a ServerChannelFactory");
-    }
-}
 
 const ChannelHandlerPtr& ServerBootstrap::getParentHandler() {
     return this->parentHandler;
 }
 
-void ServerBootstrap::setParentHandler(const ChannelHandlerPtr& parentHandler) {
+ServerBootstrap& ServerBootstrap::setParentHandler(const ChannelHandlerPtr& parentHandler) {
     this->parentHandler = parentHandler;
+
+    return *this;
 }
 
-ChannelPtr ServerBootstrap::bind() {
-    const SocketAddress* localAddress = getTypedOption<SocketAddress>("localAddress");
-
-    if (NULL == localAddress) {
-        return ChannelPtr();
-    }
-
-    return bind(*localAddress);
-}
-
-ChannelPtr ServerBootstrap::bind(int port) {
+ChannelFuturePtr ServerBootstrap::bind(int port) {
     return bind(SocketAddress(IpAddress::IPv4, port));
 }
 
-ChannelPtr ServerBootstrap::bind(const std::string& ip, int port) {
+ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
     return bind(SocketAddress(ip, port));
 }
 
-ChannelPtr ServerBootstrap::bind(const SocketAddress& localAddress) {
+ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     // bossPipeline's life cycle will be managed by the server channel.
-    ChannelPipelinePtr bossPipeline = Channels::pipeline();
+    ChannelPipelinePtr serverPipeline = ChannelPipelines::pipeline();
 
-    BinderPtr binder = BinderPtr(new Binder(localAddress, *this));
-    ChannelHandlerPtr binderHandler = boost::dynamic_pointer_cast<ChannelHandler>(binder);
+    ChannelHandlerPtr acceptor(new Acceptor(*this));
     ChannelHandlerPtr parentHandler = getParentHandler();
 
-    bossPipeline->addLast("binder", binderHandler);
+    serverPipeline->addLast("acceptor", acceptor);
 
     if (parentHandler) {
-        bossPipeline->addLast("userHandler", parentHandler->clone());
+        serverPipeline->addLast("userHandler", parentHandler->clone());
     }
 
     const ChannelFactoryPtr& factory = getFactory();
 
     if (!factory) {
         LOG_ERROR(logger, "has not set the factory.");
-        return ChannelPtr();
+        return NullChannel::getInstance()->getCloseFuture();
     }
 
-    ChannelPtr channel = getFactory()->newChannel(bossPipeline);
+    ChannelPtr channel = factory->newChannel(serverPipeline);
 
     if (!channel) {
         LOG_ERROR(logger, "Server channel factory failed to create a new channel.");
-        return ChannelPtr();
+        return NullChannel::getInstance()->getCloseFuture();
     }
 
-    // Wait until the future is available.
-    Binder::FutureQueue& futureQueue = binder->getFutureQueue();
-    ChannelFuturePtr future;
+    ChannelFuturePtr future = channel->newFuture();
+    channel->bind(localAddress, future)->addListener(ChannelFutureListener::CLOSE_ON_FAILURE);
 
-    do {
-        if (!futureQueue.empty()) {
-            future = futureQueue.front();
-            futureQueue.pop_front();
-        }
-
-        boost::this_thread::yield();
-
-        if (boost::this_thread::interruption_requested()) {
-            return ChannelPtr();
-        }
-    }
-    while (!future);
-
-    // Wait for the future.
-    future->awaitUninterruptibly();
-
-    if (!future->isSuccess()) {
-        future->getChannel()->close()->awaitUninterruptibly();
-        LOG_ERROR(logger, "Failed to bind to: %s.", localAddress.toString().c_str());
-        return ChannelPtr();
-    }
-
-    return channel;
+    return future;
 }
 
+ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
+                                     const ChannelOption::Variant& value) {
+    if (value.empty()) {
+        childOptions.erase(option);
+        LOG_WARN(logger, "setOption, the key (%s) is empty value, remove from the options.", option.getName().c_str());
+    }
+    else {
+        LOG_INFO(logger, "set Option, the key is %s.", option.getName().c_str());
+        childOptions.insert(std::make_pair(option, value));
+    }
 
+    return *this;
+}
 
+const ChannelOption::Options& ServerBootstrap::getChildOptions() const {
+    return childOptions;
+}
 
+ServerBootstrap& ServerBootstrap::setFactory(const ChannelFactoryPtr& factory) {
+    ChannelPipelinePtr childPipeline = getPipeline();
+    if (childPipeline) {
+        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
+            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
+        if (serverFactory) {
+            serverFactory->setChildChannelPipeline(childPipeline);
+        }
+        else {
+            //
+        }
+    }
+
+    Bootstrap::setFactory(factory);
+    return *this;
+}
+
+ServerBootstrap& ServerBootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
+    ChannelFactoryPtr factory = getFactory();
+    if (factory) {
+        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
+            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
+        if (serverFactory) {
+            serverFactory->setChildChannelPipeline(pipeline);
+        }
+        else {
+            //
+        }
+    }
+
+    Bootstrap::setPipeline(pipeline);
+    return *this;
+}
 
 }
 }

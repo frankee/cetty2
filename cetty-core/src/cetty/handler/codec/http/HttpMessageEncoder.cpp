@@ -19,12 +19,9 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/Integer.h>
 
-#include <cetty/handler/codec/http/HttpHeader.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
@@ -48,9 +45,11 @@ HttpMessageEncoder::~HttpMessageEncoder() {
 HttpMessageEncoder::HttpMessageEncoder() {
 }
 
-ChannelMessage HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
-        const ChannelPtr& channel,
-        const ChannelMessage& msg) {
+ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
+    const HttpMessagePtr& msg,
+    const ChannelBufferPtr& out) {
+        return ChannelBufferPtr();
+#if 0
     HttpMessagePtr message = msg.smartPointer<HttpMessage>();
 
     if (!message) {
@@ -167,6 +166,7 @@ ChannelMessage HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
             return ChannelMessage(chunk->getContent());
         }
     }
+#endif
 }
 
 void HttpMessageEncoder::encodeHeaders(ChannelBuffer& buf,

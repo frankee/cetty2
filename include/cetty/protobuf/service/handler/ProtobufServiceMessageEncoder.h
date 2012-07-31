@@ -45,9 +45,9 @@ public:
     virtual std::string toString() const;
 
     //protected:
-    virtual ChannelMessage encode(ChannelHandlerContext& ctx,
+    virtual UserEvent encode(ChannelHandlerContext& ctx,
                                   const ChannelPtr& channel,
-                                  const ChannelMessage& msg);
+                                  const UserEvent& msg);
 
 
     static void encodeMessage(const ChannelBufferPtr& buffer,

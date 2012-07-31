@@ -14,13 +14,10 @@
     <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\RedisMessageHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\RedisReplyDecoder.cpp">
+    <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessageDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -31,16 +28,19 @@
     <ClInclude Include="..\..\..\include\cetty\redis\RedisCommand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisMessageHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\redis\RedisServiceFuture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyDecoder.h">
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessagePtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessageDecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisRequestHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

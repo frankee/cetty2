@@ -40,9 +40,9 @@ std::string ProtobufServiceMessageDecoder::toString() const {
     return "ProtobufServiceMessageDecoder";
 }
 
-ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
+UserEvent ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelPtr& channel,
-        const ChannelMessage& msg) {
+        const UserEvent& msg) {
 
     ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
 
@@ -50,7 +50,7 @@ ChannelMessage ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
         ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
 
         if (!decode(buffer, message)) {
-            return ChannelMessage(message);
+            return UserEvent(message);
         }
         else {
             // error here

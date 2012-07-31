@@ -26,6 +26,8 @@
 namespace cetty {
 namespace channel {
 
+class AbstractChannel;
+
 /**
  * A skeletal {@link ChannelSink} implementation.
  *
@@ -37,24 +39,28 @@ namespace channel {
 
 class AbstractChannelSink : public ChannelSink {
 public:
-    AbstractChannelSink();
-    virtual ~AbstractChannelSink() {}
+    AbstractChannelSink(AbstractChannel& channel);
+    virtual ~AbstractChannelSink();
 
-    virtual void eventSunk(const ChannelPipeline& pipeline,
-        const ChannelEvent& e);
+    virtual void bind(const SocketAddress& localAddress, const ChannelFuturePtr& future);
 
-    /**
-     * Sends an {@link ExceptionEvent} upstream with the specified
-     * <tt>cause</tt>.
-     *
-     * @param event the {@link ChannelEvent} which caused a
-     *              {@link ChannelHandler} to raise an exception
-     * @param cause the exception raised by a {@link ChannelHandler}
-     */
-    virtual void exceptionCaught(const ChannelPipeline& pipeline,
-                                  const ChannelEvent& e,
-                                  const ChannelPipelineException& cause);
+    virtual void disconnect(const ChannelFuturePtr& future);
 
+    virtual void close(const ChannelFuturePtr& future);
+
+    virtual void connect(const SocketAddress& remoteAddress,
+                         const SocketAddress& localAddress,
+                         const ChannelFuturePtr& future);
+
+    virtual void flush(const ChannelBufferPtr& buffer,
+                       const ChannelFuturePtr& future);
+
+protected:
+    bool ensureOpen(const ChannelFuturePtr& future);
+    void closeIfClosed();
+
+private:
+    AbstractChannel& channel;
 };
 
 }

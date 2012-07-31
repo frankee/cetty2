@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOCLIENTSOCKETCHANNELFACTORY_H)
-#define CETTY_CHANNEL_SOCKET_ASIO_ASIOCLIENTSOCKETCHANNELFACTORY_H
+#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELFACTORY_H)
+#define CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELFACTORY_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -21,9 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <map>
 #include <vector>
 
-#include <cetty/channel/ChannelSinkFwd.h>
 #include <cetty/channel/socket/ClientSocketChannelFactory.h>
 #include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
 #include <cetty/util/TimerFwd.h>
@@ -100,7 +100,7 @@ class AsioTcpSocketAddressImplFactory;
  */
 
 class AsioClientSocketChannelFactory
-        : public cetty::channel::socket::ClientSocketChannelFactory {
+        : public cetty::channel::socket::SocketChannelFactory {
 public:
     /**
      * Creates a new instance.  Calling this constructor is same with calling
@@ -123,7 +123,7 @@ public:
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
 
-    virtual void releaseExternalResources();
+    virtual void shutdown();
 
     bool start();
 
@@ -139,7 +139,6 @@ private:
     AsioServicePtr ioService;
     AsioServicePoolPtr ioServicePool;
 
-    ChannelSinkPtr sink; // keep the life cycle
     TimerFactoryPtr timerFactory; // keep the life cycle
 
     std::vector<ChannelPtr> clientChannels;
@@ -153,7 +152,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOCLIENTSOCKETCHANNELFACTORY_H)
+#endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELFACTORY_H)
 
 // Local Variables:
 // mode: c++

@@ -20,13 +20,20 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace cetty { namespace channel { namespace socket { namespace asio { 
-    class AsioService;
-    class AsioServicePool;
+namespace cetty {
+namespace channel {
+namespace socket {
+namespace asio {
 
-    typedef boost::intrusive_ptr<AsioService> AsioServicePtr;
-    typedef boost::intrusive_ptr<AsioServicePool> AsioServicePoolPtr;
+class AsioService;
+class AsioServicePool;
 
-}}}}
+typedef boost::intrusive_ptr<AsioService> AsioServicePtr;
+typedef boost::intrusive_ptr<AsioServicePool> AsioServicePoolPtr;
+
+}
+}
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSERVICEPOOLFWD_H)

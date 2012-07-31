@@ -22,8 +22,8 @@
 namespace cetty { namespace channel { 
 
 class Channel;
-typedef Channel* ChannelPtr;
-typedef Channel const* ConstChannelPtr;
+typedef boost::intrusive_ptr<Channel> ChannelPtr;
+typedef boost::intrusive_ptr<Channel const> ConstChannelPtr;
 
 }}
 
