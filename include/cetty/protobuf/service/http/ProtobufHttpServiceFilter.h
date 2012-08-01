@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPMESSAGEFILTER_H)
-#define CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPMESSAGEFILTER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPSERVICEFILTER_H)
+#define CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPSERVICEFILTER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -40,22 +40,27 @@ using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::http::map;
 
-class ProtobufHttpMessageFilter
-        : public cetty::service::ServerFilter<HttpRequestPtr, HttpResponsePtr, ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
+class ProtobufHttpServiceFilter
+        : public cetty::service::ServiceFilter<HttpRequestPtr,
+        ProtobufServiceMessagePtr,
+        ProtobufServiceMessagePtr,
+        HttpResponsePtr> {
 
 public:
-    ProtobufHttpMessageFilter(const ConfigCenter& config);
+    ProtobufHttpServiceFilter();
 
-    ProtobufHttpMessageFilter(const ServiceRequestMapperPtr& requestMapper,
+    ProtobufHttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
                               const ServiceResponseMapperPtr& responseMap);
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterReq(const HttpRequestPtr& req);
-    virtual HttpResponsePtr filterRep(const HttpRequestPtr& req,
-                                      const ProtobufServiceMessagePtr& rep);
+    virtual ProtobufServiceMessagePtr filterRequest(OutboundMessageContext& ctx,
+        const HttpRequestPtr& req);
+    virtual HttpResponsePtr filterResponse(InboundMessageContext& ctx,
+        const HttpRequestPtr& req,
+        const ProtobufServiceMessagePtr& rep);
 
 private:
     ServiceRequestMapperPtr requestMapper;
@@ -70,7 +75,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPMESSAGEFILTER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HTTP_PROTOBUFHTTPSERVICEFILTER_H)
 
 // Local Variables:
 // mode: c++

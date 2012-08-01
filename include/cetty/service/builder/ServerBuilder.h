@@ -82,6 +82,9 @@ private:
 private:
     ServerBuilderConfig config;
 
+    EventLoopPoolPtr parentEventLoopPool;
+    EventLoopPoolPtr childEventLoopPool;
+
     AsioServicePoolPtr servicePool;
 
     std::map<std::string, ChannelPipelinePtr> pipelines;

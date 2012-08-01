@@ -17,8 +17,9 @@
  * under the License.
  */
 
-#include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/Channels.h>
+
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
@@ -29,15 +30,11 @@
 #include <cetty/service/ClientService.h>
 #include <cetty/service/ClientServiceDispatcher.h>
 #include <cetty/service/ClientServiceMessageHandler.h>
-#include <cetty/service/asio/AsioClientService.h>
-#include <cetty/service/asio/AsioClientServiceFactory.h>
-#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
 namespace cetty {
 namespace service {
 namespace builder {
 
-using namespace cetty::bootstrap;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 using namespace cetty::config;
@@ -56,24 +53,25 @@ public:
 public:
     ClientBuilder()
         : serviceInited(false),
-          asioServicePool(new AsioServicePool(1)) {
+          eventLoopPool(new AsioServicePool(1)) {
     }
     ClientBuilder(int threadCnt)
         : serviceInited(false),
-          asioServicePool(new AsioServicePool(threadCnt)) {
+          eventLoopPool(new AsioServicePool(threadCnt)) {
     }
-    ClientBuilder(const AsioServicePoolPtr& ioServicePool)
+    ClientBuilder(const EventLoopPtr& eventLoop)
         : serviceInited(false),
-          asioServicePool(ioServicePool) {
+        eventLoop(eventLoop) {
     }
-    ClientBuilder(const AsioServicePtr& ioService)
+    ClientBuilder(const EventLoopPoolPtr& eventLoopPool)
         : serviceInited(false),
-          asioService(ioService) {
+          eventLoopPool(eventLoopPool) {
     }
 
     ClientBuilder(const ClientBuilderConfig& conf);
-    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePoolPtr& ioServciePool);
-    ClientBuilder(const ClientBuilderConfig& conf, const AsioServicePtr& ioService);
+    ClientBuilder(const ClientBuilderConfig& conf, const EventLoopPtr& eventLoop);
+    ClientBuilder(const ClientBuilderConfig& conf, const EventLoopPoolPtr& eventLoopPool);
+    
 
     virtual ~ClientBuilder() {}
 
@@ -86,31 +84,12 @@ public:
     }
 
     ClientServicePtr build() {
-        ServiceContext context;
-        const AsioServicePtr& asioService =
-            asioServicePool ? asioServicePool->getService() : asioService;
-
-        ServiceContextMap::iterator itr = serviceContext.find(asioService->getId());
-
-        if (itr != serviceContext.end()) {
-            context = itr->second;
-        }
-        else {
-            ChannelFactoryPtr factory =
-                new AsioClientServiceFactory(asioService, asioServicePool);
-
-            context = std::make_pair(factory,
-                                     getPipelineFactory(asioService));
-
-            serviceContext[asioService->getId()] = context;
-        }
-
-        ChannelPtr channel = context.first->newChannel(context.second->getPipeline());
+        ChannelPtr channel = bootstrap.newChannel();
         return (ClientServicePtr)channel;
     }
 
 private:
-    ChannelPipelineFactoryPtr getPipelineFactory(const AsioServicePtr& ioService) {
+    ChannelPipelinePtr getPipeline(const AsioServicePtr& ioService) {
         // construct the pipeline
         ChannelHandlerPtr dispatcher(
             new DispatcherType(connections, clientPipeline, ioService));
@@ -121,23 +100,36 @@ private:
         pipeline->addLast("dispatcher", dispatcher);
         pipeline->addLast("message", messageHandler);
 
-        return ChannelPipelines::pipelineFactory(pipeline);
+        return pipeline;
     }
 
 private:
-    typedef std::pair<ChannelFactoryPtr, ChannelPipelineFactoryPtr> ServiceContext;
-    typedef std::map<int, ServiceContext> ServiceContextMap;
+    class ClientServiceBootstrap {
+    public:
+        ClientServiceBootstrap(const EventLoopPtr& eventLoop);
+        ClientServiceBootstrap(const EventLoopPoolPtr& eventLoopPool);
+
+        ChannelPtr newChannel() {
+            const EventLoopPtr& eventLoop = factory->getEventLoop();
+            return factory->newChannel(eventLoop, clientBuilder.getPipeline(eventLoop));
+        }
+
+    private:
+        ClientBuilder* clientBuilder;
+        AsioClientServiceFactoryPtr factory;
+        ChannelPipelinePtr pipeline;
+    };
 
 private:
     bool serviceInited;
     std::vector<Connection> connections;
 
-    AsioServicePoolPtr asioServicePool;
-    AsioServicePtr asioService;
-
-    ServiceContextMap serviceContext;
+    EventLoopPtr eventLoop;
+    EventLoopPoolPtr eventLoopPool;
 
     ChannelPipelinePtr clientPipeline;
+
+    ClientServiceBootstrap bootstrap;
 };
 
 }

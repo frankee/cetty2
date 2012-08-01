@@ -83,7 +83,8 @@ public:
     std::string pidfile;
     std::vector<Server*> servers;
 
-    int threadCount;
+    int parentThreadCount;
+    int childThreadCount;
     int backlog;
     std::string logger;
 

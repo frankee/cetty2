@@ -29,7 +29,7 @@ using namespace cetty::service;
 using namespace cetty::handler::codec::http;
 
 class HttpMessageFilter
-        : public cetty::service::ServerFilter<HttpRequestPtr, HttpResponsePtr> {
+        : public cetty::service::ServiceFilter<HttpRequestPtr, HttpResponsePtr> {
 public:
 
 protected:

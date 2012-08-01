@@ -22,11 +22,7 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/MessageEvent.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelStateEvent.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 
 #include <cetty/protobuf/service/ProtobufService.h>
@@ -52,14 +48,11 @@ ProtobufServiceMessageHandler::ProtobufServiceMessageHandler() {
 ProtobufServiceMessageHandler::~ProtobufServiceMessageHandler() {
 }
 
-void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    ProtobufServiceMessagePtr msg = e.getMessage().smartPointer<ProtobufServiceMessage>();
+void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
+        const ProtobufServiceMessagePtr& msg) {
     const ServiceMessage& rpc = msg->getServiceMessage();
 
-    if (NULL == msg) {
-        ctx.sendUpstream(e);
-    }
-    else if (rpc.type() == cetty::protobuf::service::proto::REQUEST) {
+    if (rpc.type() == cetty::protobuf::service::proto::REQUEST) {
         const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
 
@@ -88,7 +81,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx, 
     else if (rpc.type() == cetty::protobuf::service::proto::ERROR) {
     }
     else {
-        ctx.sendUpstream(e);
+        //ctx.sendUpstream(e);
     }
 }
 
@@ -96,11 +89,12 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ChannelHandlerContext& ctx,
         ProtobufServiceMessagePtr req,
         boost::int64_t id) {
-    
-    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE, 
-        id, req->getService(), req->getMethod(), response));
-    //DownstreamMessageEvent  evt(ctx.getChannel(),ctx.getChannel->getSucceededFuture(),message,ctx.getChannel()->getRemoteAddress());
-    Channels::write(ctx.getChannel(), ChannelMessage(message));
+
+    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE,
+                                      id, req->getService(), req->getMethod(), response));
+
+    //ctx.write()
+    ctx.getPipeline()->write(message);
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {

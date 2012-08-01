@@ -92,7 +92,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientService.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />
@@ -103,19 +102,18 @@
     <ClCompile Include="..\..\src\cetty\service\pool\WatermarkConnectionPool.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ClientFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ServerFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\CookieTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\UriTemplate.h" />
@@ -127,6 +125,9 @@
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\cetty\service\ClientService.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

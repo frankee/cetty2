@@ -29,7 +29,10 @@ using namespace cetty::channel;
 
 template<typename ReqT, typename RepT>
 class ServiceRequestHandler
-    : public cetty::channel::ChannelMessageHandler<ReqT, RepT> {
+    : public cetty::channel::ChannelMessageHandler<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+        RepT> {
+
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
@@ -42,11 +45,15 @@ public:
     ServiceRequestHandler(const ChannelPtr& parent) : parent(parent) {}
     virtual ~ServiceRequestHandler() {}
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        RepT& response = e.getMessage().value<RepT>();
+    virtual void messageUpdated(InboundMessageContext& ctx) {
+        InboundMessageContext::MessageQueue& in =
+            ctx.getInboundMessageQueue();
 
-        if (response) {
-            // TODO: using template traits to define the pointer or object.
+        bool notify = false;
+
+        while (!in.empty()) {
+            RepT& response = in.front();
+
             const OutstandingCallPtr& out = outMessages.front();
 
             if (out->future) {
@@ -59,19 +66,31 @@ public:
             }
 
             if (parent) {
-                ChannelPipelines::fireMessageReceived(parent, UserEvent(out));
+                parent->getPipeline()->addInboundMessage<OutstandingCallPtr>(out);
+                notify = true;
             }
+
             outMessages.pop_front();
         }
-        else {
-            ctx.sendUpstream(e);
+
+        if (notify) {
+            parent->getPipeline()->fireMessageUpdated();
         }
     }
 
-    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        OutstandingCallPtr msg = e.getMessage().smartPointer<OutstandingCallType>();
-        outMessages.push_back(msg);
-        ChannelPipelines::write(ctx, ChannelPipelines::future(ctx.getChannel()), UserEvent(msg->request));
+    virtual void flush(OutboundMessageContext& ctx,
+                       const ChannelFuturePtr& future) {
+        OutboundMessageContext::MessageQueue& in =
+            ctx.getOutboundMessageQueue();
+
+        while (!in.empty()) {
+            OutstandingCallPtr& msg = in.front();
+            outMessages.push_back(msg);
+
+            CodecUtil<RepT>::unfoldAndAdd(ctx, msg->request, false);
+        }
+
+        ctx.flush(future);
     }
 
     virtual ChannelHandlerPtr clone() {
@@ -79,7 +98,7 @@ public:
     }
 
     virtual std::string toString() const {
-        return "ServiceRequestHandlerType";
+        return "ServiceRequestHandler";
     }
 
 private:

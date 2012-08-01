@@ -18,9 +18,9 @@
  */
 
 #include <vector>
-#include <cetty/channel/ChannelSinkFwd.h>
 #include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/util/TimerFwd.h>
 
 namespace cetty {
@@ -49,25 +49,37 @@ using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 using namespace cetty::util;
 
+class AsioClientServiceFactory;
+typedef boost::intrusive_ptr<AsioClientServiceFactory> AsioClientServiceFactoryPtr;
+
 class AsioClientServiceFactory : public cetty::channel::ChannelFactory {
 public:
-    AsioClientServiceFactory(const AsioServicePtr& ioService,
-        const AsioServicePoolPtr& pool);
+    AsioClientServiceFactory(int threadCnt);
+    AsioClientServiceFactory(const EventLoopPtr& eventLoop);
+    AsioClientServiceFactory(const EventLoopPoolPtr& eventLoopPool);
 
     virtual ~AsioClientServiceFactory();
 
+    EventLoopPtr getEventLoop();
+
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
+    
+    ChannelPtr newChannel(const ChannelPipelinePtr& pipeline,
+        const EventLoopPtr& eventLoop);
+
     virtual void shutdown();
 
 private:
-    void init(const AsioServicePoolPtr& pool);
+    void init();
     void deinit();
 
 private:
     static InternalLogger* logger;
 
 private:
-    AsioServicePtr ioService;
+    EventLoopPtr eventLoop;
+    EventLoopPoolPtr eventLoopPool;
+
     std::vector<ChannelPtr> channels;
 
     TimerFactoryPtr timerFactory; // keep the life cycle

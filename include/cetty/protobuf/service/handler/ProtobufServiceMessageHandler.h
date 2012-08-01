@@ -19,7 +19,7 @@
 
 #include <deque>
 #include <boost/cstdint.hpp>
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
@@ -52,17 +52,20 @@ namespace handler {
 using namespace cetty::channel;
 
 class ProtobufServiceMessageHandler;
-typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufRpcMessageHandlerPtr;
+typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufServiceMessageHandlerPtr;
 
-class ProtobufServiceMessageHandler : public cetty::channel::SimpleChannelUpstreamHandler {
+class ProtobufServiceMessageHandler
+    : public cetty::channel::ChannelInboundMessageHandler<ProtobufServiceMessagePtr> {
 public:
     ProtobufServiceMessageHandler();
     virtual ~ProtobufServiceMessageHandler();
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
+
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const ProtobufServiceMessagePtr& msg);
 
 private:
     void doneCallback(const MessagePtr& response,

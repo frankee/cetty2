@@ -24,9 +24,6 @@
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp">
       <Filter>service\builder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientService.cpp">
-      <Filter>service\asio</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp">
       <Filter>service\asio</Filter>
     </ClCompile>
@@ -64,9 +61,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
       <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientService.h">
-      <Filter>service\asio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h">
       <Filter>service\asio</Filter>
@@ -113,11 +107,16 @@
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ServerFilter.h">
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceFilter.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientFilter.h">
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h">
       <Filter>service</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\cetty\service\ClientService.cpp">
+      <Filter>service</Filter>
+    </None>
   </ItemGroup>
 </Project>

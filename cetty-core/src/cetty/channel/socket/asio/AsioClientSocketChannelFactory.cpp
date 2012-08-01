@@ -57,7 +57,6 @@ AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(int threadCnt)
     init();
 }
 
-
 AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
     deinit();
 }

@@ -17,66 +17,29 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
-#include <cetty/handler/codec/frame/LengthFieldPrepender.h>
-
 #include <cetty/service/builder/ClientBuilder.h>
-#include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceRequestHandler.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace builder {
 
-using namespace cetty::bootstrap;
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
-using namespace cetty::handler::codec::frame;
-using namespace cetty::service;
 using namespace cetty::service::builder;
-using namespace cetty::protobuf::service::handler;
 
 class ProtobufClientBuilder
-        : public cetty::service::builder::ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> {
+        : public cetty::service::builder::ClientBuilder<ProtobufServiceMessagePtr> {
 public:
-    typedef ClientBuilder<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ClientBuilderType;
+    typedef ClientBuilder<ProtobufServiceMessagePtr> ClientBuilderType;
 
 public:
-    ProtobufClientBuilder()
-        : ClientBuilderType() {
-        init();
-    }
-    ProtobufClientBuilder(int threadCnt)
-        : ClientBuilderType(threadCnt) {
-        init();
-    }
-    ProtobufClientBuilder(const AsioServicePoolPtr& ioServicePool)
-        : ClientBuilderType(ioServicePool) {
-        init();
-    }
-    ProtobufClientBuilder(const AsioServicePtr& ioService)
-        :  ClientBuilderType(ioService) {
-        init();
-    }
+    ProtobufClientBuilder();
+    ProtobufClientBuilder(int threadCnt);
+    ProtobufClientBuilder(const EventLoopPtr& eventLoop);
+    ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
 private:
-    void init() {
-        pipeline = ChannelPipelines::pipeline();
-
-        pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
-        pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));
-
-        pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
-        pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
-
-        pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
-
-        ClientBuilderType::setPipeline(pipeline);
-    }
+    void init();
 
 private:
     ChannelPipelinePtr pipeline;

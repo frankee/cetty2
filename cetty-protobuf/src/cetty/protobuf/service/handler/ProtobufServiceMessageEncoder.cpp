@@ -17,7 +17,7 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 
 #include <boost/assert.hpp>
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
@@ -31,7 +31,6 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::protobuf::service::proto;
 
-
 ChannelHandlerPtr ProtobufServiceMessageEncoder::clone() {
     return ChannelHandlerPtr(new ProtobufServiceMessageEncoder);
 }
@@ -40,22 +39,18 @@ std::string ProtobufServiceMessageEncoder::toString() const {
     return "ProtobufServiceMessageEncoder";
 }
 
-UserEvent ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
-        const ChannelPtr& channel,
-        const UserEvent& msg) {
+ChannelBufferPtr ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
+    const ProtobufServiceMessagePtr& msg) {
+        if (msg) {
+            int msgSize = msg->getMessageSize();
+            ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize + 8);
+            encodeMessage(buffer, msg);
 
-    ProtobufServiceMessagePtr message = msg.smartPointer<ProtobufServiceMessage>();
-
-    if (message) {
-        int msgSize = message->getMessageSize();
-        ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize + 8);
-        encodeMessage(buffer, message);
-
-        return UserEvent(buffer);
-    }
-    else {
-        return msg;
-    }
+            return buffer;
+        }
+        else {
+            return ChannelBufferPtr();
+        }
 }
 
 void ProtobufServiceMessageEncoder::encodeProtobufMessage(const ChannelBufferPtr& buffer,

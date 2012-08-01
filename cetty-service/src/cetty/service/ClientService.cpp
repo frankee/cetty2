@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,26 +15,8 @@
  * under the License.
  */
 
-#include <cetty/service/asio/AsioClientService.h>
+#include <cetty/service/ClientService.h>
 
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/ChannelPipelineFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+namespace cetty { namespace service { 
 
-namespace cetty {
-namespace service {
-namespace asio {
-
-using namespace cetty::channel;
-
-AsioClientService::AsioClientService(const ChannelFactoryPtr& factory,
-                                     const ChannelPipelinePtr& pipeline,
-                                     const AsioServicePtr& ioService)
-    : ClientService(factory, pipeline, sink),
-      ioService(ioService) {
-
-}
-
-}
-}
-}
+}}

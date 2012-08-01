@@ -17,10 +17,9 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/oneone/OneToOneDecoder.h>
 #include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-
 
 namespace cetty {
 namespace protobuf {
@@ -37,12 +36,14 @@ namespace protobuf {
 namespace service {
 namespace handler {
 
-using namespace cetty::channel;
-using namespace cetty::protobuf::service::proto;
 using namespace cetty::buffer;
+using namespace cetty::channel;
+using namespace cetty::handler::codec;
+using namespace cetty::protobuf::service::proto;
 using namespace cetty::protobuf::service::handler;
 
-class ProtobufServiceMessageDecoder : public cetty::handler::codec::oneone::OneToOneDecoder {
+class ProtobufServiceMessageDecoder
+    : public MessageToMessageDecoder<ChannelBufferPtr, ProtobufServiceMessagePtr> {
 public:
     ProtobufServiceMessageDecoder() {}
     virtual ~ProtobufServiceMessageDecoder() {}
@@ -50,19 +51,16 @@ public:
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
-    //protected:
-    virtual UserEvent decode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const UserEvent& msg);
-
-
     static int decode(const ChannelBufferPtr& buffer,
                       const ProtobufServiceMessagePtr& message);
+
+protected:
+    virtual ProtobufServiceMessagePtr decode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg);
 
 private:
     static int decodePayload(const ChannelBufferPtr& buffer,
                              const ProtobufServiceMessagePtr& message);
-
 };
 
 }

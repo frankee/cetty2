@@ -22,6 +22,8 @@
  */
 
 #include <string>
+#include <boost/noncopyable.hpp>
+
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelFwd.h>
 #include <cetty/channel/ChannelFutureFwd.h>
@@ -129,7 +131,10 @@ class ChannelSink;
  * @enddot
  *
  */
-class Channel : public ChannelOutboundInvoker, public ReferenceCounter<Channel> {
+class Channel : public ChannelOutboundInvoker,
+    public ReferenceCounter<Channel>,
+    private boost::noncopyable {
+
 public:
     virtual ~Channel() {}
 

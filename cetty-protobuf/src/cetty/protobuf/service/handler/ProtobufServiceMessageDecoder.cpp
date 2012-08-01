@@ -33,34 +33,11 @@ using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
 
 ChannelHandlerPtr ProtobufServiceMessageDecoder::clone() {
-    return ChannelHandlerPtr(new ProtobufServiceMessageDecoder);
+    return shared_from_this();
 }
 
 std::string ProtobufServiceMessageDecoder::toString() const {
     return "ProtobufServiceMessageDecoder";
-}
-
-UserEvent ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
-        const ChannelPtr& channel,
-        const UserEvent& msg) {
-
-    ChannelBufferPtr buffer = msg.smartPointer<ChannelBuffer>();
-
-    if (buffer) {
-        ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
-
-        if (!decode(buffer, message)) {
-            return UserEvent(message);
-        }
-        else {
-            // error here
-            printf("ProtobufServiceMessageDecoder::decode failed beacuse of type wrong");
-            return msg;
-        }
-    }
-    else {
-        return msg;
-    }
 }
 
 int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
@@ -152,6 +129,24 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
     }
 
     return 0;
+}
+
+ProtobufServiceMessagePtr ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
+    const ChannelBufferPtr& msg) {
+
+        if (msg) {
+            ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
+
+            if (!decode(msg, message)) {
+                return message;
+            }
+            else {
+                // error here
+                printf("ProtobufServiceMessageDecoder::decode failed because of type wrong");
+            }
+        }
+
+        return ChannelBufferPtr();
 }
 
 }

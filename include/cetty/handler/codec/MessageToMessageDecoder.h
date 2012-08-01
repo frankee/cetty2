@@ -43,7 +43,7 @@ namespace codec {
     using namespace cetty::channel;
 
 template<typename InboundInT, typename InboundOutT>
-class MessageToMessageDecoder : ChannelInboundMessageHandler<InboundInT> {
+class MessageToMessageDecoder : public ChannelInboundMessageHandler<InboundInT> {
 public:
     MessageToMessageDecoder() {}
     virtual ~MessageToMessageDecoder() {}

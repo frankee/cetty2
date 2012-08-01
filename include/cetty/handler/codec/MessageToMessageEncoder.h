@@ -42,38 +42,42 @@ template<typename OutboundInT, typename OutboundOutT>
 class MessageToMessageEncoder
         : public cetty::channel::ChannelOutboundMessageHandler<OutboundInT> {
 public:
-    virtual void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        MessageBuf<I> in = ctx.outboundMessageBuffer();
+    virtual ~MessageToMessageEncoder() {}
 
-        for (;;) {
+protected:
+    virtual void flush(OutboundMessageContext& ctx,
+        const ChannelFuturePtr& future) {
+            OutboundMessageContext::MessageQueue& in =
+                ctx.getOutboundMessageQueue();
+
+        while (!in.empty()) {
             try {
-                Object msg = in.poll();
+                OutboundInT& msg = in.front();
 
-                if (msg == null) {
+                if (!msg) {
                     break;
                 }
 
                 if (!isEncodable(msg)) {
-                    ctx.nextOutboundMessageBuffer().add(msg);
+                    //ctx.nextOutboundMessageBuffer().add(msg);
                     continue;
                 }
 
-                I imsg = (I) msg;
-                O omsg = encode(ctx, imsg);
+                OutboundOutT omsg = encode(ctx, msg);
 
-                if (omsg == null) {
+                if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
                     // an aggregated message - keep polling.
                     continue;
                 }
 
-                CodecUtil.unfoldAndAdd(ctx, omsg, false);
+                CodecUtil<OutboundOutT>::unfoldAndAdd(ctx, omsg, false);
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);
             }
-            catch (Throwable t) {
-                ctx.fireExceptionCaught(new EncoderException(t));
+            catch (const std::exception& e) {
+                ctx.fireExceptionCaught(EncoderException(e.what()));
             }
         }
 

@@ -16,11 +16,11 @@
 
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/config/ConfigCenter.h>
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
-#include <cetty/handler/codec/frame/LengthFieldPrepender.h>
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
+#include <cetty/handler/codec/LengthFieldPrepender.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
@@ -47,13 +47,13 @@ using namespace cetty::protobuf::service::http;
 static const std::string PROTOBUF_SERVICE_HTTP("http");
 static const std::string PROTOBUF_SERVICE_RPC("rpc");
 
-ProtobufServerBuilder::ProtobufServerBuilder(int threadCnt)
-    : ServerBuilder(threadCnt) {
-    init();
+ProtobufServerBuilder::ProtobufServerBuilder()
+    : ServerBuilder() {
+        init();
 }
 
-ProtobufServerBuilder::ProtobufServerBuilder(const ConfigCenter& conf)
-    : ServerBuilder(conf), confCenter(&conf) {
+ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt)
+    : ServerBuilder(parentThreadCnt, childThreadCnt) {
     init();
 }
 
@@ -99,8 +99,7 @@ ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
     return pipeline;
 }
 
-ChannelPipelinePtr ProtobufServerBuilder::createProtobufHttpServicePipeline(
-    const ConfigCenter& confCenter) {
+ChannelPipelinePtr ProtobufServerBuilder::createProtobufHttpServicePipeline() {
     ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
     //if (ssl) {

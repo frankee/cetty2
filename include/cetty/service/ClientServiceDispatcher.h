@@ -41,7 +41,10 @@ using namespace cetty::service::pool;
 
 template<typename ReqT, typename RepT>
 class ClientServiceDispatcher
-    : public cetty::channel::ChannelMessageHandler<ReqT, RepT> {
+    : public cetty::channel::ChannelMessageHandler<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
+
 public:
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
     typedef ServiceRequestHandler<ReqT, RepT> ServiceRequestHandlerType;
@@ -67,27 +70,42 @@ public:
 
         pool.getBootstrap().setPipeline(pipeline);
         pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(asioService));
-
     }
 
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        //OutstandingCallPtr call = e.getMessage().smartPointer<OutstandingCallType>();
-        //ctx.sendUpstream(e);
-    }
+    //virtual void messageUpdated(InboundMessageContext& ctx) {
+    //}
 
-    virtual void flush(OutboundMessageContext& ctx) {
-        OutboundMessageContext::MessageQueue queue = ctx.getOutboundMessageQueue();
+    virtual void flush(OutboundMessageContext& ctx,
+        const ChannelFuturePtr& future) {
+        OutboundMessageContext::MessageQueue& in =
+            ctx.getOutboundMessageQueue();
 
+        bool notify = false;
         ChannelPtr ch = pool.getChannel(ConnectionPool::ConnectedCallback());
+        BufferingCall bufferingCall;
 
-        if (ch) {
-            ch->write(e.getMessage());
-            outStandingCalls.insert(std::make_pair(call->getId(), call));
+        while (!in.empty()) {
+            OutstandingCallPtr& request = in.front();
+
+            if (ch) {
+                ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                outStandingCalls.insert(std::make_pair(call->getId(), call));
+                notify = true;
+            }
+            else {
+                bufferingCall.calls.push_back(call);
+            }
+        }
+
+        if (notify) {
+            ctx.flush(future);
         }
         else {
-            bufferingCalls.push_back(call);
+            bufferingCall.future = future;
+            bufferingCalls.push_back(bufferingCall);
+
             pool.getChannel(boost::bind(
-                                &ClientServiceDispatcherType::connectedCallback, this, _1));
+                &ClientServiceDispatcherType::connectedCallback, this, _1));
         }
     }
 
@@ -95,10 +113,14 @@ public:
         BOOST_ASSERT(channel);
 
         while (!bufferingCalls.empty()) {
-            const OutstandingCallPtr& call = bufferingCalls.front();
-            channel->write(UserEvent(call));
-            outStandingCalls.insert(std::make_pair(call->getId(), call));
+            const BufferingCall& call = bufferingCalls.front();
+            while (!call.calls.empty()) {
+                OutstandingCallPtr& request = call.calls.front();
 
+                    channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                    outStandingCalls.insert(std::make_pair(call->getId(), call));
+            }
+            ctx.flush(call.future);
             bufferingCalls.pop_front();
         }
     }
@@ -113,13 +135,19 @@ public:
     virtual std::string toString() { return "ClientServiceDispatcherType"; }
 
 private:
+    struct BufferingCall {
+        std::deque<OutstandingCallPtr> calls;
+        ChannelFuturePtr future;
+    };
+
+private:
     AsioServicePtr asioService;
     ChannelPipelinePtr defaultPipeline;
 
     Connections connections;
     ConnectionPool pool;
 
-    std::deque<OutstandingCallPtr> bufferingCalls;
+    std::deque<BufferingCall> bufferingCalls;
     std::map<boost::int64_t, OutstandingCallPtr> outStandingCalls;
 };
 

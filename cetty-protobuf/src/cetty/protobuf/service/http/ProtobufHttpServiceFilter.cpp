@@ -14,7 +14,8 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/http/ProtobufHttpMessageFilter.h>
+#include <cetty/protobuf/service/http/ProtobufHttpServiceFilter.h>
+
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/config/ConfigCenter.h>
@@ -30,7 +31,7 @@ namespace http {
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
-ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ServiceRequestMapperPtr& requestMapper,
+ProtobufHttpServiceFilter::ProtobufHttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
         const ServiceResponseMapperPtr& responseMapper)
     : requestMapper(requestMapper),
       responseMapper(responseMapper),
@@ -38,7 +39,7 @@ ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ServiceRequestMapperP
       proto2http(responseMapper) {
 }
 
-ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ConfigCenter& config) {
+ProtobufHttpServiceFilter::ProtobufHttpServiceFilter() {
     requestMapper = new ServiceRequestMapper(config);
     responseMapper = new ServiceResponseMapper(config);
 
@@ -46,20 +47,22 @@ ProtobufHttpMessageFilter::ProtobufHttpMessageFilter(const ConfigCenter& config)
     proto2http.setResponseMapper(responseMapper);
 }
 
-ChannelHandlerPtr ProtobufHttpMessageFilter::clone() {
-//    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
+ChannelHandlerPtr ProtobufHttpServiceFilter::clone() {
+    //    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
     return NULL;
 }
 
-std::string ProtobufHttpMessageFilter::toString() const {
+std::string ProtobufHttpServiceFilter::toString() const {
     return "ProtobufHttpMessageFilter";
 }
 
-ProtobufServiceMessagePtr ProtobufHttpMessageFilter::filterReq(const HttpRequestPtr& req) {
+ProtobufServiceMessagePtr ProtobufHttpServiceFilter::filterRequest(OutboundMessageContext& ctx,
+        const HttpRequestPtr& req) {
     return http2proto.getProtobufMessage(req);
 }
 
-HttpResponsePtr ProtobufHttpMessageFilter::filterRep(const HttpRequestPtr& req,
+HttpResponsePtr ProtobufHttpServiceFilter::filterResponse(InboundMessageContext& ctx,
+        const HttpRequestPtr& req,
         const ProtobufServiceMessagePtr& rep) {
 
     return proto2http.getHttpResponse(req, rep);

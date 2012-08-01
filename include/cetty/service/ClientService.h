@@ -21,25 +21,56 @@
 #include <cetty/channel/AbstractChannel.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/DefaultChannelConfig.h>
 #include <cetty/util/ReferenceCounter.h>
+
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ClientServicePtr.h>
 #include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
+    namespace logging {
+        class InternalLogger;
+    }
+}
+
+namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
+using namespace cetty::logging;
 
 class ClientService : public cetty::channel::AbstractChannel {
 public:
+    ClientService(const EventLoopPtr& eventLoop,
+        const ChannelFactoryPtr& factory,
+        const ChannelPipelinePtr& pipeline)
+        : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {}
+    
     virtual ~ClientService() {}
 
+    virtual ChannelConfig& getConfig() { return this->config; }
+    virtual const ChannelConfig& getConfig() const { return this->config; }
+
+    virtual const SocketAddress& getLocalAddress() const { return SocketAddress::NULL_ADDRESS ; }
+    virtual const SocketAddress& getRemoteAddress() const { return SocketAddress::NULL_ADDRESS; }
+    
+    virtual bool isOpen() const { return true; }
+    virtual bool isActive() const { return true; }
+
 protected:
-    ClientService(const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline)
-        : AbstractChannel(ChannelPtr(), factory, pipeline) {}
+    virtual void doBind(const SocketAddress& localAddress);
+    virtual void doDisconnect();
+    virtual void doClose();
+
+protected:
+    static InternalLogger* logger;
+
+protected:
+    EventLoopPtr  eventLoop;
+    ChannelSink* sink;
+
+    DefaultChannelConfig config;
 };
 
 template<typename ReqT, typename RepT>
@@ -49,7 +80,7 @@ void callMethod(const ChannelPtr& channel,
     if (channel) {
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
             new OutstandingCall<ReqT, RepT>(request, future));
-        channel->write(UserEvent(outstanding));
+        channel->write(outstanding);
     }
 }
 

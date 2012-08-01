@@ -290,7 +290,8 @@ ServerBuilder::ServerBuilder() {
 }
 
 ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
-    //config.threadCount = threadCnt;
+    config.parentThreadCount = parentThreadCnt;
+    config.childThreadCount = childThreadCnt;
     init();
 }
 
@@ -318,8 +319,16 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return ChannelPtr();
     }
 
-    if (!servicePool) {
-        servicePool = new AsioServicePool(config.threadCount);
+    if (!parentEventLoopPool) {
+        parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
+    }
+    if (!childEventLoopPool) {
+        if (config.childThreadCount) {
+            childEventLoopPool = new AsioServicePool(config.childThreadCount);
+        }
+        else {
+            childEventLoopPool = parentEventLoopPool;
+        }
     }
 
     ServerBootstrap* bootstrap = new ServerBootstrap(
@@ -379,7 +388,7 @@ void ServerBuilder::deinit() {
 void ServerBuilder::stop() {
     std::map<std::string, ServerBootstrap*>::iterator itr;
     for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
-
+        itr->second->shutdown();
     }
 }
 
@@ -388,8 +397,6 @@ void ServerBuilder::waitingForExit() {
         createPidFile(config.pidfile.c_str());
     }
     else {
-        //ChannelPtr c = bootstraps.begin()->second->getFactory()->;
-        //if (c && c->isBound()) {
             printf("Server is running...\n");
             printf("To quit server, press 'q'.\n");
 
@@ -403,7 +410,6 @@ void ServerBuilder::waitingForExit() {
                 }
             }
             while (true);
-        //}
     }
 }
 

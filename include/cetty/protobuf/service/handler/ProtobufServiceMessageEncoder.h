@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
 #include <cetty/buffer/ChannelBufferFwd.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
@@ -34,9 +33,11 @@ namespace handler {
 
 using namespace cetty::buffer;
 using namespace cetty::channel;
+using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service;
 
-class ProtobufServiceMessageEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {
+class ProtobufServiceMessageEncoder
+    : public MessageToMessageEncoder<ProtobufServiceMessagePtr, ChannelBufferPtr> {
 public:
     ProtobufServiceMessageEncoder() {}
     virtual ~ProtobufServiceMessageEncoder() {}
@@ -44,14 +45,12 @@ public:
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
-    //protected:
-    virtual UserEvent encode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const UserEvent& msg);
-
-
     static void encodeMessage(const ChannelBufferPtr& buffer,
                               const ProtobufServiceMessagePtr& message);
+
+protected:
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+        const ProtobufServiceMessagePtr& msg);
 
 private:
     static void encodeProtobufMessage(const ChannelBufferPtr& buffer,

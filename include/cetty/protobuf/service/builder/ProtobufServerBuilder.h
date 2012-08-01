@@ -40,8 +40,8 @@ using namespace cetty::protobuf::service;
 
 class ProtobufServerBuilder : public cetty::service::builder::ServerBuilder {
 public:
-    ProtobufServerBuilder(int threadCnt);
-    ProtobufServerBuilder(const ConfigCenter& conf);
+    ProtobufServerBuilder();
+    ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt);
 
     virtual ~ProtobufServerBuilder();
 
@@ -53,11 +53,8 @@ public:
 private:
     void init();
     ChannelPipelinePtr createProtobufServicePipeline();
-    ChannelPipelinePtr createProtobufHttpServicePipeline(
-        const ConfigCenter& confCenter);
+    ChannelPipelinePtr createProtobufHttpServicePipeline();
 
-private:
-    const ConfigCenter* confCenter;
 };
 
 }
