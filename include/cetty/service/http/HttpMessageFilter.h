@@ -18,7 +18,7 @@
  */
 
 #include <cetty/service/ServerFilter.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 
 namespace cetty {
 namespace service {

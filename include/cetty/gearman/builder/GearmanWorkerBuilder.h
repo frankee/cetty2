@@ -17,8 +17,8 @@
  */
 
 #include <vector>
-#include <cetty/channel/ChannelPipelineFwd.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>

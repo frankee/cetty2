@@ -21,8 +21,8 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelFutureFwd.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/channel/ChannelFuturePtr.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace channel {

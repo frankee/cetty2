@@ -26,7 +26,7 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
@@ -49,7 +50,7 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpServiceFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />

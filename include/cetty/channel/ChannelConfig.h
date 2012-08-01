@@ -22,8 +22,8 @@
  */
 
 #include <cetty/channel/ChannelOption.h>
-#include <cetty/channel/ChannelPipelineFactoryFwd.h>
-#include <cetty/buffer/ChannelBufferFactoryFwd.h>
+#include <cetty/channel/ChannelPipelineFactoryPtr.h>
+#include <cetty/buffer/ChannelBufferFactoryPtr.h>
 
 namespace cetty {
 namespace channel {

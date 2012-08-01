@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 #include <cetty/bootstrap/ServerBootstrap.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/service/builder/ServerBuilderConfig.h>
 
 namespace cetty {

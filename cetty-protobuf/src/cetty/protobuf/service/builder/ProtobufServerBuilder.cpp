@@ -29,7 +29,7 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/protobuf/service/http/ProtobufHttpMessageFilter.h>
+#include <cetty/protobuf/service/http/ProtobufHttpServiceFilter.h>
 
 namespace cetty {
 namespace protobuf {

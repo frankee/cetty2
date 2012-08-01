@@ -21,7 +21,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/placeholders.hpp>
 
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/util/Timeout.h>
 #include <cetty/util/TimerTask.h>
 #include <cetty/util/TimeUnit.h>

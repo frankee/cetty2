@@ -19,7 +19,7 @@
 
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 
 namespace google {
 namespace protobuf {

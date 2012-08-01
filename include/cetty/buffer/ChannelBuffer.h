@@ -26,7 +26,7 @@
 
 #include <cetty/buffer/Array.h>
 #include <cetty/buffer/ByteOrder.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/buffer/ChannelBufferIndexFinder.h>
 #include <cetty/util/ReferenceCounter.h>
 

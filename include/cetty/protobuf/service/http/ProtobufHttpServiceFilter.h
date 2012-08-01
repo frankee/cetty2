@@ -18,7 +18,7 @@
  */
 
 #include <cetty/service/ServerFilter.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>

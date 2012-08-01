@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h">
       <Filter>protobuf\proto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpMessageFilter.h">
-      <Filter>protobuf\http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.h">
       <Filter>protobuf\http\map</Filter>
     </ClInclude>
@@ -93,6 +90,9 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h">
       <Filter>protobuf\builder</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpServiceFilter.h">
+      <Filter>protobuf\http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
@@ -125,9 +125,6 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp">
       <Filter>protobuf\http\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpMessageFilter.cpp">
-      <Filter>protobuf\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
@@ -145,6 +142,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp">
       <Filter>protobuf\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp">
+      <Filter>protobuf\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpServiceFilter.cpp">
+      <Filter>protobuf\http</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -19,7 +19,7 @@
 
 #include <map>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
 namespace cetty {

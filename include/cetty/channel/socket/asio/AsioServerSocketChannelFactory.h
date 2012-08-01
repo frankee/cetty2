@@ -23,8 +23,8 @@
 
 #include <vector>
 #include <cetty/channel/socket/ServerSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
-#include <cetty/util/TimerFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace logging {

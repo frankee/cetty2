@@ -27,7 +27,7 @@
 #include <cetty/channel/socket/ServerSocketChannel.h>
 
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/channel/socket/asio/AsioHandlerAllocator.h>
 #include <cetty/channel/socket/asio/AsioServerSocketChannelConfig.h>
 

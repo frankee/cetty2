@@ -24,7 +24,7 @@
  *
  */
 
-#include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/channel/ChannelFuturePtr.h>
 #include <cetty/bootstrap/Bootstrap.h>
 
 namespace cetty {

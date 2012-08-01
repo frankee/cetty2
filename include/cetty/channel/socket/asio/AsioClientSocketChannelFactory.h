@@ -25,8 +25,8 @@
 #include <vector>
 
 #include <cetty/channel/socket/ClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
-#include <cetty/util/TimerFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace channel {

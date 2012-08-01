@@ -25,7 +25,7 @@
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/ChannelFwd.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/service/Connection.h>
 
 namespace cetty {

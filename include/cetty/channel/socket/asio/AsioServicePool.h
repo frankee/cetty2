@@ -29,7 +29,7 @@
 #include <boost/mpl/size_t.hpp>
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/EventLoopPool.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
 namespace cetty {
 namespace logging {

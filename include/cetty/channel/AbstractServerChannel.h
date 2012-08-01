@@ -26,7 +26,7 @@
 
 #include <cetty/channel/ServerChannel.h>
 #include <cetty/channel/AbstractChannel.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 
 namespace cetty {
 namespace channel {

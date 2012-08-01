@@ -31,7 +31,7 @@
  * under the License.
  */
 
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/channel/ChannelOutboundBufferHandler.h>
 
 namespace cetty {

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelFwd.h>
-#include <cetty/util/TimerFwd.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace util {

@@ -1,7 +1,7 @@
-#if !defined(CETTY_CHANNEL_CHANNELFWD_H)
-#define CETTY_CHANNEL_CHANNELFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELFUTUREPTR_H)
+#define CETTY_CHANNEL_CHANNELFUTUREPTR_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -19,15 +19,16 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace cetty { namespace channel { 
+namespace cetty {
+namespace channel {
 
-class Channel;
-typedef boost::intrusive_ptr<Channel> ChannelPtr;
-typedef boost::intrusive_ptr<Channel const> ConstChannelPtr;
+class ChannelFuture;
+typedef boost::intrusive_ptr<ChannelFuture> ChannelFuturePtr;
 
-}}
+}
+}
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELFWD_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELFUTUREPTR_H)
 
 // Local Variables:
 // mode: c++

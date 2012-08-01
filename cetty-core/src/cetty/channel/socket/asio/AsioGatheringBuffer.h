@@ -19,7 +19,7 @@
 
 #include <boost/asio/buffer.hpp>
 #include <cetty/buffer/GatheringBuffer.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/util/TruncatableArray.h>
 
 namespace cetty { namespace channel {

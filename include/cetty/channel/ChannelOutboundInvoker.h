@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/channel/ChannelFuturePtr.h>
 
 namespace cetty {
 namespace channel {

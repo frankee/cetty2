@@ -23,7 +23,7 @@
 
 #include <string>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/ChannelHandlerFwd.h>
+#include <cetty/channel/ChannelHandlerPtr.h>
 #include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {

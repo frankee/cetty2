@@ -22,7 +22,7 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <cetty/util/TimerFwd.h>
+#include <cetty/util/TimerPtr.h>
 #include <cetty/util/TimerTask.h>
 
 namespace cetty {

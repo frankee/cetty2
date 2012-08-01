@@ -63,9 +63,6 @@ typedef boost::intrusive_ptr<SocketAddressImpl> SocketAddressImplPtr;
  */
 class SocketAddress {
 public:
-    typedef boost::intrusive_ptr<SocketAddressImpl> SmartPointer;
-
-public:
     static const SocketAddress NULL_ADDRESS;
 
 public:
@@ -122,7 +119,7 @@ public:
      */
     SocketAddress(const SocketAddress& addr);
 
-    SocketAddress(const SmartPointer& impl);
+    SocketAddress(const SocketAddressImplPtr& impl);
 
     ~SocketAddress();
 
@@ -177,7 +174,7 @@ private:
     void init(const std::string& host, int port);
 
 private:
-    SmartPointer impl;
+    SocketAddressImplPtr impl;
     static SocketAddressImplFactory* factory;
 };
 

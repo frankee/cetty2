@@ -8,7 +8,7 @@
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/DefaultChannelPipeline.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 

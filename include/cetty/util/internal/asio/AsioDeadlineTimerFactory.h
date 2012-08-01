@@ -23,7 +23,7 @@
 
 #include <map>
 #include <cetty/util/TimerFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
 namespace cetty {
     namespace logging {

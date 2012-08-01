@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELHANDLERFWD_H)
-#define CETTY_CHANNEL_CHANNELHANDLERFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELPIPELINEPTR_H)
+#define CETTY_CHANNEL_CHANNELPIPELINEPTR_H
 
 /**
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -22,18 +22,13 @@
 namespace cetty {
 namespace channel {
 
-class ChannelHandler;
-class ChannelInboundHandler;
-class ChannelOutboundHandler;
-
-typedef boost::intrusive_ptr<ChannelHandler> ChannelHandlerPtr;
-typedef boost::intrusive_ptr<ChannelInboundHandler> ChannelInboundHandlerPtr;
-typedef boost::intrusive_ptr<ChannelOutboundHandler> ChannelOutboundHandlerPtr;
+class ChannelPipeline;
+typedef boost::intrusive_ptr<ChannelPipeline> ChannelPipelinePtr;
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELHANDLERFWD_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELPIPELINEPTR_H)
 
 // Local Variables:
 // mode: c++

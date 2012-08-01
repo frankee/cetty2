@@ -49,22 +49,22 @@ const cetty::channel::IpAddress IpAddress::NULL_ADDRESS;
 IpAddress::IpAddress() {
 }
 
-IpAddress::IpAddress(const SmartPointer& impl) : impl(impl) {
+IpAddress::IpAddress(const IpAddressImplPtr& impl) : impl(impl) {
 }
 
 IpAddress::IpAddress(const IpAddress& addr): impl(addr.impl) {
 }
 
 IpAddress::IpAddress(int family) {
-    if (factory) { impl = SmartPointer(factory->create(family)); }
+    if (factory) { impl = factory->create(family); }
 }
 
 IpAddress::IpAddress(const std::string& addr) {
-    if (factory) { impl = SmartPointer(factory->create(addr)); }
+    if (factory) { impl = factory->create(addr); }
 }
 
 IpAddress::IpAddress(const std::string& addr, int family) {
-    if (factory) { impl = SmartPointer(factory->create(addr, family)); }
+    if (factory) { impl = factory->create(addr, family); }
 }
 
 IpAddress::~IpAddress() {

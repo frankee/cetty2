@@ -29,12 +29,12 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelSink.h>
-#include <cetty/channel/ChannelHandlerFwd.h>
+#include <cetty/channel/ChannelHandlerPtr.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {

@@ -21,7 +21,7 @@
 #include <stack>
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
-#include <cetty/channel/ChannelFwd.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/SimpleChannelHandler.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 

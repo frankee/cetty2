@@ -18,7 +18,7 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/pool/WatermarkConnectionPool.h>
 

@@ -20,7 +20,7 @@
 #include <list>
 
 #include <cetty/util/Timer.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
 namespace cetty {
 namespace util {

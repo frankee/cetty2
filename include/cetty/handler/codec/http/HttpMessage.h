@@ -23,7 +23,7 @@
 
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/NameValueCollection.h>
 

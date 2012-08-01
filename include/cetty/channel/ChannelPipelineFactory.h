@@ -22,8 +22,8 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
-#include <cetty/channel/ChannelPipelineFactoryFwd.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
+#include <cetty/channel/ChannelPipelineFactoryPtr.h>
 
 namespace cetty {
 namespace channel {

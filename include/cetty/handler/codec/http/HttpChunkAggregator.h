@@ -22,7 +22,7 @@
  */
 
 #include <cetty/handler/codec/MessageToMessageDecoder.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 
 namespace cetty {
 namespace handler {

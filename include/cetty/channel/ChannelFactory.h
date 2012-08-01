@@ -21,9 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelFwd.h>
-#include <cetty/channel/ChannelFactoryFwd.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/ChannelFactoryPtr.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/util/ExternalResourceReleasable.h>
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace buffer {

@@ -32,7 +32,7 @@
  */
 
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace channel {

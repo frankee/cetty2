@@ -39,6 +39,7 @@ namespace channel {
 
 class IpAddressImpl;
 class IpAddressImplFactory;
+typedef boost::intrusive_ptr<IpAddressImpl> IpAddressImplPtr;
 
 /**
  * This class represents an internet (IP) host
@@ -61,8 +62,6 @@ class IpAddressImplFactory;
 class IpAddress {
 public:
     static const IpAddress NULL_ADDRESS;
-
-    typedef boost::intrusive_ptr<IpAddressImpl> SmartPointer;
 
 public:
     /**
@@ -102,7 +101,7 @@ public:
      */
     IpAddress(const std::string& addr, int family);
 
-    IpAddress(const SmartPointer& impl);
+    IpAddress(const IpAddressImplPtr& impl);
 
     /**
      * Creates an IpAddress by copying another one.
@@ -382,7 +381,7 @@ public:
     static bool hasFactory();
 
 private:
-    SmartPointer impl;
+    IpAddressImplPtr impl;
     static IpAddressImplFactory* factory;
 };
 

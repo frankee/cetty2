@@ -24,8 +24,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/function.hpp>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/ChannelFwd.h>
-#include <cetty/channel/ChannelFutureFwd.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/ChannelFuturePtr.h>
 
 namespace cetty {
 namespace util {

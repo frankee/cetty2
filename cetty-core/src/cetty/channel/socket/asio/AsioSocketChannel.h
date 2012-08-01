@@ -32,7 +32,7 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 #include <cetty/channel/socket/SocketChannel.h>
-#include <cetty/channel/socket/asio/AsioServicePoolFwd.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/channel/socket/asio/AsioHandlerAllocator.h>
 #include <cetty/channel/socket/asio/AsioSocketChannelConfig.h>
 #include <cetty/buffer/ChannelBuffer.h>

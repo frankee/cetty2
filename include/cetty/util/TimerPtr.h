@@ -1,5 +1,5 @@
-#if !defined(CETTY_UTIL_TIMERFWD_H)
-#define CETTY_UTIL_TIMERFWD_H
+#if !defined(CETTY_UTIL_TIMERPTR_H)
+#define CETTY_UTIL_TIMERPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -31,4 +31,4 @@ namespace cetty { namespace util {
 
 }}
 
-#endif //#if !defined(CETTY_UTIL_TIMERFWD_H)
+#endif //#if !defined(CETTY_UTIL_TIMERPTR_H)

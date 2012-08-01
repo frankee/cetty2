@@ -649,24 +649,6 @@
     <ClInclude Include="..\..\src\cetty\logging\SimpleLogger.h">
       <Filter>logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFwd.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\TimerFwd.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
@@ -1023,6 +1005,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\QueryStringEncoder.h">
       <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryFwd.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuturePtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerPtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelinePtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\TimerPtr.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

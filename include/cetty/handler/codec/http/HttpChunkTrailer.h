@@ -22,7 +22,7 @@
  */
 
 #include <cetty/handler/codec/http/HttpChunk.h>
-#include <cetty/handler/codec/http/HttpMessageFwd.h>
+#include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/util/NameValueCollection.h>
 
 namespace cetty {

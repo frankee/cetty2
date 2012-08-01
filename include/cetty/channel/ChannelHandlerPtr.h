@@ -1,5 +1,5 @@
-#if !defined(CETTY_BUFFER_CHANNELBUFFERFWD_H)
-#define CETTY_BUFFER_CHANNELBUFFERFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELHANDLERPTR_H)
+#define CETTY_CHANNEL_CHANNELHANDLERPTR_H
 
 /**
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,16 +20,20 @@
 #include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
-namespace buffer {
+namespace channel {
 
-class ChannelBuffer;
-typedef boost::intrusive_ptr<ChannelBuffer> ChannelBufferPtr;
-typedef boost::intrusive_ptr<ChannelBuffer const> ConstChannelBufferPtr;
+class ChannelHandler;
+class ChannelInboundHandler;
+class ChannelOutboundHandler;
+
+typedef boost::intrusive_ptr<ChannelHandler> ChannelHandlerPtr;
+typedef boost::intrusive_ptr<ChannelInboundHandler> ChannelInboundHandlerPtr;
+typedef boost::intrusive_ptr<ChannelOutboundHandler> ChannelOutboundHandlerPtr;
 
 }
 }
 
-#endif //#if !defined(CETTY_BUFFER_CHANNELBUFFERFWD_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELHANDLERPTR_H)
 
 // Local Variables:
 // mode: c++

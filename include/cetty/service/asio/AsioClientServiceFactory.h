@@ -21,7 +21,7 @@
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
-#include <cetty/util/TimerFwd.h>
+#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace channel {

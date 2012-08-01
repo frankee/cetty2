@@ -21,9 +21,9 @@
  */
 
 #include <cetty/channel/ChannelOption.h>
-#include <cetty/channel/ChannelFactoryFwd.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
-#include <cetty/channel/ChannelPipelineFactoryFwd.h>
+#include <cetty/channel/ChannelFactoryPtr.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
+#include <cetty/channel/ChannelPipelineFactoryPtr.h>
 
 namespace cetty {
 namespace logging {

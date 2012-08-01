@@ -33,7 +33,7 @@
  */
 
 #include <vector>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>

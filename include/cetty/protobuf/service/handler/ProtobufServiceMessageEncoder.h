@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace google {

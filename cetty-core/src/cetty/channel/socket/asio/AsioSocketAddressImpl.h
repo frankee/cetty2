@@ -84,8 +84,8 @@ public:
 
     virtual const IpAddress& ipAddress() const {
         if (!hostAddress.validated()) {
-            hostAddress = IpAddress(
-                              IpAddress::SmartPointer(new AsioIpAddressImpl(endpoint.address())));
+            hostAddress = IpAddress(IpAddressImplPtr(
+                new AsioIpAddressImpl(endpoint.address())));
         }
 
         return hostAddress;

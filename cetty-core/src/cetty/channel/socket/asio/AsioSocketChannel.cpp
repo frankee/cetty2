@@ -109,8 +109,8 @@ const SocketAddress& AsioSocketChannel::getLocalAddress() const {
     boost::asio::ip::tcp::endpoint endpoint = tcpSocket.local_endpoint(ec);
 
     if (!ec) {
-        localAddress = SocketAddress(
-                           SocketAddress::SmartPointer(new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+        localAddress = SocketAddress(SocketAddressImplPtr(
+            new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
     }
     else {
         LOG_ERROR(logger, "failed to get the local address of the channel from asio.");
@@ -128,8 +128,8 @@ const SocketAddress& AsioSocketChannel::getRemoteAddress() const {
     boost::asio::ip::tcp::endpoint endpoint = tcpSocket.remote_endpoint(ec);
 
     if (!ec) {
-        remoteAddress = SocketAddress(
-                            SocketAddress::SmartPointer(new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+        remoteAddress = SocketAddress(SocketAddressImplPtr(
+            new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
     }
     else {
         LOG_ERROR(logger, "failed to get the remote address of the channel from asio.");

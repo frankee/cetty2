@@ -38,7 +38,7 @@ SocketAddress::SocketAddress(int family) {
     BOOST_ASSERT(factory);
 
     if (factory) {
-        impl = SmartPointer(factory->create(family));
+        impl = factory->create(family);
     }
 }
 
@@ -46,7 +46,7 @@ SocketAddress::SocketAddress(int family, int port) {
     BOOST_ASSERT(factory);
 
     if (factory) {
-        impl = SmartPointer(factory->create(family, port));
+        impl = factory->create(family, port);
     }
 }
 
@@ -54,7 +54,7 @@ SocketAddress::SocketAddress(const IpAddress& addr, int port) {
     BOOST_ASSERT(factory);
 
     if (factory) {
-        impl = SmartPointer(factory->create(addr, port));
+        impl = factory->create(addr, port);
     }
 }
 
@@ -116,7 +116,7 @@ SocketAddress::SocketAddress(const std::string& hostAndPort) {
 SocketAddress::SocketAddress(const SocketAddress& addr) : impl(addr.impl) {
 }
 
-SocketAddress::SocketAddress(const SmartPointer& impl) : impl(impl) {
+SocketAddress::SocketAddress(const SocketAddressImplPtr& impl) : impl(impl) {
 }
 
 SocketAddress::~SocketAddress() {
@@ -207,7 +207,7 @@ void SocketAddress::init(const std::string& host, int port) {
     }
 
     if (factory) {
-        impl = SmartPointer(factory->create(host, port));
+        impl = factory->create(host, port);
     }
 }
 
@@ -217,7 +217,7 @@ void SocketAddress::init(const std::string& host, const std::string& port) {
     }
 
     if (factory) {
-        impl = SmartPointer(factory->create(host, port));
+        impl = factory->create(host, port);
     }
 }
 

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelFwd.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 

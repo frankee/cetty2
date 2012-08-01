@@ -18,7 +18,7 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <cetty/buffer/ChannelBufferFwd.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace protobuf {

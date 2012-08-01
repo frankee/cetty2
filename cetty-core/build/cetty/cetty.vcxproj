@@ -212,6 +212,10 @@
     <ClCompile Include="..\..\src\cetty\logging\InternalLogLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundHandler.h" />
@@ -227,14 +231,14 @@
     <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuturePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureListener.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerLifeCycleException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerContext.h" />
@@ -257,7 +261,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelinePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelines.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CompleteChannelFuture.h" />
@@ -348,7 +352,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h" />
-    <ClInclude Include="..\..\..\include\cetty\util\TimerFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\TimerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioClientSocketChannelFactory.h" />
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioGatheringBuffer.h" />

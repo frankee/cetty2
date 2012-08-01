@@ -25,10 +25,10 @@
 #include <boost/noncopyable.hpp>
 
 #include <cetty/channel/EventLoop.h>
-#include <cetty/channel/ChannelFwd.h>
-#include <cetty/channel/ChannelFutureFwd.h>
-#include <cetty/channel/ChannelFactoryFwd.h>
-#include <cetty/channel/ChannelPipelineFwd.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/ChannelFuturePtr.h>
+#include <cetty/channel/ChannelFactoryPtr.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
 #include <cetty/util/Exception.h>

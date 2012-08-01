@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELFACTORYFWD_H)
-#define CETTY_CHANNEL_CHANNELFACTORYFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELFACTORYPTR_H)
+#define CETTY_CHANNEL_CHANNELFACTORYPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -28,7 +28,7 @@ typedef boost::intrusive_ptr<ChannelFactory> ChannelFactoryPtr;
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELFACTORYFWD_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELFACTORYPTR_H)
 
 // Local Variables:
 // mode: c++

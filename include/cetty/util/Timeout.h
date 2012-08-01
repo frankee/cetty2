@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/util/TimerFwd.h>
+#include <cetty/util/TimerPtr.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
