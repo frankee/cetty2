@@ -24,6 +24,7 @@
 #include <boost/asio.hpp>
 
 #include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ServerSocketChannel.h>
 
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
@@ -57,11 +58,11 @@ using namespace cetty::channel::socket;
 // only response to bind port, open and close.
 class AsioServerSocketChannel : public cetty::channel::socket::ServerSocketChannel {
 public:
-    AsioServerSocketChannel(const AsioServicePtr& ioService,
+    AsioServerSocketChannel(const EventLoopPtr& eventLoop,
                             const ChannelFactoryPtr& factory,
                             const ChannelPipelinePtr& pipeline,
                             const ChannelPipelinePtr& childPipeline,
-                            const AsioServicePoolPtr& childServicePool);
+                            const EventLoopPoolPtr& childEventLoopPool);
 
     virtual ~AsioServerSocketChannel();
 

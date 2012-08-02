@@ -28,6 +28,7 @@
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/AdaptiveReceiveBuffer.h>
 
+#include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioSocketChannelSink.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImpl.h>
@@ -54,12 +55,12 @@ using namespace cetty::util;
 InternalLogger* AsioSocketChannel::logger;
 
 AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
-                                     const AsioServicePtr& ioService,
+                                     const EventLoopPtr& eventLoop,
                                      const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline)
-    : SocketChannel(boost::static_pointer_cast<EventLoop>(ioService), parent, factory, pipeline),
-      ioService(ioService),
-      tcpSocket(ioService->service()),
+    : SocketChannel(eventLoop, parent, factory, pipeline),
+      ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       sink(),
       isWriting(false),
       highWaterMarkCounter(0),
@@ -68,12 +69,12 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
       init(pipeline);
 }
 
-AsioSocketChannel::AsioSocketChannel(const AsioServicePtr& ioService,
+AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
                                      const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline)
-    : SocketChannel(boost::static_pointer_cast<EventLoop>(ioService), ChannelPtr(), factory, pipeline),
-      ioService(ioService),
-      tcpSocket(ioService->service()),
+    : SocketChannel(eventLoop, ChannelPtr(), factory, pipeline),
+      ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       sink(),
       isWriting(false),
       highWaterMarkCounter(0),

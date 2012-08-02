@@ -17,6 +17,66 @@
 
 #include <cetty/service/ClientService.h>
 
-namespace cetty { namespace service { 
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/AbstractChannelSink.h>
 
-}}
+#include <cetty/logging/LoggerHelper.h>
+
+namespace cetty {
+namespace service {
+
+using namespace cetty::channel;
+
+
+ChannelConfig& ClientService::getConfig() {
+    return this->config;
+}
+
+const ChannelConfig& ClientService::getConfig() const {
+    return this->config;
+}
+
+const SocketAddress& ClientService::getLocalAddress() const {
+    return SocketAddress::NULL_ADDRESS ;
+}
+
+const SocketAddress& ClientService::getRemoteAddress() const {
+    return SocketAddress::NULL_ADDRESS;
+}
+
+bool ClientService::isOpen() const {
+    return true;
+}
+
+bool ClientService::isActive() const {
+    return true;
+}
+
+void ClientService::doBind(const SocketAddress& localAddress) {
+
+}
+
+void ClientService::doDisconnect() {
+
+}
+
+void ClientService::doClose() {
+
+}
+
+ChannelSink& ClientService::getSink() {
+    return *sink;
+}
+
+ClientService::ClientService(const EventLoopPtr& eventLoop,
+                             const ChannelFactoryPtr& factory,
+                             const ChannelPipelinePtr& pipeline)
+    : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline),
+      sink() {
+
+    sink = new AbstractChannelSink(*this);
+    AbstractChannel::setPipeline(pipeline);
+}
+
+}
+}

@@ -60,7 +60,7 @@ public:
     virtual ~MessageToBufferEncoder() {}
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        MessageContext* context = ctx.downcast<MessageContext>();
+        MessageContext* context = ctx.outboundMessageHandlerContext<MessageContext>();
         BufferContext* nextContxt = ctx.nextOutboundBufferHandlerContext();
         BOOST_ASSERT(context && nextContxt);
 

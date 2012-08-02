@@ -19,15 +19,15 @@
 #include <cetty/channel/ChannelSink.h>
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelState.h>
-#include <cetty/channel/ChannelStateEvent.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
+#include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
 #include <cetty/util/TimerFactory.h>
 #include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
-#include <cetty/service/asio/AsioClientService.h>
+
+#include <cetty/service/ClientService.h>
 
 namespace cetty {
 namespace service {
@@ -38,30 +38,48 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::util;
 using namespace cetty::util::internal::asio;
 
-
-AsioClientServiceFactory::AsioClientServiceFactory(const AsioServicePtr& ioService,
-        const AsioServicePoolPtr& pool)
-    : ioService(ioService),
-      sink(new AsioClientServiceSink),
+AsioClientServiceFactory::AsioClientServiceFactory(int threadCnt)
+    : eventLoop(),
+      eventLoopPool(new AsioServicePool(threadCnt)),
       timerFactory(),
       socketAddressFactory(),
       ipAddressFactory() {
-    init(pool);
+    init();
+}
+
+AsioClientServiceFactory::AsioClientServiceFactory(const EventLoopPtr& eventLoop)
+    : eventLoop(eventLoop),
+      eventLoopPool(),
+      timerFactory(),
+      socketAddressFactory(),
+      ipAddressFactory() {
+    init();
+}
+
+AsioClientServiceFactory::AsioClientServiceFactory(
+    const EventLoopPoolPtr& eventLoopPool)
+    : eventLoop(),
+      eventLoopPool(eventLoopPool),
+      timerFactory(),
+      socketAddressFactory(),
+      ipAddressFactory() {
+    init();
 }
 
 AsioClientServiceFactory::~AsioClientServiceFactory() {
-    if (sink) {
-        delete sink;
-    }
-
     deinit();
 }
 
-cetty::channel::ChannelPtr AsioClientServiceFactory::newChannel(const ChannelPipelinePtr& pipeline) {
-    if (ioService) {
-        return new AsioClientService(shared_from_this(),
-                                     pipeline,
-                                     ioService);
+ChannelPtr AsioClientServiceFactory::newChannel(const ChannelPipelinePtr& pipeline) {
+    return newChannel(pipeline, this->eventLoop);
+}
+
+ChannelPtr AsioClientServiceFactory::newChannel(const ChannelPipelinePtr& pipeline,
+        const EventLoopPtr& eventLoop) {
+    if (eventLoop) {
+        return ChannelPtr(new ClientService(eventLoop,
+                                 shared_from_this(),
+                                 pipeline));
     }
     else {
         return ChannelPtr();
@@ -69,25 +87,35 @@ cetty::channel::ChannelPtr AsioClientServiceFactory::newChannel(const ChannelPip
 }
 
 void AsioClientServiceFactory::shutdown() {
+    if (eventLoopPool) {
+        eventLoopPool->stop();
+        eventLoopPool->waitForStop();
+    }
 
+    channels.clear();
 }
 
-void AsioClientServiceFactory::init(const AsioServicePoolPtr& pool) {
+void AsioClientServiceFactory::init() {
     if (!TimerFactory::hasFactory()) {
-        if (pool) {
-            timerFactory = new AsioDeadlineTimerFactory(pool);
+        if (eventLoopPool) {
+            timerFactory = new AsioDeadlineTimerFactory(eventLoopPool);
         }
         else {
-            timerFactory = new AsioDeadlineTimerFactory(ioService);
+            timerFactory = new AsioDeadlineTimerFactory(eventLoop);
         }
 
         TimerFactory::setFactory(timerFactory);
     }
 
     if (!SocketAddress::hasFactory()) {
-        socketAddressFactory = new AsioTcpSocketAddressImplFactory(
-            pool ? pool->getService(AsioServicePool::PRIORITY_BOSS)->service()
-            : ioService->service());
+        EventLoopPtr loop
+            = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
+        AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
+        BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
+
+        socketAddressFactory =
+            new AsioTcpSocketAddressImplFactory(service->service());
+
         SocketAddress::setFacotry(socketAddressFactory);
     }
 
@@ -117,6 +145,15 @@ void AsioClientServiceFactory::deinit() {
 
         delete timerFactory;
         timerFactory = NULL;
+    }
+}
+
+EventLoopPtr AsioClientServiceFactory::getEventLoop() {
+    if (eventLoopPool) {
+        return eventLoopPool->getNextLoop();
+    }
+    else {
+        return eventLoop;
     }
 }
 

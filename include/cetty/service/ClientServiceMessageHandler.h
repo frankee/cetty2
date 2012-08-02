@@ -19,11 +19,15 @@
 #include <boost/cstdint.hpp>
 #include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/handler/codec/CodecUtil.h>
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/OutstandingCall.h>
 
 namespace cetty {
 namespace service {
+
+using namespace cetty::channel;
+using namespace cetty::handler::codec;
 
 template<typename ReqT, typename RepT>
 class ClientServiceMessageHandler

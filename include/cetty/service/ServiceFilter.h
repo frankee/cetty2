@@ -19,11 +19,14 @@
 
 #include <deque>
 #include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/handler/codec/CodecUtil.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
+using namespace cetty::handler::codec;
+
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
 * transformations to the input and output of that service:
@@ -65,7 +68,7 @@ protected:
 
         while (!in.empty()) {
             RequestInT& req = in.front();
-            reqs.push(req);
+            reqs.push_back(req);
             RequestOutT oreq = filterRequest(ctx, req);
 
             if (CodecUtil<RequestOutT>::unfoldAndAdd(ctx, oreq, true)) {
@@ -87,16 +90,16 @@ protected:
             ResponseInT& rep = in.front();
             ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
             reqs.pop_front();
-            CodecUtil<RequestOutT>::unfoldAndAdd(ctx, orep, false);
+            CodecUtil<ResponseOutT>::unfoldAndAdd(ctx, orep, false);
         }
 
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(OutboundMessageContext& ctx,
+    virtual RequestOutT filterRequest(InboundMessageContext& ctx,
                                       const RequestInT& req) = 0;
 
-    virtual ResponseOutT filterResponse(InboundMessageContext& ctx,
+    virtual ResponseOutT filterResponse(OutboundMessageContext& ctx,
                                         const RequestInT& req,
                                         const ResponseInT& rep) = 0;
 

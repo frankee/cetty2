@@ -17,10 +17,15 @@
 #include <cetty/util/TimerFactory.h>
 
 #include <boost/assert.hpp>
+#include <boost/thread.hpp>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/EventLoop.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace util {
+
+using namespace cetty::channel;
 
 cetty::util::TimerFactoryPtr TimerFactory::factory = NULL;
 
@@ -61,6 +66,26 @@ TimerFactory& TimerFactory::getFactory() {
 
 bool TimerFactory::hasFactory() {
     return !!factory;
+}
+
+const TimerPtr& TimerFactory::getTimer(const ChannelPtr& channel) {
+    if (channel) {
+        return getTimer(channel->getEventLoop());
+    }
+    else {
+        // if the channel ptr is null, using the standalone timer.
+        //LOG_WARN(logger, "the input channel is NULL, return the default timer, you should make sure the thread safe.");
+        return getTimer(boost::this_thread::get_id());
+    }
+}
+
+const TimerPtr& TimerFactory::getTimer(const EventLoopPtr& eventLoop) {
+    if (eventLoop) {
+        return getTimer(eventLoop->getThreadId());
+    }
+    else {
+        return getTimer(boost::this_thread::get_id());
+    }
 }
 
 }

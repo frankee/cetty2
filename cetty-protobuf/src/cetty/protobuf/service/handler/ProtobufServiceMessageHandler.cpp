@@ -23,6 +23,7 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 
 #include <cetty/protobuf/service/ProtobufService.h>
@@ -93,8 +94,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
     ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE,
                                       id, req->getService(), req->getMethod(), response));
 
-    //ctx.write()
-    ctx.getPipeline()->write(message);
+    ctx.getPipeline().write(message);
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {

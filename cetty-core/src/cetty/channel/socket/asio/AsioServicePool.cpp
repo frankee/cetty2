@@ -28,6 +28,8 @@
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/logging/InternalLoggerFactory.h>
 
+#include <cetty/channel/socket/asio/AsioService.h>
+
 namespace cetty {
 namespace channel {
 namespace socket {
@@ -38,119 +40,129 @@ using namespace boost::asio;
 
 InternalLogger* AsioServicePool::logger = NULL;
 
-AsioServicePool::AsioServicePool(int poolSize, bool onlyMainThread)
-    : usingthread(!onlyMainThread),
-      running(false),
-      nextServiceIndex(0),
-      mainThreadId(boost::this_thread::get_id()) {
+class AsioServiceHolder : public EventLoopPool::EventLoopHolder {
+public:
+    enum {
+        INITIALIZED =  0,
+        RUNNING     =  1,
+        STOPPED     = -1
+    };
 
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioServicePool");
+    typedef boost::shared_ptr<boost::thread> ThreadPtr;
+    typedef boost::shared_ptr<boost::asio::io_service::work> WorkPtr;
+
+public:
+    AsioServiceHolder() : priority(0), state(INITIALIZED) {}
+    virtual ~AsioServiceHolder() {}
+
+    virtual const EventLoopPtr& getEventLoop() const {
+        return eventLoop;
     }
 
-    if (poolSize <= 0) {
-        poolSize = boost::thread::hardware_concurrency();
-        LOG_WARN(logger, "poolSize is negative, instead of the cpu number : %d.", poolSize);
-    }
-    else if (onlyMainThread && poolSize != 1) {
-        LOG_WARN(logger, "if set onlyMainThread, pool size only can be 1.");
-        poolSize = 1;
-    }
+    int state;
+    int priority;
 
-    this->poolSize = poolSize;
+    WorkPtr work; /// The work that keeps the io_services running.
+    ThreadPtr thread;
+    AsioServicePtr service;
+    EventLoopPtr eventLoop;
+
+    void stop() {
+        if (state != STOPPED) {
+            state = STOPPED;
+            service->service().stop();
+        }
+    }
+};
+
+AsioServicePool::AsioServicePool(int threadCnt)
+    : EventLoopPool(threadCnt),
+      nextServiceIndex(0) {
 
     // Give all the io_services work to do so that their run() functions will not
     // exit until they are explicitly stopped.
-    serviceContexts.resize(poolSize);
-
-    for (int i = 0; i < poolSize; ++i) {
+    for (int i = 0; i < eventLoopCnt; ++i) {
+        AsioServiceHolder* holder = new AsioServiceHolder();
         AsioServicePtr service = new AsioService(i);
-        serviceContexts[i].service = service;
-        serviceContexts[i].work = WorkPtr(new io_service::work(*service));
+        holder->service = service;
+        holder->work = WorkPtr(new io_service::work(*service));
+
+        eventLoops.push_back(holder);
     }
 
     // automatic start
-    if (usingthread) {
+    if (!mainThread) {
         // Create a pool of threads to run all of the io_services.
-        for (std::size_t i = 0; i < serviceContexts.size(); ++i) {
-            serviceContexts[i].thread
+        for (std::size_t i = 0; i < eventLoops.size(); ++i) {
+            AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops[i];
+            holder->thread
                 = ThreadPtr(new boost::thread(
                                 boost::bind(&AsioServicePool::runIOservice,
                                             this,
-                                            boost::ref(serviceContexts[i]))));
+                                            holder)));
         }
 
-        running = true;
+        started = true;
     }
     else {
-        serviceContexts[0].service->setThreadId(boost::this_thread::get_id());
+        AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops.front();
+        holder->service->setThreadId(boost::this_thread::get_id());
     }
 }
 
-bool AsioServicePool::run() {
-    if (!running && !usingthread) {
+bool AsioServicePool::start() {
+    if (!started && mainThread) {
         LOG_INFO(logger, "AsioServciePool running in main thread mode.");
 
-        if (runIOservice(serviceContexts.front()) < 0) {
-            LOG_ERROR(logger, "AsioServicePool run the %d service error.",
-                      serviceContexts.front().service->getId());
+        if (runIOservice((AsioServiceHolder*)eventLoops.front()) < 0) {
+            LOG_ERROR(logger, "AsioServicePool run the main thead service error.");
             return false;
         }
     }
 
-    running = true;
-    return running;
+    started = true;
+    return true;
 }
 
-void cetty::channel::socket::asio::AsioServicePool::waitForExit() {
+void cetty::channel::socket::asio::AsioServicePool::waitForStop() {
+    if (mainThread) {
+        return;
+    }
+
     // Wait for all threads in the pool to exit.
-    for (std::size_t i = 0; usingthread && i < serviceContexts.size(); ++i) {
-        serviceContexts[i].thread->join();
+    for (int i = 0; i < eventLoopCnt; ++i) {
+        AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops[i];
+        holder->thread->join();
     }
 }
 
 void AsioServicePool::stop() {
     // Explicitly stop all io_services.
-    for (std::size_t i = 0; i < serviceContexts.size(); ++i) {
-        serviceContexts[i].stop();
+    for (int i = 0; i < eventLoopCnt; ++i) {
+        AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops[i];
+        holder->stop();
     }
 
-    running = false;
+    started = false;
 }
 
-const AsioServicePtr& AsioServicePool::getService() {
-    // Only one service.
-    if (poolSize == 1) {
-        return serviceContexts.front().service;
-    }
-
-    // Use a round-robin scheme to choose the next io_service to use.
-    AsioServiceContext& context = serviceContexts[nextServiceIndex];
-    ++nextServiceIndex;
-
-    if (nextServiceIndex == poolSize) {
-        nextServiceIndex = 0;
-    }
-
-    return context.service;
+const AsioServicePtr& AsioServicePool::getNextService() {
+    return getNextServiceHolder()->service;
 }
 
-const AsioServicePtr& AsioServicePool::findService(int id) {
-    return serviceContexts.at(id).service;
-}
+int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
+    BOOST_ASSERT(holder && holder->service && "ioservice can not be NULL.");
 
-int AsioServicePool::runIOservice(AsioServiceContext& context) {
-    BOOST_ASSERT(context.service && "ioservice can not be NULL.");
-
-    context.service->setThreadId(boost::this_thread::get_id());
+    AsioServicePtr& service = holder->service;
+    service->setThreadId(boost::this_thread::get_id());
 
     boost::system::error_code err;
-    std::size_t opCount = context.service->service().run(err);
+    std::size_t opCount = service->service().run(err);
 
     // if error happened, try to recover.
     if (err) {
         LOG_ERROR(logger, "when runIOservice, the io service has error = %d.", err.value());
-        context.stop();
+        stop();
         return -1;
     }
 
@@ -158,9 +170,28 @@ int AsioServicePool::runIOservice(AsioServiceContext& context) {
     return opCount;
 }
 
-const AsioServicePtr& AsioServicePool::getService(int priority /*= PRIORITY_WORK*/) {
-    return getService();
+const EventLoopPtr& AsioServicePool::getNextLoop() {
+    return getNextServiceHolder()->eventLoop;
 }
+
+AsioServiceHolder* AsioServicePool::getNextServiceHolder() {
+    // Only one service.
+    if (eventLoopCnt == 1) {
+        return (AsioServiceHolder*)eventLoops.front();
+    }
+
+    // Use a round-robin scheme to choose the next io_service to use.
+    AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops[nextServiceIndex];
+    ++nextServiceIndex;
+
+    if (nextServiceIndex == eventLoopCnt) {
+        nextServiceIndex = 0;
+    }
+
+    return holder;
+}
+
+
 
 }
 }

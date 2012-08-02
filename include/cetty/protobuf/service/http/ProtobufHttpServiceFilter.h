@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/service/ServerFilter.h>
+#include <cetty/service/ServiceFilter.h>
 #include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>

@@ -19,6 +19,7 @@
 
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
@@ -57,7 +58,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-
+        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name, pipeline, shared_from_this(), prev, next);
     }
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
@@ -65,7 +66,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-
+        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name, eventLoop, pipeline, shared_from_this(), prev, next);
     }
 };
 

@@ -40,8 +40,8 @@ ProtobufHttpServiceFilter::ProtobufHttpServiceFilter(const ServiceRequestMapperP
 }
 
 ProtobufHttpServiceFilter::ProtobufHttpServiceFilter() {
-    requestMapper = new ServiceRequestMapper(config);
-    responseMapper = new ServiceResponseMapper(config);
+    requestMapper = new ServiceRequestMapper();
+    responseMapper = new ServiceResponseMapper();
 
     http2proto.setRequestMapper(requestMapper);
     proto2http.setResponseMapper(responseMapper);

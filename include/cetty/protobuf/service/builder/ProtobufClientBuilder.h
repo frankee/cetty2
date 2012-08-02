@@ -18,6 +18,7 @@
  */
 
 #include <cetty/service/builder/ClientBuilder.h>
+#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
 namespace protobuf {

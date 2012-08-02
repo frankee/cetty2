@@ -18,6 +18,7 @@
  */
 
 #include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/handler/codec/MessageToMessageEncoder.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace google {
@@ -32,7 +33,6 @@ namespace service {
 namespace handler {
 
 using namespace cetty::buffer;
-using namespace cetty::channel;
 using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service;
 

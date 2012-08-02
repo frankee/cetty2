@@ -18,12 +18,13 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
+#include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {
 namespace channel {
 
 class EventLoopPool;
-typedef boost::intrusive_ptr<EventLoop> EventLoopPoolPtr;
+typedef boost::intrusive_ptr<EventLoopPool> EventLoopPoolPtr;
 
 }
 }

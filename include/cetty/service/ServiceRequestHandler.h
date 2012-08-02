@@ -30,8 +30,8 @@ using namespace cetty::channel;
 template<typename ReqT, typename RepT>
 class ServiceRequestHandler
     : public cetty::channel::ChannelMessageHandler<
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-        RepT> {
+    RepT,
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
 
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;

@@ -62,7 +62,7 @@ public:
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
-        Context* context = ctx.downcast<Context>();
+        Context* context = ctx.inboundBufferHandlerContext();
         const ChannelBufferPtr& in = context->getInboundChannelBuffer();
 
         if (in && in->readable()) {
@@ -124,7 +124,7 @@ public:
 
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
-        Context* context = ctx.downcast<Context>();
+        Context* context = ctx.inboundBufferHandlerContext();
         const ChannelBufferPtr& in = context->getInboundChannelBuffer();
 
         bool decoded = false;

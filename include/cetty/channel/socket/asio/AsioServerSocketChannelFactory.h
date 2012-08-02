@@ -22,8 +22,9 @@
  */
 
 #include <vector>
+
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ServerSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/util/TimerPtr.h>
 
 namespace cetty {
@@ -114,8 +115,9 @@ public:
      *         if catch the exception, when open the acceptor.
      */
     AsioServerSocketChannelFactory(int parentThreadCnt, int childThreadCnt = 0);
-    AsioServerSocketChannelFactory(const AsioServicePoolPtr& parentPool, const AsioServicePoolPtr& childPool);
-    AsioServerSocketChannelFactory(const AsioServicePoolPtr& pool);
+    AsioServerSocketChannelFactory(const EventLoopPoolPtr& pool);
+    AsioServerSocketChannelFactory(const EventLoopPoolPtr& parentPool,
+                                   const EventLoopPoolPtr& childPool);
     virtual ~AsioServerSocketChannelFactory();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
@@ -132,8 +134,8 @@ private:
     static InternalLogger* logger;
 
 private:
-    AsioServicePoolPtr serverServicePool;
-    AsioServicePoolPtr childServicePool;
+    EventLoopPoolPtr parentPool;
+    EventLoopPoolPtr childPool;
 
     TimerFactoryPtr timerFactory; // keep the life cycle.
 

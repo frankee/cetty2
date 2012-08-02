@@ -16,6 +16,7 @@
 
 #include <cetty/service/builder/ServerBuilder.h>
 
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
@@ -322,6 +323,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     if (!parentEventLoopPool) {
         parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
     }
+
     if (!childEventLoopPool) {
         if (config.childThreadCount) {
             childEventLoopPool = new AsioServicePool(config.childThreadCount);
@@ -332,7 +334,8 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     ServerBootstrap* bootstrap = new ServerBootstrap(
-        new AsioServerSocketChannelFactory(servicePool));
+        new AsioServerSocketChannelFactory(parentEventLoopPool,
+                                           childEventLoopPool));
     bootstraps.insert(std::make_pair(name, bootstrap));
 
     bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
@@ -341,6 +344,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstrap->setPipeline(pipeline);
 
     ChannelFuturePtr future;
+
     if (host.empty()) {
         future = bootstrap->bind(port);
     }
@@ -373,8 +377,8 @@ int ServerBuilder::init() {
 
     if (config.logger == "log4cplus") {
         //if (confCenter) {
-            //InternalLoggerFactory::setDefaultFactory(
-            //    new Log4cplusLoggerFactory(*confCenter));
+        //InternalLoggerFactory::setDefaultFactory(
+        //    new Log4cplusLoggerFactory(*confCenter));
         //}
     }
 
@@ -387,6 +391,7 @@ void ServerBuilder::deinit() {
 
 void ServerBuilder::stop() {
     std::map<std::string, ServerBootstrap*>::iterator itr;
+
     for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
         itr->second->shutdown();
     }
@@ -397,19 +402,19 @@ void ServerBuilder::waitingForExit() {
         createPidFile(config.pidfile.c_str());
     }
     else {
-            printf("Server is running...\n");
-            printf("To quit server, press 'q'.\n");
+        printf("Server is running...\n");
+        printf("To quit server, press 'q'.\n");
 
-            char input;
+        char input;
 
-            do {
-                input = getchar();
+        do {
+            input = getchar();
 
-                if (input == 'q') {
-                    stop();
-                }
+            if (input == 'q') {
+                stop();
             }
-            while (true);
+        }
+        while (true);
     }
 }
 
@@ -457,9 +462,11 @@ void ServerBuilder::unregisterPipeline(const std::string& name) {
 
 cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string& name) {
     std::map<std::string, ChannelPipelinePtr>::iterator itr = pipelines.find(name);
+
     if (itr != pipelines.end()) {
         return itr->second;
     }
+
     return ChannelPipelinePtr();
 }
 

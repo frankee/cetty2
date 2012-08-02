@@ -23,8 +23,8 @@
 
 #include <boost/bind.hpp>
 
-#include <cetty/channel/Channel.h>
 #include <cetty/channel/EventLoop.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelInboundHandler.h>
 #include <cetty/channel/ChannelOutboundHandler.h>
@@ -222,9 +222,6 @@ public:
      */
     const ChannelOutboundHandlerPtr& getOutboundHandler() const;
 
-    ChannelHandlerContext* nextInboundHandlerContext();
-    ChannelHandlerContext* nextOutboundHandlerContext();
-
     ChannelInboundBufferHandlerContext* inboundBufferHandlerContext();
     ChannelOutboundBufferHandlerContext* outboundBufferHandlerContext();
 
@@ -238,18 +235,33 @@ public:
         return dynamic_cast<T*>(this);
     }
 
-    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext();
-    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext();
+    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext() {
+        return nextInboundBufferHandlerContext(nextInboundContext);
+    }
+    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext() {
+        return nextOutboundBufferHandlerContext(nextOutboundContext);
+    }
+
+    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext(ChannelHandlerContext* ctx);
+    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext(ChannelHandlerContext* ctx);
 
     template<typename T>
     T* nextInboundMessageHandlerContext() {
-        ChannelHandlerContext* next = nextInboundContext;
+        return nextInboundMessageHandlerContext<T>(nextInboundContext);
+    }
+
+    template<typename T>
+    T* nextInboundMessageHandlerContext(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext* next = ctx;
+
         if (!next) {
             return (T*)NULL;
         }
 
         if (next->isInboundMessageHandler()) {
-            return dynamic_cast<T*>(next);
+            T* context = dynamic_cast<T*>(next);
+
+            if (context) { return context; }
         }
 
         next = next->nextInboundContext;
@@ -260,7 +272,9 @@ public:
             }
 
             if (next->isInboundMessageHandler()) {
-                return dynamic_cast<T*>(next);
+                T* context = dynamic_cast<T*>(next);
+
+                if (context) { return context; }
             }
 
             next = next->nextInboundContext;
@@ -269,6 +283,11 @@ public:
 
     template<typename T>
     T* nextOutboundMessageHandlerContext() {
+        return nextOutboundMessageHandlerContext<T>(nextOutboundContext);
+    }
+
+    template<typename T>
+    T* nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx) {
         ChannelHandlerContext* next = nextOutboundContext;
 
         if (!next) {
@@ -292,11 +311,6 @@ public:
 
             next = next->nextInboundContext;
         }
-    }
-
-    template<typename T>
-    T* downcast() {
-        return dynamic_cast<T*>(this);
     }
 
     /**
@@ -348,14 +362,6 @@ public:
 
     virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
-    template<typename T>
-    const ChannelFuturePtr& write(const T& message,
-                                  const ChannelFuturePtr& future) {
-        if (nextOutboundContext) {
-            return write(*nextOutboundContext, message, future);
-        }
-    }
-
     void fireChannelCreated(ChannelHandlerContext& ctx);
     void fireChannelActive(ChannelHandlerContext& ctx);
     void fireChannelInactive(ChannelHandlerContext& ctx);
@@ -384,48 +390,6 @@ public:
 
     const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
                                   const ChannelFuturePtr& future);
-    const ChannelFuturePtr& write(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& message,
-        const ChannelFuturePtr& future);
-
-    template<typename T>
-    const ChannelFuturePtr& write(ChannelHandlerContext& ctx,
-                                  const T& message,
-                                  const ChannelFuturePtr& future) {
-        if (!eventloop) {
-            try {
-                //ctx.outMsgBuf.add(message);
-                ctx.outboundHandler->flush(ctx, future);
-            }
-            catch (const Exception& e) {
-                //logger.warn(
-                //    "An exception was thrown by a user handler's " +
-                //    "exceptionCaught() method while handling the following exception:", cause);
-            }
-            catch (const std::exception& e) {
-                notifyHandlerException(e);
-            }
-            catch (...) {
-                // clear the outbound ChannelBuffer
-                //if (ctx.outByteBuf != null) {
-                //    ByteBuf buf = ctx.outByteBuf;
-
-                //   if (!buf.readable()) {
-                //       buf.discardReadBytes();
-                //   }
-                //}
-            }
-        }
-        else {
-            eventloop->post(boost::bind(&ChannelHandlerContext::write<T>,
-                                        this,
-                                        boost::ref(ctx),
-                                        message,
-                                        future));
-        }
-
-        return future;
-    }
 
 protected:
     virtual bool isInboundBufferHandler() const { return false; }
@@ -465,7 +429,6 @@ protected:
 
     ChannelPipeline& pipeline;
     EventLoopPtr eventloop;
-    ChannelPtr channel;
 };
 
 }

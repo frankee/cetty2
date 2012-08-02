@@ -17,15 +17,16 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/oneone/OneToOneEncoder.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
 #include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
 
 using namespace cetty::channel;
+using namespace cetty::handler::codec;
 
-class GearmanEncoder : public cetty::handler::codec::oneone::OneToOneEncoder {
+class GearmanEncoder : public MessageToMessageEncoder<GearmanMessagePtr, ChannelBufferPtr> {
 public:
     GearmanEncoder();
     virtual ~GearmanEncoder();
@@ -33,10 +34,8 @@ public:
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
-//protected:
-    virtual ChannelMessage encode(ChannelHandlerContext& ctx,
-                                  const ChannelPtr& channel,
-                                  const ChannelMessage& msg);
+    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+        const GearmanMessagePtr& msg);
 
 private:
     int caculateParametersLength(const GearmanMessagePtr& msg);

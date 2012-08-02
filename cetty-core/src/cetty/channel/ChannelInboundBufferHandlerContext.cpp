@@ -18,6 +18,8 @@
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <boost/bind.hpp>
 
+#include <cetty/channel/Channel.h>
+
 namespace cetty {
 namespace channel {
 

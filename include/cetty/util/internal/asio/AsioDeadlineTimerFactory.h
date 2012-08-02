@@ -22,13 +22,14 @@
  */
 
 #include <map>
+#include <boost/thread/thread.hpp>
 #include <cetty/util/TimerFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
+}
 }
 
 namespace cetty {
@@ -38,22 +39,30 @@ namespace asio {
 
 using namespace cetty::util;
 using namespace cetty::logging;
-using namespace cetty::channel::socket::asio;
 
 class AsioDeadlineTimerFactory : public cetty::util::TimerFactory {
 public:
-    AsioDeadlineTimerFactory(const AsioServicePtr& service);
-    AsioDeadlineTimerFactory(const AsioServicePoolPtr& pool);
+    AsioDeadlineTimerFactory(const EventLoopPtr& eventLoop);
+    AsioDeadlineTimerFactory(const EventLoopPoolPtr& pool);
+    AsioDeadlineTimerFactory(const EventLoopPoolPtr& parentPool,
+                             const EventLoopPoolPtr& childPool);
+
     virtual ~AsioDeadlineTimerFactory();
 
-    virtual const TimerPtr& getTimer(const ChannelPtr& channel);
+    virtual const TimerPtr& getTimer(const boost::thread::id& id);
     virtual void stopTimers();
+
+private:
+    void initWithPool(const EventLoopPoolPtr& pool);
 
 private:
     static InternalLogger* logger;
 
 private:
-    std::map<int, TimerPtr> timers;
+    typedef std::map<boost::thread::id, TimerPtr> TimerMap;
+
+private:
+    TimerMap timers;
 };
 
 }

@@ -22,7 +22,7 @@
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -33,7 +33,8 @@ typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
 
 using namespace cetty::channel;
 
-class GearmanWorkerHandler : public cetty::channel::SimpleChannelHandler {
+class GearmanWorkerHandler
+    : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
 public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
@@ -45,13 +46,7 @@ public:
 
     virtual ~GearmanWorkerHandler();
 
-    virtual void channelConnected(ChannelHandlerContext& ctx,
-                                  const ChannelStateEvent& e);
-
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const MessageEvent& e);
-    virtual void writeRequested(ChannelHandlerContext& ctx,
-                                const MessageEvent& e);
+    virtual void channelActive(ChannelHandlerContext& ctx);
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
@@ -59,10 +54,15 @@ public:
     void registerWorker(const std::string& functionName,
                         const GrabJobCallback& worker);
 
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const GearmanMessagePtr& msg);
+
+    virtual void flush(OutboundMessageContext& ctx, const ChannelFuturePtr& future);
+
 private:
     void handleJob(const GearmanMessagePtr& gearmanMessage,
-                   ChannelHandlerContext& ctx,
-                   const MessageEvent& e);
+                   ChannelHandlerContext& ctx);
 
 private:
     void registerFunction(const std::string& functionName,

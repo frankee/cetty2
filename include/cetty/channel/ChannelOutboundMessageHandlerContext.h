@@ -17,15 +17,16 @@
  * under the License.
  */
 
+#include <deque>
 #include <cetty/channel/ChannelHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename OutT>
+template<typename OutboundInT>
 class ChannelOutboundMessageHandlerContext : public virtual ChannelHandlerContext {
 public:
-    typedef std::deque<OutT> MessageQueue;
+    typedef std::deque<OutboundInT> MessageQueue;
 
 public:
     ChannelOutboundMessageHandlerContext(const std::string& name,
@@ -46,9 +47,7 @@ public:
     virtual ~ChannelOutboundMessageHandlerContext() {}
 
     MessageQueue& getOutboundMessageQueue() { return queue; }
-    void addOutboundMessage(const OutT& message) { queue.push_back(message); }
-
-protected:
+    void addOutboundMessage(const OutboundInT& message) { queue.push_back(message); }
 
 private:
     MessageQueue queue;

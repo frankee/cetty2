@@ -19,8 +19,6 @@
 
 #include <vector>
 #include <cetty/channel/AbstractChannel.h>
-#include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/DefaultChannelConfig.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -29,9 +27,9 @@
 #include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
+namespace logging {
+class InternalLogger;
+}
 }
 
 namespace cetty {
@@ -43,20 +41,21 @@ using namespace cetty::logging;
 class ClientService : public cetty::channel::AbstractChannel {
 public:
     ClientService(const EventLoopPtr& eventLoop,
-        const ChannelFactoryPtr& factory,
-        const ChannelPipelinePtr& pipeline)
-        : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {}
-    
+                  const ChannelFactoryPtr& factory,
+                  const ChannelPipelinePtr& pipeline);
+
     virtual ~ClientService() {}
 
-    virtual ChannelConfig& getConfig() { return this->config; }
-    virtual const ChannelConfig& getConfig() const { return this->config; }
+    virtual ChannelConfig& getConfig();
+    virtual const ChannelConfig& getConfig() const;
 
-    virtual const SocketAddress& getLocalAddress() const { return SocketAddress::NULL_ADDRESS ; }
-    virtual const SocketAddress& getRemoteAddress() const { return SocketAddress::NULL_ADDRESS; }
-    
-    virtual bool isOpen() const { return true; }
-    virtual bool isActive() const { return true; }
+    virtual const SocketAddress& getLocalAddress() const;
+    virtual const SocketAddress& getRemoteAddress() const;
+
+    virtual ChannelSink& getSink();
+
+    virtual bool isOpen() const;
+    virtual bool isActive() const;
 
 protected:
     virtual void doBind(const SocketAddress& localAddress);
@@ -75,8 +74,8 @@ protected:
 
 template<typename ReqT, typename RepT>
 void callMethod(const ChannelPtr& channel,
-    const ReqT& request,
-    const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+                const ReqT& request,
+                const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
     if (channel) {
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
             new OutstandingCall<ReqT, RepT>(request, future));

@@ -121,14 +121,6 @@ ChannelPipeline::ChannelPipeline()
     this->receiveBuffer = new AdaptiveReceiveBuffer();
 }
 
-const ChannelPtr& ChannelPipeline::getChannel() const {
-    if (!this->channel) {
-        throw IllegalStateException("channel has not been attached");
-    }
-
-    return this->channel;
-}
-
 void ChannelPipeline::attach(const ChannelPtr& channel) {
     if (!channel) {
         throw NullPointerException("channel");
@@ -664,9 +656,9 @@ std::string ChannelPipeline::toString() const {
 
 void ChannelPipeline::notifyHandlerException(const Exception& e) {
     if (false/*exceptionEvt*/) {
-        logger->warn(
-            "An exception was thrown by a user handler \
-                 while handling an exception event ( ... )", e);
+        //logger->warn(
+        //    "An exception was thrown by a user handler \
+        //         while handling an exception event ( ... )", e);
         return;
     }
 
@@ -1006,6 +998,75 @@ void ChannelPipeline::updateReceiveBuffer() {
         inboundHead->inboundBufferHandlerContext()->setInboundChannelBuffer(
             receiveBuffer->channelBuffer());
     }
+}
+
+ChannelFuturePtr ChannelPipeline::newFuture(const ChannelPtr& channel) {
+    return channel->newFuture();
+}
+
+void ChannelPipeline::setOutboundChannelBuffer(const ChannelBufferPtr& buffer) {
+    ChannelOutboundBufferHandlerContext* context
+        = outboundHead->nextOutboundBufferHandlerContext(outboundHead);
+
+    if (context) {
+        context->setOutboundChannelBuffer(buffer);
+    }
+}
+
+void ChannelPipeline::setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
+    ChannelInboundBufferHandlerContext* context
+        = inboundHead->nextInboundBufferHandlerContext(inboundHead);
+
+    if (context) {
+        context->setInboundChannelBuffer(buffer);
+    }
+}
+
+const ChannelFuturePtr& ChannelPipeline::write(const ChannelBufferPtr& message,
+    const ChannelFuturePtr& future) {
+    if (!outboundHead) {
+        return future;
+    }
+
+    ChannelOutboundBufferHandlerContext* context
+        = outboundHead->nextOutboundBufferHandlerContext(outboundHead);
+
+    if (!context) {
+        return future;
+    }
+
+    if (outboundHead->eventloop->inLoopThread()) {
+        try {
+            context->setOutboundChannelBuffer(message);
+            context->outboundHandler->flush(*context, future);
+        }
+        catch (const Exception& e) {
+            //logger.warn(
+            //    "An exception was thrown by a user handler's " +
+            //    "exceptionCaught() method while handling the following exception:", cause);
+        }
+        catch (const std::exception& e) {
+            //notifyHandlerException(e);
+        }
+        catch (...) {
+            // clear the outbound ChannelBuffer
+            //if (ctx.outByteBuf != null) {
+            //    ByteBuf buf = ctx.outByteBuf;
+
+            //   if (!buf.readable()) {
+            //       buf.discardReadBytes();
+            //   }
+            //}
+        }
+    }
+    else {
+        context->eventloop->post(boost::bind(&ChannelPipeline::write,
+            this,
+            message,
+            future));
+    }
+
+    return future;
 }
 
 }

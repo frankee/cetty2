@@ -33,10 +33,14 @@
  */
 
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
+
+using namespace cetty::channel;
 
 template<typename OutboundInT, typename OutboundOutT>
 class MessageToMessageEncoder
@@ -46,9 +50,9 @@ public:
 
 protected:
     virtual void flush(OutboundMessageContext& ctx,
-        const ChannelFuturePtr& future) {
-            OutboundMessageContext::MessageQueue& in =
-                ctx.getOutboundMessageQueue();
+                       const ChannelFuturePtr& future) {
+        OutboundMessageContext::MessageQueue& in =
+            ctx.getOutboundMessageQueue();
 
         while (!in.empty()) {
             try {

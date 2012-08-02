@@ -16,6 +16,7 @@
 
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
+#include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
@@ -32,17 +33,19 @@ using namespace cetty::util;
 using namespace cetty::util::internal::asio;
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
-    const AsioServicePoolPtr& ioServicePool)
-    : ioServicePool(ioServicePool),
-      timerFactory(NULL),
-      socketAddressFactory(NULL),
-      ipAddressFactory(NULL) {
-    init();
+    const EventLoopPtr& eventLoop)
+    : eventLoop(eventLoop),
+    eventLoopPool(),
+    timerFactory(NULL),
+    socketAddressFactory(NULL),
+    ipAddressFactory(NULL) {
+        init();
 }
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
-    const AsioServicePtr& ioService)
-    : ioService(ioService),
+    const EventLoopPoolPtr& eventLoopPool)
+    : eventLoop(),
+      eventLoopPool(eventLoopPool),
       timerFactory(NULL),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
@@ -50,7 +53,7 @@ AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
 }
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(int threadCnt)
-    : ioServicePool(new AsioServicePool(threadCnt)),
+    : eventLoopPool(new AsioServicePool(threadCnt)),
       timerFactory(NULL),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
@@ -63,20 +66,25 @@ AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
 
 void AsioClientSocketChannelFactory::init() {
     if (!TimerFactory::hasFactory()) {
-        if (ioServicePool) {
-            timerFactory = new AsioDeadlineTimerFactory(ioServicePool);
+        if (eventLoopPool) {
+            timerFactory = new AsioDeadlineTimerFactory(eventLoopPool);
         }
         else {
-            timerFactory = new AsioDeadlineTimerFactory(ioService);
+            timerFactory = new AsioDeadlineTimerFactory(eventLoop);
         }
 
         TimerFactory::setFactory(timerFactory);
     }
 
     if (!SocketAddress::hasFactory()) {
-        socketAddressFactory = new AsioTcpSocketAddressImplFactory(
-            ioServicePool ? ioServicePool->getService(AsioServicePool::PRIORITY_BOSS)->service()
-            : ioService->service());
+        EventLoopPtr loop
+            = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
+        AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
+        BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
+
+        socketAddressFactory =
+            new AsioTcpSocketAddressImplFactory(service->service());
+
         SocketAddress::setFacotry(socketAddressFactory);
     }
 
@@ -110,9 +118,9 @@ void AsioClientSocketChannelFactory::deinit() {
 }
 
 ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
-    const AsioServicePtr& service = ioServicePool ? ioServicePool->getService() : ioService;
+    const EventLoopPtr& eventLoop = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
     ChannelPtr client =
-        new AsioSocketChannel(service,
+        new AsioSocketChannel(eventLoop,
                               shared_from_this(),
                               pipeline);
 
@@ -121,24 +129,24 @@ ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
 }
 
 void AsioClientSocketChannelFactory::shutdown() {
-    if (ioServicePool) {
-        ioServicePool->stop();
-        ioServicePool->waitForExit();
+    if (eventLoopPool) {
+        eventLoopPool->stop();
+        eventLoopPool->waitForStop();
     }
 
     clientChannels.clear();
 }
 
 bool AsioClientSocketChannelFactory::start() {
-    if (needManuallyStartAsioService()) {
-        return ioServicePool->run();
+    if (needManuallyStart()) {
+        return eventLoopPool->start();
     }
 
     return true;
 }
 
-bool AsioClientSocketChannelFactory::needManuallyStartAsioService() const {
-    return ioServicePool && ioServicePool->onlyMainThread();
+bool AsioClientSocketChannelFactory::needManuallyStart() const {
+    return eventLoopPool && eventLoopPool->isMainThread();
 }
 
 }

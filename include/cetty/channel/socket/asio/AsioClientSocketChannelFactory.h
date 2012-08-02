@@ -24,8 +24,8 @@
 #include <map>
 #include <vector>
 
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/util/TimerPtr.h>
 
 namespace cetty {
@@ -116,9 +116,9 @@ public:
      *        the maximum number of I/O worker threads
      */
     AsioClientSocketChannelFactory(int threadCnt);
-    AsioClientSocketChannelFactory(const AsioServicePoolPtr& ioServicePool);
-    AsioClientSocketChannelFactory(const AsioServicePtr& ioService);
-
+    AsioClientSocketChannelFactory(const EventLoopPtr& eventLoop);
+    AsioClientSocketChannelFactory(const EventLoopPoolPtr& eventLoopPool);
+    
     virtual ~AsioClientSocketChannelFactory();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
@@ -130,14 +130,14 @@ public:
 private:
     void init();
     void deinit();
-    bool needManuallyStartAsioService() const;
+    bool needManuallyStart() const;
 
 private:
     typedef std::map<int, ChannelPtr> ClientChannels;
 
 private:
-    AsioServicePtr ioService;
-    AsioServicePoolPtr ioServicePool;
+    EventLoopPtr eventLoop;
+    EventLoopPoolPtr eventLoopPool;
 
     TimerFactoryPtr timerFactory; // keep the life cycle
 

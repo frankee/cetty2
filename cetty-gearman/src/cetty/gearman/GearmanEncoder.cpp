@@ -15,8 +15,6 @@
  */
 
 #include <cetty/gearman/GearmanEncoder.h>
-
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {
@@ -41,86 +39,73 @@ std::string GearmanEncoder::toString() const {
     return "GearmanEncoder";
 }
 
-UserEvent GearmanEncoder::encode(ChannelHandlerContext& ctx,
-                                      const ChannelPtr& channel,
-                                      const UserEvent& msg) {
+ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
+                                        const GearmanMessagePtr& msg) {
 
-    GearmanMessagePtr message = msg.smartPointer<GearmanMessage>();
+    if (!msg) {
+        return ChannelBufferPtr();
+    }
 
-    if (message) {
-        int parametersLength = caculateParametersLength(message);
-        int headerLength = 12;
-        //int bodyLenth = parametersLength;
-        int bodyLenth = 0;
-        int messageLength = 0;
+    int parametersLength = caculateParametersLength(msg);
+    int headerLength = 12;
+    //int bodyLenth = parametersLength;
+    int bodyLenth = 0;
+    int messageLength = 0;
 
-        //如果有hasData
-        if (message->hasData()) {
-            const ChannelBufferPtr& data = message->getData();
-            bodyLenth += data->readableBytes();
-            messageLength = bodyLenth + parametersLength;
+    if (msg->hasData()) {
+        const ChannelBufferPtr& data = msg->getData();
+        bodyLenth += data->readableBytes();
+        messageLength = bodyLenth + parametersLength;
 
-            //往前面写
-            if (data->aheadWritableBytes() >= parametersLength + headerLength) {
-                if (parametersLength) {
-                    writeParametersAhead(data, message->getParameters(), true);
-                }
-
-                writeHeaderAhead(data, message->getType(), messageLength);
-                //to check the data
-                std::string ret = ChannelBuffers::hexDump(data);
-                std::cout<<"the send data is "<<ret<<std::endl;
-                return UserEvent(data);
+        if (data->aheadWritableBytes() >= parametersLength + headerLength) {
+            if (parametersLength) {
+                writeParametersAhead(data, msg->getParameters(), true);
             }
-            else {
-                //如果不够就重新创建个channelbuffer
-                ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength + headerLength);
 
-                writeHeader(buffer, message->getType(), messageLength);
-
-                if (parametersLength) {
-                    writeParameters(buffer, message->getParameters(), true);
-                }
-
-                //写data
-                buffer->writeBytes(data);
-                //to check the data
-                std::string ret = ChannelBuffers::hexDump(buffer);
-                std::cout<<"the send data is "<<ret<<std::endl;
-                return UserEvent(buffer);
-            }
+            writeHeaderAhead(data, msg->getType(), messageLength);
+            //to check the data
+            std::string ret = ChannelBuffers::hexDump(data);
+            std::cout<<"the send data is "<<ret<<std::endl;
+            return data;
         }
         else {
-            //if (bodyLenth) { //no need to remove the last zero pad
-            //  --bodyLenth;
-            //}
-            //
-            //messageLength = bodyLenth + headerLength;
+            ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength + headerLength);
 
+            writeHeader(buffer, msg->getType(), messageLength);
 
-            if (message->getParameters().size() != 0) {
-                messageLength =  parametersLength - 1;
-            }
-            else {
-                messageLength =  parametersLength;
+            if (parametersLength) {
+                writeParameters(buffer, msg->getParameters(), true);
             }
 
-            ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength+headerLength);
-            writeHeader(buffer, message->getType(), messageLength);
-
-            if ((parametersLength - 1) > 0) {
-                writeParameters(buffer, message->getParameters(), false);
-            }
-
+            buffer->writeBytes(data);
             //to check the data
             std::string ret = ChannelBuffers::hexDump(buffer);
             std::cout<<"the send data is "<<ret<<std::endl;
-            return UserEvent(buffer);
+            return buffer;
         }
     }
     else {
-        return msg;
+        if (msg->getParameters().size() != 0) {
+            messageLength =  parametersLength - 1;
+        }
+        else {
+            messageLength =  parametersLength;
+        }
+
+        ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength+headerLength);
+        writeHeader(buffer, msg->getType(), messageLength);
+
+        if ((parametersLength - 1) > 0) {
+            writeParameters(buffer, message->getParameters(), false);
+        }
+
+        //to check the data
+        std::string ret = ChannelBuffers::hexDump(buffer);
+        std::cout<<"the send data is "<<ret<<std::endl;
+        return buffer;
     }
+
+    return ChannelBufferPtr();
 }
 
 int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {

@@ -28,7 +28,7 @@
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuturePtr.h>
 #include <cetty/channel/ChannelFactoryPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
 #include <cetty/util/Exception.h>

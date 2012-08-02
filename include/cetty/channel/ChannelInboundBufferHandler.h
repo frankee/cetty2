@@ -19,9 +19,10 @@
 
 #include <cetty/channel/ChannelInboundHandler.h>
 
-namespace cetty { namespace channel {
+namespace cetty {
+namespace channel {
 
-    class ChannelInboundBufferHandlerContext;
+class ChannelInboundBufferHandlerContext;
 
 class ChannelInboundBufferHandler : public ChannelInboundHandler {
 public:
@@ -40,27 +41,28 @@ public:
     virtual void afterRemove(ChannelHandlerContext& ctx);
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx,
-        const ChannelException& cause);
+                                 const ChannelException& cause);
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt);
+                                    const UserEvent& evt);
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next);
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+            const EventLoopPtr& eventLoop,
+            ChannelPipeline& pipeline,
+            ChannelHandlerContext* prev,
+            ChannelHandlerContext* next);
 
 protected:
     virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
 };
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H)
 

@@ -22,6 +22,7 @@
 #include <cetty/util/Exception.h>
 #include <cetty/util/internal/ConversionUtil.h>
 
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
 

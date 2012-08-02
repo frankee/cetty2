@@ -16,6 +16,7 @@
 
 #include <cetty/channel/ChannelHandlerContext.h>
 
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelInboundHandler.h>
@@ -63,6 +64,7 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
     init(handler);
 }
 
+inline
 const ChannelPtr& ChannelHandlerContext::getChannel() const {
     return pipeline.getChannel();
 }
@@ -579,42 +581,6 @@ ChannelOutboundBufferHandlerContext* ChannelHandlerContext::outboundBufferHandle
     return dynamic_cast<ChannelOutboundBufferHandlerContext*>(this);
 }
 
-const ChannelFuturePtr& ChannelHandlerContext::write(ChannelHandlerContext& ctx, const ChannelBufferPtr& message, const ChannelFuturePtr& future) {
-    if (eventloop->inLoopThread()) {
-        try {
-            ctx.outboundBufferHandlerContext()->setOutboundChannelBuffer(message);
-            ctx.outboundHandler->flush(ctx, future);
-        }
-        catch (const Exception& e) {
-            //logger.warn(
-            //    "An exception was thrown by a user handler's " +
-            //    "exceptionCaught() method while handling the following exception:", cause);
-        }
-        catch (const std::exception& e) {
-            notifyHandlerException(e);
-        }
-        catch (...) {
-            // clear the outbound ChannelBuffer
-            //if (ctx.outByteBuf != null) {
-            //    ByteBuf buf = ctx.outByteBuf;
-
-            //   if (!buf.readable()) {
-            //       buf.discardReadBytes();
-            //   }
-            //}
-        }
-    }
-    else {
-        eventloop->post(boost::bind(&ChannelHandlerContext::write<ChannelBufferPtr>,
-                                    this,
-                                    boost::ref(ctx),
-                                    message,
-                                    future));
-    }
-
-    return future;
-}
-
 void ChannelHandlerContext::init(const ChannelHandlerPtr& handler) {
     inboundHandler = boost::dynamic_pointer_cast<ChannelInboundHandler>(handler);
 
@@ -638,13 +604,63 @@ void ChannelHandlerContext::attach() {
     if (!eventloop) {
         this->eventloop = pipeline.getEventLoop();
     }
-    this->channel = pipeline.getChannel();
 }
 
 void ChannelHandlerContext::detach() {
-    this->channel.reset();
     if (eventloop == pipeline.getEventLoop()) {
         eventloop.reset();
+    }
+}
+
+ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHandlerContext(ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* next = ctx;
+
+    if (!next) {
+        return (ChannelInboundBufferHandlerContext*)NULL;
+    }
+
+    if (next->isInboundBufferHandler()) {
+        return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
+    }
+
+    next = next->nextInboundContext;
+
+    while (true) {
+        if (!next) {
+            return (ChannelInboundBufferHandlerContext*)NULL;
+        }
+
+        if (next->isInboundBufferHandler()) {
+            return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
+        }
+
+        next = next->nextInboundContext;
+    }
+}
+
+ChannelOutboundBufferHandlerContext* ChannelHandlerContext::nextOutboundBufferHandlerContext(ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* next = nextOutboundContext;
+
+    if (!next) {
+        return (ChannelOutboundBufferHandlerContext*)NULL;
+    }
+
+    if (next->isInboundBufferHandler()) {
+        return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
+    }
+
+    next = next->nextInboundContext;
+
+    while (true) {
+        if (!next) {
+            return (ChannelOutboundBufferHandlerContext*)NULL;
+        }
+
+        if (next->isOutboundBufferHandler()) {
+            return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
+        }
+
+        next = next->nextInboundContext;
     }
 }
 

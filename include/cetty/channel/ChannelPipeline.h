@@ -25,13 +25,15 @@
 #include <vector>
 #include <string>
 #include <boost/any.hpp>
+#include <boost/bind.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
-#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelSink.h>
 #include <cetty/channel/ChannelHandlerPtr.h>
-#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
@@ -314,8 +316,8 @@ public:
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
     void addBefore(const std::string& baseName,
-                           const std::string& name,
-                           const ChannelHandlerPtr& handler);
+                   const std::string& name,
+                   const ChannelHandlerPtr& handler);
 
     /**
      * Inserts a {@link ChannelHandler} after an existing handler of this
@@ -333,8 +335,8 @@ public:
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
     void addAfter(const std::string& baseName,
-                          const std::string& name,
-                          const ChannelHandlerPtr& handler);
+                  const std::string& name,
+                  const ChannelHandlerPtr& handler);
 
     /**
      * Removes the specified {@link ChannelHandler} from this pipeline.
@@ -393,8 +395,8 @@ public:
      *         <tt>NULL</tt>
      */
     void replace(const ChannelHandlerPtr& oldHandler,
-                         const std::string& newName,
-                         const ChannelHandlerPtr& newHandler);
+                 const std::string& newName,
+                 const ChannelHandlerPtr& newHandler);
 
     /**
      * Replaces the {@link ChannelHandler} of the specified name with a new
@@ -412,8 +414,8 @@ public:
      *         <tt>NULL</tt>
      */
     ChannelHandlerPtr replace(const std::string& oldName,
-                                      const std::string& newName,
-                                      const ChannelHandlerPtr& newHandler);
+                              const std::string& newName,
+                              const ChannelHandlerPtr& newHandler);
 
     /**
      * Returns the first {@link ChannelHandler} in this pipeline.
@@ -475,18 +477,27 @@ public:
 
     template<typename T>
     void addInboundMessage(const T& message) {
-        if (inboundHead) {
-            inboundHead->inboundMessageHandlerContext<ChannelInboundMessageHandlerContext<T> >()->addInboundMessage(message);
+        ChannelInboundMessageHandlerContext<T>* context
+            = inboundHead->nextInboundMessageHandlerContext<ChannelInboundMessageHandlerContext<T> >(inboundHead);
+
+        if (context) {
+            context->addInboundMessage(message);
         }
     }
 
     template<typename T>
     void addOutboundMessage(const T& message) {
-        //outboundHead->
+        ChannelOutboundMessageHandlerContext<T>* context
+            = outboundHead->nextOutboundMessageHandlerContext<ChannelOutboundMessageHandlerContext<T> >(outboundHead);
+
+        if (context) {
+            context->addOutboundMessage(message);
+        }
     }
 
     void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
-    
+    void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
+
     virtual void fireChannelCreated();
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
@@ -516,18 +527,61 @@ public:
 
     template<typename T>
     ChannelFuturePtr write(const T& message) {
-        return write(message, channel->newFuture());
+        ChannelFuturePtr f = newFuture(channel);
+        return write(message, f);
     }
 
     template<typename T>
     const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
-        // TODO: find proper handler (BufferHandler or MessageHandler)
-        if (outboundHead) {
-            return outboundHead->write(*outboundHead, message, future);
+        if (!outboundHead) {
+            return future;
+        }
+
+        ChannelOutboundMessageHandlerContext<T>* context
+            = outboundHead->nextOutboundMessageHandlerContext<ChannelOutboundMessageHandlerContext<T> >(outboundHead);
+
+        if (!context) {
+            return future;
+        }
+
+        if (context->eventloop->inLoopThread()) {
+            try {
+                context->addOutboundMessage(message);
+                // TODO:
+                // should notify the non Message Handler before context ?
+                context->outboundHandler->flush(*context, future);
+            }
+            catch (const Exception& e) {
+                //logger.warn(
+                //    "An exception was thrown by a user handler's " +
+                //    "exceptionCaught() method while handling the following exception:", cause);
+            }
+            catch (const std::exception& e) {
+                //notifyHandlerException(e);
+            }
+            catch (...) {
+                // clear the outbound ChannelBuffer
+                //if (ctx.outByteBuf != null) {
+                //    ByteBuf buf = ctx.outByteBuf;
+
+                //   if (!buf.readable()) {
+                //       buf.discardReadBytes();
+                //   }
+                //}
+            }
+        }
+        else {
+            context->eventloop->post(boost::bind(&ChannelPipeline::write<T>,
+                                                 this,
+                                                 message,
+                                                 future));
         }
 
         return future;
     }
+
+    const ChannelFuturePtr& write(const ChannelBufferPtr& message,
+                                  const ChannelFuturePtr& future);
 
     /**
      * Retrieves a boost::any which is
@@ -550,6 +604,8 @@ public:
     virtual void setAttachment(const std::string& name, const boost::any& attachment);
 
     virtual void notifyHandlerException(const Exception& e);
+
+    ChannelFuturePtr newFuture(const ChannelPtr& channel);
 
 public:
     static InternalLogger* getLogger() { return logger; }
@@ -608,6 +664,10 @@ private:
 
     AttachmentMap attachments;
 };
+
+inline const ChannelPtr& ChannelPipeline::getChannel() const {
+    return this->channel;
+}
 
 }
 }

@@ -31,13 +31,29 @@ public:
     typedef std::deque<InboundInT> MessageQueue;
 
 public:
-    ChannelMessageHandlerContext() {}
+    ChannelMessageHandlerContext(const std::string& name,
+                                 ChannelPipeline& pipeline,
+                                 const ChannelHandlerPtr& handler,
+                                 ChannelHandlerContext* prev,
+                                 ChannelHandlerContext* next)
+        : ChannelInboundMessageHandlerContext(name, pipeline, handler, prev, next),
+          ChannelOutboundMessageHandlerContext(name, pipeline, handler, prev, next),
+          ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const EventLoopPtr& eventLoop,
+                                 ChannelPipeline& pipeline,
+                                 const ChannelHandlerPtr& handler,
+                                 ChannelHandlerContext* prev,
+                                 ChannelHandlerContext* next)
+        : ChannelInboundMessageHandlerContext(name, eventLoop, pipeline, handler, prev, next),
+          ChannelOutboundMessageHandlerContext(name, eventLoop, pipeline, handler, prev, next),
+          ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+
     virtual ~ChannelMessageHandlerContext() {}
 
 protected:
-    virtual bool isInboundBufferHandler() const { return false; }
     virtual bool isInboundMessageHandler() const { return true; }
-    virtual bool isOutboundBufferHandler() const { return false; }
     virtual bool isOutboundMessageHandler() const { return true; }
 };
 

@@ -63,11 +63,11 @@ typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
 class AsioSocketChannel : public cetty::channel::socket::SocketChannel {
 public:
     AsioSocketChannel(const ChannelPtr& parent,
-                      const AsioServicePtr& ioService,
+                      const EventLoopPtr& eventLoop,
                       const ChannelFactoryPtr& factory,
                       const ChannelPipelinePtr& pipeline);
 
-    AsioSocketChannel(const AsioServicePtr& ioService,
+    AsioSocketChannel(const EventLoopPtr& eventLoop,
                       const ChannelFactoryPtr& factory,
                       const ChannelPipelinePtr& pipeline);
 

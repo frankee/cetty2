@@ -49,7 +49,7 @@ static const std::string PROTOBUF_SERVICE_RPC("rpc");
 
 ProtobufServerBuilder::ProtobufServerBuilder()
     : ServerBuilder() {
-        init();
+    init();
 }
 
 ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt)
@@ -75,12 +75,8 @@ ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
 }
 
 void ProtobufServerBuilder::init() {
-    if (confCenter) {
-        registerPipeline(PROTOBUF_SERVICE_HTTP, createProtobufHttpServicePipeline(*confCenter));
-    }
-    else {
-        printf("has not set the configCenter, so can't inti the http service.\n");
-    }
+    registerPipeline(PROTOBUF_SERVICE_HTTP, createProtobufHttpServicePipeline());
+    //printf("has not set the configCenter, so can't inti the http service.\n");
 
     registerPipeline(PROTOBUF_SERVICE_RPC, createProtobufServicePipeline());
 }

@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -16,16 +16,18 @@
 
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/buffer/Array.h>
+#include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
+
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
-using namespace cetty::protobuf::service::handler;
 using namespace cetty::buffer;
+using namespace cetty::protobuf::service::handler;
 
 bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wireType, int* fieldNumber, int* fieldLength) {
     if (NULL == wireType || NULL == fieldNumber || NULL == fieldLength) {
@@ -46,7 +48,6 @@ int64_t ProtobufMessageCodec::decodeFixed64(const ChannelBufferPtr& buffer) {
     return buffer->readLong();
 }
 
-
 int ProtobufMessageCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
     return buffer->readInt();
 }
@@ -59,9 +60,9 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     while (true) {
         temp = buffer->readByte();
 
-        //Èç¹ûÓĞºóĞøµÄ×Ö½ÚĞèÒªÆ´½Ó
+        //å¦‚æœæœ‰åç»­çš„å­—èŠ‚éœ€è¦æ‹¼æ¥
         if (temp & 0x80) {
-            //ÏÈ×óÓÒÒÆÒ»ÏÂÈ¥µômab£¬È»ºóÔÙÓÒÒÆÖ¸¶¨µÄÎ»Êı£¬ÒòÎªvarintÊÇµÍÎ»ÔÚÇ°£¬¸ßÎ»ÔÚºó
+            //å…ˆå·¦å³ç§»ä¸€ä¸‹å»æ‰mabï¼Œç„¶åå†å³ç§»æŒ‡å®šçš„ä½æ•°ï¼Œå› ä¸ºvarintæ˜¯ä½ä½åœ¨å‰ï¼Œé«˜ä½åœ¨å
             ret |= (temp << 1 >> 1) << (7 * i);
             ++i;
         }
@@ -69,7 +70,7 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
 			off = 7*i;
 			ret = ret + (temp<<off);
             //ret = ret + (temp<<0);
-            //´ïµ½×îºóÒ»¸öÊı¾İ£¬²¢ÇÒÊÇ×î¸ßÎ»
+            //è¾¾åˆ°æœ€åä¸€ä¸ªæ•°æ®ï¼Œå¹¶ä¸”æ˜¯æœ€é«˜ä½
             break;
         }
     }
@@ -107,7 +108,7 @@ void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val)
     while (val);
 
 	//write to buffer
-	Array array((char*)buf,varintSize);
+	Array array((char*)buf, varintSize);
 	buffer->writeBytes(array);
 }
 

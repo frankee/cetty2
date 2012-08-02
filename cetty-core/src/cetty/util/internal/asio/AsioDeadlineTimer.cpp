@@ -17,7 +17,7 @@
 #include <cetty/util/internal/asio/AsioDeadlineTimer.h>
 #include <cetty/util/internal/asio/AsioDeadlineTimeout.h>
 #include <cetty/util/TimeUnit.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/socket/asio/AsioService.h>
 
 namespace cetty {
 namespace util {
@@ -26,8 +26,9 @@ namespace asio {
 
 using namespace cetty::util;
 
-AsioDeadlineTimer::AsioDeadlineTimer(const AsioServicePtr& ioService)
-    : ioService(ioService) {
+AsioDeadlineTimer::AsioDeadlineTimer(const EventLoopPtr& eventLoop)
+    : ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)) {
+    BOOST_ASSERT(ioService && "constract eventLoop only can be AsioService");
 }
 
 AsioDeadlineTimer::~AsioDeadlineTimer() {

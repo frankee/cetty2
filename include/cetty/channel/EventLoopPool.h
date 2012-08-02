@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <vector>
+#include <boost/thread.hpp>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -25,15 +27,79 @@ namespace channel {
 
 class EventLoopPool : public cetty::util::ReferenceCounter<EventLoopPool> {
 public:
-    EventLoopPool(int threadCnt) {}
-    virtual ~EventLoopPool() {}
+    class EventLoopHolder {
+    public:
+        virtual ~EventLoopHolder() {}
+        virtual const EventLoopPtr& getEventLoop() const = 0;
+    };
 
-    void start();
-    const EventLoopPtr& getNextLoop();
+    typedef std::vector<EventLoopHolder*> EventLoops;
+    typedef std::map<boost::thread::id, EventLoopPtr> EventLoopMap;
+
+    static const EventLoopPtr& current();
+
+public:
+    class Iterator {
+    public:
+        typedef EventLoops::iterator EventLoopIterator;
+
+    public:
+        Iterator(const EventLoopIterator& iter) : iter(iter) {}
+        Iterator(const Iterator& iter) : iter(iter.iter) {}
+
+        Iterator& operator++() { ++iter; return *this; }
+
+        const EventLoopPtr& operator*() { return (*iter)->getEventLoop(); }
+        bool operator==(const Iterator& iter) const { return this->iter == iter.iter; }
+        bool operator!=(const Iterator& iter) const { return this->iter != iter.iter; }
+
+    private:
+        EventLoopIterator iter;
+    };
+
+public:
+    EventLoopPool(int threadCnt);
+    virtual ~EventLoopPool();
+
+    bool isStarted() const { return started; }
+    bool isMainThread() const { return mainThread; }
+    bool empty() const { return 0 == eventLoopCnt; }
+    
+    int getEventLoopCnt() const { return eventLoopCnt; }
+    Iterator begin() { return Iterator(eventLoops.begin()); }
+    Iterator end() { return Iterator(eventLoops.end()); }
+
+    virtual bool start() = 0;
+    
+    /**
+     *
+     */
+    virtual void waitForStop() = 0;
+
+    /**
+     * Stop all io_service objects in the pool.
+     */
+    virtual void stop() = 0;
+    
+    virtual const EventLoopPtr& getNextLoop() = 0;
+
+protected:
+    bool started;
+    bool mainThread; //< indicated this pool is only use the program's main thread.
+    
+    int threadCnt;
+    int eventLoopCnt;
+
+    // The next io_service to use for a connection.
+    int nextServiceIndex;
+
+    //
+    boost::thread::id mainThreadId;
+
+    EventLoops eventLoops;
 
 private:
-    bool started;
-    int threadCnt;
+    static EventLoopMap allEventLoops;
 };
 
 }

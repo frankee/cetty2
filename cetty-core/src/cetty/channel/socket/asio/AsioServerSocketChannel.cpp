@@ -25,6 +25,7 @@
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/AbstractChannelSink.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
+#include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImpl.h>
 
@@ -38,17 +39,17 @@ using namespace cetty::channel;
 InternalLogger* AsioServerSocketChannel::logger = NULL;
 
 AsioServerSocketChannel::AsioServerSocketChannel(
-    const AsioServicePtr& ioService,
+    const EventLoopPtr& eventLoop,
     const ChannelFactoryPtr& factory,
     const ChannelPipelinePtr& pipeline,
     const ChannelPipelinePtr& childPipeline,
-    const AsioServicePoolPtr& childServicePool)
-    : ServerSocketChannel(boost::static_pointer_cast<EventLoop>(ioService), factory, pipeline),
-      ioService(ioService),
+    const EventLoopPoolPtr& childEventLoopPool)
+    : ServerSocketChannel(eventLoop, factory, pipeline),
+      ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       sink(),
       childPipeline(childPipeline),
-      childServicePool(childServicePool),
-      acceptor(ioService->service()),
+      childServicePool(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
+      acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       config(acceptor) {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("AsioServerSocketChannel");
@@ -155,7 +156,7 @@ void AsioServerSocketChannel::accept() {
     ChannelPipelinePtr pipeline =
         ChannelPipelines::pipeline(childPipeline);
 
-    const AsioServicePtr& ioService = childServicePool->getService();
+    const AsioServicePtr& ioService = childServicePool->getNextService();
 
     AsioSocketChannelPtr c =
         new AsioSocketChannel(shared_from_this(),
@@ -191,7 +192,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
         ChannelPipelinePtr pipeline =
             ChannelPipelines::pipeline(childPipeline);
 
-        const AsioServicePtr& ioService = childServicePool->getService();
+        const AsioServicePtr& ioService = childServicePool->getNextService();
         AsioSocketChannelPtr newChannel = new AsioSocketChannel(
             shared_from_this(),
             ioService,

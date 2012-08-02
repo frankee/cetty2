@@ -17,6 +17,8 @@
 
 #include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <boost/bind.hpp>
+
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelPipeline.h>
 
 namespace cetty {

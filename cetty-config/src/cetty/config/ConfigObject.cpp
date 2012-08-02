@@ -22,21 +22,21 @@ namespace config {
 
 ConfigObject::ObjectDescriptorMap ConfigObject::objects;
 
-const ConfigReflection& ConfigObject::getreflection() const {
-    ObjectDescriptorMap::const_iterator itr = objects.find(className);
+const ConfigReflection* ConfigObject::getreflection() const {
+    ObjectDescriptorMap::const_iterator itr = objects.find(name);
 
     if (itr != objects.end()) {
         //return itr->second.first->
     }
 
-    return *(const ConfigReflection*)(8);
+    return (const ConfigReflection*)(8);
 }
 
-const ConfigDescriptor& ConfigObject::getdescriptor() const {
-    ObjectDescriptorMap::const_iterator itr = objects.find(className);
+const ConfigDescriptor* ConfigObject::getdescriptor() const {
+    ObjectDescriptorMap::const_iterator itr = objects.find(name);
 
     if (itr != objects.end()) {
-        return *(itr->second.descriptor);
+        return itr->second.descriptor;
     }
 }
 

@@ -17,6 +17,7 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/protobuf/service/proto/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
@@ -59,7 +60,7 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
     Array arry;
     buffer->readableBytes(&arry);
     payload->ParseFromArray(arry.data(), arry.length());
-	buffer->offsetReaderIndex(arry.length());
+    buffer->offsetReaderIndex(arry.length());
 
     message->setPayload(payload);
 
@@ -70,10 +71,10 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
 int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
-	bool flag = false;
+    bool flag = false;
 
-	while (buffer->readable() && !flag) {
-		int wireType = 0;
+    while (buffer->readable() && !flag) {
+        int wireType = 0;
         int fieldNum = 0;
         int fieldLength = 0;
         int64_t type = 0;
@@ -95,7 +96,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 
             case 2:
                 id = ProtobufMessageCodec::decodeFixed64(buffer);
-				id = ChannelBuffers::swapLong(id);
+                id = ChannelBuffers::swapLong(id);
                 serviceMessage->set_id(id);
                 break;
 
@@ -114,12 +115,12 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 
             case 6:
                 decodePayload(buffer, message);
-				flag = true;
+                flag = true;
                 break;
 
             case 7:
                 decodePayload(buffer, message);
-				flag = true;
+                flag = true;
                 break;
 
             default:
@@ -132,21 +133,21 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 }
 
 ProtobufServiceMessagePtr ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& msg) {
+        const ChannelBufferPtr& msg) {
 
-        if (msg) {
-            ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
+    if (msg) {
+        ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
 
-            if (!decode(msg, message)) {
-                return message;
-            }
-            else {
-                // error here
-                printf("ProtobufServiceMessageDecoder::decode failed because of type wrong");
-            }
+        if (!decode(msg, message)) {
+            return message;
         }
+        else {
+            // error here
+            printf("ProtobufServiceMessageDecoder::decode failed because of type wrong");
+        }
+    }
 
-        return ChannelBufferPtr();
+    return ProtobufServiceMessagePtr();
 }
 
 }

@@ -26,8 +26,6 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include <boost/mpl/size_t.hpp>
-#include <cetty/channel/EventLoop.h>
 #include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
@@ -42,84 +40,22 @@ namespace channel {
 namespace socket {
 namespace asio {
 
+using namespace cetty::channel;
 using namespace cetty::logging;
 
-/**
- *
- *
- */
-class AsioService : public cetty::channel::EventLoop {
-public:
-    AsioService(int index) : poolIndex(index) {}
-
-    //AsioServicePool& servicePool();
-    //const AsioServicePool& servicePool() const;
-
-    int getId() const { return poolIndex; }
-
-    boost::asio::io_service& service() { return ioService; }
-    operator boost::asio::io_service& () { return ioService; }
-
-    virtual void post(const Functor& handler) {
-        ioService.post(handler);
-    }
-
-private:
-    int                     poolIndex;
-    boost::asio::io_service ioService;
-};
+class AsioServiceHolder;
 
 /**
  * A pool of io_service objects.
  */
-class AsioServicePool : public cetty::util::ReferenceCounter<AsioServicePool> {
-private:
-    class AsioServiceContext;
-
+class AsioServicePool : public cetty::channel::EventLoopPool {
 public:
-    class Iterator {
-    public:
-        typedef std::vector<AsioServiceContext>::iterator ServiceIterator;
-
-    public:
-        Iterator(const ServiceIterator& iter) : iter(iter) {}
-        Iterator(const Iterator& iter) : iter(iter.iter) {}
-
-        Iterator& operator++() {
-            ++iter;
-            return *this;
-        }
-
-        const AsioServicePtr& operator*() {
-            return iter->service;
-        }
-
-        bool operator==(const Iterator& iter) {
-            return this->iter == iter.iter;
-        }
-
-        bool operator!=(const Iterator& iter) {
-            return this->iter != iter.iter;
-        }
-
-    private:
-        ServiceIterator iter;
-    };
-
-public:
-    static const int PRIORITY_BOSS = 0;
-    static const int PRIORITY_WORK = 1;
-
-    static AsioService& current();
-
-public:
-
     /**
      * Construction of AsioServicePool
      *
      * if multi-thread, will automatically run.
      */
-    AsioServicePool(int poolSize, bool onlyMainThread = false);
+    AsioServicePool(int threadCnt);
 
     ~AsioServicePool() {}
 
@@ -127,95 +63,42 @@ public:
      * Run all io_service objects in the pool.
      * Usually, you only need to run manually under single-thread mode.
      */
-    bool run();
+    virtual bool start();
 
     /**
      *
      */
-    void waitForExit();
+    virtual void waitForStop();
 
     /**
      * Stop all io_service objects in the pool.
      */
-    void stop();
+    virtual void stop();
+
+    virtual const EventLoopPtr& getNextLoop();
 
     /**
      * Get an io_service to use.
      */
-    const AsioServicePtr& getService();
+    const AsioServicePtr& getNextService();
 
-    const AsioServicePtr& getService(int priority);
+private:
+    AsioServicePool(const AsioServicePool&);
+    AsioServicePool& operator=(const AsioServicePool&);
 
-    const AsioServicePtr& findService(int id);
-
-    Iterator begin() {
-        return Iterator(serviceContexts.begin());
-    }
-    Iterator end() {
-        return Iterator(serviceContexts.end());
-    }
-
-    /**
-     *
-     */
-    bool onlyMainThread() const { return !usingthread; }
-
-    bool empty() const { return !poolSize; }
-    int  size() const { return poolSize; }
+    int runIOservice(AsioServiceHolder* holder);
+    AsioServiceHolder* getNextServiceHolder();
 
 private:
     typedef boost::shared_ptr<boost::thread> ThreadPtr;
     typedef boost::shared_ptr<boost::asio::io_service::work> WorkPtr;
 
-    class AsioServiceContext {
-    public:
-        enum {
-            INITIALIZED =  0,
-            RUNNING     =  1,
-            STOPPED     = -1
-        };
-
-        int state;
-        int priority;
-
-        WorkPtr work; /// The work that keeps the io_services running.
-        ThreadPtr thread;
-        AsioServicePtr service;
-
-        AsioServiceContext() : priority(0), state(INITIALIZED) {}
-
-        void stop() {
-            if (state != STOPPED) {
-                state = STOPPED;
-                service->service().stop();
-            }
-        }
-    };
-private:
-    AsioServicePool(const AsioServicePool&);
-    AsioServicePool& operator=(const AsioServicePool&);
-
-    int runIOservice(AsioServiceContext& context);
-
 private:
     static InternalLogger* logger;
 
 private:
-    // indicated this pool using thread except the program's main thread.
-    bool usingthread;
-
-    // io service pool already running.
-    bool running;
-
     // The next io_service to use for a connection.
     int nextServiceIndex;
-
-    int poolSize;
-
-    //
-    boost::thread::id mainThreadId;
-
-    std::vector<AsioServiceContext> serviceContexts;
 };
 
 }

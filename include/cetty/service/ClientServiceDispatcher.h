@@ -43,7 +43,7 @@ template<typename ReqT, typename RepT>
 class ClientServiceDispatcher
     : public cetty::channel::ChannelMessageHandler<
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
+        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
 
 public:
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
@@ -55,28 +55,28 @@ public:
 public:
     ClientServiceDispatcher(const Connections& connections,
                             const ChannelPipelinePtr& pipeline,
-                            const AsioServicePtr& asioService)
+                            const EventLoopPtr& eventLoop)
         : connections(connections),
           pool(connections),
           defaultPipeline(pipeline),
-          asioService(asioService) {
+          eventLoop(eventLoop) {
     }
 
 public:
     virtual void channelActive(ChannelHandlerContext& ctx) {
-        ChannelPtr ch = e.getChannel();
-        ChannelPipelinePtr pipeline = ChannelPipelines::getPipeline(defaultPipeline);
+        ChannelPtr ch = ctx.getChannel();
+        ChannelPipelinePtr pipeline = ChannelPipelines::pipeline(defaultPipeline);
         pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
 
         pool.getBootstrap().setPipeline(pipeline);
-        pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(asioService));
+        pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(eventLoop));
     }
 
     //virtual void messageUpdated(InboundMessageContext& ctx) {
     //}
 
     virtual void flush(OutboundMessageContext& ctx,
-        const ChannelFuturePtr& future) {
+                       const ChannelFuturePtr& future) {
         OutboundMessageContext::MessageQueue& in =
             ctx.getOutboundMessageQueue();
 
@@ -89,11 +89,11 @@ public:
 
             if (ch) {
                 ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
-                outStandingCalls.insert(std::make_pair(call->getId(), call));
+                outStandingCalls.insert(std::make_pair(request->getId(), request));
                 notify = true;
             }
             else {
-                bufferingCall.calls.push_back(call);
+                bufferingCall.calls.push_back(request);
             }
         }
 
@@ -105,21 +105,23 @@ public:
             bufferingCalls.push_back(bufferingCall);
 
             pool.getChannel(boost::bind(
-                &ClientServiceDispatcherType::connectedCallback, this, _1));
+                                &ClientServiceDispatcherType::connectedCallback, this, _1, boost::ref(ctx)));
         }
     }
 
-    void connectedCallback(const ChannelPtr& channel) {
+    void connectedCallback(const ChannelPtr& channel, OutboundMessageContext& ctx) {
         BOOST_ASSERT(channel);
 
         while (!bufferingCalls.empty()) {
-            const BufferingCall& call = bufferingCalls.front();
+            BufferingCall& call = bufferingCalls.front();
+
             while (!call.calls.empty()) {
                 OutstandingCallPtr& request = call.calls.front();
 
-                    channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
-                    outStandingCalls.insert(std::make_pair(call->getId(), call));
+                channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                outStandingCalls.insert(std::make_pair(request->getId(), request));
             }
+
             ctx.flush(call.future);
             bufferingCalls.pop_front();
         }
@@ -129,10 +131,10 @@ public:
         return ChannelHandlerPtr(
                    new ClientServiceDispatcherType(connections,
                            defaultPipeline,
-                           asioService));
+                           eventLoop));
     }
 
-    virtual std::string toString() { return "ClientServiceDispatcherType"; }
+    virtual std::string toString() const { return "ClientServiceDispatcherType"; }
 
 private:
     struct BufferingCall {
@@ -141,7 +143,7 @@ private:
     };
 
 private:
-    AsioServicePtr asioService;
+    EventLoopPtr eventLoop;
     ChannelPipelinePtr defaultPipeline;
 
     Connections connections;

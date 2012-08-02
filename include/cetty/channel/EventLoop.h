@@ -34,11 +34,9 @@ public:
     virtual ~EventLoop() {}
 
     const boost::thread::id& getThreadId() const;
-    void setThreadId(const boost::thread::id& id) { threadId = id; }
+    void setThreadId(const boost::thread::id& id);
 
-    bool inLoopThread() const {
-        return threadId == boost::this_thread::get_id();
-    }
+    bool inLoopThread() const;
 
     virtual void post(const Functor& handler) = 0;
 
@@ -50,6 +48,20 @@ private:
     boost::thread::id threadId;
 };
 
+inline
+const boost::thread::id& EventLoop::getThreadId() const {
+    return threadId;
+}
+
+inline
+void EventLoop::setThreadId(const boost::thread::id& id) {
+    threadId = id;
+}
+
+inline
+bool EventLoop::inLoopThread() const {
+     return threadId == boost::this_thread::get_id();
+}
 }
 }
 

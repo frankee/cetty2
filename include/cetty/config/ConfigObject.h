@@ -36,10 +36,10 @@ public:
     virtual const ConfigDescriptor* getdescriptor() const;
 
     virtual ConfigObject* create() const = 0;
-	virtual std::string name() const = 0;
+	//virtual std::string name() const = 0;
 	
-	virtual void clear();
-	virtual void copyFrom(const ConfigObject& from);
+	//virtual void clear();
+	//virtual void copyFrom(const ConfigObject& from);
 
 protected:
     void addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object);

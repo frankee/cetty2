@@ -34,25 +34,21 @@
 //
 
 #include <cetty/util/NestedDiagnosticContext.h>
-#include "boost/thread//tss.hpp"
+#include <boost/thread/tss.hpp>
 
 
 namespace cetty {
 namespace util {
 
-
 NestedDiagnosticContext::NestedDiagnosticContext() {
 }
-
 
 NestedDiagnosticContext::NestedDiagnosticContext(const NestedDiagnosticContext& ctx) {
     _stack = ctx._stack;
 }
 
-
 NestedDiagnosticContext::~NestedDiagnosticContext() {
 }
-
 
 NestedDiagnosticContext& NestedDiagnosticContext::operator = (const NestedDiagnosticContext& ctx) {
     if (&ctx != this) {
@@ -62,7 +58,6 @@ NestedDiagnosticContext& NestedDiagnosticContext::operator = (const NestedDiagno
     return *this;
 }
 
-
 void NestedDiagnosticContext::push(const std::string& info) {
     Context ctx;
     ctx.info = info;
@@ -70,7 +65,6 @@ void NestedDiagnosticContext::push(const std::string& info) {
     ctx.file = 0;
     _stack.push_back(ctx);
 }
-
 
 void NestedDiagnosticContext::push(const std::string& info, int line, const char* filename) {
     Context ctx;
@@ -80,18 +74,15 @@ void NestedDiagnosticContext::push(const std::string& info, int line, const char
     _stack.push_back(ctx);
 }
 
-
 void NestedDiagnosticContext::pop() {
     if (!_stack.empty()) {
         _stack.pop_back();
     }
 }
 
-
 int NestedDiagnosticContext::depth() const {
     return int(_stack.size());
 }
-
 
 std::string NestedDiagnosticContext::toString() const {
     std::string result;
@@ -107,11 +98,9 @@ std::string NestedDiagnosticContext::toString() const {
     return result;
 }
 
-
 void NestedDiagnosticContext::dump(std::ostream& ostr) const {
     dump(ostr, "\n");
 }
-
 
 void NestedDiagnosticContext::dump(std::ostream& ostr, const std::string& delimiter) const {
     for (Stack::const_iterator it = _stack.begin(); it != _stack.end(); ++it) {
@@ -124,7 +113,6 @@ void NestedDiagnosticContext::dump(std::ostream& ostr, const std::string& delimi
         ostr << delimiter;
     }
 }
-
 
 void NestedDiagnosticContext::clear() {
     _stack.clear();

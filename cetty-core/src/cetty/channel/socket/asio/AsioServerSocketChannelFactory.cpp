@@ -23,6 +23,7 @@
 #include <cetty/channel/socket/asio/AsioServerSocketChannel.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
+#include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
 #include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
@@ -41,12 +42,13 @@ using namespace cetty::util::internal::asio;
 
 InternalLogger* AsioServerSocketChannelFactory::logger = NULL;
 
-AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(const AsioServicePoolPtr& ioServicePool)
-    : serverServicePool(ioServicePool),
-      childServicePool(ioServicePool),
+AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
+    const EventLoopPoolPtr& pool)
+    : parentPool(pool),
+      childPool(pool),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
-    BOOST_ASSERT(ioServicePool && "ioServicePool SHOULD NOT BE NULL.");
+    BOOST_ASSERT(pool && "ioServicePool SHOULD NOT BE NULL.");
     init();
 }
 
@@ -54,27 +56,28 @@ AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(int parentThreadC
         int childThreadCnt /*= 0*/)
     : ipAddressFactory(),
       socketAddressFactory() {
-    serverServicePool = new AsioServicePool(parentThreadCnt);
+    parentPool = new AsioServicePool(parentThreadCnt);
 
     if (0 == childThreadCnt) {
-        childServicePool = serverServicePool;
+        childPool = parentPool;
     }
     else {
-        childServicePool = new AsioServicePool(childThreadCnt);
+        childPool = new AsioServicePool(childThreadCnt);
     }
 
-    BOOST_ASSERT(serverServicePool && childServicePool && "ioServicePool SHOULD NOT BE NULL.");
+    BOOST_ASSERT(parentPool && childPool && "ioServicePool SHOULD NOT BE NULL.");
     init();
 }
 
-AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(const AsioServicePoolPtr& parentPool,
-        const AsioServicePoolPtr& childPool)
-    : serverServicePool(parentPool),
-      childServicePool(childPool),
+AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
+    const EventLoopPoolPtr& parentPool,
+        const EventLoopPoolPtr& childPool)
+    : parentPool(parentPool),
+      childPool(childPool),
       ipAddressFactory(),
       socketAddressFactory() {
 
-    BOOST_ASSERT(serverServicePool && childServicePool && "ioServicePool SHOULD NOT BE NULL.");
+    BOOST_ASSERT(parentPool && childPool && "ioServicePool SHOULD NOT BE NULL.");
     init();
 }
 
@@ -84,19 +87,19 @@ AsioServerSocketChannelFactory::~AsioServerSocketChannelFactory() {
 
 ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
     ChannelPtr channel =
-        new AsioServerSocketChannel(serverServicePool->getService(),
+        new AsioServerSocketChannel(parentPool->getNextLoop(),
             shared_from_this(),
             pipeline,
             childPipeline,
-            childServicePool);
+            childPool);
     LOG_INFO(logger, "Created the AsioServerSocketChannel.");
 
-    if (serverServicePool->onlyMainThread()) {
+    if (parentPool->isMainThread()) {
         LOG_INFO(logger, "the asio service pool starting to run in main thread.");
 
-        if (!serverServicePool->run()) {
+        if (!parentPool->start()) {
             LOG_ERROR(logger, "start the boost asio service error, stop service pool and close channel.");
-            serverServicePool->stop();
+            parentPool->stop();
             channel->getPipeline()->fireExceptionCaught(
                 ChannelException("failed to start the asio service."));
             channel->close();
@@ -112,11 +115,11 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
 }
 
 void AsioServerSocketChannelFactory::shutdown() {
-    childServicePool->stop();
-    childServicePool->waitForExit();
+    childPool->stop();
+    childPool->waitForStop();
 
-    serverServicePool->stop();
-    serverServicePool->waitForExit();
+    parentPool->stop();
+    parentPool->waitForStop();
 
     serverChannels.clear();
 }
@@ -127,7 +130,7 @@ void AsioServerSocketChannelFactory::init() {
     }
 
     if (!TimerFactory::hasFactory()) {
-        timerFactory = new AsioDeadlineTimerFactory(serverServicePool);
+        timerFactory = new AsioDeadlineTimerFactory(parentPool);
         TimerFactory::setFactory(timerFactory);
     }
     else {
@@ -136,8 +139,13 @@ void AsioServerSocketChannelFactory::init() {
     }
 
     if (!SocketAddress::hasFactory()) {
-        socketAddressFactory = new AsioTcpSocketAddressImplFactory(
-            serverServicePool->getService()->service());
+        EventLoopPtr loop = parentPool->getNextLoop();
+        AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
+        BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
+
+        socketAddressFactory =
+            new AsioTcpSocketAddressImplFactory(service->service());
+
         SocketAddress::setFacotry(socketAddressFactory);
     }
 
