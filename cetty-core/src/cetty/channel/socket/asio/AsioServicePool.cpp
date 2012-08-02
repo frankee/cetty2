@@ -85,6 +85,7 @@ AsioServicePool::AsioServicePool(int threadCnt)
         AsioServiceHolder* holder = new AsioServiceHolder();
         AsioServicePtr service = new AsioService(i);
         holder->service = service;
+        holder->eventLoop = boost::static_pointer_cast<EventLoop>(service);
         holder->work = WorkPtr(new io_service::work(*service));
 
         eventLoops.push_back(holder);

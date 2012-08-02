@@ -130,7 +130,7 @@ void AsioServerSocketChannelFactory::init() {
     }
 
     if (!TimerFactory::hasFactory()) {
-        timerFactory = new AsioDeadlineTimerFactory(parentPool);
+        timerFactory = new AsioDeadlineTimerFactory(parentPool, childPool);
         TimerFactory::setFactory(timerFactory);
     }
     else {

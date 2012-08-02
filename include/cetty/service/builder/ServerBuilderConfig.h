@@ -92,7 +92,7 @@ public:
     Timeout* timeout;
 	
 public:
-    ServerBuilderConfig() : deamonize(0) {
+    ServerBuilderConfig() : deamonize(0), parentThreadCount(1), childThreadCount(0) {
         CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig",
             new ConfigDescriptor(
                 CETTY_CONFIG_FIELD(ServerBuilderConfig, deamonize, INT32),
