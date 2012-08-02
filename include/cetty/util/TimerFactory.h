@@ -17,7 +17,9 @@
  * under the License.
  */
 
+#include <boost/thread/thread.hpp>
 #include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/EventLoopPtr.h>
 #include <cetty/util/TimerPtr.h>
 
 namespace cetty {
@@ -40,7 +42,11 @@ public:
      *
      * @exception RuntimeException
      */
-    virtual const TimerPtr& getTimer(const ChannelPtr& channel) = 0;
+    const TimerPtr& getTimer(const ChannelPtr& channel);
+
+    const TimerPtr& getTimer(const EventLoopPtr& eventLoop);
+    
+    virtual const TimerPtr& getTimer(const boost::thread::id& id) = 0;
 
     /**
      *

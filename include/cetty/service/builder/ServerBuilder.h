@@ -21,21 +21,15 @@
 #include <string>
 #include <vector>
 #include <cetty/bootstrap/ServerBootstrap.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/service/builder/ServerBuilderConfig.h>
-
-namespace cetty {
-namespace config {
-class ConfigCenter;
-}
-}
 
 namespace cetty {
 namespace service {
 namespace builder {
 
+using namespace cetty::channel;
 using namespace cetty::bootstrap;
-using namespace cetty::channel::socket::asio;
 using namespace cetty::service;
 using namespace cetty::config;
 
@@ -68,11 +62,10 @@ public:
     ChannelPipelinePtr getPipeline(const std::string& name);
 
     const ServerBuilderConfig& getConfig() const { return config; }
-    const AsioServicePoolPtr& getServicePool();
 
 protected:
     ChannelPtr build(const std::string& name, int port);
-    
+
     void stop();
 
 private:
@@ -84,8 +77,6 @@ private:
 
     EventLoopPoolPtr parentEventLoopPool;
     EventLoopPoolPtr childEventLoopPool;
-
-    AsioServicePoolPtr servicePool;
 
     std::map<std::string, ChannelPipelinePtr> pipelines;
     std::map<std::string, ServerBootstrap*> bootstraps;

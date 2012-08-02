@@ -1,5 +1,6 @@
-#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYFWD_H)
-#define CETTY_BUFFER_CHANNELBUFFERFACTORYFWD_H
+#if !defined(CETTY_CHANNEL_CHANNELPIPELINEFACTORYPTR_H)
+#define CETTY_CHANNEL_CHANNELPIPELINEFACTORYPTR_H
+
 
 /**
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,12 +18,18 @@
  * under the License.
  */
 
-namespace cetty { namespace buffer { 
-    class ChannelBufferFactory;
-    typedef ChannelBufferFactory* ChannelBufferFactoryPtr;
-}}
+#include <boost/intrusive_ptr.hpp>
 
-#endif //#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYFWD_H)
+namespace cetty {
+namespace channel {
+
+class ChannelPipelineFactory;
+typedef boost::intrusive_ptr<ChannelPipelineFactory> ChannelPipelineFactoryPtr;
+
+}
+}
+
+#endif //#if !defined(CETTY_CHANNEL_CHANNELPIPELINEFACTORYPTR_H)
 
 // Local Variables:
 // mode: c++

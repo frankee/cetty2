@@ -20,19 +20,20 @@
 #include <list>
 
 #include <cetty/util/Timer.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/channel/socket/asio/AsioServicePtr.h>
 
 namespace cetty {
 namespace util {
 namespace internal {
 namespace asio {
 
+using namespace cetty::channel;
 using namespace cetty::util;
-using cetty::channel::socket::asio::AsioServicePtr;
+using namespace cetty::channel::socket::asio;
 
 class AsioDeadlineTimer : public cetty::util::Timer {
 public:
-    AsioDeadlineTimer(const AsioServicePtr& ioService);
+    AsioDeadlineTimer(const EventLoopPtr& eventLoop);
     virtual ~AsioDeadlineTimer();
 
     virtual const TimeoutPtr& newTimeout(const TimerTask& task, boost::int64_t delay);

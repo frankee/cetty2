@@ -63,9 +63,9 @@ public:
     EventLoopPtr getEventLoop();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
-    
+
     ChannelPtr newChannel(const ChannelPipelinePtr& pipeline,
-        const EventLoopPtr& eventLoop);
+                          const EventLoopPtr& eventLoop);
 
     virtual void shutdown();
 
