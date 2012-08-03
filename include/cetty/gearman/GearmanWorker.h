@@ -31,7 +31,7 @@ using namespace cetty::service::pool;
 
 class GearmanWorker : public cetty::util::ReferenceCounter<GearmanWorker, int> {
 public:
-    GearmanWorker(const AsioServicePtr& ioService,
+    GearmanWorker(const EventLoopPtr& eventLoop,
                   const ChannelPipelinePtr& pipeline,
                   const Connections& connections);
 

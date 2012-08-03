@@ -55,7 +55,7 @@ protected:
     virtual ChannelPipelinePtr getDefaultPipeline();
 
 private:
-    void buildWorker(const AsioServicePtr& ioService);
+    void buildWorker(const EventLoopPtr& eventLoop);
 
 private:
     std::vector<Connection> connections;

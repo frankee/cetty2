@@ -36,5 +36,26 @@ void ChannelInboundBufferHandlerContext::setInboundChannelBuffer(
     }
 }
 
+ChannelInboundBufferHandlerContext::ChannelInboundBufferHandlerContext(
+    const std::string& name,
+    ChannelPipeline& pipeline,
+    const ChannelHandlerPtr& handler,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next)
+    : ChannelHandlerContext(name, pipeline, handler, prev, next) {
+    hasInboundBufferHandler = true;
+}
+
+ChannelInboundBufferHandlerContext::ChannelInboundBufferHandlerContext(
+    const std::string& name,
+    const EventLoopPtr& eventLoop,
+    ChannelPipeline& pipeline,
+    const ChannelHandlerPtr& handler,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next)
+    : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+    hasInboundBufferHandler = true;
+}
+
 }
 }

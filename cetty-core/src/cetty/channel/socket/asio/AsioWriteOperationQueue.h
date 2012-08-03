@@ -119,11 +119,9 @@ public:
         return ops.front();
     }
 
-    AsioWriteOperation& poll() {
-        polledOp = ops.front();
+    void popup() {
+        minusWriteBufferSize(ops.front().writeBufferSize());
         ops.pop_front();
-        minusWriteBufferSize(polledOp.writeBufferSize());
-        return polledOp;
     }
 
     AsioWriteOperation& offer(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f) {
@@ -145,8 +143,6 @@ private:
     InternalLogger* logger;
 
     int writeBufferSize;
-
-    AsioWriteOperation polledOp;
     std::deque<AsioWriteOperation> ops;
 };
 

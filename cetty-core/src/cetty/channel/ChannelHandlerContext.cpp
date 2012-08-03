@@ -40,6 +40,10 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
       nextOutboundContext(NULL),
       canHandleInbound(false),
       canHandleOutbound(false),
+      hasInboundBufferHandler(false),
+      hasInboundMessageHandler(false),
+      hasOutboundBufferHandler(false),
+      hasOutboundMessageHandler(false),
       name(name),
       handler(handler) {
           init(handler);
@@ -59,6 +63,10 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
       nextOutboundContext(NULL),
       canHandleInbound(false),
       canHandleOutbound(false),
+      hasInboundBufferHandler(false),
+      hasInboundMessageHandler(false),
+      hasOutboundBufferHandler(false),
+      hasOutboundMessageHandler(false),
       name(name),
       handler(handler) {
     init(handler);
@@ -619,7 +627,7 @@ ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHand
         return (ChannelInboundBufferHandlerContext*)NULL;
     }
 
-    if (next->isInboundBufferHandler()) {
+    if (next->hasInboundBufferHandler) {
         return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
     }
 
@@ -630,7 +638,7 @@ ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHand
             return (ChannelInboundBufferHandlerContext*)NULL;
         }
 
-        if (next->isInboundBufferHandler()) {
+        if (next->hasInboundBufferHandler) {
             return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
         }
 
@@ -638,29 +646,30 @@ ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHand
     }
 }
 
-ChannelOutboundBufferHandlerContext* ChannelHandlerContext::nextOutboundBufferHandlerContext(ChannelHandlerContext* ctx) {
-    ChannelHandlerContext* next = nextOutboundContext;
+ChannelOutboundBufferHandlerContext* ChannelHandlerContext::nextOutboundBufferHandlerContext(
+    ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* next = ctx;
 
     if (!next) {
         return (ChannelOutboundBufferHandlerContext*)NULL;
     }
 
-    if (next->isInboundBufferHandler()) {
+    if (next->hasOutboundBufferHandler) {
         return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
     }
 
-    next = next->nextInboundContext;
+    next = next->nextOutboundContext;
 
     while (true) {
         if (!next) {
             return (ChannelOutboundBufferHandlerContext*)NULL;
         }
 
-        if (next->isOutboundBufferHandler()) {
+        if (next->hasOutboundBufferHandler) {
             return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
         }
 
-        next = next->nextInboundContext;
+        next = next->nextOutboundContext;
     }
 }
 

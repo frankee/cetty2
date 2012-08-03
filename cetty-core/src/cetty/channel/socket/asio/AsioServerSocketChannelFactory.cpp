@@ -93,23 +93,6 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
             childPipeline,
             childPool);
     LOG_INFO(logger, "Created the AsioServerSocketChannel.");
-
-    if (parentPool->isMainThread()) {
-        LOG_INFO(logger, "the asio service pool starting to run in main thread.");
-
-        if (!parentPool->start()) {
-            LOG_ERROR(logger, "start the boost asio service error, stop service pool and close channel.");
-            parentPool->stop();
-            channel->getPipeline()->fireExceptionCaught(
-                ChannelException("failed to start the asio service."));
-            channel->close();
-            return ChannelPtr();
-        }
-        else {
-            LOG_INFO(logger, "the asio service pool started to running.");
-        }
-    }
-
     serverChannels.push_back(channel);
     return channel;
 }

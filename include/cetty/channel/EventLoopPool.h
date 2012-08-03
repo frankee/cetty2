@@ -77,7 +77,7 @@ public:
     virtual void waitForStop() = 0;
 
     /**
-     * Stop all io_service objects in the pool.
+     * Stop all eventLoop in the pool.
      */
     virtual void stop() = 0;
     

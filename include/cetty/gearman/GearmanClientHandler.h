@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <queue>
+#include <deque>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SimpleChannelHandler.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -28,29 +28,32 @@ namespace gearman {
 
 using namespace cetty::channel;
 
-class GearmanClientHandler : public cetty::channel::SimpleChannelHandler {
+class GearmanClientHandler
+    : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
+
 public:
     GearmanClientHandler();
     virtual ~GearmanClientHandler();
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-
-    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
-
-    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+    virtual void channelActive(ChannelHandlerContext& ctx);
 
     virtual ChannelHandlerPtr clone();
 
     virtual std::string toString() const;
 
-    void handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e);
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const GearmanMessagePtr& msg);
+
+    virtual void flush(OutboundMessageContext& ctx,
+        const ChannelFuturePtr& future);
 
 private:
-    void submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e);
+    void submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg);
 
 private:
     ChannelPtr channel;
-    std::queue<GearmanMessagePtr> msgs;
+    std::deque<GearmanMessagePtr> msgs;
 };
 
 }

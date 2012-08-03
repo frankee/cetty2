@@ -71,9 +71,6 @@ public:
                       const ChannelFactoryPtr& factory,
                       const ChannelPipelinePtr& pipeline);
 
-    
-
-
     virtual ~AsioSocketChannel();
 
     virtual ChannelConfig& getConfig();
@@ -88,11 +85,6 @@ public:
     const AsioServicePtr& getService() {
         return ioService;
     }
-
-    void setMainThreadMode(bool mainThreadMode) {
-        this->mainThreadMode = mainThreadMode;
-    }
-    bool isMainThreadMode() const { return mainThreadMode; }
 
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
@@ -152,9 +144,6 @@ protected:
 
     mutable SocketAddress localAddress;
     mutable SocketAddress remoteAddress;
-
-private:
-    bool mainThreadMode;
 };
 
 }

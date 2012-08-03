@@ -29,7 +29,7 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::service;
 using namespace cetty::service::pool;
 
-GearmanWorker::GearmanWorker(const AsioServicePtr& ioService,
+GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
                              const ChannelPipelinePtr& pipeline,
                              const Connections& connections)
     : connectionPool(connections,
@@ -37,7 +37,7 @@ GearmanWorker::GearmanWorker(const AsioServicePtr& ioService,
                      (int)connections.size()) {
     connectionPool.getBootstrap().setPipeline(pipeline);
     connectionPool.getBootstrap().setFactory(
-        new AsioClientSocketChannelFactory(ioService));
+        new AsioClientSocketChannelFactory(eventLoop));
     connectionPool.start();
 }
 

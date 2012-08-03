@@ -34,7 +34,9 @@ public:
                                          const ChannelHandlerPtr& handler,
                                          ChannelHandlerContext* prev,
                                          ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+        : ChannelHandlerContext(name, pipeline, handler, prev, next) {
+        hasOutboundMessageHandler = true;
+    }
 
     ChannelOutboundMessageHandlerContext(const std::string& name,
                                          const EventLoopPtr& eventLoop,
@@ -42,12 +44,25 @@ public:
                                          const ChannelHandlerPtr& handler,
                                          ChannelHandlerContext* prev,
                                          ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+        hasOutboundMessageHandler = true;
+    }
 
     virtual ~ChannelOutboundMessageHandlerContext() {}
 
     MessageQueue& getOutboundMessageQueue() { return queue; }
-    void addOutboundMessage(const OutboundInT& message) { queue.push_back(message); }
+
+    void addOutboundMessage(const OutboundInT& message) {
+        if (eventloop->inLoopThread()) {
+            queue.push_back(message);
+        }
+        else {
+            eventloop->post(boost::bind(
+                                &ChannelOutboundMessageHandlerContext<OutboundInT>::addOutboundMessage,
+                                this,
+                                message));
+        }
+    }
 
 private:
     MessageQueue queue;

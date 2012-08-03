@@ -60,9 +60,6 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h">
       <Filter>gearman</Filter>
     </ClInclude>
-    <ClInclude Include="test.h">
-      <Filter>gearman\protobuf</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp">

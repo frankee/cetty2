@@ -137,18 +137,6 @@ void AsioClientSocketChannelFactory::shutdown() {
     clientChannels.clear();
 }
 
-bool AsioClientSocketChannelFactory::start() {
-    if (needManuallyStart()) {
-        return eventLoopPool->start();
-    }
-
-    return true;
-}
-
-bool AsioClientSocketChannelFactory::needManuallyStart() const {
-    return eventLoopPool && eventLoopPool->isMainThread();
-}
-
 }
 }
 }

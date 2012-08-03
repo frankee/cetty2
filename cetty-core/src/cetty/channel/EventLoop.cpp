@@ -16,11 +16,17 @@
  */
 
 #include <cetty/channel/EventLoop.h>
-
+#include <cetty/channel/EventLoopPool.h>
 
 namespace cetty {
 namespace channel {
 
+EventLoop::EventLoop(const EventLoopPoolPtr& pool)
+    : pool(pool) {
+}
+
+EventLoop::~EventLoop() {
+}
 
 }
 }

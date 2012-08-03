@@ -16,9 +16,9 @@
 
 #include <cetty/gearman/builder/GearmanClientBuilder.h>
 
-#include <cetty/channel/Channels.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanDecoder.h>
 #include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanClientHandler.h>
@@ -28,7 +28,7 @@ namespace gearman {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 using namespace cetty::gearman;
 
 GearmanClientBuilder::GearmanClientBuilder()
@@ -41,13 +41,13 @@ GearmanClientBuilder::GearmanClientBuilder(int threadCnt)
     init();
 }
 
-GearmanClientBuilder::GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool)
-    : ClientBuilderType(ioServicePool) {
+GearmanClientBuilder::GearmanClientBuilder(const EventLoopPoolPtr& eventLoopPool)
+    : ClientBuilderType(eventLoopPool) {
     init();
 }
 
-GearmanClientBuilder::GearmanClientBuilder(const AsioServicePtr& ioService)
-    :  ClientBuilderType(ioService) {
+GearmanClientBuilder::GearmanClientBuilder(const EventLoopPtr& eventLoop)
+    :  ClientBuilderType(eventLoop) {
     init();
 }
 

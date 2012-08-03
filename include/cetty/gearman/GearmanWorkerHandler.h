@@ -34,7 +34,7 @@ typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
 using namespace cetty::channel;
 
 class GearmanWorkerHandler
-    : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
+        : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
 public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
@@ -56,9 +56,10 @@ public:
 
 protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const GearmanMessagePtr& msg);
+                                 const GearmanMessagePtr& msg);
 
-    virtual void flush(OutboundMessageContext& ctx, const ChannelFuturePtr& future);
+    virtual void flush(OutboundMessageContext& ctx,
+                       const ChannelFuturePtr& future);
 
 private:
     void handleJob(const GearmanMessagePtr& gearmanMessage,

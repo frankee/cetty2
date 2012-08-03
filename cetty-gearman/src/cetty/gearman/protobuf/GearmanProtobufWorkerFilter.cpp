@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -45,22 +46,26 @@ std::string GearmanProtobufWorkerFilter::toString() const {
     return "GearmanProtobufWorkerFilter";
 }
 
-ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterReq(const GearmanMessagePtr& req) {
-    //decode from GearmanMessage
-    ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-    ProtobufServiceMessageDecoder::decode(req->getData(),protoMsg);
-    return protoMsg;
+ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterRequest(
+    InboundMessageContext& ctx,
+    const GearmanMessagePtr& req) {
+        ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
+        ProtobufServiceMessageDecoder::decode(req->getData(),protoMsg);
+        return protoMsg;
 }
 
-GearmanMessagePtr GearmanProtobufWorkerFilter::filterRep(const GearmanMessagePtr& req,
-        const ProtobufServiceMessagePtr& rep) {
-    std::string jobHandle = req->getParameters().front();
-    ChannelBufferPtr buffer = ChannelBuffers::buffer(rep->getMessageSize()+8);
+GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
+    OutboundMessageContext& ctx,
+    const GearmanMessagePtr& req,
+    const ProtobufServiceMessagePtr& rep) {
+        std::string jobHandle = req->getParameters().front();
+        ChannelBufferPtr buffer = ChannelBuffers::buffer(rep->getMessageSize()+8);
 
-    //encode the protobufServiceMessage and set it to GearmanMessage
-    ProtobufServiceMessageEncoder::encodeMessage(buffer,rep);
-    return GearmanMessage::createWorkCompleteMessage(jobHandle,buffer);
+        //encode the protobufServiceMessage and set it to GearmanMessage
+        ProtobufServiceMessageEncoder::encodeMessage(buffer,rep);
+        return GearmanMessage::createWorkCompleteMessage(jobHandle,buffer);
 }
+
 }
 }
 }

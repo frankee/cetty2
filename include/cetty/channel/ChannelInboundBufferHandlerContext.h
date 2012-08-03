@@ -25,27 +25,22 @@ namespace channel {
 class ChannelInboundBufferHandlerContext : public virtual ChannelHandlerContext {
 public:
     ChannelInboundBufferHandlerContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        const ChannelHandlerPtr& handler,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+                                       ChannelPipeline& pipeline,
+                                       const ChannelHandlerPtr& handler,
+                                       ChannelHandlerContext* prev,
+                                       ChannelHandlerContext* next);
 
     ChannelInboundBufferHandlerContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        const ChannelHandlerPtr& handler,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+                                       const EventLoopPtr& eventLoop,
+                                       ChannelPipeline& pipeline,
+                                       const ChannelHandlerPtr& handler,
+                                       ChannelHandlerContext* prev,
+                                       ChannelHandlerContext* next);
 
     virtual ~ChannelInboundBufferHandlerContext() {}
 
     const ChannelBufferPtr& getInboundChannelBuffer() const;
     void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
-
-protected:
-    virtual bool isInboundBufferHandler() const { return true; }
 
 private:
     ChannelBufferPtr inboundBuffer;

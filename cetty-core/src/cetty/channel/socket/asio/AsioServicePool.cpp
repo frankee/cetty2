@@ -83,10 +83,10 @@ AsioServicePool::AsioServicePool(int threadCnt)
     // exit until they are explicitly stopped.
     for (int i = 0; i < eventLoopCnt; ++i) {
         AsioServiceHolder* holder = new AsioServiceHolder();
-        AsioServicePtr service = new AsioService(i);
+        AsioServicePtr service = new AsioService(shared_from_this());
         holder->service = service;
         holder->eventLoop = boost::static_pointer_cast<EventLoop>(service);
-        holder->work = WorkPtr(new io_service::work(*service));
+        holder->work = WorkPtr(new io_service::work(service->service()));
 
         eventLoops.push_back(holder);
     }
@@ -191,8 +191,6 @@ AsioServiceHolder* AsioServicePool::getNextServiceHolder() {
 
     return holder;
 }
-
-
 
 }
 }

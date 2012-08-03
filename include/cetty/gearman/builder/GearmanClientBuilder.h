@@ -35,8 +35,8 @@ public:
 public:
     GearmanClientBuilder();
     GearmanClientBuilder(int threadCnt);
-    GearmanClientBuilder(const AsioServicePoolPtr& ioServicePool);
-    GearmanClientBuilder(const AsioServicePtr& ioService);
+    GearmanClientBuilder(const EventLoopPoolPtr& eventLoopPool);
+    GearmanClientBuilder(const EventLoopPtr& eventLoop);
 
     virtual ~GearmanClientBuilder(){}
 

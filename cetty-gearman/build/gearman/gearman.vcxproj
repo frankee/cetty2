@@ -26,7 +26,6 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufClientFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.h" />
-    <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp" />

@@ -20,7 +20,9 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/asio/AsioServicePtr.h>
+#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
 namespace cetty {
 namespace channel {
@@ -33,22 +35,17 @@ namespace asio {
  */
 class AsioService : public cetty::channel::EventLoop {
 public:
-    AsioService(int index) : poolIndex(index) {}
-
-    //AsioServicePool& servicePool();
-    //const AsioServicePool& servicePool() const;
-
-    int getId() const { return poolIndex; }
+    AsioService(const EventLoopPoolPtr& pool)
+        : EventLoop(pool) {
+    }
 
     boost::asio::io_service& service() { return ioService; }
-    operator boost::asio::io_service& () { return ioService; }
 
     virtual void post(const Functor& handler) {
         ioService.post(handler);
     }
 
 private:
-    int                     poolIndex;
     boost::asio::io_service ioService;
 };
 

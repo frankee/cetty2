@@ -110,10 +110,13 @@ private:
 
 ChannelPipeline::ChannelPipeline()
     : channel(),
+      firedChannelActive(false),
+      fireInboundBufferUpdatedOnActivation(false),
       head(NULL),
       tail(NULL),
       inboundHead(NULL),
-      outboundHead(NULL) {
+      outboundHead(NULL),
+      receiveBuffer() {
     if (NULL == logger) {
         logger = InternalLoggerFactory::getInstance("ChannelPipeline");
     }
@@ -927,7 +930,7 @@ void ChannelPipeline::fireMessageUpdated() {
 
 void ChannelPipeline::fireWriteCompleted() {
     if (inboundHead) {
-        inboundHead->fireMessageUpdated(*inboundHead);
+        inboundHead->fireWriteCompleted(*inboundHead);
     }
 }
 
@@ -1035,10 +1038,11 @@ const ChannelFuturePtr& ChannelPipeline::write(const ChannelBufferPtr& message,
         return future;
     }
 
-    if (outboundHead->eventloop->inLoopThread()) {
+    if (context->eventloop->inLoopThread()) {
         try {
             context->setOutboundChannelBuffer(message);
-            context->outboundHandler->flush(*context, future);
+            outboundHead->flush(*outboundHead, future);
+            //context->outboundHandler->flush(*context, future);
         }
         catch (const Exception& e) {
             //logger.warn(

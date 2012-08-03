@@ -39,7 +39,6 @@ using namespace cetty::buffer;
 class EchoServerHandler : public ChannelInboundBufferHandler {
 public:
     EchoServerHandler() : transferredBytes(0) {
-        out = ChannelBuffers::buffer(4096);
     }
     virtual ~EchoServerHandler() {}
 
@@ -48,14 +47,9 @@ public:
     }
 
     virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
-        ChannelBufferPtr buffer = ctx.getInboundChannelBuffer();
+        const ChannelBufferPtr& buffer = ctx.getInboundChannelBuffer();
         if (buffer) {
-            static int readableBytes = buffer->readableBytes();
-
-            //out->clear();
-            //out.swap(buffer);
-            buffer->clear();
-            out->setIndex(0, readableBytes);
+            ChannelBufferPtr out = buffer->readBytes();
             ctx.getChannel()->write(out);
         }
     }
@@ -70,5 +64,4 @@ public:
 
 private:
     int transferredBytes;
-    ChannelBufferPtr out;
 };

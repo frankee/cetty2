@@ -140,6 +140,24 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
 
         this->active = true;
         //future->setSuccess();
+
+        // start the event loop pool if in main thread mode.
+        const EventLoopPoolPtr& loop = ioService->getEventLoopPool();
+        if (loop && loop->isMainThread()) {
+            LOG_INFO(logger, "the asio service pool starting to run in main thread.");
+
+            if (!loop->start()) {
+                LOG_ERROR(logger, "start the boost asio service error, stop service pool and close channel.");
+                loop->stop();
+                getPipeline()->fireExceptionCaught(
+                    ChannelException("failed to start the asio service."));
+
+                close();
+            }
+            else {
+                LOG_INFO(logger, "the asio service pool started to running.");
+            }
+        }
     }
     catch (const std::exception& e) {
         //Exception exception(e.what());
@@ -177,13 +195,11 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
     BOOST_ASSERT(channel);
 
     if (!error) {
-        //pipeline->
         // create the socket add it to the buffer and fire the event
-        //channel.pipeline().inboundMessageBuffer().add(
-        //    new AioSocketChannel(channel, null, channel.eventLoop, ch));
         pipeline->addInboundMessage<ChannelPtr>(boost::static_pointer_cast<Channel>(channel));
         pipeline->fireMessageUpdated();
 
+        channel->getPipeline()->fireChannelActive();
         channel->beginRead();
 
         childChannels.insert(

@@ -162,7 +162,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
             data = ChannelBuffers::hexDump(msg->getData());
             std::cout<<"the arg data is "<<data<<std::endl;
 #endif
-            handleJob(msg, ctx, e);
+            handleJob(msg, ctx);
             grabIdleCount = 0;
             grabJob(ctx);
             break;
@@ -178,7 +178,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
             std::cout<<"the arg data is "<<data<<std::endl;
 
             grabIdleCount = 0;
-            handleJob(msg, ctx, e);
+            handleJob(msg, ctx);
             break;
 
         case GearmanMessage::ECHO_RES:

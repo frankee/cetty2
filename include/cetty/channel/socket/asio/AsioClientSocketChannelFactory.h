@@ -118,19 +118,16 @@ public:
     AsioClientSocketChannelFactory(int threadCnt);
     AsioClientSocketChannelFactory(const EventLoopPtr& eventLoop);
     AsioClientSocketChannelFactory(const EventLoopPoolPtr& eventLoopPool);
-    
+
     virtual ~AsioClientSocketChannelFactory();
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
 
     virtual void shutdown();
 
-    bool start();
-
 private:
     void init();
     void deinit();
-    bool needManuallyStart() const;
 
 private:
     typedef std::map<int, ChannelPtr> ClientChannels;

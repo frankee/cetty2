@@ -16,10 +16,10 @@
 
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanWorker.h>
 #include <cetty/gearman/GearmanDecoder.h>
 #include <cetty/gearman/GearmanEncoder.h>
@@ -31,7 +31,7 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 
 GearmanWorkerBuilder::GearmanWorkerBuilder()
     : ServerBuilder() {
@@ -50,7 +50,7 @@ void GearmanWorkerBuilder::addConnection(const std::string& host, int port) {
 }
 
 const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
-    const AsioServicePoolPtr& pool = getServicePool();
+    const EventLoopPoolPtr& pool = getChildPool();
 
     if (pool) {
         AsioServicePool::Iterator itr = pool->begin();
@@ -63,14 +63,15 @@ const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
     return workers;
 }
 
-void GearmanWorkerBuilder::buildWorker(const AsioServicePtr& ioService) {
+void GearmanWorkerBuilder::buildWorker(const EventLoopPtr& eventLoop) {
     if (!pipeline) {
         pipeline = getDefaultPipeline();
     }
 
     //to connect to remote at this point
     GearmanWorkerPtr worker =
-        new GearmanWorker(ioService, pipeline, connections);
+        new GearmanWorker(eventLoop, pipeline, connections);
+
     workers.push_back(worker);
 }
 
@@ -85,7 +86,7 @@ const ChannelPipelinePtr& GearmanWorkerBuilder::getWorkerPipeline() {
 }
 
 ChannelPipelinePtr GearmanWorkerBuilder::getDefaultPipeline() {
-    ChannelPipelinePtr pipeline = Channels::pipeline();
+    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
     pipeline->addLast("gearmanDecoder", new GearmanDecoder());

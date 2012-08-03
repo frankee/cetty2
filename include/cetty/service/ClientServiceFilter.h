@@ -19,11 +19,13 @@
 
 #include <deque>
 #include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/handler/codec/CodecUtil.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
+using namespace cetty::handler::codec;
 
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
@@ -86,9 +88,11 @@ protected:
         while (!in.empty()) {
             RequestInT& req = in.front();
 
-            reqs.push(req);
-            RequestOutT oreq = filterRequest(req);
+            reqs.push_back(req);
+            RequestOutT oreq = filterRequest(ctx, req);
             CodecUtil<RequestOutT>::unfoldAndAdd(ctx, oreq, false);
+
+            in.pop_front();
         }
 
         ctx.flush(future);

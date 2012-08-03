@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -28,6 +29,7 @@ namespace gearman {
 namespace protobuf {
 
 using namespace cetty::channel;
+using namespace cetty::buffer;
 using namespace cetty::gearman;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
@@ -45,16 +47,22 @@ std::string GearmanProtobufClientFilter::toString() const {
     return "GearmanProtobufClientFilter";
 }
 
-GearmanMessagePtr GearmanProtobufClientFilter::filterReq(const ProtobufServiceMessagePtr& req) {
+GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
+    OutboundMessageContext& ctx,
+    const ProtobufServiceMessagePtr& req) {
     const std::string& method = req->getMethod();
-    ChannelBufferPtr buffer = ChannelBuffers::buffer(req->getMessageSize()+8);
+    ChannelBufferPtr buffer
+        = ChannelBuffers::buffer(req->getMessageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
-    ProtobufServiceMessageEncoder::encodeMessage(buffer,req);
-    return GearmanMessage::createsubmitJobMessage(method,"12345",buffer);
+    ProtobufServiceMessageEncoder::encodeMessage(buffer, req);
+    return GearmanMessage::createsubmitJobMessage(method, "12345", buffer);
 }
 
-ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterRep(const ProtobufServiceMessagePtr& req,const GearmanMessagePtr& rep) {
+ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterResponse(
+    InboundMessageContext& ctx,
+    const ProtobufServiceMessagePtr& req,
+    const GearmanMessagePtr& rep) {
     //decode from GearmanMessage
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
     ProtobufServiceMessageDecoder::decode(rep->getData(),protoMsg);

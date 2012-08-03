@@ -17,9 +17,10 @@
 #include <cetty/gearman/protobuf/builder/GearmanProtobufWorkerBuilder.h>
 
 #include <google/protobuf/descriptor.h>
-#include <cetty/channel/Channels.h>
+
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/handler/codec/frame/LengthFieldBasedFrameDecoder.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
@@ -35,7 +36,7 @@ namespace builder {
 
 using namespace google::protobuf;
 using namespace cetty::channel;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service::handler;
 
 
@@ -51,7 +52,7 @@ GearmanProtobufWorkerBuilder::~GearmanProtobufWorkerBuilder() {}
 
 
 ChannelPipelinePtr GearmanProtobufWorkerBuilder::getDefaultPipeline() {
-    ChannelPipelinePtr pipeline = Channels::pipeline();
+    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
 

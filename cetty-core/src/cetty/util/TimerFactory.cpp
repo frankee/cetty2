@@ -88,5 +88,9 @@ const TimerPtr& TimerFactory::getTimer(const EventLoopPtr& eventLoop) {
     }
 }
 
+const TimerPtr& TimerFactory::getTimer() {
+    return getTimer(boost::this_thread::get_id());
+}
+
 }
 }

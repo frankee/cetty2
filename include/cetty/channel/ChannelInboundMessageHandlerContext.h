@@ -34,7 +34,9 @@ public:
                                         const ChannelHandlerPtr& handler,
                                         ChannelHandlerContext* prev,
                                         ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+        : ChannelHandlerContext(name, pipeline, handler, prev, next) {
+        hasInboundMessageHandler = true;
+    }
 
     ChannelInboundMessageHandlerContext(const std::string& name,
                                         const EventLoopPtr& eventLoop,
@@ -42,18 +44,25 @@ public:
                                         const ChannelHandlerPtr& handler,
                                         ChannelHandlerContext* prev,
                                         ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+        hasInboundMessageHandler = true;
+    }
 
     virtual ~ChannelInboundMessageHandlerContext() {}
 
     MessageQueue& getInboundMessageQueue() { return queue; }
 
     void addInboundMessage(const InboundInT& message) {
-        queue.push_back(message);
+        if (eventloop->inLoopThread()) {
+            queue.push_back(message);
+        }
+        else {
+            eventloop->post(boost::bind(
+                                &ChannelInboundMessageHandlerContext<InboundInT>::addInboundMessage,
+                                this,
+                                message));
+        }
     }
-
-protected:
-    virtual bool isInboundMessageHandler() const { return true; }
 
 private:
     MessageQueue queue;

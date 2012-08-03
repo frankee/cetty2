@@ -23,30 +23,48 @@ void EchoClientHandler::messageUpdated(ChannelInboundBufferHandlerContext& ctx) 
         ChannelBufferPtr tmp = buffer->readBytes();
         ChannelPtr channel = ctx.getChannel();
 
-        if (intervalTime == 0) {
-            channel->write(tmp);
-        }
-        else {
-            timer->newTimeout(boost::bind(&EchoClientHandler::delaySendMessage,
-                this,
-                _1,
-                boost::ref(*channel),
-                tmp),
-                intervalTime);
-        }
-
-        printf("received message from %d at %s.\n", channel->getId(), boost::posix_time::to_simple_string(boost::get_system_time()).c_str());
+        channel->write(tmp);
+        printf("received message from %d at %s with %dBytes.\n",
+            channel->getId(),
+            boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
+            readableBytes);
     }
-}
-
-void EchoClientHandler::delaySendMessage(Timeout& timeout, Channel& channel, const ChannelBufferPtr& buffer) {
-    printf("send message from %d at %s.\n", channel.getId(), boost::posix_time::to_simple_string(boost::get_system_time()).c_str());
-    channel.write(buffer);
 }
 
 void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
-    timer = TimerFactory::getFactory().getTimer(ctx.getChannel());
-    ctx.getPipeline().write(firstMessage);
+    ctx.getChannel()->write(firstMessage);
+    //ctx.getPipeline().write(firstMessage);
+}
+
+EchoClientHandler::EchoClientHandler(int firstMessageSize) : transferredBytes(0),
+    firstMessageSize(firstMessageSize) {
+        if (firstMessageSize <= 0) {
+            throw InvalidArgumentException("firstMessageSize must > 0.");
+        }
+
+        firstMessage = ChannelBuffers::buffer(firstMessageSize);
+        BOOST_ASSERT(firstMessage);
+        int capacity = firstMessage->writableBytes();
+
+        for (int i = 0; i < capacity; i ++) {
+            firstMessage->writeByte(i);
+        }
+}
+
+void EchoClientHandler::exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
+    // Close the connection when an exception is raised.
+    logger->warn(
+        "Unexpected exception from downstream.",
+        e);
+    ctx.close();
+}
+
+cetty::channel::ChannelHandlerPtr EchoClientHandler::clone() {
+    return new EchoClientHandler(firstMessageSize);
+}
+
+std::string EchoClientHandler::toString() const {
+    return "EchoClientHandler";
 }

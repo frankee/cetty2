@@ -42,6 +42,8 @@ public:
      *
      * @exception RuntimeException
      */
+    const TimerPtr& getTimer();
+
     const TimerPtr& getTimer(const ChannelPtr& channel);
 
     const TimerPtr& getTimer(const EventLoopPtr& eventLoop);

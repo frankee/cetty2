@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/service/ServerFilter.h>
+#include <cetty/service/ServiceFilter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
@@ -31,9 +31,9 @@ using namespace cetty::gearman;
 class GearmanProtobufWorkerFilter
     : public cetty::service::ServiceFilter<
     GearmanMessagePtr,
-    GearmanMessagePtr,
     ProtobufServiceMessagePtr,
-        ProtobufServiceMessagePtr > {
+    ProtobufServiceMessagePtr,
+    GearmanMessagePtr> {
 
 public:
     typedef boost::intrusive_ptr<GearmanProtobufWorkerFilter> GearmanProtobufWorkerFilterPtr;
@@ -47,10 +47,12 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterReq(const GearmanMessagePtr& req);
+    virtual ProtobufServiceMessagePtr filterRequest(InboundMessageContext& ctx,
+        const GearmanMessagePtr& req);
 
-    virtual GearmanMessagePtr filterRep(const GearmanMessagePtr& req,
-                                        const ProtobufServiceMessagePtr& rep);
+    virtual GearmanMessagePtr filterResponse(OutboundMessageContext& ctx,
+        const GearmanMessagePtr& req,
+        const ProtobufServiceMessagePtr& rep);
 };
 
 }

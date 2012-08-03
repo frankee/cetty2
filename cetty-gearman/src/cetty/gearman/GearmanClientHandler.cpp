@@ -16,11 +16,8 @@
 
 #include <cetty/gearman/GearmanClientHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/DownstreamMessageEvent.h>
-#include <cetty/channel/UpstreamMessageEvent.h>
+#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/handler/codec/CodecUtil.h>
 
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/GearmanWorker.h>
@@ -33,6 +30,7 @@ namespace gearman {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
+using namespace cetty::handler::codec;
 
 GearmanClientHandler::GearmanClientHandler(): channel(0) {
 }
@@ -40,40 +38,27 @@ GearmanClientHandler::GearmanClientHandler(): channel(0) {
 GearmanClientHandler::~GearmanClientHandler() {
 }
 
-void GearmanClientHandler::channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-    channel = ctx.getChannel();
+void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
+    if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, false)) {
+        ctx.flush();
+    }
 }
 
-void GearmanClientHandler::submitJob(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx, const MessageEvent& e) {
-    DownstreamMessageEvent message(e.getChannel(),e.getFuture(),ChannelMessage(msg),e.getRemoteAddress());
-    ctx.sendDownstream(message);
-}
-
-void GearmanClientHandler::handleRet(const GearmanMessagePtr& msg,ChannelHandlerContext& ctx,const MessageEvent& e) {
-    //do something to the msg
-    ctx.sendUpstream(e);
-}
-
-void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    GearmanMessagePtr message = e.getMessage().smartPointer<GearmanMessage>();
+void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
     std::string  data;
     std::vector<std::string> params;
 
-    if (!message) {
-        ctx.sendUpstream(e);
-    }
-
-    switch (message->getType()) {
+    switch (msg->getType()) {
     case GearmanMessage::JOB_CREATED:
         std::cout<<"the JOB_SUBMIT is ok "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         //can store the job-handler for match the result
         break;
 
     case GearmanMessage::WORK_STATUS:
         std::cout<<"the  WORK_STATUS"<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         std::cout<<"the percent complete numerator is "<<params[1]<<std::endl;
         std::cout<<"the Percent complete denominator is "<<params[2]<<std::endl;
@@ -83,26 +68,28 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
         //use job handler to identify a job  define a map<Ö÷job£¬vector<·Öjob handler> > for split
     case GearmanMessage::WORK_COMPLETE:
         std::cout<<"the WORK_COMPLETE! "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
 
-        data = ChannelBuffers::hexDump(message->getData());
+        data = ChannelBuffers::hexDump(msg->getData());
         std::cout<<"the work complete data is "<< data <<std::endl;
 
-        handleRet(message,ctx,e);
+        if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, true)) {
+            ctx.fireMessageUpdated();
+        }
         break;
 
     case GearmanMessage::WORK_WARNING:
         std::cout<<"the client reciver the WORK_WARNING, handler it "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        data = ChannelBuffers::hexDump(message->getData());
+        data = ChannelBuffers::hexDump(msg->getData());
         std::cout<<"the work data is "<<data<<std::endl;
         break;
 
     case GearmanMessage::WORK_FAIL:
         std::cout<<"the WORK_FAIL! "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         break;
 
@@ -112,15 +99,15 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
 
     case GearmanMessage::WORK_DATA:
         std::cout<<"the client reciver the WORK_DATA, handler it "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        data = ChannelBuffers::hexDump(message->getData());
+        data = ChannelBuffers::hexDump(msg->getData());
         std::cout<<"the work data is "<<data<<std::endl;
         break;
 
     case GearmanMessage::STATUS_RES:
         std::cout<<"the GET_STATUS is ok,only for bg way"<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         std::cout<<"the known status is "<<params[1]<<std::endl;
         std::cout<<"the running status is "<<params[2]<<std::endl;
@@ -130,24 +117,12 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Mes
 
     case GearmanMessage::OPTION_RES:
         std::cout<<"the OPTION_REQ is ok "<< std::endl;
-        params = message->getParameters();
+        params = msg->getParameters();
         std::cout<<"the name of the option is "<<params[0]<<std::endl;
         break;
 
     default:
-        ctx.sendUpstream(e);
-    }
-}
-
-void GearmanClientHandler::writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    GearmanMessagePtr msg = e.getMessage().smartPointer<GearmanMessage>();
-
-    if (msg) {
-        msgs.push(msg);
-        Channels::write(ctx, e.getFuture(), ChannelMessage(msg));
-    }
-    else {
-        ctx.sendDownstream(e);
+        break;
     }
 }
 
@@ -157,6 +132,24 @@ ChannelHandlerPtr GearmanClientHandler::clone() {
 
 std::string GearmanClientHandler::toString() const {
     return "GearmanClientHandler";
+}
+
+void GearmanClientHandler::flush(OutboundMessageContext& ctx, const ChannelFuturePtr& future) {
+    OutboundMessageContext::MessageQueue& in = ctx.getOutboundMessageQueue();
+
+    while (!in.empty()) {
+        GearmanMessagePtr& msg = in.front();
+        if (msg) {
+            msgs.push_back(msg);
+            CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, false);
+        }
+    }
+
+    ctx.flush();
+}
+
+void GearmanClientHandler::channelActive(ChannelHandlerContext& ctx) {
+    channel = ctx.getChannel();
 }
 
 }

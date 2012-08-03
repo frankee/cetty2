@@ -26,9 +26,9 @@ using namespace cetty::util;
 
 int main(int argc, char* argv[]) {
     // Print usage if no argument is specified.
-    if (argc < 3 || argc > 7) {
+    if (argc < 3 || argc > 6) {
         printf(
-            "Usage: EchoClient \n <host> <port> [<first message size> <client count> <send message intervals> <io thread count>]");
+            "Usage: EchoClient \n <host> <port> [<first message size> <client count> <io thread count>]");
         return -1;
     }
 
@@ -47,16 +47,10 @@ int main(int argc, char* argv[]) {
         clientCount = atoi(argv[4]);
     }
 
-    int sendIntervals = 0;
-
-    if (argc >= 6) {
-        sendIntervals = atoi(argv[5]);
-    }
-
     int ioThreadCount = 1;
 
-    if (argc >= 7) {
-        ioThreadCount = atoi(argv[6]);
+    if (argc >= 6) {
+        ioThreadCount = atoi(argv[5]);
     }
 
     // Configure the client.
@@ -65,7 +59,7 @@ int main(int argc, char* argv[]) {
     // Set up the pipeline factory.
     bootstrap.setPipeline(
         ChannelPipelines::pipeline(
-            new EchoClientHandler(firstMessageSize, sendIntervals)));
+            new EchoClientHandler(firstMessageSize)));
 
     // Start the connection attempt.
     std::vector<ChannelPtr> clientChannels;
@@ -85,6 +79,5 @@ int main(int argc, char* argv[]) {
 
     // Shut down thread pools to exit.
     bootstrap.shutdown();
-
     return 0;
 }

@@ -258,7 +258,7 @@ public:
             return (T*)NULL;
         }
 
-        if (next->isInboundMessageHandler()) {
+        if (next->hasInboundMessageHandler) {
             T* context = dynamic_cast<T*>(next);
 
             if (context) { return context; }
@@ -271,7 +271,7 @@ public:
                 return (T*)NULL;
             }
 
-            if (next->isInboundMessageHandler()) {
+            if (next->hasInboundMessageHandler) {
                 T* context = dynamic_cast<T*>(next);
 
                 if (context) { return context; }
@@ -288,13 +288,13 @@ public:
 
     template<typename T>
     T* nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx) {
-        ChannelHandlerContext* next = nextOutboundContext;
+        ChannelHandlerContext* next = ctx;
 
         if (!next) {
             return (T*)NULL;
         }
 
-        if (next->isOutboundMessageHandler()) {
+        if (next->hasOutboundMessageHandler) {
             return dynamic_cast<T*>(next);
         }
 
@@ -305,7 +305,7 @@ public:
                 return (T*)NULL;
             }
 
-            if (next->isOutboundMessageHandler()) {
+            if (next->hasOutboundMessageHandler) {
                 return dynamic_cast<T*>(next);
             }
 
@@ -391,12 +391,6 @@ public:
     const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
                                   const ChannelFuturePtr& future);
 
-protected:
-    virtual bool isInboundBufferHandler() const { return false; }
-    virtual bool isInboundMessageHandler() const { return false; }
-    virtual bool isOutboundBufferHandler() const { return false; }
-    virtual bool isOutboundMessageHandler() const { return false; }
-
 private:
     void init(const ChannelHandlerPtr& handler);
 
@@ -414,6 +408,11 @@ private:
 protected:
     bool canHandleInbound;
     bool canHandleOutbound;
+
+    bool hasInboundBufferHandler;
+    bool hasInboundMessageHandler;
+    bool hasOutboundBufferHandler;
+    bool hasOutboundMessageHandler;
 
     ChannelHandlerPtr         handler;
     ChannelInboundHandlerPtr  inboundHandler;

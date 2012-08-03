@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageDecoder.h>
+#include <cetty/handler/codec/MessageToMessageEncoder.h>
 #include <cetty/gearman/GearmanMessage.h>
 
 namespace cetty {

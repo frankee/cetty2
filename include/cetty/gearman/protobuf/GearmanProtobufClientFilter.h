@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/service/ClientFilter.h>
+#include <cetty/service/ClientServiceFilter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
@@ -32,9 +32,9 @@ using namespace cetty::gearman;
 class GearmanProtobufClientFilter
     : public cetty::service::ClientServiceFilter<
     ProtobufServiceMessagePtr,
-    ProtobufServiceMessagePtr,
     GearmanMessagePtr,
-        GearmanMessagePtr > {
+    GearmanMessagePtr,
+    ProtobufServiceMessagePtr> {
 public:
     GearmanProtobufClientFilter();
     virtual ~GearmanProtobufClientFilter();
@@ -46,9 +46,13 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual GearmanMessagePtr filterReq(const ProtobufServiceMessagePtr& req);
+    virtual GearmanMessagePtr filterRequest(OutboundMessageContext& ctx,
+        const ProtobufServiceMessagePtr& req);
 
-    virtual ProtobufServiceMessagePtr filterRep(const ProtobufServiceMessagePtr& req,const GearmanMessagePtr& rep);
+    virtual ProtobufServiceMessagePtr filterResponse(InboundMessageContext& ctx,
+        const ProtobufServiceMessagePtr& req,
+        const GearmanMessagePtr& rep);
+
 };
 
 }

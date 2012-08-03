@@ -24,7 +24,8 @@
 namespace cetty {
 namespace channel {
 
-void ChannelOutboundBufferHandlerContext::setOutboundChannelBuffer(const ChannelBufferPtr& buffer) {
+void ChannelOutboundBufferHandlerContext::setOutboundChannelBuffer(
+    const ChannelBufferPtr& buffer) {
     if (eventloop->inLoopThread()) {
         this->buffer = buffer;
     }
@@ -34,6 +35,27 @@ void ChannelOutboundBufferHandlerContext::setOutboundChannelBuffer(const Channel
                             this,
                             buffer));
     }
+}
+
+ChannelOutboundBufferHandlerContext::ChannelOutboundBufferHandlerContext(
+    const std::string& name,
+    ChannelPipeline& pipeline,
+    const ChannelHandlerPtr& handler,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next)
+    : ChannelHandlerContext(name, pipeline, handler, prev, next) {
+    hasOutboundBufferHandler = true;
+}
+
+ChannelOutboundBufferHandlerContext::ChannelOutboundBufferHandlerContext(
+    const std::string& name,
+    const EventLoopPtr& eventLoop,
+    ChannelPipeline& pipeline,
+    const ChannelHandlerPtr& handler,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next)
+    : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+    hasOutboundBufferHandler = true;
 }
 
 }

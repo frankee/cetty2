@@ -17,6 +17,8 @@
 #include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanMessage.h>
 
+#include <cetty/buffer/ChannelBuffers.h>
+
 namespace cetty {
 namespace gearman {
 
@@ -96,7 +98,7 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
         writeHeader(buffer, msg->getType(), messageLength);
 
         if ((parametersLength - 1) > 0) {
-            writeParameters(buffer, message->getParameters(), false);
+            writeParameters(buffer, msg->getParameters(), false);
         }
 
         //to check the data

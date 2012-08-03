@@ -64,8 +64,7 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
       sink(),
       isWriting(false),
       highWaterMarkCounter(0),
-      config(tcpSocket),
-      mainThreadMode(false) {
+      config(tcpSocket) {
       init(pipeline);
 }
 
@@ -78,8 +77,7 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
       sink(),
       isWriting(false),
       highWaterMarkCounter(0),
-      config(tcpSocket),
-      mainThreadMode(false) {
+      config(tcpSocket) {
     init(pipeline);
 }
 
@@ -155,8 +153,10 @@ bool AsioSocketChannel::setClosed() {
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
     if (!error) {
-        pipeline->getReceiveBuffer().setReceiveBufferSize(bytes_transferred);
-        pipeline->updateReceiveBuffer();
+        AdaptiveReceiveBuffer& buffer = pipeline->getReceiveBuffer();
+        buffer.setReceiveBufferSize(bytes_transferred);
+        pipeline->setInboundChannelBuffer(buffer.channelBuffer());
+
         pipeline->fireMessageUpdated();
 
         beginRead();
@@ -169,7 +169,8 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
 void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
                                     size_t bytes_transferred) {
     if (!error) {
-        writeQueue->poll().setSuccess();
+        writeQueue->peek().setSuccess();
+        writeQueue->popup();
 
         pipeline->fireWriteCompleted();
 
@@ -178,9 +179,13 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         }
     }
     else {
-        writeQueue->poll().setFailure(
-            RuntimeException(std::string("write buffer failed, code=") +
-                             Integer::toString(error.value())));
+        if (!writeQueue->empty()) {
+            writeQueue->peek().setFailure(
+                RuntimeException(std::string("write buffer failed, code=") +
+                Integer::toString(error.value())));
+            writeQueue->popup();
+        }
+        
         close();
     }
 }
@@ -237,7 +242,9 @@ void AsioSocketChannel::cleanUpWriteBuffer() {
         // it is already sent asynchronously, will take care of itself.
         while (writeQueue->size() > 1) {
             LOG_WARN(logger, "cleanUpWriteBuffer: poll and clean the write queue.");
-            writeQueue->poll().setFailure(cause);
+            writeQueue->peek().setFailure(cause);
+            writeQueue->popup();
+
             fireExceptionCaught = true;
         }
     }
@@ -283,19 +290,15 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
                     ++iterator,
                     connectFuture));
 
-    if (mainThreadMode) {
-        boost::intrusive_ptr<AsioClientSocketChannelFactory> clientFactory
-            = boost::dynamic_pointer_cast<AsioClientSocketChannelFactory>(factory);
-
-        if (clientFactory) {
+    const EventLoopPoolPtr& pool = eventLoop->getEventLoopPool();
+    if (pool && pool->isMainThread()) {
             LOG_INFO(logger, "the asio service pool starting to run in main thread.");
-
-            if (clientFactory->start()) {
+            if (pool->start()) {
                 LOG_INFO(logger, "the asio service pool started to running.");
             }
             else {
                 //TODO: may duplicated with the callback of AsioSocketChannel::handleConnect
-                LOG_ERROR(logger, "start the boost asio service error, and firing an exception.");
+                LOG_ERROR(logger, "start the boost asio service error, and firing an exception, then terminate self.");
                 ChannelException e("the boost asio service can not be started.");
                 connectFuture->setFailure(e);
                 pipeline->fireExceptionCaught(e);
@@ -304,10 +307,6 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
                 //TODO: should terminate the program
                 std::terminate();
             }
-        }
-        else {
-            LOG_ERROR(logger, "the asio service pool is in single thread mode, but the factory type is unknown.");
-        }
     }
 }
 

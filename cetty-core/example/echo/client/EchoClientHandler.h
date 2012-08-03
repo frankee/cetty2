@@ -53,24 +53,7 @@ public:
     /**
      * Creates a client-side handler.
      */
-    EchoClientHandler(int firstMessageSize, int intervalTime = 0)
-        : transferredBytes(0),
-          firstMessageSize(firstMessageSize),
-          intervalTime(intervalTime) {
-
-        if (firstMessageSize <= 0) {
-            throw InvalidArgumentException("firstMessageSize must > 0.");
-        }
-
-        firstMessage = ChannelBuffers::buffer(firstMessageSize);
-        BOOST_ASSERT(firstMessage);
-        int capacity = firstMessage->writableBytes();
-
-        for (int i = 0; i < capacity; i ++) {
-            firstMessage->writeByte(i);
-        }
-    }
-
+    EchoClientHandler(int firstMessageSize);
     virtual ~EchoClientHandler() {}
 
     int getTransferredBytes() const {
@@ -81,34 +64,17 @@ public:
 
     virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
-        // Close the connection when an exception is raised.
-        logger->warn(
-                "Unexpected exception from downstream.",
-                e);
-        ctx.close();
-    }
+    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e);
 
-    virtual ChannelHandlerPtr clone() {
-        ChannelHandlerPtr ptr(
-            new EchoClientHandler(firstMessageSize, intervalTime));
-        return ptr;
-    }
+    virtual ChannelHandlerPtr clone();
 
-    virtual std::string toString() const {
-        return "EchoClientHandler";
-    }
-
-    void delaySendMessage(Timeout& timeout, Channel& channel, const ChannelBufferPtr& buffer);
+    virtual std::string toString() const;
 
 private:
     static InternalLogger* logger;
     
 private:
     int firstMessageSize;
-    int intervalTime;
-
-    TimerPtr timer; 
 
     ChannelBufferPtr firstMessage;
     int transferredBytes;

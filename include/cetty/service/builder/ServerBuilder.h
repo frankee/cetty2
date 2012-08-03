@@ -63,6 +63,9 @@ public:
 
     const ServerBuilderConfig& getConfig() const { return config; }
 
+    const EventLoopPoolPtr& getParentPool() const { return parentEventLoopPool; }
+    const EventLoopPoolPtr& getChildPool() const { return childEventLoopPool; }
+
 protected:
     ChannelPtr build(const std::string& name, int port);
 
