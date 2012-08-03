@@ -71,6 +71,7 @@ public:
             }
 
             outMessages.pop_front();
+            in.pop_front();
         }
 
         if (notify) {
@@ -88,6 +89,7 @@ public:
             outMessages.push_back(msg);
 
             CodecUtil<RepT>::unfoldAndAdd(ctx, msg->request, false);
+            in.pop_front();
         }
 
         ctx.flush(future);

@@ -64,6 +64,7 @@ protected:
                 if (!isDecodable(msg)) {
                     //ctx.nextInboundMessageBuffer().add(msg);
                     notify = true;
+                    in.pop_front();
                     continue;
                 }
 
@@ -72,12 +73,15 @@ protected:
                 if (!omsg) {
                     // Decoder consumed a message but returned null.
                     // Probably it needs more messages because it's an aggregator.
+                    in.pop_front();
                     continue;
                 }
 
                 if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, omsg, true)) {
                     notify = true;
                 }
+
+                in.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);

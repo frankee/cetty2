@@ -95,6 +95,8 @@ public:
             else {
                 bufferingCall.calls.push_back(request);
             }
+
+            in.pop_front();
         }
 
         if (notify) {

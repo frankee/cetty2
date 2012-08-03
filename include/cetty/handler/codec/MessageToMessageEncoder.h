@@ -64,6 +64,7 @@ protected:
 
                 if (!isEncodable(msg)) {
                     //ctx.nextOutboundMessageBuffer().add(msg);
+                    in.pop_front();
                     continue;
                 }
 
@@ -72,10 +73,12 @@ protected:
                 if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
                     // an aggregated message - keep polling.
+                    in.pop_front();
                     continue;
                 }
 
                 CodecUtil<OutboundOutT>::unfoldAndAdd(ctx, omsg, false);
+                in.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);

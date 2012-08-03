@@ -63,6 +63,7 @@ public:
             }
 
             outMessages.pop_front();
+            in.pop_front();
         }
     }
 
@@ -77,6 +78,7 @@ public:
             outMessages.push_back(request);
 
             CodecUtil<OutstandingCallPtr>::unfoldAndAdd(ctx, request, false);
+            in.pop_front();
         }
 
         ctx.flush(future);

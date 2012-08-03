@@ -425,7 +425,7 @@ void AsioSocketChannel::init(const ChannelPipelinePtr& pipeline) {
     this->sink = new AsioSocketChannelSink(*this);
 
     AbstractChannel::setPipeline(pipeline);
-    LOG_INFO(logger, "Server Channel firing the Channel Create Event.");
+    LOG_INFO(logger, "AsioSocketChannel firing the Channel Create Event.");
     pipeline->fireChannelCreated();
 }
 

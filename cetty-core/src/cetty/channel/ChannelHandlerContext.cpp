@@ -524,7 +524,7 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& fut
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
-    if (eventloop->inLoopThread()) {
+    if (ctx.eventloop->inLoopThread()) {
         try {
             ctx.outboundHandler->flush(ctx, future);
         }

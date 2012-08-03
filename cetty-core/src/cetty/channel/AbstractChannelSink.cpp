@@ -118,7 +118,9 @@ void AbstractChannelSink::closeIfClosed() {
     //close(voidFuture());
 }
 
-void AbstractChannelSink::connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+void AbstractChannelSink::connect(const SocketAddress& remoteAddress,
+                                  const SocketAddress& localAddress,
+                                  const ChannelFuturePtr& future) {
     throw ChannelException("has not implement this method.");
 }
 

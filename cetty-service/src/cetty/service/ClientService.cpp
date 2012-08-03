@@ -76,6 +76,9 @@ ClientService::ClientService(const EventLoopPtr& eventLoop,
 
     sink = new AbstractChannelSink(*this);
     AbstractChannel::setPipeline(pipeline);
+
+    //LOG_INFO(logger, "AsioSocketChannel firing the Channel Create Event.");
+    pipeline->fireChannelCreated();
 }
 
 }

@@ -73,6 +73,8 @@ protected:
             if (CodecUtil<ResponseOutT>::unfoldAndAdd(ctx, omsg, true)) {
                 notify = true;
             }
+
+            in.pop_front();
         }
 
         if (notify) {

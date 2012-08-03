@@ -143,6 +143,7 @@ void GearmanClientHandler::flush(OutboundMessageContext& ctx, const ChannelFutur
             msgs.push_back(msg);
             CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, false);
         }
+        in.pop_front();
     }
 
     ctx.flush();

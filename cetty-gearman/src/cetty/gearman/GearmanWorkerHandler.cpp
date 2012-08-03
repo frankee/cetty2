@@ -222,6 +222,8 @@ void GearmanWorkerHandler::flush(OutboundMessageContext& ctx,
         default:
             break;
         }
+
+        in.pop_front();
     }
 
     ctx.flush();

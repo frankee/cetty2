@@ -74,6 +74,8 @@ protected:
             if (CodecUtil<RequestOutT>::unfoldAndAdd(ctx, oreq, true)) {
                 notify = true;
             }
+
+            in.pop_front();
         }
 
         if (notify) {
@@ -91,6 +93,7 @@ protected:
             ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
             reqs.pop_front();
             CodecUtil<ResponseOutT>::unfoldAndAdd(ctx, orep, false);
+            in.pop_front();
         }
 
         ctx.flush(future);

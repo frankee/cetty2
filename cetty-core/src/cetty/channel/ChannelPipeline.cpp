@@ -849,7 +849,7 @@ void ChannelPipeline::updateOutboundHandlerContextList() {
             }
 
             if (outboundContextIndex) {
-                outboundContextIndex->nextInboundContext = contextIndex;
+                outboundContextIndex->nextOutboundContext = contextIndex;
             }
 
             outboundContextIndex = contextIndex;
