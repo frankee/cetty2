@@ -28,7 +28,8 @@
 
 namespace cetty {
 namespace channel {
-    class AbstractChannelSink;
+
+class AbstractChannelSink;
 
 /**
  * A skeletal {@link Channel} implementation.

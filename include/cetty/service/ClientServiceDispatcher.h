@@ -100,7 +100,7 @@ public:
         }
 
         if (notify) {
-            ctx.flush(future);
+            ch->flush(future);
         }
         else {
             bufferingCall.future = future;

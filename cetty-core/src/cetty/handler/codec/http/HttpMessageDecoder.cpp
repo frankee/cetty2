@@ -78,7 +78,7 @@ HttpMessageDecoder::HttpMessageDecoder(int maxInitialLineLength,
     }
 }
 
-HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
+HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     const ReplayingDecoderBufferPtr& buffer,
     int state) {
     switch (state) {
@@ -213,12 +213,11 @@ HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
             if (!chunk->isLast()) {
                 // Append the last chunk.
-                //return ChannelMessage(ChannelMessage(chunk),
-                //                      ChannelMessage(HttpChunk::LAST_CHUNK));
+                chunk->setFollowLastChunk(true);
+                return chunk;
             }
         }
-
-        //return ChannelMessage(chunk);
+        return chunk;
     }
 
     case READ_FIXED_LENGTH_CONTENT: {
@@ -264,12 +263,12 @@ HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
             if (!chunk->isLast()) {
                 // Append the last chunk.
-                //return ChannelMessage(ChannelMessage(chunk),
-                //                      ChannelMessage(HttpChunk::LAST_CHUNK));
+                chunk->setFollowLastChunk(true);
+                return chunk;
             }
         }
 
-        //return chunk;
+        return chunk;
     }
 
     /**
@@ -310,7 +309,7 @@ HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
         HttpChunkPtr chunk = HttpChunkPtr(new HttpChunk(buff));
         checkpoint(READ_CHUNK_DELIMITER);
-        //return (chunk);
+        return chunk;
     }
 
     case READ_CHUNKED_CONTENT_AS_CHUNKS: {
@@ -347,7 +346,7 @@ HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         if (!chunk->isLast()) {
-            //return (chunk);
+            return chunk;
         }
 
         break;
@@ -390,7 +389,7 @@ HttpMessagePtr HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         else {
             reset();
             // The last chunk, which is empty
-            //return ChannelMessage(trailer);
+            return trailer;
         }
     }
 

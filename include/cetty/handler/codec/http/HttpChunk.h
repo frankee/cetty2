@@ -69,6 +69,9 @@ public:
     */
     virtual bool isLast() const;
 
+    bool followingLastChunk() const;
+    void setFollowLastChunk(bool followLast);
+
     /**
     * Returns the content of this chunk.  If this is the 'end of content'
     * marker, {@link ChannelBuffers#EMPTY_BUFFER} will be returned.

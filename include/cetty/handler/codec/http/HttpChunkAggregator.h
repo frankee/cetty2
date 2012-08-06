@@ -22,7 +22,7 @@
  */
 
 #include <cetty/handler/codec/MessageToMessageDecoder.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
 
 namespace cetty {
 namespace handler {
@@ -30,6 +30,8 @@ namespace codec {
 namespace http {
 
 using namespace cetty::handler::codec;
+
+class HttpPackageVisitor;
 
 /**
  * A {@link ChannelHandler} that aggregates an {@link HttpMessage}
@@ -56,7 +58,7 @@ using namespace cetty::handler::codec;
  */
 
 class HttpChunkAggregator
-    : public MessageToMessageDecoder<HttpMessagePtr, HttpMessagePtr> {
+        : public MessageToMessageDecoder<HttpPackage, HttpMessagePtr> {
 public:
     /**
      * Creates a new instance.
@@ -72,9 +74,12 @@ public:
 
 protected:
     virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
-        const HttpMessagePtr& msg);
+                                  const HttpPackage& msg);
 
     void appendToCumulation(const ChannelBufferPtr& input);
+
+private:
+    friend class HttpPackageVisitor;
 
 private:
     int maxContentLength;

@@ -45,38 +45,30 @@ HttpMessageEncoder::~HttpMessageEncoder() {
 HttpMessageEncoder::HttpMessageEncoder() {
 }
 
-ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
-    const HttpMessagePtr& msg,
-    const ChannelBufferPtr& out) {
-        return ChannelBufferPtr();
-#if 0
-    HttpMessagePtr message = msg.smartPointer<HttpMessage>();
+class HttpPackageEncodeVisitor : public boost::static_visitor<ChannelBufferPtr> {
+public:
+    HttpPackageEncodeVisitor(HttpMessageEncoder& encoder,
+                             ChannelHandlerContext& ctx,
+                             const ChannelBufferPtr& out)
+        : encoder(encoder), ctx(ctx), out(out) {
 
-    if (!message) {
-        message = msg.smartPointer<HttpMessage, HttpRequest>();
-
-        if (!message) {
-            message = msg.smartPointer<HttpMessage, HttpResponse>();
-        }
     }
 
-    if (message) {
-        bool chunked = this->chunked =
-                           HttpCodecUtil::isTransferEncodingChunked(*message);
+    ChannelBufferPtr operator()(const HttpMessagePtr& value) const {
+        bool chunked = encoder.chunked =
+                           HttpCodecUtil::isTransferEncodingChunked(*value);
 
-        const ChannelBufferFactoryPtr& factory = channel->getConfig().getBufferFactory();
-        BOOST_ASSERT(factory);
-        ChannelBufferPtr header = ChannelBuffers::dynamicBuffer(*factory);
+        ChannelBufferPtr header = ChannelBuffers::dynamicBuffer();
 
-        encodeInitialLine(*header, *message);
-        encodeHeaders(*header, message->getFirstHeader(), message->getLastHeader());
+        encoder.encodeInitialLine(*header, *value);
+        encoder.encodeHeaders(*header, value->getFirstHeader(), value->getLastHeader());
         header->writeByte(HttpCodecUtil::CR);
         header->writeByte(HttpCodecUtil::LF);
 
-        ChannelBufferPtr content = message->getContent();
+        ChannelBufferPtr content = value->getContent();
 
         if (!content->readable()) {
-            return ChannelMessage(header); // no content
+            return header; // no content
         }
         else if (chunked) {
             throw InvalidArgumentException(
@@ -85,51 +77,18 @@ ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
         else {
             if (content->aheadWritableBytes() >= header->readableBytes()) {
                 content->writeBytesAhead(header);
-                return ChannelMessage(content);
+                return content;
             }
             else {
                 header->writeBytes(content);
-                return ChannelMessage(header);
+                return header;
             }
         }
     }
 
-    HttpChunkPtr chunk = msg.smartPointer<HttpChunk>();
-
-    if (!chunk) {
-        // Unknown message type.
-        return msg;
-    }
-
-    if (this->chunked) {
-        if (chunk->isLast()) {
-            this->chunked = false;
-            HttpChunkTrailerPtr chunkTrailer =
-                boost::dynamic_pointer_cast<HttpChunkTrailer>(chunk);
-
-            if (chunkTrailer) {
-                const ChannelBufferFactoryPtr& factory = channel->getConfig().getBufferFactory();
-                BOOST_ASSERT(factory);
-                ChannelBufferPtr trailer = ChannelBuffers::dynamicBuffer(1024, *factory);
-
-                trailer->writeByte('0');
-                trailer->writeByte(HttpCodecUtil::CR);
-                trailer->writeByte(HttpCodecUtil::LF);
-
-                encodeHeaders(*trailer,
-                              chunkTrailer->getFirstHeader(),
-                              chunkTrailer->getLastHeader());
-
-                trailer->writeByte(HttpCodecUtil::CR);
-                trailer->writeByte(HttpCodecUtil::LF);
-                return ChannelMessage(trailer);
-            }
-            else {
-                return ChannelMessage(LAST_CHUNK);
-            }
-        }
-        else {
-            ChannelBufferPtr content = chunk->getContent();
+    ChannelBufferPtr operator()(const HttpChunkPtr& value) const {
+        if (encoder.chunked) {
+            ChannelBufferPtr content = value->getContent();
             int contentLength = content->readableBytes();
             std::string lengthStr = Integer::toHexString(contentLength);
             int lengthPartSize = lengthStr.size() + 2;
@@ -143,7 +102,7 @@ ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
                 content->writeByteAhead(HttpCodecUtil::CR);
                 content->writeBytesAhead(lengthStr);
 
-                return ChannelMessage(content);
+                return content;
             }
             else {
                 ChannelBufferPtr buffer = ChannelBuffers::buffer(contentLength + lengthPartSize + 2);
@@ -154,19 +113,65 @@ ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
                 buffer->writeBytes(content);
                 buffer->writeByte(HttpCodecUtil::CR);
                 buffer->writeByte(HttpCodecUtil::LF);
-                return ChannelMessage(buffer);
+                return buffer;
+            }
+
+            if (value->isLast()) {
+                encoder.chunked = false;
+                return ChannelBuffers::EMPTY_BUFFER;
+            }
+        }
+        else { // if (this->chunked) {
+            if (value->isLast()) {
+                return ChannelBufferPtr();
+            }
+            else {
+                return value->getContent();
             }
         }
     }
-    else { // if (this->chunked) {
-        if (chunk->isLast()) {
-            return ChannelMessage::EMPTY_MESSAGE;
+
+    ChannelBufferPtr operator()(const HttpChunkTrailerPtr& value) const {
+        if (encoder.chunked) {
+            encoder.chunked = false;
+
+            if (value) {
+                ChannelBufferPtr trailer = ChannelBuffers::dynamicBuffer(1024);
+
+                trailer->writeByte('0');
+                trailer->writeByte(HttpCodecUtil::CR);
+                trailer->writeByte(HttpCodecUtil::LF);
+
+                encoder.encodeHeaders(*trailer,
+                                      value->getFirstHeader(),
+                                      value->getLastHeader());
+
+                trailer->writeByte(HttpCodecUtil::CR);
+                trailer->writeByte(HttpCodecUtil::LF);
+                return trailer;
+            }
         }
-        else {
-            return ChannelMessage(chunk->getContent());
-        }
+
+        return ChannelBufferPtr();
     }
-#endif
+
+    template<typename U>
+    ChannelBufferPtr operator()(const U& value) const {
+        return ChannelBufferPtr();
+    }
+
+private:
+    HttpMessageEncoder& encoder;
+    ChannelHandlerContext& ctx;
+    const ChannelBufferPtr& out;
+};
+
+ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
+        const HttpPackage& msg,
+        const ChannelBufferPtr& out) {
+
+    HttpPackageEncodeVisitor visitor(*this, ctx, out);
+    return msg.apply_visitor(visitor);
 }
 
 void HttpMessageEncoder::encodeHeaders(ChannelBuffer& buf,

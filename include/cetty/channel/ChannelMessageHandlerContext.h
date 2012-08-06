@@ -38,7 +38,10 @@ public:
                                  ChannelHandlerContext* next)
         : ChannelInboundMessageHandlerContext(name, pipeline, handler, prev, next),
           ChannelOutboundMessageHandlerContext(name, pipeline, handler, prev, next),
-          ChannelHandlerContext(name, pipeline, handler, prev, next) {}
+          ChannelHandlerContext(name, pipeline, handler, prev, next) {
+        hasInboundMessageHandler = true;
+        hasOutboundMessageHandler = true;
+    }
 
     ChannelMessageHandlerContext(const std::string& name,
                                  const EventLoopPtr& eventLoop,
@@ -48,13 +51,13 @@ public:
                                  ChannelHandlerContext* next)
         : ChannelInboundMessageHandlerContext(name, eventLoop, pipeline, handler, prev, next),
           ChannelOutboundMessageHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-          ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {}
+          ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+        hasInboundMessageHandler = true;
+        hasOutboundMessageHandler = true;
+    }
 
     virtual ~ChannelMessageHandlerContext() {}
 
-protected:
-    virtual bool isInboundMessageHandler() const { return true; }
-    virtual bool isOutboundMessageHandler() const { return true; }
 };
 
 }

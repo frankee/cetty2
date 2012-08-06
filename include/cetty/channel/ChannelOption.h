@@ -110,19 +110,6 @@ private:
     const boost::static_visitor<bool>* checker;
 };
 
-// #if defined()
-// 
-// #define SO_REUSEADDR    0x0004          /* allow local address reuse */
-// #define SO_KEEPALIVE    0x0008          /* keep connections alive */
-// #define SO_BROADCAST    0x0020          /* permit sending of broadcast msgs */
-// #define SO_LINGER       0x0080          /* linger on close if data present */
-// #define SO_SNDBUF       0x1001          /* send buffer size */
-// #define SO_RCVBUF       0x1002          /* receive buffer size */
-// #define SO_SNDLOWAT     0x1003          /* send low-water mark */
-// #define SO_RCVLOWAT     0x1004          /* receive low-water mark */
-// 
-// #endif
-
 }
 }
 

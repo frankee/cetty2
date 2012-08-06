@@ -22,8 +22,8 @@
  */
 
 #include <vector>
-#include <boost/variant.hpp>
 
+#include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
@@ -34,9 +34,6 @@ namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
-
-class HttpMessage;
-typedef boost::variant<HttpMessagePtr, HttpChunkPtr> HttpPackage;
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
@@ -123,7 +120,7 @@ using namespace cetty::util;
  */
 
 class HttpMessageDecoder
-        : public cetty::handler::codec::ReplayingDecoder<HttpMessagePtr> {
+        : public cetty::handler::codec::ReplayingDecoder<HttpPackage> {
 private:
     /**
      * The internal state of {@link HttpMessageDecoder}.
@@ -174,7 +171,7 @@ protected:
         int maxChunkSize);
 
 protected:
-    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
+    virtual HttpPackage decode(ChannelHandlerContext& ctx,
         const ReplayingDecoderBufferPtr& buffer,
         int state);
 

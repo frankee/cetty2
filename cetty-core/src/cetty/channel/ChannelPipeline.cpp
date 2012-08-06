@@ -89,7 +89,7 @@ public:
     }
 
     ChannelHandlerPtr clone() {
-        return shared_from_this();
+        return ChannelHandlerPtr(new SinkHandler(sink));
     }
 
     std::string toString() const {

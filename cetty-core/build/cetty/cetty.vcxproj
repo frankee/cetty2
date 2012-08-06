@@ -230,6 +230,11 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactoryFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedByteChannel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedMessageChannel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedSocketAddressImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioService.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePoolPtr.h" />
@@ -330,6 +335,7 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessageEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMethod.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequest.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestEncoder.h" />

@@ -54,6 +54,9 @@
     <Filter Include="handler\logging">
       <UniqueIdentifier>{aee756a0-980c-4ee2-b0df-9b989b2bce10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="channel\embedded">
+      <UniqueIdentifier>{1df1590a-7ba4-47a1-851e-646db088c472}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp">
@@ -1056,6 +1059,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePtr.h">
       <Filter>channel\socket\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedByteChannel.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedMessageChannel.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedSocketAddressImpl.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h">
+      <Filter>handler\codec\http</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

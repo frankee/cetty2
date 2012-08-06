@@ -24,7 +24,7 @@
 #include <string>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
 
 namespace cetty {
 namespace handler {
@@ -37,6 +37,7 @@ using namespace cetty::handler::codec;
 
 class HttpHeader;
 class HttpMessage;
+class HttpPackageEncodeVisitor;
 
 /**
  * Encodes an {@link HttpMessage} or an {@link HttpChunk} into
@@ -59,7 +60,7 @@ class HttpMessage;
  * @apiviz.landmark
  */
 
-class HttpMessageEncoder : public MessageToBufferEncoder<HttpMessagePtr> {
+class HttpMessageEncoder : public MessageToBufferEncoder<HttpPackage> {
 public:
     virtual ~HttpMessageEncoder();
 
@@ -70,7 +71,7 @@ protected:
     HttpMessageEncoder();
 
     virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-        const HttpMessagePtr& msg,
+        const HttpPackage& msg,
         const ChannelBufferPtr& out);
 
 protected:
@@ -86,6 +87,9 @@ private:
     void encodeHeader(ChannelBuffer& buf,
                       const std::string& header,
                       const std::string& value);
+
+private:
+    friend class HttpPackageEncodeVisitor;
 
 private:
     static ChannelBufferPtr LAST_CHUNK;

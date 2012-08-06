@@ -94,6 +94,8 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
     ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE,
                                       id, req->getService(), req->getMethod(), response));
 
+    //addOutboundMessage();
+    //ctx.flush();
     ctx.getPipeline().write(message);
 }
 
