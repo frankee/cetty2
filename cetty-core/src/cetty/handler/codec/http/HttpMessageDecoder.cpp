@@ -48,7 +48,7 @@ const int HttpMessageDecoder::MAX_HEADER_SIZE = 8192;
 const int HttpMessageDecoder::MAX_CHUNK_SIZE  = 8192;
 
 HttpMessageDecoder::HttpMessageDecoder()
-    : ReplayingDecoder(SKIP_CONTROL_CHARS, true),
+    : ReplayingDecoder<HttpPackage>(SKIP_CONTROL_CHARS, true),
       maxInitialLineLength(MAX_INITIAL_LINE_LENGTH),
       maxHeaderSize(MAX_HEADER_SIZE),
       maxChunkSize(MAX_CHUNK_SIZE),
@@ -59,7 +59,7 @@ HttpMessageDecoder::HttpMessageDecoder()
 HttpMessageDecoder::HttpMessageDecoder(int maxInitialLineLength,
                                        int maxHeaderSize,
                                        int maxChunkSize)
-    : ReplayingDecoder(SKIP_CONTROL_CHARS, true),
+    : ReplayingDecoder<HttpPackage>(SKIP_CONTROL_CHARS, true),
       maxInitialLineLength(maxInitialLineLength),
       maxHeaderSize(maxHeaderSize),
       maxChunkSize(maxChunkSize),

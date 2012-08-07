@@ -13,9 +13,9 @@
 InternalLogger* EchoClientHandler::logger =
     InternalLoggerFactory::getInstance("EchoClientHandler");
 
-void EchoClientHandler::messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
+void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
     // Send back the received message to the remote peer.
-    const ChannelBufferPtr& buffer = ctx.getInboundChannelBuffer();
+    const ChannelBufferPtr& buffer = getInboundChannelBuffer();
 
     if (buffer) {
         int readableBytes = buffer->readableBytes();
@@ -23,34 +23,37 @@ void EchoClientHandler::messageUpdated(ChannelInboundBufferHandlerContext& ctx) 
         ChannelBufferPtr tmp = buffer->readBytes();
         ChannelPtr channel = ctx.getChannel();
 
-        channel->write(tmp);
+        outboundTransfer.write(ctx, tmp, ctx.getChannel()->newSucceededFuture());
+        //channel->write(tmp);
         printf("received message from %d at %s with %dBytes.\n",
-            channel->getId(),
-            boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
-            readableBytes);
+               channel->getId(),
+               boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
+               readableBytes);
     }
 }
 
 void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
-    ctx.getChannel()->write(firstMessage);
+
+    outboundTransfer.write(ctx, firstMessage, ctx.getChannel()->newSucceededFuture());
+    //ctx.getChannel()->write(firstMessage);
     //ctx.getPipeline().write(firstMessage);
 }
 
 EchoClientHandler::EchoClientHandler(int firstMessageSize) : transferredBytes(0),
     firstMessageSize(firstMessageSize) {
-        if (firstMessageSize <= 0) {
-            throw InvalidArgumentException("firstMessageSize must > 0.");
-        }
+    if (firstMessageSize <= 0) {
+        throw InvalidArgumentException("firstMessageSize must > 0.");
+    }
 
-        firstMessage = ChannelBuffers::buffer(firstMessageSize);
-        BOOST_ASSERT(firstMessage);
-        int capacity = firstMessage->writableBytes();
+    firstMessage = ChannelBuffers::buffer(firstMessageSize);
+    BOOST_ASSERT(firstMessage);
+    int capacity = firstMessage->writableBytes();
 
-        for (int i = 0; i < capacity; i ++) {
-            firstMessage->writeByte(i);
-        }
+    for (int i = 0; i < capacity; i ++) {
+        firstMessage->writeByte(i);
+    }
 }
 
 void EchoClientHandler::exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {

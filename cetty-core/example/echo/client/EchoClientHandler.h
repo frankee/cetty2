@@ -24,6 +24,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/AbstractChannelInboundBufferHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
@@ -48,7 +49,7 @@ using namespace cetty::logging;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoClientHandler : public ChannelInboundBufferHandler {
+class EchoClientHandler : public AbstractChannelInboundBufferHandler<> {
 public:
     /**
      * Creates a client-side handler.
@@ -62,7 +63,7 @@ public:
 
     virtual void channelActive(ChannelHandlerContext& ctx);
 
-    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
+    virtual void messageUpdated(ChannelHandlerContext& ctx);
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e);
 

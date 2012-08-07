@@ -80,6 +80,13 @@ public:
         }
     }
 
+    void flush(ChannelHandlerContext& ctx,
+        const ChannelFuturePtr& future) {
+            if (sink) {
+                sink->flush(getOutboundChannelBuffer(), future);
+            }
+    }
+
     void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause) {
         ctx.fireExceptionCaught(cause);
     }
@@ -94,14 +101,6 @@ public:
 
     std::string toString() const {
         return "HeadHandler";
-    }
-
-protected:
-    void flush(ChannelOutboundBufferHandlerContext& ctx,
-               const ChannelFuturePtr& future) {
-        if (sink) {
-            sink->flush(ctx.getOutboundChannelBuffer(), future);
-        }
     }
 
 private:
@@ -135,7 +134,10 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
 
     this->channel = channel;
     this->eventLoop = channel->getEventLoop();
-    ChannelHandlerPtr sinkHandler(new SinkHandler(&channel->getSink()));
+
+    if (!sinkHandler) {
+        sinkHandler = ChannelHandlerPtr(new SinkHandler(&channel->getSink()));
+    }
     addFirst("_sink", sinkHandler);
 
     ChannelHandlerContext* ctx = head;
@@ -1025,52 +1027,14 @@ void ChannelPipeline::setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
     }
 }
 
-const ChannelFuturePtr& ChannelPipeline::write(const ChannelBufferPtr& message,
-    const ChannelFuturePtr& future) {
-    if (!outboundHead) {
-        return future;
+const ChannelHandlerPtr& ChannelPipeline::getSinkHandler() const {
+    return this->sinkHandler;
+}
+
+void ChannelPipeline::setSinkHandler(const ChannelHandlerPtr& handler) {
+    if (handler) {
+        this->sinkHandler = handler;
     }
-
-    ChannelOutboundBufferHandlerContext* context
-        = outboundHead->nextOutboundBufferHandlerContext(outboundHead);
-
-    if (!context) {
-        return future;
-    }
-
-    if (context->eventloop->inLoopThread()) {
-        try {
-            context->setOutboundChannelBuffer(message);
-            outboundHead->flush(*outboundHead, future);
-            //context->outboundHandler->flush(*context, future);
-        }
-        catch (const Exception& e) {
-            //logger.warn(
-            //    "An exception was thrown by a user handler's " +
-            //    "exceptionCaught() method while handling the following exception:", cause);
-        }
-        catch (const std::exception& e) {
-            //notifyHandlerException(e);
-        }
-        catch (...) {
-            // clear the outbound ChannelBuffer
-            //if (ctx.outByteBuf != null) {
-            //    ByteBuf buf = ctx.outByteBuf;
-
-            //   if (!buf.readable()) {
-            //       buf.discardReadBytes();
-            //   }
-            //}
-        }
-    }
-    else {
-        context->eventloop->post(boost::bind(&ChannelPipeline::write,
-            this,
-            message,
-            future));
-    }
-
-    return future;
 }
 
 }

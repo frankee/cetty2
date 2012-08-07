@@ -81,7 +81,7 @@ public:
      * @param delimiter  the delimiter
      */
     DelimiterBasedFrameDecoder(int maxFrameLength,
-        const ChannelBufferPtr& delimiter);
+                               const ChannelBufferPtr& delimiter);
 
     /**
      * Creates a new instance.
@@ -94,8 +94,8 @@ public:
      * @param delimiter  the delimiter
      */
     DelimiterBasedFrameDecoder(int maxFrameLength,
-        bool stripDelimiter,
-        const ChannelBufferPtr& delimiter);
+                               bool stripDelimiter,
+                               const ChannelBufferPtr& delimiter);
 
     /**
      * Creates a new instance.
@@ -106,7 +106,7 @@ public:
      * @param delimiters  the delimiters
      */
     DelimiterBasedFrameDecoder(int maxFrameLength,
-        const std::vector<ChannelBufferPtr>& delimiters);
+                               const std::vector<ChannelBufferPtr>& delimiters);
 
     /**
      * Creates a new instance.
@@ -119,8 +119,8 @@ public:
      * @param delimiters  the delimiters
      */
     DelimiterBasedFrameDecoder(int maxFrameLength,
-        bool stripDelimiter,
-        const std::vector<ChannelBufferPtr>& delimiters);
+                               bool stripDelimiter,
+                               const std::vector<ChannelBufferPtr>& delimiters);
 
     virtual ~DelimiterBasedFrameDecoder() {}
 
@@ -129,14 +129,16 @@ public:
                                  stripDelimiter,
                                  delimiters));
     }
+
     virtual std::string toString() const { return "FixedLengthFrameDecoder"; }
 
 protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in);
+                                    const ChannelBufferPtr& in);
 
-    virtual UserEvent decode(
-        ChannelHandlerContext& ctx, const ChannelPtr& channel, const ChannelBufferPtr& buffer);
+    virtual UserEvent decode(ChannelHandlerContext& ctx,
+                             const ChannelPtr& channel,
+                             const ChannelBufferPtr& buffer);
 
 private:
     void fail(ChannelHandlerContext& ctx, long frameLength);

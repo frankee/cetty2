@@ -18,9 +18,12 @@
  */
 
 #include <cetty/channel/ChannelInboundHandler.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace channel {
+
+using namespace cetty::buffer;
 
 class ChannelInboundBufferHandlerContext;
 
@@ -57,9 +60,18 @@ public:
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next);
 
+    virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
+
 protected:
-    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx);
+    const ChannelBufferPtr& getInboundChannelBuffer() const;
+
+private:
+    ChannelBufferPtr inboundBuffer;
 };
+
+inline const ChannelBufferPtr& ChannelInboundBufferHandler::getInboundChannelBuffer() const {
+    return this->inboundBuffer;
+}
 
 }
 }

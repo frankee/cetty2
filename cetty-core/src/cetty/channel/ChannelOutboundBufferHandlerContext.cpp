@@ -20,6 +20,7 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelOutboundBufferHandler.h>
 
 namespace cetty {
 namespace channel {
@@ -27,7 +28,7 @@ namespace channel {
 void ChannelOutboundBufferHandlerContext::setOutboundChannelBuffer(
     const ChannelBufferPtr& buffer) {
     if (eventloop->inLoopThread()) {
-        this->buffer = buffer;
+        outboundHandler->setOutboundChannelBuffer(buffer);
     }
     else {
         eventloop->post(boost::bind(
@@ -45,6 +46,8 @@ ChannelOutboundBufferHandlerContext::ChannelOutboundBufferHandlerContext(
     ChannelHandlerContext* next)
     : ChannelHandlerContext(name, pipeline, handler, prev, next) {
     hasOutboundBufferHandler = true;
+    outboundHandler = boost::dynamic_pointer_cast<ChannelOutboundBufferHandler>(handler);
+    BOOST_ASSERT(outboundHandler);
 }
 
 ChannelOutboundBufferHandlerContext::ChannelOutboundBufferHandlerContext(
@@ -56,6 +59,11 @@ ChannelOutboundBufferHandlerContext::ChannelOutboundBufferHandlerContext(
     ChannelHandlerContext* next)
     : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
     hasOutboundBufferHandler = true;
+    outboundHandler = boost::dynamic_pointer_cast<ChannelOutboundBufferHandler>(handler);
+    BOOST_ASSERT(outboundHandler);
+}
+
+ChannelOutboundBufferHandlerContext::~ChannelOutboundBufferHandlerContext() {
 }
 
 }

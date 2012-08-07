@@ -22,9 +22,12 @@
  */
 
 #include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/handler/codec/BufferToMessageDecoder.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
+#include <cetty/handler/codec/DecoderException.h>
 
 namespace cetty {
 namespace logging {
@@ -303,9 +306,12 @@ using namespace cetty::logging;
  */
 
 template<typename InboundOutT>
-class ReplayingDecoder : public cetty::channel::ChannelInboundBufferHandler {
+class ReplayingDecoder
+    : public ChannelInboundBufferHandler {
+
 public:
     typedef ChannelInboundBufferHandlerContext Context;
+    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
 
 public:
     virtual ~ReplayingDecoder() {}
@@ -395,8 +401,8 @@ protected:
         return cumulation;
     }
 
-    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
-        callDecode(ctx, ctx.getInboundChannelBuffer());
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        callDecode(ctx, getInboundChannelBuffer());
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
@@ -414,9 +420,8 @@ protected:
         }
 
         try {
-            if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx,
-                    decodeLast(ctx, replayable, state),
-                    true)) {
+            if (inboundTransfer.unfoldAndAdd(ctx,
+                    decodeLast(ctx, replayable, state))) {
                 fireInboundBufferUpdated(ctx, in);
             }
         }
@@ -480,7 +485,7 @@ protected:
                 replayable->syncIndex();
 
                 // A successful decode
-                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, result, true)) {
+                if (inboundTransfer.unfoldAndAdd(ctx, result)) {
                     decoded = true;
                 }
             }
@@ -546,7 +551,7 @@ protected:
 
 private:
     void fireInboundBufferUpdated(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in) {
+                                  const ChannelBufferPtr& in) {
         checkedPoint -= in->readerIndex();
         in->discardReadBytes();
         ctx.fireMessageUpdated();
@@ -566,6 +571,9 @@ private:
                 ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(input));
         }
     }
+
+protected:
+    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
 
 private:
     static InternalLogger* logger;

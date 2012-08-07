@@ -404,6 +404,9 @@
     <ClCompile Include="..\..\src\cetty\channel\EventLoopPool.cpp">
       <Filter>channel</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpPackage.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -727,9 +730,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\CodecException.h">
       <Filter>handler\codec</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\CodecUtil.h">
-      <Filter>handler\codec</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\DecoderException.h">
       <Filter>handler\codec</Filter>
     </ClInclude>
@@ -770,9 +770,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoop.h">
@@ -868,9 +865,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerContext.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundHandlerPtr.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandlerPtr.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -932,9 +926,6 @@
       <Filter>handler\codec\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieHeaderNames.h">
-      <Filter>handler\codec\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\DefaultHttpHeader.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunk.h">
@@ -1083,6 +1074,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h">
       <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerPtr.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineMessageTransfer.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelMessage.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundBufferHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundMessageHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundBufferHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundMessageHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerFwd.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerFwd.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h">
+      <Filter>channel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

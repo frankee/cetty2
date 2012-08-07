@@ -19,6 +19,7 @@
 
 #include <deque>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandlerFwd.h>
 
 namespace cetty {
 namespace channel {
@@ -26,7 +27,8 @@ namespace channel {
 template<typename InboundInT>
 class ChannelInboundMessageHandlerContext : public virtual ChannelHandlerContext {
 public:
-    typedef std::deque<InboundInT> MessageQueue;
+    typedef ChannelInboundMessageHandler<InboundInT> InboundHandler;
+    typedef boost::intrusive_ptr<InboundHandler> InboundHandlerPtr;
 
 public:
     ChannelInboundMessageHandlerContext(const std::string& name,
@@ -36,6 +38,8 @@ public:
                                         ChannelHandlerContext* next)
         : ChannelHandlerContext(name, pipeline, handler, prev, next) {
         hasInboundMessageHandler = true;
+        inboundHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
+        BOOST_ASSERT(inboundHandler);
     }
 
     ChannelInboundMessageHandlerContext(const std::string& name,
@@ -46,15 +50,15 @@ public:
                                         ChannelHandlerContext* next)
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
         hasInboundMessageHandler = true;
+        inboundHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
+        BOOST_ASSERT(inboundHandler);
     }
 
     virtual ~ChannelInboundMessageHandlerContext() {}
 
-    MessageQueue& getInboundMessageQueue() { return queue; }
-
     void addInboundMessage(const InboundInT& message) {
         if (eventloop->inLoopThread()) {
-            queue.push_back(message);
+            inboundHandler->addInboundMessage(message);
         }
         else {
             eventloop->post(boost::bind(
@@ -65,7 +69,7 @@ public:
     }
 
 private:
-    MessageQueue queue;
+    InboundHandlerPtr inboundHandler;
 };
 
 }

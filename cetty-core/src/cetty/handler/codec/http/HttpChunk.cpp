@@ -60,6 +60,14 @@ void HttpChunk::setContent(const ChannelBufferPtr& content) {
     }
 }
 
+bool HttpChunk::followingLastChunk() const {
+    return true;
+}
+
+void HttpChunk::setFollowLastChunk(bool followLast) {
+
+}
+
 }
 }
 }

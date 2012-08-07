@@ -44,15 +44,7 @@ void ChannelInboundBufferHandler::channelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelInboundBufferHandler::messageUpdated(ChannelHandlerContext& ctx) {
-    ChannelInboundBufferHandlerContext* context =
-        ctx.inboundBufferHandlerContext();
-
-    BOOST_ASSERT(context && "");
-    messageUpdated(*context);
-}
-
-void ChannelInboundBufferHandler::messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
-    ctx.fireMessageUpdated(ctx);
+    ctx.fireMessageUpdated();
 }
 
 void ChannelInboundBufferHandler::writeCompleted(ChannelHandlerContext& ctx) {
@@ -107,6 +99,10 @@ ChannelHandlerContext* ChannelInboundBufferHandler::createContext(const std::str
             shared_from_this(),
             prev,
             next);
+}
+
+void ChannelInboundBufferHandler::setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
+    inboundBuffer = buffer;
 }
 
 }

@@ -35,11 +35,11 @@ using namespace cetty::util::internal::asio;
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
     const EventLoopPtr& eventLoop)
     : eventLoop(eventLoop),
-    eventLoopPool(),
-    timerFactory(NULL),
-    socketAddressFactory(NULL),
-    ipAddressFactory(NULL) {
-        init();
+      eventLoopPool(),
+      timerFactory(NULL),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    init();
 }
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
@@ -118,7 +118,10 @@ void AsioClientSocketChannelFactory::deinit() {
 }
 
 ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
-    const EventLoopPtr& eventLoop = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
+    const EventLoopPtr& eventLoop = eventLoopPool ?
+                                    eventLoopPool->getNextLoop()
+                                    : this->eventLoop;
+
     ChannelPtr client =
         new AsioSocketChannel(eventLoop,
                               shared_from_this(),

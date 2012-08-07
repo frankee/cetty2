@@ -21,7 +21,6 @@
 namespace cetty {
 namespace channel {
 
-
 ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name,
         ChannelPipeline& pipeline,
         const ChannelHandlerPtr& handler,
@@ -30,7 +29,8 @@ ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name
     : ChannelInboundBufferHandlerContext(name, pipeline, handler, prev, next),
       ChannelOutboundBufferHandlerContext(name, pipeline, handler, prev, next),
       ChannelHandlerContext(name, pipeline, handler, prev, next) {
-
+          hasInboundBufferHandler = true;
+          hasOutboundBufferHandler = true;
 }
 
 ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name,
@@ -42,7 +42,8 @@ ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name
     : ChannelInboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
       ChannelOutboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
       ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
-
+          hasInboundBufferHandler = true;
+          hasOutboundBufferHandler = true;
 }
 
 }

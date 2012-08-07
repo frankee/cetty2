@@ -122,9 +122,12 @@ public:
 
                 channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
                 outStandingCalls.insert(std::make_pair(request->getId(), request));
-            }
 
-            ctx.flush(call.future);
+                call.calls.pop_front();
+            }
+            channel->flush(call.future);
+
+            //ctx.flush(call.future);
             bufferingCalls.pop_front();
         }
     }

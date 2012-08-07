@@ -22,7 +22,12 @@
 namespace cetty {
 namespace channel {
 
+    class ChannelOutboundBufferHandler;
+
 class ChannelOutboundBufferHandlerContext : public virtual ChannelHandlerContext {
+public:
+    typedef boost::intrusive_ptr<ChannelOutboundBufferHandler> OutboundHandlerPtr;
+
 public:
     ChannelOutboundBufferHandlerContext(const std::string& name,
                                         ChannelPipeline& pipeline,
@@ -37,16 +42,12 @@ public:
                                         ChannelHandlerContext* prev,
                                         ChannelHandlerContext* next);
 
-    virtual~ ChannelOutboundBufferHandlerContext() {}
-
-    const ChannelBufferPtr& getOutboundChannelBuffer() const {
-        return buffer;
-    }
+    virtual ~ChannelOutboundBufferHandlerContext();
 
     void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
 
 private:
-    ChannelBufferPtr buffer;
+    OutboundHandlerPtr outboundHandler;
 };
 
 }

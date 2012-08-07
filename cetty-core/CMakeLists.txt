@@ -17,10 +17,12 @@ ADD_SUBDIRECTORY(src)
 # They are not built by default.  To build them, set the
 # build_gtest_samples option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
-option(BUILD_CETTY_CORE_EXAMPLES "Build cetty-cor example programs." OFF)
+option(BUILD_CETTY_CORE_EXAMPLES "Build cetty-cor example programs." ON)
 
 
 if (BUILD_CETTY_CORE_EXAMPLES)
 	MESSAGE(STATUS "BUILDING SAMPLES...")
 	ADD_SUBDIRECTORY(example)
 endif()
+
+ADD_SUBDIRECTORY(example)

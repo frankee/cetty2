@@ -25,6 +25,7 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
 #include <cetty/handler/codec/http/HttpPackage.h>
+#include <cetty/handler/codec/http/HttpMessage.h>
 
 namespace cetty {
 namespace handler {

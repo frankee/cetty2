@@ -1,5 +1,3 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H)
-#define CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,30 +15,17 @@
  * under the License.
  */
 
-#include <boost/variant.hpp>
-#include <cetty/handler/codec/http/HttpMessage.h>
-#include <cetty/handler/codec/http/HttpChunk.h>
-#include <cetty/handler/codec/http/HttpChunkTrailer.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
+
+
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
 
-typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> HttpPackage;
-
-inline
-bool operator !(const HttpPackage& pacakge) {
-    return !pacakge.empty();
-}
 
 }
 }
 }
 }
-
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H)
-
-// Local Variables:
-// mode: c++
-// End:

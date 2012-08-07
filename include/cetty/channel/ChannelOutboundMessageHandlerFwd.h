@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDBUFFERHANDLER_H)
-#define CETTY_CHANNEL_CHANNELOUTBOUNDBUFFERHANDLER_H
+#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERFWD_H)
+#define CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERFWD_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,52 +17,67 @@
  * under the License.
  */
 
+#include <deque>
 #include <cetty/channel/ChannelOutboundHandler.h>
-#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/channel/ChannelHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-using namespace cetty::buffer;
-
-class ChannelOutboundBufferHandlerContext;
-
-class ChannelOutboundBufferHandler : public ChannelOutboundHandler {
+template<typename OutboundInT>
+class ChannelOutboundMessageHandler : public ChannelOutboundHandler {
 public:
-    ChannelOutboundBufferHandler();
-    virtual ~ChannelOutboundBufferHandler();
+    typedef std::deque<OutboundInT> MessageQueue;
+
+public:
+    ChannelOutboundMessageHandler() {}
+    virtual~ ChannelOutboundMessageHandler() {}
 
     virtual void bind(ChannelHandlerContext& ctx,
                       const SocketAddress& localAddress,
-                      const ChannelFuturePtr& future);
+                      const ChannelFuturePtr& future) {
+        ctx.bind(localAddress, future);
+    }
 
     virtual void connect(ChannelHandlerContext& ctx,
                          const SocketAddress& remoteAddress,
                          const SocketAddress& localAddress,
-                         const ChannelFuturePtr& future);
+                         const ChannelFuturePtr& future) {
+        ctx.connect(remoteAddress, localAddress, future);
+    }
 
     virtual void disconnect(ChannelHandlerContext& ctx,
-                            const ChannelFuturePtr& future);
+                            const ChannelFuturePtr& future) {
+        ctx.disconnect(future);
+    }
 
     virtual void close(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+                       const ChannelFuturePtr& future) {
+        ctx.close(future);
+    }
 
     virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+                       const ChannelFuturePtr& future) {
+        ctx.flush(future);
+    }
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    virtual void beforeAdd(ChannelHandlerContext& ctx) {}
 
-    virtual void afterAdd(ChannelHandlerContext& ctx);
+    virtual void afterAdd(ChannelHandlerContext& ctx) {}
 
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
+    virtual void beforeRemove(ChannelHandlerContext& ctx) {}
 
-    virtual void afterRemove(ChannelHandlerContext& ctx);
+    virtual void afterRemove(ChannelHandlerContext& ctx) {}
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
+                                 const ChannelException& cause) {
+        ctx.fireExceptionCaught(cause);
+    }
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const UserEvent& evt);
+                                    const UserEvent& evt) {
+        ctx.fireUserEventTriggered(evt);
+    }
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
             ChannelPipeline& pipeline,
@@ -75,21 +90,18 @@ public:
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next);
 
-    virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
-
-protected:
-    const ChannelBufferPtr& getOutboundChannelBuffer() const {
-        return outboundBuffer;
+    void addOutboundMessage(const OutboundInT& message) {
+        queue.push_back(message);
     }
 
-private:
-    ChannelBufferPtr outboundBuffer;
+protected:
+    MessageQueue queue;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDBUFFERHANDLER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERFWD_H)
 
 // Local Variables:
 // mode: c++

@@ -28,9 +28,6 @@ class ChannelMessageHandlerContext
     : public ChannelInboundMessageHandlerContext<InboundInT>,
       public ChannelOutboundMessageHandlerContext<OutboundInT> {
 public:
-    typedef std::deque<InboundInT> MessageQueue;
-
-public:
     ChannelMessageHandlerContext(const std::string& name,
                                  ChannelPipeline& pipeline,
                                  const ChannelHandlerPtr& handler,

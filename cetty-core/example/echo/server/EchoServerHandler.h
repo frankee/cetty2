@@ -21,6 +21,7 @@
 #include "cetty/channel/ChannelConfig.h"
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/channel/AbstractChannelInboundBufferHandler.h>
 #include "cetty/buffer/ChannelBuffer.h"
 #include "cetty/buffer/ChannelBuffers.h"
 #include "cetty/buffer/ChannelBufferFactory.h"
@@ -36,7 +37,7 @@ using namespace cetty::buffer;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoServerHandler : public ChannelInboundBufferHandler {
+class EchoServerHandler : public AbstractChannelInboundBufferHandler<> {
 public:
     EchoServerHandler() : transferredBytes(0) {
     }
@@ -46,11 +47,17 @@ public:
         return transferredBytes;
     }
 
-    virtual void messageUpdated(ChannelInboundBufferHandlerContext& ctx) {
-        const ChannelBufferPtr& buffer = ctx.getInboundChannelBuffer();
+    virtual void channelActive(ChannelHandlerContext& ctx) {
+        voidFuture = ctx.getChannel()->newSucceededFuture();
+        //out = ChannelBuffers::buffer(1024*512);
+    }
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& buffer = getInboundChannelBuffer();
         if (buffer) {
-            ChannelBufferPtr out = buffer->readBytes();
-            ctx.getChannel()->write(out);
+            //out->clear();
+            //buffer->readBytes(out, buffer->readableBytes());
+            outboundTransfer.write(ctx, buffer->readBytes(), voidFuture);
         }
     }
 
@@ -63,5 +70,7 @@ public:
     }
 
 private:
+    //ChannelBufferPtr out;
+    ChannelFuturePtr voidFuture;
     int transferredBytes;
 };

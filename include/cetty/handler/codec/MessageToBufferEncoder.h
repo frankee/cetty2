@@ -30,9 +30,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
+#include <cetty/channel/AbstractChannelOutboundMessageHandler.h>
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/handler/codec/EncoderException.h>
 
@@ -44,11 +42,10 @@ using namespace cetty::buffer;
 using namespace cetty::channel;
 
 template<typename OutboundInT>
-class MessageToBufferEncoder : public ChannelOutboundMessageHandler<OutboundInT> {
-public:
-    typedef ChannelOutboundMessageHandlerContext<OutboundInT> MessageContext;
-    typedef ChannelOutboundBufferHandlerContext BufferContext;
-    typedef typename MessageContext::MessageQueue MessageQueue;
+class MessageToBufferEncoder
+    : public AbstractChannelOutboundMessageHandler<OutboundInT, ChannelBufferPtr, ChannelOutboundBufferHandlerContext> {
+    using AbstractChannelOutboundMessageHandler<OutboundInT, ChannelBufferPtr, ChannelOutboundBufferHandlerContext>::outboundTransfer;
+    using ChannelOutboundMessageHandler<OutboundInT>::queue;
 
 public:
     MessageToBufferEncoder() : hasOutBuffer(false), initBufferSize(0) {}
@@ -60,12 +57,6 @@ public:
     virtual ~MessageToBufferEncoder() {}
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        MessageContext* context = ctx.outboundMessageHandlerContext<MessageContext>();
-        BufferContext* nextContxt = ctx.nextOutboundBufferHandlerContext();
-        BOOST_ASSERT(context && nextContxt);
-
-        MessageQueue& queue = context->getOutboundMessageQueue();
-
         ChannelBufferPtr out;
 
         if (hasOutBuffer) {
@@ -95,8 +86,7 @@ public:
                     ChannelBufferPtr decodedBuf = encode(ctx, msg, out);
 
                     if (decodedBuf) {
-                        nextContxt->setOutboundChannelBuffer(decodedBuf);
-                        nextContxt->flush(future);
+                        outboundTransfer.write(ctx, decodedBuf, future);
                     }
                 }
             }
@@ -111,10 +101,8 @@ public:
         }
 
         if (hasOutBuffer) {
-            nextContxt->setOutboundChannelBuffer(out);
+            outboundTransfer.write(ctx, out, future);
         }
-
-        ctx.flush(future);
     }
 
     /**
@@ -134,7 +122,6 @@ private:
     bool hasOutBuffer;
     int  initBufferSize;
 };
-
 
 }
 }

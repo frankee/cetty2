@@ -17,113 +17,37 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandlerFwd.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT>
-class ChannelInboundMessageHandler : public ChannelInboundHandler {
-public:
-    typedef ChannelInboundMessageHandlerContext<InboundInT> InboundMessageContext;
+template<typename InboundInT> inline
+ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next) {
+    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
+                                     pipeline,
+                                     shared_from_this(),
+                                     prev,
+                                     next);
+}
 
-public:
-    ChannelInboundMessageHandler() {}
-    virtual ~ChannelInboundMessageHandler() {}
-
-    virtual void channelCreated(ChannelHandlerContext& ctx) {
-        ctx.fireChannelCreated();
-    }
-
-    virtual void channelActive(ChannelHandlerContext& ctx) {
-        ctx.fireChannelActive();
-    }
-
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
-        ctx.fireChannelInactive();
-    }
-
-    virtual void writeCompleted(ChannelHandlerContext& ctx) {
-        ctx.fireWriteCompleted();
-    }
-
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        InboundMessageContext* context = 
-            ctx.inboundMessageHandlerContext<InboundMessageContext>();
-
-        messageUpdated(*context);
-    }
-
-    virtual void beforeAdd(ChannelHandlerContext& ctx) {}
-    virtual void afterAdd(ChannelHandlerContext& ctx) {}
-    virtual void beforeRemove(ChannelHandlerContext& ctx) {}
-    virtual void afterRemove(ChannelHandlerContext& ctx) {}
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause) {
-        ctx.fireExceptionCaught(cause);
-    }
-
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const UserEvent& evt) {
-        ctx.fireUserEventTriggered(evt);
-    }
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next) {
-        return new InboundMessageContext(name,
-                pipeline,
-                shared_from_this(),
-                prev,
-                next);
-    }
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            const EventLoopPtr& eventLoop,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next) {
-        return new InboundMessageContext(name,
-                eventLoop,
-                pipeline,
-                shared_from_this(),
-                prev,
-                next);
-    }
-
-protected:
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue in = ctx.getInboundMessageQueue();
-
-        while (!in.empty()) {
-            InboundInT msg = in.front();
-
-            if (!msg) {
-                break;
-            }
-
-            try {
-                messageReceived(ctx, msg);
-            }
-            catch (const ChannelException& e) {
-                ctx.fireExceptionCaught(e);
-            }
-            catch (const std::exception& e) {
-                ctx.fireExceptionCaught(ChannelException(e.what()));
-            }
-
-            in.pop_front();
-        }
-    }
-
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-        const InboundInT& msg) {
-            throw ChannelException("you must implement the messageReceived method.");
-    }
-};
+template<typename InboundInT> inline
+ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
+        const EventLoopPtr& eventLoop,
+        ChannelPipeline& pipeline,
+        ChannelHandlerContext* prev,
+        ChannelHandlerContext* next) {
+    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
+                                     eventLoop,
+                                     pipeline,
+                                     shared_from_this(),
+                                     prev,
+                                     next);
+}
 
 }
 }

@@ -55,11 +55,6 @@ void ChannelOutboundBufferHandler::close(ChannelHandlerContext& ctx,
 
 void ChannelOutboundBufferHandler::flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
-    flush(*ctx.outboundBufferHandlerContext(), future);
-}
-
-void ChannelOutboundBufferHandler::flush(ChannelOutboundBufferHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
     ctx.flush(future);
 }
 
@@ -111,6 +106,10 @@ ChannelHandlerContext* ChannelOutboundBufferHandler::createContext(const std::st
             shared_from_this(),
             prev,
             next);
+}
+
+void ChannelOutboundBufferHandler::setOutboundChannelBuffer(const ChannelBufferPtr& buffer) {
+    outboundBuffer = buffer;
 }
 
 }

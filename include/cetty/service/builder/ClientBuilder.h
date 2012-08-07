@@ -84,6 +84,7 @@ public:
 
     ClientServicePtr build() {
         ChannelPtr channel = bootstrap.newChannel();
+        channel->getPipeline()->fireChannelActive();
         return boost::dynamic_pointer_cast<ClientService>(channel);
     }
 
@@ -96,8 +97,9 @@ private:
         ChannelHandlerPtr messageHandler(new MessageHandlerType);
 
         ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
-        pipeline->addLast("dispatcher", dispatcher);
         pipeline->addLast("message", messageHandler);
+
+        pipeline->setSinkHandler(dispatcher);
 
         return pipeline;
     }

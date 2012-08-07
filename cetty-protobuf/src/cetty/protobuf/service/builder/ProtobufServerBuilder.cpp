@@ -21,14 +21,15 @@
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/handler/codec/LengthFieldPrepender.h>
-#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
+#include <cetty/handler/codec/http/HttpChunkAggregator.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
-#include <cetty/handler/codec/http/HttpRequest.h>
-#include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/protobuf/service/http/ProtobufHttpServiceFilter.h>
 
 namespace cetty {
@@ -104,14 +105,14 @@ ChannelPipelinePtr ProtobufServerBuilder::createProtobufHttpServicePipeline() {
     pipeline->addLast("decoder", new HttpRequestDecoder());
 
     // Uncomment the following line if you don't want to handle HttpChunks.
-    //pipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
+    //pipeline->addLast("aggregator", new HttpChunkAggregator(1048576));
 
     pipeline->addLast("encoder", new HttpResponseEncoder());
 
     // Remove the following line if you don't want automatic content compression.
     //pipeline.addLast("deflater", new HttpContentCompressor());
 
-    //pipeline->addLast("protobufFilter", new ProtobufHttpMessageFilter(confCenter));
+    //pipeline->addLast("protobufFilter", new ProtobufHttpServiceFilter());
 
     pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 

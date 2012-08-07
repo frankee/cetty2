@@ -235,10 +235,37 @@ public:
         return dynamic_cast<T*>(this);
     }
 
+    ChannelHandlerContext* getNextOutboundContext() {
+        if (canHandleOutbound) {
+            return nextOutboundContext;
+        }
+        else {
+            ChannelHandlerContext* preCtx = prev;
+            while (preCtx) {
+                if (preCtx->canHandleOutbound) {
+                    return preCtx;
+                }
+                preCtx = preCtx->prev;
+            }
+            return NULL;
+        }
+    }
+
     ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext() {
         return nextInboundBufferHandlerContext(nextInboundContext);
     }
     ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext() {
+        if (!canHandleOutbound) {
+            ChannelHandlerContext* preCtx = prev;
+            while (preCtx) {
+                if (preCtx->canHandleOutbound) {
+                    return nextOutboundBufferHandlerContext(preCtx);
+                }
+                preCtx = preCtx->prev;
+            }
+            return NULL;
+        }
+
         return nextOutboundBufferHandlerContext(nextOutboundContext);
     }
 
@@ -283,6 +310,17 @@ public:
 
     template<typename T>
     T* nextOutboundMessageHandlerContext() {
+        if (!canHandleOutbound) {
+            ChannelHandlerContext* preCtx = prev;
+            while (preCtx) {
+                if (preCtx->canHandleOutbound) {
+                    return nextOutboundMessageHandlerContext<T>(preCtx);
+                }
+                preCtx = preCtx->prev;
+            }
+            return NULL;
+        }
+
         return nextOutboundMessageHandlerContext<T>(nextOutboundContext);
     }
 

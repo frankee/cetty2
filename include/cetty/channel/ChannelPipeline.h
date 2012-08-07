@@ -34,6 +34,7 @@
 #include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>
 #include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelInboundInvoker.h>
 #include <cetty/channel/ChannelOutboundInvoker.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
@@ -580,8 +581,8 @@ public:
         return future;
     }
 
-    const ChannelFuturePtr& write(const ChannelBufferPtr& message,
-                                  const ChannelFuturePtr& future);
+    //const ChannelFuturePtr& write(const ChannelBufferPtr& message,
+    //                              const ChannelFuturePtr& future);
 
     /**
      * Retrieves a boost::any which is
@@ -594,16 +595,19 @@ public:
      * @return Empty boost::any if no such attachment was attached.
      *
      */
-    virtual boost::any getAttachment(const std::string& name) const;
+    boost::any getAttachment(const std::string& name) const;
 
     /**
      * Attaches an object to this pipeline to store a some information
      * specific to the {@link ChannelPipeline} which will not take care of
      * the life cycle of the attachment.
      */
-    virtual void setAttachment(const std::string& name, const boost::any& attachment);
+    void setAttachment(const std::string& name, const boost::any& attachment);
 
-    virtual void notifyHandlerException(const Exception& e);
+    const ChannelHandlerPtr& getSinkHandler() const;
+    void setSinkHandler(const ChannelHandlerPtr& handler);
+
+    void notifyHandlerException(const Exception& e);
 
     ChannelFuturePtr newFuture(const ChannelPtr& channel);
 
@@ -661,12 +665,64 @@ private:
     ChannelHandlerContext* outboundHead; //< downstream single list.
 
     AdaptiveReceiveBuffer* receiveBuffer;
+    ChannelHandlerPtr sinkHandler;
 
     AttachmentMap attachments;
 };
 
 inline const ChannelPtr& ChannelPipeline::getChannel() const {
     return this->channel;
+}
+
+template<> inline
+const ChannelFuturePtr& ChannelPipeline::write<ChannelBufferPtr>(
+    const ChannelBufferPtr& message,
+    const ChannelFuturePtr& future) {
+        if (!outboundHead) {
+            return future;
+        }
+
+        ChannelOutboundBufferHandlerContext* context
+            = outboundHead->nextOutboundBufferHandlerContext(outboundHead);
+
+        if (!context) {
+            return future;
+        }
+
+        if (context->eventloop->inLoopThread()) {
+            try {
+                context->setOutboundChannelBuffer(message);
+                outboundHead->flush(*outboundHead, future);
+                //context->outboundHandler->flush(*context, future);
+            }
+            catch (const Exception& e) {
+                //logger.warn(
+                //    "An exception was thrown by a user handler's " +
+                //    "exceptionCaught() method while handling the following exception:", cause);
+            }
+            catch (const std::exception& e) {
+                //notifyHandlerException(e);
+            }
+            catch (...) {
+                // clear the outbound ChannelBuffer
+                //if (ctx.outByteBuf != null) {
+                //    ByteBuf buf = ctx.outByteBuf;
+
+                //   if (!buf.readable()) {
+                //       buf.discardReadBytes();
+                //   }
+                //}
+            }
+        }
+        else {
+            context->eventloop->post(boost::bind(
+                &ChannelPipeline::write<ChannelBufferPtr>,
+                this,
+                message,
+                future));
+        }
+
+        return future;
 }
 
 }

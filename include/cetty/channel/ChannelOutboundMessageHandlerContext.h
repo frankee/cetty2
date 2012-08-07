@@ -19,14 +19,19 @@
 
 #include <deque>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelOutboundMessageHandlerFwd.h>
 
 namespace cetty {
 namespace channel {
 
+    template<typename OutboundInT>
+    class ChannelOutboundMessageHandler;
+
 template<typename OutboundInT>
 class ChannelOutboundMessageHandlerContext : public virtual ChannelHandlerContext {
 public:
-    typedef std::deque<OutboundInT> MessageQueue;
+    typedef ChannelOutboundMessageHandler<OutboundInT> OutboundHandler;
+    typedef boost::intrusive_ptr<OutboundHandler> OutboundHandlerPtr;
 
 public:
     ChannelOutboundMessageHandlerContext(const std::string& name,
@@ -36,6 +41,9 @@ public:
                                          ChannelHandlerContext* next)
         : ChannelHandlerContext(name, pipeline, handler, prev, next) {
         hasOutboundMessageHandler = true;
+
+        outboundHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
+        BOOST_ASSERT(outboundHandler);
     }
 
     ChannelOutboundMessageHandlerContext(const std::string& name,
@@ -46,15 +54,16 @@ public:
                                          ChannelHandlerContext* next)
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
         hasOutboundMessageHandler = true;
+
+        outboundHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
+        BOOST_ASSERT(outboundHandler);
     }
 
     virtual ~ChannelOutboundMessageHandlerContext() {}
 
-    MessageQueue& getOutboundMessageQueue() { return queue; }
-
     void addOutboundMessage(const OutboundInT& message) {
         if (eventloop->inLoopThread()) {
-            queue.push_back(message);
+            outboundHandler->addOutboundMessage(message);
         }
         else {
             eventloop->post(boost::bind(
@@ -65,7 +74,7 @@ public:
     }
 
 private:
-    MessageQueue queue;
+    OutboundHandlerPtr outboundHandler;
 };
 
 }

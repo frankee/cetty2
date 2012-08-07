@@ -19,6 +19,7 @@
 #include <boost/bind.hpp>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
 
 namespace cetty {
 namespace channel {
@@ -26,7 +27,7 @@ namespace channel {
 void ChannelInboundBufferHandlerContext::setInboundChannelBuffer(
     const ChannelBufferPtr& buffer) {
     if (eventloop->inLoopThread()) {
-        this->inboundBuffer = buffer;
+        inboundHandler->setInboundChannelBuffer(buffer);
     }
     else {
         eventloop->post(boost::bind(
@@ -44,6 +45,8 @@ ChannelInboundBufferHandlerContext::ChannelInboundBufferHandlerContext(
     ChannelHandlerContext* next)
     : ChannelHandlerContext(name, pipeline, handler, prev, next) {
     hasInboundBufferHandler = true;
+    inboundHandler = boost::dynamic_pointer_cast<ChannelInboundBufferHandler>(handler);
+    BOOST_ASSERT(inboundHandler);
 }
 
 ChannelInboundBufferHandlerContext::ChannelInboundBufferHandlerContext(
@@ -55,6 +58,12 @@ ChannelInboundBufferHandlerContext::ChannelInboundBufferHandlerContext(
     ChannelHandlerContext* next)
     : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
     hasInboundBufferHandler = true;
+    inboundHandler = boost::dynamic_pointer_cast<ChannelInboundBufferHandler>(handler);
+    BOOST_ASSERT(inboundHandler);
+}
+
+ChannelInboundBufferHandlerContext::~ChannelInboundBufferHandlerContext() {
+
 }
 
 }

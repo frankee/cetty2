@@ -32,30 +32,32 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/channel/AbstractChannelInboundMessageHandler.h>
 #include <cetty/handler/codec/DecoderException.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
-    using namespace cetty::channel;
+using namespace cetty::channel;
 
 template<typename InboundInT, typename InboundOutT>
-class MessageToMessageDecoder : public ChannelInboundMessageHandler<InboundInT> {
+class MessageToMessageDecoder
+    : public AbstractChannelInboundMessageHandler<InboundInT, InboundOutT> {
+public:
+    typedef typename ChannelInboundMessageHandler<InboundInT>::MessageQueue MessageQueue;
+
 public:
     MessageToMessageDecoder() {}
     virtual ~MessageToMessageDecoder() {}
 
-protected:
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue in = ctx.getInboundMessageQueue();
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
+        MessageQueue& queue = ChannelInboundMessageHandler<InboundInT>::queue;
 
-        while (!in.empty()) {
+        while (!queue.empty()) {
             try {
-                InboundInT& msg = in.front();
+                InboundInT& msg = queue.front();
 
                 if (!msg) {
                     break;
@@ -64,7 +66,7 @@ protected:
                 if (!isDecodable(msg)) {
                     //ctx.nextInboundMessageBuffer().add(msg);
                     notify = true;
-                    in.pop_front();
+                    queue.pop_front();
                     continue;
                 }
 
@@ -73,15 +75,15 @@ protected:
                 if (!omsg) {
                     // Decoder consumed a message but returned null.
                     // Probably it needs more messages because it's an aggregator.
-                    in.pop_front();
+                    queue.pop_front();
                     continue;
                 }
 
-                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, omsg, true)) {
+                if (AbstractChannelInboundMessageHandler<InboundInT, InboundOutT>::inboundTransfer.unfoldAndAdd(ctx, omsg)) {
                     notify = true;
                 }
 
-                in.pop_front();
+                queue.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);
@@ -107,6 +109,7 @@ protected:
 
     virtual InboundOutT decode(ChannelHandlerContext& ctx,
                                const InboundInT& msg) = 0;
+
 };
 
 }

@@ -42,10 +42,6 @@ public:
         ChannelHandlerContext* next);
 
     virtual ~ChannelBufferHandlerContext();
-
-protected:
-    virtual bool isInboundBufferHandler() const { return true; }
-    virtual bool isOutboundBufferHandler() const { return true; }
 };
 
 }

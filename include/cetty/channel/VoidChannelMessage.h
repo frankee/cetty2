@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H)
-#define CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H
+#if !defined(CETTY_CHANNEL_VOIDCHANNELMESSAGE_H)
+#define CETTY_CHANNEL_VOIDCHANNELMESSAGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,29 +17,18 @@
  * under the License.
  */
 
-#include <boost/variant.hpp>
-#include <cetty/handler/codec/http/HttpMessage.h>
-#include <cetty/handler/codec/http/HttpChunk.h>
-#include <cetty/handler/codec/http/HttpChunkTrailer.h>
-
 namespace cetty {
-namespace handler {
-namespace codec {
-namespace http {
+namespace channel {
 
-typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> HttpPackage;
-
-inline
-bool operator !(const HttpPackage& pacakge) {
-    return !pacakge.empty();
-}
+class VoidChannelMessage {
+public:
+    operator bool() const { return false; }
+};
 
 }
 }
-}
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPPACKAGE_H)
+#endif //#if !defined(CETTY_CHANNEL_VOIDCHANNELMESSAGE_H)
 
 // Local Variables:
 // mode: c++

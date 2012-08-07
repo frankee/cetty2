@@ -32,7 +32,7 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/AbstractChannelOutboundMessageHandler.h>
 #include <cetty/handler/codec/CodecUtil.h>
 #include <cetty/handler/codec/EncoderException.h>
 
@@ -44,19 +44,16 @@ using namespace cetty::channel;
 
 template<typename OutboundInT, typename OutboundOutT>
 class MessageToMessageEncoder
-        : public cetty::channel::ChannelOutboundMessageHandler<OutboundInT> {
+        : public AbstractChannelOutboundMessageHandler<OutboundInT, OutboundOutT> {
 public:
     virtual ~MessageToMessageEncoder() {}
 
 protected:
     virtual void flush(OutboundMessageContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
-        while (!in.empty()) {
+        while (!queue.empty()) {
             try {
-                OutboundInT& msg = in.front();
+                OutboundInT& msg = queue.front();
 
                 if (!msg) {
                     break;
@@ -64,7 +61,7 @@ protected:
 
                 if (!isEncodable(msg)) {
                     //ctx.nextOutboundMessageBuffer().add(msg);
-                    in.pop_front();
+                    queue.pop_front();
                     continue;
                 }
 
@@ -73,12 +70,13 @@ protected:
                 if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
                     // an aggregated message - keep polling.
-                    in.pop_front();
+                    queue.pop_front();
                     continue;
                 }
 
-                CodecUtil<OutboundOutT>::unfoldAndAdd(ctx, omsg, false);
-                in.pop_front();
+                outboundTransfer.unfoldAndAdd(ctx, omsg);
+
+                queue.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);

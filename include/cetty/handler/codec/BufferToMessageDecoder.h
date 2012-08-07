@@ -34,9 +34,8 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/handler/codec/DecoderException.h>
-#include <cetty/handler/codec/CodecUtil.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -47,30 +46,21 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 template<typename InboundOutT>
-class BufferToMessageDecoder : public cetty::channel::ChannelInboundBufferHandler {
+class BufferToMessageDecoder : public ChannelInboundBufferHandler {
 public:
-    typedef ChannelInboundBufferHandlerContext Context;
-
-public:
-    virtual void beforeAdd(ChannelHandlerContext& ctx) {
-        this->context = &ctx;
-        ChannelInboundBufferHandler::beforeAdd(ctx);
-    }
-
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx);
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
-        Context* context = ctx.inboundBufferHandlerContext();
-        const ChannelBufferPtr& in = context->getInboundChannelBuffer();
+        const ChannelBufferPtr& in = getInboundChannelBuffer();
 
         if (in && in->readable()) {
-            callDecode(*context);
+            callDecode(ctx);
         }
 
         try {
-            if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, decodeLast(ctx, in), true)) {
+            if (inboundTransfer.unfoldAndAdd(ctx, decodeLast(ctx, in))) {
                 in->discardReadBytes();
                 ctx.fireMessageUpdated();
             }
@@ -124,8 +114,7 @@ public:
 
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
-        Context* context = ctx.inboundBufferHandlerContext();
-        const ChannelBufferPtr& in = context->getInboundChannelBuffer();
+        const ChannelBufferPtr& in = getInboundChannelBuffer();
 
         bool decoded = false;
 
@@ -149,7 +138,7 @@ protected:
                     }
                 }
 
-                if (CodecUtil<InboundOutT>::unfoldAndAdd(ctx, o, true)) {
+                if (inboundTransfer.unfoldAndAdd(ctx, o)) {
                     decoded = true;
                 }
                 else {
@@ -182,8 +171,8 @@ protected:
         }
     }
 
-private:
-    ChannelHandlerContext* context;
+protected:
+    ChannelPipelineMessageTransfer<InboundOutT, ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
 };
 
 }
