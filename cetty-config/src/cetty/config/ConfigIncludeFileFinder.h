@@ -22,6 +22,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace config {
