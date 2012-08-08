@@ -1,3 +1,5 @@
+#if !definded(CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H)
+#define CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,9 +19,21 @@
  * under the License.
  */
 
+#include <cetty/shiro/authc/CredentialsMatcher.h>
+#include <cetty/shiro/realm/Realm.h>
+
+class CacheManager;
+
+namespace cetty { namespace shiro { namespace subject {
+    class PrincipalCollection;
+}}}
+
 namespace cetty {
 namespace shiro {
+namespace realm {
 
+using namespace cetty::shiro::authc;
+using namespace cetty::shiro::subject;
 /**
  * A top-level abstract implementation of the <tt>Realm</tt> interface that only implements authentication support
  * (log-in) operations and leaves authorization (access control) behavior to subclasses.
@@ -39,40 +53,29 @@ namespace shiro {
  *
  * @since 0.2
  */
-class AuthenticatingRealm : public CachingRealm {
-
-    //TODO - complete JavaDoc
-
-    private static final Logger log = LoggerFactory.getLogger(AuthenticatingRealm.class);
-
+class AuthenticatingRealm : public Realm {
+private:
     /**
      * Password matcher used to determine if the provided password matches
      * the password stored in the data store.
      */
-    private CredentialsMatcher credentialsMatcher = new SimpleCredentialsMatcher();
+    CredentialsMatcher credentialsMatcher;
 
-    /**
-     * The class that this realm supports for authentication tokens.  This is used by the
-     * default implementation of the {@link Realm#supports(org.apache.shiro.authc.AuthenticationToken)} method to
-     * determine whether or not the given authentication token is supported by this realm.
-     */
-    private Class<? extends AuthenticationToken> authenticationTokenClass = UsernamePasswordToken.class;
-
+public:
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
     ============================================*/
-    public AuthenticatingRealm() {
-    }
+    AuthenticatingRealm() {}
 
-    public AuthenticatingRealm(CacheManager cacheManager) {
+    AuthenticatingRealm(const CacheManager &cacheManager) {
         setCacheManager(cacheManager);
     }
 
-    public AuthenticatingRealm(CredentialsMatcher matcher) {
+    AuthenticatingRealm(const CredentialsMatcher &matcher) {
         setCredentialsMatcher(matcher);
     }
 
-    public AuthenticatingRealm(CacheManager cacheManager, CredentialsMatcher matcher) {
+    AuthenticatingRealm(CacheManager cacheManager, CredentialsMatcher matcher) {
         setCacheManager(cacheManager);
         setCredentialsMatcher(matcher);
     }
@@ -90,7 +93,7 @@ class AuthenticatingRealm : public CachingRealm {
      * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
      *         credentials with those stored in the system.
      */
-    public CredentialsMatcher getCredentialsMatcher() {
+    const CredentialsMatcher &getCredentialsMatcher() {
         return credentialsMatcher;
     }
 
@@ -104,86 +107,11 @@ class AuthenticatingRealm : public CachingRealm {
      *
      * @param credentialsMatcher the matcher to use.
      */
-    public void setCredentialsMatcher(CredentialsMatcher credentialsMatcher) {
-        this.credentialsMatcher = credentialsMatcher;
+    void setCredentialsMatcher(const CredentialsMatcher &credentialsMatcher) {
+        this->credentialsMatcher = credentialsMatcher;
     }
 
-    /**
-     * Returns the authenticationToken class supported by this realm.
-     *
-     * <p>The default value is <tt>{@link org.apache.shiro.authc.UsernamePasswordToken UsernamePasswordToken.class}</tt>, since
-     * about 90% of realms use username/password authentication, regardless of their protocol (e.g. over jdbc, ldap,
-     * kerberos, http, etc).
-     *
-     * <p>If subclasses haven't already overridden the {@link Realm#supports Realm.supports(AuthenticationToken)} method,
-     * they must {@link #setAuthenticationTokenClass(Class) set a new class} if they won't support
-     * <tt>UsernamePasswordToken</tt> authentication token submissions.
-     *
-     * @return the authenticationToken class supported by this realm.
-     * @see #setAuthenticationTokenClass
-     */
-    public Class getAuthenticationTokenClass() {
-        return authenticationTokenClass;
-    }
-
-    /**
-     * Sets the authenticationToken class supported by this realm.
-     *
-     * <p>Unless overridden by this method, the default value is
-     * {@link org.apache.shiro.authc.UsernamePasswordToken UsernamePasswordToken.class} to support the majority of applications.
-     *
-     * @param authenticationTokenClass the class of authentication token instances supported by this realm.
-     * @see #getAuthenticationTokenClass getAuthenticationTokenClass() for more explanation.
-     */
-    public void setAuthenticationTokenClass(Class<? extends AuthenticationToken> authenticationTokenClass) {
-        this.authenticationTokenClass = authenticationTokenClass;
-    }
-
-    /*--------------------------------------------
-    |               M E T H O D S               |
-    ============================================*/
-    /**
-     * Convenience implementation that returns
-     * <tt>getAuthenticationTokenClass().isAssignableFrom( token.getClass() );</tt>.  Can be overridden
-     * by subclasses for more complex token checking.
-     * <p>Most configurations will only need to set a different class via
-     * {@link #setAuthenticationTokenClass}, as opposed to overriding this method.
-     *
-     * @param token the token being submitted for authentication.
-     * @return true if this authentication realm can process the submitted token instance of the class, false otherwise.
-     */
-    public boolean supports(AuthenticationToken token) {
-        return token != null && getAuthenticationTokenClass().isAssignableFrom(token.getClass());
-    }
-
-    public final AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-
-        AuthenticationInfo info = doGetAuthenticationInfo(token);
-
-        if (info == null) {
-            if (log.isDebugEnabled()) {
-                String msg = "No authentication information found for submitted authentication token [" + token + "].  " +
-                        "Returning null.";
-                log.debug(msg);
-            }
-            return null;
-        }
-
-        CredentialsMatcher cm = getCredentialsMatcher();
-        if (cm != null) {
-            if (!cm.doCredentialsMatch(token, info)) {
-                String msg = "The credentials provided for account [" + token +
-                        "] did not match the expected credentials.";
-                throw new IncorrectCredentialsException(msg);
-            }
-        } else {
-            throw new AuthenticationException("A CredentialsMatcher must be configured in order to verify " +
-                    "credentials during authentication.  If you do not wish for credentials to be examined, you " +
-                    "can configure an " + AllowAllCredentialsMatcher.class.getName() + " instance.");
-        }
-
-        return info;
-    }
+    bool getAuthenticationInfo(const AuthenticationToken &token, AuthenticationInfo *);
 
     /**
      * Retrieves authentication data from an implementation-specific datasource (RDBMS, LDAP, etc) for the given
@@ -202,7 +130,7 @@ class AuthenticatingRealm : public CachingRealm {
      *          if there is an error acquiring data or performing
      *          realm-specific authentication logic for the specified <tt>token</tt>
      */
-    protected abstract AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException;
+    virtual bool doGetAuthenticationInfo(AuthenticationToken token, AuthenticationInfo *);
 
     /**
      * Default implementation that does nothing (no-op) and exists as a convenience mechanism in case subclasses
@@ -220,10 +148,14 @@ class AuthenticatingRealm : public CachingRealm {
      *
      * @param principals the application-specific Subject/user identifier that is logging out.
      */
-    public void onLogout(PrincipalCollection principals) {
+    void onLogout(const PrincipalCollection &principals) {
         //no-op, here for subclass override if desired.
     }
+
+    virtual ~AuthenticatingRealm(){}
 
 };
 }
 }
+}
+#endif //#if !definded(CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H)

@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_ATLASTONESUCCESSFULSTRATEGY_H)
+#define CETTY_SHIRO_ATLASTONESUCCESSFULSTRATEGY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 /**
  * <tt>AuthenticationStrategy</tt> implementation that requires <em>at least one</em> configured realm to
  * successfully process the submitted <tt>AuthenticationToken</tt> during the log-in attempt.
@@ -35,26 +38,19 @@ namespace shiro {
  * @see FirstSuccessfulStrategy FirstSuccessfulAuthenticationStrategy
  * @since 0.2
  */
-class AtLeastOneSuccessfulStrategy : public AbstractAuthenticationStrategy {
-
+class AtLeastOneSuccessfulStrategy : public AuthenticationStrategy {
+public:
     /**
      * Ensures that the <code>aggregate</code> method argument is not <code>null</code> and
      * <code>aggregate.{@link org.apache.shiro.authc.AuthenticationInfo#getPrincipals() getPrincipals()}</code>
      * is not <code>null</code>, and if either is <code>null</code>, throws an AuthenticationException to indicate
      * that none of the realms authenticated successfully.
      */
-    public AuthenticationInfo afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate) throws AuthenticationException {
-        //we know if one or more were able to succesfully authenticate if the aggregated account object does not
-        //contain null or empty data:
-        if (aggregate == null || CollectionUtils.isEmpty(aggregate.getPrincipals())) {
-            throw new AuthenticationException("Authentication token of type [" + token.getClass() + "] " +
-                    "could not be authenticated by any configured realms.  Please ensure that at least one realm can " +
-                    "authenticate these tokens.");
-        }
-
-        return aggregate;
-    }
+    virtual bool afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate, AuthenticationInfo *info);
 };
 
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_ATLASTONESUCCESSFULSTRATEGY_H)

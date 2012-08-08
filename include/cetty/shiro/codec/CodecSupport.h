@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_CODEC_CODECSUPPORT_H)
+#define CETTY_SHIRO_CODEC_CODECSUPPORT_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <string>
 
 namespace cetty {
 namespace shiro {
+namespace codec {
 
 /**
  * Base abstract class that provides useful encoding and decoding operations, especially for character data.
@@ -26,27 +30,12 @@ namespace shiro {
  * @since 0.9
  */
 class CodecSupport {
+public:
 
     /**
      * Shiro's default preferred character encoding, equal to <b><code>UTF-8</code></b>.
      */
-    public static final String PREFERRED_ENCODING = "UTF-8";
-
-    /**
-     * Converts the specified character array to a byte array using the Shiro's preferred encoding (UTF-8).
-     * <p/>
-     * This is a convenience method equivalent to calling the {@link #toBytes(String,String)} method with a
-     * a wrapping String and {@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING}, i.e.
-     * <p/>
-     * <code>toBytes( new String(chars), {@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING} );</code>
-     *
-     * @param chars the character array to be converted to a byte array.
-     * @return the byte array of the UTF-8 encoded character array.
-     */
-    public static byte[] toBytes(char[] chars) {
-        return toBytes(new String(chars), PREFERRED_ENCODING);
-    }
-
+    static const std::string PREFERRED_ENCODING = "UTF-8";
     /**
      * Converts the specified character array into a byte array using the specified character encoding.
      * <p/>
@@ -60,9 +49,7 @@ class CodecSupport {
      * @return the bytes of the specified character array under the specified encoding.
      * @throws CodecException if the JVM does not support the specified encoding.
      */
-    public static byte[] toBytes(char[] chars, String encoding) throws CodecException {
-        return toBytes(new String(chars), encoding);
-    }
+    static bool toBytes(const char *src, char *des, std::string encoding);
 
     /**
      * Converts the specified source argument to a byte array with Shiro's
@@ -72,8 +59,8 @@ class CodecSupport {
      * @return the bytes representing the specified string under the {@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING}.
      * @see #toBytes(String, String)
      */
-    public static byte[] toBytes(String source) {
-        return toBytes(source, PREFERRED_ENCODING);
+    static bool toBytes(const std::string &src, char *des) {
+        return toBytes(src, des, PREFERRED_ENCODING);
     }
 
     /**
@@ -85,15 +72,7 @@ class CodecSupport {
      * @return the byte array of the specified source with the given encoding.
      * @throws CodecException if the JVM does not support the specified encoding.
      */
-    public static byte[] toBytes(String source, String encoding) throws CodecException {
-        try {
-            return source.getBytes(encoding);
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Unable to convert source [" + source + "] to byte array using " +
-                    "encoding '" + encoding + "'";
-            throw new CodecException(msg, e);
-        }
-    }
+    static bool toBytes(const std::string &src, char *des, std::string encoding);
 
     /**
      * Converts the specified byte array to a String using the {@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING}.
@@ -102,8 +81,8 @@ class CodecSupport {
      * @return the specified byte array as an encoded String ({@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING}).
      * @see #toString(byte[], String)
      */
-    public static String toString(byte[] bytes) {
-        return toString(bytes, PREFERRED_ENCODING);
+    static bool toString(const char *src, std::string *des) {
+        return toString(src, des, PREFERRED_ENCODING);
     }
 
     /**
@@ -117,14 +96,7 @@ class CodecSupport {
      * @return the specified byte array as an encoded String
      * @throws CodecException if the JVM does not support the specified encoding.
      */
-    public static String toString(byte[] bytes, String encoding) throws CodecException {
-        try {
-            return new String(bytes, encoding);
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Unable to convert byte array to String with encoding '" + encoding + "'.";
-            throw new CodecException(msg, e);
-        }
-    }
+    static bool toString(const char *src, std::string *des, std::string encoding);
 
     /**
      * Returns the specified byte array as a character array using the
@@ -134,7 +106,7 @@ class CodecSupport {
      * @return the specified byte array encoded as a character array ({@link CodecSupport#PREFERRED_ENCODING PREFERRED_ENCODING}).
      * @see #toChars(byte[], String)
      */
-    public static char[] toChars(byte[] bytes) {
+    static bool toChars(char ) {
         return toChars(bytes, PREFERRED_ENCODING);
     }
 
@@ -319,3 +291,5 @@ class CodecSupport {
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_CODEC_CODECSUPPORT_H)

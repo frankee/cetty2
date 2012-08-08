@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_ALLSUCCESSFULSTRATEGY_H)
+#define CETTY_SHIRO_ALLSUCCESSFULSTRATEGY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +21,7 @@
 
 namespace cetty {
 namespace shiro {
-
+namespace authc {
 /**
  * <tt>AuthenticationStrategy</tt> implementation that requires <em>all</em> configured realms to
  * <b>successfully</b> process the submitted <tt>AuthenticationToken</tt> during the log-in attempt.
@@ -30,11 +32,8 @@ namespace shiro {
  *
  * @since 0.2
  */
-class AllSuccessfulStrategy : public AbstractAuthenticationStrategy {
-
-    /** Private class log instance. */
-    private static final Logger log = LoggerFactory.getLogger(AllSuccessfulStrategy.class);
-
+class AllSuccessfulStrategy : public AuthenticationStrategy {
+public:
     /**
      * Because all realms in this strategy must complete successfully, this implementation ensures that the given
      * <code>Realm</code> {@link org.apache.shiro.realm.Realm#supports(org.apache.shiro.authc.AuthenticationToken) supports} the given
@@ -42,18 +41,7 @@ class AllSuccessfulStrategy : public AbstractAuthenticationStrategy {
      * {@link UnsupportedTokenException UnsupportedTokenException} to end the authentication
      * process immediately. If the realm does support the token, the <code>info</code> argument is returned immediately.
      */
-    public AuthenticationInfo beforeAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo info) throws AuthenticationException {
-        if (!realm.supports(token)) {
-            String msg = "Realm [" + realm + "] of type [" + realm.getClass().getName() + "] does not support " +
-                    " the submitted AuthenticationToken [" + token + "].  The [" + getClass().getName() +
-                    "] implementation requires all configured realm(s) to support and be able to process the submitted " +
-                    "AuthenticationToken.";
-            throw new UnsupportedTokenException(msg);
-        }
-
-        return info;
-    }
-
+    virtual bool beforeAttempt(AuthenticatingRealm realm, AuthenticationToken token, AuthenticationInfo aggregate, AuthenticationInfo *info);
     /**
      * Merges the specified <code>info</code> into the <code>aggregate</code> argument and returns it (just as the
      * parent implementation does), but additionally ensures the following:
@@ -64,35 +52,14 @@ class AllSuccessfulStrategy : public AbstractAuthenticationStrategy {
      * realm did in fact authenticate successfully</li>
      * </ol>
      */
-    public AuthenticationInfo afterAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo info, AuthenticationInfo aggregate, Throwable t)
-            throws AuthenticationException {
-        if (t != null) {
-            if (t instanceof AuthenticationException) {
-                //propagate:
-                throw ((AuthenticationException) t);
-            } else {
-                String msg = "Unable to acquire account data from realm [" + realm + "].  The [" +
-                        getClass().getName() + " implementation requires all configured realm(s) to operate successfully " +
-                        "for a successful authentication.";
-                throw new AuthenticationException(msg, t);
-            }
-        }
-        if (info == null) {
-            String msg = "Realm [" + realm + "] could not find any associated account data for the submitted " +
-                    "AuthenticationToken [" + token + "].  The [" + getClass().getName() + "] implementation requires " +
-                    "all configured realm(s) to acquire valid account data for a submitted token during the " +
-                    "log-in process.";
-            throw new UnknownAccountException(msg);
-        }
-
-        log.debug("Account successfully authenticated using realm [{}]", realm);
-
-        // If non-null account is returned, then the realm was able to authenticate the
-        // user - so merge the account with any accumulated before:
-        merge(info, aggregate);
-
-        return aggregate;
-    }
+    virtual bool afterAttempt(const AuthenticatingRealm &realm,
+            const AuthenticationToken &token,
+            const AuthenticationInfo &singleRealmInfo,
+            const AuthenticationInfo &aggregateInfo,
+            AuthenticationInfo *info);
 };
 }
 }
+}
+
+//#endif /#if !defined(CETTY_SHIRO_ALLSUCCESSFULSTRATEGY_H)

@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_MODULARREALMAUTHENTICATION_H)
+#define CETTY_SHIRO_MODULARREALMAUTHENTICATION_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <vector>
+#include <cetty/shiro/subject/PrincipalCollection.h>
+
+namespace cetty { namespace shiro {namespace realm {
+    class AuthenticatingRealm;
+}}}
 
 namespace cetty {
 namespace shiro {
+namespace authc {
+
+using namespace cetty::shiro::subject;
+using namespace cetty::shiro::realm;
 /**
  * A {@code ModularRealmAuthenticator} delgates account lookups to a pluggable (modular) collection of
  * {@link Realm}s.  This enables PAM (Pluggable Authentication Module) behavior in Shiro.
@@ -55,25 +67,19 @@ namespace shiro {
  */
 class ModularRealmAuthenticator : public AbstractAuthenticator {
 
-    /*--------------------------------------------
-    |             C O N S T A N T S             |
-    ============================================*/
-    private static final Logger log = LoggerFactory.getLogger(ModularRealmAuthenticator.class);
-
-    /*--------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
     /**
      * List of realms that will be iterated through when a user authenticates.
      */
-    private Collection<Realm> realms;
+private:
+    std::vector<AuthenticatingRealm> realms;
 
     /**
      * The authentication strategy to use during authentication attempts, defaults to a
      * {@link org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy} instance.
      */
-    private AuthenticationStrategy authenticationStrategy;
+    AuthenticationStrategy authenticationStrategy;
 
+public:
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
     ============================================*/
@@ -83,10 +89,7 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * {@link #setAuthenticationStrategy(AuthenticationStrategy) enables}  an
      * {@link org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy} by default.
      */
-    public ModularRealmAuthenticator() {
-        this.authenticationStrategy = new AtLeastOneSuccessfulStrategy();
-    }
-
+    ModularRealmAuthenticator() {}
     /*--------------------------------------------
     |  A C C E S S O R S / M O D I F I E R S    |
     ============================================*/
@@ -96,8 +99,8 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      *
      * @param realms the realms to consult during authentication attempts.
      */
-    public void setRealms(Collection<Realm> realms) {
-        this.realms = realms;
+    void setRealms(const std::vector<AuthenticatingRealm> &realms) {
+        this->realms.assign(realms.begin(), realms.end());
     }
 
     /**
@@ -105,8 +108,8 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      *
      * @return the realm(s) used by this {@code Authenticator} during an authentication attempt.
      */
-    protected Collection<Realm> getRealms() {
-        return this.realms;
+    const std::vector<AuthenticatingRealm> &getRealms() const{
+        return this->realms;
     }
 
     /**
@@ -120,7 +123,7 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * @return the {@code AuthenticationStrategy} utilized by this modular authenticator during a log-in attempt.
      * @since 0.2
      */
-    public AuthenticationStrategy getAuthenticationStrategy() {
+    const AuthenticationStrategy &getAuthenticationStrategy() {
         return authenticationStrategy;
     }
 
@@ -131,27 +134,17 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * @param authenticationStrategy the strategy implementation to use during log-in attempts.
      * @since 0.2
      */
-    public void setAuthenticationStrategy(AuthenticationStrategy authenticationStrategy) {
-        this.authenticationStrategy = authenticationStrategy;
+    void setAuthenticationStrategy(const AuthenticationStrategy &authenticationStrategy) {
+        this->authenticationStrategy = authenticationStrategy;
     }
 
-    /*--------------------------------------------
-    |               M E T H O D S               |
+    void onLogout(PrincipalCollection principals);
 
-    /**
-     * Used by the internal {@link #doAuthenticate} implementation to ensure that the {@code realms} property
-     * has been set.  The default implementation ensures the property is not null and not empty.
-     *
-     * @throws IllegalStateException if the {@code realms} property is configured incorrectly.
-     */
 
-    protected void assertRealmsConfigured() throws IllegalStateException {
-        Collection<Realm> realms = getRealms();
-        if (realms == null || realms.isEmpty()) {
-            String msg = "Configuration error:  No realms have been configured!  One or more realms must be " +
-                    "present to execute an authentication attempt.";
-            throw new IllegalStateException(msg);
-        }
+protected:
+    bool assertRealmsConfigured() {
+        std::vector<AuthenticatingRealm> realms = getRealms();
+        return !realms.empty();
     }
 
     /**
@@ -162,21 +155,7 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * @param token the submitted AuthenticationToken representing the subject's (user's) log-in principals and credentials.
      * @return the AuthenticationInfo associated with the user account corresponding to the specified {@code token}
      */
-    protected AuthenticationInfo doSingleRealmAuthentication(Realm realm, AuthenticationToken token) {
-        if (!realm.supports(token)) {
-            String msg = "Realm [" + realm + "] does not support authentication token [" +
-                    token + "].  Please ensure that the appropriate Realm implementation is " +
-                    "configured correctly or that the realm accepts AuthenticationTokens of this type.";
-            throw new UnsupportedTokenException(msg);
-        }
-        AuthenticationInfo info = realm.getAuthenticationInfo(token);
-        if (info == null) {
-            String msg = "Realm [" + realm + "] was unable to find account data for the " +
-                    "submitted AuthenticationToken [" + token + "].";
-            throw new UnknownAccountException(msg);
-        }
-        return info;
-    }
+    void doSingleRealmAuthentication(const AuthenticatingRealm &realm, const AuthenticationToken &token, AuthenticationInfo *info);
 
     /**
      * Performs the multi-realm authentication attempt by calling back to a {@link AuthenticationStrategy} object
@@ -187,46 +166,9 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * @return an aggregated AuthenticationInfo instance representing account data across all the successfully
      *         consulted realms.
      */
-    protected AuthenticationInfo doMultiRealmAuthentication(Collection<Realm> realms, AuthenticationToken token) {
-
-        AuthenticationStrategy strategy = getAuthenticationStrategy();
-
-        AuthenticationInfo aggregate = strategy.beforeAllAttempts(realms, token);
-
-        if (log.isTraceEnabled()) {
-            log.trace("Iterating through {} realms for PAM authentication", realms.size());
-        }
-
-        for (Realm realm : realms) {
-
-            if (realm.supports(token)) {
-
-                log.trace("Attempting to authenticate token [{}] using realm [{}]", token, realm);
-
-                AuthenticationInfo info = null;
-                Throwable t = null;
-                try {
-                    info = realm.getAuthenticationInfo(token);
-                } catch (Throwable throwable) {
-                    t = throwable;
-                    if (log.isDebugEnabled()) {
-                        String msg = "Realm [" + realm + "] threw an exception during a multi-realm authentication attempt:";
-                        log.debug(msg, t);
-                    }
-                }
-
-                aggregate = strategy.afterAttempt(realm, token, info, aggregate, t);
-
-            } else {
-                log.debug("Realm [{}] does not support token {}.  Skipping realm.", realm, token);
-            }
-        }
-
-        aggregate = strategy.afterAllAttempts(token, aggregate);
-
-        return aggregate;
-    }
-
+    void doMultiRealmAuthentication(const std::vector<AuthenticatingRealm> &realms,
+        const AuthenticationToken &token,
+        AuthenticationInfo *info);
 
     /**
      * Attempts to authenticate the given token by iterating over the internal collection of
@@ -250,15 +192,7 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      * @throws AuthenticationException if the user could not be authenticated or the user is denied authentication
      *                                 for the given principal and credentials.
      */
-    protected AuthenticationInfo doAuthenticate(AuthenticationToken authenticationToken) throws AuthenticationException {
-        assertRealmsConfigured();
-        Collection<Realm> realms = getRealms();
-        if (realms.size() == 1) {
-            return doSingleRealmAuthentication(realms.iterator().next(), authenticationToken);
-        } else {
-            return doMultiRealmAuthentication(realms, authenticationToken);
-        }
-    }
+    bool doAuthenticate(const AuthenticationToken &authenticationToken, AuthenticationInfo *info);
 
     /**
      * First calls <code>super.onLogout(principals)</code> to ensure a logout notification is issued, and for each
@@ -271,18 +205,10 @@ class ModularRealmAuthenticator : public AbstractAuthenticator {
      *
      * @param principals the application-specific Subject/user identifier.
      */
-    public void onLogout(PrincipalCollection principals) {
-        super.onLogout(principals);
-        Collection<Realm> realms = getRealms();
-        if (realms != null && !realms.isEmpty()) {
-            for (Realm realm : realms) {
-                if (realm instanceof LogoutAware) {
-                    ((LogoutAware) realm).onLogout(principals);
-                }
-            }
-        }
-    }
 };
 
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_MODULARREALMAUTHENTICATION_H)

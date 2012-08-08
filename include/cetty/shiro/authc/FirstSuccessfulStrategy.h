@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_FIRSTSUCCESSFULSTRATEGY_H)
+#define CETTY_SHIRO_FIRSTSUCCESSFULSTRATEGY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/authc/AuthenticationStrategy.h>
 
 namespace cetty {
 namespace shiro {
+namespace authc {
+
 
 /**
  * {@link AuthenticationStrategy} implementation that only accepts the account data from
@@ -29,15 +34,13 @@ namespace shiro {
  * @see AtLeastOneSuccessfulStrategy AtLeastOneSuccessfulAuthenticationStrategy
  * @since 0.9
  */
-class FirstSuccessfulStrategy : public AbstractAuthenticationStrategy {
-
+class FirstSuccessfulStrategy : public AuthenticationStrategy {
+public:
     /**
      * Returns {@code null} immediately, relying on this class's {@link #merge merge} implementation to return
      * only the first {@code info} object it encounters, ignoring all subsequent ones.
      */
-    public AuthenticationInfo beforeAllAttempts(Collection<? extends Realm> realms, AuthenticationToken token) throws AuthenticationException {
-        return null;
-    }
+    virtual bool beforeAllAttempts(const std::vector<AuthenticatingRealm> &realms, const AuthenticationToken &token, AuthenticationInfo *info);
 
     /**
      * Returns the specified {@code aggregate} instance if is non null and valid (that is, has principals and they are
@@ -46,12 +49,10 @@ class FirstSuccessfulStrategy : public AbstractAuthenticationStrategy {
      * This logic ensures that the first valid info encountered is the one retained and all subsequent ones are ignored,
      * since this strategy mandates that only the info from the first successfully authenticated realm be used.
      */
-    protected AuthenticationInfo merge(AuthenticationInfo info, AuthenticationInfo aggregate) {
-        if (aggregate != null && !CollectionUtils.isEmpty(aggregate.getPrincipals())) {
-            return aggregate;
-        }
-        return info != null ? info : aggregate;
-    }
+    virtual bool merge(AuthenticationInfo info, AuthenticationInfo aggregate, AuthenticationInfo *info);
+    virtual ~FirstSuccessfulStrategy();
 };
 }
 }
+}
+#endif //#if !defined(CETTY_SHIRO_FIRSTSUCCESSFULSTRATEGY_H)

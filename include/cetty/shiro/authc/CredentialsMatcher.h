@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_AUTHC_CREDENTIALSMATCHER_H)
+#define CETTY_SHIRO_AUTHC_CREDENTIALSMATCHER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 /**
  * Simple CredentialsMatcher implementation.  Supports direct (plain) comparison for credentials of type
  * byte[], char[], and Strings, and if the arguments do not match these types, then reverts back to simple
@@ -30,10 +33,8 @@ namespace shiro {
  * @see org.apache.shiro.authc.credential.HashedCredentialsMatcher
  * @since 0.9
  */
-class CredentialsMatcher : public CodecSupport {
-
-    private static final Logger log = LoggerFactory.getLogger(SimpleCredentialsMatcher.class);
-
+class CredentialsMatcher{
+protected:
     /**
      * Returns the {@code token}'s credentials.
      * <p/>
@@ -45,7 +46,7 @@ class CredentialsMatcher : public CodecSupport {
      * @param token the {@code AuthenticationToken} submitted during the authentication attempt.
      * @return the {@code token}'s associated credentials.
      */
-    protected Object getCredentials(AuthenticationToken token) {
+    const std::string &getCredentials(const AuthenticationToken &token) {
         return token.getCredentials();
     }
 
@@ -61,10 +62,11 @@ class CredentialsMatcher : public CodecSupport {
      *             token's credentials.
      * @return the {@code account}'s associated credentials.
      */
-    protected Object getCredentials(AuthenticationInfo info) {
+    const std::string &getCredentials(const AuthenticationInfo &info) {
         return info.getCredentials();
     }
 
+protected:
     /**
      * Returns {@code true} if the {@code tokenCredentials} argument is logically equal to the
      * {@code accountCredentials} argument.
@@ -82,24 +84,7 @@ class CredentialsMatcher : public CodecSupport {
      * @param accountCredentials the {@code AuthenticationInfo}'s stored credentials.
      * @return {@code true} if the {@code tokenCredentials} are equal to the {@code accountCredentials}.
      */
-    protected boolean equals(Object tokenCredentials, Object accountCredentials) {
-        if (log.isDebugEnabled()) {
-            log.debug("Performing credentials equality check for tokenCredentials of type [" +
-                    tokenCredentials.getClass().getName() + " and accountCredentials of type [" +
-                    accountCredentials.getClass().getName() + "]");
-        }
-        if (isByteSource(tokenCredentials) && isByteSource(accountCredentials)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Both credentials arguments can be easily converted to byte arrays.  Performing " +
-                        "array equals comparison");
-            }
-            byte[] tokenBytes = toBytes(tokenCredentials);
-            byte[] accountBytes = toBytes(accountCredentials);
-            return Arrays.equals(tokenBytes, accountBytes);
-        } else {
-            return accountCredentials.equals(tokenCredentials);
-        }
-    }
+    bool equals(const std::string &tokenCredentials, const std::string accountCredentials);
 
     /**
      * This implementation acquires the {@code token}'s credentials
@@ -114,12 +99,16 @@ class CredentialsMatcher : public CodecSupport {
      * @return {@code true} if the provided token credentials are equal to the stored account credentials,
      *         {@code false} otherwise
      */
-    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
-        Object tokenCredentials = getCredentials(token);
-        Object accountCredentials = getCredentials(info);
+    virtual bool doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
+        std::string tokenCredentials = getCredentials(token);
+        std::string accountCredentials = getCredentials(info);
         return equals(tokenCredentials, accountCredentials);
     }
+
+    virtual ~CredentialsMatcher(){}
 
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_AUTHC_CREDENTIALSMATCHER_H)

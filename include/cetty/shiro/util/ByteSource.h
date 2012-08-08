@@ -41,32 +41,9 @@ namespace util {
  */
 class ByteSource {
 
-    private final byte[] bytes;
-    private String cachedHex;
-    private String cachedBase64;
-
-    public SimpleByteSource(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
-    /**
-     * Creates an instance by converting the characters to a byte array (assumes UTF-8 encoding).
-     *
-     * @param chars the source characters to use to create the underlying byte array.
-     * @since 1.1
-     */
-    public SimpleByteSource(char[] chars) {
-        this.bytes = CodecSupport.toBytes(chars);
-    }
-
-    /**
-     * Creates an instance by converting the String to a byte array (assumes UTF-8 encoding).
-     *
-     * @param string the source string to convert to a byte array (assumes UTF-8 encoding).
-     * @since 1.1
-     */
-    public SimpleByteSource(String string) {
-        this.bytes = CodecSupport.toBytes(string);
+public:
+    ByteSource(const std::string &bytes) {
+        this->bytes = bytes;
     }
 
     /**
@@ -76,28 +53,10 @@ class ByteSource {
      * @param source the source to use to populate the underlying byte array.
      * @since 1.1
      */
-    public SimpleByteSource(ByteSource source) {
-        this.bytes = source.getBytes();
-    }
-
-    /**
-     * Creates an instance by converting the file to a byte array.
-     *
-     * @param file the file from which to acquire bytes.
-     * @since 1.1
-     */
-    public SimpleByteSource(File file) {
-        this.bytes = new BytesHelper().getBytes(file);
-    }
-
-    /**
-     * Creates an instance by converting the stream to a byte array.
-     *
-     * @param stream the stream from which to acquire bytes.
-     * @since 1.1
-     */
-    public SimpleByteSource(InputStream stream) {
-        this.bytes = new BytesHelper().getBytes(stream);
+    ByteSource(const ByteSource &src) {
+        this->bytes = src.bytes;
+        this->cachedHex = src.cachedHex;
+        this->cachedBase64 = src.cachedBase64;
     }
 
     public byte[] getBytes() {
@@ -148,6 +107,11 @@ class ByteSource {
             return toBytes(stream);
         }
     }
+
+private:
+    std::string bytes;
+    std::string cachedHex;
+    std::string cachedBase64;
 };
 }
 }

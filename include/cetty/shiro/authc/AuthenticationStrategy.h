@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_AUTHENTICATIONSTRATEGY_H)
+#define CETTY_SHIRO_AUTHENTICATIONSTRATEGY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,50 +19,42 @@
  * under the License.
  */
 
+namespace cetty { namespace shiro { namespace realm {
+    class AuthenticingRealm;
+} }}
+
 namespace cetty {
 namespace shiro {
+namespace authc {
 
+using namespace cetty::shiro::realm;
 /**
  * Abstract base implementation for Shiro's concrete <code>AuthenticationStrategy</code>
  * implementations.
  *
  * @since 0.9
  */
-class AbstractAuthenticationStrategy {
-
+class AuthenticationStrategy {
+public:
     /**
      * Simply returns <code>new {@link org.apache.shiro.authc.SimpleAuthenticationInfo SimpleAuthenticationInfo}();</code>, which supports
      * aggregating account data across realms.
      */
-    public AuthenticationInfo beforeAllAttempts(Collection<? extends Realm> realms, AuthenticationToken token) throws AuthenticationException {
-        return new SimpleAuthenticationInfo();
-    }
+    virtual bool beforeAllAttempts(const std::vector<AuthenticatingRealm> &realms, const AuthenticationToken &token, AuthenticationInfo *info);
 
     /**
      * Simply returns the <code>aggregate</code> method argument, without modification.
      */
-    public AuthenticationInfo beforeAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo aggregate) throws AuthenticationException {
-        return aggregate;
-    }
-
+    virtual bool beforeAttempt(AuthenticatingRealm realm, AuthenticationToken token, AuthenticationInfo aggregate, AuthenticationInfo *info);
     /**
      * Base implementation that will aggregate the specified <code>singleRealmInfo</code> into the
      * <code>aggregateInfo</code> and then returns the aggregate.  Can be overridden by subclasses for custom behavior.
      */
-    public AuthenticationInfo afterAttempt(Realm realm, AuthenticationToken token, AuthenticationInfo singleRealmInfo, AuthenticationInfo aggregateInfo, Throwable t) throws AuthenticationException {
-        AuthenticationInfo info;
-        if (singleRealmInfo == null) {
-            info = aggregateInfo;
-        } else {
-            if (aggregateInfo == null) {
-                info = singleRealmInfo;
-            } else {
-                info = merge(singleRealmInfo, aggregateInfo);
-            }
-        }
-
-        return info;
-    }
+    virtual bool afterAttempt(const AuthenticatingRealm &realm,
+        const AuthenticationToken &token,
+        const AuthenticationInfo &singleRealmInfo,
+        const AuthenticationInfo &aggregateInfo,
+        AuthenticationInfo *info);
 
     /**
      * Merges the specified <code>info</code> argument into the <code>aggregate</code> argument and then returns an
@@ -73,23 +67,17 @@ class AbstractAuthenticationStrategy {
      * Can be overridden by subclasses for custom merging behavior if implementing the
      * {@link org.apache.shiro.authc.MergableAuthenticationInfo MergableAuthenticationInfo} is not desired for some reason.
      */
-    protected AuthenticationInfo merge(AuthenticationInfo info, AuthenticationInfo aggregate) {
-        if( aggregate instanceof MergableAuthenticationInfo ) {
-            ((MergableAuthenticationInfo)aggregate).merge(info);
-            return aggregate;
-        } else {
-            throw new IllegalArgumentException( "Attempt to merge authentication info from multiple realms, but aggregate " +
-                      "AuthenticationInfo is not of type MergableAuthenticationInfo." );
-        }
-    }
+    virtual bool merge(AuthenticationInfo info, AuthenticationInfo aggregate, AuthenticationInfo *info);
 
     /**
      * Simply returns the <code>aggregate</code> argument without modification.  Can be overridden for custom behavior.
      */
-    public AuthenticationInfo afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate) throws AuthenticationException {
-        return aggregate;
-    }
+    virtual bool afterAllAttempts(AuthenticationToken token, AuthenticationInfo aggregate, AuthenticationInfo *info);
+    virtual ~AuthenticationStrategy();
 };
 
 }
 }
+}
+
+#endif //#if !defined(CETTY_SHIRO_AUTHENTICATIONSTRATEGY_H)

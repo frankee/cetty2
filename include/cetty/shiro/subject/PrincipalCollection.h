@@ -40,23 +40,19 @@ private:
     std::string cachedToString; //cached toString() result, as this can be printed many times in logging
 
 public:
-    PrincipalCollection() {
-    }
+    PrincipalCollection() {}
 
-    PrincipalCollection(const std::string &principal, const std::string &realmName) {
-    }
+    PrincipalCollection(const std::string &principal, const std::string &realmName) {}
 
     PrincipalCollection(const PrincipalCollection &principals, const std::string &realmName) {
-        realmPrincipals = new std::map<std::string, std::set<std::string> >();
         addAll(principals, realmName);
     }
 
     PrincipalCollection(const PrincipalCollection &principals) {
-        realmPrincipals = new std::map<std::string, std::set<std::string> >();
         addAll(principals);
     }
 
-    PrincipalCollection getPrincipalsLazy(std::string realmName);
+    const std::set<std::string> &getPrincipalsLazy (std::string realmName) const;
 
     /**
      * Returns the first available principal from any of the {@code Realm} principals, or {@code null} if there are
@@ -78,10 +74,6 @@ public:
     /**
      * Return the first principal
      */
-
-    //const boost::any &oneByType() const;
-
-    //public <T> Collection<T> byType(Class<T> type);
 
     const std::set<std::string> &asSet();
 
@@ -106,6 +98,7 @@ public:
      * @since 1.0
      */
     std::string toString();
+
     virtual ~PrincipalCollection(){}
 
 private:

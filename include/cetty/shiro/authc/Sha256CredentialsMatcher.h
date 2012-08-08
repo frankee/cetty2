@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H)
+#define CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 
 /**
  * A {@code HashedCredentialMatcher} provides support for hashing of supplied {@code AuthenticationToken} credentials
@@ -109,65 +112,19 @@ namespace shiro {
  * @see org.apache.shiro.crypto.hash.Sha256Hash
  * @since 0.9
  */
-class HashedCredentialsMatcher : public CredentialsMatcher {
+class Sha256CredentialsMatcher : public CredentialsMatcher {
 
-    /**
-     * @since 1.1
-     */
-    private String hashAlgorithm;
-    private int hashIterations;
-    private boolean hashSalted;
-    private boolean storedCredentialsHexEncoded;
 
+public:
     /**
      * JavaBeans-compatibile no-arg constructor intended for use in IoC/Dependency Injection environments.  If you
      * use this constructor, you <em>MUST</em> also additionally set the
      * {@link #setHashAlgorithmName(String) hashAlgorithmName} property.
      */
-    public HashedCredentialsMatcher() {
-        this.hashAlgorithm = null;
-        this.hashSalted = false;
-        this.hashIterations = 1;
-        this.storedCredentialsHexEncoded = true; //false means Base64-encoded
-    }
-
-    /**
-     * Creates an instance using the specified {@link #getHashAlgorithmName() hashAlgorithmName} to hash submitted
-     * credentials.
-     * @param hashAlgorithmName the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName}
-     *                          to use when performing hashes for credentials matching.
-     * @since 1.1
-     */
-    public HashedCredentialsMatcher(String hashAlgorithmName) {
-        this();
-        if (!StringUtils.hasText(hashAlgorithmName) ) {
-            throw new IllegalArgumentException("hashAlgorithmName cannot be null or empty.");
-        }
-        this.hashAlgorithm = hashAlgorithmName;
-    }
-
-    /**
-     * Returns the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
-     * when performing hashes for credentials matching.
-     *
-     * @return the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
-     *         when performing hashes for credentials matching.
-     * @since 1.1
-     */
-    public String getHashAlgorithmName() {
-        return hashAlgorithm;
-    }
-
-    /**
-     * Sets the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
-     * when performing hashes for credentials matching.
-     *
-     * @param hashAlgorithmName the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName}
-     *                          to use when performing hashes for credentials matching.
-     * @since 1.1
-     */
-    public void setHashAlgorithmName(String hashAlgorithmName) {
-        this.hashAlgorithm = hashAlgorithmName;
+    Sha256CredentialsMatcher() {
+        this->hashSalted = false;
+        this->hashIterations = 1;
+        this->storedCredentialsHexEncoded = true; //false means Base64-encoded
     }
 
     /**
@@ -181,7 +138,7 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      * @return {@code true} if the system's stored credential hash is Hex encoded, {@code false} if it
      *         is Base64 encoded.  Default is {@code true}
      */
-    public boolean isStoredCredentialsHexEncoded() {
+    bool isStoredCredentialsHexEncoded() {
         return storedCredentialsHexEncoded;
     }
 
@@ -198,8 +155,8 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      * @param storedCredentialsHexEncoded the indicator if this system's stored credential hash is Hex
      *                                    encoded or not ('not' automatically implying it is Base64 encoded).
      */
-    public void setStoredCredentialsHexEncoded(boolean storedCredentialsHexEncoded) {
-        this.storedCredentialsHexEncoded = storedCredentialsHexEncoded;
+    void setStoredCredentialsHexEncoded(bool storedCredentialsHexEncoded) {
+        this->storedCredentialsHexEncoded = storedCredentialsHexEncoded;
     }
 
     /**
@@ -225,8 +182,7 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
      *             are almost impossible to break.  This method will be removed in Shiro 2.0.
      */
-    @Deprecated
-    public boolean isHashSalted() {
+    bool isHashSalted() {
         return hashSalted;
     }
 
@@ -251,9 +207,8 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
      *             are almost impossible to break.  This method will be removed in Shiro 2.0.
      */
-    @Deprecated
-    public void setHashSalted(boolean hashSalted) {
-        this.hashSalted = hashSalted;
+    void setHashSalted(bool hashSalted) {
+        this->hashSalted = hashSalted;
     }
 
     /**
@@ -265,7 +220,7 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      * @return the number of times a submitted {@code AuthenticationToken}'s credentials will be hashed before
      *         comparing to the credentials stored in the system.
      */
-    public int getHashIterations() {
+    int getHashIterations() {
         return hashIterations;
     }
 
@@ -280,14 +235,15 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *
      * @param hashIterations the number of times to hash a submitted {@code AuthenticationToken}'s credentials.
      */
-    public void setHashIterations(int hashIterations) {
+    void setHashIterations(int hashIterations) {
         if (hashIterations < 1) {
-            this.hashIterations = 1;
+            this->hashIterations = 1;
         } else {
-            this.hashIterations = hashIterations;
+            this->hashIterations = hashIterations;
         }
     }
 
+protected:
     /**
      * Returns a salt value used to hash the token's credentials.
      * <p/>
@@ -309,8 +265,7 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
      *             are almost impossible to break.  This method will be removed in Shiro 2.0.
      */
-    @Deprecated
-    protected Object getSalt(AuthenticationToken token) {
+    std::string getSalt(const AuthenticationToken &token) {
         return token.getPrincipal();
     }
 
@@ -333,24 +288,7 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      * @param info the AuthenticationInfo from which to retrieve the credentials which assumed to be in already-hashed form.
      * @return a {@link Hash Hash} instance representing the given AuthenticationInfo's stored credentials.
      */
-    protected Object getCredentials(AuthenticationInfo info) {
-        Object credentials = info.getCredentials();
-
-        byte[] storedBytes = toBytes(credentials);
-
-        if (credentials instanceof String || credentials instanceof char[]) {
-            //account.credentials were a char[] or String, so
-            //we need to do text decoding first:
-            if (isStoredCredentialsHexEncoded()) {
-                storedBytes = Hex.decode(storedBytes);
-            } else {
-                storedBytes = Base64.decode(storedBytes);
-            }
-        }
-        AbstractHash hash = newHashInstance();
-        hash.setBytes(storedBytes);
-        return hash;
-    }
+    const std::string &getCredentials(const AuthenticationInfo &info);
 
     /**
      * This implementation first hashes the {@code token}'s credentials, potentially using a
@@ -366,10 +304,11 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *         {@code false} otherwise
      * @since 1.1
      */
-    @Override
-    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
-        Object tokenHashedCredentials = hashProvidedCredentials(token, info);
-        Object accountCredentials = getCredentials(info);
+
+public:
+    virtual bool doCredentialsMatch(const AuthenticationToken &token, const AuthenticationInfo &info) {
+        std::string tokenHashedCredentials = hashProvidedCredentials(token, info);
+        std::string accountCredentials = getCredentials(info);
         return equals(tokenHashedCredentials, accountCredentials);
     }
 
@@ -391,36 +330,9 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      * @return the token credentials hash
      * @since 1.1
      */
-    protected Object hashProvidedCredentials(AuthenticationToken token, AuthenticationInfo info) {
-        Object salt = null;
-        if (info instanceof SaltedAuthenticationInfo) {
-            salt = ((SaltedAuthenticationInfo) info).getCredentialsSalt();
-        } else {
-            //retain 1.0 backwards compatibility:
-            if (isHashSalted()) {
-                salt = getSalt(token);
-            }
-        }
-        return hashProvidedCredentials(token.getCredentials(), salt, getHashIterations());
-    }
+protected:
+    std::string hashProvidedCredentials(const AuthenticationToken &token, const AuthenticationInfo &info);
 
-    /**
-     * Returns the {@link #getHashAlgorithmName() hashAlgorithmName} property, but will throw an
-     * {@link IllegalStateException} if it has not been set.
-     *
-     * @return the required {@link #getHashAlgorithmName() hashAlgorithmName} property
-     * @throws IllegalStateException if the property has not been set prior to calling this method.
-     * @since 1.1
-     */
-    private String assertHashAlgorithmName() throws IllegalStateException {
-        String hashAlgorithmName = getHashAlgorithmName();
-        if (hashAlgorithmName == null) {
-            String msg = "Required 'hashAlgorithmName' property has not been set.  This is required to execute " +
-                    "the hashing algorithm.";
-            throw new IllegalStateException(msg);
-        }
-        return hashAlgorithmName;
-    }
 
     /**
      * Hashes the provided credentials a total of {@code hashIterations} times, using the given salt.  The hash
@@ -432,22 +344,21 @@ class HashedCredentialsMatcher : public CredentialsMatcher {
      *                       even if this argument is 0 or negative.
      * @return the hashed value of the provided credentials, according to the specified salt and hash iterations.
      */
-    protected Hash hashProvidedCredentials(Object credentials, Object salt, int hashIterations) {
-        String hashAlgorithmName = assertHashAlgorithmName();
-        return new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-    }
-
+    Sha256Hash hashProvidedCredentials(const std::string &credentials, const std::string &salt, int hashIterations);
     /**
      * Returns a new, <em>uninitialized</em> instance, without its byte array set.  Used as a utility method in the
      * {@link SimpleCredentialsMatcher#getCredentials(org.apache.shiro.authc.AuthenticationInfo) getCredentials(AuthenticationInfo)} implementation.
      *
      * @return a new, <em>uninitialized</em> instance, without its byte array set.
      */
-    protected AbstractHash newHashInstance() {
-        String hashAlgorithmName = assertHashAlgorithmName();
-        return new SimpleHash(hashAlgorithmName);
-    }
+    Sha256Hash newHashInstance();
 
+private:
+    int hashIterations;
+    bool hashSalted;
+    bool storedCredentialsHexEncoded;
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H)

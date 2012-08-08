@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_REALM_REALM_H)
+#define CETTY_SHIRO_REALM_REALM_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,8 +19,11 @@
  * under the License.
  */
 
+class CacheManager;
+
 namespace cetty {
 namespace shiro {
+namespace realm {
 
 /**
  * A simple implementation of the {@link Realm Realm} interface that
@@ -31,112 +36,89 @@ namespace shiro {
  *
  * @since 0.1
  */
-class SimpleAccountRealm : public AuthorizingRealm {
+class Realm{
 
-    //TODO - complete JavaDoc
+private:
+    /*--------------------------------------------
+    |    I N S T A N C E   V A R I A B L E S    |
+    ============================================*/
+    std::string name;
+    bool cachingEnabled;
+    CacheManager &cacheManager;
 
-    protected final Map<String, SimpleAccount> users; //username-to-SimpleAccount
-    protected final Map<String, SimpleRole> roles; //roleName-to-SimpleRole
-
-    public SimpleAccountRealm() {
-        this.users = new LinkedHashMap<String, SimpleAccount>();
-        this.roles = new LinkedHashMap<String, SimpleRole>();
-        //SimpleAccountRealms are memory-only realms - no need for an additional cache mechanism since we're
-        //already as memory-efficient as we can be:
-        setCachingEnabled(false);
+    Realm() {
+        this->cachingEnabled = false;
+        this->name = autoName();
     }
 
-    public SimpleAccountRealm(String name) {
-        this();
-        setName(name);
+    /**
+     * Returns the <tt>CacheManager</tt> used for data caching to reduce EIS round trips, or <tt>null</tt> if
+     * caching is disabled.
+     *
+     * @return the <tt>CacheManager</tt> used for data caching to reduce EIS round trips, or <tt>null</tt> if
+     *         caching is disabled.
+     */
+    const CacheManager &getCacheManager() const{
+        return this->cacheManager;
     }
 
-    protected SimpleAccount getUser(String username) {
-        return this.users.get(username);
+    /**
+     * Sets the <tt>CacheManager</tt> to be used for data caching to reduce EIS round trips.
+     * <p/>
+     * <p>This property is <tt>null</tt> by default, indicating that caching is turned off.
+     *
+     * @param cacheManager the <tt>CacheManager</tt> to use for data caching, or <tt>null</tt> to disable caching.
+     */
+    void setCacheManager(const CacheManager &cacheManager) {
+        this->cacheManager = cacheManager;
+        afterCacheManagerSet();
     }
 
-    public boolean accountExists(String username) {
-        return getUser(username) != null;
+    /**
+     * Returns {@code true} if caching should be used if a {@link CacheManager} has been
+     * {@link #setCacheManager(org.apache.shiro.cache.CacheManager) configured}, {@code false} otherwise.
+     * <p/>
+     * The default value is {@code true} since the large majority of Realms will benefit from caching if a CacheManager
+     * has been configured.  However, memory-only realms should set this value to {@code false} since they would
+     * manage account data in memory already lookups would already be as efficient as possible.
+     *
+     * @return {@code true} if caching will be globally enabled if a {@link CacheManager} has been
+     *         configured, {@code false} otherwise
+     */
+    bool isCachingEnabled() {
+        return cachingEnabled;
     }
 
-    public void addAccount(String username, String password) {
-        addAccount(username, password, (String[]) null);
+    /**
+     * Sets whether or not caching should be used if a {@link CacheManager} has been
+     * {@link #setCacheManager(org.apache.shiro.cache.CacheManager) configured}.
+     *
+     * @param cachingEnabled whether or not to globally enable caching for this realm.
+     */
+    void setCachingEnabled(bool cachingEnabled) {
+        this->cachingEnabled = cachingEnabled;
     }
 
-    public void addAccount(String username, String password, String... roles) {
-        Set<String> roleNames = CollectionUtils.asSet(roles);
-        SimpleAccount account = new SimpleAccount(username, password, getName(), roleNames, null);
-        add(account);
+    const std::string &getName() {
+        return name;
     }
 
-    protected String getUsername(SimpleAccount account) {
-        return getUsername(account.getPrincipals());
+    void setName(const std::string &name) {
+        this->name = name;
     }
 
-    protected String getUsername(PrincipalCollection principals) {
-        return getAvailablePrincipal(principals).toString();
+protected:
+    void afterCacheManagerSet() {
     }
 
-    protected void add(SimpleAccount account) {
-        String username = getUsername(account);
-        this.users.put(username, account);
-    }
-
-    protected SimpleRole getRole(String rolename) {
-        return roles.get(rolename);
-    }
-
-    public boolean roleExists(String name) {
-        return getRole(name) != null;
-    }
-
-    public void addRole(String name) {
-        add(new SimpleRole(name));
-    }
-
-    protected void add(SimpleRole role) {
-        roles.put(role.getName(), role);
-    }
-
-    protected static Set<String> toSet(String delimited, String delimiter) {
-        if (delimited == null || delimited.trim().equals("")) {
-            return null;
-        }
-
-        Set<String> values = new HashSet<String>();
-        String[] rolenamesArray = delimited.split(delimiter);
-        for (String s : rolenamesArray) {
-            String trimmed = s.trim();
-            if (trimmed.length() > 0) {
-                values.add(trimmed);
-            }
-        }
-
-        return values;
-    }
-
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
-        SimpleAccount account = getUser(upToken.getUsername());
-
-        if (account != null) {
-
-            if (account.isLocked()) {
-                throw new LockedAccountException("Account [" + account + "] is locked.");
-            }
-            if (account.isCredentialsExpired()) {
-                String msg = "The credentials for account [" + account + "] are expired";
-                throw new ExpiredCredentialsException(msg);
-            }
-
-        }
-
-        return account;
-    }
-
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        return this.users.get(getUsername(principals));
-    }
+    /**
+     *
+     * Generator name based on the current time.
+     */
+    std::string autoName();
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_REALM_REALM_H)

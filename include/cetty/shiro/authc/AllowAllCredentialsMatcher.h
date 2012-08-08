@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_ALLOWALLCREDENTIALSMATCHER_H)
+#define CETTY_SHIRO_ALLOWALLCREDENTIALSMATCHER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 /**
  * A credentials matcher that always returns {@code true} when matching credentials no matter what arguments
  * are passed in.  This can be used for testing or when credentials are implicitly trusted for a particular
@@ -27,7 +30,7 @@ namespace shiro {
  * @since 0.2
  */
 class AllowAllCredentialsMatcher : public CredentialsMatcher {
-
+public:
     /**
      * Returns <code>true</code> <em>always</em> no matter what the method arguments are.
      *
@@ -35,9 +38,12 @@ class AllowAllCredentialsMatcher : public CredentialsMatcher {
      * @param info    the account being verified for access
      * @return <code>true</code> <em>always</em>.
      */
-    public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
+    bool doCredentialsMatch(const AuthenticationToken &token, const AuthenticationInfo &info) {
         return true;
     }
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_ALLOWALLCREDENTIALSMATCHER_H)

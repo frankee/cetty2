@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_CRYPTO_ABSTRACTHASH_H)
+#define CETTY_SHIRO_CRYPTO_ABSTRACTHASH_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace crypto {
 
 /**
  * Provides a base for all Shiro Hash algorithms with support for salts and multiple hash iterations.
@@ -34,22 +37,23 @@ namespace shiro {
  * @since 0.9
  * @deprecated in Shiro 1.1 in favor of using the concrete {@link SimpleHash} implementation directly.
  */
-class AbstractHash : public CodecSupport{
-
+class AbstractHash{
+private:
     /**
      * The hashed data
      */
-    private byte[] bytes = null;
+    std::string bytes;
 
     /**
      * Cached value of the {@link #toHex() toHex()} call so multiple calls won't incur repeated overhead.
      */
-    private transient String hexEncoded = null;
+    std::string hexEncoded;
     /**
      * Cached value of the {@link #toBase64() toBase64()} call so multiple calls won't incur repeated overhead.
      */
-    private transient String base64Encoded = null;
+    std::string base64Encoded;
 
+public:
     /**
      * Creates an new instance without any of its properties set (no hashing is performed).
      * <p/>
@@ -59,8 +63,7 @@ class AbstractHash : public CodecSupport{
      * this default, no-arg constructor, you can then immediately call {@link #setBytes setBytes} to have a
      * fully-initialized instance.
      */
-    public AbstractHash() {
-    }
+    AbstractHash() {}
 
     /**
      * Creates a hash of the specified {@code source} with no {@code salt} using a single hash iteration.
@@ -75,8 +78,8 @@ class AbstractHash : public CodecSupport{
      * @param source the object to be hashed.
      * @throws CodecException if the specified {@code source} cannot be converted into a byte array (byte[]).
      */
-    public AbstractHash(Object source) throws CodecException {
-        this(source, null, 1);
+    AbstractHash(std::string source){
+        init(source, std::string(), 1);
     }
 
     /**
@@ -93,8 +96,8 @@ class AbstractHash : public CodecSupport{
      * @param salt   the salt to use for the hash
      * @throws CodecException if either constructor argument cannot be converted into a byte array.
      */
-    public AbstractHash(Object source, Object salt) throws CodecException {
-        this(source, salt, 1);
+    AbstractHash(std::string src, std::string salt){
+        init(src, salt, 1);
     }
 
     /**
@@ -116,13 +119,12 @@ class AbstractHash : public CodecSupport{
      * @param hashIterations the number of times the {@code source} argument hashed for attack resiliency.
      * @throws CodecException if either Object constructor argument cannot be converted into a byte array.
      */
-    public AbstractHash(Object source, Object salt, int hashIterations) throws CodecException {
-        byte[] sourceBytes = toBytes(source);
-        byte[] saltBytes = null;
-        if (salt != null) {
-            saltBytes = toBytes(salt);
-        }
-        byte[] hashedBytes = hash(sourceBytes, saltBytes, hashIterations);
+    AbstractHash(const std::string &src, const std::string &salt, int hashIterations){
+        init(src, salt, hashIterations);
+    }
+
+    void init(const std::string &src, const std::string &salt, int hashIterations){
+        std::string hashedBytes = hash(src, salt, hashIterations);
         setBytes(hashedBytes);
     }
 
@@ -132,10 +134,9 @@ class AbstractHash : public CodecSupport{
      *
      * @return the {@link MessageDigest MessageDigest} algorithm name to use when performing the hash.
      */
-    public abstract String getAlgorithmName();
 
-    public byte[] getBytes() {
-        return this.bytes;
+    const std::string &getBytes() {
+        return bytes;
     }
 
     /**
@@ -146,10 +147,8 @@ class AbstractHash : public CodecSupport{
      *
      * @param alreadyHashedBytes the raw already-hashed bytes to store in this instance.
      */
-    public void setBytes(byte[] alreadyHashedBytes) {
-        this.bytes = alreadyHashedBytes;
-        this.hexEncoded = null;
-        this.base64Encoded = null;
+    void setBytes(const std::string &bytes) {
+        this->bytes = bytes;
     }
 
     /**
@@ -346,3 +345,6 @@ class AbstractHash : public CodecSupport{
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_CRYPTO_ABSTRACTHASH_H)

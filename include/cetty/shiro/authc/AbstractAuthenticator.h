@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_ABSTRACTAUTHENTICATOR_H)
+#define CETTY_SHIRO_ABSTRACTAUTHENTICATOR_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/subject/PrincipalCollection.h>
 
 namespace cetty {
 namespace shiro {
+namespace authc {
+
+using namespace cetty::shiro::subject;
+
 /**
  * Superclass for almost all {@link Authenticator} implementations that performs the common work around authentication
  * attempts.
@@ -35,51 +42,8 @@ namespace shiro {
  */
 class AbstractAuthenticator {
 public:
-    typedef boost::function3<void, const AuthenticationToken&, const AuthenticationInfo*, const AuthenticationException*> LoginCallback;
-    typedef boost::function1<void, const PrincipalCollection&> LogoutCallback;
-
-    /**
-     * Callback triggered when an authentication attempt for a {@code Subject} has succeeded.
-     *
-     * @param token the authentication token submitted during the {@code Subject} (user)'s authentication attempt.
-     * @param info  the authentication-related account data acquired after authentication for the corresponding {@code Subject}.
-     */
-    void onSuccess(AuthenticationToken token, AuthenticationInfo info);
-
-    /**
-     * Callback triggered when an authentication attempt for a {@code Subject} has failed.
-     *
-     * @param token the authentication token submitted during the {@code Subject} (user)'s authentication attempt.
-     * @param ae    the {@code AuthenticationException} that occurred as a result of the attempt.
-     */
-    void onFailure(AuthenticationToken token, AuthenticationException ae);
-
-    /**
-     * Callback triggered when a {@code Subject} logs-out of the system.
-     * <p/>
-     * This method will only be triggered when a Subject explicitly logs-out of the session.  It will not
-     * be triggered if their Session times out.
-     *
-     * @param principals the identifying principals of the Subject logging out.
-     */
-    void onLogout(PrincipalCollection principals);
-
-
-private:
-    /**
-     * Private class log instance.
-     */
-    private static final Logger log = LoggerFactory.getLogger(AbstractAuthenticator.class);
-
-    /*-------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
-    /**
-     * Any registered listeners that wish to know about things during the authentication process.
-     */
-    std::vector<LoginCallback> loginCallbacks;
-    std::vector<LogoutCallback> logoutCallbacks;
-
+    //typedef boost::function3<void, const AuthenticationToken&, const AuthenticationInfo*, const AuthenticationException*> LoginCallback;
+    //typedef boost::function1<void, const PrincipalCollection&> LogoutCallback;
 
     /*-------------------------------------------
     |         C O N S T R U C T O R S           |
@@ -89,9 +53,8 @@ private:
      * Default no-argument constructor. Ensures the internal
      * {@link AuthenticationListener AuthenticationListener} collection is a non-null {@code ArrayList}.
      */
-    public AbstractAuthenticator() {
-        listeners = new ArrayList<AuthenticationListener>();
-    }
+public:
+    AbstractAuthenticator() {}
 
     /*--------------------------------------------
     |  A C C E S S O R S / M O D I F I E R S    |
@@ -104,13 +67,9 @@ private:
      * @param listeners one or more {@code AuthenticationListener}s that should be notified due to an
      *                  authentication attempt.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void setAuthenticationListeners(Collection<AuthenticationListener> listeners) {
-        if (listeners == null) {
-            this.listeners = new ArrayList<AuthenticationListener>();
-        } else {
-            this.listeners = listeners;
-        }
+
+    void setAuthenticationListeners(const std::vector<AuthenticationListener> &listeners) {
+        this->listeners.assign(listeners.begin(), listeners.end());
     }
 
     /**
@@ -120,15 +79,15 @@ private:
      * @return the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
      *         attempts.
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public Collection<AuthenticationListener> getAuthenticationListeners() {
-        return this.listeners;
+    const std::vector<AuthenticationListener> &getAuthenticationListeners() {
+        return this->listeners;
     }
 
     /*-------------------------------------------
     |               M E T H O D S               |
     ============================================*/
 
+protected:
     /**
      * Notifies any registered {@link AuthenticationListener AuthenticationListener}s that
      * authentication was successful for the specified {@code token} which resulted in the specified
@@ -139,9 +98,10 @@ private:
      * @param token the submitted {@code AuthenticationToken} that resulted in a successful authentication.
      * @param info  the returned {@code AuthenticationInfo} resulting from the successful authentication.
      */
-    protected void notifySuccess(AuthenticationToken token, AuthenticationInfo info) {
-        for (AuthenticationListener listener : this.listeners) {
-            listener.onSuccess(token, info);
+    void notifySuccess(const AuthenticationToken &token, const AuthenticationInfo &info) {
+        std::vector<AuthenticationListener>::iterator it = this->listeners.begin();
+        for (; it < this->listeners.end(); ++ it) {
+            (*it).onSuccess(token, info);
         }
     }
 
@@ -156,10 +116,11 @@ private:
      * @param token the submitted {@code AuthenticationToken} that resulted in a failed authentication.
      * @param ae    the resulting {@code AuthenticationException} that caused the authentication to fail.
      */
-    protected void notifyFailure(AuthenticationToken token, AuthenticationException ae) {
-        for (AuthenticationListener listener : this.listeners) {
-            listener.onFailure(token, ae);
-        }
+    void notifyFailure(const AuthenticationToken &token, const AuthenticationException &ae) {
+        std::vector<AuthenticationListener>::iterator it = this->listeners.begin();
+                for (; it < this->listeners.end(); ++ it) {
+                    (*it).onFailure(token, ae);
+                }
     }
 
     /**
@@ -171,12 +132,14 @@ private:
      *
      * @param principals the identifying principals of the {@code Subject}/account logging out.
      */
-    protected void notifyLogout(PrincipalCollection principals) {
-        for (AuthenticationListener listener : this.listeners) {
-            listener.onLogout(principals);
-        }
+    void notifyLogout(const PrincipalCollection &principals) {
+        std::vector<AuthenticationListener>::iterator it = this->listeners.begin();
+                for (; it < this->listeners.end(); ++ it) {
+                    (*it).onLogout(principals);
+                }
     }
 
+public:
     /**
      * This implementation merely calls
      * {@link #notifyLogout(org.apache.shiro.subject.PrincipalCollection) notifyLogout} to allow any registered listeners
@@ -184,7 +147,7 @@ private:
      *
      * @param principals the identifying principals of the {@code Subject}/account logging out.
      */
-    public void onLogout(PrincipalCollection principals) {
+    void onLogout(PrincipalCollection principals) {
         notifyLogout(principals);
     }
 
@@ -208,55 +171,7 @@ private:
      * @throws AuthenticationException if there is any problem during the authentication process - see the
      *                                 interface's JavaDoc for a more detailed explanation.
      */
-    public final AuthenticationInfo authenticate(AuthenticationToken token) throws AuthenticationException {
-
-        if (token == null) {
-            throw new IllegalArgumentException("Method argumet (authentication token) cannot be null.");
-        }
-
-        log.trace("Authentication attempt received for token [{}]", token);
-
-        AuthenticationInfo info;
-        try {
-            info = doAuthenticate(token);
-            if (info == null) {
-                String msg = "No account information found for authentication token [" + token + "] by this " +
-                        "Authenticator instance.  Please check that it is configured correctly.";
-                throw new AuthenticationException(msg);
-            }
-        } catch (Throwable t) {
-            AuthenticationException ae = null;
-            if (t instanceof AuthenticationException) {
-                ae = (AuthenticationException) t;
-            }
-            if (ae == null) {
-                //Exception thrown was not an expected AuthenticationException.  Therefore it is probably a little more
-                //severe or unexpected.  So, wrap in an AuthenticationException, log to warn, and propagate:
-                String msg = "Authentication failed for token submission [" + token + "].  Possible unexpected " +
-                        "error? (Typical or expected login exceptions should extend from AuthenticationException).";
-                ae = new AuthenticationException(msg, t);
-            }
-            try {
-                notifyFailure(token, ae);
-            } catch (Throwable t2) {
-                if (log.isWarnEnabled()) {
-                    String msg = "Unable to send notification for failed authentication attempt - listener error?.  " +
-                            "Please check your AuthenticationListener implementation(s).  Logging sending exception " +
-                            "and propagating original AuthenticationException instead...";
-                    log.warn(msg, t2);
-                }
-            }
-
-
-            throw ae;
-        }
-
-        log.debug("Authentication successful for token [{}].  Returned account [{}]", token, info);
-
-        notifySuccess(token, info);
-
-        return info;
-    }
+    bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
 
     /**
      * Template design pattern hook for subclasses to implement specific authentication behavior.
@@ -275,11 +190,20 @@ private:
      *         important to Shiro.
      * @throws AuthenticationException if there is a problem logging in the user.
      */
-    protected abstract AuthenticationInfo doAuthenticate(AuthenticationToken token)
-            throws AuthenticationException;
+    virtual bool doAuthenticate(const AuthenticationToken &token, AuthenticationInfo *info);
+    virtual ~AbstractAuthenticator(){}
 
+private:
+
+    /**
+     * Any registered listeners that wish to know about things during the authentication process.
+     */
+    std::vector<AuthenticationListener> listeners;
 
 };
 
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_ABSTRACTAUTHENTICATOR_H)
