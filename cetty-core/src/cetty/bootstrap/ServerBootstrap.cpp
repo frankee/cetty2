@@ -61,8 +61,8 @@ public:
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        while (!queue.empty()) {
-            const ChannelPtr& child = queue.front();
+        while (!inboundQueue.empty()) {
+            const ChannelPtr& child = inboundQueue.front();
 
             if (!child) {
                 break;
@@ -76,7 +76,7 @@ public:
                 }
             }
 
-            queue.pop_front();
+            inboundQueue.pop_front();
         }
     }
 

@@ -29,12 +29,22 @@ namespace config {
     }
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
-    ConfigFieldDescriptor(\
+    new ConfigFieldDescriptor(\
         static_cast<int>(reinterpret_cast<const char*>(\
             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
         ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
         #FIELD\
     )\
+
+#define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
+    new ConfigFieldDescriptor(\
+        static_cast<int>(reinterpret_cast<const char*>(\
+        &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+        ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+        #FIELD,\
+        true,\
+    )\
+
 
 class ConfigFieldDescriptor {
 public:
@@ -42,36 +52,41 @@ public:
     // fixed mapping from Type to CppType where each Type maps to exactly one
     // CppType.  0 is reserved for errors.
     enum CppType {
-        CPPTYPE_INT32       = 1,
-        CPPTYPE_INT64       = 2,
-        CPPTYPE_DOUBLE      = 5,
-        CPPTYPE_BOOL        = 7,
-        CPPTYPE_STRING      = 9,
-        CPPTYPE_OBJECT     = 10,
+        CPPTYPE_INT32       =  1,
+        CPPTYPE_INT64       =  2,
+        CPPTYPE_DOUBLE      =  5,
+        CPPTYPE_BOOL        =  7,
+        CPPTYPE_STRING      =  9,
+        CPPTYPE_OBJECT      = 10,
 
         MAX_CPPTYPE         = 10,    // Constant useful for defining lookup tables
     };
+
+    bool repeated;
 
     int offset;
     int type;
     const char* name;
 
-    ConfigFieldDescriptor(int offset, int type, const char* name) : offset(offset), type(type), name(name) {}
+    ConfigFieldDescriptor(int offset, int type, const char* name, bool repeated = false)
+        : offset(offset), type(type), name(name), repeated(repeated) {}
  };
 
 class ConfigDescriptor {
 public:
-    typedef std::vector<ConfigFieldDescriptor>::const_iterator ConstIterator;
+    typedef const ConfigFieldDescriptor* ConstConfigFieldDescriptorPtr;
+    typedef std::vector<ConstConfigFieldDescriptorPtr>::const_iterator ConstIterator;
 
 public:
-    ConfigDescriptor(ConfigFieldDescriptor descriptor, ...) {}
+    ConfigDescriptor(ConstConfigFieldDescriptorPtr descriptor, ...);
+    ~ConfigDescriptor();
 
 public:
-    ConstIterator* begin() const;
-    ConstIterator* end() const;
+    ConstIterator begin() const;
+    ConstIterator end() const;
 
 private:
-    std::vector<ConfigFieldDescriptor> fields;
+    std::vector<ConstConfigFieldDescriptorPtr> fields;
 };
 
 }

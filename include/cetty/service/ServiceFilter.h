@@ -18,14 +18,12 @@
  */
 
 #include <deque>
-#include <cetty/channel/ChannelMessageHandler.h>
-#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec;
 
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
@@ -54,28 +52,31 @@ template<typename RequestInT,
          typename ResponseInT,
          typename ResponseOutT>
 class ServiceFilter
-        : public cetty::channel::ChannelMessageHandler<RequestInT, ResponseInT> {
+        : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
+
+        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
+        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
+
+        using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
+        using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
 
 public:
     virtual ~ServiceFilter() {}
 
 protected:
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue& in =
-            ctx.getInboundMessageQueue();
-
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
-        while (!in.empty()) {
-            RequestInT& req = in.front();
+        while (!inboundQueue.empty()) {
+            RequestInT& req = inboundQueue.front();
             reqs.push_back(req);
             RequestOutT oreq = filterRequest(ctx, req);
 
-            if (CodecUtil<RequestOutT>::unfoldAndAdd(ctx, oreq, true)) {
+            if (inboundTransfer.unfoldAndAdd(ctx, oreq)) {
                 notify = true;
             }
 
-            in.pop_front();
+            inboundQueue.pop_front();
         }
 
         if (notify) {
@@ -83,26 +84,23 @@ protected:
         }
     }
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
-        while (!in.empty()) {
+        while (!outboundQueue.empty()) {
             ResponseInT& rep = in.front();
             ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
             reqs.pop_front();
-            CodecUtil<ResponseOutT>::unfoldAndAdd(ctx, orep, false);
-            in.pop_front();
+            outboundTransfer.unfoldAndAdd(ctx, orep);
+            outboundQueue.pop_front();
         }
 
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(InboundMessageContext& ctx,
+    virtual RequestOutT filterRequest(ChannelHandlerContext& ctx,
                                       const RequestInT& req) = 0;
 
-    virtual ResponseOutT filterResponse(OutboundMessageContext& ctx,
+    virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
                                         const RequestInT& req,
                                         const ResponseInT& rep) = 0;
 

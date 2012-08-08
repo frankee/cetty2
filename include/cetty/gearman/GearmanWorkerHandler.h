@@ -54,11 +54,10 @@ public:
     void registerWorker(const std::string& functionName,
                         const GrabJobCallback& worker);
 
-protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
                                  const GearmanMessagePtr& msg);
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future);
 
 private:

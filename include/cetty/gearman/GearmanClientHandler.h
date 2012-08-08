@@ -41,11 +41,10 @@ public:
 
     virtual std::string toString() const;
 
-protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
         const GearmanMessagePtr& msg);
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future);
 
 private:

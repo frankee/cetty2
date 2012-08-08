@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDMESSAGEHANDLER_H)
-#define CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDMESSAGEHANDLER_H
+#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERADAPTER_H)
+#define CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERADAPTER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,35 +17,31 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
 #include <cetty/channel/VoidChannelMessage.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT,
-         typename InboundOutT,
-         typename OutboundOutT = VoidChannelMessage,
+template<typename OutboundInT,
+         typename OutboundOutT,
          typename OutboundContext = ChannelOutboundMessageHandlerContext<OutboundOutT> >
-class AbstractChannelInboundMessageHandler
-    : public ChannelInboundMessageHandler<InboundInT> {
+class ChannelOutboundMessageHandlerAdapter
+        : public ChannelOutboundMessageHandler<OutboundInT> {
 public:
-    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
-    typedef OutboundContext NextOutboundContext;
-
-public:
-    virtual ~AbstractChannelInboundMessageHandler() {}
+    virtual ~ChannelOutboundMessageHandlerAdapter() {}
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+    typedef OutboundContext NextOutboundContext;
+
     ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDMESSAGEHANDLER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLERADAPTER_H)
 
 // Local Variables:
 // mode: c++

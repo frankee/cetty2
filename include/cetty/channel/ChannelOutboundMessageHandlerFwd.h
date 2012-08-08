@@ -91,11 +91,11 @@ public:
             ChannelHandlerContext* next);
 
     void addOutboundMessage(const OutboundInT& message) {
-        queue.push_back(message);
+        outboundQueue.push_back(message);
     }
 
 protected:
-    MessageQueue queue;
+    MessageQueue outboundQueue;
 };
 
 }

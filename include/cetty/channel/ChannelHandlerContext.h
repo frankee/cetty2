@@ -222,19 +222,6 @@ public:
      */
     const ChannelOutboundHandlerPtr& getOutboundHandler() const;
 
-    ChannelInboundBufferHandlerContext* inboundBufferHandlerContext();
-    ChannelOutboundBufferHandlerContext* outboundBufferHandlerContext();
-
-    template<typename T>
-    T* inboundMessageHandlerContext() {
-        return dynamic_cast<T*>(this);
-    }
-
-    template<typename T>
-    T* outboundMessageHandlerContext() {
-        return dynamic_cast<T*>(this);
-    }
-
     ChannelHandlerContext* getNextOutboundContext() {
         if (canHandleOutbound) {
             return nextOutboundContext;

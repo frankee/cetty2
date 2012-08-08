@@ -134,7 +134,7 @@ std::string GearmanClientHandler::toString() const {
     return "GearmanClientHandler";
 }
 
-void GearmanClientHandler::flush(OutboundMessageContext& ctx, const ChannelFuturePtr& future) {
+void GearmanClientHandler::flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
     OutboundMessageContext::MessageQueue& in = ctx.getOutboundMessageQueue();
 
     while (!in.empty()) {

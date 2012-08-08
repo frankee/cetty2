@@ -16,8 +16,16 @@
 
 #include <cetty/config/ConfigCenter.h>
 
+#include <boost/program_options.hpp>
+#include <yaml-cpp/yaml.h>
+
+#include <cetty/config/ConfigObject.h>
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace config {
+
+using namespace boost::program_options;
 
 ConfigCenter* ConfigCenter::center = NULL;
 
@@ -36,10 +44,41 @@ ConfigCenter::ConfigCenter() : argc(0), argv(NULL) {
 int ConfigCenter::load(int argc, char* argv[]) {
     this->argc = argc;
     this->argv = argv;
-    return 0;
+
+    options_description desc("Allowed options");
+    desc.add_options()
+    ("help", "produce this help message")
+    ("conf", "the main configure file");
+
+    variables_map vm;
+    store(parse_command_line(argc, argv, desc), vm);
+    notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << desc << "\n";
+        return -1;
+    }
+
+    const variable_value& option = vm["conf"];
+
+    if (option.empty()) {
+        return -1;
+    }
+
+    return loadFromFile(option.as<std::string>());
 }
 
 int ConfigCenter::load(const char* str) {
+    if (!str) {
+        return -1;
+    }
+
+    root = YAML::Load(str);
+
+    if (!root) {
+        return -2;
+    }
+
     return 0;
 }
 
@@ -52,7 +91,28 @@ int ConfigCenter::loadFromFile(const std::string& file) {
 }
 
 int ConfigCenter::configure(ConfigObject* object) const {
-    return 0;
+    if (!object) {
+        return -1;
+    }
+
+    return configure(object->getName(), object);
+}
+
+int parseConfigObject(const YAML::Node& node, ConfigObject* object);
+
+int ConfigCenter::configure(const std::string& name,
+                            ConfigObject* object) const {
+    if (!object) {
+        return -1;
+    }
+
+    YAML::Node node = root[name];
+
+    if (node) {
+        return parseConfigObject(node, object);
+    }
+
+    return -1;
 }
 
 }

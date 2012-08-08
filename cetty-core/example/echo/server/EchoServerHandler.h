@@ -21,7 +21,7 @@
 #include "cetty/channel/ChannelConfig.h"
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/AbstractChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include "cetty/buffer/ChannelBuffer.h"
 #include "cetty/buffer/ChannelBuffers.h"
 #include "cetty/buffer/ChannelBufferFactory.h"
@@ -37,7 +37,7 @@ using namespace cetty::buffer;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoServerHandler : public AbstractChannelInboundBufferHandler<> {
+class EchoServerHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
     EchoServerHandler() : transferredBytes(0) {
     }

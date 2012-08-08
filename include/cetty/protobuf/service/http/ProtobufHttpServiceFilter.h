@@ -56,9 +56,9 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterRequest(OutboundMessageContext& ctx,
+    virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req);
-    virtual HttpResponsePtr filterResponse(InboundMessageContext& ctx,
+    virtual HttpResponsePtr filterResponse(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req,
         const ProtobufServiceMessagePtr& rep);
 

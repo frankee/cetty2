@@ -46,7 +46,6 @@ public:
         }
 
         ConfigObject* create() const { return new Server; }
-		void copyFrom(const Server& server);
     };
 
     class Limit : public ConfigObject {
@@ -92,7 +91,13 @@ public:
     Timeout* timeout;
 	
 public:
-    ServerBuilderConfig() : deamonize(0), parentThreadCount(1), childThreadCount(0) {
+    ServerBuilderConfig()
+        : deamonize(0),
+          parentThreadCount(1),
+          childThreadCount(0),
+          backlog(4096),
+          limit(),
+          timeout() {
         CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig",
             new ConfigDescriptor(
                 CETTY_CONFIG_FIELD(ServerBuilderConfig, deamonize, INT32),
@@ -108,7 +113,8 @@ public:
     }
 
     ~ServerBuilderConfig() {
-
+        if (limit) delete limit;
+        if (timeout) delete timeout;
     }
 
     ConfigObject* create() const { return new ServerBuilderConfig; }

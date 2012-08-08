@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDBUFFERHANDLER_H)
-#define CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDBUFFERHANDLER_H
+#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLERADAPTER_H)
+#define CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLERADAPTER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -31,28 +31,22 @@ template<typename InboundOutT = ChannelBufferPtr,
          typename InboundContext = ChannelInboundBufferHandlerContext,
          typename OutboundOutT = ChannelBufferPtr,
          typename OutboundContext = ChannelOutboundBufferHandlerContext>
-class AbstractChannelInboundBufferHandler : public ChannelInboundBufferHandler {
+class ChannelInboundBufferHandlerAdapter : public ChannelInboundBufferHandler {
 public:
+    virtual ~ChannelInboundBufferHandlerAdapter() {}
+
+protected:
     typedef InboundContext NextInboundContext;
     typedef OutboundContext NextOutboundContext;
 
-public:
-    virtual ~AbstractChannelInboundBufferHandler() {}
-
-protected:
     ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
     ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
 };
 
-//template<>
-//class AbstractChannelInboundBufferHandler<ChannelBufferPtr, ChannelInboundBufferHandlerContext> {
-//public:
-//};
-
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_ABSTRACTCHANNELINBOUNDBUFFERHANDLER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLERADAPTER_H)
 
 // Local Variables:
 // mode: c++

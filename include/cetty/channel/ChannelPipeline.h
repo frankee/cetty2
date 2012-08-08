@@ -474,8 +474,6 @@ public:
         return *receiveBuffer;
     }
 
-    void updateReceiveBuffer();
-
     template<typename T>
     void addInboundMessage(const T& message) {
         ChannelInboundMessageHandlerContext<T>* context
@@ -541,6 +539,13 @@ public:
         ChannelOutboundMessageHandlerContext<T>* context
             = outboundHead->nextOutboundMessageHandlerContext<ChannelOutboundMessageHandlerContext<T> >(outboundHead);
 
+        return write(context, message, future);
+    }
+
+    template<typename T>
+    const ChannelFuturePtr& write(ChannelOutboundMessageHandlerContext<T>* context,
+        const T& message,
+        const ChannelFuturePtr& future) {
         if (!context) {
             return future;
         }
@@ -574,6 +579,7 @@ public:
         else {
             context->eventloop->post(boost::bind(&ChannelPipeline::write<T>,
                                                  this,
+                                                 context,
                                                  message,
                                                  future));
         }

@@ -57,5 +57,13 @@ void ConfigObject::addDescriptor(const std::string& name, ConfigDescriptor* desc
     }
 }
 
+void ConfigObject::clear() {
+
+}
+
+void ConfigObject::copyFrom(const ConfigObject& from) {
+
+}
+
 }
 }

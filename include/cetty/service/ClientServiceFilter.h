@@ -18,14 +18,12 @@
  */
 
 #include <deque>
-#include <cetty/channel/ChannelMessageHandler.h>
-#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec;
 
 /**
 *  A Filter acts as a decorator/transformer of a service. It may apply
@@ -54,19 +52,23 @@ template<typename RequestInT,
          typename ResponseInT,
          typename ResponseOutT>
 class ClientServiceFilter
-        : public cetty::channel::ChannelMessageHandler<ResponseInT, RequestInT> {
+    : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
+
+        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
+        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
+
+        using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
+        using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
+
 public:
     virtual ~ClientServiceFilter() {}
 
 protected:
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue& in =
-            ctx.getInboundMessageQueue();
-
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
-        while (!in.empty()) {
-            ResponseInT& msg = in.front();
+        while (!inboundQueue.empty()) {
+            ResponseInT& msg = inboundQueue.front();
             ResponseOutT omsg = filterResponse(ctx, reqs.front(), msg);
             reqs.pop_front();
 
@@ -74,7 +76,7 @@ protected:
                 notify = true;
             }
 
-            in.pop_front();
+            inboundQueue.pop_front();
         }
 
         if (notify) {
@@ -82,7 +84,7 @@ protected:
         }
     }
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
         OutboundMessageContext::MessageQueue& in =
             ctx.getOutboundMessageQueue();
@@ -100,10 +102,10 @@ protected:
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(OutboundMessageContext& ctx,
+    virtual RequestOutT filterRequest(ChannelHandlerContext& ctx,
                                       const RequestInT& req) = 0;
 
-    virtual ResponseOutT filterResponse(InboundMessageContext& ctx,
+    virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
                                         const RequestInT& req,
                                         const ResponseInT& rep) = 0;
 

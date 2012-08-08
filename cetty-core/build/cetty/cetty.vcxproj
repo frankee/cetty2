@@ -221,12 +221,12 @@
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundBufferHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundBufferHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AdaptiveReceiveBuffer.h" />

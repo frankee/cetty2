@@ -32,8 +32,8 @@
  * under the License.
  */
 
-#include <cetty/channel/AbstractChannelOutboundMessageHandler.h>
-#include <cetty/handler/codec/CodecUtil.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
@@ -44,16 +44,18 @@ using namespace cetty::channel;
 
 template<typename OutboundInT, typename OutboundOutT>
 class MessageToMessageEncoder
-        : public AbstractChannelOutboundMessageHandler<OutboundInT, OutboundOutT> {
+        : public ChannelOutboundMessageHandler<OutboundInT> {
+        using ChannelOutboundMessageHandler<OutboundInT>::outboundQueue;
+
 public:
     virtual ~MessageToMessageEncoder() {}
 
 protected:
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        while (!queue.empty()) {
+        while (!outboundQueue.empty()) {
             try {
-                OutboundInT& msg = queue.front();
+                OutboundInT& msg = outboundQueue.front();
 
                 if (!msg) {
                     break;
@@ -61,7 +63,7 @@ protected:
 
                 if (!isEncodable(msg)) {
                     //ctx.nextOutboundMessageBuffer().add(msg);
-                    queue.pop_front();
+                    outboundQueue.pop_front();
                     continue;
                 }
 
@@ -70,13 +72,13 @@ protected:
                 if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
                     // an aggregated message - keep polling.
-                    queue.pop_front();
+                    outboundQueue.pop_front();
                     continue;
                 }
 
                 outboundTransfer.unfoldAndAdd(ctx, omsg);
 
-                queue.pop_front();
+                outboundQueue.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);
@@ -100,8 +102,11 @@ protected:
 
     virtual OutboundOutT encode(ChannelHandlerContext& ctx,
                                 const OutboundInT& msg) = 0;
-};
 
+protected:
+    typedef ChannelOutboundMessageHandlerContext<OutboundOutT> NextOutboundContext;
+    ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+};
 
 }
 }

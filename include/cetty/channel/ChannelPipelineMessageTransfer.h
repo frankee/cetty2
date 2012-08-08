@@ -50,6 +50,9 @@ public:
     bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg);
 
     void write(ChannelHandlerContext& ctx, const T& msg, const ChannelFuturePtr& future);
+
+    bool unfoldAndAdd(const T& msg);
+    void write(const T& msg, const ChannelFuturePtr& future);
 };
 
 template<typename T>
@@ -167,6 +170,18 @@ public:
 private:
     ChannelOutboundBufferHandlerContext* nextCtx;
     ChannelHandlerContext* nextOutCtx;
+};
+
+template<typename T>
+class ChannelPipelineMessageTransfer<T, ChannelPipeline> {
+public:
+
+};
+
+template<>
+class ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelPipeline> {
+public:
+
 };
 
 template<typename T, typename U>

@@ -30,7 +30,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/channel/AbstractChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/handler/codec/EncoderException.h>
 
@@ -43,9 +44,8 @@ using namespace cetty::channel;
 
 template<typename OutboundInT>
 class MessageToBufferEncoder
-    : public AbstractChannelOutboundMessageHandler<OutboundInT, ChannelBufferPtr, ChannelOutboundBufferHandlerContext> {
-    using AbstractChannelOutboundMessageHandler<OutboundInT, ChannelBufferPtr, ChannelOutboundBufferHandlerContext>::outboundTransfer;
-    using ChannelOutboundMessageHandler<OutboundInT>::queue;
+    : public ChannelOutboundMessageHandler<OutboundInT> {
+    using ChannelOutboundMessageHandler<OutboundInT>::outboundQueue;
 
 public:
     MessageToBufferEncoder() : hasOutBuffer(false), initBufferSize(0) {}
@@ -63,8 +63,8 @@ public:
             out = ChannelBuffers::dynamicBuffer(initBufferSize);
         }
 
-        while (!queue.empty()) {
-            OutboundInT& msg = queue.front();
+        while (!outboundQueue.empty()) {
+            OutboundInT& msg = outboundQueue.front();
 
             if (!msg) {
                 break;
@@ -97,7 +97,7 @@ public:
                 ctx.fireExceptionCaught(EncoderException(e.what()));
             }
 
-            queue.pop_front();
+            outboundQueue.pop_front();
         }
 
         if (hasOutBuffer) {
@@ -117,6 +117,9 @@ public:
     virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
                                     const OutboundInT& msg,
                                     const ChannelBufferPtr& out) = 0;
+
+protected:
+    ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelOutboundBufferHandlerContext> outboundTransfer;
 
 private:
     bool hasOutBuffer;

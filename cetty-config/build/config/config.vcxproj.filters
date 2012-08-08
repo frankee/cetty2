@@ -15,6 +15,12 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp">
       <Filter>config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\ConfigObjectYamlParser.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\ConfigDescriptor.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h">

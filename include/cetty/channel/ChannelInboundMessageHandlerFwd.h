@@ -49,8 +49,8 @@ public:
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        while (!queue.empty()) {
-            InboundInT msg = queue.front();
+        while (!inboundQueue.empty()) {
+            InboundInT msg = inboundQueue.front();
 
             if (!msg) {
                 break;
@@ -66,7 +66,7 @@ public:
                 ctx.fireExceptionCaught(ChannelException(e.what()));
             }
 
-            queue.pop_front();
+            inboundQueue.pop_front();
         }
     }
 
@@ -97,7 +97,7 @@ public:
             ChannelHandlerContext* next);
 
     void addInboundMessage(const InboundInT& message) {
-        queue.push_back(message);
+        inboundQueue.push_back(message);
     }
 
 protected:
@@ -107,7 +107,7 @@ protected:
     }
 
 protected:
-    MessageQueue queue;
+    MessageQueue inboundQueue;
 };
 
 }

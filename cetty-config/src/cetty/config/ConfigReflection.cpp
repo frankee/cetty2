@@ -20,7 +20,7 @@
 namespace cetty {
 namespace config {
 
-ConfigObject* ConfigReflection::addMessage(ConfigObject* object, const ConfigFieldDescriptor* field) const {
+ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object, const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 

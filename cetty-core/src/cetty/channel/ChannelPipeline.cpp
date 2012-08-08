@@ -998,13 +998,6 @@ const ChannelFuturePtr& ChannelPipeline::flush(const ChannelFuturePtr& future) {
     }
 }
 
-void ChannelPipeline::updateReceiveBuffer() {
-    if (inboundHead) {
-        inboundHead->inboundBufferHandlerContext()->setInboundChannelBuffer(
-            receiveBuffer->channelBuffer());
-    }
-}
-
 ChannelFuturePtr ChannelPipeline::newFuture(const ChannelPtr& channel) {
     return channel->newFuture();
 }

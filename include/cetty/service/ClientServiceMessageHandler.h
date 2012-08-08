@@ -17,9 +17,12 @@
  * under the License.
  */
 #include <boost/cstdint.hpp>
-#include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
+
+#include <cetty/channel/VoidChannelMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/handler/codec/CodecUtil.h>
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/OutstandingCall.h>
 
@@ -27,13 +30,23 @@ namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-using namespace cetty::handler::codec;
 
 template<typename ReqT, typename RepT>
 class ClientServiceMessageHandler
-    : public cetty::channel::ChannelMessageHandler<
+    : public cetty::channel::ChannelMessageHandlerAdapter<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+    VoidChannelMessage,
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
+
+    using ChannelMessageHandlerAdapter<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+          VoidChannelMessage,
+          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundTransfer;
+
+    using ChannelInboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundQueue;
+    using ChannelOutboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundQueue;
 
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;
@@ -46,14 +59,11 @@ public:
     ClientServiceMessageHandler() : id(0) {}
     virtual ~ClientServiceMessageHandler() {}
 
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue& in =
-            ctx.getInboundMessageQueue();
-
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
-        while (!in.empty()) {
-            OutstandingCallPtr& response = in.front();
+        while (!inboundQueue.empty()) {
+            OutstandingCallPtr& response = inboundQueue.front();
 
             boost::int64_t id = response->getId();
             const OutstandingCallPtr& out = outMessages.front();
@@ -63,22 +73,19 @@ public:
             }
 
             outMessages.pop_front();
-            in.pop_front();
+            inboundQueue.pop_front();
         }
     }
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
-        while (!in.empty()) {
-            OutstandingCallPtr& request = in.front();
+        while (!outboundQueue.empty()) {
+            OutstandingCallPtr& request = outboundQueue.front();
             request->setId(++id);
             outMessages.push_back(request);
 
-            CodecUtil<OutstandingCallPtr>::unfoldAndAdd(ctx, request, false);
-            in.pop_front();
+            outboundTransfer.unfoldAndAdd(ctx, request);
+            outboundQueue.pop_front();
         }
 
         ctx.flush(future);

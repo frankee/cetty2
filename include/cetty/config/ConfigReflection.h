@@ -36,23 +36,35 @@ public:
                     std::vector<const ConfigFieldDescriptor*>* output) const;
 
     int getInt(const ConfigObject& object,
-               const ConfigFieldDescriptor* field) const;
+               const ConfigFieldDescriptor* field) const {
+        return getField<int>(object, field);
+    }
 
     boost::int64_t getInt64(const ConfigObject& object,
-                            const ConfigFieldDescriptor* field) const;
+                            const ConfigFieldDescriptor* field) const {
+        return getField<boost::int64_t>(object, field);
+    }
+
     double getDouble(const ConfigObject& object,
-                     const ConfigFieldDescriptor* field) const;
+                     const ConfigFieldDescriptor* field) const {
+        return getField<double>(object, field);
+    }
+
     bool getBool(const ConfigObject& object,
-                 const ConfigFieldDescriptor* field) const;
+                 const ConfigFieldDescriptor* field) const {
+        return getField<bool>(object, field);
+    }
+
     std::string getString(const ConfigObject& object,
-                          const ConfigFieldDescriptor* field) const;
+                          const ConfigFieldDescriptor* field) const {
+        return getField<std::string>(object, field);
+    }
 
     void setInt32(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
                   int value) const {
         setField<int>(object, field, value);
     }
-
     void setInt64(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
                   boost::int64_t value) const {
@@ -74,8 +86,8 @@ public:
         setField<std::string>(object, field, value);
     }
 
-    ConfigObject* MutableMessage(ConfigObject* object,
-                                 const ConfigFieldDescriptor* field) const {
+    ConfigObject* mutableConfigObject(ConfigObject* object,
+                                      const ConfigFieldDescriptor* field) const {
         return mutableRaw<ConfigObject>(object, field);
     }
 
@@ -105,9 +117,15 @@ public:
         addField<std::string>(object, field, value);
     }
 
-    ConfigObject* addMessage(ConfigObject* object, const ConfigFieldDescriptor* field) const;
+    ConfigObject* addConfigObject(ConfigObject* object, const ConfigFieldDescriptor* field) const;
 
 private:
+    template <typename Type>
+    inline const Type& getField(const ConfigObject& message,
+                                const ConfigFieldDescriptor* field) const {
+        return getRaw<Type>(message, field);
+    }
+
     template <typename Type>
     inline void setField(ConfigObject* object,
                          const ConfigFieldDescriptor* field,
@@ -120,6 +138,14 @@ private:
                             const ConfigFieldDescriptor* field) const {
         void* ptr = reinterpret_cast<boost::uint8_t*>(object) + field->offset;
         return reinterpret_cast<Type*>(ptr);
+    }
+
+    template <typename Type>
+    inline const Type& getRaw(const ConfigObject& object,
+                              const ConfigFieldDescriptor* field) const {
+        const void* ptr = reinterpret_cast<const boost::uint8_t*>(&object) +
+                          field->offset;
+        return *reinterpret_cast<const Type*>(ptr);
     }
 
     template <typename Type>

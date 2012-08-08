@@ -21,7 +21,7 @@ message ProtobufClientBuilder {
 }
 
 message PoiService {
-	option embed = true;
+	option embeded = true;
 	
 	repeated ProtobufClientBuilder client_builders = 1;
 	

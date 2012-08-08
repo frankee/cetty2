@@ -49,7 +49,7 @@ using namespace cetty::logging;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoClientHandler : public AbstractChannelInboundBufferHandler<> {
+class EchoClientHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
     /**
      * Creates a client-side handler.

@@ -32,7 +32,8 @@
  * under the License.
  */
 
-#include <cetty/channel/AbstractChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/handler/codec/DecoderException.h>
 
 namespace cetty {
@@ -42,10 +43,8 @@ namespace codec {
 using namespace cetty::channel;
 
 template<typename InboundInT, typename InboundOutT>
-class MessageToMessageDecoder
-    : public AbstractChannelInboundMessageHandler<InboundInT, InboundOutT> {
-public:
-    typedef typename ChannelInboundMessageHandler<InboundInT>::MessageQueue MessageQueue;
+class MessageToMessageDecoder : public ChannelInboundMessageHandler<InboundInT> {
+    using ChannelInboundMessageHandler<InboundInT>::inboundQueue;
 
 public:
     MessageToMessageDecoder() {}
@@ -53,20 +52,21 @@ public:
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
-        MessageQueue& queue = ChannelInboundMessageHandler<InboundInT>::queue;
 
-        while (!queue.empty()) {
+        while (!inboundQueue.empty()) {
             try {
-                InboundInT& msg = queue.front();
+                InboundInT& msg = inboundQueue.front();
 
                 if (!msg) {
                     break;
                 }
 
                 if (!isDecodable(msg)) {
-                    //ctx.nextInboundMessageBuffer().add(msg);
-                    notify = true;
-                    queue.pop_front();
+                    if (skipInboundTransfer.unfoldAndAdd(ctx, msg)) {
+                        notify = true;
+                    }
+
+                    inboundQueue.pop_front();
                     continue;
                 }
 
@@ -75,15 +75,15 @@ public:
                 if (!omsg) {
                     // Decoder consumed a message but returned null.
                     // Probably it needs more messages because it's an aggregator.
-                    queue.pop_front();
+                    inboundQueue.pop_front();
                     continue;
                 }
 
-                if (AbstractChannelInboundMessageHandler<InboundInT, InboundOutT>::inboundTransfer.unfoldAndAdd(ctx, omsg)) {
+                if (inboundTransfer.unfoldAndAdd(ctx, omsg)) {
                     notify = true;
                 }
 
-                queue.pop_front();
+                inboundQueue.pop_front();
             }
             catch (const CodecException& e) {
                 ctx.fireExceptionCaught(e);
@@ -110,6 +110,12 @@ public:
     virtual InboundOutT decode(ChannelHandlerContext& ctx,
                                const InboundInT& msg) = 0;
 
+protected:
+    ChannelPipelineMessageTransfer<InboundOutT,
+                                   ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
+
+    ChannelPipelineMessageTransfer<InboundInT,
+                                   ChannelInboundMessageHandlerContext<InboundInT> > skipInboundTransfer;
 };
 
 }

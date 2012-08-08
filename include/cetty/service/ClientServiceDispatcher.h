@@ -23,7 +23,9 @@
 
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
@@ -41,9 +43,20 @@ using namespace cetty::service::pool;
 
 template<typename ReqT, typename RepT>
 class ClientServiceDispatcher
-    : public cetty::channel::ChannelMessageHandler<
+    : public cetty::channel::ChannelMessageHandlerAdapter<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
+
+    using ChannelMessageHandlerAdapter<
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundTransfer;
+
+    using ChannelInboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundQueue;
+    using ChannelOutboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundQueue;
 
 public:
     typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
@@ -75,17 +88,14 @@ public:
     //virtual void messageUpdated(InboundMessageContext& ctx) {
     //}
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
         bool notify = false;
         ChannelPtr ch = pool.getChannel(ConnectionPool::ConnectedCallback());
         BufferingCall bufferingCall;
 
-        while (!in.empty()) {
-            OutstandingCallPtr& request = in.front();
+        while (!outboundQueue.empty()) {
+            OutstandingCallPtr& request = outboundQueue.front();
 
             if (ch) {
                 ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
@@ -96,7 +106,7 @@ public:
                 bufferingCall.calls.push_back(request);
             }
 
-            in.pop_front();
+            outboundQueue.pop_front();
         }
 
         if (notify) {
@@ -111,7 +121,7 @@ public:
         }
     }
 
-    void connectedCallback(const ChannelPtr& channel, OutboundMessageContext& ctx) {
+    void connectedCallback(const ChannelPtr& channel, ChannelHandlerContext& ctx) {
         BOOST_ASSERT(channel);
 
         while (!bufferingCalls.empty()) {
@@ -125,6 +135,7 @@ public:
 
                 call.calls.pop_front();
             }
+
             channel->flush(call.future);
 
             //ctx.flush(call.future);

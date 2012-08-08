@@ -206,7 +206,7 @@ std::string GearmanWorkerHandler::toString() const {
     return "GearmanWorkerHandler";
 }
 
-void GearmanWorkerHandler::flush(OutboundMessageContext& ctx,
+void GearmanWorkerHandler::flush(ChannelHandlerContext& ctx,
                                  const ChannelFuturePtr& future) {
     OutboundMessageContext::MessageQueue& in
         = ctx.getOutboundMessageQueue();

@@ -18,7 +18,10 @@
  */
 
 #include <boost/cstdint.hpp>
-#include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/VoidChannelMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/service/OutstandingCall.h>
 
@@ -29,9 +32,19 @@ using namespace cetty::channel;
 
 template<typename ReqT, typename RepT>
 class ServiceRequestHandler
-    : public cetty::channel::ChannelMessageHandler<
+    : public cetty::channel::ChannelMessageHandlerAdapter<
     RepT,
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
+    VoidChannelMessage,
+    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+    ReqT> {
+
+        using ChannelMessageHandlerAdapter<ReqT,
+            VoidChannelMessage,
+            boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+            ReqT>::outboundTransfer;
+
+        using ChannelInboundMessageHandler<RepT>::inboundQueue;
+        using ChannelOutboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundQueue;
 
 public:
     typedef ServiceFuture<RepT> ServiceFutureType;
@@ -45,13 +58,10 @@ public:
     ServiceRequestHandler(const ChannelPtr& parent) : parent(parent) {}
     virtual ~ServiceRequestHandler() {}
 
-    virtual void messageUpdated(InboundMessageContext& ctx) {
-        InboundMessageContext::MessageQueue& in =
-            ctx.getInboundMessageQueue();
-
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
-        while (!in.empty()) {
+        while (!inboundQueue.empty()) {
             RepT& response = in.front();
 
             const OutstandingCallPtr& out = outMessages.front();
@@ -71,7 +81,7 @@ public:
             }
 
             outMessages.pop_front();
-            in.pop_front();
+            inboundQueue.pop_front();
         }
 
         if (notify) {
@@ -79,17 +89,14 @@ public:
         }
     }
 
-    virtual void flush(OutboundMessageContext& ctx,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
-        while (!in.empty()) {
-            OutstandingCallPtr& msg = in.front();
+        while (!outboundQueue.empty()) {
+            OutstandingCallPtr& msg = outboundQueue.front();
             outMessages.push_back(msg);
 
-            CodecUtil<RepT>::unfoldAndAdd(ctx, msg->request, false);
-            in.pop_front();
+            outboundTransfer.unfoldAndAdd(ctx, msg->request);
+            outboundQueue.pop_front();
         }
 
         ctx.flush(future);

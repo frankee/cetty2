@@ -56,12 +56,12 @@ std::string ProtobufHttpServiceFilter::toString() const {
     return "ProtobufHttpMessageFilter";
 }
 
-ProtobufServiceMessagePtr ProtobufHttpServiceFilter::filterRequest(OutboundMessageContext& ctx,
+ProtobufServiceMessagePtr ProtobufHttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req) {
     return http2proto.getProtobufMessage(req);
 }
 
-HttpResponsePtr ProtobufHttpServiceFilter::filterResponse(InboundMessageContext& ctx,
+HttpResponsePtr ProtobufHttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req,
         const ProtobufServiceMessagePtr& rep) {
 

@@ -581,14 +581,6 @@ void ChannelHandlerContext::notifyHandlerException(const Exception& e) {
     pipeline.notifyHandlerException(e);
 }
 
-ChannelInboundBufferHandlerContext* ChannelHandlerContext::inboundBufferHandlerContext() {
-    return dynamic_cast<ChannelInboundBufferHandlerContext*>(this);
-}
-
-ChannelOutboundBufferHandlerContext* ChannelHandlerContext::outboundBufferHandlerContext() {
-    return dynamic_cast<ChannelOutboundBufferHandlerContext*>(this);
-}
-
 void ChannelHandlerContext::init(const ChannelHandlerPtr& handler) {
     inboundHandler = boost::dynamic_pointer_cast<ChannelInboundHandler>(handler);
 

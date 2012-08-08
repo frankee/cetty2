@@ -19,7 +19,7 @@
 
 #include <deque>
 #include <boost/cstdint.hpp>
-#include <cetty/channel/ChannelInboundMessageHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandlerAdapter.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
@@ -55,7 +55,9 @@ class ProtobufServiceMessageHandler;
 typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufServiceMessageHandlerPtr;
 
 class ProtobufServiceMessageHandler
-    : public cetty::channel::ChannelInboundMessageHandler<ProtobufServiceMessagePtr> {
+    : public ChannelInboundMessageHandlerAdapter<ProtobufServiceMessagePtr,
+      VoidChannelMessage,
+          ProtobufServiceMessagePtr> {
 public:
     ProtobufServiceMessageHandler();
     virtual ~ProtobufServiceMessageHandler();
@@ -65,15 +67,13 @@ public:
 
 protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const ProtobufServiceMessagePtr& msg);
+                                 const ProtobufServiceMessagePtr& msg);
 
 private:
     void doneCallback(const MessagePtr& response,
                       ChannelHandlerContext& ctx,
                       ProtobufServiceMessagePtr req,
                       boost::int64_t id);
-
-private:
 };
 
 }

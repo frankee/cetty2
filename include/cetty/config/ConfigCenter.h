@@ -18,6 +18,13 @@
  */
 
 #include <string>
+#include <yaml-cpp/node/node.h>
+
+namespace cetty {
+    namespace logging {
+        class InternalLogger;
+    }
+}
 
 namespace cetty {
 namespace config {
@@ -42,10 +49,13 @@ public:
 
 private:
     static ConfigCenter* center;
+    static cetty::logging::InternalLogger* logger;
 
 private:
     int argc;
     char** argv;
+
+    YAML::Node root;
 };
 
 }
