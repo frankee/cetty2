@@ -46,6 +46,9 @@ public:
 
     int configure(ConfigObject* object) const;
     int configure(const std::string& name, ConfigObject* object) const;
+	
+private:
+	int getFileContent(const std::string& file, std::string* content);
 
 private:
     static ConfigCenter* center;
