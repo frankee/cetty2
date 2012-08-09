@@ -20,14 +20,27 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <cetty/util/StringUtil.h>
+
 namespace cetty {
 namespace config {
+
+extern struct FileNameMatchPattern;
+extern struct IncludeLine;
 
 class ConfigIncludeFileFinder {
 public:
     ConfigIncludeFileFinder();
 
     int find(const std::string& file, std::vector<std::string>* files);
+
+private:
+    void findFile(const boost::filesystem::path& filePath,
+                  const FileNameMatchPattern& pattern,
+                  std::vector<std::string>* files);
+    int ConfigIncludeFileFinder::getFileIncludes(const std::string& file, std::vector<IncludeLine>* includes);
 };
 
 }
