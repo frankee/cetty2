@@ -17,6 +17,8 @@
 #include <cetty/protobuf/service/http/map/ServiceResponseMapper.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 
+#include <cetty/config/ConfigCenter.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
@@ -25,51 +27,72 @@ namespace map {
 
 using namespace cetty::handler::codec::http;
 
-
 ServiceResponseMapper::ServiceResponseMapper() {
-
+    ConfigCenter::instance().configure(&config);
+    init();
 }
 
 ServiceResponseMapper::ServiceResponseMapper(const std::string& conf) {
-
+    ConfigCenter::configureFromString(conf, &config);
+    init();
 }
 
-ServiceResponseMapper::ServiceResponseMapper(const ConfigCenter& confCenter) {
-
+bool ServiceResponseMapper::configure(const std::string& conf) {
+    if (ConfigCenter::configureFromString(conf, &config)) {
+        return init();
+    }
+    return false;
 }
 
-int ServiceResponseMapper::configure(const std::string& conf) {
-    return 0;
+bool ServiceResponseMapper::configureFromFile(const std::string& file) {
+    if (ConfigCenter::configureFromFile(file, &config)) {
+        return init();
+    }
+    
+    return false;
 }
 
-int ServiceResponseMapper::configure(const ConfigCenter& confCenter) {
-    return 0;
-}
-
-int ServiceResponseMapper::configureFromFile(const std::string& file) {
-    return 0;
-}
-
-const ServiceResponseMapper::MapValue* ServiceResponseMapper::match(
+const ServiceResponseMapper::ResponseTemplate* ServiceResponseMapper::match(
     const std::string& service,
     const std::string& method) const {
-        return NULL;
+    std::string key(service);
+    key += method;
+
+    ResponseTemplateMap::const_iterator itr = maps.find(key);
+
+    if (itr != maps.end()) {
+        return itr->second;
+    }
+
+    return NULL;
 }
 
-void ServiceResponseMapper::setHttpHeaders(const MapValue& value,
+void ServiceResponseMapper::setHttpHeaders(const ResponseTemplate& templ,
         const HttpResponsePtr& response) {
-    std::map<std::string, std::string>::const_iterator itr = value.headers.begin();
-    std::map<std::string, std::string>::const_iterator end = value.headers.end();
 
-    for (; itr != end; ++itr) {
-        response->setHeader(itr->first, itr->second);
+    std::size_t j = templ.headers.size();
+
+    for (std::size_t i = 0; i < j; ++i) {
+        const ResponseTemplate::Header* header = templ.headers[i];
+        response->setHeader(header->name, header->value);
     }
 }
 
-//ServiceResponseMapperConfig repConfig;
-//ServiceRequestMapperConfig reqConfig;
-//config.configure(&reqConfig);
-//config.configure(&repConfig);
+bool ServiceResponseMapper::init() {
+    maps.clear();
+
+    std::size_t j = config.templates.size();
+
+    for (std::size_t i = 0; i < j; ++i) {
+        const ServiceResponseMapperConfig::Template* tmpl = config.templates[i];
+        std::string key(tmpl->service);
+        key += tmpl->method;
+
+        maps[key] = tmpl;
+    }
+
+    return !maps.empty();
+}
 
 }
 }

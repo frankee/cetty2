@@ -26,17 +26,17 @@ using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::proto;
 
 ProtobufServiceMessage::ProtobufServiceMessage()
-    : message(new ServiceMessage) {
+    : message(new ServiceMessage), payload() {
 
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type)
-    : message(new ServiceMessage) {
+    : message(new ServiceMessage), payload() {
     message->set_type(MessageType(type));
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type, boost::int64_t id)
-    : message(new ServiceMessage) {
+    : message(new ServiceMessage), payload() {
     message->set_type(MessageType(type));
     message->set_id(id);
 }
@@ -52,7 +52,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method)
-    : message(new ServiceMessage) {
+    : message(new ServiceMessage), payload() {
     message->set_type(MessageType(type));
     message->set_service(service);
     message->set_method(method);
@@ -83,6 +83,10 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
 ProtobufServiceMessage::~ProtobufServiceMessage() {
     if (message) {
         delete message;
+    }
+
+    if (payload) {
+        delete payload;
     }
 }
 
@@ -141,7 +145,7 @@ const ServiceMessage& ProtobufServiceMessage::getServiceMessage() const {
     return *message;
 }
 
-static MessagePtr EMPTY_MESSAGE;
+static MessagePtr EMPTY_MESSAGE= NULL;
 
 const MessagePtr& ProtobufServiceMessage::getResponse() const {
     if (isResponse()) {

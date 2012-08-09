@@ -42,8 +42,8 @@ public:
         : ChannelHandlerContext(name, pipeline, handler, prev, next) {
         hasOutboundMessageHandler = true;
 
-        outboundHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
-        BOOST_ASSERT(outboundHandler);
+        outboundMsgHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
+        BOOST_ASSERT(outboundMsgHandler);
     }
 
     ChannelOutboundMessageHandlerContext(const std::string& name,
@@ -55,15 +55,15 @@ public:
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
         hasOutboundMessageHandler = true;
 
-        outboundHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
-        BOOST_ASSERT(outboundHandler);
+        outboundMsgHandler = boost::dynamic_pointer_cast<OutboundHandler>(handler);
+        BOOST_ASSERT(outboundMsgHandler);
     }
 
     virtual ~ChannelOutboundMessageHandlerContext() {}
 
     void addOutboundMessage(const OutboundInT& message) {
         if (eventloop->inLoopThread()) {
-            outboundHandler->addOutboundMessage(message);
+            outboundMsgHandler->addOutboundMessage(message);
         }
         else {
             eventloop->post(boost::bind(
@@ -74,7 +74,7 @@ public:
     }
 
 private:
-    OutboundHandlerPtr outboundHandler;
+    OutboundHandlerPtr outboundMsgHandler;
 };
 
 }

@@ -30,7 +30,6 @@ using namespace cetty::handler::codec::http;
 
 class HttpMessageFilter
         : public cetty::service::ServiceFilter<HttpRequestPtr, HttpResponsePtr> {
-public:
 
 protected:
     virtual HttpRequestPtr filterReq(const HttpRequestPtr& req);

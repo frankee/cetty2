@@ -39,33 +39,35 @@ using namespace cetty::util;
 // are less strict in one important way:  the request and response objects
 // need not be of any specific class as long as their descriptors are
 // method->input_type() and method->output_type().
-void ProtobufClientServiceAdaptor::CallMethod(
-    const ::google::protobuf::MethodDescriptor* method,
-    const ConstMessagePtr& request,
-    const ProtobufServiceFuturePtr& future) {
-
-    if (!service) {
-        if (future) {
-            future->setFailure(Exception(""));
-        }
-
-        return;
-    }
-
-    ProtobufServiceMessagePtr message(
-        new ProtobufServiceMessage(REQUEST,
-                               method->service()->full_name(),
-                               method->name(),
-                               cetty::util::const_pointer_cast<google::protobuf::Message>(request)));
-
-    callMethod(service, message, future);
-}
 
 ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ClientServicePtr& service)
     : service(service) {
 }
 
 ProtobufClientServiceAdaptor::~ProtobufClientServiceAdaptor() {
+}
+
+template<> inline
+    void ProtobufClientServiceAdaptor::CallMethod<ConstMessagePtr, ProtobufServiceMessagePtr>(
+    const ::google::protobuf::MethodDescriptor* method,
+    const ConstMessagePtr& request,
+    const ProtobufServiceFuturePtr& future) {
+
+        if (!service) {
+            if (future) {
+                //future->setFailure(Exception(""));
+            }
+
+            return;
+        }
+
+        ProtobufServiceMessagePtr message(
+            new ProtobufServiceMessage(REQUEST,
+            method->service()->full_name(),
+            method->name(),
+            (MessagePtr)request));
+
+        callMethod(service, message, future);
 }
 
 }

@@ -48,8 +48,7 @@ ProtobufHttpServiceFilter::ProtobufHttpServiceFilter() {
 }
 
 ChannelHandlerPtr ProtobufHttpServiceFilter::clone() {
-    //    return new ProtobufHttpMessageFilter(requestMapper, responseMapper);
-    return NULL;
+    return new ProtobufHttpServiceFilter(requestMapper, responseMapper);
 }
 
 std::string ProtobufHttpServiceFilter::toString() const {

@@ -19,13 +19,17 @@
 #include <boost/program_options.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include <cetty/config/ConfigObject.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/logging/InternalLoggerFactory.h>
+
+#include <cetty/config/ConfigObject.h>
+#include <cetty/config/ConfigIncludeFileFinder.h>
 
 namespace cetty {
 namespace config {
 
 using namespace boost::program_options;
+using namespace cetty::logging;
 
 ConfigCenter* ConfigCenter::center = NULL;
 
@@ -37,11 +41,22 @@ ConfigCenter& ConfigCenter::instance() {
     return *center;
 }
 
-ConfigCenter::ConfigCenter() : argc(0), argv(NULL) {
+ConfigCenter::ConfigCenter() : argc(0), argv(NULL), finder() {
+    if (!logger) {
+        logger = InternalLoggerFactory::getInstance("ConfigCenter");
+    }
 
+    finder = new ConfigIncludeFileFinder(/*logger*/);
 }
 
-int ConfigCenter::load(int argc, char* argv[]) {
+ConfigCenter::~ConfigCenter() {
+
+    if (finder) {
+        delete finder;
+    }
+}
+
+bool ConfigCenter::load(int argc, char* argv[]) {
     this->argc = argc;
     this->argv = argv;
 
@@ -56,54 +71,63 @@ int ConfigCenter::load(int argc, char* argv[]) {
 
     if (vm.count("help")) {
         std::cout << desc << "\n";
-        return -1;
+        return false;
     }
 
     const variable_value& option = vm["conf"];
 
     if (option.empty()) {
-        return -1;
+        return false;
     }
 
     return loadFromFile(option.as<std::string>());
 }
 
-int ConfigCenter::load(const char* str) {
+bool ConfigCenter::load(const char* str) {
     if (!str) {
-        return -1;
+        return false;
     }
 
     root = YAML::Load(str);
 
     if (!root) {
-        return -2;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
-int ConfigCenter::load(const std::string& str) {
+bool ConfigCenter::load(const std::string& str) {
     return load(str.c_str());
 }
 
-int ConfigCenter::loadFromFile(const std::string& file) {
-    return 0;
+bool ConfigCenter::loadFromFile(const std::string& file) {
+    std::vector<std::string> files;
+    std::string content;
+
+    if (finder->find(file, &files) > 0) {
+        if (getFileContent(files, &content)) {
+            return load(content.c_str());
+        }
+    }
+
+    return true;
 }
 
-int ConfigCenter::configure(ConfigObject* object) const {
+bool ConfigCenter::configure(ConfigObject* object) const {
     if (!object) {
-        return -1;
+        return false;
     }
 
     return configure(object->getName(), object);
 }
 
-int parseConfigObject(const YAML::Node& node, ConfigObject* object);
+bool parseConfigObject(const YAML::Node& node, ConfigObject* object);
 
-int ConfigCenter::configure(const std::string& name,
+bool ConfigCenter::configure(const std::string& name,
                             ConfigObject* object) const {
     if (!object) {
-        return -1;
+        return false;
     }
 
     YAML::Node node = root[name];
@@ -112,7 +136,19 @@ int ConfigCenter::configure(const std::string& name,
         return parseConfigObject(node, object);
     }
 
-    return -1;
+    return false;
+}
+
+bool ConfigCenter::getFileContent(const std::vector<std::string>& files, std::string* content) {
+    std::vector<std::string>::const_iterator itr = files.begin();
+    for (; itr != files.end(); ++itr) {
+        getFileContent(*itr, content);
+    }
+    return !content->empty();
+}
+
+bool ConfigCenter::getFileContent(const std::string& file, std::string* content) {
+
 }
 
 }

@@ -23,9 +23,11 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceMapperPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapperConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapperConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />

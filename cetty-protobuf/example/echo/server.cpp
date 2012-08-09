@@ -23,7 +23,7 @@ public:
 
         rep->set_payload(request->payload());
         if (done) {
-            done(static_pointer_cast<google::protobuf::Message>(rep));
+            done(rep);
         }
     }
 };

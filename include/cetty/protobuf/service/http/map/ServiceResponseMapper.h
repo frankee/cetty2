@@ -21,6 +21,7 @@
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
+#include <cetty/protobuf/service/http/map/ServiceResponseMapperConfig.h>
 
 namespace cetty {
 namespace config {
@@ -37,33 +38,31 @@ namespace map {
 using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 
-class ServiceResponseMapper : public cetty::util::ReferenceCounter<ServiceResponseMapper, int> {
+class ServiceResponseMapper
+    : public cetty::util::ReferenceCounter<ServiceResponseMapper, int> {
 public:
-    struct MapKey {
-        std::string service;
-        std::string method;
-    };
-
-    struct MapValue {
-        std::string content;
-        std::map<std::string, std::string> headers;
-    };
+    typedef ServiceResponseMapperConfig::Template ResponseTemplate;
 
 public:
     ServiceResponseMapper();
     ServiceResponseMapper(const std::string& conf);
-    ServiceResponseMapper(const ConfigCenter& confCenter);
 
-    int configure(const std::string& conf);
-    int configure(const ConfigCenter& confCenter);
-    int configureFromFile(const std::string& file);
+    bool configure(const std::string& conf);
+    bool configureFromFile(const std::string& file);
 
-    const MapValue* match(const std::string& service, const std::string& method) const;
+    const ResponseTemplate* match(const std::string& service, const std::string& method) const;
 
-    static void setHttpHeaders(const MapValue& value, const HttpResponsePtr& response);
+    static void setHttpHeaders(const ResponseTemplate& templ, const HttpResponsePtr& response);
 
 private:
-    std::map<MapKey, MapValue> maps;
+    bool init();
+
+private:
+    typedef std::map<std::string, const ResponseTemplate*> ResponseTemplateMap;
+
+private:
+    ServiceResponseMapperConfig config;
+    ResponseTemplateMap maps;
 };
 
 }

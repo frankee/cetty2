@@ -54,11 +54,11 @@ template<typename RequestInT,
 class ServiceFilter
         : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
 
-        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
-        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
+    using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
+    using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
 
-        using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
-        using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
+    using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
+    using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
 
 public:
     virtual ~ServiceFilter() {}
@@ -87,7 +87,7 @@ protected:
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
         while (!outboundQueue.empty()) {
-            ResponseInT& rep = in.front();
+            ResponseInT& rep = outboundQueue.front();
             ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
             reqs.pop_front();
             outboundTransfer.unfoldAndAdd(ctx, orep);

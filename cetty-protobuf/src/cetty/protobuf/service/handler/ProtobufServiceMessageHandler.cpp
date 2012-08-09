@@ -65,7 +65,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
 
         if (method) {
             service->CallMethod(method,
-                                msg->getConstPayload(),
+                                msg->getPayload(),
                                 MessagePtr(),
                                 boost::bind(&ProtobufServiceMessageHandler::doneCallback,
                                             this,
@@ -91,8 +91,12 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ProtobufServiceMessagePtr req,
         boost::int64_t id) {
 
-    ProtobufServiceMessagePtr message(new ProtobufServiceMessage(RESPONSE,
-                                      id, req->getService(), req->getMethod(), response));
+    ProtobufServiceMessagePtr message(
+        new ProtobufServiceMessage(RESPONSE,
+                                      id,
+                                      req->getService(),
+                                      req->getMethod(),
+                                      response));
 
     outboundTransfer.write(ctx, message, ctx.getChannel()->newSucceededFuture());
 }

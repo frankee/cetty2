@@ -100,9 +100,9 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
             sub_vars["out_typedef"] = output_types[i].second;
             sub_vars["method"] = method_names[i];
             printer->Print(sub_vars, 
-                "typedef ::cetty::util::BarePointer< $type$> $typedef$Ptr;\n"
-                "typedef ::cetty::util::BarePointer< $type$ const> Const$typedef$Ptr;\n"
-                "typedef ::cetty::util::BarePointer< $out_type$> $out_typedef$Ptr;\n"
+                "typedef $type$* $typedef$Ptr;\n"
+                "typedef $type$ const* Const$typedef$Ptr;\n"
+                "typedef $out_type$* $out_typedef$Ptr;\n"
                 "typedef ::cetty::service::ServiceFuture<$out_typedef$Ptr> $method$ServiceFuture;\n"
                 "typedef boost::intrusive_ptr<$method$ServiceFuture> $method$ServiceFuturePtr;\n"
                 );
@@ -320,15 +320,15 @@ void ServiceGenerator::GenerateCallMethod(io::Printer* printer) {
         map<string, string> sub_vars;
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);
-        sub_vars["input_type"] = ClassName(method->input_type(), true);
-        sub_vars["output_type"] = ClassName(method->output_type(), true);
+        sub_vars["input_type"] = ClassName(method->input_type(), false);
+        sub_vars["output_type"] = ClassName(method->output_type(), false);
 
         // Note:  down_cast does not work here because it only works on pointers,
         //   not references.
         printer->Print(sub_vars,
                        "    case $index$:\n"
-                       "      $name$(::cetty::util::static_pointer_cast< $input_type$ const>(request),\n"
-                       "             ::cetty::util::static_pointer_cast< $output_type$>(response),\n"
+                       "      $name$(static_cast< Const$input_type$Ptr>(request),\n"
+                       "             static_cast< $output_type$Ptr>(response),\n"
                        "             done);\n"
                        "      break;\n");
     }
@@ -395,8 +395,9 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
         printer->Print(sub_vars,
                        "void $classname$_Stub::$name$(const Const$input_type$Ptr& request,\n"
                        "                              const $name$ServiceFuturePtr& future) {\n"
-                       "  channel_.CallMethod(descriptor()->method($index$),\n"
-                       "                      request, future);\n"
+                       "  channel_.CallMethod<Const$input_type$Ptr, $output_type$Ptr>(descriptor()->method($index$),\n"
+                       "                                                              request,\n"
+                       "                                                              future);\n"
                        "}\n");
     }
 }
@@ -445,7 +446,6 @@ void changeHeader(const std::string& proto) {
         std::getline(file, line);
 
         if (line.find("google/protobuf/service.h") != line.npos) {
-            lines.push_back("#include <cetty/util/BarePointer.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufService.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufServiceFuture.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>");

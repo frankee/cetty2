@@ -25,50 +25,87 @@ namespace service {
 namespace http {
 namespace map {
 
-//ServiceResponseMapperConfig repConfig;
-//ServiceRequestMapperConfig reqConfig;
-//config.configure(&reqConfig);
-//config.configure(&repConfig);
-
 ServiceRequestMapper::ServiceRequestMapper() {
+    ConfigCenter::instance().configure(&config);
 }
 
 ServiceRequestMapper::ServiceRequestMapper(const std::string& conf) {
+    ConfigCenter::configureFromString(conf, &config);
 }
 
-ServiceRequestMapper::ServiceRequestMapper(const ConfigCenter& confCenter) {
+ServiceRequestMapper::~ServiceRequestMapper() {
+
 }
 
-int ServiceRequestMapper::configure(const char* conf) {
-    BOOST_ASSERT(false);
-    return -1;
+bool ServiceRequestMapper::configure(const char* conf) {
+    if (ConfigCenter::configureFromString(conf, &config)) {
+        return init();
+    }
+    return false;
 }
 
-int ServiceRequestMapper::configure(const std::string& conf) {
-    BOOST_ASSERT(false);
-    return -1;
+bool ServiceRequestMapper::configure(const std::string& conf) {
+    if (ConfigCenter::configureFromString(conf, &config)) {
+        return init();
+    }
+    return false;
 }
 
-int ServiceRequestMapper::configure(const ConfigCenter& confCenter) {
-    BOOST_ASSERT(false);
-    return -1;
+bool ServiceRequestMapper::configure(const ServiceRequestMapperConfig& conf) {
+    config.copyFrom(conf);
+    return init();
 }
 
-int ServiceRequestMapper::configureFromFile(const std::string& file) {
-    BOOST_ASSERT(false);
-    return -1;
+bool ServiceRequestMapper::configureFromFile(const std::string& file) {
+    if (ConfigCenter::configureFromFile(file, &config)) {
+        return init();
+    }
+    return false;
 }
 
 HttpServiceTemplate* ServiceRequestMapper::match(const HttpMethod& method, const std::vector<std::string>& pathSegments) {
     std::size_t j = serviceTemplates.size();
 
     for (std::size_t i = 0; i < j; ++i) {
-        if (serviceTemplates[i].match(method, pathSegments)) {
-            return &serviceTemplates[i];
+        if (serviceTemplates[i]->match(method, pathSegments)) {
+            return serviceTemplates[i];
         }
     }
 
     return NULL;
+}
+
+bool ServiceRequestMapper::init() {
+    deinit();
+
+    std::size_t j = config.templates.size();
+    for (std::size_t i = 0; i < j; ++i) {
+        const ServiceRequestMapperConfig::Template* t = config.templates[i];
+        if (t) {
+            HttpServiceTemplate* templ = new HttpServiceTemplate(t->method, t->uri, t->cookie);
+
+            if (templ->validated()) {
+                serviceTemplates.push_back(templ);
+            }
+            else {
+                delete templ;
+            }
+        }
+    }
+
+    return !serviceTemplates.empty();
+}
+
+void ServiceRequestMapper::deinit() {
+    std::size_t j = serviceTemplates.size();
+    for (std::size_t i = 0; i < j; ++i) {
+        HttpServiceTemplate* tmpl = serviceTemplates[i];
+        if (tmpl) {
+            delete tmpl;
+        }
+    }
+
+    serviceTemplates.clear();
 }
 
 }

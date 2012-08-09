@@ -36,7 +36,8 @@ public:
     virtual const ConfigDescriptor* getdescriptor() const;
 
     virtual ConfigObject* create() const = 0;
-    virtual std::string getName() const { return name; }
+
+    std::string getName() const { return name; }
 	
 	virtual void clear();
 	virtual void copyFrom(const ConfigObject& from);

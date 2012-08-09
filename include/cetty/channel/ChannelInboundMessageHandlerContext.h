@@ -38,8 +38,8 @@ public:
                                         ChannelHandlerContext* next)
         : ChannelHandlerContext(name, pipeline, handler, prev, next) {
         hasInboundMessageHandler = true;
-        inboundHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
-        BOOST_ASSERT(inboundHandler);
+        inboundMsgHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
+        BOOST_ASSERT(inboundMsgHandler);
     }
 
     ChannelInboundMessageHandlerContext(const std::string& name,
@@ -50,15 +50,15 @@ public:
                                         ChannelHandlerContext* next)
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
         hasInboundMessageHandler = true;
-        inboundHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
-        BOOST_ASSERT(inboundHandler);
+        inboundMsgHandler = boost::dynamic_pointer_cast<InboundHandler>(handler);
+        BOOST_ASSERT(inboundMsgHandler);
     }
 
     virtual ~ChannelInboundMessageHandlerContext() {}
 
     void addInboundMessage(const InboundInT& message) {
         if (eventloop->inLoopThread()) {
-            inboundHandler->addInboundMessage(message);
+            inboundMsgHandler->addInboundMessage(message);
         }
         else {
             eventloop->post(boost::bind(
@@ -69,7 +69,7 @@ public:
     }
 
 private:
-    InboundHandlerPtr inboundHandler;
+    InboundHandlerPtr inboundMsgHandler;
 };
 
 }

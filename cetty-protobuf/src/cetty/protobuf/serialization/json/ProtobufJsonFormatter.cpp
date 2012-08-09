@@ -1,30 +1,176 @@
-#include "cetty/handler/rpc/protobuf/ProtobufJsonFormatter.h"
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
+#include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
+
+#include <boost/cstdint.hpp>
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
-namespace cetty { namespace handler { namespace rpc { namespace protobuf { 
+#include <cetty/util/StringUtil.h>
 
-void ProtobufJsonFormatter::serializeToString(const google::protobuf::Message& message, std::string* str) {
+namespace cetty {
+namespace protobuf {
+namespace serialization {
+namespace json {
+
+using namespace cetty::util;
+
+/**
+ * An inner class for writing text to the output stream.
+ */
+class JsonPrinter {
+public:
+    JsonPrinter(std::string* output) : output(output), styled(false) {
+    }
+
+    ~JsonPrinter() {}
+
+    /**
+     * Indent text by two spaces. After calling Indent(), two spaces will be inserted at the
+     * beginning of each line of text. Indent() may be called multiple times to produce deeper
+     * indents.
+     */
+    void indent() {
+        output->append("  ");
+    }
+
+    /**
+     * Reduces the current indent level by two spaces, or crashes if the indent level is zero.
+     */
+    void outdent() {
+        std::string::size_type length = output->size();
+
+        if (length > 2) {
+            output->resize(length - 2);
+        }
+    }
+
+    void eatLastComma() {
+        std::string::size_type size = output->size();
+
+        if (output->at(size -1) == ',') {
+            output->resize(size - 1);
+        }
+    }
+
+    JsonPrinter& operator<<(const char* text) {
+        append(text);
+        return *this;
+    }
+
+    JsonPrinter& operator<<(const std::string& text) {
+        append(text);
+        return *this;
+    }
+
+    /**
+     * Print text to the output stream.
+     */
+    void append(const char* text) {
+        output->append(text);
+        //             int size = text.length();
+        //             int pos = 0;
+        //
+        //             for (int i = 0; i < size; i++) {
+        //                 if (text.charAt(i) == '\n') {
+        //                     write(text.subSequence(pos, size), i - pos + 1);
+        //                     pos = i + 1;
+        //                     atStartOfLine = true;
+        //                 }
+        //             }
+        //             write(text.subSequence(pos, size), size - pos);
+    }
+
+    void append(const std::string& text) {
+        append(text.c_str());
+    }
+
+    void append(boost::uint32_t value) {
+        StringUtil::strprintf(output, "%u", value);
+    }
+
+    void append(boost::int32_t value) {
+        StringUtil::strprintf(output, "%d", value);
+    }
+
+    void append(boost::int64_t value) {
+        StringUtil::strprintf(output, "%lld", value);
+    }
+
+    void append(boost::uint64_t value) {
+        StringUtil::strprintf(output, "%llu", value);
+    }
+
+    void append(double value) {
+        StringUtil::strprintf(output, "%lf", value);
+    }
+
+    void append(bool value) {
+        if (value) {
+            output->append("true");
+        }
+        else {
+            output->append("false");
+        }
+    }
+
+    void append(const char* data, int size) {
+        output->append(data, size);
+
+        //             if (size == 0) {
+        //                 return;
+        //             }
+        //
+        //             if (atStartOfLine) {
+        //                 atStartOfLine = false;
+        //                 output.append(indent);
+        //             }
+        //             output.append(data);
+    }
+
+private:
+    bool styled;
+    std::string* output;
+};
+
+void ProtobufJsonFormatter::format(const google::protobuf::Message& message,
+                                   std::string* str) {
     if (str) {
-        JsonGenerator json(*str);
-        json.append("{");
-        serializeMessage(message, json);
-        json.append("}");
+        JsonPrinter printer(str);
+        printer << "{";
+        printMessage(message, printer);
+        printer << "}";
     }
 }
 
-void ProtobufJsonFormatter::serializeMessage(const google::protobuf::Message& message, JsonGenerator& json) {
+void ProtobufJsonFormatter::printMessage(const google::protobuf::Message& message,
+        JsonPrinter& printer) {
+
     const google::protobuf::Reflection* reflection = message.GetReflection();
     const google::protobuf::Descriptor* descriptor = message.GetDescriptor();
 
     int fieldCnt = descriptor->field_count();
+
     for (int i = 0; i < fieldCnt; ++i) {
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
-        bool serialized = serializeField(message, field, json);
+        bool serialized = printField(message, field, printer);
 
         if (serialized) {
-            json.append(",");
+            printer.append(",");
         }
     }
 
@@ -33,290 +179,218 @@ void ProtobufJsonFormatter::serializeMessage(const google::protobuf::Message& me
     reflection->ListFields(message, &fields);
 
     std::size_t j = fields.size();
+
     for (std::size_t i = 0; i < j; ++i) {
         const google::protobuf::FieldDescriptor* field = fields[i];
+
         if (field->is_extension()) {
             extentionFields.push_back(field);
         }
     }
 
     j = extentionFields.size();
-    
+
     for (std::size_t i = 0; i < j; ++i) {
-        bool serialized = serializeField(message, extentionFields[i], json);
+        bool serialized = printField(message, extentionFields[i], printer);
+
         if (serialized) {
-            json.append(",");
+            printer.append(",");
         }
     }
-    json.eatLastComma();
+
+    printer.eatLastComma();
 
     //TODO process UnknownFields
 }
 
-bool ProtobufJsonFormatter::serializeField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json) {
+bool ProtobufJsonFormatter::printField(const google::protobuf::Message& message,
+                                       const google::protobuf::FieldDescriptor* field,
+                                       JsonPrinter& printer) {
     const google::protobuf::Reflection* reflection = message.GetReflection();
+
     //FIXME
     if (field->is_repeated() || reflection->HasField(message, field)) {
-        serializeSingleField(message, field, json);
+        printSingleField(message, field, printer);
         return true;
     }
+
     return false;
 }
 
-void ProtobufJsonFormatter::serializeSingleField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json) {
+void ProtobufJsonFormatter::printSingleField(const google::protobuf::Message& message,
+        const google::protobuf::FieldDescriptor* field,
+        JsonPrinter& printer) {
     if (field->is_extension()) {
-        json.append("\"");
-        json.append(field->camelcase_name());
-        json.append("\"");
+        printer << "\"" << field->camelcase_name() << "\"";
     }
     else if (field->type() == google::protobuf::FieldDescriptor::TYPE_GROUP) {
         // Groups must be serialized with their original capitalization.
-        json.append("\"");
-        json.append(field->message_type()->name());
-        json.append("\"");
+        printer << "\"" << field->message_type()->name() << "\"";
     }
     else {
-        json.append("\"");
-        json.append(field->camelcase_name());
-        json.append("\"");
+        printer << "\"" << field->camelcase_name() << "\"";
     }
 
     // Done with the name, on to the value
-    json.append(":");
+    printer.append(":");
 
     //if (field->cpp_type() == google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE) {
-    //    json.indent();
+    //    printer.indent();
     //}
 
     if (field->is_repeated()) {
         // Repeated field-> append each element.
-        json.append("[");
-        printFieldRepeatedValue(message, field, json);
-        json.append("]");
+        printer.append("[");
+        printFieldRepeatedValue(message, field, printer);
+        printer.append("]");
     }
     else {
-        printFieldValue(message, field, json);
+        printFieldValue(message, field, printer);
+
         if (field->cpp_type() == google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE) {
-            //json.outdent();
+            //printer.outdent();
         }
     }
 }
 
-void ProtobufJsonFormatter::printFieldRepeatedValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json) {
+void ProtobufJsonFormatter::printFieldRepeatedValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonPrinter& printer) {
     const google::protobuf::Reflection* reflection = message.GetReflection();
     int fieldsize = reflection->FieldSize(message, field);
 
     for (int i = 0; i < fieldsize; ++i) {
         switch (field->cpp_type()) {
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-            json.append(reflection->GetRepeatedInt32(message, field, i));
+            printer.append(reflection->GetRepeatedInt32(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-            json.append(reflection->GetRepeatedInt64(message, field, i));
+            printer.append(reflection->GetRepeatedInt64(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-            json.append(reflection->GetRepeatedFloat(message, field, i));
+            printer.append(reflection->GetRepeatedFloat(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-            json.append(reflection->GetRepeatedDouble(message, field, i));
+            printer.append(reflection->GetRepeatedDouble(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
-            json.append(reflection->GetRepeatedBool(message, field, i));
+            printer.append(reflection->GetRepeatedBool(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-            json.append(reflection->GetRepeatedUInt32(message, field, i));
+            printer.append(reflection->GetRepeatedUInt32(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-            json.append(reflection->GetRepeatedUInt64(message, field, i));
+            printer.append(reflection->GetRepeatedUInt64(message, field, i));
             break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING: {
             std::string value = reflection->GetRepeatedString(message, field, i);
+
             if (value.empty()) {
-                json.append("null");
+                printer.append("null");
             }
             else {
-                json.append("\"");
-                json.append(value);
-                json.append("\"");
+                printer << "\"" << value << "\"";
             }
+
             break;
-                                                                }
+        }
+
         case google::protobuf::FieldDescriptor::CPPTYPE_ENUM: {
-            json.append("\"");
-            json.append(reflection->GetRepeatedEnum(message, field, i)->name());
-            json.append("\"");
+            printer << "\""
+                    << reflection->GetRepeatedEnum(message, field, i)->name()
+                    << "\"";
             break;
-                                                              }
+        }
+
         case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: {
-            json.append("{");
-            serializeMessage(reflection->GetRepeatedMessage(message, field, i), json);
-            json.append("}");
+            printer.append("{");
+            printMessage(reflection->GetRepeatedMessage(message, field, i), printer);
+            printer.append("}");
             break;
-                                                                 }
+        }
+
         default:
             break;
         }
 
         if (i < fieldsize -1) {
-            json.append(",");
+            printer.append(",");
         }
     }
 }
 
-void ProtobufJsonFormatter::printFieldValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator json) {
+void ProtobufJsonFormatter::printFieldValue(const google::protobuf::Message& message,
+    const google::protobuf::FieldDescriptor* field,
+    JsonPrinter& printer) {
     const google::protobuf::Reflection* reflection = message.GetReflection();
 
     switch (field->cpp_type()) {
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-        json.append(reflection->GetInt32(message, field));
+        printer.append(reflection->GetInt32(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-        json.append(reflection->GetInt64(message, field));
+        printer.append(reflection->GetInt64(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-        json.append(reflection->GetFloat(message, field));
+        printer.append(reflection->GetFloat(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-        json.append(reflection->GetDouble(message, field));
+        printer.append(reflection->GetDouble(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
-        json.append(reflection->GetBool(message, field));
+        printer.append(reflection->GetBool(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-        json.append(reflection->GetUInt32(message, field));
+        printer.append(reflection->GetUInt32(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-        json.append(reflection->GetUInt64(message, field));
+        printer.append(reflection->GetUInt64(message, field));
         break;
+
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING: {
         std::string value = reflection->GetString(message, field);
+
         if (value.empty()) {
-            json.append("null");
+            printer.append("null");
         }
         else {
-            json.append("\"");
-            json.append(value);
-            json.append("\"");
+            printer << "\"" << value << "\"";
         }
+
         break;
-                                                            }
+    }
+
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM: {
-        json.append("\"");
-        json.append(reflection->GetEnum(message, field)->name());
-        json.append("\"");
+        printer << "\""
+                << reflection->GetEnum(message, field)->name()
+                << "\"";
         break;
-                                                          }
+    }
+
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: {
-        json.append("{");
-        serializeMessage(reflection->GetMessage(message, field), json);
-        json.append("}");
+        printer.append("{");
+        printMessage(reflection->GetMessage(message, field), printer);
+        printer.append("}");
         break;
-                                                             }
+    }
+
     default:
         break;
     }
 }
 
-
-void ProtobufJsonFormatter::JsonGenerator::indent() {
-    output.append("  ");
 }
-
-void ProtobufJsonFormatter::JsonGenerator::outdent() {
-    std::string::size_type length = output.size();
-    if (length > 2) {
-        output.resize(length - 2);
-    }
 }
-
-void ProtobufJsonFormatter::JsonGenerator::append(const char* text) {
-    output.append(text);
-    //             int size = text.length();
-    //             int pos = 0;
-    // 
-    //             for (int i = 0; i < size; i++) {
-    //                 if (text.charAt(i) == '\n') {
-    //                     write(text.subSequence(pos, size), i - pos + 1);
-    //                     pos = i + 1;
-    //                     atStartOfLine = true;
-    //                 }
-    //             }
-    //             write(text.subSequence(pos, size), size - pos);
 }
-
-void ProtobufJsonFormatter::JsonGenerator::append(const std::string& text) {
-    output.append(text);
 }
-
-void ProtobufJsonFormatter::JsonGenerator::append(int32 value) {
-    char buf[128] = {0};
-    sprintf(buf, "%d", value);
-    output.append(buf);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(uint32 value) {
-    char buf[128] = {0};
-    sprintf(buf, "%u", value);
-    output.append(buf);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(int64 value) {
-    char buf[128] = {0};
-
-#if defined(_WIN32)
-    sprintf(buf, "%I64d", value);
-#else
-    sprintf(buf, "%lld", value);
-#endif
-
-    output.append(buf);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(uint64 value) {
-    char buf[128] = {0};
-
-#if defined(_WIN32)
-    sprintf(buf, "%I64u", value);
-#else
-    sprintf(buf, "%llu", value);
-#endif
-
-    output.append(buf);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(double value) {
-    char buf[128] = {0};
-    sprintf(buf, "%lf", value);
-    output.append(buf);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(bool value) {
-    if (value) {
-        output.append("true");
-    }
-    else {
-        output.append("false");
-    }
-}
-
-void ProtobufJsonFormatter::JsonGenerator::append(const char* data, int size) {
-    output.append(data, size);
-
-    //             if (size == 0) {
-    //                 return;
-    //             }
-    // 
-    //             if (atStartOfLine) {
-    //                 atStartOfLine = false;
-    //                 output.append(indent);
-    //             }
-    //             output.append(data);
-}
-
-void ProtobufJsonFormatter::JsonGenerator::eatLastComma() {
-    if (output.back() == ',') {
-        output.resize(output.size()-1);
-    }
-}
-
-}}}}

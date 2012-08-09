@@ -65,6 +65,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoWorker", "..\..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfigGenerator", "..\..\..\cetty-config\build\ConfigGenerator\ConfigGenerator.vcxproj", "{0452B388-3767-4DED-930D-652177D13DCD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufJsonSerialization", "..\..\..\cetty-protobuf\build\ProtobufJsonSerialization\ProtobufJsonSerialization.vcxproj", "{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -139,6 +141,10 @@ Global
 		{0452B388-3767-4DED-930D-652177D13DCD}.Debug|Win32.Build.0 = Debug|Win32
 		{0452B388-3767-4DED-930D-652177D13DCD}.Release|Win32.ActiveCfg = Release|Win32
 		{0452B388-3767-4DED-930D-652177D13DCD}.Release|Win32.Build.0 = Release|Win32
+		{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}.Debug|Win32.Build.0 = Debug|Win32
+		{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}.Release|Win32.ActiveCfg = Release|Win32
+		{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

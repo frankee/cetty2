@@ -18,7 +18,6 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
-#include <cetty/util/BarePointer.h>
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
@@ -33,8 +32,8 @@ namespace protobuf {
 namespace service {
 
 
-typedef ::cetty::util::BarePointer< ::google::protobuf::Message> MessagePtr;
-typedef ::cetty::util::BarePointer< ::google::protobuf::Message const> ConstMessagePtr;
+typedef ::google::protobuf::Message* MessagePtr;
+typedef ::google::protobuf::Message const* ConstMessagePtr;
 
 typedef ::cetty::service::ServiceFuture<ProtobufServiceMessagePtr>   ProtobufServiceFuture;
 typedef ::boost::intrusive_ptr<ProtobufServiceFuture> ProtobufServiceFuturePtr;

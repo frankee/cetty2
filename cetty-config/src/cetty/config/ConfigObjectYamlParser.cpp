@@ -26,9 +26,9 @@ int parseField(const ConfigFieldDescriptor* field,
                const YAML::Node& node,
                ConfigObject* object);
 
-int parseConfigObject(const YAML::Node& node, ConfigObject* object) {
+bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
     if (!object) {
-        return -1;
+        return false;
     }
 
     const ConfigReflection* reflection = object->getreflection();
@@ -47,7 +47,7 @@ int parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         }
     }
 
-    return 0;
+    return true;
 }
 
 int parseField(const ConfigFieldDescriptor* field,

@@ -22,12 +22,7 @@
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 #include <cetty/protobuf/service/http/map/HttpServiceTemplate.h>
-
-namespace cetty {
-namespace config {
-class ConfigCenter;
-}
-}
+#include <cetty/protobuf/service/http/map/ServiceRequestMapperConfig.h>
 
 namespace cetty {
 namespace protobuf {
@@ -38,21 +33,28 @@ namespace map {
 using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 
-class ServiceRequestMapper : public cetty::util::ReferenceCounter<ServiceRequestMapper, int> {
+class ServiceRequestMapper
+    : public cetty::util::ReferenceCounter<ServiceRequestMapper, int> {
 public:
     ServiceRequestMapper();
     ServiceRequestMapper(const std::string& conf);
-    ServiceRequestMapper(const ConfigCenter& confCenter);
+    virtual ~ServiceRequestMapper();
 
-    int configure(const char* conf);
-    int configure(const std::string& conf);
-    int configure(const ConfigCenter& confCenter);
-    int configureFromFile(const std::string& file);
+    bool configure(const char* conf);
+    bool configure(const std::string& conf);
+    bool configure(const ServiceRequestMapperConfig& conf);
+    bool configureFromFile(const std::string& file);
 
     HttpServiceTemplate* match(const HttpMethod& method, const std::vector<std::string>& pathSegments);
 
 private:
-    std::vector<HttpServiceTemplate> serviceTemplates;
+    bool init();
+    void deinit();
+
+private:
+    ServiceRequestMapperConfig config;
+
+    std::vector<HttpServiceTemplate*> serviceTemplates;
 };
 
 }

@@ -54,10 +54,19 @@ public:
         int index;
         std::string cookie;
         std::string name;
+        std::string alias;
+
+        static Parameter* createFromPath(const std::string& name, const std::string& alias, int index);
+        static Parameter* createFromQuery(const std::string& name, const std::string& alias);
+        static Parameter* createFromCookie();
     };
 
 public:
-    HttpServiceTemplate();
+    HttpServiceTemplate(const std::string& method,
+                        const std::string& uri,
+                        const std::string& cookie);
+
+    bool validated() const;
 
     bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const {
         return method == httpMethod && uriTemplate.matchPath(pathSegments);

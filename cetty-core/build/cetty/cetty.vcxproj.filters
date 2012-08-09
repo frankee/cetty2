@@ -697,9 +697,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -1110,6 +1107,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

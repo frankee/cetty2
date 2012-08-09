@@ -30,13 +30,11 @@ using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
 ProtobufMessage2HttpResponse::ProtobufMessage2HttpResponse() {
-
 }
 
 ProtobufMessage2HttpResponse::ProtobufMessage2HttpResponse(
     const ServiceResponseMapperPtr& mapper)
     : mapper(mapper) {
-
 }
 
 void ProtobufMessage2HttpResponse::setResponseMapper(
@@ -47,13 +45,17 @@ void ProtobufMessage2HttpResponse::setResponseMapper(
 HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
     const HttpRequestPtr& req,
     const ProtobufServiceMessagePtr& message) {
-    const ServiceResponseMapper::MapValue* v = mapper->match(message->getService(), message->getMethod());
+    const ServiceResponseMapper::ResponseTemplate* tmpl
+        = mapper->match(message->getService(), message->getMethod());
 
-    if (v) {
+    if (tmpl) {
         HttpResponsePtr response(new HttpResponse);
-        ServiceResponseMapper::setHttpHeaders(*v, response);
+        ServiceResponseMapper::setHttpHeaders(*tmpl, response);
 
         const std::string& format = req->getLabel();
+        if (tmpl->content.empty()) {
+            //google::protobuf::Message* msg = message->getPayload();
+        }
 
         return response;
     }

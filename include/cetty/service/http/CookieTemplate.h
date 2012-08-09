@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <string>
+
 namespace cetty {
 namespace service {
 namespace http {
@@ -24,7 +26,7 @@ namespace http {
 // [name:alias]={}:{param:alias}:{:alias}
 class CookieTemplate {
 public:
-    CookieTemplate();
+    CookieTemplate(const std::string& str) {}
 };
 
 }

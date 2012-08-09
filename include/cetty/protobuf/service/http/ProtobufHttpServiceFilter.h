@@ -58,6 +58,7 @@ public:
 protected:
     virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req);
+
     virtual HttpResponsePtr filterResponse(ChannelHandlerContext& ctx,
         const HttpRequestPtr& req,
         const ProtobufServiceMessagePtr& rep);

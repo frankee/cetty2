@@ -103,30 +103,36 @@ public:
     ProtobufClientServiceAdaptor(const ClientServicePtr& service);
     ~ProtobufClientServiceAdaptor();
 
+    template<typename RepT>
+    RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
+        return static_cast<RepT>(from->getPayload());
+    }
+
+    template<typename ReqT, typename RepT>
+    void CallMethod(const ::google::protobuf::MethodDescriptor* method,
+                    const ReqT& request,
+                    const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+        CallMethod<ConstMessagePtr, ProtobufServiceMessagePtr>(
+            method,
+            request,
+            ProtobufServiceFuturePtr(
+                new TypeCastServiceFuture<ProtobufServiceMessagePtr, RepT>(future,
+                        boost::bind(
+                            &ProtobufClientServiceAdaptor::downPointerCast<RepT>,
+                            this,
+                            _1))));
+    }
+
     // Call the given method of the remote service.  The signature of this
     // procedure looks the same as Service::CallMethod(), but the requirements
     // are less strict in one important way:  the request and response objects
     // need not be of any specific class as long as their descriptors are
     // method->input_type() and method->output_type().
-    void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const ConstMessagePtr& request,
-                    const ProtobufServiceFuturePtr& future);
-
-    template<typename RepT>
-    RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return cetty::util::static_pointer_cast<typename RepT::element_type>(from->getPayload());
-    }
-
-    template<typename ReqT, typename RepT>
-    void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const cetty::util::BarePointer<ReqT const>& request,
-                    const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
-        CallMethod(method,
-                   cetty::util::static_pointer_cast<typename MessagePtr::element_type const>(request),
-                   ProtobufServiceFuturePtr(
-                       new TypeCastServiceFuture<ProtobufServiceMessagePtr, RepT>(future,
-                               boost::bind(&ProtobufClientServiceAdaptor::downPointerCast<RepT>, this, _1))));
-    }
+    template<>
+    void CallMethod<ConstMessagePtr, ProtobufServiceMessagePtr>(
+        const ::google::protobuf::MethodDescriptor* method,
+        const ConstMessagePtr& request,
+        const ProtobufServiceFuturePtr& future);
 
     const ClientServicePtr& getService() {
         return service;

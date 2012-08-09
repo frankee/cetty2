@@ -1,94 +1,75 @@
-#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFJSONFORMATTER_H)
-#define CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFJSONFORMATTER_H
+#if !defined(CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H)
+#define CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H
 
-#if !defined(_MSC_VER)
-    #include <stdint.h>
-#endif
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 
-#include "cetty/handler/rpc/protobuf/ProtobufFormatter.h"
+#include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
-namespace google { namespace protobuf {
-    class FieldDescriptor;
-}}
+namespace google {
+namespace protobuf {
+class FieldDescriptor;
+}
+}
 
-namespace cetty { namespace handler { namespace rpc { namespace protobuf { 
+namespace cetty {
+namespace protobuf {
+namespace serialization {
+namespace json {
+
+using namespace cetty::protobuf::serialization;
+
+class JsonPrinter;
 
 class ProtobufJsonFormatter : public ProtobufFormatter {
-private:
-    class JsonGenerator;
-
 public:
-	ProtobufJsonFormatter() {}
-	virtual ~ProtobufJsonFormatter() {}
+    ProtobufJsonFormatter() {}
+    virtual ~ProtobufJsonFormatter() {}
 
-	virtual void serializeToString(const google::protobuf::Message& message, std::string* str);
+    virtual void format(const google::protobuf::Message& message,
+                        std::string* str);
 
 private:
-	void serializeMessage(const google::protobuf::Message& message, JsonGenerator& json);
-	bool serializeField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json);
-	void serializeSingleField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json);
+    void printMessage(const google::protobuf::Message& message,
+                      JsonPrinter& printer);
 
-	void printFieldRepeatedValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator& json);
-	void printFieldValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, JsonGenerator json);
+    bool printField(const google::protobuf::Message& message,
+                    const google::protobuf::FieldDescriptor* field,
+                    JsonPrinter& printer);
 
-	/**
-     * An inner class for writing text to the output stream.
-     */
-    class JsonGenerator {
-	public:
-#ifdef _MSC_VER
-        typedef __int32 int32;
-        typedef __int64 int64;
-        typedef unsigned __int32 uint32;
-        typedef unsigned __int64 uint64;
-#else
-        typedef int32_t int32;
-        typedef int64_t int64;;
-        typedef uint32_t uint32;
-        typedef uint64_t uint64;
-#endif
+    void printSingleField(const google::protobuf::Message& message,
+                          const google::protobuf::FieldDescriptor* field,
+                          JsonPrinter& printer);
 
-		JsonGenerator(std::string& output) : output(output), styled(false) {
-        }
+    void printFieldRepeatedValue(const google::protobuf::Message& message,
+                                 const google::protobuf::FieldDescriptor* field,
+                                 JsonPrinter& printer);
 
-		~JsonGenerator() {}
-
-        /**
-         * Indent text by two spaces. After calling Indent(), two spaces will be inserted at the
-         * beginning of each line of text. Indent() may be called multiple times to produce deeper
-         * indents.
-         */
-        void indent();
-
-        /**
-         * Reduces the current indent level by two spaces, or crashes if the indent level is zero.
-         */
-        void outdent();
-
-        void eatLastComma();
-
-        /**
-         * Print text to the output stream.
-         */
-        void append(const char* text);
-		void append(const std::string& text);
-
-		void append(int32 value);
-		void append(uint32 value);
-		void append(int64 value);
-        void append(uint64 value);
-
-		void append(double value);
-		void append(bool value);
-
-		void append(const char* data, int size);
-
-	private:
-        bool styled;
-		std::string& output;
-    };
+    void printFieldValue(const google::protobuf::Message& message,
+                         const google::protobuf::FieldDescriptor* field,
+                         JsonPrinter& printer);
 };
 
-}}}}
+}
+}
+}
+}
 
-#endif //#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFJSONFORMATTER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H)
+
+// Local Variables:
+// mode: c++
+// End:

@@ -599,8 +599,8 @@ void EchoService::CallMethod(const ::google::protobuf::MethodDescriptor* method,
   GOOGLE_DCHECK_EQ(method->service(), EchoService_descriptor_);
   switch(method->index()) {
     case 0:
-      Echo(::cetty::util::static_pointer_cast< ::echo::EchoRequest const>(request),
-             ::cetty::util::static_pointer_cast< ::echo::EchoResponse>(response),
+      Echo(static_cast< ConstEchoRequestPtr>(request),
+             static_cast< EchoResponsePtr>(response),
              done);
       break;
     default:
@@ -652,8 +652,9 @@ EchoService_Stub::~EchoService_Stub() {
 
 void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
                               const EchoServiceFuturePtr& future) {
-  channel_.CallMethod(descriptor()->method(0),
-                      request, future);
+  channel_.CallMethod<ConstEchoRequestPtr, EchoResponsePtr>(descriptor()->method(0),
+                                                              request,
+                                                              future);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -661,3 +662,5 @@ void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
 }  // namespace echo
 
 // @@protoc_insertion_point(global_scope)
+
+

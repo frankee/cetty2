@@ -30,6 +30,7 @@ namespace cetty {
 namespace config {
 
 class ConfigObject;
+class ConfigIncludeFileFinder;
 
 class ConfigCenter {
 public:
@@ -37,18 +38,25 @@ public:
 
 public:
     ConfigCenter();
+    ~ConfigCenter();
 
-    int load(int argc, char* argv[]);
+    bool load(int argc, char* argv[]);
 
-    int load(const char* str);
-    int load(const std::string& str);
-    int loadFromFile(const std::string& file);
+    bool load(const char* str);
+    bool load(const std::string& str);
+    bool loadFromFile(const std::string& file);
 
-    int configure(ConfigObject* object) const;
-    int configure(const std::string& name, ConfigObject* object) const;
+    bool configure(ConfigObject* object) const;
+    bool configure(const std::string& name, ConfigObject* object) const;
+
+public:
+    static bool configureFromString(const char* str, ConfigObject* object);
+    static bool configureFromString(const std::string& str, ConfigObject* object);
+    static bool configureFromFile(const std::string& file, ConfigObject* object);
 	
 private:
-	int getFileContent(const std::string& file, std::string* content);
+    bool getFileContent(const std::vector<std::string>& files, std::string* content);
+	bool getFileContent(const std::string& file, std::string* content);
 
 private:
     static ConfigCenter* center;
@@ -59,6 +67,7 @@ private:
     char** argv;
 
     YAML::Node root;
+    ConfigIncludeFileFinder* finder;
 };
 
 }

@@ -366,7 +366,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h" />
-    <ClInclude Include="..\..\..\include\cetty\util\BarePointer.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />

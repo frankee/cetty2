@@ -11,54 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceMapperPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceResponseMapper.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\HttpServiceTemplate.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\map\ServiceRequestMapper.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\http\ProtobufHttpServiceFilter.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessagePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceRegister.h" />
-    <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\json\ProtobufJsonFormatter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\json\ProtobufJsonParser.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufFormatter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufParser.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpRequest2ProtobufMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpResponse2ProtobufMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpServiceTemplate.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpServiceFilter.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\proto\service.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonParser.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}</ProjectGuid>
-    <RootNamespace>ProotobufJsonSerialization</RootNamespace>
+    <ProjectGuid>{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}</ProjectGuid>
+    <RootNamespace>ProtobufJsonSerialization</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

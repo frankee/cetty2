@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigCenter.cpp" />
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigReflection.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigDescriptor.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\ConfigIncludeFileFinder.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectYamlParser.cpp" />
   </ItemGroup>
@@ -103,6 +104,7 @@
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h" />
+    <ClInclude Include="..\..\src\cetty\config\ConfigIncludeFileFinder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
