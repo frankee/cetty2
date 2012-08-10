@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_SESSIONCONTEXT_H)
+#define CETTY_SHIRO_SESSION_SESSIONCONTEXT_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Default implementation of the {@link SessionContext} interface which provides getters and setters that
@@ -27,37 +30,34 @@ namespace shiro {
  * @since 1.0
  */
 class SessionContext : public MapContext{
+private:
+    static const std::string HOST;
+    static const std::string SESSION_ID;
 
-    private static final long serialVersionUID = -1424160751361252966L;
+public:
+    SessionContext() {}
 
-    private static final String HOST = DefaultSessionContext.class.getName() + ".HOST";
-    private static final String SESSION_ID = DefaultSessionContext.class.getName() + ".SESSION_ID";
+    SessionContext(const std::map<std::string, std::string> &map):MapContext(map) {}
 
-    public DefaultSessionContext() {
-        super();
+    std::string getHost() {
+        return getValue(HOST);
     }
 
-    public DefaultSessionContext(Map<String, Object> map) {
-        super(map);
-    }
-
-    public String getHost() {
-        return getTypedValue(HOST, String.class);
-    }
-
-    public void setHost(String host) {
-        if (StringUtils.hasText(host)) {
+    void setHost(const std::string &host) {
+        if (host.size() > 0) {
             put(HOST, host);
         }
     }
 
-    public Serializable getSessionId() {
-        return getTypedValue(SESSION_ID, Serializable.class);
+    std::string getSessionId() {
+        return getValue(SESSION_ID);
     }
 
-    public void setSessionId(Serializable sessionId) {
+    void setSessionId(std::string sessionId) {
         nullSafePut(SESSION_ID, sessionId);
     }
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_SESSION_SESSIONCONTEXT_H)

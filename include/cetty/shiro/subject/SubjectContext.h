@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SUBJECT_SUBJECTCONTEXT_H)
+#define CETTY_SHIRO_SUBJECT_SUBJECTCONTEXT_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,10 +18,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cstdlib>
+
+#include <cetty/shiro/session/Session.h>
+#include <cetty/shiro/authc/AuthenticationInfo.h>
 
 namespace cetty {
 namespace shiro {
+namespace subject {
 
+using namespace cetty::shiro::session;
+using namespace cetty::shiro::authc;
 /**
  * Default implementation of the {@link SubjectContext} interface.  Note that the getters and setters are not
  * simple pass-through methods to an underlying attribute;  the getters will employ numerous heuristics to acquire
@@ -29,223 +38,95 @@ namespace shiro {
  *
  * @since 1.0
  */
-class DefaultSubjectContext : public MapContext{
+class SubjectContext : public MapContext{
 
-    private static final String SECURITY_MANAGER = DefaultSubjectContext.class.getName() + ".SECURITY_MANAGER";
+private:
+    static const std::string SECURITY_MANAGER;
+    static const std::string SESSION_ID;
+    static const std::string AUTHENTICATION_TOKEN;
+    static const std::string AUTHENTICATION_INFO;
+    static const std::string SUBJECT;
+    static const std::string PRINCIPALS;
+    static const std::string SESSION;
+    static const std::string AUTHENTICATED ;
+    static const std::string HOST;
 
-    private static final String SESSION_ID = DefaultSubjectContext.class.getName() + ".SESSION_ID";
-
-    private static final String AUTHENTICATION_TOKEN = DefaultSubjectContext.class.getName() + ".AUTHENTICATION_TOKEN";
-
-    private static final String AUTHENTICATION_INFO = DefaultSubjectContext.class.getName() + ".AUTHENTICATION_INFO";
-
-    private static final String SUBJECT = DefaultSubjectContext.class.getName() + ".SUBJECT";
-
-    private static final String PRINCIPALS = DefaultSubjectContext.class.getName() + ".PRINCIPALS";
-
-    private static final String SESSION = DefaultSubjectContext.class.getName() + ".SESSION";
-
-    private static final String AUTHENTICATED = DefaultSubjectContext.class.getName() + ".AUTHENTICATED";
-
-    private static final String HOST = DefaultSubjectContext.class.getName() + ".HOST";
-
+public:
     /**
      * The session key that is used to store subject principals.
      */
-    public static final String PRINCIPALS_SESSION_KEY = DefaultSubjectContext.class.getName() + "_PRINCIPALS_SESSION_KEY";
+    static const std::string PRINCIPALS_SESSION_KEY;
 
     /**
      * The session key that is used to store whether or not the user is authenticated.
      */
-    public static final String AUTHENTICATED_SESSION_KEY = DefaultSubjectContext.class.getName() + "_AUTHENTICATED_SESSION_KEY";
+    static const std::string AUTHENTICATED_SESSION_KEY;
 
-    private static final transient Logger log = LoggerFactory.getLogger(DefaultSubjectContext.class);
+    //SubjectContext(): securityManager(NULL), subject(NULL), principal(NULL) {}
 
-    public DefaultSubjectContext() {
-        super();
+    SecurityManager *getSecurityManager() {
+        return getTypedValue<SecurityManager>(SECURITY_MANAGER);
     }
 
-    public DefaultSubjectContext(SubjectContext ctx) {
-        super(ctx);
+    void setSecurityManager(SecurityManager *securityManager) {
+        nullSafePut(SECURITY_MANAGER, (boost::any *)securityManager);
     }
 
-    public SecurityManager getSecurityManager() {
-        return getTypedValue(SECURITY_MANAGER, SecurityManager.class);
+    SecurityManager *resolveSecurityManager();
+
+    std::string getSessionId() {
+        return get<std::string>(SESSION_ID);
     }
 
-    public void setSecurityManager(SecurityManager securityManager) {
-        nullSafePut(SECURITY_MANAGER, securityManager);
+    void setSessionId(std::string *sessionId) {
+        nullSafePut(SESSION_ID, (boost::any *)sessionId);
     }
 
-    public SecurityManager resolveSecurityManager() {
-        SecurityManager securityManager = getSecurityManager();
-        if (securityManager == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("No SecurityManager available in subject context map.  " +
-                        "Falling back to SecurityUtils.getSecurityManager() lookup.");
-            }
-            try {
-                securityManager = SecurityUtils.getSecurityManager();
-            } catch (UnavailableSecurityManagerException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No SecurityManager available via SecurityUtils.  Heuristics exhausted.", e);
-                }
-            }
-        }
-        return securityManager;
+    Subject *getSubject() {
+        return subject;
     }
 
-    public Serializable getSessionId() {
-        return getTypedValue(SESSION_ID, Serializable.class);
+    void setSubject(Subject *subject) {
+        this->subject = subject;
     }
 
-    public void setSessionId(Serializable sessionId) {
-        nullSafePut(SESSION_ID, sessionId);
+    PrincipalCollection *getPrincipals() {
+        return principal;
     }
 
-    public Subject getSubject() {
-        return getTypedValue(SUBJECT, Subject.class);
+    void setPrincipals(PrincipalCollection *principals) {
+        this->principal = principals;
     }
 
-    public void setSubject(Subject subject) {
-        nullSafePut(SUBJECT, subject);
-    }
+    PrincipalCollection *resolvePrincipals();
 
-    public PrincipalCollection getPrincipals() {
-        return getTypedValue(PRINCIPALS, PrincipalCollection.class);
-    }
+   Session *getSession();
 
-    public void setPrincipals(PrincipalCollection principals) {
-        if (!CollectionUtils.isEmpty(principals)) {
-            put(PRINCIPALS, principals);
-        }
-    }
+    void setSession(Session *session);
 
-    public PrincipalCollection resolvePrincipals() {
-        PrincipalCollection principals = getPrincipals();
+    Session *resolveSession();
 
-        if (CollectionUtils.isEmpty(principals)) {
-            //check to see if they were just authenticated:
-            AuthenticationInfo info = getAuthenticationInfo();
-            if (info != null) {
-                principals = info.getPrincipals();
-            }
-        }
+    bool isAuthenticated();
 
-        if (CollectionUtils.isEmpty(principals)) {
-            Subject subject = getSubject();
-            if (subject != null) {
-                principals = subject.getPrincipals();
-            }
-        }
+    void setAuthenticated(bool authc);
 
-        if (CollectionUtils.isEmpty(principals)) {
-            //try the session:
-            Session session = resolveSession();
-            if (session != null) {
-                principals = (PrincipalCollection) session.getAttribute(PRINCIPALS_SESSION_KEY);
-            }
-        }
+    bool resolveAuthenticated();
 
-        return principals;
-    }
+    AuthenticationInfo *getAuthenticationInfo();
 
+    void setAuthenticationInfo(AuthenticationInfo *info);
 
-    public Session getSession() {
-        return getTypedValue(SESSION, Session.class);
-    }
+    AuthenticationToken *getAuthenticationToken();
 
-    public void setSession(Session session) {
-        nullSafePut(SESSION, session);
-    }
+    void setAuthenticationToken(AuthenticationToken *token);
+    std::string getHost();
 
-    public Session resolveSession() {
-        Session session = getSession();
-        if (session == null) {
-            //try the Subject if it exists:
-            Subject existingSubject = getSubject();
-            if (existingSubject != null) {
-                session = existingSubject.getSession(false);
-            }
-        }
-        return session;
-    }
+    void setHost(std::string host);
 
-    public boolean isAuthenticated() {
-        Boolean authc = getTypedValue(AUTHENTICATED, Boolean.class);
-        return authc != null && authc;
-    }
-
-    public void setAuthenticated(boolean authc) {
-        put(AUTHENTICATED, authc);
-    }
-
-    public boolean resolveAuthenticated() {
-        Boolean authc = getTypedValue(AUTHENTICATED, Boolean.class);
-        if (authc == null) {
-            //see if there is an AuthenticationInfo object.  If so, the very presence of one indicates a successful
-            //authentication attempt:
-            AuthenticationInfo info = getAuthenticationInfo();
-            authc = info != null;
-        }
-        if (!authc) {
-            //fall back to a session check:
-            Session session = resolveSession();
-            if (session != null) {
-                Boolean sessionAuthc = (Boolean) session.getAttribute(AUTHENTICATED_SESSION_KEY);
-                authc = sessionAuthc != null && sessionAuthc;
-            }
-        }
-
-        return authc;
-    }
-
-    public AuthenticationInfo getAuthenticationInfo() {
-        return getTypedValue(AUTHENTICATION_INFO, AuthenticationInfo.class);
-    }
-
-    public void setAuthenticationInfo(AuthenticationInfo info) {
-        nullSafePut(AUTHENTICATION_INFO, info);
-    }
-
-    public AuthenticationToken getAuthenticationToken() {
-        return getTypedValue(AUTHENTICATION_TOKEN, AuthenticationToken.class);
-    }
-
-    public void setAuthenticationToken(AuthenticationToken token) {
-        nullSafePut(AUTHENTICATION_TOKEN, token);
-    }
-
-    public String getHost() {
-        return getTypedValue(HOST, String.class);
-    }
-
-    public void setHost(String host) {
-        if (StringUtils.hasText(host)) {
-            put(HOST, host);
-        }
-    }
-
-    public String resolveHost() {
-        String host = getHost();
-
-        if (host == null) {
-            //check to see if there is an AuthenticationToken from which to retrieve it:
-            AuthenticationToken token = getAuthenticationToken();
-            if (token instanceof HostAuthenticationToken) {
-                host = ((HostAuthenticationToken) token).getHost();
-            }
-        }
-
-        if (host == null) {
-            Session session = resolveSession();
-            if (session != null) {
-                host = session.getHost();
-            }
-        }
-
-        return host;
-    }
+    std::string resolveHost();
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_SUBJECT_SUBJECTCONTEXT_H)

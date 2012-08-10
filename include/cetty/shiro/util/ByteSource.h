@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/codec/Hex.h>
+#include <cetty/shiro/codec/Base64.h>
 
 namespace cetty {
 namespace shiro {
 namespace util {
 
+using namespace cetty::shiro::codec;
 /**
  * Very simple {@link ByteSource ByteSource} implementation that maintains an internal {@code byte[]} array and uses the
  * {@link Hex Hex} and {@link Base64 Base64} codec classes to support the
@@ -42,6 +45,7 @@ namespace util {
 class ByteSource {
 
 public:
+    ByteSource(){}
     ByteSource(const std::string &bytes) {
         this->bytes = bytes;
     }
@@ -59,59 +63,37 @@ public:
         this->cachedBase64 = src.cachedBase64;
     }
 
-    public byte[] getBytes() {
-        return this.bytes;
+    const std::string& getBytes() {
+        return this->bytes;
     }
 
-    public String toHex() {
-        if ( this.cachedHex == null ) {
-            this.cachedHex = Hex.encodeToString(getBytes());
+    const std::string& toHex() const {
+        if ( this->cachedHex == "" ) {
+            this->cachedHex = Hex::encode(getBytes());
         }
-        return this.cachedHex;
+        return this->cachedHex;
     }
 
-    public String toBase64() {
-        if ( this.cachedBase64 == null ) {
-            this.cachedBase64 = Base64.encodeToString(getBytes());
+    const std::string& toBase64() const {
+        if ( this->cachedBase64 == "" ) {
+            this->cachedBase64 = Base64::encodeToString(getBytes());
         }
-        return this.cachedBase64;
+        return this->cachedBase64;
     }
 
-    public String toString() {
+    std::string toString() {
         return toBase64();
     }
 
-    public int hashCode() {
-        return toString().hashCode();
-    }
+    int hashCode();
 
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (o instanceof ByteSource) {
-            ByteSource bs = (ByteSource) o;
-            return Arrays.equals(getBytes(), bs.getBytes());
-        }
-        return false;
-    }
-
-    //will probably be removed in Shiro 2.0.  See SHIRO-203:
-    //https://issues.apache.org/jira/browse/SHIRO-203
-    private static final class BytesHelper extends CodecSupport {
-        public byte[] getBytes(File file) {
-            return toBytes(file);
-        }
-
-        public byte[] getBytes(InputStream stream) {
-            return toBytes(stream);
-        }
-    }
+    bool equals(const ByteSource &obj);
 
 private:
     std::string bytes;
-    std::string cachedHex;
-    std::string cachedBase64;
+
+    mutable std::string cachedHex;
+    mutable std::string cachedBase64;
 };
 }
 }

@@ -1,3 +1,5 @@
+#if !define(CETTY_SHIRO_SESSION_SESSIONFACTORY_H)
+#define CETTY_SHIRO_SESSION_SESSIONFACTORY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,13 +21,14 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * {@code SessionFactory} implementation that generates {@link SimpleSession} instances.
  *
  * @since 1.0
  */
-class SimpleSessionFactory {
+class SessionFactory {
 
     /**
      * Creates a new {@link SimpleSession SimpleSession} instance retaining the context's
@@ -34,15 +37,13 @@ class SimpleSessionFactory {
      * @param initData the initialization data to be used during {@link Session} creation.
      * @return a new {@link SimpleSession SimpleSession} instance
      */
-    public Session createSession(SessionContext initData) {
-        if (initData != null) {
-            String host = initData.getHost();
-            if (host != null) {
-                return new SimpleSession(host);
-            }
-        }
-        return new SimpleSession();
+public:
+    static Session *createSession(SessionContext initData) {
+
+        return new Session(initData.getHost());
     }
 };
 }
 }
+}
+#endif // #if !define(CETTY_SHIRO_SESSION_SESSIONFACTORY_H)

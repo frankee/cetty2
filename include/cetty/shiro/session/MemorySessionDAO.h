@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_MEMORYSESSIONDAO_H)
+#define CETTY_SHIRO_SESSION_MEMORYSESSIONDAO_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cstdlib>
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Simple memory-based implementation of the SessionDAO that stores all of its sessions in an in-memory
@@ -42,57 +46,52 @@ namespace shiro {
  * @see CachingSessionDAO
  * @since 0.1
  */
-class MemorySessionDAO : public AbstractSessionDAO {
+class MemorySessionDAO : public SessionDAO {
+private:
+    std::map<std::string, Session*> sessions;
 
-    private static final Logger log = LoggerFactory.getLogger(MemorySessionDAO.class);
 
-    private ConcurrentMap<Serializable, Session> sessions;
 
-    public MemorySessionDAO() {
-        this.sessions = new ConcurrentHashMap<Serializable, Session>();
-    }
-
-    protected Serializable doCreate(Session session) {
-        Serializable sessionId = generateSessionId(session);
+protected:
+    std::string doCreate(Session *session) {
+        std::string sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
         storeSession(sessionId, session);
         return sessionId;
     }
 
-    protected Session storeSession(Serializable id, Session session) {
-        if (id == null) {
-            throw new NullPointerException("id argument cannot be null.");
+    Session *storeSession(const std::string &id, Session *session) {
+        if (id == "") {
+           return NULL;
         }
-        return sessions.putIfAbsent(id, session);
+        return sessions.insert(std::pair<std::string, Session *>(id, session));
     }
 
-    protected Session doReadSession(Serializable sessionId) {
-        return sessions.get(sessionId);
+    virtual Session *doReadSession(const std::string &sessionId) {
+        std::map<std::string, Session*>::iterator ret = sessions.find(sessionId);
+        if(ret == sessions.end()) return NULL;
+        return ret->second;
     }
 
-    public void update(Session session) throws UnknownSessionException {
-        storeSession(session.getId(), session);
+
+public:
+    virtual std::vector<Session *> * getActiveSessions();
+    virtual void update(Session *session){
+        storeSession(session->getId(), session);
     }
 
-    public void delete(Session session) {
-        if (session == null) {
-            throw new NullPointerException("session argument cannot be null.");
+    virtual void remove(Session *session) {
+        if (session == NULL) {
+            return;
         }
-        Serializable id = session.getId();
-        if (id != null) {
-            sessions.remove(id);
-        }
-    }
-
-    public Collection<Session> getActiveSessions() {
-        Collection<Session> values = sessions.values();
-        if (CollectionUtils.isEmpty(values)) {
-            return Collections.emptySet();
-        } else {
-            return Collections.unmodifiableCollection(values);
+        std::string id = session->getId();
+        if (id != "") {
+            sessions.erase(id);
         }
     }
 
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_SESSION_MEMORYSESSIONDAO_H)

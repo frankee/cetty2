@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_SESSIONDAO_H)
+#define CETTY_SHIRO_SESSION_SESSIONDAO_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cstdlib>
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * An abstract {@code SessionDAO} implementation that performs some sanity checks on session creation and reading and
@@ -38,45 +42,44 @@ namespace shiro {
  *
  * @since 1.0
  */
-class AbstractSessionDAO {
-
+class SessionDAO {
+public:
     /**
-     * Optional SessionIdGenerator instance available to subclasses via the
-     * {@link #generateSessionId(org.apache.shiro.session.Session)} method.
+     * Retrieves the Session object from the underlying EIS identified by <tt>sessionId</tt> by delegating to
+     * the {@link #doReadSession(java.io.Serializable)} method.  If {@code null} is returned from that method, an
+     * {@link UnknownSessionException} will be thrown.
+     *
+     * @param sessionId the id of the session to retrieve from the EIS.
+     * @return the session identified by <tt>sessionId</tt> in the EIS.
+     * @throws UnknownSessionException if the id specified does not correspond to any session in the EIS.
      */
-    private SessionIdGenerator sessionIdGenerator;
+    Session *readSession(const std::string &sessionId){
+        Session *s = doReadSession(sessionId);
+        return s;
+    }
+
+    virtual ~SessionDAO(){}
 
     /**
      * Default no-arg constructor that defaults the {@link #setSessionIdGenerator sessionIdGenerator} to be a
      * {@link org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator}.
      */
-    public AbstractSessionDAO() {
-        this.sessionIdGenerator = new JavaUuidSessionIdGenerator();
-    }
-
+    SessionDAO(): cacheManager(NULL) {}
     /**
-     * Returns the {@code SessionIdGenerator} used by the {@link #generateSessionId(org.apache.shiro.session.Session)}
-     * method.  Unless overridden by the {@link #setSessionIdGenerator(SessionIdGenerator)} method, the default instance
-     * is a {@link JavaUuidSessionIdGenerator}.
+     * Creates the session by delegating EIS creation to subclasses via the {@link #doCreate} method, and then
+     * asserting that the returned sessionId is not null.
      *
-     * @return the {@code SessionIdGenerator} used by the {@link #generateSessionId(org.apache.shiro.session.Session)}
-     *         method.
+     * @param session Session object to create in the EIS and associate with an ID.
      */
-    public SessionIdGenerator getSessionIdGenerator() {
-        return sessionIdGenerator;
+    std::string create(Session *session) {
+        std::string sessionId = doCreate(session);
+        return sessionId;
     }
+    virtual std::vector<Session *> * getActiveSessions();
+    virtual void update(Session *session) = 0;
+    virtual void remove(Session *session) = 0;
 
-    /**
-     * Sets the {@code SessionIdGenerator} used by the {@link #generateSessionId(org.apache.shiro.session.Session)}
-     * method.  Unless overridden by this method, the default instance ss a {@link JavaUuidSessionIdGenerator}.
-     *
-     * @param sessionIdGenerator the {@code SessionIdGenerator} to use in the
-     *                           {@link #generateSessionId(org.apache.shiro.session.Session)} method.
-     */
-    public void setSessionIdGenerator(SessionIdGenerator sessionIdGenerator) {
-        this.sessionIdGenerator = sessionIdGenerator;
-    }
-
+protected:
     /**
      * Generates a new ID to be applied to the specified {@code session} instance.  This method is usually called
      * from within a subclass's {@link #doCreate} implementation where they assign the returned id to the session
@@ -93,37 +96,8 @@ class AbstractSessionDAO {
      * @param session the new session instance for which an ID will be generated and then assigned
      * @return the generated ID to assign
      */
-    protected Serializable generateSessionId(Session session) {
-        if (this.sessionIdGenerator == null) {
-            String msg = "sessionIdGenerator attribute has not been configured.";
-            throw new IllegalStateException(msg);
-        }
-        return this.sessionIdGenerator.generateId(session);
-    }
-
-    /**
-     * Creates the session by delegating EIS creation to subclasses via the {@link #doCreate} method, and then
-     * asserting that the returned sessionId is not null.
-     *
-     * @param session Session object to create in the EIS and associate with an ID.
-     */
-    public Serializable create(Session session) {
-        Serializable sessionId = doCreate(session);
-        verifySessionId(sessionId);
-        return sessionId;
-    }
-
-    /**
-     * Ensures the sessionId returned from the subclass implementation of {@link #doCreate} is not null and not
-     * already in use.
-     *
-     * @param sessionId session id returned from the subclass implementation of {@link #doCreate}
-     */
-    private void verifySessionId(Serializable sessionId) {
-        if (sessionId == null) {
-            String msg = "sessionId returned from doCreate implementation is null.  Please verify the implementation.";
-            throw new IllegalStateException(msg);
-        }
+    std::string generateSessionId(Session *session) {
+        return SessionIdGenerator::generateId(session);
     }
 
     /**
@@ -137,8 +111,8 @@ class AbstractSessionDAO {
      * @param session   the session instance to which the sessionId will be applied
      * @param sessionId the id to assign to the specified session instance.
      */
-    protected void assignSessionId(Session session, Serializable sessionId) {
-        ((SimpleSession) session).setId(sessionId);
+    void assignSessionId(Session *session, const std::string &sessionId) {
+        session->setId(sessionId);
     }
 
     /**
@@ -148,24 +122,7 @@ class AbstractSessionDAO {
      * @return the id of the session created in the EIS (i.e. this is almost always a primary key and should be the
      *         value returned from {@link org.apache.shiro.session.Session#getId() Session.getId()}.
      */
-    protected abstract Serializable doCreate(Session session);
-
-    /**
-     * Retrieves the Session object from the underlying EIS identified by <tt>sessionId</tt> by delegating to
-     * the {@link #doReadSession(java.io.Serializable)} method.  If {@code null} is returned from that method, an
-     * {@link UnknownSessionException} will be thrown.
-     *
-     * @param sessionId the id of the session to retrieve from the EIS.
-     * @return the session identified by <tt>sessionId</tt> in the EIS.
-     * @throws UnknownSessionException if the id specified does not correspond to any session in the EIS.
-     */
-    public Session readSession(Serializable sessionId) throws UnknownSessionException {
-        Session s = doReadSession(sessionId);
-        if (s == null) {
-            throw new UnknownSessionException("There is no session with id [" + sessionId + "]");
-        }
-        return s;
-    }
+    virtual std::string doCreate(Session *session) = 0;
 
     /**
      * Subclass implementation hook that retrieves the Session object from the underlying EIS or {@code null} if a
@@ -175,8 +132,15 @@ class AbstractSessionDAO {
      * @return the Session in the EIS identified by <tt>sessionId</tt> or {@code null} if a
      *         session with that ID could not be found.
      */
-    protected abstract Session doReadSession(Serializable sessionId);
-
+    virtual Session *doReadSession(const std::string &sessionId) = 0;
+private:
+    CacheManager *cacheManager;
+    void setCacheManager(const CacheManager *cacheManager){
+        this->cacheManager = cacheManager;
+    }
 };
 }
 }
+}
+
+#endif // CETTY_SHIRO_SESSION_SESSIONDAO_H

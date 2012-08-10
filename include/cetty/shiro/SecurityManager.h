@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SECURITYMANAGER_H)
+#define CETTY_SHIRO_SECURITYMANAGER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,10 +18,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/authc/ModularRealmAuthenticator.h>
+#include <cetty/shiro/session/SessionManager.h>
+#include <cetty/shiro/subject/Subject.h>
 
 namespace cetty {
 namespace shiro {
 
+using namespace ::cetty::shiro::authc;
+using namespace ::cetty::shiro::session;
+using namespace cetty::shiro::subject;
 /**
  * The Shiro framework's default concrete implementation of the {@link SecurityManager} interface,
  * based around a collection of {@link org.apache.shiro.realm.Realm}s.  This implementation delegates its
@@ -50,62 +58,44 @@ namespace shiro {
  *
  * @since 0.2
  */
-class DefaultSecurityManager : public SessionsSecurityManager {
+class SecurityManager {
 
-    //TODO - complete JavaDoc
+private:
+    SubjectFactory *subjectFactory;
+    ModularRealmAuthenticator *authenticator;
+    SessionManager *sessionManager;
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultSecurityManager.class);
-
-    protected RememberMeManager rememberMeManager;
-
-    protected SubjectFactory subjectFactory;
-
+public:
     /**
      * Default no-arg constructor.
      */
-    public DefaultSecurityManager() {
-        super();
-        this.subjectFactory = new DefaultSubjectFactory();
+    SecurityManager() {
+        subjectFactory = new SubjectFactory();
+        authenticator = new ModularRealmAuthenticator();
+        sessionManager = new SessionManager();
     }
 
-    /**
-     * Supporting constructor for a single-realm application.
-     *
-     * @param singleRealm the single realm used by this SecurityManager.
-     */
-    public DefaultSecurityManager(Realm singleRealm) {
-        this();
-        setRealm(singleRealm);
+    SecurityManager(SubjectFactory *subjectFactory,
+        ModularRealmAuthenticator *authenticator,
+        SessionManager *sessionManager)
+    {
+       this->subjectFactory = subjectFactory;
+       this->authenticator = authenticator;
+       this->sessionManager = sessionManager;
     }
 
-    /**
-     * Supporting constructor for multiple {@link #setRealms realms}.
-     *
-     * @param realms the realm instances backing this SecurityManager.
-     */
-    public DefaultSecurityManager(Collection<Realm> realms) {
-        this();
-        setRealms(realms);
-    }
 
-    public SubjectFactory getSubjectFactory() {
+    SubjectFactory *getSubjectFactory() {
         return subjectFactory;
     }
 
-    public void setSubjectFactory(SubjectFactory subjectFactory) {
-        this.subjectFactory = subjectFactory;
+    void setSubjectFactory(SubjectFactory *subjectFactory) {
+        this->subjectFactory = subjectFactory;
     }
 
-    public RememberMeManager getRememberMeManager() {
-        return rememberMeManager;
-    }
-
-    public void setRememberMeManager(RememberMeManager rememberMeManager) {
-        this.rememberMeManager = rememberMeManager;
-    }
-
-    protected SubjectContext createSubjectContext() {
-        return new DefaultSubjectContext();
+protected:
+    SubjectContext *createSubjectContext() {
+        return new SubjectContext();
     }
 
     /**
@@ -117,13 +107,13 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @return the {@code Subject} instance that represents the context and session data for the newly
      *         authenticated subject.
      */
-    protected Subject createSubject(AuthenticationToken token, AuthenticationInfo info, Subject existing) {
-        SubjectContext context = createSubjectContext();
-        context.setAuthenticated(true);
-        context.setAuthenticationToken(token);
-        context.setAuthenticationInfo(info);
-        if (existing != null) {
-            context.setSubject(existing);
+    Subject *createSubject(AuthenticationToken *token, AuthenticationInfo *info, Subject *existing) {
+        SubjectContext *context = createSubjectContext();
+        context->setAuthenticated(true);
+        context->setAuthenticationToken(token);
+        context->setAuthenticationInfo(info);
+        if (existing != NULL) {
+            context->setSubject(existing);
         }
         return createSubject(context);
     }
@@ -137,27 +127,27 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @param subject the {@code Subject} instance created after authentication to be bound to the application
      *                for later use.
      */
-    protected void bind(Subject subject) {
+    void bind(Subject *subject) {
         // TODO consider refactoring to use Subject.Binder.
         // This implementation was copied from SessionSubjectBinder that was removed
-        PrincipalCollection principals = subject.getPrincipals();
-        if (principals != null && !principals.isEmpty()) {
-            Session session = subject.getSession();
+        PrincipalCollection *principals = subject->getPrincipals();
+        if (principals != NULL && !principals->isEmpty()) {
+            Session *session = subject->getSession();
             bindPrincipalsToSession(principals, session);
         } else {
-            Session session = subject.getSession(false);
-            if (session != null) {
-                session.removeAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+            Session *session = subject->getSession(false);
+            if (session != NULL) {
+                session->removeAttribute(SubjectContext::PRINCIPALS_SESSION_KEY);
             }
         }
 
-        if (subject.isAuthenticated()) {
-            Session session = subject.getSession();
-            session.setAttribute(DefaultSubjectContext.AUTHENTICATED_SESSION_KEY, subject.isAuthenticated());
+        if (subject->isAuthenticated()) {
+            Session *session = subject->getSession();
+            session->setAttribute(SubjectContext::AUTHENTICATED_SESSION_KEY, subject->isAuthenticated());
         } else {
-            Session session = subject.getSession(false);
-            if (session != null) {
-                session.removeAttribute(DefaultSubjectContext.AUTHENTICATED_SESSION_KEY);
+            Session *session = subject.getSession(false);
+            if (session != NULL) {
+                session->removeAttribute(SubjectContext::AUTHENTICATED_SESSION_KEY);
             }
         }
     }
@@ -170,68 +160,8 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @throws IllegalArgumentException if the principals are null or empty or the session is null
      * @since 1.0
      */
-    private void bindPrincipalsToSession(PrincipalCollection principals, Session session) throws IllegalArgumentException {
-        if (session == null) {
-            throw new IllegalArgumentException("Session argument cannot be null.");
-        }
-        if (CollectionUtils.isEmpty(principals)) {
-            throw new IllegalArgumentException("Principals cannot be null or empty.");
-        }
-        session.setAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY, principals);
-    }
-
-    protected void rememberMeSuccessfulLogin(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
-        RememberMeManager rmm = getRememberMeManager();
-        if (rmm != null) {
-            try {
-                rmm.onSuccessfulLogin(subject, token, info);
-            } catch (Exception e) {
-                if (log.isWarnEnabled()) {
-                    String msg = "Delegate RememberMeManager instance of type [" + rmm.getClass().getName() +
-                            "] threw an exception during onSuccessfulLogin.  RememberMe services will not be " +
-                            "performed for account [" + info + "].";
-                    log.warn(msg, e);
-                }
-            }
-        } else {
-            if (log.isTraceEnabled()) {
-                log.trace("This " + getClass().getName() + " instance does not have a " +
-                        "[" + RememberMeManager.class.getName() + "] instance configured.  RememberMe services " +
-                        "will not be performed for account [" + info + "].");
-            }
-        }
-    }
-
-    protected void rememberMeFailedLogin(AuthenticationToken token, AuthenticationException ex, Subject subject) {
-        RememberMeManager rmm = getRememberMeManager();
-        if (rmm != null) {
-            try {
-                rmm.onFailedLogin(subject, token, ex);
-            } catch (Exception e) {
-                if (log.isWarnEnabled()) {
-                    String msg = "Delegate RememberMeManager instance of type [" + rmm.getClass().getName() +
-                            "] threw an exception during onFailedLogin for AuthenticationToken [" +
-                            token + "].";
-                    log.warn(msg, e);
-                }
-            }
-        }
-    }
-
-    protected void rememberMeLogout(Subject subject) {
-        RememberMeManager rmm = getRememberMeManager();
-        if (rmm != null) {
-            try {
-                rmm.onLogout(subject);
-            } catch (Exception e) {
-                if (log.isWarnEnabled()) {
-                    String msg = "Delegate RememberMeManager instance of type [" + rmm.getClass().getName() +
-                            "] threw an exception during onLogout for subject with principals [" +
-                            (subject != null ? subject.getPrincipals() : null) + "]";
-                    log.warn(msg, e);
-                }
-            }
-        }
+    void bindPrincipalsToSession(PrincipalCollection *principals, Session *session){
+        session->setAttribute(SubjectContext::PRINCIPALS_SESSION_KEY, principals);
     }
 
     /**
@@ -245,45 +175,33 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @return a Subject representing the authenticated user.
      * @throws AuthenticationException if there is a problem authenticating the specified {@code token}.
      */
-    public Subject login(Subject subject, AuthenticationToken token) throws AuthenticationException {
-        AuthenticationInfo info;
-        try {
-            info = authenticate(token);
-        } catch (AuthenticationException ae) {
-            try {
-                onFailedLogin(token, ae, subject);
-            } catch (Exception e) {
-                if (log.isInfoEnabled()) {
-                    log.info("onFailedLogin method threw an " +
-                            "exception.  Logging and propagating original AuthenticationException.", e);
-                }
-            }
-            throw ae; //propagate
+    Subject *login(Subject *subject, AuthenticationToken *token) {
+        AuthenticationInfo *info =  authenticate(token);
+        if(info == NULL) {
+            onFailedLogin(token, ae, subject);
+            return NULL;
         }
 
-        Subject loggedIn = createSubject(token, info, subject);
-
+        Subject *loggedIn = createSubject(token, info, subject);
         bind(loggedIn);
-
         onSuccessfulLogin(token, info, loggedIn);
         return loggedIn;
     }
 
-    protected void onSuccessfulLogin(AuthenticationToken token, AuthenticationInfo info, Subject subject) {
+    void onSuccessfulLogin(AuthenticationToken *token, AuthenticationInfo *info, Subject *subject) {
         rememberMeSuccessfulLogin(token, info, subject);
     }
 
-    protected void onFailedLogin(AuthenticationToken token, AuthenticationException ae, Subject subject) {
-        rememberMeFailedLogin(token, ae, subject);
-    }
+    void rememberMeSuccessfulLogin(AuthenticationToken *token, AuthenticationInfo *info, Subject *subject);
 
-    protected void beforeLogout(Subject subject) {
-        rememberMeLogout(subject);
-    }
+    void onFailedLogin(AuthenticationToken *token, AuthenticationException ae, Subject *subject);
+    void rememberMeFailedLogin(AuthenticationToken *token, AuthenticationException ae, Subject *subject);
 
-    protected SubjectContext copy(SubjectContext subjectContext) {
-        return new DefaultSubjectContext(subjectContext);
-    }
+    void beforeLogout(Subject *subject);
+
+    void rememberMeLogout(Subject *subject);
+
+    SubjectContext *copy(SubjectContext *subjectContext);
 
     /**
      * This implementation attempts to resolve any session ID that may exist in the context by
@@ -298,9 +216,9 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @see SubjectFactory#createSubject
      * @since 1.0
      */
-    public Subject createSubject(SubjectContext subjectContext) {
+    Subject *createSubject(SubjectContext *subjectContext) {
         //create a copy so we don't modify the argument's backing map:
-        SubjectContext context = copy(subjectContext);
+        SubjectContext *context = copy(subjectContext);
 
         //ensure that the context has a SecurityManager instance, and if not, add one:
         context = ensureSecurityManager(context);
@@ -326,14 +244,9 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @return The SubjectContext to use to pass to a {@link SubjectFactory} for subject creation.
      * @since 1.0
      */
-    @SuppressWarnings({"unchecked"})
-    protected SubjectContext ensureSecurityManager(SubjectContext context) {
-        if (context.resolveSecurityManager() != null) {
-            log.trace("Context already contains a SecurityManager instance.  Returning.");
-            return context;
-        }
-        log.trace("No SecurityManager found in context.  Adding self reference.");
-        context.setSecurityManager(this);
+    SubjectContext *ensureSecurityManager(SubjectContext *context) {
+        if (context->resolveSecurityManager() != NULL)  return context;
+        context->setSecurityManager(this);
         return context;
     }
 
@@ -350,41 +263,22 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @return The context to use to pass to a {@link SubjectFactory} for subject creation.
      * @since 1.0
      */
-    @SuppressWarnings({"unchecked"})
-    protected SubjectContext resolveSession(SubjectContext context) {
-        if (context.resolveSession() != null) {
-            log.debug("Context already contains a session.  Returning.");
+    SubjectContext *resolveSession(SubjectContext *context) {
+        if (context->resolveSession() != NULL) {
             return context;
         }
-        try {
-            //Context couldn't resolve it directly, let's see if we can since we have direct access to 
-            //the session manager:
-            Session session = resolveContextSession(context);
-            if (session != null) {
-                context.setSession(session);
-            }
-        } catch (InvalidSessionException e) {
-            log.debug("Resolved SubjectContext context session is invalid.  Ignoring and creating an anonymous " +
-                    "(session-less) Subject instance.", e);
-        }
+
+        Session *session = resolveContextSession(context);
+        if (session != NULL) {
+                context->setSession(session);
+        return context;
+    }
         return context;
     }
 
-    protected Session resolveContextSession(SubjectContext context) throws InvalidSessionException {
-        SessionKey key = getSessionKey(context);
-        if (key != null) {
-            return getSession(key);
-        }
-        return null;
-    }
+    Session *resolveContextSession(SubjectContext *context);
 
-    protected SessionKey getSessionKey(SubjectContext context) {
-        Serializable sessionId = context.getSessionId();
-        if (sessionId != null) {
-            return new DefaultSessionKey(sessionId);
-        }
-        return null;
-    }
+    SessionKey *getSessionKey(SubjectContext *context);
 
     /**
      * Attempts to resolve an identity (a {@link PrincipalCollection}) for the context using heuristics.  The
@@ -403,30 +297,8 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @return The Subject context to use to pass to a {@link SubjectFactory} for subject creation.
      * @since 1.0
      */
-    @SuppressWarnings({"unchecked"})
-    protected SubjectContext resolvePrincipals(SubjectContext context) {
 
-        PrincipalCollection principals = context.resolvePrincipals();
-
-        if (CollectionUtils.isEmpty(principals)) {
-            log.trace("No identity (PrincipalCollection) found in the context.  Looking for a remembered identity.");
-
-            principals = getRememberedIdentity(context);
-
-            if (!CollectionUtils.isEmpty(principals)) {
-                log.debug("Found remembered PrincipalCollection.  Adding to the context to be used " +
-                        "for subject construction by the SubjectFactory.");
-
-                context.setPrincipals(principals);
-                bindPrincipalsToSession(principals, context);
-            } else {
-                log.trace("No remembered identity found.  Returning original context.");
-            }
-        }
-
-        return context;
-    }
-
+    SubjectContext *resolvePrincipals(SubjectContext *context);
     /**
      * Satisfies SHIRO-157: associate a known identity with the current session to ensure that we don't need to
      * continually perform rememberMe operations for sessions that already have an identity.  Doing this prevents the
@@ -441,87 +313,12 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      * @param context    the context to use to locate or create a session to which the principals will be saved
      * @since 1.0
      */
-    private void bindPrincipalsToSession(PrincipalCollection principals, SubjectContext context) {
-        SecurityManager securityManager = context.resolveSecurityManager();
-        if (securityManager == null) {
-            throw new IllegalStateException("SecurityManager instance should already be present in the " +
-                    "SubjectContext argument.");
-        }
-        Session session = context.resolveSession();
-        if (session == null) {
-            log.trace("No session in the current subject context.  One will be created to persist principals [{}] " +
-                    "Doing this prevents unnecessary repeated RememberMe operations since an identity has been " +
-                    "discovered.", principals);
-            //no session - start one:
-            SessionContext sessionContext = createSessionContext(context);
-            session = start(sessionContext);
-            context.setSession(session);
-            log.debug("Created session with id {} to retain discovered principals {}", session.getId(), principals);
-        }
-        bindPrincipalsToSession(principals, session);
-    }
+    void bindPrincipalsToSession(PrincipalCollection *principals, SubjectContext *context);
 
-    protected SessionContext createSessionContext(SubjectContext subjectContext) {
-        DefaultSessionContext sessionContext = new DefaultSessionContext();
-        if (!CollectionUtils.isEmpty(subjectContext)) {
-            sessionContext.putAll(subjectContext);
-        }
-        Serializable sessionId = subjectContext.getSessionId();
-        if (sessionId != null) {
-            sessionContext.setSessionId(sessionId);
-        }
-        String host = subjectContext.resolveHost();
-        if (host != null) {
-            sessionContext.setHost(host);
-        }
-        return sessionContext;
-    }
+    SessionContext *createSessionContext(SubjectContext *subjectContext);
+    void logout(Subject *subject);
 
-    public void logout(Subject subject) {
-
-        if (subject == null) {
-            throw new IllegalArgumentException("Subject method argument cannot be null.");
-        }
-
-        beforeLogout(subject);
-
-        PrincipalCollection principals = subject.getPrincipals();
-        if (principals != null && !principals.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Logging out subject with primary principal {}" + principals.getPrimaryPrincipal());
-            }
-            Authenticator authc = getAuthenticator();
-            if (authc instanceof LogoutAware) {
-                ((LogoutAware) authc).onLogout(principals);
-            }
-        }
-
-        try {
-            unbind(subject);
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                String msg = "Unable to cleanly unbind Subject.  Ignoring (logging out).";
-                log.debug(msg, e);
-            }
-        } finally {
-            try {
-                stopSession(subject);
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    String msg = "Unable to cleanly stop Session for Subject [" + subject.getPrincipal() + "] " +
-                            "Ignoring (logging out).";
-                    log.debug(msg, e);
-                }
-            }
-        }
-    }
-
-    protected void stopSession(Subject subject) {
-        Session s = subject.getSession(false);
-        if (s != null) {
-            s.stop();
-        }
-    }
+    void stopSession(Subject *subject);
 
     /**
      * Unbinds or removes the Subject's state from the application, typically called during {@link #logout}.
@@ -532,29 +329,12 @@ class DefaultSecurityManager : public SessionsSecurityManager {
      *
      * @param subject the subject to unbind from the application as it will no longer be used.
      */
-    protected void unbind(Subject subject) {
-        Session session = subject.getSession(false);
-        if (session != null) {
-            session.removeAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
-            session.removeAttribute(DefaultSubjectContext.AUTHENTICATED_SESSION_KEY);
-        }
-    }
+    void unbind(Subject *subject);
 
-    protected PrincipalCollection getRememberedIdentity(SubjectContext subjectContext) {
-        RememberMeManager rmm = getRememberMeManager();
-        if (rmm != null) {
-            try {
-                return rmm.getRememberedPrincipals(subjectContext);
-            } catch (Exception e) {
-                if (log.isWarnEnabled()) {
-                    String msg = "Delegate RememberMeManager instance of type [" + rmm.getClass().getName() +
-                            "] threw an exception during getRememberedPrincipals().";
-                    log.warn(msg, e);
-                }
-            }
-        }
-        return null;
-    }
+    Session *start(SessionContext *context);
+
+    PrincipalCollection *getRememberedIdentity(SubjectContext *subjectContext);
 };
 }
 }
+#endif // #if !defined(CETTY_SHIRO_SECURITYMANAGER_H)

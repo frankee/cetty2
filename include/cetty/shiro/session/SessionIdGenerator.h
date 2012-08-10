@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_SESSIONIDGENERATOR)
+#define CETTY_SHIRO_SESSION_SESSIONIDGENERATOR
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Generates session IDs by using a {@link Random} instance to generate random IDs. The default {@code Random}
@@ -26,41 +29,20 @@ namespace shiro {
  *
  * @since 1.0
  */
-class RandomSessionIdGenerator {
+class SessionIdGenerator {
+private:
+    static long id;
 
-    private static final Logger log = LoggerFactory.getLogger(RandomSessionIdGenerator.class);
-
-    private static final String RANDOM_NUM_GENERATOR_ALGORITHM_NAME = "SHA1PRNG";
-    private Random random;
-
-    public RandomSessionIdGenerator() {
-        try {
-            this.random = java.security.SecureRandom.getInstance(RANDOM_NUM_GENERATOR_ALGORITHM_NAME);
-        } catch (java.security.NoSuchAlgorithmException e) {
-            log.debug("The SecureRandom SHA1PRNG algorithm is not available on the current platform.  Using the " +
-                    "platform's default SecureRandom algorithm.", e);
-            this.random = new java.security.SecureRandom();
-        }
-    }
-
-    public Random getRandom() {
-        return this.random;
-    }
-
-    public void setRandom(Random random) {
-        this.random = random;
-    }
-
+public:
     /**
-     * Returns the String value of the configured {@link Random}'s {@link Random#nextLong() nextLong()} invocation.
+     * Returns the String value of the session id: current time + id
      *
      * @param session the {@link Session} instance to which the ID will be applied.
-     * @return the String value of the configured {@link Random}'s {@link Random#nextLong()} invocation.
+     * @return the String value of the session id
      */
-    public Serializable generateId(Session session) {
-        //ignore the argument - just call the Random:
-        return Long.toString(getRandom().nextLong());
-    }
+    static std::string generateId(const Session *session);
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_SESSION_SESSIONIDGENERATOR)

@@ -37,15 +37,7 @@ namespace realm {
  * @since 0.1
  */
 class Realm{
-
-private:
-    /*--------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
-    std::string name;
-    bool cachingEnabled;
-    CacheManager &cacheManager;
-
+public:
     Realm() {
         this->cachingEnabled = false;
         this->name = autoName();
@@ -110,6 +102,15 @@ private:
 protected:
     void afterCacheManagerSet() {
     }
+
+private:
+    /*--------------------------------------------
+    |    I N S T A N C E   V A R I A B L E S    |
+    ============================================*/
+    bool cachingEnabled;
+    std::string name;
+
+    CacheManager &cacheManager;
 
     /**
      *

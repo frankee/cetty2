@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SUBJECT_SUBJECT_H)
+#define CETTY_SHIRO_SUBJECT_SUBJECT_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,10 +18,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <vector>
+#include <cstdlib>
+#include <cetty/shiro/session/Session.h>
+#include <cetty/shiro/SecurityManager.h>
+#include <cetty/shiro/authc/AuthenticationToken.h>
+
+class Permission;
 
 namespace cetty {
 namespace shiro {
+namespace subject {
 
+using namespace cetty::shiro;
+using namespace cetty::shiro::session;
+using namespace cetty::shiro::authc;
 /**
  * Implementation of the {@code Subject} interface that delegates
  * method calls to an underlying {@link org.apache.shiro.mgt.SecurityManager SecurityManager} instance for security checks.
@@ -44,396 +57,174 @@ namespace shiro {
  *
  * @since 0.1
  */
-class DelegatingSubject {
+class Subject {
 
-    private static final long serialVersionUID = -5094259915319399138L;
+protected:
+    PrincipalCollection *principals;
+    bool authenticated;
+    std::string host;
+    Session *session;
 
-    private static final Logger log = LoggerFactory.getLogger(DelegatingSubject.class);
+private:
+    static const std::string RUN_AS_PRINCIPALS_SESSION_KEY;
+protected:
+    SecurityManager *securityManager;
 
-    private static final String RUN_AS_PRINCIPALS_SESSION_KEY =
-            DelegatingSubject.class.getName() + ".RUN_AS_PRINCIPALS_SESSION_KEY";
+public:
+    Subject(SecurityManager *securityManager)
+      : securityManager(securityManager),
+        authenticated(false),
+        session(false),
+        principals(NULL){}
 
-    protected PrincipalCollection principals;
-    protected boolean authenticated;
-    protected String host;
-    protected Session session;
-    private List<PrincipalCollection> runAsPrincipals; //supports assumed identities (aka 'run as')
-
-    protected transient SecurityManager securityManager;
-
-    public DelegatingSubject(SecurityManager securityManager) {
-        this(null, false, null, null, securityManager);
+    Subject(PrincipalCollection *principals,
+            bool authenticated,
+            const std::string &host,
+            Session *session,
+            SecurityManager *securityManager)
+        :securityManager(securityManager) {
+        this->principals = principals;
+        this->authenticated = authenticated;
+        this->host = host;
+            // ???
+            this->session = session;
+            //???
     }
 
-    public DelegatingSubject(PrincipalCollection principals, boolean authenticated, String host,
-                             Session session, SecurityManager securityManager) {
-        if (securityManager == null) {
-            throw new IllegalArgumentException("SecurityManager argument cannot be null.");
-        }
-        this.securityManager = securityManager;
-        this.principals = principals;
-        this.authenticated = authenticated;
-        this.host = host;
-        if (session != null) {
-            this.session = decorate(session);
-            this.runAsPrincipals = getRunAsPrincipals(this.session);
-        }
-    }
-
-    protected Session decorate(Session session) {
-        if (session == null) {
-            throw new IllegalArgumentException("session cannot be null");
-        }
-        return new StoppingAwareProxiedSession(session, this);
-    }
-
-    public SecurityManager getSecurityManager() {
+public:
+    const SecurityManager &getSecurityManager() {
         return securityManager;
     }
 
-    protected boolean hasPrincipals() {
-        return !CollectionUtils.isEmpty(getPrincipals());
+protected:
+    bool hasPrincipals() {
+        return !(getPrincipals()->isEmpty());
     }
 
+public:
     /**
      * Returns the host name or IP associated with the client who created/is interacting with this Subject.
      *
      * @return the host name or IP associated with the client who created/is interacting with this Subject.
      */
-    public String getHost() {
-        return this.host;
+    const std::string &getHost() {
+        return this->host;
     }
 
-    private Object getPrimaryPrincipal(PrincipalCollection principals) {
-        if (!CollectionUtils.isEmpty(principals)) {
-            return principals.getPrimaryPrincipal();
+private:
+    const std::string &getPrimaryPrincipal(PrincipalCollection *principals) {
+        if (!principals->isEmpty()) {
+            return principals->getPrimaryPrincipal();
         }
-        return null;
+        return std::string();
     }
 
+public:
     /**
      * @see Subject#getPrincipal()
      */
-    public Object getPrincipal() {
+    std::string getPrincipal() {
         return getPrimaryPrincipal(getPrincipals());
     }
 
-    public PrincipalCollection getPrincipals() {
-        return CollectionUtils.isEmpty(this.runAsPrincipals) ? this.principals : this.runAsPrincipals.get(0);
+     PrincipalCollection *getPrincipals() {
+        return this->principals;
     }
 
-    public boolean isPermitted(String permission) {
-        return hasPrincipals() && securityManager.isPermitted(getPrincipals(), permission);
-    }
+    bool isPermitted(std::string permission){ return false; }
 
-    public boolean isPermitted(Permission permission) {
-        return hasPrincipals() && securityManager.isPermitted(getPrincipals(), permission);
-    }
+    bool isPermitted(Permission permission) { return false; }
 
-    public boolean[] isPermitted(String... permissions) {
-        if (hasPrincipals()) {
-            return securityManager.isPermitted(getPrincipals(), permissions);
-        } else {
-            return new boolean[permissions.length];
-        }
-    }
+    void isPermitted(std::string *perssions, std::vector<bool> *bools) { }
 
-    public boolean[] isPermitted(List<Permission> permissions) {
-        if (hasPrincipals()) {
-            return securityManager.isPermitted(getPrincipals(), permissions);
-        } else {
-            return new boolean[permissions.size()];
-        }
-    }
+    void isPermitted(std::vector<Permission> permissions,std::vector<bool> *bools) { }
 
-    public boolean isPermittedAll(String... permissions) {
-        return hasPrincipals() && securityManager.isPermittedAll(getPrincipals(), permissions);
-    }
+    bool isPermittedAll(std::vector<std::string> permissions) { return false; }
 
-    public boolean isPermittedAll(Collection<Permission> permissions) {
-        return hasPrincipals() && securityManager.isPermittedAll(getPrincipals(), permissions);
-    }
+    bool isPermittedAll(std::vector<Permission> permissions) { return false; }
 
-    protected void assertAuthzCheckPossible() throws AuthorizationException {
-        if (!hasPrincipals()) {
-            String msg = "This subject is anonymous - it does not have any identifying principals and " +
-                    "authorization operations require an identity to check against.  A Subject instance will " +
-                    "acquire these identifying principals automatically after a successful login is performed " +
-                    "be executing " + Subject.class.getName() + ".login(AuthenticationToken) or when 'Remember Me' " +
-                    "functionality is enabled by the SecurityManager.  This exception can also occur when a " +
-                    "previously logged-in Subject has logged out which " +
-                    "makes it anonymous again.  Because an identity is currently not known due to any of these " +
-                    "conditions, authorization is denied.";
-            throw new UnauthenticatedException(msg);
-        }
-    }
 
-    public void checkPermission(String permission) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkPermission(getPrincipals(), permission);
-    }
 
-    public void checkPermission(Permission permission) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkPermission(getPrincipals(), permission);
-    }
+    void checkPermission(std::string permission){}
 
-    public void checkPermissions(String... permissions) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkPermissions(getPrincipals(), permissions);
-    }
+    void checkPermission(Permission permission){}
 
-    public void checkPermissions(Collection<Permission> permissions) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkPermissions(getPrincipals(), permissions);
-    }
+    void checkPermissions(std::vector<std::string> perssions){}
 
-    public boolean hasRole(String roleIdentifier) {
-        return hasPrincipals() && securityManager.hasRole(getPrincipals(), roleIdentifier);
-    }
+    void checkPermissions(std::vector<Permission> permissions){}
 
-    public boolean[] hasRoles(List<String> roleIdentifiers) {
-        if (hasPrincipals()) {
-            return securityManager.hasRoles(getPrincipals(), roleIdentifiers);
-        } else {
-            return new boolean[roleIdentifiers.size()];
-        }
-    }
+    bool hasRole(std::string roleIdentifier) { return false; }
 
-    public boolean hasAllRoles(Collection<String> roleIdentifiers) {
-        return hasPrincipals() && securityManager.hasAllRoles(getPrincipals(), roleIdentifiers);
-    }
+    void hasRoles(const std::vector<std::string> &roleIdentifiers, std::vector<bool> *bools) {}
 
-    public void checkRole(String role) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkRole(getPrincipals(), role);
-    }
-    
-    public void checkRoles(String... roleIdentifiers) throws AuthorizationException {
-    }
+    bool hasAllRoles(const std::vector<std::string> &roleIdentifiers) { return false; }
 
-    public void checkRoles(Collection<String> roles) throws AuthorizationException {
-        assertAuthzCheckPossible();
-        securityManager.checkRoles(getPrincipals(), roles);
-    }
+    void checkRole(const std::string &role){}
+    void checkRoles(const std::vector<std::string> &roleIdentifiers)  {}
 
-    public void login(AuthenticationToken token) throws AuthenticationException {
-        clearRunAsIdentities();
-        Subject subject = securityManager.login(this, token);
+    void checkRoles(const std::vector<std::string> roles){}
 
-        PrincipalCollection principals;
+    bool login(const AuthenticationToken &token);
 
-        String host = null;
-
-        if (subject instanceof DelegatingSubject) {
-            DelegatingSubject delegating = (DelegatingSubject) subject;
-            //we have to do this in case there are assumed identities - we don't want to lose the 'real' principals:
-            principals = delegating.principals;
-            host = delegating.host;
-        } else {
-            principals = subject.getPrincipals();
-        }
-
-        if (principals == null || principals.isEmpty()) {
-            String msg = "Principals returned from securityManager.login( token ) returned a null or " +
-                    "empty value.  This value must be non null and populated with one or more elements.";
-            throw new IllegalStateException(msg);
-        }
-        this.principals = principals;
-        this.authenticated = true;
-        if (token instanceof HostAuthenticationToken) {
-            host = ((HostAuthenticationToken) token).getHost();
-        }
-        if (host != null) {
-            this.host = host;
-        }
-        Session session = subject.getSession(false);
-        if (session != null) {
-            this.session = decorate(session);
-            this.runAsPrincipals = getRunAsPrincipals(this.session);
-        } else {
-            this.session = null;
-        }
-        ThreadContext.bind(this);
-    }
-
-    public boolean isAuthenticated() {
+    bool isAuthenticated() {
         return authenticated;
     }
 
-    public boolean isRemembered() {
+    bool isRemembered() {
         PrincipalCollection principals = getPrincipals();
-        return principals != null && !principals.isEmpty() && !isAuthenticated();
+        return !principals.isEmpty() && !isAuthenticated();
     }
 
-    public Session getSession() {
+    Session *getSession() {
         return getSession(true);
     }
 
-    public Session getSession(boolean create) {
-        if (log.isTraceEnabled()) {
-            log.trace("attempting to get session; create = " + create + "; session is null = " + (this.session == null) + "; session has id = " + (this.session != null && session.getId() != null));
+    Session *getSession(bool create) {
+        if (this->session == NULL && create) {
+            SessionContext *sessionContext = createSessionContext();
+            Session *session = this->securityManager->start(sessionContext);
+            this->session = decorate(session);
         }
-
-        if (this.session == null && create) {
-            log.trace("Starting session for host {}", getHost());
-            SessionContext sessionContext = createSessionContext();
-            Session session = this.securityManager.start(sessionContext);
-            this.session = decorate(session);
-        }
-        return this.session;
+        return this->session;
     }
 
-    protected SessionContext createSessionContext() {
-        SessionContext sessionContext = new DefaultSessionContext();
-        if (StringUtils.hasText(host)) {
-            sessionContext.setHost(host);
+protected:
+    SessionContext *createSessionContext() {
+        SessionContext *sessionContext = new SessionContext();
+        if (host.size() > 0) {
+            sessionContext->setHost(host);
         }
         return sessionContext;
     }
 
-    public void logout() {
-        try {
-            clearRunAsIdentities();
-            this.securityManager.logout(this);
-        } finally {
-            this.session = null;
-            this.principals = null;
-            this.authenticated = false;
-            this.runAsPrincipals = null;
-            //Don't set securityManager to null here - the Subject can still be
-            //used, it is just considered anonymous at this point.  The SecurityManager instance is
-            //necessary if the subject would log in again or acquire a new session.  This is in response to
-            //https://issues.apache.org/jira/browse/JSEC-22
-            //this.securityManager = null;
-        }
-    }
+    Session *decorate(Session *session);
 
-    private void sessionStopped() {
-        this.session = null;
-    }
+public:
+    void logout(){
+        // session.stop() 其实是stopawaresession.stop，继承了代理类！！！
+    };
 
-    public <V> V execute(Callable<V> callable) throws ExecutionException {
-        Callable<V> associated = associateWith(callable);
-        try {
-            return associated.call();
-        } catch (Throwable t) {
-            throw new ExecutionException(t);
-        }
-    }
+private:
 
-    public void execute(Runnable runnable) {
-        Runnable associated = associateWith(runnable);
-        associated.run();
-    }
-
-    public <V> Callable<V> associateWith(Callable<V> callable) {
-        return new SubjectCallable<V>(this, callable);
-    }
-
-    public Runnable associateWith(Runnable runnable) {
-        if (runnable instanceof Thread) {
-            String msg = "This implementation does not support Thread arguments because of JDK ThreadLocal " +
-                    "inheritance mechanisms required by Shiro.  Instead, the method argument should be a non-Thread " +
-                    "Runnable and the return value from this method can then be given to an ExecutorService or " +
-                    "another Thread.";
-            throw new UnsupportedOperationException(msg);
-        }
-        return new SubjectRunnable(this, runnable);
-    }
-
-    private class StoppingAwareProxiedSession extends ProxiedSession {
-
-        private final DelegatingSubject owner;
-
-        private StoppingAwareProxiedSession(Session target, DelegatingSubject owningSubject) {
-            super(target);
-            owner = owningSubject;
-        }
-
-        public void stop() throws InvalidSessionException {
-            super.stop();
-            owner.sessionStopped();
-        }
-    }
+    // should delete the session?
+    void sessionStopped();
 
 
-    // ======================================
-    // 'Run As' support implementations
-    // ======================================
 
-    public void runAs(PrincipalCollection principals) {
-        if (!hasPrincipals()) {
-            String msg = "This subject does not yet have an identity.  Assuming the identity of another " +
-                    "Subject is only allowed for Subjects with an existing identity.  Try logging this subject in " +
-                    "first, or using the " + Subject.Builder.class.getName() + " to build ad hoc Subject instances " +
-                    "with identities as necessary.";
-            throw new IllegalStateException(msg);
-        }
-        pushIdentity(principals);
-    }
+    protected:
+        void assertAuthzCheckPossible() {}
 
-    public boolean isRunAs() {
-        return !CollectionUtils.isEmpty(this.runAsPrincipals);
-    }
+private:
 
-    public PrincipalCollection getPreviousPrincipals() {
-        return isRunAs() ? this.principals : null;
-    }
 
-    public PrincipalCollection releaseRunAs() {
-        return popIdentity();
-    }
+    void pushIdentity(PrincipalCollection principals);
 
-    @SuppressWarnings({"unchecked"})
-    private List<PrincipalCollection> getRunAsPrincipals(Session session) {
-        if (session != null) {
-            return (List<PrincipalCollection>) session.getAttribute(RUN_AS_PRINCIPALS_SESSION_KEY);
-        }
-        return null;
-    }
-
-    private void clearRunAsIdentities() {
-        Session session = getSession(false);
-        if (session != null) {
-            session.removeAttribute(RUN_AS_PRINCIPALS_SESSION_KEY);
-        }
-        this.runAsPrincipals = null;
-    }
-
-    private void pushIdentity(PrincipalCollection principals) throws NullPointerException {
-        if (CollectionUtils.isEmpty(principals)) {
-            String msg = "Specified Subject principals cannot be null or empty for 'run as' functionality.";
-            throw new NullPointerException(msg);
-        }
-        if (this.runAsPrincipals == null) {
-            this.runAsPrincipals = new ArrayList<PrincipalCollection>();
-        }
-        this.runAsPrincipals.add(0, principals);
-        Session session = getSession();
-        session.setAttribute(RUN_AS_PRINCIPALS_SESSION_KEY, this.runAsPrincipals);
-    }
-
-    private PrincipalCollection popIdentity() {
-        PrincipalCollection popped = null;
-        if (!CollectionUtils.isEmpty(this.runAsPrincipals)) {
-            popped = this.runAsPrincipals.remove(0);
-            Session session;
-            if (!CollectionUtils.isEmpty(this.runAsPrincipals)) {
-                //persist the changed deque to the session
-                session = getSession();
-                session.setAttribute(RUN_AS_PRINCIPALS_SESSION_KEY, this.runAsPrincipals);
-            } else {
-                //deque is empty, remove it from the session:
-                session = getSession(false);
-                if (session != null) {
-                    session.removeAttribute(RUN_AS_PRINCIPALS_SESSION_KEY);
-                }
-            }
-        }
-
-        return popped;
-    }
+    PrincipalCollection popIdentity();
+    public:
+    virtual ~Subject(){}
 };
 }
 }
+}
+
+#endif //#if !defined(CETTY_SHIRO_SUBJECT_SUBJECT_H)

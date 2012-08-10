@@ -62,7 +62,10 @@ public:
      * @param credentialsSalt   the salt used when hashing the given hashedCredentials
      * @param realmName         the realm from where the principal and credentials were acquired.
      */
-    AuthenticationInfo(const std::string &principal, const std::string &hashedCredentials, const ByteSource &credentialsSalt, const std::string &realmName);
+    AuthenticationInfo(const std::string &principal,
+                       const std::string &hashedCredentials,
+                       const ByteSource &credentialsSalt,
+                       const std::string &realmName);
 
     /**
      * Constructor that takes in an account's identifying principal(s) and its corresponding credentials that verify
@@ -81,7 +84,9 @@ public:
      * @param hashedCredentials the hashed credentials that verify the principals.
      * @param credentialsSalt   the salt used when hashing the hashedCredentials.
      */
-    AuthenticationInfo(const PrincipalCollection &principals, std::string &hashedCredentials, const ByteSource &credentialsSalt);
+    AuthenticationInfo(const PrincipalCollection &principals,
+                       const std::string &hashedCredentials,
+                       const ByteSource &credentialsSalt);
 
 
     const PrincipalCollection &getPrincipals() const{
@@ -121,7 +126,7 @@ public:
      *         hashed at all.
      * @since 1.1
      */
-    const ByteSource &getCredentialsSalt();
+    const ByteSource& getCredentialsSalt() const;
 
     /**
      * Sets the salt used to hash the credentials, or {@code null} if no salt was used or credentials were not
@@ -154,6 +159,13 @@ public:
      *         its {@link #getPrincipals() principals} are equal to this instance's principals, <code>false</code> otherwise.
      */
     bool equals(const std::string &o);
+
+        int compare(const AuthenticationInfo& info);
+
+        bool operator<(const AuthenticationInfo& info) {
+            return compare(info) < 0;
+        }
+
 
     /**
      * Returns the hashcode of the internal {@link #getPrincipals() principals} instance.

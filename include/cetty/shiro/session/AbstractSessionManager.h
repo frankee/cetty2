@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_ABSTRACTSESSIONMANAGER_H)
+#define CETTY_SHIRO_SESSION_ABSTRACTSESSIONMANAGER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Base abstract class of the {@link SessionManager SessionManager} interface, enabling configuration of an
@@ -41,10 +44,10 @@ public:
     static const long DEFAULT_GLOBAL_SESSION_TIMEOUT = 30 * MILLIS_PER_MINUTE;
 
 private:
-    long globalSessionTimeout = DEFAULT_GLOBAL_SESSION_TIMEOUT;
+    long globalSessionTimeout;
 
 public:
-    AbstractSessionManager() {}
+    AbstractSessionManager(): globalSessionTimeout(DEFAULT_GLOBAL_SESSION_TIMEOUT) {}
 
     /**
      * Returns the system-wide default time in milliseconds that any session may remain idle before expiring. This
@@ -84,3 +87,6 @@ public:
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_SESSION_ABSTRACTSESSIONMANAGER_H)

@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SECURITYUTILS_H)
+#define CETTY_SHIRO_SECURITYUTILS_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,23 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+#include <cetty/shiro/subject/Subject.h>
 namespace cetty {
 namespace shiro {
 
+using namespace cetty::shiro::subject;
 /**
  * Accesses the currently accessible {@code Subject} for the calling code depending on runtime environment.
  *
  * @since 0.2
  */
 class SecurityUtils {
-
+private:
     /**
      * ONLY used as a 'backup' in VM Singleton environments (that is, standalone environments), since the
      * ThreadContext should always be the primary source for Subject instances when possible.
      */
-    private static SecurityManager securityManager;
+    static SecurityManager securityManager;
 
+public:
     /**
      * Returns the currently accessible {@code Subject} available to the calling code depending on
      * runtime environment.
@@ -47,14 +51,7 @@ class SecurityUtils {
      *                               a {@code Subject}, which which is considered an invalid application configuration
      *                               - a Subject should <em>always</em> be available to the caller.
      */
-    public static Subject getSubject() {
-        Subject subject = ThreadContext.getSubject();
-        if (subject == null) {
-            subject = (new Subject.Builder()).buildSubject();
-            ThreadContext.bind(subject);
-        }
-        return subject;
-    }
+    static Subject *getSubject();
 
     /**
      * Sets a VM (static) singleton SecurityManager, specifically for transparent use in the
@@ -88,8 +85,8 @@ class SecurityUtils {
      *
      * @param securityManager the securityManager instance to set as a VM static singleton.
      */
-    public static void setSecurityManager(SecurityManager securityManager) {
-        SecurityUtils.securityManager = securityManager;
+    static void setSecurityManager(SecurityManager *securityManager) {
+        SecurityUtils::securityManager = securityManager;
     }
 
     /**
@@ -108,19 +105,9 @@ class SecurityUtils {
      *          if there is no {@code SecurityManager} instance available to the
      *          calling code, which typically indicates an invalid application configuration.
      */
-    public static SecurityManager getSecurityManager() throws UnavailableSecurityManagerException {
-        SecurityManager securityManager = ThreadContext.getSecurityManager();
-        if (securityManager == null) {
-            securityManager = SecurityUtils.securityManager;
-        }
-        if (securityManager == null) {
-            String msg = "No SecurityManager accessible to the calling code, either bound to the " +
-                    ThreadContext.class.getName() + " or as a vm static singleton.  This is an invalid application " +
-                    "configuration.";
-            throw new UnavailableSecurityManagerException(msg);
-        }
-        return securityManager;
-    }
+    static SecurityManager *getSecurityManager();
 };
 }
 }
+#if !defined(CETTY_SHIRO_SECURITYUTILS_H)
+#define CETTY_SHIRO_SECURITYUTILS_H

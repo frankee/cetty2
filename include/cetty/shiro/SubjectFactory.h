@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SUBJECTFACTORY_H)
+#define CETTY_SHIRO_SUBJECTFACTORY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,34 +18,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/subject/Subject.h>
+namespace cetty { namespace shiro { namespace subject {
+    class SubjectContext;
+}}}
 
 namespace cetty {
 namespace shiro {
 
+using namespace cetty::shiro::subject;
 /**
  * Default {@link SubjectFactory SubjectFactory} implementation that creates {@link org.apache.shiro.subject.support.DelegatingSubject DelegatingSubject}
  * instances.
  *
  * @since 1.0
  */
-public class DefaultSubjectFactory {
+class SubjectFactory {
+public:
+    SubjectFactory(){}
+    Subject *createSubject(SubjectContext *context);
 
-    public DefaultSubjectFactory() {
-    }
-
-    public Subject createSubject(SubjectContext context) {
-        SecurityManager securityManager = context.resolveSecurityManager();
-        Session session = context.resolveSession();
-        PrincipalCollection principals = context.resolvePrincipals();
-        boolean authenticated = context.resolveAuthenticated();
-        String host = context.resolveHost();
-        return newSubjectInstance(principals, authenticated, host, session, securityManager);
-    }
-
-    protected Subject newSubjectInstance(PrincipalCollection principals, boolean authenticated, String host,
-                                         Session session, SecurityManager securityManager) {
-        return new DelegatingSubject(principals, authenticated, host, session, securityManager);
+    Subject *newSubjectInstance(PrincipalCollection *principals, bool authenticated, const std::string &host,
+                                         Session *session, SecurityManager *securityManager) {
+        return new Subject(principals, authenticated, host, session, securityManager);
     }
 };
 }
 }
+
+#endif // #if !defined(CETTY_SHIRO_SUBJECTFACTORY_H)

@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_UTIL_MAPCONTEXT_H)
+#define CETTY_SHIRO_UTIL_MAPCONTEXT_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+#include <cstdlib>
 namespace cetty {
 namespace shiro {
+namespace util {
 
 /**
  * A {@code MapContext} provides a common base for context-based data storage in a {@link Map}.  Type-safe attribute
@@ -29,22 +32,62 @@ namespace shiro {
  * @since 1.0
  */
 class MapContext {
+public:
+    MapContext() {}
 
-    private static final long serialVersionUID = 5373399119017820322L;
+    int size() { return backingMap.size(); }
+    bool isEmpty() { return backingMap.empty(); }
+    bool containsKey(const std::string &key) { return backingMap.count(key) > 0; }
 
-    private final Map<String, Object> backingMap;
+    template<typename T>
+    bool containsValue(T *t) {
+        std::map<std::string, boost::any *>::iterator it = backingMap.begin();
+        boost::any *any = NULL;
 
-    public MapContext() {
-        this.backingMap = new HashMap<String, Object>();
-    }
+        for(; it < backingMap.end(); ++it){
+            any = it->second;
+            if(any->type() == typeid(T)){
+               T *value = boost::any_cast<T *>(any);
+               if(t->equal(value)) return true;
+            }
 
-    public MapContext(Map<String, Object> map) {
-        this();
-        if (!CollectionUtils.isEmpty(map)) {
-            this.backingMap.putAll(map);
         }
+        return false;
+    }
+    template<typename T>
+    T *get(const std::string &key) {
+       return getTypedValue<T>(key);
     }
 
+    boost::any *put(const std::string &key, boost::any *value) {
+        std::pair<std::map<std::string, boost::any *>::iterator, bool> ret =
+            backingMap.insert(std::pair<std::string, boost::any *>(key, value));
+        if(!ret.second) NULL;
+        return ret.first->second;
+    }
+
+    boost::any * remove(const std::string &key) {
+        std::map<std::string, boost::any *>::iterator it = backingMap.find(key);
+        if(it == backingMap.end()) return NULL;
+        boost::any *ret = it->second;
+        backingMap.erase(it);
+        return ret;
+    }
+
+    void putAll(const std::map<std::string, boost::any *> &map) {
+        backingMap.insert(map.begin(), map.end());
+    }
+
+    void clear() {
+       backingMap.clear();
+    }
+
+    std::vector<std::string> *keySet();
+
+    std::vector<boost::any *> *values();
+    std::vector<std::pair<std::string, boost::any *> > entrySet();
+
+protected:
     /**
      * Performs a {@link #get get} operation but additionally ensures that the value returned is of the specified
      * {@code type}.  If there is no value, {@code null} is returned.
@@ -54,20 +97,13 @@ class MapContext {
      * @param <E>  the expected type of the value
      * @return the typed value or {@code null} if the attribute does not exist.
      */
-    @SuppressWarnings({"unchecked"})
-    protected <E> E getTypedValue(String key, Class<E> type) {
-        E found = null;
-        Object o = backingMap.get(key);
-        if (o != null) {
-            if (!type.isAssignableFrom(o.getClass())) {
-                String msg = "Invalid object found in SubjectContext Map under key [" + key + "].  Expected type " +
-                        "was [" + type.getName() + "], but the object under that key is of type " +
-                        "[" + o.getClass().getName() + "].";
-                throw new IllegalArgumentException(msg);
-            }
-            found = (E) o;
-        }
-        return found;
+    template<typename T>
+    T *getTypedValue(const std::string &key) {
+        std::map<std::string, boost::any *>::iterator it = backingMap.find(key);
+        if(it == backingMap.end()) return NULL;
+        T* t = boost::any_cast<T *>(it->second);
+        if(t == NULL) return NULL;
+        return t;
     }
 
     /**
@@ -76,59 +112,18 @@ class MapContext {
      * @param key   the attribute key under which the non-null value will be stored
      * @param value the non-null value to store.  If {@code null}, this method does nothing and returns immediately.
      */
-    protected void nullSafePut(String key, Object value) {
-        if (value != null) {
+    void nullSafePut(const std::string &key, boost::any *value) {
+        if (key.size() > 0) {
             put(key, value);
         }
     }
 
-    public int size() {
-        return backingMap.size();
-    }
 
-    public boolean isEmpty() {
-        return backingMap.isEmpty();
-    }
-
-    public boolean containsKey(Object o) {
-        return backingMap.containsKey(o);
-    }
-
-    public boolean containsValue(Object o) {
-        return backingMap.containsValue(o);
-    }
-
-    public Object get(Object o) {
-        return backingMap.get(o);
-    }
-
-    public Object put(String s, Object o) {
-        return backingMap.put(s, o);
-    }
-
-    public Object remove(Object o) {
-        return backingMap.remove(o);
-    }
-
-    public void putAll(Map<? extends String, ?> map) {
-        backingMap.putAll(map);
-    }
-
-    public void clear() {
-        backingMap.clear();
-    }
-
-    public Set<String> keySet() {
-        return Collections.unmodifiableSet(backingMap.keySet());
-    }
-
-    public Collection<Object> values() {
-        return Collections.unmodifiableCollection(backingMap.values());
-    }
-
-    public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(backingMap.entrySet());
-    }
+private:
+    std::map<std::string, boost::any *> backingMap;
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_UTIL_MAPCONTEXT_H)
+#define CETTY_SHIRO_UTIL_MAPCONTEXT_H

@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_SESSIONKEY_H)
+#define CETTY_SHIRO_SESSION_SESSIONKEY_H
 /*
  * Copyright 2008 Les Hazlewood
  *
@@ -16,6 +18,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Default implementation of the {@link SessionKey} interface, which allows setting and retrieval of a concrete
@@ -24,24 +27,28 @@ namespace shiro {
  *
  * @since 1.0
  */
-class SessionId {
+class SessionKey {
 
-    private Serializable sessionId;
+private:
+    std::string sessionId;
 
-    public DefaultSessionKey() {
+public:
+    SessionKey() {}
+
+    SessionKey(const std::string sessionId) {
+        this->sessionId = sessionId;
     }
 
-    public DefaultSessionKey(Serializable sessionId) {
-        this.sessionId = sessionId;
+    void setSessionId(const std::string sessionId) {
+        this->sessionId = sessionId;
     }
 
-    public void setSessionId(Serializable sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public Serializable getSessionId() {
-        return this.sessionId;
+    const std::string &getSessionId() const{
+        return this->sessionId;
     }
 };
 }
 }
+}
+
+#endif // #if !defined(CETTY_SHIRO_SESSION_SESSIONKEY_H)

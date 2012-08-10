@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_SESSIONMANAGER_H)
+#define CETTY_SHIRO_SESSION_SESSIONMANAGER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cstdlib>
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * Default business-tier implementation of a {@link ValidatingSessionManager}.  All session CRUD operations are
@@ -26,55 +30,28 @@ namespace shiro {
  *
  * @since 0.1
  */
-class SessionManager {
+class SessionManager : public AbstractValidatingSessionManager{
+protected:
+    SessionDAO *sessionDAO;  //todo - move SessionDAO up to AbstractValidatingSessionManager?
 
-    //TODO - complete JavaDoc
+    CacheManager *cacheManager;
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultSessionManager.class);
+private:
+    bool deleteInvalidSessions;
 
-    private SessionFactory sessionFactory;
+public:
+    SessionManager()
+      :deleteInvalidSessions(true),
+       sessionDAO(NULL),
+       cacheManager(NULL){}
 
-    protected SessionDAO sessionDAO;  //todo - move SessionDAO up to AbstractValidatingSessionManager?
-
-    private CacheManager cacheManager;
-
-    private boolean deleteInvalidSessions;
-
-    public DefaultSessionManager() {
-        this.deleteInvalidSessions = true;
-        this.sessionFactory = new SimpleSessionFactory();
-        this.sessionDAO = new MemorySessionDAO();
-    }
-
-    public void setSessionDAO(SessionDAO sessionDAO) {
-        this.sessionDAO = sessionDAO;
+    void setSessionDAO(SessionDAO *sessionDAO) {
+        this->sessionDAO = sessionDAO;
         applyCacheManagerToSessionDAO();
     }
 
-    public SessionDAO getSessionDAO() {
-        return this.sessionDAO;
-    }
-
-    /**
-     * Returns the {@code SessionFactory} used to generate new {@link Session} instances.  The default instance
-     * is a {@link SimpleSessionFactory}.
-     *
-     * @return the {@code SessionFactory} used to generate new {@link Session} instances.
-     * @since 1.0
-     */
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
-
-    /**
-     * Sets the {@code SessionFactory} used to generate new {@link Session} instances.  The default instance
-     * is a {@link SimpleSessionFactory}.
-     *
-     * @param sessionFactory the {@code SessionFactory} used to generate new {@link Session} instances.
-     * @since 1.0
-     */
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    SessionDAO *getSessionDAO() {
+        return this->sessionDAO;
     }
 
     /**
@@ -95,7 +72,7 @@ class SessionManager {
      *         {@code false} if invalid sessions will be manually deleted by some process external to Shiro's control.
      * @since 1.0
      */
-    public boolean isDeleteInvalidSessions() {
+    bool isDeleteInvalidSessions() {
         return deleteInvalidSessions;
     }
 
@@ -111,13 +88,12 @@ class SessionManager {
      *                              to be invalid.
      * @since 1.0
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void setDeleteInvalidSessions(boolean deleteInvalidSessions) {
-        this.deleteInvalidSessions = deleteInvalidSessions;
+    void setDeleteInvalidSessions(bool deleteInvalidSessions) {
+        this->deleteInvalidSessions = deleteInvalidSessions;
     }
 
-    public void setCacheManager(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+    void setCacheManager(CacheManager *cacheManager) {
+        this->cacheManager = cacheManager;
         applyCacheManagerToSessionDAO();
     }
 
@@ -132,23 +108,31 @@ class SessionManager {
      *
      * @since 1.0
      */
-    private void applyCacheManagerToSessionDAO() {
-        if (this.cacheManager != null && this.sessionDAO != null && this.sessionDAO instanceof CacheManagerAware) {
-            ((CacheManagerAware) this.sessionDAO).setCacheManager(this.cacheManager);
+    void applyCacheManagerToSessionDAO() {
+        if (this->cacheManager != NULL && this->sessionDAO != NULL) {
+            (this->sessionDAO)->setCacheManager(this->cacheManager);
         }
     }
 
-    protected Session doCreateSession(SessionContext context) {
-        Session s = newSessionInstance(context);
-        if (log.isTraceEnabled()) {
-            log.trace("Creating session for host {}", s.getHost());
-        }
+    DelegatingSession* createExposedSession(Session *session, SessionContext context) {
+        DelegatingSession *ds = new DelegatingSession(*this, SessionKey(session->getId()));
+        return ds;
+    }
+
+    Session *createExposedSession(Session *session, SessionKey key) {
+        DelegatingSession *ds = new DelegatingSession(*this, key.getSessionId());
+        return ds;
+    }
+
+protected:
+    Session *doCreateSession(SessionContext context) {
+        Session *s = newSessionInstance(context);
         create(s);
         return s;
     }
 
-    protected Session newSessionInstance(SessionContext context) {
-        return getSessionFactory().createSession(context);
+    Session *newSessionInstance(SessionContext context) {
+        return SessionFactory::createSession(context);
     }
 
     /**
@@ -158,81 +142,80 @@ class SessionManager {
      *
      * @param session the Session instance to persist to the underlying EIS.
      */
-    protected void create(Session session) {
-        if (log.isDebugEnabled()) {
-            log.debug("Creating new EIS record for new session instance [" + session + "]");
-        }
-        sessionDAO.create(session);
+    void create(Session *session) {
+        sessionDAO->create(session);
     }
 
-    @Override
-    protected void onStop(Session session) {
-        if (session instanceof SimpleSession) {
-            SimpleSession ss = (SimpleSession) session;
-            Date stopTs = ss.getStopTimestamp();
-            ss.setLastAccessTime(stopTs);
-        }
+    void onStop(Session *session) {
+        time_t stopTs = session->getStopTimestamp();
+            session->setLastAccessTime(stopTs);
         onChange(session);
     }
 
-    @Override
-    protected void afterStopped(Session session) {
+    void afterStopped(Session *session) {
         if (isDeleteInvalidSessions()) {
             delete(session);
         }
     }
 
-    protected void onExpiration(Session session) {
-        if (session instanceof SimpleSession) {
-            ((SimpleSession) session).setExpired(true);
-        }
+    void onExpiration(Session *session) {
+        session->setExpired(true);
         onChange(session);
     }
 
-    @Override
-    protected void afterExpired(Session session) {
+    void afterExpired(Session *session) {
         if (isDeleteInvalidSessions()) {
             delete(session);
         }
     }
 
-    protected void onChange(Session session) {
-        sessionDAO.update(session);
+    void onChange(Session *session) {
+        sessionDAO->update(session);
     }
 
-    protected Session retrieveSession(SessionKey sessionKey) throws UnknownSessionException {
-        Serializable sessionId = getSessionId(sessionKey);
-        if (sessionId == null) {
-            log.debug("Unable to resolve session ID from SessionKey [{}].  Returning null to indicate a " +
-                    "session could not be found.", sessionKey);
-            return null;
-        }
-        Session s = retrieveSessionFromDataSource(sessionId);
-        if (s == null) {
-            //session ID was provided, meaning one is expected to be found, but we couldn't find one:
-            String msg = "Could not find session with ID [" + sessionId + "]";
-            throw new UnknownSessionException(msg);
-        }
+    Session *retrieveSession(const SessionKey &sessionKey){
+        std::string sessionId = getSessionId(sessionKey);
+        if (sessionId == "") return NULL;
+        Session *s = retrieveSessionFromDataSource(sessionId);
         return s;
     }
 
-    protected Serializable getSessionId(SessionKey sessionKey) {
+    const std::string &getSessionId(const SessionKey &sessionKey) {
         return sessionKey.getSessionId();
     }
 
-    protected Session retrieveSessionFromDataSource(Serializable sessionId) throws UnknownSessionException {
-        return sessionDAO.readSession(sessionId);
+    Session *retrieveSessionFromDataSource(const SessionKey &sessionKey) {
+        return sessionDAO->readSession(sessionKey.getSessionId());
     }
 
-    protected void delete(Session session) {
-        sessionDAO.delete(session);
+    void remove(Session *session) {
+        sessionDAO->remove(session);
     }
 
-    protected Collection<Session> getActiveSessions() {
-        Collection<Session> active = sessionDAO.getActiveSessions();
-        return active != null ? active : Collections.<Session>emptySet();
+    std::vector<Session *> *getActiveSessions() {
+        return sessionDAO->getActiveSessions();
     }
+
+    Session *getSession(SessionKey key){
+        Session *session = lookupSession(key);
+        return session != NULL ? createExposedSession(session, key) : NULL;
+    }
+
+    Session *start(const SessionContext &context) {
+       Session *session = createSession(context);
+       if(session != NULL){
+           applyGlobalSessionTimeout(session);
+           onStart(session, context);
+           notifyStart(session);
+           //Don't expose the EIS-tier Session object to the client-tier:
+           return createExposedSession(session, context);
+       }
+       return session;
+   }
 
 };
 }
 }
+}
+
+#endif //#if !defined(CETTY_SHIRO_SESSION_SESSIONMANAGER_H)

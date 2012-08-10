@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_SESSION_DELEGATINGSESSION_H)
+#define CETTY_SHIRO_SESSION_DELEGATINGSESSION_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +21,7 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
 /**
  * A DelegatingSession is a client-tier representation of a server side
@@ -36,50 +39,22 @@ namespace shiro {
  * @since 0.1
  */
 class DelegatingSession {
-
-    //TODO - complete JavaDoc
-
-    private final SessionKey key;
-
-    //cached fields to avoid a server-side method call if out-of-process:
-    private Date startTimestamp = null;
-    private String host = null;
-
-    /**
-     * Handle to the target NativeSessionManager that will support the delegate calls.
-     */
-    private final transient NativeSessionManager sessionManager;
-
-
-    public DelegatingSession(NativeSessionManager sessionManager, SessionKey key) {
-        if (sessionManager == null) {
-            throw new IllegalArgumentException("sessionManager argument cannot be null.");
-        }
-        if (key == null) {
-            throw new IllegalArgumentException("sessionKey argument cannot be null.");
-        }
-        if (key.getSessionId() == null) {
-            String msg = "The " + DelegatingSession.class.getName() + " implementation requires that the " +
-                    "SessionKey argument returns a non-null sessionId to support the " +
-                    "Session.getId() invocations.";
-            throw new IllegalArgumentException(msg);
-        }
-        this.sessionManager = sessionManager;
-        this.key = key;
-    }
+public:
+    DelegatingSession(const  SessionManager &sessionManager, const SessionKey &key)
+      :sessionManager(sessionManager), key(key), startTimestamp(0){}
 
     /**
      * @see org.apache.shiro.session.Session#getId()
      */
-    public Serializable getId() {
+    const std::string &getId() {
         return key.getSessionId();
     }
 
     /**
      * @see org.apache.shiro.session.Session#getStartTimestamp()
      */
-    public Date getStartTimestamp() {
-        if (startTimestamp == null) {
+    time_t getStartTimestamp() {
+        if (startTimestamp == 0) {
             startTimestamp = sessionManager.getStartTimestamp(key);
         }
         return startTimestamp;
@@ -88,21 +63,21 @@ class DelegatingSession {
     /**
      * @see org.apache.shiro.session.Session#getLastAccessTime()
      */
-    public Date getLastAccessTime() {
+    time_t getLastAccessTime() {
         //can't cache - only business pojo knows the accurate time:
         return sessionManager.getLastAccessTime(key);
     }
 
-    public long getTimeout() throws InvalidSessionException {
+    long getTimeout() {
         return sessionManager.getTimeout(key);
     }
 
-    public void setTimeout(long maxIdleTimeInMillis) throws InvalidSessionException {
+    void setTimeout(long maxIdleTimeInMillis){
         sessionManager.setTimeout(key, maxIdleTimeInMillis);
     }
 
-    public String getHost() {
-        if (host == null) {
+    std::string getHost() {
+        if (host == "") {
             host = sessionManager.getHost(key);
         }
         return host;
@@ -111,48 +86,62 @@ class DelegatingSession {
     /**
      * @see org.apache.shiro.session.Session#touch()
      */
-    public void touch() throws InvalidSessionException {
+    void touch(){
         sessionManager.touch(key);
     }
 
     /**
      * @see org.apache.shiro.session.Session#stop()
      */
-    public void stop() throws InvalidSessionException {
+    void stop(){
         sessionManager.stop(key);
     }
 
     /**
      * @see org.apache.shiro.session.Session#getAttributeKeys
      */
-    public Collection<Object> getAttributeKeys() throws InvalidSessionException {
+    std::vector<std::string> *getAttributeKeys(){
         return sessionManager.getAttributeKeys(key);
     }
 
     /**
      * @see org.apache.shiro.session.Session#getAttribute(Object key)
      */
-    public Object getAttribute(Object attributeKey) throws InvalidSessionException {
-        return sessionManager.getAttribute(this.key, attributeKey);
+    const std::string &getAttribute(const std::string &attributeKey){
+        return sessionManager.getAttribute(key, attributeKey);
     }
 
     /**
      * @see Session#setAttribute(Object key, Object value)
      */
-    public void setAttribute(Object attributeKey, Object value) throws InvalidSessionException {
-        if (value == null) {
+    void setAttribute(std::string attributeKey, std::string value){
+        if (value == "") {
             removeAttribute(attributeKey);
         } else {
-            sessionManager.setAttribute(this.key, attributeKey, value);
+            sessionManager.setAttribute(key, attributeKey, value);
         }
     }
 
     /**
      * @see Session#removeAttribute(Object key)
      */
-    public Object removeAttribute(Object attributeKey) throws InvalidSessionException {
-        return sessionManager.removeAttribute(this.key, attributeKey);
+    std::string removeAttribute(const std::string &attributeKey){
+        return sessionManager.removeAttribute(key, attributeKey);
     }
+
+private:
+    SessionKey key;
+
+    //cached fields to avoid a server-side method call if out-of-process:
+    time_t startTimestamp;
+    std::string host;
+
+    /**
+     * Handle to the target NativeSessionManager that will support the delegate calls.
+     */
+    SessionManager &sessionManager;
 };
 }
 }
+}
+#endif // #if !defined(CETTY_SHIRO_SESSION_DELEGATINGSESSION_H)
