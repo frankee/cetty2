@@ -45,6 +45,11 @@ public:
         int type;
         std::string name;
         std::string alias;
+
+        PathSegment() {}
+        PathSegment(int type) : type(type) {}
+        PathSegment(int type, const std::string& name)
+            : type(type), name(name) {}
     };
 
     typedef std::vector<PathSegment> PathSegments;
@@ -53,21 +58,23 @@ public:
 public:
     UriTemplate(const std::string& templateStr);
 
-    void parse(const std::string& str);
-
     //std::string expand(const NameValueCollection& values);
     //int extract(const std::string& uri, NameValueCollection* values);
 
     bool matchPath(const std::vector<std::string>& pathSegments) const;
 
     const PathSegments& getPathSegments() const { return pathSegments; }
-    
+
     const std::string& getLabel() const { return label; }
     const std::string& getLabelAlias() const { return labelAlias; }
 
     const QueryParams& getQueryParams() const { return queryParams; }
 
     const std::string& getParameterAlias(const std::string& parameter) const;
+
+private:
+    void parse(const std::string& str);
+    void clear();
 
 private:
     //path

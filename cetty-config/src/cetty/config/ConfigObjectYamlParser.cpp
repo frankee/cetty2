@@ -40,7 +40,20 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         const ConfigFieldDescriptor* field = *itr;
         const YAML::Node fieldNode = node[field->name];
 
+        YAML::NodeType::value type = fieldNode.Type();
+
         if (!fieldNode) {
+            //if (fieldNode.Type() == YAML::NodeType::Null) {
+            if (descriptor->fieldCnt() == 1 && field->repeated) {
+                if (!parseField(field, node, object)) {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+        else {
             if (!parseField(field, fieldNode, object)) {
                 return false;
             }
@@ -118,7 +131,7 @@ int parseField(const ConfigFieldDescriptor* field,
         }
     }
 
-    return 0;
+    return true;
 }
 
 }

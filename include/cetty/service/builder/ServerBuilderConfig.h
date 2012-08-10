@@ -36,15 +36,7 @@ public:
         std::string pipeline;
 
     public:
-        Server() {
-            CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig.Server",
-                                        new ConfigDescriptor(
-                                                CETTY_CONFIG_FIELD(Server, port, INT32),
-                                                CETTY_CONFIG_FIELD(Server, host, STRING),
-                                                CETTY_CONFIG_FIELD(Server, pipeline, STRING)),
-                                        new Server);
-        }
-
+        Server();
         ConfigObject* create() const { return new Server; }
     };
 
@@ -53,13 +45,7 @@ public:
         int maxConcurrentRequests;
 
     public:
-        Limit() {
-            CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig.Limit",
-                                        new ConfigDescriptor(
-                                            CETTY_CONFIG_FIELD(Limit, maxConcurrentRequests, INT32)),
-                                        new Server);
-        }
-
+        Limit();
         ConfigObject* create() const { return new Limit; }
     };
 
@@ -69,12 +55,7 @@ public:
 
     public:
         ConfigObject* create() const { return new Timeout; }
-        Timeout() {
-            CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig.Timeout",
-                new ConfigDescriptor(
-                    CETTY_CONFIG_FIELD(Timeout, hostConnectionMaxIdleTime, INT32)),
-                new Timeout);
-        }
+        Timeout();
     };
 
 public:
@@ -91,26 +72,7 @@ public:
     Timeout* timeout;
 	
 public:
-    ServerBuilderConfig()
-        : deamonize(0),
-          parentThreadCount(1),
-          childThreadCount(0),
-          backlog(4096),
-          limit(),
-          timeout() {
-        CETTY_CONFIG_ADD_DESCRIPTOR("ServiceBuilderConfig",
-            new ConfigDescriptor(
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, deamonize, INT32),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, pidfile, STRING),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, servers, OBJECT),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, parentThreadCount, INT32),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, childThreadCount, INT32),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, backlog, INT32),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, logger, OBJECT),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, limit, OBJECT),
-                CETTY_CONFIG_FIELD(ServerBuilderConfig, timeout, OBJECT)),
-            new ServerBuilderConfig);
-    }
+    ServerBuilderConfig();
 
     ~ServerBuilderConfig() {
         if (limit) delete limit;

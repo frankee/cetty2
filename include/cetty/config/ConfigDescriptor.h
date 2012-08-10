@@ -22,30 +22,54 @@
 namespace cetty {
 namespace config {
 
-#define CETTY_CONFIG_ADD_DESCRIPTOR(name, descriptor, server) \
-    { \
-    static bool inited = false; \
-    if (inited) { addDescriptor(name, descriptor, server);  inited = true; } \
-    }
+#define CETTY_CONFIG_ADD_DESCRIPTOR(name, descriptor, object) \
+    class DescriptorRegister##name {\
+    public:\
+        DescriptorRegister##name() {\
+            ConfigObject::addDescriptor(#name, descriptor, object);\
+        }\
+    };\
+    static DescriptorRegister##name descriptorRegister##name;\
+     
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ConfigFieldDescriptor(\
-        static_cast<int>(reinterpret_cast<const char*>(\
-            &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-        ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-        #FIELD\
-    )\
-
+                              static_cast<int>(reinterpret_cast<const char*>(\
+                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+                              ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+                              #FIELD,\
+                              #CPP_TYPE\
+                             )\
+     
+#define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+    new ConfigFieldDescriptor(\
+                              static_cast<int>(reinterpret_cast<const char*>(\
+                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+                              ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+                              #FIELD,\
+                              #CLASS\
+                             )\
+     
 #define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ConfigFieldDescriptor(\
-        static_cast<int>(reinterpret_cast<const char*>(\
-        &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-        ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-        #FIELD,\
-        true,\
-    )\
+                              static_cast<int>(reinterpret_cast<const char*>(\
+                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+                              ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+                              #FIELD,\
+                              true\
+                             )\
+     
+#define CETTY_CONFIG_REPEATED_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+    new ConfigFieldDescriptor(\
+                              static_cast<int>(reinterpret_cast<const char*>(\
+                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+                              ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+                              #FIELD,\
+                              #CLASS,\
+                              true\
+                             )\
 
-
+     
 class ConfigFieldDescriptor {
 public:
     // Specifies the C++ data type used to represent the field.  There is a
@@ -67,10 +91,11 @@ public:
     int offset;
     int type;
     const char* name;
+    const char* className;
 
-    ConfigFieldDescriptor(int offset, int type, const char* name, bool repeated = false)
-        : offset(offset), type(type), name(name), repeated(repeated) {}
- };
+    ConfigFieldDescriptor(int offset, int type, const char* name, const char* className, bool repeated = false)
+        : offset(offset), type(type), name(name), className(className), repeated(repeated) {}
+};
 
 class ConfigDescriptor {
 public:
@@ -78,12 +103,14 @@ public:
     typedef std::vector<ConstConfigFieldDescriptorPtr>::const_iterator ConstIterator;
 
 public:
-    ConfigDescriptor(ConstConfigFieldDescriptorPtr descriptor, ...);
+    ConfigDescriptor(int count, ConstConfigFieldDescriptorPtr descriptor, ...);
     ~ConfigDescriptor();
 
 public:
     ConstIterator begin() const;
     ConstIterator end() const;
+
+    int fieldCnt() const { return (int)fields.size(); }
 
 private:
     std::vector<ConstConfigFieldDescriptorPtr> fields;

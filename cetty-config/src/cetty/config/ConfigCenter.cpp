@@ -16,6 +16,7 @@
 
 #include <cetty/config/ConfigCenter.h>
 
+#include <fstream>
 #include <boost/program_options.hpp>
 #include <yaml-cpp/yaml.h>
 
@@ -32,6 +33,7 @@ using namespace boost::program_options;
 using namespace cetty::logging;
 
 ConfigCenter* ConfigCenter::center = NULL;
+InternalLogger* ConfigCenter::logger = NULL;
 
 ConfigCenter& ConfigCenter::instance() {
     if (NULL == center) {
@@ -46,11 +48,10 @@ ConfigCenter::ConfigCenter() : argc(0), argv(NULL), finder() {
         logger = InternalLoggerFactory::getInstance("ConfigCenter");
     }
 
-    finder = new ConfigIncludeFileFinder(/*logger*/);
+    finder = new ConfigIncludeFileFinder(logger);
 }
 
 ConfigCenter::~ConfigCenter() {
-
     if (finder) {
         delete finder;
     }
@@ -63,7 +64,7 @@ bool ConfigCenter::load(int argc, char* argv[]) {
     options_description desc("Allowed options");
     desc.add_options()
     ("help", "produce this help message")
-    ("conf", "the main configure file");
+    ("conf", value<std::string>(), "the main configure file");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -88,7 +89,12 @@ bool ConfigCenter::load(const char* str) {
         return false;
     }
 
-    root = YAML::Load(str);
+    try {
+        root = YAML::Load(str);
+    }
+    catch (const std::exception& e) {
+        LOG_ERROR(logger, "parse the yaml configure file error: %s", e.what());
+    }
 
     if (!root) {
         return false;
@@ -148,7 +154,72 @@ bool ConfigCenter::getFileContent(const std::vector<std::string>& files, std::st
 }
 
 bool ConfigCenter::getFileContent(const std::string& file, std::string* content) {
+    std::fstream filestream;
+    filestream.open(file, std::fstream::in);
 
+    if (!filestream.is_open()) {
+        filestream.close();
+        LOG_ERROR(logger, "can not open the configure file: %s", file.c_str());
+        return false;
+    }
+
+    std::string line;
+
+    while (!filestream.eof()) {
+        std::getline(filestream, line);
+        content->append(line);
+        content->append("\n");
+    }
+
+    filestream.close();
+
+    return true;
+}
+
+bool ConfigCenter::configureFromString(const char* str, ConfigObject* object) {
+    if (!str || !object) {
+        return false;
+    }
+
+    YAML::Node root;
+
+    try {
+        root = YAML::Load(str);
+    }
+    catch (const std::exception& e) {
+        LOG_ERROR(logger, "parse the yaml configure file error: %s", e.what());
+    }
+
+    if (!root) {
+        return false;
+    }
+
+    return parseConfigObject(root, object);
+}
+
+bool ConfigCenter::configureFromString(const std::string& str, ConfigObject* object) {
+    return configureFromString(str.c_str(), object);
+}
+
+bool ConfigCenter::configureFromFile(const std::string& file, ConfigObject* object) {
+    if (file.empty() || !object) {
+        return false;
+    }
+
+    YAML::Node root;
+
+    try {
+        root = YAML::LoadFile(file);
+    }
+    catch (const std::exception& e) {
+        LOG_ERROR(logger, "parse the yaml configure file error: %s", e.what());
+    }
+
+    if (!root) {
+        return false;
+    }
+
+    return parseConfigObject(root, object);
 }
 
 }

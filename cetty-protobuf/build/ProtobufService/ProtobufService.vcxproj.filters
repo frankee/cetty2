@@ -155,5 +155,11 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpServiceFilter.cpp">
       <Filter>protobuf\http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapperConfig.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapperConfig.cpp">
+      <Filter>protobuf\http\map</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

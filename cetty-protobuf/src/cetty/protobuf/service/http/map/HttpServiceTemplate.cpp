@@ -36,6 +36,14 @@ HttpServiceTemplate::HttpServiceTemplate(const std::string& method,
            trie.addKey(segment.alias,
                Parameter::createFromPath(segment.name, segment.alias, i));
        }
+       else if (segment.type == UriTemplate::PATH_SEG_ALIAS) {
+           if (service.empty()) {
+               service = segment.alias;
+           }
+           else if (this->method.empty()){
+               this->method = segment.alias;
+           }
+       }
    }
 
    const UriTemplate::QueryParams& queryParams = uriTemplate.getQueryParams();
@@ -44,7 +52,10 @@ HttpServiceTemplate::HttpServiceTemplate(const std::string& method,
        trie.addKey(itr->second,
            Parameter::createFromQuery(itr->first, itr->second));
    }
-   
+}
+
+bool HttpServiceTemplate::validated() const {
+    return !service.empty() && !method.empty();
 }
 
 }

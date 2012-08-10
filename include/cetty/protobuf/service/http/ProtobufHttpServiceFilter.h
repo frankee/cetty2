@@ -18,16 +18,11 @@
  */
 
 #include <cetty/service/ServiceFilter.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/HttpRequest2ProtobufMessage.h>
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>
-
-namespace cetty {
-namespace config {
-class ConfigCenter;
-}
-}
 
 namespace cetty {
 namespace protobuf {
@@ -35,16 +30,15 @@ namespace service {
 namespace http {
 
 using namespace cetty::channel;
-using namespace cetty::config;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::http::map;
 
 class ProtobufHttpServiceFilter
-        : public cetty::service::ServiceFilter<HttpRequestPtr,
-        ProtobufServiceMessagePtr,
-        ProtobufServiceMessagePtr,
-        HttpResponsePtr> {
+    : public cetty::service::ServiceFilter<HttpMessagePtr,
+      ProtobufServiceMessagePtr,
+      ProtobufServiceMessagePtr,
+          HttpPackage> {
 
 public:
     ProtobufHttpServiceFilter();
@@ -57,11 +51,11 @@ public:
 
 protected:
     virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
-        const HttpRequestPtr& req);
+            const HttpMessagePtr& req);
 
-    virtual HttpResponsePtr filterResponse(ChannelHandlerContext& ctx,
-        const HttpRequestPtr& req,
-        const ProtobufServiceMessagePtr& rep);
+    virtual HttpPackage filterResponse(ChannelHandlerContext& ctx,
+                                       const HttpMessagePtr& req,
+                                       const ProtobufServiceMessagePtr& rep);
 
 private:
     ServiceRequestMapperPtr requestMapper;

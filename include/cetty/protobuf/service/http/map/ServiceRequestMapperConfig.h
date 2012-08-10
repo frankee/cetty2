@@ -18,12 +18,15 @@
  */
 
 #include <cetty/config/ConfigObject.h>
+#include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace http {
 namespace map {
+
+using namespace cetty::config;
 
 class ServiceRequestMapperConfig : public cetty::config::ConfigObject {
 public:
@@ -33,10 +36,16 @@ public:
         std::string method;
         std::string cookie;
 
-        virtual ConfigObject* create() const { return new Template; }
+        Template();
+
+        virtual ConfigObject* create() const {
+            return new Template;
+        }
     };
 
     std::vector<Template*> templates;
+
+    ServiceRequestMapperConfig();
 
     virtual ConfigObject* create() const { return new ServiceRequestMapperConfig; }
 };

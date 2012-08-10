@@ -98,7 +98,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
     for (int i = 0; i < fieldCnt; ++i) {
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
 
-        if (tmpl.hasField(field->full_name())) {
+        if (tmpl.hasField(field->name())) {
             if (!parseField(tmpl, request, field, message)) {
                 return false;
             }
@@ -108,7 +108,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
     return true;
 }
 
-static int getValue(const HttpRequestPtr& request,
+static bool getValue(const HttpRequestPtr& request,
                          const HttpServiceTemplate::Parameter& parameter,
                          NameValueCollection::ConstIterator* begin,
                          NameValueCollection::ConstIterator* end) {

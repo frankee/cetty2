@@ -56,15 +56,15 @@ std::string ProtobufHttpServiceFilter::toString() const {
 }
 
 ProtobufServiceMessagePtr ProtobufHttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
-        const HttpRequestPtr& req) {
-    return http2proto.getProtobufMessage(req);
+        const HttpMessagePtr& req) {
+    return http2proto.getProtobufMessage(boost::static_pointer_cast<HttpRequest>(req));
 }
 
-HttpResponsePtr ProtobufHttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
-        const HttpRequestPtr& req,
+HttpPackage ProtobufHttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
+        const HttpMessagePtr& req,
         const ProtobufServiceMessagePtr& rep) {
 
-    return proto2http.getHttpResponse(req, rep);
+    return proto2http.getHttpResponse(boost::static_pointer_cast<HttpRequest>(req), rep);
 }
 
 }

@@ -20,22 +20,22 @@
 namespace cetty {
 namespace config {
 
+ConfigReflection::ConfigReflection() {
+}
+
 ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object, const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
     // We must allocate a new object.
-    const ConfigObject* prototype;
-
-    if (repeated->empty()) {
-        //prototype = factory->GetPrototype(field->message_type());
-    }
-    else {
-        prototype = repeated->front();
-    }
-
+    std::string className(object->getName());
+    className += "_";
+    className += field->className;
+    
+    const ConfigObject* prototype = ConfigObject::getDefaultObject(className);
     ConfigObject* newObject = prototype->create();
     repeated->push_back(newObject);
+
     return newObject;
 }
 

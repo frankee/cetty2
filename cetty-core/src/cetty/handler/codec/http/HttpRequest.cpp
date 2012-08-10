@@ -51,6 +51,13 @@ const NameValueCollection& HttpRequest::getQueryParameters() const {
 const std::vector<std::string>& HttpRequest::getPathSegments() const {
     if (pathSegments.empty()) {
         uri.getPathSegments(pathSegments);
+
+        std::string& lastSegment = pathSegments.back();
+        std::string::size_type pos = lastSegment.find('.');
+        if (pos != lastSegment.npos) {
+            label = lastSegment.substr(pos + 1);
+            lastSegment = lastSegment.substr(0, pos);
+        }
     }
 
     return pathSegments;

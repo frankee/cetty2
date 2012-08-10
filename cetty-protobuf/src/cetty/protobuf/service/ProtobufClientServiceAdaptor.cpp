@@ -47,27 +47,26 @@ ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ClientServicePt
 ProtobufClientServiceAdaptor::~ProtobufClientServiceAdaptor() {
 }
 
-template<> inline
-    void ProtobufClientServiceAdaptor::CallMethod<ConstMessagePtr, ProtobufServiceMessagePtr>(
+void ProtobufClientServiceAdaptor::callMethod(
     const ::google::protobuf::MethodDescriptor* method,
     const ConstMessagePtr& request,
     const ProtobufServiceFuturePtr& future) {
 
-        if (!service) {
-            if (future) {
-                //future->setFailure(Exception(""));
-            }
-
-            return;
+    if (!service) {
+        if (future) {
+            future->setFailure(Exception(""));
         }
 
-        ProtobufServiceMessagePtr message(
-            new ProtobufServiceMessage(REQUEST,
-            method->service()->full_name(),
-            method->name(),
-            (MessagePtr)request));
+        return;
+    }
 
-        callMethod(service, message, future);
+    ProtobufServiceMessagePtr message(
+        new ProtobufServiceMessage(REQUEST,
+                                   method->service()->full_name(),
+                                   method->name(),
+                                   (MessagePtr)request));
+
+    cetty::service::callMethod(service, message, future);
 }
 
 }

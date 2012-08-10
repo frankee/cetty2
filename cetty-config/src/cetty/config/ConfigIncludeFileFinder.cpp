@@ -16,10 +16,18 @@
 
 #include <cetty/config/ConfigIncludeFileFinder.h>
 
+#include <boost/algorithm/string.hpp>
+#include <cetty/util/StringUtil.h>
+
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace config {
 
-struct FileNameMatchPattern {
+    using namespace cetty::logging;
+
+class FileNameMatchPattern {
+public:
     std::string prefix;
     std::string postfix;
     std::string fullName;
@@ -31,7 +39,8 @@ struct FileNameMatchPattern {
     bool isMatchAll() const;
 };
 
-struct IncludeLine {
+class IncludeLine {
+public:
     boost::filesystem::path filePath;
     FileNameMatchPattern pattern;
 
@@ -42,6 +51,14 @@ struct IncludeLine {
 
     bool parse(const std::string& str);
 };
+
+InternalLogger* ConfigIncludeFileFinder::logger = NULL;
+
+ConfigIncludeFileFinder::ConfigIncludeFileFinder(cetty::logging::InternalLogger* logger) {
+    if (NULL == ConfigIncludeFileFinder::logger) {
+        ConfigIncludeFileFinder::logger = logger;
+    }
+}
 
 int ConfigIncludeFileFinder::find(const std::string& file,
                                   std::vector<std::string>* files) {
@@ -79,6 +96,8 @@ int ConfigIncludeFileFinder::find(const std::string& file,
         const IncludeLine& include = includes[i];
         findFile(include.filePath, include.pattern, files);
     }
+
+    return (int)files->size();
 }
 
 bool filterIncludeLine(const std::string line) {

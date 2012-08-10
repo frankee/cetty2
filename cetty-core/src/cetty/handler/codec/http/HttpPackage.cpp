@@ -17,8 +17,6 @@
 
 #include <cetty/handler/codec/http/HttpPackage.h>
 
-
-
 namespace cetty {
 namespace handler {
 namespace codec {

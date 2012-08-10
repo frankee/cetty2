@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\src\cetty\service\ClientService.cpp">
       <Filter>service</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp">
+      <Filter>service\builder</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">
@@ -116,5 +119,8 @@
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h">
       <Filter>service</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>

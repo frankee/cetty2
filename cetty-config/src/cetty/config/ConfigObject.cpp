@@ -16,36 +16,53 @@
 
 #include <cetty/config/ConfigObject.h>
 #include <boost/assert.hpp>
+#include <cetty/config/ConfigReflection.h>
 
 namespace cetty {
 namespace config {
 
-ConfigObject::ObjectDescriptorMap ConfigObject::objects;
+ConfigObject::ObjectDescriptorMap* ConfigObject::objects = NULL;
+ConfigReflection* ConfigObject::reflection = NULL;
 
 const ConfigReflection* ConfigObject::getreflection() const {
+    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
+
     ObjectDescriptorMap::const_iterator itr = objects.find(name);
 
     if (itr != objects.end()) {
-        //return itr->second.first->
+        if (!reflection) {
+            reflection = new ConfigReflection;
+        }
+
+        return reflection;
     }
 
-    return (const ConfigReflection*)(8);
+    return NULL;
 }
 
 const ConfigDescriptor* ConfigObject::getdescriptor() const {
+    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
+
     ObjectDescriptorMap::const_iterator itr = objects.find(name);
 
     if (itr != objects.end()) {
         return itr->second.descriptor;
     }
+
+    return NULL;
 }
 
-void ConfigObject::addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object) {
+void ConfigObject::addDescriptor(const std::string& name,
+                                 ConfigDescriptor* desciptor,
+                                 ConfigObject* object) {
     BOOST_ASSERT(!name.empty() && desciptor && object);
 
     if (name.empty() || NULL == desciptor || NULL == object) {
         return;
     }
+
+    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
+    Metadata data = {desciptor, object};
 
     ObjectDescriptorMap::const_iterator itr = objects.find(name);
 
@@ -53,7 +70,7 @@ void ConfigObject::addDescriptor(const std::string& name, ConfigDescriptor* desc
 
     }
     else {
-        //objects[name] = std::make_pair(desciptor, objects);
+        objects[name] = data;
     }
 }
 
@@ -63,6 +80,29 @@ void ConfigObject::clear() {
 
 void ConfigObject::copyFrom(const ConfigObject& from) {
 
+}
+
+ConfigObject::ObjectDescriptorMap& ConfigObject::getObjectDescriptorMap() {
+    if (!objects) {
+        objects = new ObjectDescriptorMap;
+    }
+
+    return *objects;
+}
+
+ConfigObject* ConfigObject::getDefaultObject(const std::string& name) {
+    if (name.empty()) {
+        return NULL;
+    }
+
+    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
+    ObjectDescriptorMap::const_iterator itr = objects.find(name);
+
+    if (itr != objects.end()) {
+        return itr->second.object;
+    }
+
+    return NULL;
 }
 
 }

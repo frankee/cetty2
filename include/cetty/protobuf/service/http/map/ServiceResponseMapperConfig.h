@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <cetty/config/ConfigObject.h>
+#include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
 namespace protobuf {
@@ -37,6 +38,8 @@ public:
             std::string name;
             std::string value;
 
+            Header();
+
             virtual ConfigObject* create() const { return new Header; }
         };
 
@@ -45,6 +48,8 @@ public:
         std::string content;
         std::vector<Header*> headers;
 
+        Template();
+
         virtual ConfigObject* create() const { return new Template; }
     };
 
@@ -52,6 +57,7 @@ public:
 
     typedef std::vector<Template*> Templates;
 
+    ServiceResponseMapperConfig();
     virtual ConfigObject* create() const { return new ServiceResponseMapperConfig; }
 };
 

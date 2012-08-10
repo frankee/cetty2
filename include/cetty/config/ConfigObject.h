@@ -29,7 +29,7 @@ class ConfigDescriptor;
 class ConfigObject {
 public:
     ConfigObject() {}
-    ConfigObject(const std::string& name) {}
+    ConfigObject(const std::string& name) : name(name) {}
     virtual ~ConfigObject() {}
 
     virtual const ConfigReflection* getreflection() const;
@@ -38,14 +38,19 @@ public:
     virtual ConfigObject* create() const = 0;
 
     std::string getName() const { return name; }
-	
-	virtual void clear();
-	virtual void copyFrom(const ConfigObject& from);
 
-protected:
-    void addDescriptor(const std::string& name, ConfigDescriptor* desciptor, ConfigObject* object);
+    virtual void clear();
+    virtual void copyFrom(const ConfigObject& from);
 
-protected:
+public:
+    static void addDescriptor(const std::string& name,
+                              ConfigDescriptor* desciptor,
+                              ConfigObject* object);
+
+    static ConfigObject* getDefaultObject(const std::string& name);
+    
+
+private:
     std::string name;
 
 private:
@@ -55,7 +60,11 @@ private:
     };
 
     typedef std::map<std::string, Metadata>  ObjectDescriptorMap;
-    static ObjectDescriptorMap objects;
+
+    static ObjectDescriptorMap& getObjectDescriptorMap();
+    
+    static ObjectDescriptorMap* objects;
+    static ConfigReflection* reflection;
 };
 
 }

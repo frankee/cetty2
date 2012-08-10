@@ -137,14 +137,15 @@ cetty::buffer::ByteOrder ReplayingDecoderBuffer::order() const {
 
 int ReplayingDecoderBuffer::readableBytes() const {
     if (terminated) {
-        return buffer->readableBytes();
+        return ChannelBuffer::readableBytes();
     }
     else {
-        return Integer::MAX_VALUE - buffer->readerIndex();
+        return Integer::MAX_VALUE - readerIndex();
     }
 }
 
 void ReplayingDecoderBuffer::readableBytes(Array* arry) {
+    syncIndex();
     return buffer->readableBytes(arry);
 }
 

@@ -50,8 +50,10 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\HttpServiceTemplate.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpRequest.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ProtobufMessage2HttpResponse.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapperConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceRequestMapper.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\http\map\ServiceResponseMapperConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\http\ProtobufHttpServiceFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />

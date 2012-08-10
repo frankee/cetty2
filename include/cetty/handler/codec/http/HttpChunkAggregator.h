@@ -72,6 +72,9 @@ public:
 
     virtual ~HttpChunkAggregator() {}
 
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
+
 protected:
     virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
                                   const HttpPackage& msg);

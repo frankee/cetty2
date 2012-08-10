@@ -45,6 +45,8 @@ class ReplayingDecoderBuffer : public cetty::buffer::ChannelBuffer {
 public:
     ReplayingDecoderBuffer(const ChannelBufferPtr& buffer)
         : needMore(false), terminated(false), buffer(buffer) {
+            readerIdx = buffer->readerIndex();
+            writerIdx = buffer->writerIndex();
     }
 
     void terminate() {

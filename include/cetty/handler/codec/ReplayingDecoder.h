@@ -470,6 +470,7 @@ protected:
                     else {
                         // Previous data has been discarded or caused state transition.
                         // Probably it is reading on.
+                        replayable->syncIndex();
                         continue;
                     }
                 }

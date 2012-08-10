@@ -21,7 +21,7 @@
 namespace cetty {
 namespace config {
     
-ConfigDescriptor::ConfigDescriptor(ConstConfigFieldDescriptorPtr descriptor, ...) {
+ConfigDescriptor::ConfigDescriptor(int count, ConstConfigFieldDescriptorPtr descriptor, ...) {
     va_list valist;
 
     if (!descriptor) {
@@ -31,10 +31,10 @@ ConfigDescriptor::ConfigDescriptor(ConstConfigFieldDescriptorPtr descriptor, ...
     va_start(valist, descriptor);
 
     fields.push_back(descriptor);
-
-    while (true) {
+    for (int i = 1; i < count; ++i) {
         ConstConfigFieldDescriptorPtr field
             = va_arg(valist, ConstConfigFieldDescriptorPtr);
+        
         if (!field) {
             break;
         }

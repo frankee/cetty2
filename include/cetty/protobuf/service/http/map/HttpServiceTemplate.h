@@ -56,8 +56,19 @@ public:
         std::string name;
         std::string alias;
 
-        static Parameter* createFromPath(const std::string& name, const std::string& alias, int index);
-        static Parameter* createFromQuery(const std::string& name, const std::string& alias);
+        Parameter(int type, const std::string& name, const std::string& alias)
+            : type(type), name(name), alias(alias), index(0) {
+        }
+        Parameter(int type, const std::string& name, const std::string& alias, int index)
+            : type(type), name(name), alias(alias), index(index) {
+        }
+
+        static Parameter* createFromPath(const std::string& name, const std::string& alias, int index) {
+            return new Parameter(T_PATH, name, alias, index);
+        }
+        static Parameter* createFromQuery(const std::string& name, const std::string& alias) {
+            return new Parameter(T_QUERY, name, alias);
+        }
         static Parameter* createFromCookie();
     };
 

@@ -27,10 +27,12 @@ namespace map {
 
 ServiceRequestMapper::ServiceRequestMapper() {
     ConfigCenter::instance().configure(&config);
+    init();
 }
 
 ServiceRequestMapper::ServiceRequestMapper(const std::string& conf) {
     ConfigCenter::configureFromString(conf, &config);
+    init();
 }
 
 ServiceRequestMapper::~ServiceRequestMapper() {

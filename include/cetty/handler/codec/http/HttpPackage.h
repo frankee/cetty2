@@ -17,7 +17,9 @@
  * under the License.
  */
 
+#include <boost/blank.hpp>
 #include <boost/variant.hpp>
+
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
@@ -29,9 +31,19 @@ namespace http {
 
 typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> HttpPackage;
 
+class HttpPackageEmptyVisitor : public boost::static_visitor<bool> {
+public:
+    bool operator()(const HttpMessagePtr& value) const { return !value; }
+    bool operator()(const HttpChunkPtr& value) const { return !value; }
+    bool operator()(const HttpChunkTrailerPtr& value) const { return !value; }
+
+    template <typename T>
+    bool operator()(const T& t) const { return false; }
+};
+
 inline
 bool operator !(const HttpPackage& pacakge) {
-    return !pacakge.empty();
+    return pacakge.apply_visitor(HttpPackageEmptyVisitor());
 }
 
 }
