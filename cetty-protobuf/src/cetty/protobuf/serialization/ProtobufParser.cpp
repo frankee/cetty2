@@ -17,11 +17,49 @@
 
 #include <cetty/protobuf/serialization/ProtobufParser.h>
 
+#include <cetty/buffer/ChannelBuffer.h>
+
 namespace cetty {
 namespace protobuf {
 namespace serialization {
 
-    std::map<std::string, ProtobufParser*> ProtobufParser::parsers;
+using namespace cetty::buffer;
+
+std::map<std::string, ProtobufParser*> ProtobufParser::parsers;
+
+int ProtobufParser::parse(const std::string& buffer, Message* message) {
+    return parse(buffer.c_str(), message);
+}
+
+int ProtobufParser::parse(const ChannelBufferPtr& buffer, Message* message) {
+    Array arry;
+    buffer->readableBytes(&arry);
+    return parse(arry.data(), message);
+}
+
+ProtobufParser* ProtobufParser::getParser(const std::string& name) {
+    std::map<std::string, ProtobufParser*>::const_iterator i
+        = parsers.find(name);
+
+    if (i != parsers.end()) {
+        return i->second;
+    }
+
+    return NULL;
+}
+
+void ProtobufParser::registerParser(const std::string& name, ProtobufParser* parser) {
+    if (!name.empty() && parser) {
+        parsers.insert(std::make_pair(name, parser));
+    }
+}
+
+void ProtobufParser::unregisterParser(const std::string& name) {
+    std::map<std::string, ProtobufParser*>::iterator itr = parsers.find(name);
+    if (itr != parsers.end()) {
+        parsers.erase(itr);
+    }
+}
 
 }
 }

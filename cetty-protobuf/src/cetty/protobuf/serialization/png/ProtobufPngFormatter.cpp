@@ -51,27 +51,27 @@ void ProtobufPngFormatter::format(const google::protobuf::Message& value, const 
     BOOST_ASSERT(false && "png not support format Message");
 }
 
-void ProtobufPngFormatter::format(std::vector<boost::int64_t>& value, std::string* str) {
+void ProtobufPngFormatter::format(const std::vector<boost::int64_t>& value, std::string* str) {
     BOOST_ASSERT(false && "png not support format vector of int64");
 }
 
-void ProtobufPngFormatter::format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
+void ProtobufPngFormatter::format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
     BOOST_ASSERT(false && "png not support format vector of int64");
 }
 
-void ProtobufPngFormatter::format(std::vector<const std::string*>& value, std::string* str) {
+void ProtobufPngFormatter::format(const std::vector<const std::string*>& value, std::string* str) {
     BOOST_ASSERT(false && "png not support format vector of string");
 }
 
-void ProtobufPngFormatter::format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
+void ProtobufPngFormatter::format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
     BOOST_ASSERT(false && "png not support format vector of string");
 }
 
-void ProtobufPngFormatter::format(std::vector<const google::protobuf::Message*>& value, std::string* str) {
+void ProtobufPngFormatter::format(const std::vector<const google::protobuf::Message*>& value, std::string* str) {
     BOOST_ASSERT(false && "png not support format vector of Message");
 }
 
-void ProtobufPngFormatter::format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
+void ProtobufPngFormatter::format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
     BOOST_ASSERT(false && "png not support format vector of Message");
 }
 

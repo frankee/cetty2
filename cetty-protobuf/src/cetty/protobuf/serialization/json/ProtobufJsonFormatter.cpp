@@ -189,27 +189,27 @@ void ProtobufJsonFormatter::format(const google::protobuf::Message& value, const
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<boost::int64_t>& value, std::string* str) {
+void ProtobufJsonFormatter::format(const std::vector<boost::int64_t>& value, std::string* str) {
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
+void ProtobufJsonFormatter::format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<const std::string*>& value, std::string* str) {
+void ProtobufJsonFormatter::format(const std::vector<const std::string*>& value, std::string* str) {
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
+void ProtobufJsonFormatter::format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<const google::protobuf::Message*>& value, std::string* str) {
+void ProtobufJsonFormatter::format(const std::vector<const google::protobuf::Message*>& value, std::string* str) {
 
 }
 
-void ProtobufJsonFormatter::format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
+void ProtobufJsonFormatter::format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
 
 }
 

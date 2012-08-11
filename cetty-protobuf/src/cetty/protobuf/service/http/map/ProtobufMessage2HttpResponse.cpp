@@ -18,6 +18,7 @@
 
 #include <google/protobuf/message.h>
 #include <boost/variant.hpp>
+#include <boost/cstdint.hpp>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
@@ -49,6 +50,11 @@ public:
     }
 
     ChannelBufferPtr operator()(boost::int64_t value) const {
+        return ChannelBufferPtr();
+    }
+
+    ChannelBufferPtr operator()(double value) const {
+        return ChannelBufferPtr();
     }
 
     ChannelBufferPtr operator()(const std::string* value) const {
@@ -56,7 +62,7 @@ public:
 
         if (value) {
             content = ChannelBuffers::buffer(value->size());
-            formatter->format(value, content);
+            formatter->format(*value, content);
         }
         return content;
     }
@@ -67,16 +73,27 @@ public:
         return ChannelBuffers::copiedBuffer(content);
     }
 
-    ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) {
+    ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) const {
         ChannelBufferPtr content = ChannelBuffers::buffer(1024);
         formatter->format(value, content);
         return content;
     }
 
-    ChannelBufferPtr operator()(const std::vector<const std::string*>& value) {
+    ChannelBufferPtr operator()(const std::vector<double>& value) const {
+        return ChannelBufferPtr();
     }
 
-    ChannelBufferPtr operator()(const std::vector<const Message*>& value) {
+    ChannelBufferPtr operator()(const std::vector<const std::string*>& value) const {
+        return ChannelBufferPtr();
+    }
+
+    ChannelBufferPtr operator()(const std::vector<const Message*>& value) const {
+        return ChannelBufferPtr();
+    }
+
+    template<typename T>
+    ChannelBufferPtr operator()(const T& value) const {
+        return ChannelBufferPtr();
     }
 
 private:

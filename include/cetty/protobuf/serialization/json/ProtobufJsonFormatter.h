@@ -51,14 +51,14 @@ public:
     virtual void format(const google::protobuf::Message& value, std::string* str);
     virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer);
 
-    virtual void format(std::vector<boost::int64_t>& value, std::string* str);
-    virtual void format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::vector<boost::int64_t>& value, std::string* str);
+    virtual void format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
 
-    virtual void format(std::vector<const std::string*>& value, std::string* str);
-    virtual void format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::vector<const std::string*>& value, std::string* str);
+    virtual void format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer);
 
-    virtual void format(std::vector<const google::protobuf::Message*>& value, std::string* str);
-    virtual void format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::vector<const google::protobuf::Message*>& value, std::string* str);
+    virtual void format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer);
 
 private:
     void printMessage(const google::protobuf::Message& message,

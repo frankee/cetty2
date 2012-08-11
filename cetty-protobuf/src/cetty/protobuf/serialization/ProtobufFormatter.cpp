@@ -16,11 +16,56 @@
 
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
+#include <cetty/util/StringUtil.h>
+
 namespace cetty {
 namespace protobuf {
 namespace serialization {
 
+using namespace cetty::util;
+
 std::map<std::string, ProtobufFormatter*> ProtobufFormatter::formatters;
+
+void ProtobufFormatter::format(const std::string& key, boost::int64_t value, std::string* str) {
+    std::string v;
+    StringUtil::strprintf(&v, "%lld", key);
+    format(key, v, str);
+}
+
+void ProtobufFormatter::format(const std::string& key, boost::int64_t value, const ChannelBufferPtr& buffer) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, double value, std::string* str) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, double value, const ChannelBufferPtr& buffer) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, const std::vector<boost::int64_t>& value, std::string* str) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, const std::vector<double>& value, std::string* str) {
+
+}
+
+void ProtobufFormatter::format(const std::string& key, const std::vector<double>& value, const ChannelBufferPtr& buffer) {
+
+}
+
+
+
+
+
+
+
 
 }
 }

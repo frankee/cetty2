@@ -40,26 +40,14 @@ public:
 
     virtual int parse(const char* buffer, Message* message) = 0;
 
-    virtual int parse(const std::string& buffer, Message* message);
-    virtual int parse(const ChannelBufferPtr& buffer, Message* message);
+    int parse(const std::string& buffer, Message* message);
+    int parse(const ChannelBufferPtr& buffer, Message* message);
 
 public:
-    static ProtobufParser* getParser(const std::string& name) {
-        std::map<std::string, ProtobufParser*>::const_iterator i
-            = parsers.find(name);
+    static ProtobufParser* getParser(const std::string& name);
 
-        if (i != parsers.end()) {
-            return i->second;
-        }
-
-        return NULL;
-    }
-
-    static void registerParser(const std::string& name, ProtobufParser* parser) {
-        if (!name.empty() && parser) {
-            parsers.insert(std::make_pair(name, parser));
-        }
-    }
+    static void registerParser(const std::string& name, ProtobufParser* parser);
+    static void unregisterParser(const std::string& name);
 
 private:
     static std::map<std::string, ProtobufParser*> parsers;

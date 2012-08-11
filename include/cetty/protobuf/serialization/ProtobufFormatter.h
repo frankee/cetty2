@@ -39,26 +39,32 @@ class ProtobufFormatter {
 public:
     virtual ~ProtobufFormatter() {}
 
-    virtual void format(boost::int64_t value, std::string* str) = 0;
-    virtual void format(boost::int64_t value, const ChannelBufferPtr& buffer) = 0;
+    void format(const std::string& key, boost::int64_t value, std::string* str);
+    void format(const std::string& key, boost::int64_t value, const ChannelBufferPtr& buffer);
+
+    void format(const std::string& key, double value, std::string* str);
+    void format(const std::string& key, double value, const ChannelBufferPtr& buffer);
 
     // if the value is binary, in json or xml will using base64
-    virtual void format(const std::string& value, std::string* str) = 0;
-    virtual void format(const std::string& value, const ChannelBufferPtr& buffer) = 0;
+    virtual void format(const std::string& key, const std::string& value, std::string* str) = 0;
+    virtual void format(const std::string& key, const std::string& value, const ChannelBufferPtr& buffer) = 0;
 
     // if there is a formated field in message (using the field option),
     // the the formatter will using the formated str.
     virtual void format(const google::protobuf::Message& value, std::string* str) = 0;
     virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer) = 0;
 
-    virtual void format(std::vector<boost::int64_t>& value, std::string* str) = 0;
-    virtual void format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) = 0;
+    void format(const std::string& key, const std::vector<boost::int64_t>& value, std::string* str);
+    void format(const std::string& key, const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
 
-    virtual void format(std::vector<const std::string*>& value, std::string* str) = 0;
-    virtual void format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) = 0;
+    void format(const std::string& key, const std::vector<double>& value, std::string* str);
+    void format(const std::string& key, const std::vector<double>& value, const ChannelBufferPtr& buffer);
 
-    virtual void format(std::vector<const google::protobuf::Message*>& value, std::string* str) = 0;
-    virtual void format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) = 0;
+    virtual void format(const std::string& key, const std::vector<const std::string*>& value, std::string* str) = 0;
+    virtual void format(const std::string& key, const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) = 0;
+
+    virtual void format(const std::string& key, const std::vector<const google::protobuf::Message*>& value, std::string* str) = 0;
+    virtual void format(const std::string& key, const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) = 0;
 
 public:
     static ProtobufFormatter* getFormatter(const std::string& name);
