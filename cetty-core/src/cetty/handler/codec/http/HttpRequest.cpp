@@ -94,7 +94,6 @@ std::string HttpRequest::toString() const {
 }
 
 const std::string& HttpRequest::getLabel() const {
-    BOOST_ASSERT(false);
     return label;
 }
 

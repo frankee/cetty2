@@ -25,6 +25,14 @@ namespace protobuf {
 namespace serialization {
 namespace json {
 
+using namespace cetty::protobuf::serialization;
+
+struct ProtobufJsonParserRegister {
+    ProtobufJsonParserRegister() {
+        ProtobufParser::registerParser("json", new ProtobufJsonParser);
+    }
+} parserRegister;
+
 int ProtobufJsonParser::parse(const char* buffer,
                               google::protobuf::Message* message) {
     if (!buffer || strlen(buffer) == 0 || !message) {

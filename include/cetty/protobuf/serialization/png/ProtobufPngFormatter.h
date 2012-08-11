@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H)
-#define CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H
+#if !defined(CETTY_PROTOBUF_SERIALIZATION_PNG_PROTOBUFPNGFORMATTER_H)
+#define CETTY_PROTOBUF_SERIALIZATION_PNG_PROTOBUFPNGFORMATTER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -19,68 +19,43 @@
 
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
-namespace google {
-namespace protobuf {
-class FieldDescriptor;
-}
-}
-
 namespace cetty {
 namespace protobuf {
 namespace serialization {
-namespace json {
+namespace png {
 
-using namespace cetty::protobuf::serialization;
-
-class JsonPrinter;
-
-class ProtobufJsonFormatter : public ProtobufFormatter {
+class ProtobufPngFormatter : public ProtobufFormatter {
 public:
-    ProtobufJsonFormatter() {}
-    virtual ~ProtobufJsonFormatter() {}
+    ProtobufPngFormatter() {}
+    virtual ~ProtobufPngFormatter() {}
 
+    // not supported.
     virtual void format(boost::int64_t value, std::string* str);
     virtual void format(boost::int64_t value, const ChannelBufferPtr& buffer);
 
-    // if the value is binary, in json or xml will using base64
+    // only support this format type
     virtual void format(const std::string& value, std::string* str);
     virtual void format(const std::string& value, const ChannelBufferPtr& buffer);
 
-    // if there is a formated field in message (using the field option),
-    // the the formatter will using the formated str.
+    // not supported.
     virtual void format(const google::protobuf::Message& value, std::string* str);
     virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer);
 
+    // not supported.
     virtual void format(std::vector<boost::int64_t>& value, std::string* str);
     virtual void format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
 
+    // not supported.
     virtual void format(std::vector<const std::string*>& value, std::string* str);
     virtual void format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer);
 
+    // not supported.
     virtual void format(std::vector<const google::protobuf::Message*>& value, std::string* str);
     virtual void format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer);
 
 private:
-    void printMessage(const google::protobuf::Message& message,
-                      JsonPrinter& printer);
+    bool isPng(const std::string& value);
 
-    bool printField(const google::protobuf::Message& message,
-                    const google::protobuf::FieldDescriptor* field,
-                    JsonPrinter& printer);
-
-    void printSingleField(const google::protobuf::Message& message,
-                          const google::protobuf::FieldDescriptor* field,
-                          JsonPrinter& printer);
-
-    void printFieldRepeatedValue(const google::protobuf::Message& message,
-                                 const google::protobuf::FieldDescriptor* field,
-                                 JsonPrinter& printer);
-
-    void printFieldValue(const google::protobuf::Message& message,
-                         const google::protobuf::FieldDescriptor* field,
-                         JsonPrinter& printer);
-
-    bool utf8Check(const std::string& str);
 };
 
 }
@@ -88,7 +63,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_SERIALIZATION_JSON_PROTOBUFJSONFORMATTER_H)
+#endif //#if !defined(CETTY_PROTOBUF_SERIALIZATION_PNG_PROTOBUFPNGFORMATTER_H)
 
 // Local Variables:
 // mode: c++

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <string>
 #include <cetty/buffer/ChannelBufferPtr.h>
 
@@ -41,6 +42,27 @@ public:
 
     virtual int parse(const std::string& buffer, Message* message);
     virtual int parse(const ChannelBufferPtr& buffer, Message* message);
+
+public:
+    static ProtobufParser* getParser(const std::string& name) {
+        std::map<std::string, ProtobufParser*>::const_iterator i
+            = parsers.find(name);
+
+        if (i != parsers.end()) {
+            return i->second;
+        }
+
+        return NULL;
+    }
+
+    static void registerParser(const std::string& name, ProtobufParser* parser) {
+        if (!name.empty() && parser) {
+            parsers.insert(std::make_pair(name, parser));
+        }
+    }
+
+private:
+    static std::map<std::string, ProtobufParser*> parsers;
 };
 
 }

@@ -240,7 +240,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactoryFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineMessageTransfer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedByteChannel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedBufferChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedMessageChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedSocketAddressImpl.h" />

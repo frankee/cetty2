@@ -37,7 +37,7 @@
 namespace cetty {
 namespace channel {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
 class SocketAddress;
 class ChannelConfig;
@@ -211,7 +211,7 @@ public:
      *         return {@link SocketAddress NULL_ADDRESS}.
      */
     virtual const SocketAddress& getRemoteAddress() const = 0;
-    
+
     virtual ChannelFuturePtr newFuture() = 0;
     virtual ChannelFuturePtr newFailedFuture(const Exception& e) = 0;
 

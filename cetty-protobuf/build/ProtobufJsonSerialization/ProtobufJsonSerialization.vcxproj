@@ -13,12 +13,16 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\json\ProtobufJsonFormatter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\json\ProtobufJsonParser.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\png\ProtobufPngFormatter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufFormatter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufParser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonFormatter.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonParser.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\png\ProtobufPngFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\ProtobufFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\ProtobufParser.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}</ProjectGuid>

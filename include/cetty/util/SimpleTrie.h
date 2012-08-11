@@ -88,12 +88,16 @@ public:
     void* getValue(const std::string& key) const;
     void  freeValue() { root.freeData(); }
 
+    // count the prefix and include the key.
+    int count(const std::string& prefix) const;
+
+    // only count the prefix, excluding the key.
     int countPrefix(const std::string& prefix) const;
     int countKey(const std::string& key) const;
 
 private:
     void addKey(SimpleTrieNode& n, std::string* key, void* data);
-    int countPrefix(const SimpleTrieNode& n, std::string* prefix) const;
+    int countPrefix(const SimpleTrieNode& n, std::string* prefix, bool includeKey) const;
 
     const SimpleTrieNode* getLeafNode(const SimpleTrieNode& n, std::string* word) const;
 

@@ -1,0 +1,144 @@
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+#include <cetty/protobuf/service/ProtobufUtil.h>
+
+#include <google/protobuf/message.h>
+#include <google/protobuf/descriptor.h>
+
+namespace cetty {
+namespace protobuf {
+namespace service {
+
+using namespace google::protobuf;
+
+ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
+        const Message& message) {
+
+    std::string fieldName;
+    std::string subFieldName;
+    std::string::size_type pos = name.find(".");
+
+    if (pos != name.npos) {
+        fieldName = name.substr(0, pos);
+        subFieldName = name.substr(pos + 1);
+    }
+    else {
+        fieldName = name;
+    }
+
+    const google::protobuf::Reflection* reflection = message.GetReflection();
+    const google::protobuf::Descriptor* descriptor = message.GetDescriptor();
+    int fieldCnt = descriptor->field_count();
+
+    for (int i = 0; i < fieldCnt; ++i) {
+        const google::protobuf::FieldDescriptor* field = descriptor->field(i);
+
+        if (field->name() != fieldName) {
+            continue;
+        }
+
+        if (subFieldName.empty()) {
+            if (!field->is_repeated()) {
+                switch (field->cpp_type()) {
+                case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
+                    return (boost::int64_t)reflection->GetInt32(message, field);
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
+                    return reflection->GetInt64(message, field);
+                    break;
+
+                case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+                    return reflection->GetDouble(message, field);
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+                    return &(reflection->GetString(message, field));
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
+                    return &(reflection->GetMessage(message, field));
+
+                default:
+                    return FieldValue();
+                }
+            }
+            else {
+                int i = 0;
+                int fieldCnt = reflection->FieldSize(message, field);
+
+                std::vector<boost::int64_t> integers;
+                std::vector<double> doubles;
+                std::vector<const std::string*> strings;
+                std::vector<const Message*> messages;
+
+                switch (field->cpp_type()) {
+                case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
+                    for (i = 0; i < fieldCnt; ++i) {
+                        integers.push_back(reflection->GetRepeatedInt32(message, field, i));
+                    }
+
+                    return integers;
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
+                    for (i = 0; i < fieldCnt; ++i) {
+                        integers.push_back(reflection->GetRepeatedInt64(message, field, i));
+                    }
+
+                    return integers;
+                    break;
+
+                case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+                    for (i = 0; i < fieldCnt; ++i) {
+                        doubles.push_back(reflection->GetRepeatedDouble(message, field, i));
+                    }
+
+                    return doubles;
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+                    for (i = 0; i < fieldCnt; ++i) {
+                        strings.push_back(&reflection->GetRepeatedString(message, field, i));
+                    }
+
+                    return strings;
+                    break;
+
+                case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
+                    for (i = 0; i < fieldCnt; ++i) {
+                        messages.push_back(&reflection->GetRepeatedMessage(message, field, i));
+                    }
+
+                    return messages;
+
+                default:
+                    return FieldValue();
+                }
+            }
+        }
+        else {
+            return getMessageField(subFieldName, reflection->GetMessage(message, field));
+        }
+    }
+
+    return FieldValue();
+}
+
+}
+}
+}

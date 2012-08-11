@@ -49,12 +49,13 @@ HttpRequest2ProtobufMessage::HttpRequest2ProtobufMessage(
 
 void HttpRequest2ProtobufMessage::setRequestMapper(
     const ServiceRequestMapperPtr& requestMapper) {
-        this->templates = requestMapper;
+    this->templates = requestMapper;
 }
 
 ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     const HttpRequestPtr& request) {
     HttpServiceTemplate* tmpl = templates->match(request->getMethod(), request->getPathSegments());
+    methodFullName.clear();
 
     if (tmpl) {
         const Message* prototype =
@@ -63,6 +64,9 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 tmpl->getMethod());
 
         if (prototype) {
+            methodFullName = prototype->GetTypeName();
+            methodFullName += ".";
+
             Message* req = prototype->New();
 
             if (req && parseMessage(*tmpl, request, req)) {
@@ -84,6 +88,8 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     else {
         printf("wrong uri format.");
     }
+
+    return ProtobufServiceMessagePtr();
 }
 
 bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
@@ -94,12 +100,14 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
     const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
 
     int fieldCnt = descriptor->field_count();
+    std::string fieldName;
 
     for (int i = 0; i < fieldCnt; ++i) {
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
+        fieldName = field->full_name().substr(methodFullName.size());
 
-        if (tmpl.hasField(field->name())) {
-            if (!parseField(tmpl, request, field, message)) {
+        if (tmpl.hasField(fieldName)) {
+            if (!parseField(tmpl, request, field, fieldName, NULL, message)) {
                 return false;
             }
         }
@@ -109,28 +117,27 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
 }
 
 static bool getValue(const HttpRequestPtr& request,
-                         const HttpServiceTemplate::Parameter& parameter,
-                         NameValueCollection::ConstIterator* begin,
-                         NameValueCollection::ConstIterator* end) {
+                     const HttpServiceTemplate::Parameter& parameter,
+                     std::vector<std::string>* values) {
+    if (NULL == values) {
+        return false;
+    }
+
     if (parameter.isInPath()) {
+        const std::vector<std::string>& pathSegments
+            = request->getPathSegments();
+
+        values->push_back(pathSegments[parameter.index]);
         return true;
     }
     else if (parameter.isInQuery()) {
         const NameValueCollection& nameValues = request->getQueryParameters();
-        if (begin && end) {
-            *begin = nameValues.lowerBound(parameter.name);
-            *end = nameValues.upperBound(parameter.name);
-
-            return *begin != nameValues.end();
-        }
-        else {
-            return nameValues.has(parameter.name);
-        }
+        return nameValues.get(parameter.name, values) > 0;
     }
     else if (parameter.isInCookie()) {
-        if (parameter.index >= 0) { // like: cookie=value; or cookie={v:a}{}
-            return true;
-        }
+        //if (parameter.index >= 0) { // like: cookie=value; or cookie={v:a}{}
+        //    return true;
+        //}
 
         return false;//TODO
     }
@@ -141,6 +148,8 @@ static bool getValue(const HttpRequestPtr& request,
 bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
         const HttpRequestPtr& request,
         const FieldDescriptor* field,
+        const std::string& fieldName,
+        const FieldDescriptor* fatherField,
         Message* message) {
     const google::protobuf::Reflection* reflection = message->GetReflection();
 
@@ -155,23 +164,23 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
     else if (fieldType == google::protobuf::FieldDescriptor::TYPE_MESSAGE) {
         google::protobuf::Message* msg
             = field->is_repeated() ? reflection->AddMessage(message, field)
-                                   : reflection->MutableMessage(message, field);
+              : reflection->MutableMessage(message, field);
         return parseMessage(tmpl, request, msg);
     }
 
-    const HttpServiceTemplate::Parameter* parameter = tmpl.getParameter(field->full_name());
-    NameValueCollection::ConstIterator beginParam;
-    NameValueCollection::ConstIterator endParam;
+    const HttpServiceTemplate::Parameter* parameter = tmpl.getParameter(fieldName);
+    std::vector<std::string> values;
 
-    if (NULL == parameter
-            || getValue(request, *parameter, &beginParam, &endParam) == 0) {
+    if (NULL == parameter || !getValue(request, *parameter, &values)) {
         return false;
     }
 
     if (field->is_repeated()) {
-        NameValueCollection::ConstIterator itr;
-        for (itr = beginParam; itr != endParam; ++itr) {
-            const std::string& value = itr->second;
+        std::vector<std::string>::const_iterator itr;
+
+        for (itr = values.begin(); itr != values.end(); ++itr) {
+            const std::string& value = *itr;
+
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
                 reflection->AddInt32(message, field, std::atoi(value.c_str()));
@@ -195,27 +204,35 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
         }
     }
     else {
-        const std::string& value = beginParam->second;
+        if (values.size() == 1) {
+            const std::string& value = values.front();
 
-        switch (field->cpp_type()) {
-        case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-            reflection->SetInt32(message, field, std::atoi(value.c_str()));
-            break;
+            switch (field->cpp_type()) {
+            case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
+                reflection->SetInt32(message, field, std::atoi(value.c_str()));
+                break;
 
-        case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-            reflection->SetInt64(message, field, std::atoi(value.c_str()));
-            break;
+            case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
+                reflection->SetInt64(message, field, std::atoi(value.c_str()));
+                break;
 
-        case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-            reflection->SetDouble(message, field, StringUtil::atof(value));
-            break;
+            case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+                reflection->SetDouble(message, field, StringUtil::atof(value));
+                break;
 
-        case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-            reflection->SetString(message, field, value);
-            break;
+            case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+                reflection->SetString(message, field, value);
+                break;
 
-        default:
-            return false;
+            default:
+                return false;
+            }
+        }
+        else {
+            // a.b1, a.b2, a.c, a.d
+            // if has tow 'b'(b1&b2), but the field of b is not repeated,
+            // so, when a is repeated, then will create a twice, or a.b2 will be skip. 
+
         }
     }
 

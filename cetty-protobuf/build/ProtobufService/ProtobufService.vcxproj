@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessagePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceRegister.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufUtil.h" />
     <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +59,7 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\proto\service.pb.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

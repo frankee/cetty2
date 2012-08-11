@@ -21,7 +21,6 @@
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/protobuf/service/http/map/ServiceMapperPtr.h>
 
-
 namespace cetty {
 namespace protobuf {
 namespace service {

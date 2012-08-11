@@ -17,48 +17,39 @@
  * under the License.
  */
 
+#include <vector>
+#include <boost/cstdint.hpp>
+#include <boost/variant.hpp>
+
+namespace google {
+namespace protobuf {
+class Message;
+}
+}
+
 namespace cetty {
 namespace protobuf {
 namespace service {
 
+using google::protobuf::Message;
+
 class ProtobufUtil {
 public:
-    static google::protobuf::Message* getSubMessage(const std::string& name, google::protobuf::Message* message) {
-        if (!message) {
-            return NULL;
-        }
+    typedef boost::variant<boost::int64_t,
+            double,
+            const std::string*,
+            const Message*,
+            std::vector<boost::int64_t>,
+            std::vector<double>,
+            std::vector<const std::string*>,
+            std::vector<const Message*> > FieldValue;
 
-        std::string fieldName;
-        std::string subFieldName;
-        std::string::size_type pos = name.find(".");
+public:
+    static FieldValue getMessageField(const std::string& name,
+                                      const Message& message);
 
-        if (pos != name.npos) {
-            fieldName = name.substr(0, pos);
-            subFieldName = name.substr(pos);
-        }
-        else {
-            fieldName = name;
-        }
-
-        const google::protobuf::Reflection* reflection = message->GetReflection();
-        const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
-        int fieldCnt = descriptor->field_count();
-
-        for (int i = 0; i < fieldCnt; ++i) {
-            const google::protobuf::FieldDescriptor* field = descriptor->field(i);
-
-            if (field->name() == fieldName) {
-                if (subFieldName.empty()) {
-                    return reflection->MutableMessage(message, field);
-                }
-                else {
-                    return getSubMessage(subFieldName, reflection->MutableMessage(message, field));
-                }
-            }
-        }
-
-        return NULL;
-    }
+private:
+    ProtobufUtil();
 };
 
 }

@@ -87,7 +87,7 @@ private:
 template<typename T>
 class ChannelPipelineMessageTransfer<T, ChannelOutboundMessageHandlerContext<T> > {
 public:
-    ChannelPipelineMessageTransfer() : nextCtx() {}
+    ChannelPipelineMessageTransfer() : nextCtx(), nextOutCtx() {}
 
     bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg) {
         if (!nextCtx) {
@@ -106,13 +106,18 @@ public:
     void write(ChannelHandlerContext& ctx,
                const T& msg,
                const ChannelFuturePtr& future) {
-        if (unfoldAndAdd(ctx, msg)) {
-            ctx.flush(future);
+        if (!nextOutCtx) {
+            nextOutCtx = ctx.getNextOutboundContext();
+        }
+
+        if (unfoldAndAdd(ctx, msg) && nextOutCtx) {
+            nextOutCtx->flush(*nextOutCtx, future);
         }
     }
 
 private:
     ChannelOutboundMessageHandlerContext<T>* nextCtx;
+    ChannelHandlerContext* nextOutCtx;
 };
 
 template<>

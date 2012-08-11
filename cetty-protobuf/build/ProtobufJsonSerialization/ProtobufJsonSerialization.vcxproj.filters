@@ -10,6 +10,9 @@
     <Filter Include="protobuf\serialization\json">
       <UniqueIdentifier>{171103bd-c20e-40c7-b8fd-50804969ec50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="protobuf\serialization\png">
+      <UniqueIdentifier>{47346120-26e7-47c6-a133-3df1e8068c94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufFormatter.h">
@@ -24,6 +27,9 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\json\ProtobufJsonParser.h">
       <Filter>protobuf\serialization\json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\png\ProtobufPngFormatter.h">
+      <Filter>protobuf\serialization\png</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonFormatter.cpp">
@@ -31,6 +37,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\serialization\json\ProtobufJsonParser.cpp">
       <Filter>protobuf\serialization\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\ProtobufFormatter.cpp">
+      <Filter>protobuf\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\ProtobufParser.cpp">
+      <Filter>protobuf\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\png\ProtobufPngFormatter.cpp">
+      <Filter>protobuf\serialization\png</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -125,6 +125,8 @@ public:
         httpHeader.set(name, value);
     }
 
+    void setHeader(const std::string& name, int value);
+
     /**
     * Sets a new header with the specified name and values.  If there is an
     * existing header with the same name, the existing header is removed.

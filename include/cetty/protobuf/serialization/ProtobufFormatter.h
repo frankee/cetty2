@@ -17,7 +17,11 @@
  * under the License.
  */
 
+#include <map>
+#include <vector>
 #include <string>
+#include <boost/cstdint.hpp>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace google {
 namespace protobuf {
@@ -29,12 +33,39 @@ namespace cetty {
 namespace protobuf {
 namespace serialization {
 
+using namespace cetty::buffer;
+
 class ProtobufFormatter {
 public:
     virtual ~ProtobufFormatter() {}
 
-    virtual void format(const google::protobuf::Message& message,
-                         std::string* str) = 0;
+    virtual void format(boost::int64_t value, std::string* str) = 0;
+    virtual void format(boost::int64_t value, const ChannelBufferPtr& buffer) = 0;
+
+    // if the value is binary, in json or xml will using base64
+    virtual void format(const std::string& value, std::string* str) = 0;
+    virtual void format(const std::string& value, const ChannelBufferPtr& buffer) = 0;
+
+    // if there is a formated field in message (using the field option),
+    // the the formatter will using the formated str.
+    virtual void format(const google::protobuf::Message& value, std::string* str) = 0;
+    virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer) = 0;
+
+    virtual void format(std::vector<boost::int64_t>& value, std::string* str) = 0;
+    virtual void format(std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) = 0;
+
+    virtual void format(std::vector<const std::string*>& value, std::string* str) = 0;
+    virtual void format(std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) = 0;
+
+    virtual void format(std::vector<const google::protobuf::Message*>& value, std::string* str) = 0;
+    virtual void format(std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) = 0;
+
+public:
+    static ProtobufFormatter* getFormatter(const std::string& name);
+    static void registerFormatter(const std::string& name, ProtobufFormatter* formatter);
+
+private:
+    static std::map<std::string, ProtobufFormatter*> formatters;
 };
 
 }

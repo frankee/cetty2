@@ -63,8 +63,10 @@ ProtobufServiceMessagePtr ProtobufHttpServiceFilter::filterRequest(ChannelHandle
 HttpPackage ProtobufHttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const HttpMessagePtr& req,
         const ProtobufServiceMessagePtr& rep) {
+      HttpResponsePtr response =
+            proto2http.getHttpResponse(boost::static_pointer_cast<HttpRequest>(req), rep);
 
-    return proto2http.getHttpResponse(boost::static_pointer_cast<HttpRequest>(req), rep);
+      return boost::static_pointer_cast<HttpMessage>(response);
 }
 
 }

@@ -61,9 +61,12 @@ private:
     bool parseField(const HttpServiceTemplate& tmpl,
                     const HttpRequestPtr& request,
                     const FieldDescriptor* field,
+                    const std::string& fieldName,
+                    const FieldDescriptor* fatherField,
                     Message* message);
 
 private:
+    std::string methodFullName;
     ServiceRequestMapperPtr templates;
 };
 

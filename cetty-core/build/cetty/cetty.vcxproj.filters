@@ -1054,9 +1054,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h">
       <Filter>channel\embedded</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedByteChannel.h">
-      <Filter>channel\embedded</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h">
       <Filter>channel\embedded</Filter>
     </ClInclude>
@@ -1110,6 +1107,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedBufferChannel.h">
+      <Filter>channel\embedded</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

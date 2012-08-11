@@ -87,7 +87,7 @@ public:
     const std::string& getMethod() const { return method; }
 
     bool hasField(const std::string& field) const {
-        return trie.countPrefix(field) > 0;
+        return trie.count(field) > 0;
     }
 
     const Parameter* getParameter(const std::string& field) const {

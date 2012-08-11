@@ -17,8 +17,8 @@
 
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/util/StringUtil.h>
-#include <cetty/util/internal/ConversionUtil.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/internal/ConversionUtil.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
@@ -92,6 +92,10 @@ std::string HttpMessage::toString() const {
     }
 
     return buf;
+}
+
+void HttpMessage::setHeader(const std::string& name, int value) {
+    httpHeader.set(name, StringUtil::strprintf("%d", value));
 }
 
 }

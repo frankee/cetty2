@@ -15,10 +15,19 @@
  */
 
 #include <cetty/protobuf/service/http/map/ProtobufMessage2HttpResponse.h>
+
+#include <google/protobuf/message.h>
+#include <boost/variant.hpp>
+
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/protobuf/service/ProtobufUtil.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/http/map/ServiceResponseMapper.h>
+#include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
 namespace cetty {
 namespace protobuf {
@@ -26,8 +35,54 @@ namespace service {
 namespace http {
 namespace map {
 
+using namespace cetty::buffer;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::serialization;
+
+using google::protobuf::Message;
+
+class MessageFieldFormatter : public boost::static_visitor<ChannelBufferPtr> {
+public:
+    MessageFieldFormatter(ProtobufFormatter* formatter, const Message* message)
+        : formatter(formatter), message(message)  {
+    }
+
+    ChannelBufferPtr operator()(boost::int64_t value) const {
+    }
+
+    ChannelBufferPtr operator()(const std::string* value) const {
+        ChannelBufferPtr content;
+
+        if (value) {
+            content = ChannelBuffers::buffer(value->size());
+            formatter->format(value, content);
+        }
+        return content;
+    }
+
+    ChannelBufferPtr operator()(const Message* value) const {
+        std::string content;
+        formatter->format(*value, &content);
+        return ChannelBuffers::copiedBuffer(content);
+    }
+
+    ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) {
+        ChannelBufferPtr content = ChannelBuffers::buffer(1024);
+        formatter->format(value, content);
+        return content;
+    }
+
+    ChannelBufferPtr operator()(const std::vector<const std::string*>& value) {
+    }
+
+    ChannelBufferPtr operator()(const std::vector<const Message*>& value) {
+    }
+
+private:
+    ProtobufFormatter* formatter;
+    const Message* message;
+};
 
 ProtobufMessage2HttpResponse::ProtobufMessage2HttpResponse() {
 }
@@ -49,12 +104,49 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         = mapper->match(message->getService(), message->getMethod());
 
     if (tmpl) {
-        HttpResponsePtr response(new HttpResponse);
+        HttpResponsePtr response(new HttpResponse(HttpVersion::HTTP_1_1,
+                                 HttpResponseStatus::OK));
+
         ServiceResponseMapper::setHttpHeaders(*tmpl, response);
 
         const std::string& format = req->getLabel();
-        if (tmpl->content.empty()) {
-            //google::protobuf::Message* msg = message->getPayload();
+        ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(format);
+
+        if (!formatter) {
+            //
+            //response->setStatus(HttpResponseStatus::NOT_FOUND);
+        }
+
+        Message* paylod = message->getPayload();
+
+        if (!paylod) {
+            //
+        }
+
+        ChannelBufferPtr content;
+        MessageFieldFormatter f(formatter, paylod);
+
+        if (!tmpl->content.empty()) {
+            ProtobufUtil::FieldValue field = ProtobufUtil::getMessageField(tmpl->content, *paylod);
+            content = field.apply_visitor(f);
+        }
+        else {
+            content = f(paylod);
+        }
+
+        response->setContent(content);
+
+        // Decide whether to close the connection or not.
+        bool keepAlive = HttpHeaders::isKeepAlive(*req);
+
+        if (keepAlive) {
+            // Add 'Content-Length' header only for a keep-alive connection.
+            response->setHeader(HttpHeaders::Names::CONTENT_LENGTH,
+                                response->getContent()->readableBytes());
+        }
+        else {
+            response->setHeader(HttpHeaders::Names::CONNECTION,
+                                HttpHeaders::Values::CLOSE);
         }
 
         return response;
