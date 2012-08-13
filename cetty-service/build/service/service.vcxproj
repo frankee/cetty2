@@ -128,9 +128,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

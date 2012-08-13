@@ -19,6 +19,8 @@
 
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
+#define PNG_FORMATTER_PLUGIN 1
+
 namespace cetty {
 namespace protobuf {
 namespace serialization {
@@ -29,29 +31,35 @@ public:
     ProtobufPngFormatter() {}
     virtual ~ProtobufPngFormatter() {}
 
-    // not supported.
-    virtual void format(boost::int64_t value, std::string* str);
-    virtual void format(boost::int64_t value, const ChannelBufferPtr& buffer);
-
-    // only support this format type
-    virtual void format(const std::string& value, std::string* str);
-    virtual void format(const std::string& value, const ChannelBufferPtr& buffer);
-
-    // not supported.
-    virtual void format(const google::protobuf::Message& value, std::string* str);
-    virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer);
+    // only support when the value is a picture (like: pnd, jpg, bmp)
+    virtual void format(const std::string& key,
+        const std::string& value,
+        std::string* str);
+    virtual void format(const std::string& key,
+        const std::string& value,
+        const ChannelBufferPtr& buffer);
 
     // not supported.
-    virtual void format(const std::vector<boost::int64_t>& value, std::string* str);
-    virtual void format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const google::protobuf::Message& value,
+        std::string* str);
+    virtual void format(const google::protobuf::Message& value,
+        const ChannelBufferPtr& buffer);
 
     // not supported.
-    virtual void format(const std::vector<const std::string*>& value, std::string* str);
-    virtual void format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::string& key,
+        const std::vector<const std::string*>& value,
+        std::string* str);
+    virtual void format(const std::string& key,
+        const std::vector<const std::string*>& value,
+        const ChannelBufferPtr& buffer);
 
     // not supported.
-    virtual void format(const std::vector<const google::protobuf::Message*>& value, std::string* str);
-    virtual void format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::string& key,
+        const std::vector<const google::protobuf::Message*>& value,
+        std::string* str);
+    virtual void format(const std::string& key,
+        const std::vector<const google::protobuf::Message*>& value,
+        const ChannelBufferPtr& buffer);
 
 private:
     bool isPng(const std::string& value);

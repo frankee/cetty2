@@ -19,6 +19,8 @@
 
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
+#define JSON_FORMATTER_PLUGIN 1
+
 namespace google {
 namespace protobuf {
 class FieldDescriptor;
@@ -39,26 +41,34 @@ public:
     ProtobufJsonFormatter() {}
     virtual ~ProtobufJsonFormatter() {}
 
-    virtual void format(boost::int64_t value, std::string* str);
-    virtual void format(boost::int64_t value, const ChannelBufferPtr& buffer);
-
     // if the value is binary, in json or xml will using base64
-    virtual void format(const std::string& value, std::string* str);
-    virtual void format(const std::string& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::string& key,
+                        const std::string& value,
+                        std::string* str);
+    virtual void format(const std::string& key,
+                        const std::string& value,
+                        const ChannelBufferPtr& buffer);
 
     // if there is a formated field in message (using the field option),
     // the the formatter will using the formated str.
-    virtual void format(const google::protobuf::Message& value, std::string* str);
-    virtual void format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer);
+    virtual void format(const google::protobuf::Message& value,
+                        std::string* str);
+    virtual void format(const google::protobuf::Message& value,
+                        const ChannelBufferPtr& buffer);
 
-    virtual void format(const std::vector<boost::int64_t>& value, std::string* str);
-    virtual void format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::string& key,
+                        const std::vector<const std::string*>& value,
+                        std::string* str);
+    virtual void format(const std::string& key,
+                        const std::vector<const std::string*>& value,
+                        const ChannelBufferPtr& buffer);
 
-    virtual void format(const std::vector<const std::string*>& value, std::string* str);
-    virtual void format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer);
-
-    virtual void format(const std::vector<const google::protobuf::Message*>& value, std::string* str);
-    virtual void format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer);
+    virtual void format(const std::string& key,
+                        const std::vector<const google::protobuf::Message*>& value,
+                        std::string* str);
+    virtual void format(const std::string& key,
+                        const std::vector<const google::protobuf::Message*>& value,
+                        const ChannelBufferPtr& buffer);
 
 private:
     void printMessage(const google::protobuf::Message& message,

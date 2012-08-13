@@ -19,6 +19,8 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 
+#include <cetty/protobuf/serialization/json/ProtobufJsonParser.h>
+
 namespace cetty {
 namespace protobuf {
 namespace serialization {
@@ -26,6 +28,29 @@ namespace serialization {
 using namespace cetty::buffer;
 
 std::map<std::string, ProtobufParser*> ProtobufParser::parsers;
+
+struct ProtobufParserRegister {
+    ProtobufParserRegister() {
+#if JSON_PARSER_PLUGIN
+        ProtobufParser::registerParser("json", new json::ProtobufJsonParser);
+#endif
+    }
+    ~ProtobufParserRegister() {
+        ProtobufParser* parser = NULL;
+#if JSON_PARSER_PLUGIN
+       unregister("png");
+#endif
+    }
+
+    void unregister(const std::string& name) {
+        ProtobufParser* parser = ProtobufParser::getParser(name);
+        ProtobufParser::unregisterParser(name);
+        if (parser) {
+            delete parser;
+        }
+    }
+
+} parserRegister;
 
 int ProtobufParser::parse(const std::string& buffer, Message* message) {
     return parse(buffer.c_str(), message);

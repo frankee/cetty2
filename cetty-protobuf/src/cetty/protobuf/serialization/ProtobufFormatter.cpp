@@ -17,6 +17,8 @@
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
 #include <cetty/util/StringUtil.h>
+#include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
+#include <cetty/protobuf/serialization/png/ProtobufPngFormatter.h>
 
 namespace cetty {
 namespace protobuf {
@@ -25,6 +27,36 @@ namespace serialization {
 using namespace cetty::util;
 
 std::map<std::string, ProtobufFormatter*> ProtobufFormatter::formatters;
+
+struct ProtobufFormatterRegister {
+    ProtobufFormatterRegister() {
+#if (JSON_FORMATTER_PLUGIN)
+        ProtobufFormatter::registerFormatter("json", new json::ProtobufJsonFormatter);
+#endif
+
+#if (PNG_FORMATTER_PLUGIN)
+        ProtobufFormatter::registerFormatter("png", new png::ProtobufPngFormatter);
+#endif
+    }
+    ~ProtobufFormatterRegister() {
+#if (JSON_FORMATTER_PLUGIN)
+        unregister("json");
+#endif
+
+#if (PNG_FORMATTER_PLUGIN)
+        unregister("png");
+#endif
+    }
+
+    void unregister(const std::string& name) {
+        ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(name);
+        ProtobufFormatter::unregisterFormatter(name);
+        if (formatter) {
+            delete formatter;
+        }
+    }
+
+} formatterRegister;
 
 void ProtobufFormatter::format(const std::string& key, boost::int64_t value, std::string* str) {
     std::string v;
@@ -60,12 +92,31 @@ void ProtobufFormatter::format(const std::string& key, const std::vector<double>
 
 }
 
+ProtobufFormatter* ProtobufFormatter::getFormatter(const std::string& name) {
+    std::map<std::string, ProtobufFormatter*>::const_iterator itr
+        = formatters.find(name);
 
+    if (itr != formatters.end()) {
+        return itr->second;
+    }
 
+    return NULL;
+}
 
+void ProtobufFormatter::registerFormatter(const std::string& name, ProtobufFormatter* formatter) {
+    if (!name.empty() && NULL != formatter) {
+        formatters.insert(std::make_pair(name, formatter));
+    }
+}
 
+void ProtobufFormatter::unregisterFormatter(const std::string& name) {
+    std::map<std::string, ProtobufFormatter*>::iterator itr
+        = formatters.find(name);
 
-
+    if (itr != formatters.end()) {
+        formatters.erase(itr);
+    }
+}
 
 }
 }

@@ -66,7 +66,7 @@
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;libprotobufd.lib;yamld.lib;ProtobufServiced.lib;ProtobufJsonSerializationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;libprotobufd.lib;yamld.lib;ProtobufServiced.lib;ProtobufSerializationd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>

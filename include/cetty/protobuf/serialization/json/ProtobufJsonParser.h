@@ -19,6 +19,8 @@
 
 #include <cetty/protobuf/serialization/ProtobufParser.h>
 
+#define JSON_PARSER_PLUGIN 1
+
 namespace google {
 namespace protobuf {
 class FieldDescriptor;

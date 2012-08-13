@@ -6,6 +6,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Redis", "..\..\..\cetty-redis\build\Redis\Redis.vcxproj", "{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufService", "..\..\..\cetty-protobuf\build\ProtobufService\ProtobufService.vcxproj", "{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6} = {4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}
+		{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1} = {17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}
+		{7AD046C3-EC07-409B-9A39-F1A6404EC5C5} = {7AD046C3-EC07-409B-9A39-F1A6404EC5C5}
+		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B} = {5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceGenerator", "..\..\..\cetty-protobuf\build\ProtobufServiceGenerator\ProtobufServiceGenerator.vcxproj", "{75A24313-B5BB-489C-80E4-B22C18BEEC0F}"
 EndProject
@@ -62,7 +68,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoWorker", "..\..\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfigGenerator", "..\..\..\cetty-config\build\ConfigGenerator\ConfigGenerator.vcxproj", "{0452B388-3767-4DED-930D-652177D13DCD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufJsonSerialization", "..\..\..\cetty-protobuf\build\ProtobufJsonSerialization\ProtobufJsonSerialization.vcxproj", "{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufSerialization", "..\..\..\cetty-protobuf\build\ProtobufSerialization\ProtobufSerialization.vcxproj", "{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

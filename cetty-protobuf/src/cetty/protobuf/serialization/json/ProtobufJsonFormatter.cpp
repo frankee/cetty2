@@ -31,12 +31,6 @@ using namespace cetty::util;
 
 using namespace cetty::protobuf::serialization;
 
-struct ProtobufJsonFormatterRegister {
-    ProtobufJsonFormatterRegister() {
-        ProtobufFormatter::registerFormatter("json", new ProtobufJsonFormatter);
-    }
-} formatterRegister;
-
 /**
  * An inner class for writing text to the output stream.
  */
@@ -155,27 +149,6 @@ private:
     std::string* output;
 };
 
-void ProtobufJsonFormatter::format(boost::int64_t value, std::string* str) {
-    StringUtil::strprintf(str, "%lld", value);
-}
-
-void ProtobufJsonFormatter::format(boost::int64_t value, const ChannelBufferPtr& buffer) {
-
-}
-
-void ProtobufJsonFormatter::format(const std::string& value, std::string* str) {
-    if (utf8Check(value)) {
-
-    }
-    else {
-
-    }
-}
-
-void ProtobufJsonFormatter::format(const std::string& value, const ChannelBufferPtr& buffer) {
-
-}
-
 void ProtobufJsonFormatter::format(const google::protobuf::Message& value, std::string* str) {
     if (str) {
         JsonPrinter printer(str);
@@ -186,30 +159,40 @@ void ProtobufJsonFormatter::format(const google::protobuf::Message& value, std::
 }
 
 void ProtobufJsonFormatter::format(const google::protobuf::Message& value, const ChannelBufferPtr& buffer) {
+    
+}
+
+void ProtobufJsonFormatter::format(const std::string& key, const std::string& value, std::string* str) {
+    if (utf8Check(value)) {
+
+    }
+    else {
+
+    }
+}
+
+void ProtobufJsonFormatter::format(const std::string& key, const std::string& value, const ChannelBufferPtr& buffer) {
+    if (utf8Check(value)) {
+
+    }
+    else {
+
+    }
+}
+
+void ProtobufJsonFormatter::format(const std::string& key, const std::vector<const std::string*>& value, std::string* str) {
 
 }
 
-void ProtobufJsonFormatter::format(const std::vector<boost::int64_t>& value, std::string* str) {
+void ProtobufJsonFormatter::format(const std::string& key, const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
 
 }
 
-void ProtobufJsonFormatter::format(const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
+void ProtobufJsonFormatter::format(const std::string& key, const std::vector<const google::protobuf::Message*>& value, std::string* str) {
 
 }
 
-void ProtobufJsonFormatter::format(const std::vector<const std::string*>& value, std::string* str) {
-
-}
-
-void ProtobufJsonFormatter::format(const std::vector<const std::string*>& value, const ChannelBufferPtr& buffer) {
-
-}
-
-void ProtobufJsonFormatter::format(const std::vector<const google::protobuf::Message*>& value, std::string* str) {
-
-}
-
-void ProtobufJsonFormatter::format(const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
+void ProtobufJsonFormatter::format(const std::string& key, const std::vector<const google::protobuf::Message*>& value, const ChannelBufferPtr& buffer) {
 
 }
 

@@ -49,6 +49,10 @@ public:
         : formatter(formatter), message(message)  {
     }
 
+    void setFieldName(const std::string& fieldName) {
+        this->fieldName = fieldName;
+    }
+
     ChannelBufferPtr operator()(boost::int64_t value) const {
         return ChannelBufferPtr();
     }
@@ -62,7 +66,7 @@ public:
 
         if (value) {
             content = ChannelBuffers::buffer(value->size());
-            formatter->format(*value, content);
+            formatter->format(fieldName, *value, content);
         }
         return content;
     }
@@ -75,7 +79,7 @@ public:
 
     ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) const {
         ChannelBufferPtr content = ChannelBuffers::buffer(1024);
-        formatter->format(value, content);
+        formatter->format(fieldName, value, content);
         return content;
     }
 
@@ -99,6 +103,8 @@ public:
 private:
     ProtobufFormatter* formatter;
     const Message* message;
+
+    std::string fieldName;
 };
 
 ProtobufMessage2HttpResponse::ProtobufMessage2HttpResponse() {
@@ -144,11 +150,14 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         MessageFieldFormatter f(formatter, paylod);
 
         if (!tmpl->content.empty()) {
-            ProtobufUtil::FieldValue field = ProtobufUtil::getMessageField(tmpl->content, *paylod);
+            ProtobufUtil::FieldValue field
+                = ProtobufUtil::getMessageField(tmpl->content, *paylod);
+            f.setFieldName(tmpl->content);
+
             content = field.apply_visitor(f);
         }
         else {
-            content = f(paylod);
+            content = f((const Message*)paylod);
         }
 
         response->setContent(content);
