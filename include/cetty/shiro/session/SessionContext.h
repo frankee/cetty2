@@ -29,7 +29,7 @@ namespace session {
  *
  * @since 1.0
  */
-class SessionContext : public MapContext{
+class SessionContext {
 private:
     static const std::string HOST;
     static const std::string SESSION_ID;
@@ -37,7 +37,7 @@ private:
 public:
     SessionContext() {}
 
-    SessionContext(const std::map<std::string, std::string> &map):MapContext(map) {}
+    SessionContext(const std::map<std::string, std::string> &map) {}
 
     std::string getHost() {
         return getValue(HOST);
@@ -56,7 +56,11 @@ public:
     void setSessionId(std::string sessionId) {
         nullSafePut(SESSION_ID, sessionId);
     }
+
+private:
+    std::map<std::string, std::string> context;
 };
+
 }
 }
 }

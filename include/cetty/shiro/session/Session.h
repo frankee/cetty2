@@ -18,45 +18,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <ctime>
+
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace shiro {
 namespace session {
 
+using namespace boost::posix_time;
+
 /**
- * Simple {@link org.apache.shiro.session.Session} JavaBeans-compatible POJO implementation, intended to be used on the
- * business/server tier.
+ * A {@code Session} is a stateful data context associated with a single Subject (user, daemon process,
+ * etc) who interacts with a software system over a period of time.
+ * <p/>
+ * A {@code Session} is intended to be managed by the business tier and accessible via other
+ * tiers without being tied to any given client technology.  This is a <em>great</em> benefit to Java
+ * systems, since until now, the only viable session mechanisms were the
+ * {@code javax.servlet.http.HttpSession} or Stateful Session EJB's, which many times
+ * unnecessarily coupled applications to web or ejb technologies.
  *
  * @since 0.1
  */
-class Session {
+class Session : public cetty::util::ReferenceCounter<Session, int> {
 protected:
     static const long MILLIS_PER_SECOND = 1000;
     static const long MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
     static const long MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
 
-
 public:
     Session() { init(); }
-    Session(const std::string &host) {
+    Session(const std::string& host) {
         init();
         this->host = host;
     }
 
-    const std::string &getId() const{
+    const std::string& getId() const {
         return this->id;
     }
 
-    void setId(const std::string &id) {
+    void setId(const std::string& id) {
         this->id = id;
     }
 
-    time_t getStartTimestamp() const{
+    const ptime& getStartTimestamp() const {
         return startTimestamp;
     }
 
-    void setStartTimestamp(time_t startTimestamp) {
+    void setStartTimestamp(const ptime& startTimestamp) {
         this->startTimestamp = startTimestamp;
     }
 
@@ -77,7 +86,7 @@ public:
      * @return The time the session was stopped, or <tt>null</tt> if the session is still
      *         active.
      */
-    time_t getStopTimestamp() const{
+    time_t getStopTimestamp() const {
         return stopTimestamp;
     }
 
@@ -85,7 +94,7 @@ public:
         this->stopTimestamp = stopTimestamp;
     }
 
-    time_t getLastAccessTime() const{
+    time_t getLastAccessTime() const {
         return lastAccessTime;
     }
 
@@ -115,19 +124,19 @@ public:
         this->timeout = timeout;
     }
 
-    const std::string &getHost() const{
+    const std::string& getHost() const {
         return host;
     }
 
-    void setHost(const std::string &host) {
+    void setHost(const std::string& host) {
         this->host = host;
     }
 
-    const std::map<std::string, std::string> &getAttributes() const{
+    const std::map<std::string, std::string>& getAttributes() const {
         return attributes;
     }
 
-    void setAttributes(const std::map<std::string, std::string> &attributes) {
+    void setAttributes(const std::map<std::string, std::string>& attributes) {
         this->attributes.insert(attributes.begin(), attributes.end());
     }
 
@@ -180,8 +189,9 @@ protected:
             }
 
             time_t diff = time(NULL) - lastAccessTime;
-            if(diff >= (timeout / 1000)) return true;
-            else return false;
+
+            if (diff >= (timeout / 1000)) { return true; }
+            else { return false; }
 
         }
 
@@ -191,21 +201,23 @@ protected:
     void validate();
 
 private:
-    const std::map<std::string, std::string> &getAttributesLazy() {
+    const std::map<std::string, std::string>& getAttributesLazy() {
         return getAttributes();
     }
 
 public:
-    const std::set<std::string> &getAttributeKeys();
-    std::string getAttribute(const std::string &key) {
-       std::map<std::string, std::string>::iterator it = attributes.find(key);
-       if(it == attributes.end()) return std::string();
-       return it->second;
+    const std::set<std::string>& getAttributeKeys();
+    std::string getAttribute(const std::string& key) {
+        std::map<std::string, std::string>::iterator it = attributes.find(key);
+
+        if (it == attributes.end()) { return std::string(); }
+
+        return it->second;
     }
 
     void setAttribute(std::string, std::string);
 
-    std::string removeAttribute(const std::string &key);
+    std::string removeAttribute(const std::string& key);
 
     /**
      * Returns {@code true} if the specified argument is an {@code instanceof} {@code SimpleSession} and both
@@ -219,7 +231,7 @@ public:
      * @param obj the object to compare with this one for equality.
      * @return {@code true} if this object is equivalent to the specified argument, {@code false} otherwise.
      */
-    bool equals(const Session &session);
+    bool equals(const Session& session);
 
 protected:
     /**
@@ -230,7 +242,7 @@ protected:
      * @return true if all the attributes, except the id, are equal to this object's attributes.
      * @since 1.0
      */
-    bool onEquals(const Session &ss);
+    bool onEquals(const Session& ss);
 
 public:
     /**
@@ -266,7 +278,7 @@ private:
 
     std::map<std::string, std::string> attributes;
 
-    void init(){
+    void init() {
         this->timeout = SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT;
         this->startTimestamp = time(NULL);
         this->lastAccessTime = this->startTimestamp;

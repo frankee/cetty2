@@ -126,5 +126,8 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\SubjectFactory.h">
       <Filter>shiro</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionPtr.h">
+      <Filter>shiro\session</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

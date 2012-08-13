@@ -43,6 +43,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionKey.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionListener.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionManager.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionValidationScheduler.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SubjectFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\subject\PrincipalCollection.h" />
