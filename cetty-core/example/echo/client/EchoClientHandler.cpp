@@ -10,9 +10,6 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/logging/InternalLoggerFactory.h>
 
-InternalLogger* EchoClientHandler::logger =
-    InternalLoggerFactory::getInstance("EchoClientHandler");
-
 void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
     // Send back the received message to the remote peer.
     const ChannelBufferPtr& buffer = getInboundChannelBuffer();

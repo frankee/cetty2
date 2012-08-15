@@ -27,18 +27,11 @@
 #include <cetty/channel/EventLoopPoolPtr.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace util {
 namespace internal {
 namespace asio {
 
 using namespace cetty::util;
-using namespace cetty::logging;
 
 class AsioDeadlineTimerFactory : public cetty::util::TimerFactory {
 public:
@@ -54,9 +47,6 @@ public:
 
 private:
     void initWithPool(const EventLoopPoolPtr& pool);
-
-private:
-    static InternalLogger* logger;
 
 private:
     typedef std::map<boost::thread::id, TimerPtr> TimerMap;

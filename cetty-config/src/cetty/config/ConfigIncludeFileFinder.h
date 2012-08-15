@@ -22,12 +22,6 @@
 #include <boost/filesystem.hpp>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
-}
-
-namespace cetty {
 namespace config {
 
 class FileNameMatchPattern;
@@ -35,7 +29,7 @@ class IncludeLine;
 
 class ConfigIncludeFileFinder {
 public:
-    ConfigIncludeFileFinder(cetty::logging::InternalLogger* logger);
+    ConfigIncludeFileFinder();
 
     int find(const std::string& file, std::vector<std::string>* files);
 
@@ -45,9 +39,6 @@ private:
                   std::vector<std::string>* files);
 
     int getFileIncludes(const std::string& file, std::vector<IncludeLine>* includes);
-
-private:
-    static cetty::logging::InternalLogger* logger;
 };
 
 }

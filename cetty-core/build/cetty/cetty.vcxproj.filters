@@ -176,12 +176,6 @@
     <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimer.cpp">
       <Filter>util\internal\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\logging\InternalLoggerFactory.cpp">
-      <Filter>logging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\logging\InternalLogLevel.cpp">
-      <Filter>logging</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp">
       <Filter>util</Filter>
     </ClCompile>
@@ -193,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleString.cpp">
       <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\logging\LoggerHelperPrivate.cpp">
-      <Filter>logging</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp">
       <Filter>buffer</Filter>
@@ -223,9 +214,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
       <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\logging\Log4cplusLoggerFactory.cpp">
-      <Filter>logging</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioIpAddressImplFactory.cpp">
       <Filter>channel\socket\asio</Filter>
@@ -406,6 +394,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpPackage.cpp">
       <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\Logger.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp">
+      <Filter>logging</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -628,21 +628,6 @@
     <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimerFactory.h">
       <Filter>util\internal\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\AbstractInternalLogger.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLogger.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLoggerFactory.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLogLevel.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\SimpleLoggerFactory.h">
-      <Filter>logging</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -653,12 +638,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h">
-      <Filter>logging</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\logging\SimpleLogger.h">
       <Filter>logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h">
@@ -699,9 +678,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\logging\Log4cplusLogger.h">
-      <Filter>logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioIpAddressImplFactory.h">
       <Filter>channel\socket\asio</Filter>
@@ -1113,6 +1089,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedBufferChannel.h">
       <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\Logger.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogLevel.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogMessage.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogFileSink.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogPatternFormatter.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogScribeSink.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h">
+      <Filter>logging</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -27,16 +27,9 @@
 #include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 class ClientService : public cetty::channel::AbstractChannel {
 public:
@@ -61,9 +54,6 @@ protected:
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
-
-protected:
-    static InternalLogger* logger;
 
 protected:
     EventLoopPtr  eventLoop;

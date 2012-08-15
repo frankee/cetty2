@@ -189,8 +189,9 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\TooLongFrameException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\UnreplayableOperationException.cpp" />
-    <ClCompile Include="..\..\src\cetty\logging\Log4cplusLoggerFactory.cpp" />
-    <ClCompile Include="..\..\src\cetty\logging\LoggerHelperPrivate.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
     <ClCompile Include="..\..\src\cetty\util\CharsetUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Integer.cpp" />
@@ -211,8 +212,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimeout.cpp" />
     <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimer.cpp" />
-    <ClCompile Include="..\..\src\cetty\logging\InternalLoggerFactory.cpp" />
-    <ClCompile Include="..\..\src\cetty\logging\InternalLogLevel.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryPtr.h" />
@@ -364,8 +364,14 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\ReplayingDecoderBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\TooLongFrameException.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogFileSink.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\Logger.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelperPrivate.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogLevel.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogPatternFormatter.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogScribeSink.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
@@ -425,13 +431,6 @@
     <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimeout.h" />
     <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimer.h" />
     <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimerFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\AbstractInternalLogger.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLogger.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLoggerFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\InternalLogLevel.h" />
-    <ClInclude Include="..\..\..\include\cetty\logging\SimpleLoggerFactory.h" />
-    <ClInclude Include="..\..\src\cetty\logging\Log4cplusLogger.h" />
-    <ClInclude Include="..\..\src\cetty\logging\SimpleLogger.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

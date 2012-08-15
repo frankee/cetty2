@@ -52,12 +52,7 @@ public:
     bool parse(const std::string& str);
 };
 
-InternalLogger* ConfigIncludeFileFinder::logger = NULL;
-
-ConfigIncludeFileFinder::ConfigIncludeFileFinder(cetty::logging::InternalLogger* logger) {
-    if (NULL == ConfigIncludeFileFinder::logger) {
-        ConfigIncludeFileFinder::logger = logger;
-    }
+ConfigIncludeFileFinder::ConfigIncludeFileFinder() {
 }
 
 int ConfigIncludeFileFinder::find(const std::string& file,

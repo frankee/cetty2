@@ -39,12 +39,6 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel  {
 namespace socket {
 namespace asio {
@@ -122,9 +116,6 @@ private:
     friend class AsioSocketChannelSink;
     friend class AsioWriteOperationQueue;
     friend class AsioServerSocketChannel;
-
-protected:
-    static InternalLogger* logger;
 
 protected:
     bool isWriting;

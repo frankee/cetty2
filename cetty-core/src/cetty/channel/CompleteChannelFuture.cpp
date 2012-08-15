@@ -19,8 +19,7 @@
 #include <cetty/channel/CompleteChannelFuture.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/util/Exception.h>
-#include <cetty/logging/InternalLogger.h>
-#include <cetty/logging/InternalLoggerFactory.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
@@ -28,13 +27,8 @@ namespace channel {
 using namespace ::cetty::util;
 using namespace ::cetty::logging;
 
-InternalLogger* CompleteChannelFuture::logger = NULL;
-
 CompleteChannelFuture::CompleteChannelFuture(const ChannelPtr& channel)
     : channel(channel) {
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("CompleteChannelFuture");
-    }
 }
 
 void CompleteChannelFuture::addListener(const CompletedCallback& listener, int priority) {
@@ -44,7 +38,7 @@ void CompleteChannelFuture::addListener(const CompletedCallback& listener, int p
         listener(*this);
     }
     catch (const Exception& e) {
-        logger->warn("An exception was thrown by ChannelFutureListener .", e);
+        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
     }
 }
 
@@ -55,7 +49,7 @@ void CompleteChannelFuture::addProgressListener(const ProgressedCallback& listen
         listener(*this, 0, 0, 0);
     }
     catch (const Exception& e) {
-        logger->warn("An exception was thrown by ChannelFutureListener .", e);
+        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
     }
 }
 

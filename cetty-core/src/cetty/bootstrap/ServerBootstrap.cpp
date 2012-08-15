@@ -118,14 +118,14 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     const ChannelFactoryPtr& factory = getFactory();
 
     if (!factory) {
-        LOG_ERROR(logger, "has not set the factory.");
+        LOG_ERROR() << "has not set the factory.";
         return NullChannel::getInstance()->getCloseFuture();
     }
 
     ChannelPtr channel = factory->newChannel(serverPipeline);
 
     if (!channel) {
-        LOG_ERROR(logger, "Server channel factory failed to create a new channel.");
+        LOG_ERROR() << "Server channel factory failed to create a new channel.";
         return NullChannel::getInstance()->getCloseFuture();
     }
 
@@ -139,10 +139,12 @@ ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
                                      const ChannelOption::Variant& value) {
     if (value.empty()) {
         childOptions.erase(option);
-        LOG_WARN(logger, "setOption, the key (%s) is empty value, remove from the options.", option.getName().c_str());
+        LOG_WARN() << "setOption, the key ("
+            << option.getName()
+            << ") is empty value, remove from the options.";
     }
     else {
-        LOG_INFO(logger, "set Option, the key is %s.", option.getName().c_str());
+        LOG_INFO() << "set Option, the key is " << option.getName();
         childOptions.insert(std::make_pair(option, value));
     }
 

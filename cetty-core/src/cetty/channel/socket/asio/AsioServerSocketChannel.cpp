@@ -17,7 +17,6 @@
 #include <cetty/channel/socket/asio/AsioServerSocketChannel.h>
 
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
 
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
@@ -36,8 +35,6 @@ namespace asio {
 
 using namespace cetty::channel;
 
-InternalLogger* AsioServerSocketChannel::logger = NULL;
-
 AsioServerSocketChannel::AsioServerSocketChannel(
     const EventLoopPtr& eventLoop,
     const ChannelFactoryPtr& factory,
@@ -51,9 +48,6 @@ AsioServerSocketChannel::AsioServerSocketChannel(
       childServicePool(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
       acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       config(acceptor) {
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioServerSocketChannel");
-    }
 
     sink = new AbstractChannelSink(*this);
     AbstractChannel::setPipeline(pipeline);
@@ -96,7 +90,7 @@ const SocketAddress& AsioServerSocketChannel::getRemoteAddress() const {
 }
 
 bool AsioServerSocketChannel::setClosed() {
-    LOG_INFO(logger, "Server Channel set closed.");
+    LOG_INFO() << "Server Channel set closed.";
     return AbstractChannel::setClosed();
 }
 
@@ -111,11 +105,11 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
 
         if (localAddress.family() == IpAddress::IPv4) {
             acceptor.open(boost::asio::ip::tcp::v4());
-            LOG_INFO(logger, "the server channel (acceptor) opened in IPV4 mode.");
+            LOG_INFO() << "the server channel (acceptor) opened in IPV4 mode.";
         }
         else {
             acceptor.open(boost::asio::ip::tcp::v6());
-            LOG_INFO(logger, "the server channel (acceptor) opened in IPV6 mode.");
+            LOG_INFO() << "the server channel (acceptor) opened in IPV6 mode.";
         }
 
         config.setReuseAddress(acceptor);
@@ -144,10 +138,10 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
         // start the event loop pool if in main thread mode.
         const EventLoopPoolPtr& loop = ioService->getEventLoopPool();
         if (loop && loop->isMainThread()) {
-            LOG_INFO(logger, "the asio service pool starting to run in main thread.");
+            LOG_INFO() << "the asio service pool starting to run in main thread.";
 
             if (!loop->start()) {
-                LOG_ERROR(logger, "start the boost asio service error, stop service pool and close channel.");
+                LOG_ERROR() << "start the boost asio service error, stop service pool and close channel.";
                 loop->stop();
                 getPipeline()->fireExceptionCaught(
                     ChannelException("failed to start the asio service."));
@@ -155,7 +149,7 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
                 close();
             }
             else {
-                LOG_INFO(logger, "the asio service pool started to running.");
+                LOG_INFO() << "the asio service pool started to running.";
             }
         }
     }
@@ -223,7 +217,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                               newChannel)));
     }
     else {
-        LOG_WARN(logger, "Failed to accept a connection any more. ErrorCode: %d.", error.value());
+        LOG_WARN() << "Failed to accept a connection any more. ErrorCode:" << error.value();
     }
 }
 
@@ -234,11 +228,12 @@ void AsioServerSocketChannel::doClose() {
         acceptor.close(error);
 
         if (error) {
-            LOG_ERROR(logger, "failed to close acceptor, error code:%d, msg:%s.", error.value(), error.message().c_str());
+            LOG_ERROR() << "failed to close acceptor, error:"
+                << error.value() << ":" << error.message();
             ChannelException e(error.message(), error.value());
             //future->setFailure(e);
 
-            LOG_INFO(logger, "firing the above exception event.");
+            LOG_INFO() << "firing the above exception event.";
             //Channels::fireExceptionCaught(channel, e);
         }
     }
@@ -246,7 +241,7 @@ void AsioServerSocketChannel::doClose() {
     //future->setSuccess();
 
     if (getCloseFuture()->isDone()) {
-        LOG_INFO(logger, "closing the server channel, but the channel has been closed yet.");
+        LOG_INFO() << "closing the server channel, but the channel has been closed yet.";
     }
 
     //close all children Channels

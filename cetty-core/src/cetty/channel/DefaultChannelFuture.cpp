@@ -24,7 +24,6 @@
 #include <cetty/channel/Channel.h>
 
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
 
 #include <cetty/util/TimeUnit.h>
 #include <cetty/util/Exception.h>
@@ -34,9 +33,6 @@ namespace channel {
 
 using namespace cetty::util;
 using namespace cetty::logging;
-
-InternalLogger* DefaultChannelFuture::logger =
-    InternalLoggerFactory::getInstance("DefaultChannelFuture");
 
 bool DefaultChannelFuture::useDeadLockChecker = true;
 bool DefaultChannelFuture::disabledDeadLockCheckerOnce = false;
@@ -81,8 +77,8 @@ DefaultChannelFuture::~DefaultChannelFuture() {
 void DefaultChannelFuture::setUseDeadLockChecker(bool useDeadLockChecker) {
     if (!useDeadLockChecker && !disabledDeadLockCheckerOnce) {
         disabledDeadLockCheckerOnce = true;
-        LOG_DEBUG(logger, "The dead lock checker in ChannelFuture \
-                            has been disabled as requested at your own risk.");
+        LOG_DEBUG() << "The dead lock checker in ChannelFuture \
+                            has been disabled as requested at your own risk.";
     }
 
     DefaultChannelFuture::useDeadLockChecker = useDeadLockChecker;
@@ -254,7 +250,7 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
                 interrupted = true;
                 waiters--;
 
-                LOG_WARN(logger, "thread interrupted while awaiting");
+                LOG_WARN() << "thread interrupted while awaiting";
             }
         }
     }
@@ -481,8 +477,7 @@ void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {
         l(*this);
     }
     catch (const Exception& e) {
-        logger->warn(
-            "An exception was thrown by ChannelFutureListener .", e);
+        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
     }
 }
 
@@ -497,9 +492,7 @@ void DefaultChannelFuture::notifyProgressListener(const ProgressedCallback& l,
         l(*this, amount, current, total);
     }
     catch (const Exception& e) {
-        logger->warn(
-            std::string("An exception was thrown by process callback."),
-            e);
+        LOG_WARN_E(e) << "An exception was thrown by process callback.";
     }
 }
 

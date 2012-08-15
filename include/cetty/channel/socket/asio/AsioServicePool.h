@@ -30,18 +30,11 @@
 #include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
 
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 class AsioServiceHolder;
 
@@ -92,9 +85,6 @@ private:
 private:
     typedef boost::shared_ptr<boost::thread> ThreadPtr;
     typedef boost::shared_ptr<boost::asio::io_service::work> WorkPtr;
-
-private:
-    static InternalLogger* logger;
 
 private:
     // The next io_service to use for a connection.

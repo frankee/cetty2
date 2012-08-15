@@ -39,12 +39,6 @@ class AbstractChannelSink;
 }
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
@@ -90,8 +84,6 @@ private:
 
 private:
     typedef std::map<int, ChannelPtr> ChildChannels;
-
-    static InternalLogger* logger;
 
 private:
     AsioServicePtr ioService;

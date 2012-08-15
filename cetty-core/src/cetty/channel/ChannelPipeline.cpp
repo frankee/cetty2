@@ -34,8 +34,7 @@
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
 #include <cetty/channel/AdaptiveReceiveBuffer.h>
 
-#include <cetty/logging/InternalLogger.h>
-#include <cetty/logging/InternalLoggerFactory.h>
+#include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/util/Exception.h>
 
@@ -43,8 +42,6 @@ namespace cetty {
 namespace channel {
 
 using namespace cetty::util;
-
-InternalLogger* ChannelPipeline::logger = NULL;
 
 class SinkHandler : public ChannelOutboundBufferHandler {
 public:
@@ -116,10 +113,6 @@ ChannelPipeline::ChannelPipeline()
       inboundHead(NULL),
       outboundHead(NULL),
       receiveBuffer() {
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("ChannelPipeline");
-    }
-
     this->receiveBuffer = new AdaptiveReceiveBuffer();
 }
 
@@ -540,8 +533,8 @@ ChannelPipeline::replace(ChannelHandlerContext* ctx,
         }
 
         if (!removed && !added) {
-            logger->warn(removeException.what(), removeException);
-            logger->warn(addException.what(), addException);
+            LOG_WARN_E(removeException);
+            LOG_WARN_E(addException);
             throw ChannelHandlerLifeCycleException(
                 std::string("Both ") +
                 ctx->getHandler()->toString() +
@@ -686,7 +679,7 @@ void ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
         ctx->getHandler()->afterAdd(*ctx);
     }
     catch (const Exception& e) {
-        logger->warn("call afterAdd has throw an exception, then try to remove", e);
+        LOG_WARN_E(e) << "call afterAdd has throw an exception, then try to remove";
 
         bool removed = false;
 
@@ -695,8 +688,7 @@ void ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
             removed = true;
         }
         catch (const Exception& e) {
-            logger->warn(
-                std::string("Failed to remove a handler: ").append(ctx->getName()), e);
+            LOG_WARN_E(e) << "Failed to remove a handler: " << ctx->getName();
 
             if (removed) {
                 throw ChannelHandlerLifeCycleException(

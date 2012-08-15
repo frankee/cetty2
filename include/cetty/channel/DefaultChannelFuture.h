@@ -31,16 +31,9 @@ namespace boost {
 }
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 
 using namespace ::cetty::util;
-using namespace ::cetty::logging;
 
 /**
  * The default {@link ChannelFuture} implementation.  It is recommended to
@@ -120,7 +113,6 @@ private:
     boost::mutex& getMutex() const;
 
 private:
-    static InternalLogger* logger;
     static Exception CANCELLED;
 
     static bool useDeadLockChecker;

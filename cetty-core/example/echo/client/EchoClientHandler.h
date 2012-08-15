@@ -32,7 +32,7 @@
 #include <cetty/util/Timer.h>
 #include <cetty/util/Timeout.h>
 #include <cetty/util/TimerFactory.h>
-#include <cetty/logging/InternalLogger.h>
+#include <cetty/logging/LoggerHelper.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -71,9 +71,6 @@ public:
 
     virtual std::string toString() const;
 
-private:
-    static InternalLogger* logger;
-    
 private:
     int firstMessageSize;
 

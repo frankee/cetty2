@@ -24,12 +24,6 @@
 #include <cetty/channel/ChannelFuture.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 
 /**
@@ -80,9 +74,6 @@ protected:
 private:
     CompleteChannelFuture(const CompleteChannelFuture&);
     CompleteChannelFuture& operator=(const CompleteChannelFuture&);
-
-private:
-    static cetty::logging::InternalLogger* logger;
 
 private:
     ChannelPtr channel;

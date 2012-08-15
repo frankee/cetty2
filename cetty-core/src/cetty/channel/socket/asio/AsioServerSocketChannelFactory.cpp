@@ -29,7 +29,6 @@
 #include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
 
 namespace cetty {
 namespace channel {
@@ -39,8 +38,6 @@ namespace asio {
 using namespace cetty::channel;
 using namespace cetty::logging;
 using namespace cetty::util::internal::asio;
-
-InternalLogger* AsioServerSocketChannelFactory::logger = NULL;
 
 AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
     const EventLoopPoolPtr& pool)
@@ -92,7 +89,7 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
             pipeline,
             childPipeline,
             childPool);
-    LOG_INFO(logger, "Created the AsioServerSocketChannel.");
+    LOG_INFO() << "Created the AsioServerSocketChannel.";
     serverChannels.push_back(channel);
     return channel;
 }
@@ -108,17 +105,13 @@ void AsioServerSocketChannelFactory::shutdown() {
 }
 
 void AsioServerSocketChannelFactory::init() {
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioServerSocketChannelFactory");
-    }
-
     if (!TimerFactory::hasFactory()) {
         timerFactory = new AsioDeadlineTimerFactory(parentPool, childPool);
         TimerFactory::setFactory(timerFactory);
     }
     else {
         // log info here.
-        LOG_WARN(logger, "the timer factory has already been set.");
+        LOG_WARN() << "the timer factory has already been set.";
     }
 
     if (!SocketAddress::hasFactory()) {

@@ -34,19 +34,12 @@ namespace cetty {
 }
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
-}
-
-namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
 
 using namespace cetty::buffer;
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 class AsioSocketChannel;
 
@@ -107,8 +100,8 @@ private:
 // no need ensure the thread safe.
 class AsioWriteOperationQueue {
 public:
-    AsioWriteOperationQueue(AsioSocketChannel& channel, InternalLogger* logger)
-        : channel(channel), logger(logger), writeBufferSize(0) {}
+    AsioWriteOperationQueue(AsioSocketChannel& channel)
+        : channel(channel), writeBufferSize(0) {}
 
     ~AsioWriteOperationQueue() {}
 
@@ -140,7 +133,6 @@ private:
 
 private:
     AsioSocketChannel& channel;
-    InternalLogger* logger;
 
     int writeBufferSize;
     std::deque<AsioWriteOperation> ops;

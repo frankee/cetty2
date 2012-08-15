@@ -1,8 +1,5 @@
-#if !defined(CETTY_LOGGING_LOG4CPLUSLOGGERFACTORY_H)
-#define CETTY_LOGGING_LOG4CPLUSLOGGERFACTORY_H
-
-/**
- * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+/*
+ * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -17,24 +14,32 @@
  * under the License.
  */
 
-#include <cetty/logging/InternalLoggerFactory.h>
+#include <cetty/logging/LogLevel.h>
 
 namespace cetty {
 namespace logging {
 
-class Log4cplusLoggerFactory : public InternalLoggerFactory {
-public:
-    Log4cplusLoggerFactory(const std::string& configureFile);
-    virtual ~Log4cplusLoggerFactory();
+const LogLevel LogLevel::FATAL(5);
+const LogLevel LogLevel::ERROR(4);
+const LogLevel LogLevel::WARN(3);
+const LogLevel LogLevel::INFO(2);
+const LogLevel LogLevel::DEBUG(1);
+const LogLevel LogLevel::TRACE(0);
 
-    virtual InternalLogger* newInstance(const std::string& name);
+static const std::string LOG_LEVLE_STRS[] = 
+{
+    "TRACE",
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "ERROR",
+    "FATAL",
+    "UNKNOWN"
 };
 
-}
+const std::string& LogLevel::toString() const {
+    return LOG_LEVLE_STRS[this->level];
 }
 
-#endif //#if !defined(CETTY_LOGGING_LOG4CPLUSLOGGERFACTORY_H)
-
-// Local Variables:
-// mode: c++
-// End:
+}
+}

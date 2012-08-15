@@ -35,16 +35,9 @@ class AsioIpAddressImplFactory;
 }
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace service {
 namespace asio {
 
-using namespace cetty::logging;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 using namespace cetty::util;
@@ -72,9 +65,6 @@ public:
 private:
     void init();
     void deinit();
-
-private:
-    static InternalLogger* logger;
 
 private:
     EventLoopPtr eventLoop;

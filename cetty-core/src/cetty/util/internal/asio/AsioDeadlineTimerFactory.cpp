@@ -26,8 +26,6 @@
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
 
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
-
 
 namespace cetty {
 namespace util {
@@ -39,17 +37,11 @@ using namespace cetty::channel;
 using namespace cetty::logging;
 using namespace cetty::channel::socket::asio;
 
-InternalLogger* AsioDeadlineTimerFactory::logger = NULL;
-
 AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const EventLoopPtr& eventLoop) {
     BOOST_ASSERT(eventLoop && "Initialized service CAN NOT BE NULL.");
 
     if (eventLoop) {
         timers[eventLoop->getThreadId()] = new AsioDeadlineTimer(eventLoop);
-    }
-
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioDeadlineTimerFactory");
     }
 }
 
@@ -58,10 +50,6 @@ AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const EventLoopPoolPtr& pool)
 
     if (pool) {
         initWithPool(pool);
-    }
-
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioDeadlineTimerFactory");
     }
 }
 
@@ -75,10 +63,6 @@ AsioDeadlineTimerFactory::AsioDeadlineTimerFactory(const EventLoopPoolPtr& paren
 
     if (childPool && childPool != parentPool) {
         initWithPool(childPool);
-    }
-
-    if (NULL == logger) {
-        logger = InternalLoggerFactory::getInstance("AsioDeadlineTimerFactory");
     }
 }
 
@@ -101,7 +85,7 @@ const TimerPtr& AsioDeadlineTimerFactory::getTimer(const boost::thread::id& id) 
         BOOST_ASSERT(false && "timers has not initialized.");
 
         CETTY_NDC_SCOPE("AsioDeadlineTimerFactory::getTimer");
-        LOG_ERROR(logger, "AsioDeadlineTimerFactory using before initialized.");
+        LOG_ERROR() << "AsioDeadlineTimerFactory using before initialized.";
         throw RuntimeException("AsioDeadlineTimerFactory using before initialized.");
     }
 

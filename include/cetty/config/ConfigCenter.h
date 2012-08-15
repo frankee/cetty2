@@ -21,12 +21,6 @@
 #include <yaml-cpp/node/node.h>
 
 namespace cetty {
-    namespace logging {
-        class InternalLogger;
-    }
-}
-
-namespace cetty {
 namespace config {
 
 class ConfigObject;
@@ -60,7 +54,6 @@ private:
 
 private:
     static ConfigCenter* center;
-    static cetty::logging::InternalLogger* logger;
 
 private:
     int argc;

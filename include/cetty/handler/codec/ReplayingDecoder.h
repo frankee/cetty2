@@ -30,12 +30,6 @@
 #include <cetty/handler/codec/DecoderException.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 class Channel;
 class SocketAddress;
@@ -48,7 +42,6 @@ namespace codec {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
-using namespace cetty::logging;
 
 /**
  * A specialized variation of {@link FrameDecoder} which enables implementation
@@ -575,9 +568,6 @@ private:
 
 protected:
     ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
-
-private:
-    static InternalLogger* logger;
 
 private:
     bool channelOwnBuffer;

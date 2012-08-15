@@ -47,17 +47,10 @@ class Exception;
 }
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 
 using namespace cetty::buffer;
 using namespace cetty::util;
-using namespace cetty::logging;
 
 class Channel;
 class UserEvent;
@@ -617,9 +610,6 @@ public:
 
     ChannelFuturePtr newFuture(const ChannelPtr& channel);
 
-public:
-    static InternalLogger* getLogger() { return logger; }
-
 protected:
     void callBeforeAdd(ChannelHandlerContext* ctx);
     void callAfterAdd(ChannelHandlerContext* ctx);
@@ -645,9 +635,6 @@ private:
     // upstream & downstream list operators.
     void updateInboundHandlerContextList();
     void updateOutboundHandlerContextList();
-
-private:
-    static InternalLogger* logger;
 
 private:
     typedef std::map<std::string, ChannelHandlerContext*> ContextMap;

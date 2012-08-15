@@ -26,17 +26,9 @@
 #include <cetty/channel/ChannelPipelineFactoryPtr.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-
-namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 /**
  * A helper class which initializes a {@link Channel}.  This class provides
@@ -174,9 +166,6 @@ protected:
      * Creates a new instance with the specified initial {@link ChannelFactory}.
      */
     Bootstrap(const ChannelFactoryPtr& channelFactory);
-
-protected:
-    static InternalLogger* logger;
 
 private:
     ChannelOption::Options options;

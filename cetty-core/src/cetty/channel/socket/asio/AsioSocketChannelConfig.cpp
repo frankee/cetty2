@@ -24,7 +24,6 @@
 #include <cetty/util/NestedDiagnosticContext.h>
 
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
 
 namespace cetty {
 namespace channel {
@@ -36,16 +35,10 @@ using namespace cetty::util;
 using namespace cetty::util::internal;
 using namespace cetty::logging;
 
-InternalLogger* AsioSocketChannelConfig::logger = NULL;
-
 AsioSocketChannelConfig::AsioSocketChannelConfig(TcpSocket& socket)
     : socket(socket),
       writeBufferLowWaterMark(0),
       writeBufferHighWaterMark(DEFAULT_WRITE_BUFFER_HIGH_WATERMARK) {
-
-    if (NULL == logger) {
-        InternalLoggerFactory::getInstance("AsioSocketChannelConfig");
-    }
 }
 
 bool AsioSocketChannelConfig::setOption(const ChannelOption& option,
@@ -295,7 +288,7 @@ int AsioSocketChannelConfig::getWriteBufferLowWaterMark() const {
             writeBufferLowWaterMark = DEFAULT_WRITE_BUFFER_LOW_WATERMARK;
             //throw ChannelException(e.what(), e.code().value());
 
-            LOG_ERROR(logger, "has error %d, %s", e.code(), e.what());
+            LOG_ERROR_E(e) << "getWriteBufferLowWaterMark has error";
         }
     }
 

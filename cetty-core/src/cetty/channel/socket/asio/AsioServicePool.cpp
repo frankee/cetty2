@@ -26,7 +26,6 @@
 
 #include <cetty/util/Exception.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/logging/InternalLoggerFactory.h>
 
 #include <cetty/channel/socket/asio/AsioService.h>
 
@@ -37,8 +36,6 @@ namespace asio {
 
 using namespace cetty::logging;
 using namespace boost::asio;
-
-InternalLogger* AsioServicePool::logger = NULL;
 
 class AsioServiceHolder : public EventLoopPool::EventLoopHolder {
 public:
@@ -113,10 +110,10 @@ AsioServicePool::AsioServicePool(int threadCnt)
 
 bool AsioServicePool::start() {
     if (!started && mainThread) {
-        LOG_INFO(logger, "AsioServciePool running in main thread mode.");
+        LOG_INFO() << "AsioServciePool running in main thread mode.";
 
         if (runIOservice((AsioServiceHolder*)eventLoops.front()) < 0) {
-            LOG_ERROR(logger, "AsioServicePool run the main thead service error.");
+            LOG_ERROR() << "AsioServicePool run the main thread service error.";
             return false;
         }
     }
@@ -162,12 +159,12 @@ int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
 
     // if error happened, try to recover.
     if (err) {
-        LOG_ERROR(logger, "when runIOservice, the io service has error = %d.", err.value());
+        LOG_ERROR()  << "when runIOservice, the io service has error = " << err.value();
         stop();
         return -1;
     }
 
-    LOG_INFO(logger, "runIOservice OK, and %d handlers that were executed.", opCount);
+    LOG_INFO() << "runIOservice OK, and " << opCount << "handlers that were executed.";
     return opCount;
 }
 

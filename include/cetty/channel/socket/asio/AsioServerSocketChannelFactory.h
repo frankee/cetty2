@@ -28,12 +28,6 @@
 #include <cetty/util/TimerPtr.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
@@ -41,7 +35,6 @@ namespace asio {
 using namespace cetty::channel;
 using namespace cetty::channel::socket;
 using namespace cetty::util;
-using namespace cetty::logging;
 
 class AsioTcpSocketAddressImplFactory;
 class AsioIpAddressImplFactory;
@@ -129,9 +122,6 @@ public:
 private:
     void init();
     void deinit();
-
-private:
-    static InternalLogger* logger;
 
 private:
     EventLoopPoolPtr parentPool;

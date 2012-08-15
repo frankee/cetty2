@@ -1,106 +1,77 @@
 #if !defined(LOGGER_HELPER_H)
 #define LOGGER_HELPER_H
 
-#include <cetty/logging/LoggerHelperPrivate.h>
+#include <cetty/logging/Logger.h>
 
-#define LOG(logger, priority, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG(level) \
+    cetty::logging::Logger(__FILE__, __LINE__, level).stream()
 
-#define LOG_ERROR(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::ERROR, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_FATAL() \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::ERROR).stream()
 
-#define LOG_WARN(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::WARN, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_SYSFATAL() \
+    cetty::logging::Logger(__FILE__, __LINE__, true).stream()
 
-#define LOG_INFO(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::INFO, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_ERROR() \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::ERROR).stream()
 
-#define LOG_DEBUG(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::DEBUG, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_ERROR_E(exception) \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::ERROR).stream()
 
-#define LOG_MARK_FUNCTION(logger, funname) \
-    ::cetty::logging::internal::LogMessageMarker(logger, __FILE__, __LINE__, funname)
+#define LOG_WARN() \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::WARN).stream()
 
-#define LOG_IF(logger, priority, condition, msg, ...) \
-    !(condition) ? (void) 0 : ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_WARN_E(exception) \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::WARN).stream()
 
-#define LOG_EVERY_N(logger, priority, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_EVERY_N(n) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_INFO() \
+    cetty::logging::Logger(__FILE__, __LINE__, cetty::logging::LogLevel::INFO).stream()
 
-#define LOG_IF_EVERY_N(logger, priority, condition, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_IF_EVERY_N(condition, n)\
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#if defined(_MSC_VER)
 
-#define LOG_FIRST_N(logger, priority, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_FIRST_N(n) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_DEBUG() \
+    cetty::logging::Logger(__FILE__, __LINE__, __FUNCTION__, cetty::logging::LogLevel::DEBUG).stream()
 
-#define LOG_START_TIMER(logger) \
-    ::cetty::logging::internal::LoggerWrapper(logger).startTimer(__FILE__, __LINE__)
+#define LOG_TRACE() \
+    cetty::logging::Logger(__FILE__, __LINE__, __FUNCTION__, cetty::logging::LogLevel::TRACE).stream()
 
-#define LOG_CHECK_TIMER(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).checkTimer(__FILE__, __LINE__, msg, ##__VA_ARGS__)
+#else
 
+#define LOG_DEBUG() \
+    cetty::logging::Logger(__FILE__, __LINE__, __func__, cetty::logging::LogLevel::DEBUG).stream()
+
+#define LOG_TRACE() \
+    cetty::logging::Logger(__FILE__, __LINE__, __func__, cetty::logging::LogLevel::TRACE).stream()
+
+#endif
+
+#define LOG_IF(level, condition) \
+    !(condition) ? (void) 0 : cetty::logging::LogMessageVoidify() & LOG(level)
 
 // Plus some debug-logging macros that get compiled to nothing for production
 #if !defined(NDEBUG) || defined(_DEBUG)
 
-#define DLOG(logger, priority, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG(logger, priority, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_ERROR(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::ERROR, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_WARN(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::WARN, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_INFO(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::INFO, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_DEBUG(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(InternalLogLevel::DEBUG, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_IF(logger, priority, condition, msg, ...) \
-    !(condition) ? (void) 0 : ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_EVERY_N(logger, priority, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_EVERY_N(n) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_IF_EVERY_N(logger, priority, condition, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_IF_EVERY_N(condition, n)\
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_FIRST_N(logger, priority, n, msg, ...) \
-    INTERNAL_LOG_CONDITION_FIRST_N(n) \
-    ::cetty::logging::internal::LoggerWrapper(logger).log(priority, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
-#define DLOG_START_TIMER(logger) \
-    ::cetty::logging::internal::LoggerWrapper(logger).startTimer(__FILE__, __LINE__)
-
-#define DLOG_CHECK_TIMER(logger, msg, ...) \
-    ::cetty::logging::internal::LoggerWrapper(logger).checkTimer(__FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define DLOG(level) LOG(level)
+#define DLOG_DEBUG() LOG_DEBUG()
+#define DLOG_TRACE() LOG_TRACE()
+#define DLOG_IF(level, condition) LOG_IF(level, condition)
 
 #else  // NDEBUG
 
-#define DLOG(logger, priority, msg, ...)
-#define DLOG_ERROR(logger, msg, ...)
-#define DLOG_WARN(logger, msg, ...)
-#define DLOG_INFO(logger, msg, ...)
-#define DLOG_DEBUG(logger, msg, ...)
-#define DLOG_IF(logger, priority, condition, msg, ...)
-#define DLOG_EVERY_N(logger, priority, n, msg, ...)
-#define DLOG_IF_EVERY_N(logger, priority, condition, n, msg, ...)
-#define DLOG_FIRST_N(logger, priority, n, msg, ...)
+#define DLOG(level) \
+    true ? (void) 0 : cetty::logging::LogMessageVoidify() & LOG(level)
 
-#define DLOG_START_TIMER(logger)
-#define DLOG_CHECK_TIMER(logger, msg, ...)
+#define DLOG_DEBUG() \
+    true ? (void) 0 : cetty::logging::LogMessageVoidify() & LOG_DEBUG()
+
+#define DLOG_TRACE() \
+    true ? (void) 0 : cetty::logging::LogMessageVoidify() & LOG_TRACE()
+
+#define DLOG_IF(level, condition) \
+    (true || !(condition)) ? (void) 0 : cetty::logging::LogMessageVoidify() & LOG_IF(level, condition)
 
 #endif  // NDEBUG
+
 
 // Local Variables:
 // mode: c++

@@ -20,7 +20,6 @@
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
-#include <cetty/logging/Log4cplusLoggerFactory.h>
 #include <cetty/config/ConfigCenter.h>
 
 #if (defined(linux) || defined(__linux) || defined(__linux__))
@@ -49,7 +48,6 @@ namespace builder {
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 using namespace cetty::bootstrap;
-using namespace cetty::logging;
 using namespace cetty::service;
 using namespace cetty::config;
 
@@ -412,6 +410,7 @@ void ServerBuilder::waitingForExit() {
 
             if (input == 'q') {
                 stop();
+                break;
             }
         }
         while (true);
