@@ -18,6 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cstdlib>
+#include <map>
+#include <string>
+#include <map>
 
 namespace cetty {
 namespace shiro {
@@ -30,34 +34,36 @@ namespace session {
  * @since 1.0
  */
 class SessionContext {
-private:
-    static const std::string HOST;
-    static const std::string SESSION_ID;
-
 public:
     SessionContext() {}
 
-    SessionContext(const std::map<std::string, std::string> &map) {}
-
-    std::string getHost() {
-        return getValue(HOST);
-    }
+    std::string getHost() { return (get(HOST)); }
 
     void setHost(const std::string &host) {
-        if (host.size() > 0) {
-            put(HOST, host);
-        }
+        if(host.size() > 0) return;
+        put(HOST, host);
     }
 
-    std::string getSessionId() {
-        return getValue(SESSION_ID);
+    std::string getSessionId() { return get(SESSION_ID); }
+
+    void setSessionId(const std::string &sessionId) {
+        if(sessionId.size() < 0) return;
+        put(SESSION_ID, sessionId);
     }
 
-    void setSessionId(std::string sessionId) {
-        nullSafePut(SESSION_ID, sessionId);
+protected:
+    const std::string get (const std::string &key) {
+        std::map<std::string, std::string>::iterator it = context.find(key);
+        if(it == context.end()) return std::string();
+        return it->second;
     }
-
+    void put(const std::string &key, const std::string &value){
+           if(key.size() <= 0) return;
+           context.insert(std::pair<std::string, std::string>(key, value));
+       }
 private:
+    static const std::string HOST;
+    static const std::string SESSION_ID;
     std::map<std::string, std::string> context;
 };
 

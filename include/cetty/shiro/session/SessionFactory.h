@@ -1,4 +1,4 @@
-#if !define(CETTY_SHIRO_SESSION_SESSIONFACTORY_H)
+#if !defined(CETTY_SHIRO_SESSION_SESSIONFACTORY_H)
 #define CETTY_SHIRO_SESSION_SESSIONFACTORY_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/shiro/session/Session.h>
 
 namespace cetty {
 namespace shiro {
@@ -38,9 +39,8 @@ class SessionFactory {
      * @return a new {@link SimpleSession SimpleSession} instance
      */
 public:
-    static Session *createSession(SessionContext initData) {
-
-        return new Session(initData.getHost());
+    static SessionPtr createSession(SessionContext &initData) {
+        return SessionPtr(new Session(initData.getHost()));
     }
 };
 }

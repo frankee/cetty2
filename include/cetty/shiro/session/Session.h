@@ -19,15 +19,21 @@
  * under the License.
  */
 
+#include <vector>
+
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <cetty/util/ReferenceCounter.h>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/any.hpp>
+#include <cetty/shiro/session/ReferenceCounter.h>
+#include <cetty/shiro/util/EmptyObj.h>
+//#include "SessionManager.h"
 
 namespace cetty {
 namespace shiro {
 namespace session {
 
 using namespace boost::posix_time;
-
+using namespace cetty::util;
 /**
  * A {@code Session} is a stateful data context associated with a single Subject (user, daemon process,
  * etc) who interacts with a software system over a period of time.
@@ -40,34 +46,24 @@ using namespace boost::posix_time;
  *
  * @since 0.1
  */
-class Session : public cetty::util::ReferenceCounter<Session, int> {
-protected:
-    static const long MILLIS_PER_SECOND = 1000;
-    static const long MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
-    static const long MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
+class Session : public ReferenceCounter<Session, int>{
+public:
+    enum SessionState {
+        START,
+        ACTIVE,
+        STOPPED,
+        EXPIRED
+    };
 
 public:
     Session() { init(); }
-    Session(const std::string& host) {
-        init();
-        this->host = host;
-    }
+    Session(const std::string& host) : host(host) { init(); }
 
-    const std::string& getId() const {
-        return this->id;
-    }
+    const std::string& getId() const { return this->id; }
+    void setId(const std::string& id) { this->id = id; }
 
-    void setId(const std::string& id) {
-        this->id = id;
-    }
-
-    const ptime& getStartTimestamp() const {
-        return startTimestamp;
-    }
-
-    void setStartTimestamp(const ptime& startTimestamp) {
-        this->startTimestamp = startTimestamp;
-    }
+    const ptime& getStartTimestamp() const { return startTimestamp; }
+    void setStartTimestamp(const ptime& startTimestamp) { this->startTimestamp = startTimestamp; }
 
     /**
      * Returns the time the session was stopped, or <tt>null</tt> if the session is still active.
@@ -86,19 +82,13 @@ public:
      * @return The time the session was stopped, or <tt>null</tt> if the session is still
      *         active.
      */
-    time_t getStopTimestamp() const {
-        return stopTimestamp;
-    }
-
-    void setStopTimestamp(time_t stopTimestamp) {
+    const ptime& getStopTimestamp() const { return stopTimestamp; }
+    void setStopTimestamp(const ptime& stopTimestamp) {
         this->stopTimestamp = stopTimestamp;
     }
 
-    time_t getLastAccessTime() const {
-        return lastAccessTime;
-    }
-
-    void setLastAccessTime(time_t lastAccessTime) {
+    const ptime& getLastAccessTime() const { return lastAccessTime; }
+    void setLastAccessTime(ptime& lastAccessTime) {
         this->lastAccessTime = lastAccessTime;
     }
 
@@ -108,184 +98,88 @@ public:
      *
      * @return true if this session has expired, false otherwise.
      */
-    bool isExpired() {
-        return expired;
-    }
+    bool isExpired() { return expired; }
+    void setExpired(bool expired) { this->expired = expired; }
 
-    void setExpired(bool expired) {
-        this->expired = expired;
-    }
+    int getTimeout() const{ return timeout; }
+    void setTimeout(int timeout) { this->timeout = timeout; }
 
-    long getTimeout() {
-        return timeout;
-    }
+    const std::string& getHost() const { return host; }
+    void setHost(const std::string& host) { this->host = host; }
 
-    void setTimeout(long timeout) {
-        this->timeout = timeout;
-    }
-
-    const std::string& getHost() const {
-        return host;
-    }
-
-    void setHost(const std::string& host) {
-        this->host = host;
-    }
-
-    const std::map<std::string, std::string>& getAttributes() const {
+    const std::map<std::string, boost::any>& getAttributes() const {
         return attributes;
     }
-
-    void setAttributes(const std::map<std::string, std::string>& attributes) {
+    void setAttributes(const std::map<std::string, boost::any>& attributes) {
         this->attributes.insert(attributes.begin(), attributes.end());
     }
 
     void touch() {
-        this->lastAccessTime = time(NULL);
+        this->lastAccessTime =  ptime(second_clock::local_time());
     }
 
     void stop() {
-        if (this->stopTimestamp == 0) {
-            this->stopTimestamp = time(NULL);
+        if (this->stopTimestamp.is_not_a_date_time()) {
+            this->stopTimestamp =  ptime( second_clock::local_time() );
         }
     }
 
-protected:
-    bool isStopped() {
-        return getStopTimestamp() != 0;
+    void getAttributeKeys(std::vector<std::string>* keys){}
+
+    const boost::any &getAttribute(const std::string& key) {
+        std::map<std::string, boost::any>::iterator it = attributes.find(key);
+        if (it == attributes.end()) { return cetty::shiro::util::emptyAny; }
+        return it->second;
     }
 
+    void setAttribute(const std::string& key, const boost::any& value){
+        if(key.empty()) return;
+        attributes.insert(std::pair<std::string, boost::any>(key, value));
+    }
+
+    void removeAttribute(const std::string& key){
+        if(key.empty()) return;
+        attributes.erase(key);
+    }
+
+    SessionState validate();
+
+protected:
+    static const int MILLIS_PER_SECOND;
+    static const int MILLIS_PER_MINUTE;
+    static const int MILLIS_PER_HOUR;
+
+    bool isStopped() { return !getStopTimestamp().is_not_a_date_time(); }
     void expire() {
         stop();
         this->expired = true;
     }
-
-    /**
-     * @since 0.9
-     */
-    bool isValid() {
-        return !isStopped() && !isExpired();
-    }
+    bool isValid() { return !isStopped() && !isExpired(); }
 
     /**
      * Determines if this session is expired.
      *
      * @return true if the specified session has expired, false otherwise.
      */
-    bool isTimedOut() {
-
-        if (isExpired()) {
-            return true;
-        }
-
-        long timeout = getTimeout();
-
-        if (timeout >= 0l) {
-
-            time_t lastAccessTime = getLastAccessTime();
-
-            if (lastAccessTime <= 0) {
-                return true;
-            }
-
-            time_t diff = time(NULL) - lastAccessTime;
-
-            if (diff >= (timeout / 1000)) { return true; }
-            else { return false; }
-
-        }
-
-        return false;
-    }
-
-    void validate();
+    bool isTimedOut();
 
 private:
-    const std::map<std::string, std::string>& getAttributesLazy() {
-        return getAttributes();
-    }
+    void init();
 
-public:
-    const std::set<std::string>& getAttributeKeys();
-    std::string getAttribute(const std::string& key) {
-        std::map<std::string, std::string>::iterator it = attributes.find(key);
-
-        if (it == attributes.end()) { return std::string(); }
-
-        return it->second;
-    }
-
-    void setAttribute(std::string, std::string);
-
-    std::string removeAttribute(const std::string& key);
-
-    /**
-     * Returns {@code true} if the specified argument is an {@code instanceof} {@code SimpleSession} and both
-     * {@link #getId() id}s are equal.  If the argument is a {@code SimpleSession} and either 'this' or the argument
-     * does not yet have an ID assigned, the value of {@link #onEquals(SimpleSession) onEquals} is returned, which
-     * does a necessary attribute-based comparison when IDs are not available.
-     * <p/>
-     * Do your best to ensure {@code SimpleSession} instances receive an ID very early in their lifecycle to
-     * avoid the more expensive attributes-based comparison.
-     *
-     * @param obj the object to compare with this one for equality.
-     * @return {@code true} if this object is equivalent to the specified argument, {@code false} otherwise.
-     */
-    bool equals(const Session& session);
-
-protected:
-    /**
-     * Provides an attribute-based comparison (no ID comparison) - incurred <em>only</em> when 'this' or the
-     * session object being compared for equality do not have a session id.
-     *
-     * @param ss the SimpleSession instance to compare for equality.
-     * @return true if all the attributes, except the id, are equal to this object's attributes.
-     * @since 1.0
-     */
-    bool onEquals(const Session& ss);
-
-public:
-    /**
-     * Returns the hashCode.  If the {@link #getId() id} is not {@code null}, its hashcode is returned immediately.
-     * If it is {@code null}, an attributes-based hashCode will be calculated and returned.
-     * <p/>
-     * Do your best to ensure {@code SimpleSession} instances receive an ID very early in their lifecycle to
-     * avoid the more expensive attributes-based calculation.
-     *
-     * @return this object's hashCode
-     * @since 1.0
-     */
-    int hashCode();
-
-    /**
-     * Returns the string representation of this SimpleSession, equal to
-     * <code>getClass().getName() + &quot;,id=&quot; + getId()</code>.
-     *
-     * @return the string representation of this SimpleSession, equal to
-     *         <code>getClass().getName() + &quot;,id=&quot; + getId()</code>.
-     * @since 1.0
-     */
-    std::string toString() { return std::string(); }
+    const std::map<std::string, boost::any>& getAttributesLazy(){ return getAttributes(); };
 
 private:
     std::string id;
-    time_t startTimestamp;
-    time_t stopTimestamp;
-    time_t lastAccessTime;
-    long timeout;
+    ptime startTimestamp;
+    ptime stopTimestamp;
+    ptime lastAccessTime;
+    int timeout;
     bool expired;
     std::string host;
 
-    std::map<std::string, std::string> attributes;
-
-    void init() {
-        this->timeout = SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT;
-        this->startTimestamp = time(NULL);
-        this->lastAccessTime = this->startTimestamp;
-    }
-
-
+    std::map<std::string, boost::any> attributes;
 };
+
 }
 }
 }

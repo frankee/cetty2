@@ -19,7 +19,6 @@
  * under the License.
  */
 #include <cstdlib>
-
 namespace cetty {
 namespace shiro {
 namespace session {
@@ -47,49 +46,45 @@ namespace session {
  * @since 0.1
  */
 class MemorySessionDAO : public SessionDAO {
-private:
-    std::map<std::string, Session*> sessions;
+public:
+    virtual void getActiveSessions(std::vector<SessionPtr> *actives){
+        if(actives == NULL) return;
+        std::map<std::string, SessionPtr>::iterator it = sessions.begin();
+        for(; it != sessions.end(); ++it)
+            actives->push_back(it->second);
+    }
+    virtual void update(SessionPtr &session){
+        storeSession(session->getId(), session);
+    }
 
-
+    virtual void remove(SessionPtr &session) {
+        std::string id = session->getId();
+        if (!id.empty()) {
+            sessions.erase(id);
+        }
+    }
 
 protected:
-    std::string doCreate(Session *session) {
+    virtual std::string doCreate(SessionPtr &session) {
         std::string sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
         storeSession(sessionId, session);
         return sessionId;
     }
 
-    Session *storeSession(const std::string &id, Session *session) {
-        if (id == "") {
-           return NULL;
-        }
-        return sessions.insert(std::pair<std::string, Session *>(id, session));
+    void storeSession(const std::string &id, SessionPtr &session) {
+        if (id.empty()) return;
+        sessions.insert(std::pair<std::string, SessionPtr>(id, session));
     }
 
-    virtual Session *doReadSession(const std::string &sessionId) {
-        std::map<std::string, Session*>::iterator ret = sessions.find(sessionId);
-        if(ret == sessions.end()) return NULL;
+    virtual SessionPtr doReadSession(const std::string &sessionId) {
+        std::map<std::string, SessionPtr >::iterator ret = sessions.find(sessionId);
+        if(ret == sessions.end()) return SessionPtr();
         return ret->second;
     }
 
-
-public:
-    virtual std::vector<Session *> * getActiveSessions();
-    virtual void update(Session *session){
-        storeSession(session->getId(), session);
-    }
-
-    virtual void remove(Session *session) {
-        if (session == NULL) {
-            return;
-        }
-        std::string id = session->getId();
-        if (id != "") {
-            sessions.erase(id);
-        }
-    }
-
+private:
+    std::map<std::string, SessionPtr> sessions;
 };
 }
 }
