@@ -224,6 +224,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />

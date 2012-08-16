@@ -47,10 +47,10 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual ProtobufServiceMessagePtr filterRequest(InboundMessageContext& ctx,
+    virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
         const GearmanMessagePtr& req);
 
-    virtual GearmanMessagePtr filterResponse(OutboundMessageContext& ctx,
+    virtual GearmanMessagePtr filterResponse(ChannelHandlerContext& ctx,
         const GearmanMessagePtr& req,
         const ProtobufServiceMessagePtr& rep);
 };

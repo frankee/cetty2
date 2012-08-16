@@ -46,10 +46,10 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual GearmanMessagePtr filterRequest(OutboundMessageContext& ctx,
+    virtual GearmanMessagePtr filterRequest(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& req);
 
-    virtual ProtobufServiceMessagePtr filterResponse(InboundMessageContext& ctx,
+    virtual ProtobufServiceMessagePtr filterResponse(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& req,
         const GearmanMessagePtr& rep);
 

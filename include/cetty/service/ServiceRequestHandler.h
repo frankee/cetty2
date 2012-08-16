@@ -62,7 +62,7 @@ public:
         bool notify = false;
 
         while (!inboundQueue.empty()) {
-            RepT& response = in.front();
+            RepT& response = inboundQueue.front();
 
             const OutstandingCallPtr& out = outMessages.front();
 

@@ -52,13 +52,13 @@ template<typename RequestInT,
          typename ResponseInT,
          typename ResponseOutT>
 class ClientServiceFilter
-    : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
+    : public ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT> {
 
-        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
-        using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
+        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::inboundTransfer;
+        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::outboundTransfer;
 
-        using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
-        using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
+        using ChannelInboundMessageHandler<ResponseInT>::inboundQueue;
+        using ChannelOutboundMessageHandler<RequestInT>::outboundQueue;
 
 public:
     virtual ~ClientServiceFilter() {}
@@ -72,7 +72,7 @@ protected:
             ResponseOutT omsg = filterResponse(ctx, reqs.front(), msg);
             reqs.pop_front();
 
-            if (CodecUtil<ResponseOutT>::unfoldAndAdd(ctx, omsg, true)) {
+            if (inboundTransfer.unfoldAndAdd(ctx, omsg)) {
                 notify = true;
             }
 
@@ -86,17 +86,15 @@ protected:
 
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
-        OutboundMessageContext::MessageQueue& in =
-            ctx.getOutboundMessageQueue();
-
-        while (!in.empty()) {
-            RequestInT& req = in.front();
+        while (!outboundQueue.empty()) {
+            RequestInT& req = outboundQueue.front();
 
             reqs.push_back(req);
             RequestOutT oreq = filterRequest(ctx, req);
-            CodecUtil<RequestOutT>::unfoldAndAdd(ctx, oreq, false);
 
-            in.pop_front();
+            outboundTransfer.unfoldAndAdd(ctx, oreq);
+
+            outboundQueue.pop_front();
         }
 
         ctx.flush(future);

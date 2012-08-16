@@ -48,7 +48,7 @@ std::string GearmanProtobufClientFilter::toString() const {
 }
 
 GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
-    OutboundMessageContext& ctx,
+    ChannelHandlerContext& ctx,
     const ProtobufServiceMessagePtr& req) {
     const std::string& method = req->getMethod();
     ChannelBufferPtr buffer
@@ -60,7 +60,7 @@ GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
 }
 
 ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterResponse(
-    InboundMessageContext& ctx,
+    ChannelHandlerContext& ctx,
     const ProtobufServiceMessagePtr& req,
     const GearmanMessagePtr& rep) {
     //decode from GearmanMessage

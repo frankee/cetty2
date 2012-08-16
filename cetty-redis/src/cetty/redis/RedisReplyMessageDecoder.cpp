@@ -14,15 +14,14 @@
  * under the License.
  */
 
-#include <cetty/redis/RedisReplyDecoder.h>
+#include <cetty/redis/RedisReplyMessageDecoder.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
 
-#include <cetty/handler/codec/frame/TooLongFrameException.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 
 #include <cetty/redis/RedisReplyMessage.h>
 
@@ -31,7 +30,7 @@ namespace redis {
 
 using namespace cetty::util;
 using namespace cetty::channel;
-using namespace cetty::handler::codec::frame;
+using namespace cetty::handler::codec;
 
 static const char* REDIS_LBR                       = "\r\n";
 static const char* REDIS_STATUS_REPLY_OK           = "OK";
@@ -45,9 +44,9 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 
 //static const char REDIS_WHITESPACE                " \f\n\r\t\v"
 
-UserEvent RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
-                             Channel& channel,
-                             const ChannelBufferPtr& buffer) {
+RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
+    const ReplayingDecoderBufferPtr& buffer,
+    int state) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
     int minFrameLength = Integer::MAX_VALUE;
 
@@ -174,7 +173,7 @@ UserEvent RedisReplyDecoder::decode(ChannelHandlerContext& ctx,
     }
 }
 
-void RedisReplyDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
+void RedisReplyMessageDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
     std::string msg;
     msg.reserve(64);
 
@@ -198,7 +197,7 @@ void RedisReplyDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
     }
 }
 
-int RedisReplyDecoder::indexOf(const Array& arry, int offset) {
+int RedisReplyMessageDecoder::indexOf(const Array& arry, int offset) {
     for (int i = offset; i < arry.length(); ++i) {
         if (arry[i] == '\r' || arry[i] == '\0') {
             if (i+1 == arry.length()) {
@@ -213,8 +212,8 @@ int RedisReplyDecoder::indexOf(const Array& arry, int offset) {
     return -1;
 }
 
-ChannelHandlerPtr RedisReplyDecoder::clone() {
-    return ChannelHandlerPtr(new RedisReplyDecoder());
+ChannelHandlerPtr RedisReplyMessageDecoder::clone() {
+    return ChannelHandlerPtr(new RedisReplyMessageDecoder());
 }
 
 }

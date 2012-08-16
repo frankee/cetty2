@@ -47,23 +47,23 @@ std::string GearmanProtobufWorkerFilter::toString() const {
 }
 
 ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterRequest(
-    InboundMessageContext& ctx,
+    ChannelHandlerContext& ctx,
     const GearmanMessagePtr& req) {
-        ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-        ProtobufServiceMessageDecoder::decode(req->getData(),protoMsg);
-        return protoMsg;
+    ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
+    ProtobufServiceMessageDecoder::decode(req->getData(), protoMsg);
+    return protoMsg;
 }
 
 GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
-    OutboundMessageContext& ctx,
+    ChannelHandlerContext& ctx,
     const GearmanMessagePtr& req,
     const ProtobufServiceMessagePtr& rep) {
-        std::string jobHandle = req->getParameters().front();
-        ChannelBufferPtr buffer = ChannelBuffers::buffer(rep->getMessageSize()+8);
+    std::string jobHandle = req->getParameters().front();
+    ChannelBufferPtr buffer = ChannelBuffers::buffer(rep->getMessageSize() + 8);
 
-        //encode the protobufServiceMessage and set it to GearmanMessage
-        ProtobufServiceMessageEncoder::encodeMessage(buffer,rep);
-        return GearmanMessage::createWorkCompleteMessage(jobHandle,buffer);
+    //encode the protobufServiceMessage and set it to GearmanMessage
+    ProtobufServiceMessageEncoder::encodeMessage(buffer, rep);
+    return GearmanMessage::createWorkCompleteMessage(jobHandle, buffer);
 }
 
 }

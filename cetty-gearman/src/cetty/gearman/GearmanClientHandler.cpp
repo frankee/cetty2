@@ -17,7 +17,6 @@
 #include <cetty/gearman/GearmanClientHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/handler/codec/CodecUtil.h>
 
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/GearmanWorker.h>
@@ -30,7 +29,6 @@ namespace gearman {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
-using namespace cetty::handler::codec;
 
 GearmanClientHandler::GearmanClientHandler(): channel(0) {
 }
@@ -39,7 +37,7 @@ GearmanClientHandler::~GearmanClientHandler() {
 }
 
 void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
-    if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, false)) {
+    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
         ctx.flush();
     }
 }
@@ -74,13 +72,13 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Gea
         data = ChannelBuffers::hexDump(msg->getData());
         std::cout<<"the work complete data is "<< data <<std::endl;
 
-        if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, true)) {
+        if (inboundTransfer.unfoldAndAdd(ctx, msg)) {
             ctx.fireMessageUpdated();
         }
         break;
 
     case GearmanMessage::WORK_WARNING:
-        std::cout<<"the client reciver the WORK_WARNING, handler it "<< std::endl;
+        std::cout<<"the client receiver the WORK_WARNING, handler it "<< std::endl;
         params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         data = ChannelBuffers::hexDump(msg->getData());
@@ -98,7 +96,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Gea
         break;
 
     case GearmanMessage::WORK_DATA:
-        std::cout<<"the client reciver the WORK_DATA, handler it "<< std::endl;
+        std::cout<<"the client receiver the WORK_DATA, handler it "<< std::endl;
         params = msg->getParameters();
         std::cout<<"the job-handler is "<<params[0]<<std::endl;
         data = ChannelBuffers::hexDump(msg->getData());
@@ -135,15 +133,13 @@ std::string GearmanClientHandler::toString() const {
 }
 
 void GearmanClientHandler::flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-    OutboundMessageContext::MessageQueue& in = ctx.getOutboundMessageQueue();
-
-    while (!in.empty()) {
-        GearmanMessagePtr& msg = in.front();
+    while (!outboundQueue.empty()) {
+        GearmanMessagePtr& msg = outboundQueue.front();
         if (msg) {
             msgs.push_back(msg);
-            CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, false);
+            outboundTransfer.unfoldAndAdd(ctx, msg);
         }
-        in.pop_front();
+        outboundQueue.pop_front();
     }
 
     ctx.flush();

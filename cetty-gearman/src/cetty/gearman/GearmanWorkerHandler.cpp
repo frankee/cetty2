@@ -21,7 +21,6 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/handler/codec/CodecUtil.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
 
@@ -32,7 +31,6 @@ namespace gearman {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
-using namespace cetty::handler::codec;
 
 GearmanWorkerHandler::GearmanWorkerHandler()
     : isSleep(false), channel(0), grabIdleCount(0),maxGrabIdleCount(3) {
@@ -57,11 +55,7 @@ void GearmanWorkerHandler::registerFunction(const std::string& functionName,
         ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createCandoMessage(functionName);
 
-    OutboundMessageContext* context
-        = ctx.nextOutboundMessageHandlerContext<OutboundMessageContext>();
-
-    if (context) {
-        context->addOutboundMessage(msg);
+    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
         ctx.flush();
     }
 }
@@ -89,11 +83,7 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
             std::cout << "handleJob::the msg is  " << ret << std::endl;
             std::cout << "handleJob::the msg is  " << (message->getParameters())[0] <<std::endl;
 
-            OutboundMessageContext* context
-                = ctx.nextOutboundMessageHandlerContext<OutboundMessageContext>();
-
-            if (context) {
-                context->addOutboundMessage(message);
+            if (outboundTransfer.unfoldAndAdd(ctx, message)) {
                 ctx.flush();
             }
         }
@@ -108,21 +98,21 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
 void GearmanWorkerHandler::grabJob(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobMessage();
-    if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, true)) {
+    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
         ctx.flush();
     }
 }
 
 void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobUniqMessage();
-    if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, true)) {
+    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
         ctx.flush();
     }
 }
 
 void GearmanWorkerHandler::preSleep(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createPreSleepMessage();
-    if (CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, msg, true)) {
+    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
         ctx.flush();
     }
 }
@@ -208,22 +198,19 @@ std::string GearmanWorkerHandler::toString() const {
 
 void GearmanWorkerHandler::flush(ChannelHandlerContext& ctx,
                                  const ChannelFuturePtr& future) {
-    OutboundMessageContext::MessageQueue& in
-        = ctx.getOutboundMessageQueue();
-
-    while (!in.empty()) {
-        const GearmanMessagePtr& message = in.front();
+    while (!outboundQueue.empty()) {
+        const GearmanMessagePtr& message = outboundQueue.front();
 
         switch (message->getType()) {
         case GearmanMessage::WORK_COMPLETE:
-            CodecUtil<GearmanMessagePtr>::unfoldAndAdd(ctx, message, true);
+            outboundTransfer.unfoldAndAdd(ctx, message);
             break;
 
         default:
             break;
         }
 
-        in.pop_front();
+        outboundQueue.pop_front();
     }
 
     ctx.flush();

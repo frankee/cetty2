@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISRESPONSEDECODER_H)
-#define CETTY_REDIS_REDISRESPONSEDECODER_H
+#if !defined(CETTY_REDIS_REDISREPLYMESSAGEDECODER_H)
+#define CETTY_REDIS_REDISREPLYMESSAGEDECODER_H
 
 /*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,24 +20,33 @@
 #include <cetty/handler/codec/ReplayingDecoder.h>
 #include <cetty/redis/RedisReplyMessagePtr.h>
 
-namespace cetty { namespace redis {
+namespace cetty {
+namespace redis {
 
 using namespace cetty::channel;
 using namespace cetty::util;
 using namespace cetty::handler::codec;
 
-class RedisReplyDecoder : public ReplayingDecoder<RedisReplyMessagePtr> {
+class RedisReplyMessageDecoder : public ReplayingDecoder<RedisReplyMessagePtr> {
 public:
-    RedisReplyDecoder() {}
-    RedisReplyDecoder(int maxSize) {}
-    virtual ~RedisReplyDecoder() {}
+    enum State {
+        READ_INITIAL,
+        READ_BULK,
+        READ_MULTI_BULK
+    };
+
+public:
+    RedisReplyMessageDecoder() {}
+    RedisReplyMessageDecoder(int maxSize) {}
+    virtual ~RedisReplyMessageDecoder() {}
 
     virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const { return "RedisResponseDecoder"; }
+    virtual std::string toString() const { return "RedisReplyMessageDecoder"; }
 
 protected:
-    virtual UserEvent decode(
-        ChannelHandlerContext& ctx, Channel& channel, const ChannelBufferPtr& buffer);
+    virtual RedisReplyMessagePtr decode(ChannelHandlerContext& ctx,
+        const ReplayingDecoderBufferPtr& buffer,
+        int state);
 
 private:
     void fail(ChannelHandlerContext& ctx, long frameLength);
@@ -50,16 +59,17 @@ private:
     int indexOf(const Array& arry, int offset);
 
 private:
-    int maxFrameLength;
     bool stripDelimiter;
-    
     bool discardingTooLongFrame;
+
+    int maxFrameLength;
     int tooLongFrameLength;
 };
 
-}}
+}
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISRESPONSEDECODER_H)
+#endif //#if !defined(CETTY_REDIS_REDISREPLYMESSAGEDECODER_H)
 
 // Local Variables:
 // mode: c++

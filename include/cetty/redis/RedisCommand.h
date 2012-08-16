@@ -24,16 +24,12 @@
 
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
-#include <cetty/util/BarePointer.h>
 
 namespace cetty {
 namespace redis {
 
 using namespace cetty::buffer;
 using namespace cetty::util;
-
-class RedisCommand;
-typedef BarePointer<RedisCommand> RedisCommandPtr;
 
 class RedisCommand {
 public:

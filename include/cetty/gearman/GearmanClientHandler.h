@@ -20,7 +20,7 @@
 #include <deque>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -29,7 +29,7 @@ namespace gearman {
 using namespace cetty::channel;
 
 class GearmanClientHandler
-    : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
+    : public ChannelMessageHandlerAdapter<GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr> {
 
 public:
     GearmanClientHandler();

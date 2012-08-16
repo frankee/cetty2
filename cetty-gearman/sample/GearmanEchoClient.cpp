@@ -1,10 +1,12 @@
 #include <stdio.h>
 
 #include <boost/bind.hpp>
+#include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/gearman/builder/GearmanClientBuilder.h>
 #include <cetty/gearman/GearmanMessage.h>
 
+using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::gearman;
 using namespace cetty::bootstrap;

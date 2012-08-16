@@ -22,19 +22,22 @@
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelMessageHandler.h>
+#include <cetty/channel/ChannelMessageHandlerAdapter.h>
 #include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
 
+using namespace cetty::channel;
+
 class GearmanWorkerHandler;
 typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
 
-using namespace cetty::channel;
-
 class GearmanWorkerHandler
-        : public ChannelMessageHandler<GearmanMessagePtr, GearmanMessagePtr> {
+        : public ChannelMessageHandlerAdapter<GearmanMessagePtr,
+        GearmanMessagePtr,
+        GearmanMessagePtr,
+        GearmanMessagePtr> {
 public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
