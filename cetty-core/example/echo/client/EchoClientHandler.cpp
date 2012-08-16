@@ -8,7 +8,8 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <cetty/buffer/ChannelBufferFactory.h>
-#include <cetty/logging/InternalLoggerFactory.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
     // Send back the received message to the remote peer.
@@ -55,9 +56,7 @@ EchoClientHandler::EchoClientHandler(int firstMessageSize) : transferredBytes(0)
 
 void EchoClientHandler::exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
     // Close the connection when an exception is raised.
-    logger->warn(
-        "Unexpected exception from downstream.",
-        e);
+    LOG_WARN_E(e) << "Unexpected exception from downstream.";
     ctx.close();
 }
 

@@ -23,8 +23,7 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/AbstractChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
