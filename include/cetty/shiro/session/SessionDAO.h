@@ -27,22 +27,16 @@ namespace shiro {
 namespace session {
 
 /**
- * An abstract {@code SessionDAO} implementation that performs some sanity checks on session creation and reading and
- * allows for pluggable Session ID generation strategies if desired.  The {@code SessionDAO}
- * {@link SessionDAO#update update} and {@link SessionDAO#delete delete} methods are left to
- * subclasses.
- * <h3>Session ID Generation</h3>
- * This class also allows for plugging in a {@link SessionIdGenerator} for custom ID generation strategies.  This is
- * optional, as the default generator is probably sufficient for most cases.  Subclass implementations that do use a
- * generator (default or custom) will want to call the
- * {@link #generateSessionId(org.apache.shiro.session.Session)} method from within their {@link #doCreate}
- * implementations.
+ * Data Access Object design pattern specification to enable {@link Session} access to an
+ * EIS (Enterprise Information System).  It provides your four typical CRUD methods:
+ * {@link #create}, {@link #readSession}, {@link #update(Session)},
+ * and {@link #delete(Session)}.
  * <p/>
- * Subclass implementations that rely on the EIS data store to generate the ID automatically (e.g. when the session
- * ID is also an auto-generated primary key), they can simply ignore the {@code SessionIdGenerator} concept
- * entirely and just return the data store's ID from the {@link #doCreate} implementation.
- *
- * @since 1.0
+ * The remaining {@link #getActiveSessions()} method exists as a support mechanism to pre-emptively orphaned sessions,
+ * typically by {@link org.apache.shiro.session.mgt.ValidatingSessionManager ValidatingSessionManager}s), and should
+ * be as efficient as possible, especially if there are thousands of active sessions.  Large scale/high performance
+ * implementations will often return a subset of the total active sessions and perform validation a little more
+ * frequently, rather than return a massive set and infrequently validate.
  */
 class SessionDAO {
 public:
@@ -50,12 +44,11 @@ public:
 
     /**
      * Retrieves the Session object from the underlying EIS identified by <tt>sessionId</tt> by delegating to
-     * the {@link #doReadSession(java.io.Serializable)} method.  If {@code null} is returned from that method, an
+     * the {@link #doReadSession(Serializable)} method.  If {@code null} is returned from that method, an
      * {@link UnknownSessionException} will be thrown.
      *
      * @param sessionId the id of the session to retrieve from the EIS.
      * @return the session identified by <tt>sessionId</tt> in the EIS.
-     * @throws UnknownSessionException if the id specified does not correspond to any session in the EIS.
      */
     SessionPtr readSession(const std::string &sessionId){
         SessionPtr s = doReadSession(sessionId);
@@ -101,10 +94,10 @@ protected:
     /**
      * Utility method available to subclasses that wish to
      * assign a generated session ID to the session instance directly.  This method is not used by the
-     * {@code AbstractSessionDAO} implementation directly, but it is provided so subclasses don't
+     * implementation directly, but it is provided so subclasses don't
      * need to know the {@code Session} implementation if they don't need to.
      * <p/>
-     * This default implementation casts the argument to a {@link SimpleSession}, Shiro's default EIS implementation.
+     * This default implementation casts the argument to a {@link Session}, Shiro's default EIS implementation.
      *
      * @param session   the session instance to which the sessionId will be applied
      * @param sessionId the id to assign to the specified session instance.
@@ -118,7 +111,7 @@ protected:
      *
      * @param session the Session instance to persist to the EIS.
      * @return the id of the session created in the EIS (i.e. this is almost always a primary key and should be the
-     *         value returned from {@link org.apache.shiro.session.Session#getId() Session.getId()}.
+     *         value returned from {@link Session#getId() Session.getId()}.
      */
     virtual std::string doCreate(SessionPtr &session) = 0;
 

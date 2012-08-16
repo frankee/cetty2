@@ -33,15 +33,13 @@ namespace session {
 using namespace boost::posix_time;
 
 /**
- * Generates session IDs by using a {@link Random} instance to generate random IDs. The default {@code Random}
- * implementation is a {@link java.security.SecureRandom SecureRandom} with the {@code SHA1PRNG} algorithm.
- *
- * @since 1.0
+ * Generates session IDs by using a host name, nanoseconds passed from 1970-1-1 00:00:00
+ * and process id
  */
 class SessionIdGenerator {
 public:
     /**
-     * Returns the String value of the session id: current time + id
+     * Returns the String value of the session id: host + current time + id
      *
      * @param session the {@link Session} instance to which the ID will be applied.
      * @return the String value of the session id
@@ -50,8 +48,8 @@ public:
         std::stringstream sid;
         std::string host = (session ? session->getHost() : "");
         ptime epoch(boost::gregorian::date(1970,1,1));
-        ptime now = second_clock::local_time();
-        time_duration::sec_type x = (now - epoch).total_seconds();
+        ptime now = microsec_clock::local_time();
+        time_duration::tick_type x = (now - epoch).total_nanoseconds();
         pid_t pid = getpid();
 
         sid << host << x << pid;

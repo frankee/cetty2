@@ -35,10 +35,8 @@ namespace session {
 using namespace boost::posix_time;
 
 /**
- * Default business-tier implementation of a {@link ValidatingSessionManager}.  All session CRUD operations are
- * delegated to an internal {@link SessionDAO}.
- *
- * @since 0.1
+ * A SessionManager manages the creation, maintenance, and clean-up of all application
+ * Sessions.
  */
 class SessionManager{
 public:
@@ -73,7 +71,6 @@ public:
      *
      * @return {@code true} if sessions should be automatically deleted after they are discovered to be invalid,
      *         {@code false} if invalid sessions will be manually deleted by some process external to Shiro's control.
-     * @since 1.0
      */
     bool isDeleteInvalidSessions() const { return deleteInvalidSessions; }
 
@@ -87,7 +84,6 @@ public:
      *
      * @param deleteInvalidSessions whether or not sessions should be automatically deleted after they are discovered
      *                              to be invalid.
-     * @since 1.0
      */
     void setDeleteInvalidSessions(bool deleteInvalidSessions) {
         this->deleteInvalidSessions = deleteInvalidSessions;
@@ -209,9 +205,9 @@ public:
 
     /**
      * Subclass template hook in case per-session timeout is not based on
-     * {@link org.apache.shiro.session.Session#getTimeout()}.
+     * {@link oSession#getTimeout()}.
      * <p/>
-     * <p>This implementation merely returns {@link org.apache.shiro.session.Session#getTimeout()}</p>
+     * <p>This implementation merely returns {@link Session#getTimeout()}</p>
      *
      * @param session the session for which to determine session timeout.
      * @return the time in milliseconds the specified session may remain idle before expiring.
@@ -220,8 +216,6 @@ public:
         if(!session) return -1;
         return session->getTimeout();
     }
-
-    //void destroy() { disableSessionValidation(); }
 
     void validateSessions();
 
@@ -303,7 +297,7 @@ protected:
     /**
      * Persists the given session instance to an underlying EIS (Enterprise Information System).  This implementation
      * delegates and calls
-     * <code>this.{@link SessionDAO sessionDAO}.{@link SessionDAO#create(org.apache.shiro.session.Session) create}(session);<code>
+     * <code>this.{@link SessionDAO sessionDAO}.{@link SessionDAO#create(Session) create}(session);<code>
      *
      * @param session the Session instance to persist to the underlying EIS.
      */
@@ -336,7 +330,7 @@ protected:
      *
      * @param session the session that has just started that will be delivered to any
      *                {@link #setSessionListeners(java.util.Collection) registered} session listeners.
-     * @see SessionListener#onStart(org.apache.shiro.session.Session)
+     * @see SessionListener#onStart(Session)
      */
     void notifyStart(const SessionPtr &session);
     void notifyStop(const SessionPtr &session);

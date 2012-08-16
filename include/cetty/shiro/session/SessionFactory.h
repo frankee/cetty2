@@ -25,9 +25,11 @@ namespace shiro {
 namespace session {
 
 /**
- * {@code SessionFactory} implementation that generates {@link SimpleSession} instances.
- *
- * @since 1.0
+ * A simple factory class that instantiates concrete {@link Session Session} instances.  This is mainly a
+ * mechanism to allow instances to be created at runtime if they need to be different the
+ * defaults.  It is not used by end-users of the framework, but rather those configuring Shiro to work in an
+ * application, and is typically injected into the {@link SecurityManager SecurityManager} or a
+ * {@link SessionManager}.
  */
 class SessionFactory {
 

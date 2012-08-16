@@ -25,13 +25,6 @@ namespace session {
 
 class SessionManager;
 
-/**
- * SessionValidationScheduler implementation that uses a
- * {@link ScheduledExecutorService} to call {@link ValidatingSessionManager#validateSessions()} every
- * <em>{@link #getInterval interval}</em> milliseconds.
- *
- * @since 0.9
- */
 class SessionValidationScheduler{
 public:
     SessionValidationScheduler();
@@ -62,7 +55,7 @@ public:
     }
 
     /**
-     * Creates a single thread {@link ScheduledExecutorService} to validate sessions at fixed intervals 
+     * Creates a single thread  to validate sessions at fixed intervals
      * and enables this scheduler. The executor is created as a daemon thread to allow JVM to shut down
      */
     //TODO Implement an integration test to test for jvm exit as part of the standalone example

@@ -1,8 +1,9 @@
 #if !defined(CETTY_SHIRO_UTIL_EMPTYOBJ_H)
 #define CETTY_SHIRO_UTIL_EMPTYOBJ_H
 
-#include <boost/any.hpp>
 #include <string>
+
+#include <boost/any.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
 namespace cetty {

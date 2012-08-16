@@ -25,7 +25,7 @@ namespace session {
 
 /**
  * Simple memory-based implementation of the SessionDAO that stores all of its sessions in an in-memory
- * {@link ConcurrentMap}.  <b>This implementation does not page to disk and is therefore unsuitable for applications
+ * {@link Map}.  <b>This implementation does not page to disk and is therefore unsuitable for applications
  * that could experience a large amount of sessions</b> and would therefore cause {@code OutOfMemoryException}s.  It is
  * <em>not</em> recommended for production use in most environments.
  * <h2>Memory Restrictions</h2>
@@ -36,14 +36,10 @@ namespace session {
  * In this case, it is recommended to instead use a custom
  * {@link CachingSessionDAO} implementation that communicates with a higher-capacity data store of your choice
  * (file system, database, etc).
- * <h2>Changes in 1.0</h2>
  * This implementation prior to 1.0 used to subclass the {@link CachingSessionDAO}, but this caused problems with many
  * cache implementations that would expunge entries due to TTL settings, resulting in Sessions that would be randomly
  * (and permanently) lost.  The Shiro 1.0 release refactored this implementation to be 100% memory-based (without
  * {@code Cache} usage to avoid this problem.
- *
- * @see CachingSessionDAO
- * @since 0.1
  */
 class MemorySessionDAO : public SessionDAO {
 public:
@@ -74,6 +70,9 @@ protected:
 
     void storeSession(const std::string &id, SessionPtr &session) {
         if (id.empty()) return;
+        if(sessions.count(session->getId()) > 0) {
+            sessions.erase(session->getId());
+        }
         sessions.insert(std::pair<std::string, SessionPtr>(id, session));
     }
 

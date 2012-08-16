@@ -28,10 +28,18 @@ namespace shiro {
 namespace session {
 
 /**
- * Default implementation of the {@link SessionContext} interface which provides getters and setters that
- * wrap interaction with the underlying backing context map.
- *
- * @since 1.0
+ * A {@code SessionContext} is a 'bucket' of data presented to a {@link SessionFactory SessionFactory} which interprets
+ * this data to construct {@Session} instances.  It is essentially a Map of data
+ * with a few additional type-safe methods for easy retrieval of objects commonly used to construct Subject instances.
+ * <p/>
+ * While this interface contains type-safe setters and getters for common data types, the map can contain anything
+ * additional that might be needed by the {@code SessionFactory} implementation to construct {@code Session} instances.
+ * <p/>
+ * <b>USAGE</b>: Most Shiro end-users will never use a {@code SubjectContext} instance directly and instead will call
+ * the {@code Subject.}{@link Subject#getSession() getSession()} or
+ * {@code Subject.}{@link Subject#getSession(boolean) getSession(boolean)} methods (which
+ * will usually use {@code SessionContext} instances to start a session with the application's
+ * {@link SessionManager SessionManager}.
  */
 class SessionContext {
 public:
