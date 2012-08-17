@@ -20,7 +20,7 @@
  */
 
 #include <map>
-#include <set>
+#include <vector>
 #include <string>
 
 namespace cetty {
@@ -28,105 +28,153 @@ namespace shiro {
 namespace subject {
 
 /**
- * A simple implementation of the {@link MutablePrincipalCollection} interface that tracks principals internally
- * by storing them in a {@link LinkedHashMap}.
+ * A collection of all principals associated with a corresponding {@link Subject Subject}.  A <em>principal</em> is
+ * just a security term for an identifying attribute, such as a username or user id or social security number or
+ * anything else that can be considered an 'identifying' attribute for a {@code Subject}.
+ * <p/>
+ * A PrincipalCollection organizes its internal principals based on the {@code Realm} where they came from when the
+ * Subject was first created.  To obtain the principal(s) for a specific Realm, see the {@link #fromRealm} method.  You
+ * can also see which realms contributed to this collection via the {@link #getRealmNames() getRealmNames()} method.
  *
+ * @see #getPrimaryPrincipal()
+ * @see #fromRealm(String realmName)
+ * @see #getRealmNames()
  * @since 0.9
  */
 class PrincipalCollection {
-private:
-    std::map<std::string, std::set<std::string> > realmPrincipals;
-
-    std::string cachedToString; //cached toString() result, as this can be printed many times in logging
-
 public:
     PrincipalCollection() {}
 
-    PrincipalCollection(const std::string &principal, const std::string &realmName) {}
+    PrincipalCollection(const std::string &principal, const std::string &realmName){
+        add(principal, realmName);
+    }
 
-    PrincipalCollection(const PrincipalCollection &principals, const std::string &realmName) {
+    PrincipalCollection(const std::vector<std::string> &principals, const std::string &realmName){
         addAll(principals, realmName);
     }
 
-    PrincipalCollection(const PrincipalCollection &principals) {
+    PrincipalCollection(const PrincipalCollection &principals){
         addAll(principals);
     }
 
-    const std::set<std::string> &getPrincipalsLazy (std::string realmName) const;
+    PrincipalCollection& operator=(const PrincipalCollection &principals){
+        addAll(principals);
+        return *this;
+    }
+
 
     /**
-     * Returns the first available principal from any of the {@code Realm} principals, or {@code null} if there are
-     * no principals yet.
-     * <p/>
-     * The 'first available principal' is interpreted as the principal that would be returned by
-     * <code>{@link #iterator() iterator()}.{@link java.util.Iterator#next() next()}.</code>
+     * Adds the given principal to this collection.
      *
-     * @inheritDoc
+     * @param principal the principal to be added.
+     * @param realmName the realm this principal came from.
      */
-    const std::string &getPrimaryPrincipal() const;
-
     void add(const std::string &principal, const std::string &realName);
 
-    void addAll(const PrincipalCollection &principals, const std::string &realmName);
+    /**
+     * Adds all of the principals in the given collection to this collection.
+     *
+     * @param principals the principals to be added.
+     * @param realmName  the realm these principals came from.
+     */
+    void addAll(const std::vector<std::string> &principals, const std::string &realmName);
 
+    /**
+     * Adds all of the principals from the given principal collection to this collection.
+     *
+     * @param principals the principals to add.
+     */
     void addAll(const PrincipalCollection &principals);
 
     /**
-     * Return the first principal
-     */
-
-    const std::set<std::string> &asSet();
-
-    const std::set<std::string> &fromRealm(std::string realmName);
-
-    const std::set<std::string> &getRealmNames();
-
-    bool isEmpty();
-
-    void clear();
-
-    std::map<std::string, std::set<std::string> >::iterator iterator();
-
-    bool equals(const std::string &o);
-
-    int hashCode();
-
-    /**
-     * Returns a simple string representation suitable for printing.
+     * Returns the primary principal used application-wide to uniquely identify the owning account/Subject.
+     * <p/>
+     * The value is usually always a uniquely identifying attribute specific to the data source that retrieved the
+     * account data.  Some examples:
+     * <ul>
+     * <li>a {@link java.util.UUID UUID}</li>
+     * <li>a {@code long} value such as a surrogate primary key in a relational database</li>
+     * <li>an LDAP UUID or static DN</li>
+     * <li>a String username unique across all user accounts</li>
+     * </ul>
+     * <h3>Multi-Realm Applications</h3>
+     * In a single-{@code Realm} application, typically there is only ever one unique principal to retain and that
+     * is the value returned from this method.  However, in a multi-{@code Realm} application, where the
+     * {@code PrincipalCollection} might retain principals across more than one realm, the value returned from this
+     * method should be the single principal that uniquely identifies the subject for the entire application.
+     * <p/>
+     * That value is of course application specific, but most applications will typically choose one of the primary
+     * principals from one of the {@code Realm}s.
+     * <p/>
+     * Shiro's default implementations of this interface make this
+     * assumption by usually simply returning {@link #iterator()}.{@link java.util.Iterator#next() next()}, which just
+     * returns the first returned principal obtained from the first consulted/configured {@code Realm} during the
+     * authentication attempt.  This means in a multi-{@code Realm} application, {@code Realm} configuraiton order
+     * matters if you want to retain this default heuristic.
+     * <p/>
+     * If this heuristic is not sufficient, most Shiro end-users will need to implement a custom
+     * {@link org.apache.shiro.authc.pam.AuthenticationStrategy}.  An {@code AuthenticationStrategy} has exact control
+     * over the {@link PrincipalCollection} returned at the end of an authentication attempt via the
+     * <code>AuthenticationStrategy#{@link org.apache.shiro.authc.pam.AuthenticationStrategy#afterAllAttempts(org.apache.shiro.authc.AuthenticationToken, org.apache.shiro.authc.AuthenticationInfo) afterAllAttempts}</code>
+     * implementation.
      *
-     * @return a simple string representation suitable for printing.
+     * @return the primary principal used to uniquely identify the owning account/Subject
      * @since 1.0
      */
-    std::string toString();
+    std::string getPrimaryPrincipal() const;
+
+    /**
+     * Returns a single Subject's principals retrieved from all configured Realms as a Set, or an empty Set if there
+     * are not any principals.
+     * <p/>
+     * Note that this will return an empty Set if the 'owning' subject has not yet logged in.
+     *
+     * @return a single Subject's principals retrieved from all configured Realms as a Set.
+     */
+    void asVector(std::vector<std::string> *principals) const;
+
+    /**
+     * Returns a single Subject's principals retrieved from the specified Realm <em>only</em> as a Collection, or an empty
+     * Collection if there are not any principals from that realm.
+     * <p/>
+     * Note that this will return an empty Collection if the 'owning' subject has not yet logged in.
+     *
+     * @param realmName the name of the Realm from which the principals were retrieved.
+     * @return the Subject's principals from the specified Realm only as a Collection or an empty Collection if there
+     *         are not any principals from that realm.
+     */
+    void fromRealm(const std::string &realmName, std::vector<std::string> *principals) const;
+
+    /**
+      * Returns the realm names that this collection has principals for.
+      *
+      * @return the names of realms that this collection has one or more principals for.
+      */
+    void getRealmNames(std::vector<std::string> *realNames) const;
+
+    /**
+     * Returns {@code true} if this collection is empty, {@code false} otherwise.
+     *
+     * @return {@code true} if this collection is empty, {@code false} otherwise.
+     */
+    bool isEmpty() const;
+
+    /**
+     * Removes all Principals in this collection.
+     */
+    void clear();
+
+    //bool equals(const std::string &o);
 
     virtual ~PrincipalCollection(){}
 
 private:
-    /**
-     * Serialization write support.
-     * <p/>
-     * NOTE: Don't forget to change the serialVersionUID constant at the top of this class
-     * if you make any backwards-incompatible serializatoin changes!!!
-     * (use the JDK 'serialver' program for this)
-     *
-     * @param out output stream provided by Java serialization
-     * @throws IOException if there is a stream error
-     */
-    //void writeObject(ObjectOutputStream out);
+    /** real<-->paincipals */
+    std::map<std::string, std::vector<std::string>> realmPrincipals;
 
-    /**
-     * Serialization read support - reads in the Map principals collection if it exists in the
-     * input stream.
-     * <p/>
-     * NOTE: Don't forget to change the serialVersionUID constant at the top of this class
-     * if you make any backwards-incompatible serializatoin changes!!!
-     * (use the JDK 'serialver' program for this)
-     *
-     * @param in input stream provided by
-     * @throws IOException            if there is an input/output problem
-     * @throws ClassNotFoundException if the underlying Map implementation class is not available to the classloader.
-     */
-    //void readObject(ObjectInputStream in);
+    /** cached toString() result, as this can be printed many times in logging */
+    std::string cachedToString;
+
 };
 }
 }

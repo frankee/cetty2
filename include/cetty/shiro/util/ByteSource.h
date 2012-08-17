@@ -1,3 +1,5 @@
+#if !defined(CETTY_SHIRO_UTIL_BYTESOURCE_H)
+#define CETTY_SHIRO_UTIL_BYTESOURCE_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,14 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/shiro/codec/Hex.h>
-#include <cetty/shiro/codec/Base64.h>
+#include <cetty/shiro/util/EmptyObj.h>
 
 namespace cetty {
 namespace shiro {
 namespace util {
 
-using namespace cetty::shiro::codec;
+using namespace cetty::shiro::util;
+
 /**
  * Very simple {@link ByteSource ByteSource} implementation that maintains an internal {@code byte[]} array and uses the
  * {@link Hex Hex} and {@link Base64 Base64} codec classes to support the
@@ -43,12 +45,12 @@ using namespace cetty::shiro::codec;
  * @since 1.0
  */
 class ByteSource {
-
 public:
     ByteSource(){}
-    ByteSource(const std::string &bytes) {
-        this->bytes = bytes;
-    }
+
+    ByteSource(const std::string &bytes) { this->bytes = bytes; }
+
+    ByteSource &operator=(const ByteSource& byteSource){ return *this; };
 
     /**
      * Creates an instance using the sources bytes directly - it does not create a copy of the
@@ -63,27 +65,13 @@ public:
         this->cachedBase64 = src.cachedBase64;
     }
 
-    const std::string& getBytes() {
-        return this->bytes;
-    }
+    const std::string& getBytes() const{ return this->bytes; }
 
-    const std::string& toHex() const {
-        if ( this->cachedHex == "" ) {
-            this->cachedHex = Hex::encode(getBytes());
-        }
-        return this->cachedHex;
-    }
+    const std::string& toHex() const{ return emptyString;}
 
-    const std::string& toBase64() const {
-        if ( this->cachedBase64 == "" ) {
-            this->cachedBase64 = Base64::encodeToString(getBytes());
-        }
-        return this->cachedBase64;
-    }
+    const std::string& toBase64() const{ return emptyString;}
 
-    std::string toString() {
-        return toBase64();
-    }
+    std::string toString() { return toBase64(); }
 
     int hashCode();
 
@@ -98,3 +86,5 @@ private:
 }
 }
 }
+
+#endif // #if !defined(CETTY_SHIRO_UTIL_BYTESOURCE_H)

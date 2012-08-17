@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_AUTHENTICATION_TOKEN_H)
-#define CETTY_SHIRO_AUTHENTICATION_TOKEN_H
+#if !defined(CETTY_SHIRO_AUTHC_AUTHENTICATION_TOKEN_H)
+#define CETTY_SHIRO_AUTHC_AUTHENTICATION_TOKEN_H
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -48,9 +48,7 @@ namespace authc {
 class AuthenticationToken {
 public:
 
-    AuthenticationToken() {
-        init("", "", "", false);
-}
+    AuthenticationToken(): rememberMe(false) {}
 
     /**
      * Constructs a new AuthenticationToken encapsulating the principal and credential submitted
@@ -60,8 +58,8 @@ public:
      * @param principal the principal submitted for authentication
      * @param credential the credential character array submitted for authentication
      */
-    AuthenticationToken(const std::string &principal, const std::string &credential) {
-        init(principal, credential, std::string(), false);
+    AuthenticationToken(const std::string &principal, const std::string &credentials) {
+        init(principal, credentials, std::string(), false);
     }
 
     /**
@@ -74,9 +72,9 @@ public:
      * @since 0.2
      */
     AuthenticationToken(const std::string &principal,
-        const std::string &credential,
+        const std::string &credentials,
         const std::string& host) {
-        init(principal, credential, host, false);
+        init(principal, credentials, host, false);
     }
 
     /**
@@ -89,9 +87,9 @@ public:
      * @since 0.9
      */
     AuthenticationToken(const std::string &principal,
-        const std::string &credential,
+        const std::string &credentials,
         bool rememberMe) {
-        init(principal, credential, std::string(), rememberMe);
+        init(principal, credentials, std::string(), rememberMe);
     }
 
     /**
@@ -105,61 +103,100 @@ public:
      * @since 1.0
      */
     AuthenticationToken(const std::string &principal,
-        const std::string &credential,
+        const std::string &credentials,
         const std::string& host,
         bool rememberMe) {
-        init(principal, credential, host, rememberMe);
+        init(principal, credentials, host, rememberMe);
     }
 
 
-    void init(const std::string &principal, const std::string& credential, const std::string& host, bool rememberMe){}
-
-    /*--------------------------------------------
-    |  A C C E S S O R S / M O D I F I E R S    |
-    ============================================*/
-
-    const std::string& getPrincipal() const { return principal; }
-    const std::string& getCredentials() const { return credential; }
+    void init(const std::string &principal,
+              const std::string& credentials,
+              const std::string& host,
+              bool rememberMe);
 
     /**
-     * Returns the host name or IP string from where the authentication attempt occurs.  May be <tt>""</tt> if the
-     * host name/IP is unknown or explicitly omitted.  It is up to the Authenticator implementation processing this
-     * token if an authentication attempt without a host is valid or not.
+     * Returns the account identity submitted during the authentication process.
      * <p/>
-     * <p>(Shiro's default Authenticator allows <tt>null</tt> hosts to support localhost and proxy server environments).</p>
+     * <p>Most application authentications are username/password based and have this
+     * object represent a username.  If this is the case for your application,
+     * take a look at the {@link UsernamePasswordToken UsernamePasswordToken}, as it is probably
+     * sufficient for your use.
+     * <p/>
+     * <p>Ultimately, the object returned is application specific and can represent
+     * any account identity (user id, X.509 certificate, etc).
      *
-     * @return the host from where the authentication attempt occurs, or <tt>""</tt> if it is unknown or
-     *         explicitly omitted.
-     * @since 1.0
+     * @return the account identity submitted during the authentication process.
+     * @see UsernamePasswordToken
      */
-    const std::string &getHost() const{
-        return host;
-    }
+    const std::string& getPrincipal() const { return principal; }
+
+    /**
+     * Sets the principal for submission during an authentication attempt.
+     *
+     * @param principal the principal to be used for submission during an authentication attempt.
+     */
+    void setPrincipal(const std::string &principal) { this->principal = principal; }
+
+    /**
+     * Returns the credentials submitted by the user during the authentication process that verifies
+     * the submitted {@link #getPrincipal() account identity}.
+     * <p/>
+     * <p>Most application authentications are username/password based and have this object
+     * represent a submitted password.  If this is the case for your application,
+     * take a look at the {@link UsernamePasswordToken UsernamePasswordToken}, as it is probably
+     * sufficient for your use.
+     * <p/>
+     * <p>Ultimately, the credentials Object returned is application specific and can represent
+     * any credential mechanism.
+     *
+     * @return the credential submitted by the user during the authentication process.
+     */
+    const std::string& getCredentials() const { return credentials; }
+
+    /**
+     * Sets the credentials for submission during an authentication attempt.
+     *
+     * @param credentials the credentials to be used for submission during an authentication attemp.
+     */
+    void setCredentials(const std::string &credentials){ this->credentials = credentials; }
+
+    /**
+     * Returns the host name of the client from where the
+     * authentication attempt originates or if the Shiro environment cannot or
+     * chooses not to resolve the hostname to improve performance, this method
+     * returns the String representation of the client's IP address.
+     * <p/>
+     * When used in web environments, this value is usually the same as the
+     * {@code ServletRequest.getRemoteHost()} value.
+     *
+     * @return the fully qualified name of the client from where the
+     *         authentication attempt originates or the String representation
+     *         of the client's IP address is hostname resolution is not
+     *         available or disabled.
+     */
+    const std::string &getHost() const{ return host; }
 
     /**
      * Sets the host name or IP string from where the authentication attempt occurs.  It is up to the Authenticator
      * implementation processing this token if an authentication attempt without a host is valid or not.
      * <p/>
-     * <p>(Shiro's default Authenticator allows <tt>null</tt> hosts to allow localhost and proxy server environments).</p>
+     * <p>(Shiro's default Authenticator
+     * allows <tt>null</tt> hosts to allow localhost and proxy server environments).</p>
      *
      * @param host the host name or IP string from where the attempt is occuring
      * @since 1.0
      */
-    void setHost(const std::string &host) {
-        this->host = host;
-    }
+    void setHost(const std::string &host){ this->host = host; }
 
     /**
-     * Returns <tt>true</tt> if the submitting user wishes their identity (principal(s)) to be remembered
-     * across sessions, <tt>false</tt> otherwise.  Unless overridden, this value is <tt>false</tt> by default.
+     * Returns {@code true} if the submitting user wishes their identity (principal(s)) to be remembered
+     * across sessions, {@code false} otherwise.
      *
-     * @return <tt>true</tt> if the submitting user wishes their identity (principal(s)) to be remembered
-     *         across sessions, <tt>false</tt> otherwise (<tt>false</tt> by default).
-     * @since 0.9
+     * @return {@code true} if the submitting user wishes their identity (principal(s)) to be remembered
+     *         across sessions, {@code false} otherwise.
      */
-    bool isRememberMe() {
-        return rememberMe;
-    }
+    bool isRememberMe() const{ return rememberMe; }
 
     /**
      * Sets if the submitting user wishes their identity (pricipal(s)) to be remembered across sessions.  Unless
@@ -169,16 +206,10 @@ public:
      *                   sessions.
      * @since 0.9
      */
-    void setRememberMe(bool rememberMe) {
-        this->rememberMe = rememberMe;
-    }
-
-    /*--------------------------------------------
-    |               M E T H O D S               |
-    ============================================*/
+    void setRememberMe(bool rememberMe) { this->rememberMe = rememberMe; }
 
     /**
-     * Clears out the username, password, rememberMe, and inetAddress.
+     * Clears out the principal, credentials, rememberMe, and inetAddress.
      */
     void clear();
 
@@ -194,7 +225,7 @@ public:
 
 private:
     std::string principal;
-    std::string credential;
+    std::string credentials;
 
     /**
      * Whether or not 'rememberMe' should be enabled for the corresponding login attempt;
@@ -213,4 +244,4 @@ private:
 }
 }
 
-#endif // #if !defined(CETTY_SHIRO_AUTHENTICATION_TOKEN_H)
+#endif // #if !defined(CETTY_SHIRO_AUTHC_AUTHENTICATION_TOKEN_H)

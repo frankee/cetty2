@@ -36,8 +36,6 @@ bool Session::isTimedOut() {
         }
         time_duration diff = ptime(second_clock::local_time()) - lastAccessTime;
         if (diff.seconds() >= (timeout / 1000)) { return true; }
-        else { return false; }
-
     }
     return false;
 }
