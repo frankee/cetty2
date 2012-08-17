@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoop.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoopPool.cpp" />
+    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\UserEvent.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelOption.cpp" />
@@ -245,9 +246,12 @@
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedMessageChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedSocketAddressImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioDeadlineTimeout.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioService.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePoolPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\TimeoutPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactory.h" />

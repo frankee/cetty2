@@ -1,7 +1,6 @@
 #ifndef MUDUO_PROTORPC_ZURG_SLAVEAPP_H
 #define MUDUO_PROTORPC_ZURG_SLAVEAPP_H
 
-#include <muduo/net/EventLoop.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>

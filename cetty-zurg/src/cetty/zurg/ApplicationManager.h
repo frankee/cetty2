@@ -19,38 +19,45 @@ class EventLoop;
 
 struct rusage;
 
-namespace zurg
-{
+namespace cetty {
+namespace zurg {
 
 struct Application;
-class ChildManager;
+class ProcessManager;
+
 //typedef boost::shared_ptr<Application> ApplicationPtr;
 class Process;
 typedef boost::shared_ptr<Process> ProcessPtr;
 
-class AppManager : boost::noncopyable
+class ApplicationManager : boost::noncopyable
 {
  public:
-     AppManager(muduo::net::EventLoop*, ChildManager*);
-     ~AppManager();
+     ApplicationManager(muduo::net::EventLoop*, ProcessManager*);
+     ~ApplicationManager();
 
-  void add(const AddApplicationRequestPtr& request,
-           const muduo::net::RpcDoneCallback& done);
+     virtual void add(const ConstAddApplicationRequestPtr& request,
+         const AddApplicationResponsePtr& response,
+         const DoneCallback& done);
 
-  void start(const StartApplicationsRequestPtr& request,
-             const muduo::net::RpcDoneCallback& done);
+     virtual void start(const ConstStartApplicationsRequestPtr& request,
+         const StartApplicationsResponsePtr& response,
+         const DoneCallback& done);
 
-  void stop(const StopApplicationRequestPtr& request,
-            const muduo::net::RpcDoneCallback& done);
+     virtual void stop(const ConstStopApplicationRequestPtr& request,
+         const StopApplicationResponsePtr& response,
+         const DoneCallback& done);
 
-  void get(const GetApplicationsRequestPtr& request,
-           const muduo::net::RpcDoneCallback& done);
+     virtual void get(const ConstGetApplicationsRequestPtr& request,
+         const GetApplicationsResponsePtr& response,
+         const DoneCallback& done);
 
-  void list(const ListApplicationsRequestPtr& request,
-            const muduo::net::RpcDoneCallback& done);
+     virtual void list(const ConstListApplicationsRequestPtr& request,
+         const ListApplicationsResponsePtr& response,
+         const DoneCallback& done);
 
-  void remove(const RemoveApplicationsRequestPtr& request,
-              const muduo::net::RpcDoneCallback& done);
+     virtual void remove(const ConstRemoveApplicationsRequestPtr& request,
+         const RemoveApplicationsResponsePtr& response,
+         const DoneCallback& done);
 
  private:
   void startApp(Application* app, ApplicationStatus* out);
@@ -58,10 +65,11 @@ class AppManager : boost::noncopyable
 
   typedef std::map<std::string, Application> AppMap;
   muduo::net::EventLoop* loop_;
-  ChildManager* children_;
+  ProcessManager* processManager;
   AppMap apps_;
 };
 
+}
 }
 
 #endif  // MUDUO_PROTORPC_ZURG_APPMANAGER_H

@@ -1,5 +1,5 @@
-#if !defined(CETTY_UTIL_TIMERPTR_H)
-#define CETTY_UTIL_TIMERPTR_H
+#if !defined(CETTY_CHANNEL_TIMEOUTPTR_H)
+#define CETTY_CHANNEL_TIMEOUTPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,17 +20,16 @@
 #include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
-namespace util {
+namespace channel {
 
-class Timer;
 class Timeout;
-class TimerFactory;
-
-typedef Timer* TimerPtr;
-typedef TimerFactory* TimerFactoryPtr;
 typedef boost::intrusive_ptr<Timeout> TimeoutPtr;
 
 }
 }
 
-#endif //#if !defined(CETTY_UTIL_TIMERPTR_H)
+#endif //#if !defined(CETTY_CHANNEL_TIMEOUTPTR_H)
+
+// Local Variables:
+// mode: c++
+// End:

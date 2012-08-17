@@ -1,7 +1,5 @@
-#include <examples/zurg/slave/AppManager.h>
-
-#include <examples/zurg/slave/ChildManager.h>
-#include <examples/zurg/slave/Process.h>
+#include <cetty/zurg/ApplicationManager.h>
+#include <cetty/zurg/ProcessManager.h>
 
 #include <muduo/base/Logging.h>
 
@@ -9,79 +7,75 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 
+namespace cetty {
 namespace zurg
 {
 
 struct Application
 {
-  AddApplicationRequestPtr request;
+  AddApplicationRequest request;
   ApplicationStatus status;
 };
 
-}
-
-using namespace zurg;
-
-AppManager::AppManager(muduo::net::EventLoop* loop, ChildManager* children)
+ApplicationManager::ApplicationManager(muduo::net::EventLoop* loop, ProcessManager* children)
   : loop_(loop),
-    children_(children)
+    processManager(children)
 {
 }
 
-AppManager::~AppManager()
+ApplicationManager::~ApplicationManager()
 {
 }
 
-void AppManager::add(const AddApplicationRequestPtr& request,
-                     const muduo::net::RpcDoneCallback& done)
-{
-  assert(request->name().find('/') == std::string::npos); // FIXME
-  AddApplicationRequestPtr& requestRef = apps_[request->name()].request;
-  AddApplicationRequestPtr prev_request(requestRef);
-  requestRef = request;
-  ApplicationStatus& status = apps_[request->name()].status;
+void ApplicationManager::add(const ConstAddApplicationRequestPtr& request,
+    const AddApplicationResponsePtr& response,
+    const DoneCallback& done) {
+    assert(request->name().find('/') == std::string::npos); // FIXME
+    AddApplicationRequestPtr& requestRef = apps_[request->name()].request;
+    AddApplicationRequestPtr prev_request(requestRef);
+    requestRef = request;
+    ApplicationStatus& status = apps_[request->name()].status;
 
-  status.set_name(request->name());
-  if (!status.has_state())
-  {
-    LOG_INFO << "new app";
-    status.set_state(kNewApp);
-  }
-
-  AddApplicationResponse response;
-  response.mutable_status()->CopyFrom(status);
-  if (prev_request)
-  {
-    response.mutable_prev_request()->CopyFrom(*prev_request);
-  }
-  done(&response);
-}
-
-void AppManager::start(const StartApplicationsRequestPtr& request,
-                       const muduo::net::RpcDoneCallback& done)
-{
-  StartApplicationsResponse response;
-  for (int i = 0; i < request->names_size(); ++i)
-  {
-    const std::string& appName = request->names(i);
-    AppMap::iterator it = apps_.find(appName);
-    if (it != apps_.end())
+    status.set_name(request->name());
+    if (!status.has_state())
     {
-      startApp(&it->second, response.add_status());
+        LOG_INFO << "new app";
+        status.set_state(kNewApp);
     }
-    else
+
+    AddApplicationResponse response;
+    response.mutable_status()->CopyFrom(status);
+    if (prev_request)
     {
-      // application not found
-      ApplicationStatus* status = response.add_status();
-      status->set_state(kUnknown);
-      status->set_name(appName);
-      status->set_message("Application is unknown.");
+        response.mutable_prev_request()->CopyFrom(*prev_request);
     }
-  }
-  done(&response);
+    done(&response);
 }
 
-void AppManager::startApp(Application* app, ApplicationStatus* out)
+void ApplicationManager::start(const ConstStartApplicationsRequestPtr& request,
+    const StartApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+    for (int i = 0; i < request->names_size(); ++i)
+    {
+        const std::string& appName = request->names(i);
+        AppMap::iterator it = apps_.find(appName);
+        if (it != apps_.end())
+        {
+            startApp(&it->second, response.add_status());
+        }
+        else
+        {
+            // application not found
+            ApplicationStatus* status = response.add_status();
+            status->set_state(kUnknown);
+            status->set_name(appName);
+            status->set_message("Application is unknown.");
+        }
+    }
+    done(&response);
+}
+
+void ApplicationManager::startApp(Application* app, ApplicationStatus* out)
 {
   const AddApplicationRequestPtr& appRequest(app->request);
   ApplicationStatus* status = &app->status;
@@ -108,8 +102,8 @@ void AppManager::startApp(Application* app, ApplicationStatus* out)
       status->set_state(kRunning);
       status->set_pid(process->pid());
       // FIXME
-      children_->runAtExit(process->pid(),  // bind strong ptr
-          boost::bind(&AppManager::onProcessExit, this, process, _1, _2));
+      processManager->runAtExit(process->pid(),  // bind strong ptr
+          boost::bind(&ApplicationManager::onProcessExit, this, process, _1, _2));
     }
     out->CopyFrom(*status);
   }
@@ -120,14 +114,15 @@ void AppManager::startApp(Application* app, ApplicationStatus* out)
   }
 }
 
-void AppManager::stop(const StopApplicationRequestPtr& request,
-                      const muduo::net::RpcDoneCallback& done)
-{
+void ApplicationManager::stop(const ConstStopApplicationRequestPtr& request,
+    const StopApplicationResponsePtr& response,
+    const DoneCallback& done) {
+
 }
 
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 // FIXME: dup Process::onCommandExit
-void AppManager::onProcessExit(const ProcessPtr& process, int status, const struct rusage&)
+void ApplicationManager::onProcessExit(const ProcessPtr& process, int status, const struct rusage&)
 {
   const std::string& appName = process->name();
 
@@ -161,3 +156,24 @@ void AppManager::onProcessExit(const ProcessPtr& process, int status, const stru
     LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
   }
 }
+
+void ApplicationManager::get(const ConstGetApplicationsRequestPtr& request,
+    const GetApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+
+}
+
+void ApplicationManager::list(const ConstListApplicationsRequestPtr& request,
+    const ListApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+
+}
+
+void ApplicationManager::remove(const ConstRemoveApplicationsRequestPtr& request,
+    const RemoveApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+
+}
+
+}}
+

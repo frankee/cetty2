@@ -19,9 +19,13 @@
 
 #include <boost/function.hpp>
 #include <boost/thread/thread.hpp>
-#include <cetty/util/ReferenceCounter.h>
+#include <boost/date_time/posix_time/ptime.hpp>
+
+#include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
+
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
@@ -43,6 +47,12 @@ public:
     bool inLoopThread() const;
 
     virtual void post(const Functor& handler) = 0;
+
+    virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
+        const Functor& timerCallback) = 0;
+
+    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) = 0;
+    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) = 0;
 
 private:
     EventLoop(const EventLoop&);

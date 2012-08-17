@@ -14,6 +14,7 @@
 using namespace muduo::net;
 using namespace zurg;
 
+namespace cetty {
 namespace zurg
 {
 sigset_t sigmask;
@@ -27,11 +28,10 @@ int initSigMask()
   ::sigprocmask(SIG_BLOCK, &sigmask, &oldSigmask);
   return 0;
 }
-}
 
 static int dummy = initSigMask();
 
-ChildManager::ChildManager(muduo::net::EventLoop* loop, int zombieInterval)
+ProcessManager::ProcessManager(muduo::net::EventLoop* loop, int zombieInterval)
   : loop_(loop),
     zombieInterval_(zombieInterval),
     signalFd_(::signalfd(-1, &sigmask, SFD_NONBLOCK | SFD_CLOEXEC)),
@@ -41,27 +41,27 @@ ChildManager::ChildManager(muduo::net::EventLoop* loop, int zombieInterval)
             << " dummy = " << dummy;
 }
 
-ChildManager::~ChildManager()
+ProcessManager::~ProcessManager()
 {
   channel_.disableAll();
   loop_->removeChannel(&channel_);
   ::close(signalFd_);
 }
 
-void ChildManager::start()
+void ProcessManager::start()
 {
-  loop_->runEvery(zombieInterval_, boost::bind(&ChildManager::onTimer, this));
-  channel_.setReadCallback(boost::bind(&ChildManager::onRead, this, _1));
-  channel_.enableReading();
+    loop_->runEvery(zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
+    channel_.setReadCallback(boost::bind(&ProcessManager::onRead, this, _1));
+    channel_.enableReading();
 }
 
-void ChildManager::runAtExit(pid_t pid, const Callback& cb)
+void ProcessManager::runAtExit(pid_t pid, const Callback& cb)
 {
   assert(callbacks_.find(pid) == callbacks_.end());
   callbacks_[pid] = cb;
 }
 
-void ChildManager::onRead(muduo::Timestamp t)
+void ProcessManager::onRead(muduo::Timestamp t)
 {
   LOG_TRACE << "ChildManager::onRead - " << t.toString();
   struct signalfd_siginfo siginfo;
@@ -103,7 +103,7 @@ void ChildManager::onRead(muduo::Timestamp t)
   }
 }
 
-void ChildManager::onTimer()
+void ProcessManager::onTimer()
 {
   int status = 0;
   struct rusage resourceUsage;
@@ -116,7 +116,7 @@ void ChildManager::onTimer()
   }
 }
 
-void ChildManager::onExit(pid_t pid, int status, const struct rusage& resourceUsage)
+void ProcessManager::onExit(pid_t pid, int status, const struct rusage& resourceUsage)
 {
   std::map<pid_t, Callback>::iterator it = callbacks_.find(pid);
   if (it != callbacks_.end())
@@ -132,3 +132,5 @@ void ChildManager::onExit(pid_t pid, int status, const struct rusage& resourceUs
     // LOG_ERROR << "ChildManager::onExit - unknown pid " << pid;
   }
 }
+
+}}

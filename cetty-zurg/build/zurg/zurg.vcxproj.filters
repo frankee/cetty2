@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\src\cetty\zurg\ApplicationManager.cpp">
       <Filter>zurg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\Process.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\master.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\slave.pb.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\zurg\GetHardwareTask.h">
@@ -47,5 +50,8 @@
     <ClInclude Include="..\..\src\cetty\zurg\ApplicationManager.h">
       <Filter>zurg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\Process.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\master.pb.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\slave.pb.h" />
   </ItemGroup>
 </Project>

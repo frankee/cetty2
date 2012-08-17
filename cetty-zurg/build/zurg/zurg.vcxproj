@@ -12,17 +12,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\zurg\ApplicationManager.cpp" />
+    <ClCompile Include="..\..\src\cetty\zurg\master.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\Process.cc" />
     <ClCompile Include="..\..\src\cetty\zurg\ProcessManager.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\Heartbeat.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\main.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\slave.pb.cc" />
     <ClCompile Include="..\..\src\cetty\zurg\ZurgSlave.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\SlaveServiceImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\zurg\ApplicationManager.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\master.pb.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\Process.h" />
     <ClInclude Include="..\..\src\cetty\zurg\ProcessManager.h" />
     <ClInclude Include="..\..\src\cetty\zurg\GetHardwareTask.h" />
     <ClInclude Include="..\..\src\cetty\zurg\Heartbeat.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\slave.pb.h" />
     <ClInclude Include="..\..\src\cetty\zurg\ZurgSlave.h" />
     <ClInclude Include="..\..\src\cetty\zurg\ZurgSlaveConfig.h" />
     <ClInclude Include="..\..\src\cetty\zurg\SlaveServiceImpl.h" />

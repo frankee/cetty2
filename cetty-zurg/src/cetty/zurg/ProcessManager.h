@@ -18,16 +18,17 @@ class EventLoop;
 
 struct rusage;
 
+namespace cetty {
 namespace zurg
 {
 
-class ChildManager : boost::noncopyable
+class ProcessManager : boost::noncopyable
 {
  public:
   typedef boost::function<void(int status, const struct rusage&)> Callback;
 
-  ChildManager(muduo::net::EventLoop* loop, int zombieInterval);
-  ~ChildManager();
+  ProcessManager(muduo::net::EventLoop* loop, int zombieInterval);
+  ~ProcessManager();
 
   void start();
 
@@ -46,6 +47,7 @@ class ChildManager : boost::noncopyable
   std::map<pid_t, Callback> callbacks_;
 };
 
+}
 }
 
 #endif  // MUDUO_PROTORPC_ZURG_CHILDMANAGER_H

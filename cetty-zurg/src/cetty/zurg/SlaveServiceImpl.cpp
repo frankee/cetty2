@@ -14,13 +14,19 @@
 
 #include <boost/weak_ptr.hpp>
 
+#include <cetty/logging/LoggerHelper.h>
+
 using namespace muduo::net;
 using namespace zurg;
 
+namespace cetty {
+    namespace zurg {
+
+
 SlaveServiceImpl::SlaveServiceImpl(EventLoop* loop, int zombieInterval)
   : loop_(loop),
-    children_(new ChildManager(loop_, zombieInterval)),
-    apps_(new AppManager(loop_, get_pointer(children_)))
+    children_(new ProcessManager(loop_, zombieInterval)),
+    apps_(new ApplicationManager(loop_, get_pointer(children_)))
 {
 }
 
@@ -37,10 +43,17 @@ void SlaveServiceImpl::getHardware(const GetHardwareRequestPtr& request,
                                    const GetHardwareResponse* responsePrototype,
                                    const RpcDoneCallback& done)
 {
-  LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " << request->lshw();
+  
+}
 
-  GetHardwareTaskPtr task(new GetHardwareTask(request, done));
-  task->start(this);
+void SlaveServiceImpl::getHardware(const ConstGetHardwareRequestPtr& request,
+    const GetHardwareResponsePtr& response,
+    const DoneCallback& done) {
+
+        LOG_INFO() << "SlaveServiceImpl::getHardware - lshw = " << request->lshw();
+
+        GetHardwareTaskPtr task(new GetHardwareTask(request, done));
+        task->start(this);
 }
 
 void SlaveServiceImpl::getFileContent(const GetFileContentRequestPtr& request,
@@ -111,95 +124,97 @@ void SlaveServiceImpl::getFileChecksumDone(const GetFileChecksumRequestPtr& requ
   done(&response);
 }
 
-void SlaveServiceImpl::runCommand(const RunCommandRequestPtr& request,
-                                  const RunCommandResponse* responsePrototype,
-                                  const RpcDoneCallback& done)
-{
-  LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
-  ProcessPtr process(new Process(loop_, request, done));
-  int err = 12; // ENOMEM;
-  try
-  {
-    err = process->start();
-  }
-  catch (...)
-  {
-  }
-  if (err)
-  {
-    RunCommandResponse response;
-    response.set_error_code(err);
-    done(&response);
-  }
-  else
-  {
-    children_->runAtExit(process->pid(),  // bind strong ptr
-                         boost::bind(&Process::onCommandExit, process, _1, _2));
-    boost::weak_ptr<Process> weakProcessPtr(process);
-    TimerId timerId = loop_->runAfter(request->timeout(),
-                                      boost::bind(&Process::onTimeoutWeak, weakProcessPtr));
-    process->setTimerId(timerId);
-  }
+void SlaveServiceImpl::runCommand(const ConstRunCommandRequestPtr& request,
+    const RunCommandResponsePtr& response,
+    const DoneCallback& done) {
+    LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
+    ProcessPtr process(new Process(loop_, request, done));
+    int err = 12; // ENOMEM;
+    try
+    {
+        err = process->start();
+    }
+    catch (...)
+    {
+    }
+    if (err)
+    {
+        RunCommandResponse response;
+        response.set_error_code(err);
+        done(&response);
+    }
+    else
+    {
+        children_->runAtExit(process->pid(),  // bind strong ptr
+            boost::bind(&Process::onCommandExit, process, _1, _2));
+
+        timer = cetty::util::TimerFactory::getTimer();
+        TimeoutPtr timeout = timer->newTimeout(const TimerTask& task, boost::int64_t delay);
+        
+        boost::weak_ptr<Process> weakProcessPtr(process);
+        TimerId timerId = loop_->runAfter(request->timeout(),
+            boost::bind(&Process::onTimeoutWeak, weakProcessPtr));
+
+        process->setTimerId(timerId);
+    }
 }
 
-void SlaveServiceImpl::runScript(const RunScriptRequestPtr& request,
-                                 const RunCommandResponse* responsePrototype,
-                                 const RpcDoneCallback& done)
-{
-  RunCommandRequestPtr runCommandReq(new RunCommandRequest);
+void SlaveServiceImpl::runScript(const ConstRunScriptRequestPtr& request,
+    const RunCommandResponsePtr& response,
+    const DoneCallback& done) {
+    RunCommandRequestPtr runCommandReq(new RunCommandRequest);
 
-  std::string scriptFile = writeTempFile(SlaveApp::instance().name(), request->script());
-  if (!scriptFile.empty())
-  {
-    LOG_INFO << "runScript - write to " << scriptFile;
-    // FIXME: interpreter
-    runCommandReq->set_command(scriptFile);
-    // FIXME: others
-    runCommand(runCommandReq, NULL, done);
-  }
-  else
-  {
-    LOG_ERROR << "runScript - failed to write script file";
-    // FIXME: done
-  }
+    std::string scriptFile = writeTempFile(SlaveApp::instance().name(), request->script());
+    if (!scriptFile.empty()) {
+        LOG_INFO << "runScript - write to " << scriptFile;
+
+        // FIXME: interpreter
+        runCommandReq->set_command(scriptFile);
+        
+        // FIXME: others
+        runCommand(runCommandReq, NULL, done);
+    }
+    else {
+        LOG_ERROR << "runScript - failed to write script file";
+        // FIXME: done
+    }
 }
 
-void SlaveServiceImpl::addApplication(const AddApplicationRequestPtr& request,
-                                      const AddApplicationResponse* responsePrototype,
-                                      const RpcDoneCallback& done)
-{
-  apps_->add(request, done);
+void SlaveServiceImpl::addApplication(const ConstAddApplicationRequestPtr& request,
+    const AddApplicationResponsePtr& response,
+    const DoneCallback& done) {
+apps_->add(request, done);
 }
 
-void SlaveServiceImpl::startApplications(const StartApplicationsRequestPtr& request,
-                                         const StartApplicationsResponse* responsePrototype,
-                                         const RpcDoneCallback& done)
-{
-  apps_->start(request, done);
+
+void SlaveServiceImpl::startApplications(const ConstStartApplicationsRequestPtr& request,
+    const StartApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+        apps_->start(request, done);
 }
 
-void SlaveServiceImpl::stopApplication(const StopApplicationRequestPtr& request,
-                                       const StopApplicationResponse* responsePrototype,
-                                       const RpcDoneCallback& done)
-{
-  apps_->stop(request, done);
+void SlaveServiceImpl::stopApplication(const ConstStopApplicationRequestPtr& request,
+    const StopApplicationResponsePtr& response,
+    const DoneCallback& done) {
+        apps_->stop(request, response, done);
 }
 
-void SlaveServiceImpl::getApplications(const GetApplicationsRequestPtr& request,
-                                       const GetApplicationsResponse* responsePrototype,
-                                       const RpcDoneCallback& done)
-{
+void SlaveServiceImpl::getApplications(const ConstGetApplicationsRequestPtr& request,
+    const GetApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+        apps_->get(request, response, done);
 }
 
-void SlaveServiceImpl::listApplications(const ListApplicationsRequestPtr& request,
-                                        const ListApplicationsResponse* responsePrototype,
-                                        const RpcDoneCallback& done)
-{
+void SlaveServiceImpl::listApplications(const ConstListApplicationsRequestPtr& request,
+    const ListApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+        apps_->list(request, response, done);
 }
 
-void SlaveServiceImpl::removeApplications(const RemoveApplicationsRequestPtr& request,
-                                          const RemoveApplicationsResponse* responsePrototype,
-                                          const RpcDoneCallback& done)
-{
+void SlaveServiceImpl::removeApplications(const ConstRemoveApplicationsRequestPtr& request,
+    const RemoveApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+        apps_->remove(request, response, done);
 }
 
+}}
