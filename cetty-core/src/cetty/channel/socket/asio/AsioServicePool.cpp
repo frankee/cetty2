@@ -67,7 +67,7 @@ public:
     void stop() {
         if (state != STOPPED) {
             state = STOPPED;
-            service->service().stop();
+            service->stop();
         }
     }
 };

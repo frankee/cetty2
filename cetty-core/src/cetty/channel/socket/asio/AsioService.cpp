@@ -1,6 +1,3 @@
-#if !defined(CETTY_UTIL_TIMERPTR_H)
-#define CETTY_UTIL_TIMERPTR_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,20 +14,14 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+#include <cetty/channel/socket/asio/AsioService.h>
 
 namespace cetty {
-namespace util {
-
-class Timer;
-class Timeout;
-class TimerFactory;
-
-typedef Timer* TimerPtr;
-typedef TimerFactory* TimerFactoryPtr;
-typedef boost::intrusive_ptr<Timeout> TimeoutPtr;
+namespace channel {
+namespace socket {
+namespace asio {
 
 }
 }
-
-#endif //#if !defined(CETTY_UTIL_TIMERPTR_H)
+}
+}

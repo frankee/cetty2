@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="zurg">
+      <UniqueIdentifier>{393eaf8f-a722-4a93-bb42-034b3379b32d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\zurg\main.cc">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\SlaveServiceImpl.cpp">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\ZurgSlave.cpp">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\Heartbeat.cpp">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\ProcessManager.cpp">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\ApplicationManager.cpp">
+      <Filter>zurg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\Process.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\master.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\slave.pb.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cetty\zurg\GetHardwareTask.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\Heartbeat.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\SlaveServiceImpl.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\ZurgSlave.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\ZurgSlaveConfig.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\ProcessManager.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\ApplicationManager.h">
+      <Filter>zurg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\Process.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\master.pb.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\slave.pb.h" />
+  </ItemGroup>
+</Project>
