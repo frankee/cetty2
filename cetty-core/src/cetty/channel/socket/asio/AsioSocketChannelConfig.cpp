@@ -19,7 +19,6 @@
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 
-#include <cetty/util/internal/ConversionUtil.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 
@@ -32,8 +31,6 @@ namespace asio {
 
 using namespace cetty::channel;
 using namespace cetty::util;
-using namespace cetty::util::internal;
-using namespace cetty::logging;
 
 AsioSocketChannelConfig::AsioSocketChannelConfig(TcpSocket& socket)
     : socket(socket),

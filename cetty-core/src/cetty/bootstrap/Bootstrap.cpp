@@ -45,7 +45,7 @@ Bootstrap::~Bootstrap() {
 
 const ChannelFactoryPtr& Bootstrap::getFactory() {
     if (!factory) {
-        LOG_WARN() << "getFactory, but has not set yet.";
+        LOG_WARN << "getFactory, but has not set yet.";
     }
 
     return factory;
@@ -54,13 +54,13 @@ const ChannelFactoryPtr& Bootstrap::getFactory() {
 Bootstrap& Bootstrap::setFactory(const ChannelFactoryPtr& factory) {
     if (factory) {
         if (this->factory) {
-            LOG_WARN() << "setFactory, override the orignial channel facotry.";
+            LOG_WARN << "setFactory, override the orignial channel facotry.";
         }
 
         this->factory = factory;
     }
     else {
-        LOG_WARN() << "setFactory, but the factory is NULL, do nothing.";
+        LOG_WARN << "setFactory, but the factory is NULL, do nothing.";
     }
 
     return *this;
@@ -68,7 +68,7 @@ Bootstrap& Bootstrap::setFactory(const ChannelFactoryPtr& factory) {
 
 const ChannelPipelinePtr& Bootstrap::getPipeline() {
     if (!pipeline) {
-        LOG_WARN() << "pipeline has not set yet.";
+        LOG_WARN << "pipeline has not set yet.";
     }
 
     return this->pipeline;
@@ -76,12 +76,12 @@ const ChannelPipelinePtr& Bootstrap::getPipeline() {
 
 Bootstrap& Bootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
     if (!pipeline) {
-        LOG_WARN() << "the pipeline set is NULL, do nothing.";
+        LOG_WARN << "the pipeline set is NULL, do nothing.";
         return *this;
     }
 
     if (this->pipeline) {
-        LOG_WARN() << "pipeline has already set, will override.";
+        LOG_WARN << "pipeline has already set, will override.";
     }
 
     this->pipeline = pipeline;
@@ -94,7 +94,7 @@ ChannelOption::Variant Bootstrap::getOption(const ChannelOption& option) const {
     ChannelOption::Options::const_iterator itr = options.find(option);
 
     if (itr == options.end()) {
-        LOG_WARN() << "can not get the option of " << option.getName();
+        LOG_WARN << "can not get the option of " << option.getName();
         return ChannelOption::Variant();
     }
 
@@ -105,12 +105,12 @@ Bootstrap& Bootstrap::setOption(const ChannelOption& option,
                           const ChannelOption::Variant& value) {
     if (value.empty()) {
         options.erase(option);
-        LOG_WARN() << "setOption, the key ("
+        LOG_WARN << "setOption, the key ("
             << option.getName()
             << ") is empty value, remove from the options.";
     }
     else {
-        LOG_DEBUG() << "set Option, the key is " << option.getName();
+        LOG_DEBUG << "set Option, the key is " << option.getName();
         options.insert(std::make_pair(option, value));
     }
 
@@ -126,7 +126,7 @@ ChannelOption::Options& Bootstrap::getOptions() {
 }
 
 Bootstrap& Bootstrap::setOptions(const ChannelOption::Options& options) {
-    LOG_INFO() << "set options using map, will reset the original options.";
+    LOG_INFO << "set options using map, will reset the original options.";
     this->options = options;
 
     return *this;

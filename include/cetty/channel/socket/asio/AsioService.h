@@ -45,127 +45,29 @@ public:
 
     boost::asio::io_service& service() { return ioService; }
 
-    void stop() {
-        ioService.stop();
-    }
+    virtual void stop();
 
-    virtual void post(const Functor& handler) {
-        ioService.post(handler);
-    }
+    virtual void post(const Functor& handler);
 
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-                             const Functor& timerCallback) {
-        if (timerCallback) {
-            AsioDeadlineTimeoutPtr timeout
-                = new AsioDeadlineTimeout(ioService, timestamp);
+                             const Functor& timerCallback);
 
-            timeout->getTimer().async_wait(boost::bind(&AsioService::timerExpiresCallback,
-                                           this,
-                                           boost::asio::placeholders::error,
-                                           timerCallback,
-                                           boost::cref(timeout)));
+    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback);
 
-            timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-            timers.push_back(timeout);
-            return boost::static_pointer_cast<Timeout>(timeout);
-        }
-        else {
-            return TimeoutPtr();
-        }
-    }
-
-    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) {
-        if (timerCallback) {
-            AsioDeadlineTimeoutPtr timeout
-                = new AsioDeadlineTimeout(ioService, millisecond);
-
-            timeout->getTimer().async_wait(boost::bind(&AsioService::timerExpiresCallback,
-                                           this,
-                                           boost::asio::placeholders::error,
-                                           timerCallback,
-                                           boost::cref(timeout)));
-
-            timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-            timers.push_back(timeout);
-            return boost::static_pointer_cast<Timeout>(timeout);
-        }
-        else {
-            return TimeoutPtr();
-        }
-    }
-
-    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) {
-        if (timerCallback) {
-            AsioDeadlineTimeoutPtr timeout
-                = new AsioDeadlineTimeout(ioService, millisecond);
-
-            timeout->getTimer().async_wait(boost::bind(&AsioService::repeatTimerExpiresCallback,
-                                           this,
-                                           boost::asio::placeholders::error,
-                                           timerCallback,
-                                           millisecond,
-                                           boost::cref(timeout)));
-            timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-            timers.push_back(timeout);
-            return boost::static_pointer_cast<Timeout>(timeout);
-        }
-        else {
-            return TimeoutPtr();
-        }
-    }
+    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback);
 
 private:
     void timerExpiresCallback(const boost::system::error_code& code,
                               const Functor& timerCallback,
-                              const AsioDeadlineTimeoutPtr& timeout) {
-        if (code != boost::asio::error::operation_aborted) {
-            timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
-            timerCallback();
-        }
-        else {
-            timeout->setState(AsioDeadlineTimeout::TIMER_CANCELLED);
-        }
-
-        timers.remove(timeout);
-    }
+                              const AsioDeadlineTimeoutPtr& timeout);
 
     void repeatTimerExpiresCallback(const boost::system::error_code& code,
                                     const Functor& timerCallback,
                                     int millisecond,
-                                    const AsioDeadlineTimeoutPtr& timeout) {
-        if (code != boost::asio::error::operation_aborted) {
-            timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
-            timerCallback();
-
-            boost::system::error_code code;
-            boost::asio::deadline_timer& timer = timeout->getTimer();
-            timer.expires_from_now(
-                boost::posix_time::milliseconds(millisecond),
-                code);
-
-            if (!code) {
-                timer.async_wait(boost::bind(&AsioService::repeatTimerExpiresCallback,
-                                             this,
-                                             boost::asio::placeholders::error,
-                                             timerCallback,
-                                             millisecond,
-                                             boost::cref(timeout)));
-                timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-            }
-            else {
-                timers.remove(timeout);
-                //LOG_ERROR << "";
-            }
-        }
-        else {
-            timeout->setState(AsioDeadlineTimeout::TIMER_CANCELLED);
-            timers.remove(timeout);
-        }
-    }
+                                    const AsioDeadlineTimeoutPtr& timeout);
 
 private:
     boost::asio::io_service ioService;
-
     std::list<AsioDeadlineTimeoutPtr> timers;
 };
 

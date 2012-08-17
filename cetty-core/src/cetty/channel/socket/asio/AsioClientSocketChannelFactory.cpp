@@ -21,7 +21,6 @@
 #include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
-#include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -30,13 +29,11 @@ namespace socket {
 namespace asio {
 
 using namespace cetty::util;
-using namespace cetty::util::internal::asio;
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
     const EventLoopPtr& eventLoop)
     : eventLoop(eventLoop),
       eventLoopPool(),
-      timerFactory(NULL),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
     init();
@@ -46,7 +43,6 @@ AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
     const EventLoopPoolPtr& eventLoopPool)
     : eventLoop(),
       eventLoopPool(eventLoopPool),
-      timerFactory(NULL),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
     init();
@@ -54,7 +50,6 @@ AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
 
 AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(int threadCnt)
     : eventLoopPool(new AsioServicePool(threadCnt)),
-      timerFactory(NULL),
       socketAddressFactory(NULL),
       ipAddressFactory(NULL) {
     init();
@@ -65,17 +60,6 @@ AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
 }
 
 void AsioClientSocketChannelFactory::init() {
-    if (!TimerFactory::hasFactory()) {
-        if (eventLoopPool) {
-            timerFactory = new AsioDeadlineTimerFactory(eventLoopPool);
-        }
-        else {
-            timerFactory = new AsioDeadlineTimerFactory(eventLoop);
-        }
-
-        TimerFactory::setFactory(timerFactory);
-    }
-
     if (!SocketAddress::hasFactory()) {
         EventLoopPtr loop
             = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
@@ -107,13 +91,6 @@ void AsioClientSocketChannelFactory::deinit() {
 
         delete ipAddressFactory;
         ipAddressFactory = NULL;
-    }
-
-    if (timerFactory) {
-        TimerFactory::resetFactory();
-
-        delete timerFactory;
-        timerFactory = NULL;
     }
 }
 

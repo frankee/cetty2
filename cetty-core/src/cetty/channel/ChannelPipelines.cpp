@@ -18,9 +18,8 @@
 
 #include <boost/assert.hpp>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/internal/ConversionUtil.h>
+#include <cetty/util/StringUtil.h>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
@@ -30,7 +29,6 @@ namespace cetty {
 namespace channel {
 
 using namespace cetty::util;
-using namespace cetty::util::internal;
 
 class CloneChannelPipelineFactory : public ChannelPipelineFactory {
 public:
@@ -128,7 +126,7 @@ ChannelPipelinePtr ChannelPipelines::pipeline(const std::vector<ChannelHandlerPt
             continue;
         }
 
-        newPipeline->addLast(ConversionUtil::toString((int)i), handlers[i]);
+        newPipeline->addLast(StringUtil::strprintf("%d", i), handlers[i]);
     }
 
     return newPipeline;

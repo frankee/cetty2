@@ -26,7 +26,6 @@
 #include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
-#include <cetty/util/internal/asio/AsioDeadlineTimerFactory.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 #include <cetty/logging/LoggerHelper.h>
 
@@ -37,7 +36,6 @@ namespace asio {
 
 using namespace cetty::channel;
 using namespace cetty::logging;
-using namespace cetty::util::internal::asio;
 
 AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
     const EventLoopPoolPtr& pool)
@@ -89,7 +87,7 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
             pipeline,
             childPipeline,
             childPool);
-    LOG_INFO() << "Created the AsioServerSocketChannel.";
+    LOG_INFO << "Created the AsioServerSocketChannel.";
     serverChannels.push_back(channel);
     return channel;
 }
@@ -105,15 +103,6 @@ void AsioServerSocketChannelFactory::shutdown() {
 }
 
 void AsioServerSocketChannelFactory::init() {
-    if (!TimerFactory::hasFactory()) {
-        timerFactory = new AsioDeadlineTimerFactory(parentPool, childPool);
-        TimerFactory::setFactory(timerFactory);
-    }
-    else {
-        // log info here.
-        LOG_WARN() << "the timer factory has already been set.";
-    }
-
     if (!SocketAddress::hasFactory()) {
         EventLoopPtr loop = parentPool->getNextLoop();
         AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
@@ -144,13 +133,6 @@ void AsioServerSocketChannelFactory::deinit() {
 
         delete ipAddressFactory;
         ipAddressFactory = NULL;
-    }
-
-    if (timerFactory) {
-        TimerFactory::resetFactory();
-
-        delete timerFactory;
-        timerFactory = NULL;
     }
 }
 

@@ -41,6 +41,10 @@ public:
                 }
         }
 
+        SourceFile(const char* data, int size)
+            : data(data), size(size) {
+        }
+
         const char* data;
         int size;
     };

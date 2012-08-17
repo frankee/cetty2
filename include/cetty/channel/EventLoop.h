@@ -42,14 +42,16 @@ public:
     const boost::thread::id& getThreadId() const;
     void setThreadId(const boost::thread::id& id);
 
-    const EventLoopPoolPtr& getEventLoopPool() const { return pool; }
+    const EventLoopPoolPtr& getEventLoopPool() const;
 
     bool inLoopThread() const;
+
+    virtual void stop();
 
     virtual void post(const Functor& handler) = 0;
 
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-        const Functor& timerCallback) = 0;
+                             const Functor& timerCallback) = 0;
 
     virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) = 0;
     virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) = 0;
@@ -77,6 +79,12 @@ inline
 bool EventLoop::inLoopThread() const {
     return threadId == boost::this_thread::get_id();
 }
+
+inline
+const EventLoopPoolPtr& EventLoop::getEventLoopPool() const {
+    return pool;
+}
+
 }
 }
 

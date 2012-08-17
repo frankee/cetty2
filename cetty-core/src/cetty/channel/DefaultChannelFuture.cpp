@@ -25,7 +25,6 @@
 
 #include <cetty/logging/LoggerHelper.h>
 
-#include <cetty/util/TimeUnit.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -37,7 +36,7 @@ using namespace cetty::logging;
 bool DefaultChannelFuture::useDeadLockChecker = true;
 bool DefaultChannelFuture::disabledDeadLockCheckerOnce = false;
 
-Exception DefaultChannelFuture::CANCELLED("Future cancelled");
+Exception DefaultChannelFuture::CANCELLED("Future canceled");
 
 DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
         bool cancellable)
@@ -77,7 +76,7 @@ DefaultChannelFuture::~DefaultChannelFuture() {
 void DefaultChannelFuture::setUseDeadLockChecker(bool useDeadLockChecker) {
     if (!useDeadLockChecker && !disabledDeadLockCheckerOnce) {
         disabledDeadLockCheckerOnce = true;
-        LOG_DEBUG() << "The dead lock checker in ChannelFuture \
+        LOG_DEBUG << "The dead lock checker in ChannelFuture \
                             has been disabled as requested at your own risk.";
     }
 
@@ -250,7 +249,7 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
                 interrupted = true;
                 waiters--;
 
-                LOG_WARN() << "thread interrupted while awaiting";
+                LOG_WARN << "thread interrupted while awaiting";
             }
         }
     }

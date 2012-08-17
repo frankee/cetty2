@@ -26,7 +26,6 @@
 
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ClientSocketChannelFactory.h>
-#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace channel {
@@ -135,8 +134,6 @@ private:
 private:
     EventLoopPtr eventLoop;
     EventLoopPoolPtr eventLoopPool;
-
-    TimerFactoryPtr timerFactory; // keep the life cycle
 
     std::vector<ChannelPtr> clientChannels;
 

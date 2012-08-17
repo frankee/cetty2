@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-
+#include <boost/cstdint.hpp>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
@@ -62,7 +62,7 @@ public:
      * Returns the time duration (milliseconds) from now to the absolute
      * expires time.
      */
-    virtual int expiresFromNow() const = 0;
+    virtual boost::int64_t expiresFromNow() const = 0;
 
     /**
      * Cancels the {@link TimerTask} associated with this handle.  If the

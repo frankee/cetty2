@@ -25,7 +25,7 @@ struct SlaveConfig
 
   std::string name_;
   std::string prefix_;
-  string masterAddress_;
+  std::string masterAddress_;
   bool error_;
   int listenPort_;
   int zombieInterval_;

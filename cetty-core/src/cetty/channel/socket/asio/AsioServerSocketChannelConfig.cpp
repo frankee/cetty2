@@ -21,7 +21,7 @@
 #include <boost/system/system_error.hpp>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/internal/ConversionUtil.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace channel {
@@ -53,7 +53,7 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         setReuseAddress(boost::get<bool>(value));
     }
     else if (option == ChannelOption::CO_SO_BACKLOG) {
-        setBacklog(internal::ConversionUtil::toInt(value));
+        setBacklog((int)StringUtil::atoi(boost::get<std::string>(value).c_str()));
     }
     else {
         return false;

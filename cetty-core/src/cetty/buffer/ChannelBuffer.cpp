@@ -20,7 +20,6 @@
 #include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/Integer.h>
-#include <cetty/util/Charset.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 

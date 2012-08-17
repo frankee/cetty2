@@ -42,12 +42,6 @@
     <Filter Include="util">
       <UniqueIdentifier>{36a2ba7c-d4ee-49c6-a38f-47bc61401243}</UniqueIdentifier>
     </Filter>
-    <Filter Include="util\internal">
-      <UniqueIdentifier>{c076ea01-2a74-4d64-83d5-80f2f8bd0ba4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="util\internal\asio">
-      <UniqueIdentifier>{d09728e3-3d42-4a9e-b53d-9a4db7228b1d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="logging">
       <UniqueIdentifier>{27365edd-2d8b-41b2-ac99-48acdbcd0ea3}</UniqueIdentifier>
     </Filter>
@@ -149,32 +143,14 @@
     <ClCompile Include="..\..\src\cetty\bootstrap\ServerBootstrap.cpp">
       <Filter>bootstrap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\CharsetUtil.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp">
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\StringUtil.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\TimerFactory.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\TimeUnit.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\URI.cpp">
       <Filter>util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\internal\ConversionUtil.cpp">
-      <Filter>util\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimeout.cpp">
-      <Filter>util\internal\asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimer.cpp">
-      <Filter>util\internal\asio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp">
       <Filter>util</Filter>
@@ -208,9 +184,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioGatheringBuffer.cpp">
       <Filter>channel\socket\asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\internal\asio\AsioDeadlineTimerFactory.cpp">
-      <Filter>util\internal\asio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
       <Filter>util</Filter>
@@ -407,6 +380,12 @@
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp">
       <Filter>logging</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp">
+      <Filter>channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\SmallFile.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -562,25 +541,10 @@
     <ClInclude Include="..\..\..\include\cetty\util\Character.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Charset.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\CharsetUtil.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\Enum.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\EventListener.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\Exception.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\ExternalResourceReleasable.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\ExternalResourceUtil.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\InputStream.h">
@@ -601,32 +565,8 @@
     <ClInclude Include="..\..\..\include\cetty\util\Serializable.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Timeout.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Timer.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\TimerFactory.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\TimeUnit.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\URI.h">
       <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\internal\ConversionUtil.h">
-      <Filter>util\internal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimeout.h">
-      <Filter>util\internal\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimer.h">
-      <Filter>util\internal\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\internal\asio\AsioDeadlineTimerFactory.h">
-      <Filter>util\internal\asio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h">
       <Filter>util</Filter>
@@ -1003,9 +943,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\TimerPtr.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryPtr.h">
       <Filter>buffer</Filter>
     </ClInclude>
@@ -1119,6 +1056,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerAdapter.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioDeadlineTimeout.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\TimeoutPtr.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\StringUtil.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\StringPiece.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\SmallFile.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

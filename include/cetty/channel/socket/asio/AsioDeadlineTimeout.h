@@ -67,8 +67,8 @@ public:
         }
     }
 
-    virtual int expiresFromNow() const {
-        deadlineTimer.expires_from_now();
+    virtual boost::int64_t expiresFromNow() const {
+        return deadlineTimer.expires_from_now().total_milliseconds();
     }
 
     boost::asio::deadline_timer& getTimer() {

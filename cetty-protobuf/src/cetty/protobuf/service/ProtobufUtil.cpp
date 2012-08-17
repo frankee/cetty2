@@ -19,11 +19,15 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
+#include <cetty/logging/Logger.h>
+#include <cetty/logging/LogLevel.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
 
 using namespace google::protobuf;
+using namespace cetty::logging;
 
 ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
         const Message& message) {
@@ -137,6 +141,38 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
     }
 
     return FieldValue();
+}
+
+static LogLevel changeLogLevel(google::protobuf::LogLevel level) {
+    switch (level) {
+    case google::protobuf::LOGLEVEL_WARNING:
+        return LogLevel::WARN;
+
+    case google::protobuf::LOGLEVEL_ERROR:
+        return LogLevel::ERROR;
+
+    case google::protobuf::LOGLEVEL_FATAL:
+        return LogLevel::FATAL;
+
+    case google::protobuf::LOGLEVEL_INFO:
+        return LogLevel::INFO;
+
+    default:
+        return LogLevel::INFO;
+    }
+}
+
+void ProtobufUtil::logHandler(google::protobuf::LogLevel level,
+                              const char* filename,
+                              int line,
+                              const std::string& message) {
+    LogLevel logLevel = changeLogLevel(level);
+
+    //if (muduo::Logger::logLevel() <= logLevel) {
+    Logger(Logger::SourceFile(filename, strlen(filename)),
+           line,
+           logLevel).stream() << "Protobuf - " << message;
+    //}
 }
 
 }

@@ -1,6 +1,6 @@
 package cetty.protobuf.service.proto;
 
-option java_package = "cetty.protobuf.service.proto";
+option java_package = "cetty.protobuf.service";
 option java_outer_classname = "ServiceProto";
 
 import "google/protobuf/descriptor.proto";

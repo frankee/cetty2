@@ -1,10 +1,3 @@
-#include <examples/zurg/slave/Process.h>
-
-#include <examples/zurg/slave/Sink.h>
-#include <examples/zurg/slave/SlaveApp.h>
-
-#include <examples/zurg/common/Util.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/base/ProcessInfo.h>
 #include <muduo/base/FileUtil.h>
@@ -12,6 +5,7 @@
 #include <muduo/net/EventLoop.h>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 
 #include <stdexcept>
 
@@ -24,7 +18,9 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 
+namespace cetty{
 namespace zurg {
+
 extern sigset_t oldSigmask;
 
 float getSeconds(const struct timeval& tv) {
@@ -103,7 +99,7 @@ public:
           startTime(0) {
         char filename[64];
         ::snprintf(filename, sizeof filename, "/proc/%d/stat", pid);
-        muduo::FileUtil::SmallFile file(filename);
+        SmallFile file(filename);
 
         if ((error = file.readToBuffer(NULL)) == 0) {
             valid = true;
@@ -136,20 +132,13 @@ private:
         }
 
         if (p) {
-            startTime = atoll(p);
+            startTime = StringUtil::atoi(p);
         }
     }
-
 };
 
 const int kSleepAfterExec = 0; // for strace child
 }
-
-using namespace zurg;
-using namespace muduo;
-using namespace muduo::net;
-
-// ========================================================
 
 Process::Process(EventLoop* loop,
                  const RunCommandRequestPtr& request,
@@ -181,6 +170,7 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
              SlaveApp::instance().prefix().c_str(),
              SlaveApp::instance().name().c_str(),
              appRequest->name().c_str());
+
     request_->set_cwd(dir);
 
     request_->mutable_args()->CopyFrom(appRequest->args());
@@ -216,7 +206,8 @@ int Process::start() {
     Pipe stdOutput;
     Pipe stdError;
 
-    startTime_ = Timestamp::now();
+    startTime_ = boost::posix_time::microsec_clock::universal_time();
+
     const pid_t result = ::fork(); // FORKED HERE
 
     if (result == 0) {
@@ -454,4 +445,5 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response.set_memory_maxrss_kb(ru.ru_maxrss);
 
     doneCallback_(&response);
+}
 }

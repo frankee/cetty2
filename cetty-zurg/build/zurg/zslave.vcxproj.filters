@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="slave">
+      <UniqueIdentifier>{e55ca1a4-acc9-49c8-9ce4-e13a115f114d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="proto">
+      <UniqueIdentifier>{06d73cb6-0cae-4637-ae1f-bafd048dbbc1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\ApplicationManager.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\Heartbeat.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\Process.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\ProcessManager.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\SlaveServiceImpl.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlave.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\Util.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\proto\slave.pb.cc">
+      <Filter>proto</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\ApplicationManager.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\GetHardwareTask.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\Heartbeat.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\Process.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\ProcessManager.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\SlaveServiceImpl.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\slave\ZurgSlaveConfig.h">
+      <Filter>slave</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\zurg\Util.h" />
+    <ClInclude Include="..\..\src\cetty\zurg\proto\slave.pb.h">
+      <Filter>proto</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -68,7 +68,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
         pipeline = ChannelPipelines::pipeline(getPipeline());
     }
     catch (...) {
-        LOG_ERROR() << "has an exception when get pipeline from factory, then return a failed future.";
+        LOG_ERROR << "has an exception when get pipeline from factory, then return a failed future.";
         return NullChannel::getInstance()->newFailedFuture(
                    ChannelPipelineException("Failed to initialize a pipeline."));
     }
@@ -76,7 +76,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     ch = getFactory()->newChannel(pipeline);
 
     if (!ch) {
-        LOG_ERROR() << "failed to create a new channel from the factory, then return a failed future.";
+        LOG_ERROR << "failed to create a new channel from the factory, then return a failed future.";
         return NullChannel::getInstance()->newFailedFuture(
                    ChannelPipelineException("Failed to create a new channel."));
     }
@@ -86,7 +86,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
 
     // Bind.
     if (local.validated()) {
-        LOG_INFO() << "bind the channel to local address" << local.toString();
+        LOG_INFO << "bind the channel to local address" << local.toString();
         ChannelFuturePtr future = ch->bind(local);
         future->awaitUninterruptibly();
     }

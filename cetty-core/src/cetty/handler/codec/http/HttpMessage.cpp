@@ -18,7 +18,6 @@
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/internal/ConversionUtil.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>

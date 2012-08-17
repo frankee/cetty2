@@ -87,7 +87,7 @@ bool ConfigCenter::load(const char* str) {
         root = YAML::Load(str);
     }
     catch (const std::exception& e) {
-        LOG_ERROR() << "parse the yaml configure file error:" << e.what();
+        LOG_ERROR << "parse the yaml configure file error:" << e.what();
     }
 
     if (!root) {
@@ -153,7 +153,7 @@ bool ConfigCenter::getFileContent(const std::string& file, std::string* content)
 
     if (!filestream.is_open()) {
         filestream.close();
-        LOG_ERROR() << "can not open the configure file: " << file;
+        LOG_ERROR << "can not open the configure file: " << file;
         return false;
     }
 
@@ -181,7 +181,7 @@ bool ConfigCenter::configureFromString(const char* str, ConfigObject* object) {
         root = YAML::Load(str);
     }
     catch (const std::exception& e) {
-        LOG_ERROR() << "parse the yaml configure file error: " << e.what();
+        LOG_ERROR << "parse the yaml configure file error: " << e.what();
     }
 
     if (!root) {
@@ -206,7 +206,7 @@ bool ConfigCenter::configureFromFile(const std::string& file, ConfigObject* obje
         root = YAML::LoadFile(file);
     }
     catch (const std::exception& e) {
-        LOG_ERROR() << "parse the yaml configure file error: " << e.what();
+        LOG_ERROR << "parse the yaml configure file error: " << e.what();
     }
 
     if (!root) {

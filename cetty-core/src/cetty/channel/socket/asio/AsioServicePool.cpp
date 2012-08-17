@@ -110,10 +110,10 @@ AsioServicePool::AsioServicePool(int threadCnt)
 
 bool AsioServicePool::start() {
     if (!started && mainThread) {
-        LOG_INFO() << "AsioServciePool running in main thread mode.";
+        LOG_INFO << "AsioServciePool running in main thread mode.";
 
         if (runIOservice((AsioServiceHolder*)eventLoops.front()) < 0) {
-            LOG_ERROR() << "AsioServicePool run the main thread service error.";
+            LOG_ERROR << "AsioServicePool run the main thread service error.";
             return false;
         }
     }
@@ -159,12 +159,12 @@ int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
 
     // if error happened, try to recover.
     if (err) {
-        LOG_ERROR()  << "when runIOservice, the io service has error = " << err.value();
+        LOG_ERROR  << "when runIOservice, the io service has error = " << err.value();
         stop();
         return -1;
     }
 
-    LOG_INFO() << "runIOservice OK, and " << opCount << "handlers that were executed.";
+    LOG_INFO << "runIOservice OK, and " << opCount << "handlers that were executed.";
     return opCount;
 }
 

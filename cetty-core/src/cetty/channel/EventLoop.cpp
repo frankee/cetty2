@@ -28,5 +28,9 @@ EventLoop::EventLoop(const EventLoopPoolPtr& pool)
 EventLoop::~EventLoop() {
 }
 
+void EventLoop::stop() {
+    pool.reset();
+}
+
 }
 }

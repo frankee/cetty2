@@ -25,7 +25,6 @@
 
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ServerSocketChannelFactory.h>
-#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace channel {
@@ -126,8 +125,6 @@ private:
 private:
     EventLoopPoolPtr parentPool;
     EventLoopPoolPtr childPool;
-
-    TimerFactoryPtr timerFactory; // keep the life cycle.
 
     AsioTcpSocketAddressImplFactory* socketAddressFactory;
     AsioIpAddressImplFactory* ipAddressFactory;

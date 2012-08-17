@@ -28,15 +28,11 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/Timer.h>
-#include <cetty/util/Timeout.h>
-#include <cetty/util/TimerFactory.h>
 #include <cetty/logging/LoggerHelper.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
-using namespace cetty::logging;
 
 /**
  * Handler implementation for the echo client.  It initiates the ping-pong

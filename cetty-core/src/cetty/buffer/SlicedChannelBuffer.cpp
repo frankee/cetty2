@@ -18,8 +18,8 @@
 #include <cetty/buffer/Array.h>
 #include <cetty/buffer/ChannelBuffers.h>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace buffer {
@@ -147,7 +147,7 @@ void SlicedChannelBuffer::checkIndex(int index) const {
 void SlicedChannelBuffer::checkIndex(int startIndex, int length) const {
     if (length < 0) {
         throw InvalidArgumentException(
-            std::string("length is negative: ") + Integer::toString(length));
+            StringUtil::strprintf("length is negative: %d", length));
     }
 
     if (startIndex < 0) {

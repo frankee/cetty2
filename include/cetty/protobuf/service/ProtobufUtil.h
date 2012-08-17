@@ -20,6 +20,7 @@
 #include <vector>
 #include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
+#include <google/protobuf/stubs/common.h>
 
 namespace google {
 namespace protobuf {
@@ -47,6 +48,11 @@ public:
 public:
     static FieldValue getMessageField(const std::string& name,
                                       const Message& message);
+
+    static void logHandler(google::protobuf::LogLevel level,
+        const char* filename,
+        int line,
+        const std::string& message);
 
 private:
     ProtobufUtil();
