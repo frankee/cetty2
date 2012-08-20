@@ -19,101 +19,61 @@
  * under the License.
  */
 
-class CacheManager;
+#include <string>
 
 namespace cetty {
 namespace shiro {
 namespace realm {
 
 /**
- * A simple implementation of the {@link Realm Realm} interface that
- * uses a set of configured user accounts and roles to support authentication and authorization.  Each account entry
- * specifies the username, password, and roles for a user.  Roles can also be mapped
- * to permissions and associated with users.
- * <p/>
- * User accounts and roles are stored in two {@code Map}s in memory, so it is expected that the total number of either
- * is not sufficiently large.
+ * A <tt>Realm</tt> is a security component that can access application-specific security entities
+ * such as users, roles, and permissions to determine authentication and authorization operations.
  *
+ * <p><tt>Realm</tt>s usually have a 1-to-1 correspondance with a datasource such as a relational database,
+ * file sysetem, or other similar resource.  As such, implementations of this interface use datasource-specific APIs to
+ * determine authorization data (roles, permissions, etc), such as JDBC, File IO, Hibernate or JPA, or any other
+ * Data Access API.  They are essentially security-specific
+ * <a href="http://en.wikipedia.org/wiki/Data_Access_Object" target="_blank">DAO</a>s.
+ *
+ * <p>Because most of these datasources usually contain Subject (a.k.a. User) information such as usernames and
+ * passwords, a Realm can act as a pluggable authentication module in a
+ * <a href="http://en.wikipedia.org/wiki/Pluggable_Authentication_Modules">PAM</a> configuration.  This allows a Realm to
+ * perform <i>both</i> authentication and authorization duties for a single datasource, which caters to the large
+ * majority of applications.  If for some reason you don't want your Realm implementation to perform authentication
+ * duties, you should override the {@link #supports(org.apache.shiro.authc.AuthenticationToken)} method to always
+ * return <tt>false</tt>.
+ *
+ * <p>Because every application is different, security data such as users and roles can be
+ * represented in any number of ways.  Shiro tries to maintain a non-intrusive development philosophy whenever
+ * possible - it does not require you to implement or extend any <tt>User</tt>, <tt>Group</tt> or <tt>Role</tt>
+ * interfaces or classes.
+ *
+ * <p>Instead, Shiro allows applications to implement this interface to access environment-specific datasources
+ * and data model objects.  The implementation can then be plugged in to the application's Shiro configuration.
+ * This modular technique abstracts away any environment/modeling details and allows Shiro to be deployed in
+ * practically any application environment.
+ *
+ * <p>Most users will not implement the <tt>Realm</tt> interface directly, but will extend one of the subclasses,
+ * {@link org.apache.shiro.realm.AuthenticatingRealm AuthenticatingRealm} or {@AuthorizingRealm}, greatly reducing the effort requird
+ * to implement a <tt>Realm</tt> from scratch.</p>
+ *
+ * @see org.apache.shiro.realm.AuthenticatingRealm AuthenticatingRealm
+ * @see org.apache.shiro.realm.AuthorizingRealm AuthorizingRealm
+ * @see org.apache.shiro.authc.pam.ModularRealmAuthenticator ModularRealmAuthenticator
  * @since 0.1
  */
 class Realm{
 public:
-    Realm() {
-        this->cachingEnabled = false;
-        this->name = autoName();
-    }
+    Realm() { this->name = autoName(); }
 
-    /**
-     * Returns the <tt>CacheManager</tt> used for data caching to reduce EIS round trips, or <tt>null</tt> if
-     * caching is disabled.
-     *
-     * @return the <tt>CacheManager</tt> used for data caching to reduce EIS round trips, or <tt>null</tt> if
-     *         caching is disabled.
-     */
-    const CacheManager &getCacheManager() const{
-        return this->cacheManager;
-    }
+    const std::string &getName() const{ return name; }
+    void setName(const std::string &name) { this->name = name; }
 
-    /**
-     * Sets the <tt>CacheManager</tt> to be used for data caching to reduce EIS round trips.
-     * <p/>
-     * <p>This property is <tt>null</tt> by default, indicating that caching is turned off.
-     *
-     * @param cacheManager the <tt>CacheManager</tt> to use for data caching, or <tt>null</tt> to disable caching.
-     */
-    void setCacheManager(const CacheManager &cacheManager) {
-        this->cacheManager = cacheManager;
-        afterCacheManagerSet();
-    }
-
-    /**
-     * Returns {@code true} if caching should be used if a {@link CacheManager} has been
-     * {@link #setCacheManager(org.apache.shiro.cache.CacheManager) configured}, {@code false} otherwise.
-     * <p/>
-     * The default value is {@code true} since the large majority of Realms will benefit from caching if a CacheManager
-     * has been configured.  However, memory-only realms should set this value to {@code false} since they would
-     * manage account data in memory already lookups would already be as efficient as possible.
-     *
-     * @return {@code true} if caching will be globally enabled if a {@link CacheManager} has been
-     *         configured, {@code false} otherwise
-     */
-    bool isCachingEnabled() {
-        return cachingEnabled;
-    }
-
-    /**
-     * Sets whether or not caching should be used if a {@link CacheManager} has been
-     * {@link #setCacheManager(org.apache.shiro.cache.CacheManager) configured}.
-     *
-     * @param cachingEnabled whether or not to globally enable caching for this realm.
-     */
-    void setCachingEnabled(bool cachingEnabled) {
-        this->cachingEnabled = cachingEnabled;
-    }
-
-    const std::string &getName() {
-        return name;
-    }
-
-    void setName(const std::string &name) {
-        this->name = name;
-    }
-
-protected:
-    void afterCacheManagerSet() {
-    }
 
 private:
-    /*--------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
-    bool cachingEnabled;
     std::string name;
 
-    CacheManager &cacheManager;
-
     /**
-     *
      * Generator name based on the current time.
      */
     std::string autoName();

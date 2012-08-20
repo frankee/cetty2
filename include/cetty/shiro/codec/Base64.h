@@ -163,7 +163,7 @@ private:
      * @param octect The value to test
      * @return <code>true</code> if the value is defined in the the base 64 alphabet, <code>false</code> otherwise.
      */
-    static bool isBase64(char octect);
+    static bool isBase64(char octect){ return false; }
 
     /**
      * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet.
@@ -173,7 +173,7 @@ private:
      *         empty; false, otherwise
      */
 public:
-    static bool isBase64(const std::string &arrayOctect);
+    static bool isBase64(const std::string &arrayOctect){ return false; }
 
     /**
      * Discards any whitespace from a base-64 encoded block.
@@ -181,15 +181,7 @@ public:
      * @param data The base-64 encoded data to discard the whitespace from.
      * @return The data, less whitespace (see RFC 2045).
      */
-    static std::string discardWhitespace(const std::string &data);
-    /**
-     * Base64 encodes the specified byte array and then encodes it as a String using Shiro's preferred character
-     * encoding (UTF-8).
-     *
-     * @param bytes the byte array to Base64 encode.
-     * @return a UTF-8 encoded String of the resulting Base64 encoded byte array.
-     */
-    static std::string encodeToString(const std::string & bytes);
+    static std::string discardWhitespace(const std::string &data){ return data; }
 
     /**
      * Encodes binary data using the base64 algorithm and chunks the encoded output into 76 character blocks
@@ -219,14 +211,7 @@ public:
      * @return Base64-encoded data.
      * @throws IllegalArgumentException Thrown when the input array needs an output array bigger than {@link Integer#MAX_VALUE}
      */
-    static std::string encode(const std::string &binaryData, bool isChunked);
-    /**
-     * Converts the specified UTF-8 Base64 encoded String and decodes it to a resultant UTF-8 encoded string.
-     *
-     * @param base64Encoded a UTF-8 Base64 encoded String
-     * @return the decoded String, UTF-8 encoded.
-     */
-    static std::string decodeToString(const std::string &base64Encoded);
+    static std::string encode(const std::string &in, bool isChunked){ return in; }
 
     /**
      * Converts the specified UTF-8 Base64 encoded String and decodes it to a raw Base64 decoded byte array.
@@ -234,7 +219,7 @@ public:
      * @param base64Encoded a UTF-8 Base64 encoded String
      * @return the raw Base64 decoded byte array.
      */
-    static std::string decode(const std::string &base64Encoded);
+    static std::string decode(const std::string &in){ return in; };
 
     /**
      * Discards any characters outside of the base64 alphabet, per the requirements on page 25 of RFC 2045 - "Any
@@ -243,7 +228,9 @@ public:
      * @param data The base-64 encoded data to groom
      * @return The data, less non-base64 characters (see RFC 2045).
      */
-    static std::string discardNonBase64(const std::string &data);
+    static std::string discardNonBase64(const std::string &data){
+        return data;
+    }
 };
 }
 }

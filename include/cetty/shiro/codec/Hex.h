@@ -54,7 +54,7 @@ public:
      * @param bytes the byte array to Hex-encode.
      * @return A String representation of the resultant hex-encoded char array.
      */
-    static std::string encode(const std::string &in);
+    static std::string encode(const std::string &in) { return in; };
 
     /**
      * Converts an array of character bytes representing hexidecimal values into an
@@ -70,7 +70,7 @@ public:
      *                                  to this function
      * @see #decode(char[])
      */
-    static std::string decode(const std::string &in);
+    static std::string decode(const std::string &in){ return in; };
 
     /**
      * Converts a hexadecimal character to an integer.
@@ -80,7 +80,7 @@ public:
      * @return An integer
      * @throws IllegalArgumentException if ch is an illegal hex character
      */
-    static int toDigit(char ch, int index);
+    static int toDigit(char ch, int index){ return 0;};
 };
 }
 }

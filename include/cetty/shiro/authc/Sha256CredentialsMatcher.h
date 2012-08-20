@@ -18,11 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <string>
+
+#include <cetty/shiro/authc/AuthenticationToken.h>
+#include <cetty/shiro/authc/AuthenticationInfo.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
-
 /**
  * A {@code HashedCredentialMatcher} provides support for hashing of supplied {@code AuthenticationToken} credentials
  * before being compared to those in the {@code AuthenticationInfo} from the data store.
@@ -112,20 +115,76 @@ namespace authc {
  * @see org.apache.shiro.crypto.hash.Sha256Hash
  * @since 0.9
  */
-class Sha256CredentialsMatcher : public CredentialsMatcher {
-
-
+class Sha256CredentialsMatcher {
 public:
     /**
      * JavaBeans-compatibile no-arg constructor intended for use in IoC/Dependency Injection environments.  If you
      * use this constructor, you <em>MUST</em> also additionally set the
      * {@link #setHashAlgorithmName(String) hashAlgorithmName} property.
      */
-    Sha256CredentialsMatcher() {
-        this->hashSalted = false;
-        this->hashIterations = 1;
-        this->storedCredentialsHexEncoded = true; //false means Base64-encoded
+    Sha256CredentialsMatcher()
+            :hashSalted(false),
+             storedCredentialsHexEncoded(true),//false means Base64-encoded
+             hashIterations(1){}
+
+    /**
+     * Returns {@code true} if the provided token credentials match the stored account credentials,
+     * {@code false} otherwise.
+     *
+     * @param token   the {@code AuthenticationToken} submitted during the authentication attempt
+     * @param info the {@code AuthenticationInfo} stored in the system.
+     * @return {@code true} if the provided token credentials match the stored account credentials,
+     *         {@code false} otherwise.
+     */
+    bool doCredentialsMatch(const AuthenticationToken &token, const AuthenticationInfo &info);
+
+    /**
+     * Returns the {@code account}'s credentials.
+     * <p/>
+     * <p>This default implementation merely returns
+     * {@link AuthenticationInfo#getCredentials() account.getCredentials()} and exists as a template hook if subclasses
+     * wish to obtain the credentials in a different way or convert them to a different format before
+     * returning.
+     *
+     * @param info the {@code AuthenticationInfo} stored in the data store to be compared against the submitted authentication
+     *             token's credentials.
+     * @return the {@code account}'s associated credentials.
+     */
+    std::string getCredentials(const AuthenticationInfo &info);
+
+    /**
+     * Returns the {@code token}'s credentials.
+     * <p/>
+     * <p>This default implementation merely returns
+     * {@link AuthenticationToken#getCredentials() authenticationToken.getCredentials()} and exists as a template hook
+     * if subclasses wish to obtain the credentials in a different way or convert them to a different format before
+     * returning.
+     *
+     * @param token the {@code AuthenticationToken} submitted during the authentication attempt.
+     * @return the {@code token}'s associated credentials.
+     */
+    std::string getCredentials(const AuthenticationToken &token) {
+        return token.getCredentials();
     }
+
+    /**
+     * Returns {@code true} if the {@code tokenCredentials} argument is logically equal to the
+     * {@code accountCredentials} argument.
+     * <p/>
+     * <p>If both arguments are either a byte array (byte[]), char array (char[]) or String, they will be both be
+     * converted to raw byte arrays via the {@link #toBytes toBytes} method first, and then resulting byte arrays
+     * are compared via {@link Arrays#equals(byte[], byte[]) Arrays.equals(byte[],byte[])}.</p>
+     * <p/>
+     * <p>If either argument cannot be converted to a byte array as described, a simple Object <code>equals</code>
+     * comparison is made.</p>
+     * <p/>
+     * <p>Subclasses should override this method for more explicit equality checks.
+     *
+     * @param tokenCredentials   the {@code AuthenticationToken}'s associated credentials.
+     * @param accountCredentials the {@code AuthenticationInfo}'s stored credentials.
+     * @return {@code true} if the {@code tokenCredentials} are equal to the {@code accountCredentials}.
+     */
+    bool equals(const std::string &tokenCredentials, const std::string &accountCredentials);
 
     /**
      * Returns {@code true} if the system's stored credential hash is Hex encoded, {@code false} if it
@@ -236,14 +295,10 @@ public:
      * @param hashIterations the number of times to hash a submitted {@code AuthenticationToken}'s credentials.
      */
     void setHashIterations(int hashIterations) {
-        if (hashIterations < 1) {
-            this->hashIterations = 1;
-        } else {
-            this->hashIterations = hashIterations;
-        }
+        if (hashIterations < 1)  this->hashIterations = 1;
+        else this->hashIterations = hashIterations;
     }
 
-protected:
     /**
      * Returns a salt value used to hash the token's credentials.
      * <p/>
@@ -270,49 +325,6 @@ protected:
     }
 
     /**
-     * Returns a {@link Hash Hash} instance representing the already-hashed AuthenticationInfo credentials stored in the system.
-     * <p/>
-     * This method reconstructs a {@link Hash Hash} instance based on a {@code info.getCredentials} call,
-     * but it does <em>not</em> hash that value - it is expected that method call will return an already-hashed value.
-     * <p/>
-     * This implementation's reconstruction effort functions as follows:
-     * <ol>
-     * <li>Convert {@code account.getCredentials()} to a byte array via the {@link #toBytes toBytes} method.
-     * <li>If {@code account.getCredentials()} was originally a String or char[] before {@code toBytes} was
-     * called, check for encoding:
-     * <li>If {@link #storedCredentialsHexEncoded storedCredentialsHexEncoded}, Hex decode that byte array, otherwise
-     * Base64 decode the byte array</li>
-     * <li>Set the byte[] array directly on the {@code Hash} implementation and return it.</li>
-     * </ol>
-     *
-     * @param info the AuthenticationInfo from which to retrieve the credentials which assumed to be in already-hashed form.
-     * @return a {@link Hash Hash} instance representing the given AuthenticationInfo's stored credentials.
-     */
-    const std::string &getCredentials(const AuthenticationInfo &info);
-
-    /**
-     * This implementation first hashes the {@code token}'s credentials, potentially using a
-     * {@code salt} if the {@code info} argument is a
-     * {@link org.apache.shiro.authc.SaltedAuthenticationInfo SaltedAuthenticationInfo}.  It then compares the hash
-     * against the {@code AuthenticationInfo}'s
-     * {@link #getCredentials(org.apache.shiro.authc.AuthenticationInfo) already-hashed credentials}.  This method
-     * returns {@code true} if those two values are {@link #equals(Object, Object) equal}, {@code false} otherwise.
-     *
-     * @param token the {@code AuthenticationToken} submitted during the authentication attempt.
-     * @param info  the {@code AuthenticationInfo} stored in the system matching the token principal
-     * @return {@code true} if the provided token credentials hash match to the stored account credentials hash,
-     *         {@code false} otherwise
-     * @since 1.1
-     */
-
-public:
-    virtual bool doCredentialsMatch(const AuthenticationToken &token, const AuthenticationInfo &info) {
-        std::string tokenHashedCredentials = hashProvidedCredentials(token, info);
-        std::string accountCredentials = getCredentials(info);
-        return equals(tokenHashedCredentials, accountCredentials);
-    }
-
-    /**
      * Hash the provided {@code token}'s credentials using the salt stored with the account if the
      * {@code info} instance is an {@code instanceof} {@link SaltedAuthenticationInfo SaltedAuthenticationInfo} (see
      * the class-level JavaDoc for why this is the preferred approach).
@@ -330,7 +342,6 @@ public:
      * @return the token credentials hash
      * @since 1.1
      */
-protected:
     std::string hashProvidedCredentials(const AuthenticationToken &token, const AuthenticationInfo &info);
 
 
@@ -344,19 +355,13 @@ protected:
      *                       even if this argument is 0 or negative.
      * @return the hashed value of the provided credentials, according to the specified salt and hash iterations.
      */
-    Sha256Hash hashProvidedCredentials(const std::string &credentials, const std::string &salt, int hashIterations);
-    /**
-     * Returns a new, <em>uninitialized</em> instance, without its byte array set.  Used as a utility method in the
-     * {@link SimpleCredentialsMatcher#getCredentials(org.apache.shiro.authc.AuthenticationInfo) getCredentials(AuthenticationInfo)} implementation.
-     *
-     * @return a new, <em>uninitialized</em> instance, without its byte array set.
-     */
-    Sha256Hash newHashInstance();
+    std::string hashProvidedCredentials(const std::string &credentials, const std::string &salt, int hashIterations);
 
 private:
-    int hashIterations;
     bool hashSalted;
     bool storedCredentialsHexEncoded;
+
+    int hashIterations;
 };
 }
 }

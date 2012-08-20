@@ -1,4 +1,4 @@
-#if !definded(CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H)
+#if !defined(CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H)
 #define CETTY_SHIRO_REALM_AUTHENTICATINGREALM_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,14 +19,8 @@
  * under the License.
  */
 
-#include <cetty/shiro/authc/CredentialsMatcher.h>
+#include <cetty/shiro/authc/Sha256CredentialsMatcher.h>
 #include <cetty/shiro/realm/Realm.h>
-
-class CacheManager;
-
-namespace cetty { namespace shiro { namespace subject {
-    class PrincipalCollection;
-}}}
 
 namespace cetty {
 namespace shiro {
@@ -54,35 +48,16 @@ using namespace cetty::shiro::subject;
  * @since 0.2
  */
 class AuthenticatingRealm : public Realm {
-private:
-    /**
-     * Password matcher used to determine if the provided password matches
-     * the password stored in the data store.
-     */
-    CredentialsMatcher credentialsMatcher;
 
 public:
-    /*--------------------------------------------
-    |         C O N S T R U C T O R S           |
-    ============================================*/
-    AuthenticatingRealm() {}
 
-    AuthenticatingRealm(const CacheManager &cacheManager) {
-        setCacheManager(cacheManager);
-    }
+    AuthenticatingRealm() { matcher = new Sha256CredentialsMatcher(); }
 
-    AuthenticatingRealm(const CredentialsMatcher &matcher) {
+    AuthenticatingRealm(Sha256CredentialsMatcher *matcher) {
         setCredentialsMatcher(matcher);
     }
 
-    AuthenticatingRealm(CacheManager cacheManager, CredentialsMatcher matcher) {
-        setCacheManager(cacheManager);
-        setCredentialsMatcher(matcher);
-    }
 
-    /*--------------------------------------------
-    |  A C C E S S O R S / M O D I F I E R S    |
-    ============================================*/
     /**
      * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
      * credentials with those stored in the system.
@@ -93,9 +68,7 @@ public:
      * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
      *         credentials with those stored in the system.
      */
-    const CredentialsMatcher &getCredentialsMatcher() {
-        return credentialsMatcher;
-    }
+    Sha256CredentialsMatcher *getCredentialsMatcher() const{ return matcher; }
 
     /**
      * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
@@ -107,8 +80,8 @@ public:
      *
      * @param credentialsMatcher the matcher to use.
      */
-    void setCredentialsMatcher(const CredentialsMatcher &credentialsMatcher) {
-        this->credentialsMatcher = credentialsMatcher;
+    void setCredentialsMatcher(Sha256CredentialsMatcher *matcher) {
+        this->matcher = matcher;
     }
 
     bool getAuthenticationInfo(const AuthenticationToken &token, AuthenticationInfo *);
@@ -130,7 +103,7 @@ public:
      *          if there is an error acquiring data or performing
      *          realm-specific authentication logic for the specified <tt>token</tt>
      */
-    virtual bool doGetAuthenticationInfo(AuthenticationToken token, AuthenticationInfo *);
+    bool doGetAuthenticationInfo(AuthenticationToken token, AuthenticationInfo *);
 
     /**
      * Default implementation that does nothing (no-op) and exists as a convenience mechanism in case subclasses
@@ -152,7 +125,20 @@ public:
         //no-op, here for subclass override if desired.
     }
 
-    virtual ~AuthenticatingRealm(){}
+    virtual ~AuthenticatingRealm(){
+        if(matcher){
+            delete matcher;
+            matcher = NULL;
+        }
+    }
+
+private:
+    /**
+     * Password matcher used to determine if the provided password matches
+     * the password stored in the data store.
+     */
+    Sha256CredentialsMatcher *matcher;
+
 
 };
 }
