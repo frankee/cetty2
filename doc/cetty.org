@@ -29,18 +29,44 @@ ServerBootstrap watchdog(factory);
 ** discard
 
 * 模块说明
-** buffer
-** channel
-** pipeline
-** event
-** future
-** handler
-** bootstrap
-** config
-** logging
-** timer
-** SSL/TSL
-   
+** cetty-core
+*** buffer
+*** channel
+*** pipeline/handler
+*** future
+*** bootstrap
+*** config
+*** logging
+*** timer
+*** SSL/TSL
+
+** cetty-config
+*** config使用说明
+*** config internal
+
+** cetty-service
+cetty-service主要侧重于在分布式环境中，
+
+** cetty-protobuf
+
+** cetty-gearman
+
+** cetty-shiro
+*** authc
+*** authz
+*** session
+
+** cetty-soci
+
+** cetty-redis
+
+** cetty-beantalkd
+
+** cetty-zookeeper
+
+** cetty-zurg
+
+
 * 框架运行流程说明
 ** 服务器端启动流程
 ** 服务器端退出流程

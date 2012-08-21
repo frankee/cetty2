@@ -380,11 +380,11 @@
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp">
       <Filter>logging</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SmallFile.cpp">
       <Filter>util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp">
+      <Filter>channel\socket\asio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -945,9 +945,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryPtr.h">
       <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactoryFwd.h">
-      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
       <Filter>handler\codec\http</Filter>

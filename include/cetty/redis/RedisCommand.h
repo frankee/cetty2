@@ -33,11 +33,15 @@ using namespace cetty::util;
 
 class RedisCommand {
 public:
-    RedisCommand(const std::string& name) : paramCnt(0), name(name) {
+    RedisCommand(const std::string& name)
+        : paramCnt(0), name(name) {
         buffer = ChannelBuffers::buffer(512*1024);
         buffer->setIndex(12, 12);
         append(name);
     }
+
+    RedisCommand(const std::string& name, const std::string& key, const std::string& value);
+    RedisCommand(const std::string& name, const std::string& key, const StringPiece& value);
 
     ~RedisCommand() {}
 

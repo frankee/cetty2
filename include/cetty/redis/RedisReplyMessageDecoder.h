@@ -45,8 +45,8 @@ public:
 
 protected:
     virtual RedisReplyMessagePtr decode(ChannelHandlerContext& ctx,
-        const ReplayingDecoderBufferPtr& buffer,
-        int state);
+                                        const ReplayingDecoderBufferPtr& buffer,
+                                        int state);
 
 private:
     void fail(ChannelHandlerContext& ctx, long frameLength);

@@ -14,21 +14,18 @@
  * under the License.
  */
 
-#include "RedisClient.h"
+#include <cetty/redis/RedisClient.h>
 
 #include <deque>
 #include <boost/bind.hpp>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/NullChannel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/redis/RedisCommand.h>
-#include <cetty/redis/RedisMessageHandler.h>
-#include <cetty/redis/RedisResponseDecoder.h>
 
 namespace cetty {
 namespace redis {
@@ -101,19 +98,13 @@ void arrayCallBack(const RedisReplyMessagePtr& reply, const RedisClient::ArrayCa
     }
 }
 
-void RedisClient::request(const RedisCommand* request, const RedisServiceFuturePtr& future) {
-
-    if (context->connected()) {
-        context->write(commandMaker.done());
-        context->appendCallback(done);
-    }
-    else {
-        done(RedisReplyMessagePtr());
-    }
+void RedisClient::request(const RedisCommandPtr& command,
+    const RedisServiceFuturePtr& future) {
+    callMethod(clientService, command, future);
 }
 
 void RedisClient::set(const std::string& key, const SimpleString& value) {
-    request(RedisCommand("SET") << key << value, boost::bind(dummyCallBack, _1));
+    request(new RedisCommand("SET", key, value), boost::bind(dummyCallBack, _1));
 }
 
 void RedisClient::set(const std::string& key, const std::string& value) {

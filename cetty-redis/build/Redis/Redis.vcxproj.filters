@@ -43,5 +43,8 @@
     <ClInclude Include="..\..\..\include\cetty\redis\RedisRequestHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommandPtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

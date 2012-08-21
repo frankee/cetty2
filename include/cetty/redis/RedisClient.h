@@ -18,16 +18,17 @@
  */
 
 #include <map>
-#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/service/ClientService.h>
+#include <cetty/redis/RedisCommandPtr.h>
 #include <cetty/redis/RedisServiceFuture.h>
+
 
 namespace cetty {
 namespace redis {
 
 using namespace cetty::util;
-
-class RedisCommand;
+using namespace cetty::service;
 
 class RedisClient {
 public:
@@ -35,22 +36,20 @@ public:
     ~RedisClient() {}
 
 public:
-    void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future) {
-        callMethod(clientService, command, future);
-    }
+    void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future);
 
     // Strings Command
     void set(const std::string& key, const std::string& value, const RedisServiceFuturePtr& future);
-    void set(const std::string& key, const char* value, int length, const RedisServiceFuturePtr& future);
+    void set(const std::string& key, const StringPiece& value, const RedisServiceFuturePtr& future);
 
     void setnx(const std::string& key, const std::string& value, const RedisServiceFuturePtr& future);
-    void setnx(const std::string& key, const char* value, int length, const RedisServiceFuturePtr& future);
+    void setnx(const std::string& key, const StringPiece& value, const RedisServiceFuturePtr& future);
 
     void get(const std::string& key, const StringCallBack& done);
     void mget(const std::vector<std::string>& keys, const ArrayCallBack& done);
 
-    void hset(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
-    void hset(const std::string& key, const std::string& field, const SimpleString& value, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
+    void hset(const std::string& key, const std::string& field, const std::string& value, const RedisServiceFuturePtr& done);
+    void hset(const std::string& key, const std::string& field, const SimpleString& value, const RedisServiceFuturePtr& done);
 
     void hmset(const std::string& key, const std::vector<std::pair<std::string, std::string> >& fields, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
     void hmset(const std::string& key, const std::vector<std::pair<std::string, SimpleString> >& fields, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
@@ -65,6 +64,9 @@ public:
 
     void beginTransaction(const StatusCallBack& done);
     void commitTransaction(const StatusCallBack& done);
+
+private:
+    ClientServicePtr clientService;
 };
 
 }

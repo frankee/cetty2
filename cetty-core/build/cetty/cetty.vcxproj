@@ -228,7 +228,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactoryFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineMessageTransfer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedBufferChannel.h" />

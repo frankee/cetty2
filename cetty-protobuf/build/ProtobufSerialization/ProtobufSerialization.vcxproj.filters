@@ -13,6 +13,9 @@
     <Filter Include="protobuf\serialization\png">
       <UniqueIdentifier>{47346120-26e7-47c6-a133-3df1e8068c94}</UniqueIdentifier>
     </Filter>
+    <Filter Include="protobuf\serialization\xml">
+      <UniqueIdentifier>{dd13e5fc-f4b7-4122-9dc2-ed6d9cba01d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufFormatter.h">

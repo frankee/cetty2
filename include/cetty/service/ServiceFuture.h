@@ -40,12 +40,15 @@ public:
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
 
-    typedef boost::function2<void,ServiceFuture<T> const&,T const&> CompletedCallback;
+    typedef boost::function2<void, ServiceFuture<T> const&, T const&> CompletedCallback;
 	//typedef std::deque<CompletedCallback>::const_iterator ConstCallbacksIterator;
 
 public:
     ServiceFuture() {}
     ServiceFuture(int timeout) {}
+    ServiceFuture(const CompletedCallback& listener) {}
+    ServiceFuture(const CompletedCallback& listener, int timeout) {}
+
     virtual ~ServiceFuture() {}
 
     // Resets the RpcController to its initial state so that it may be reused in

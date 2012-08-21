@@ -18,9 +18,10 @@
  */
 
 #include <vector>
+#include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
 #include <cetty/util/Enum.h>
-#include <cetty/util/SimpleString.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
@@ -41,8 +42,6 @@ private:
     RedisReplyMessageType(int value) : cetty::util::Enum<RedisReplyMessageType>(value) {}
 };
 
-typedef boost::variant<boost::int64_t, SimpleString, std::vector<SimpleString> > RedisReplyMessageValue;
-
 class RedisReplyMessage : public ReferenceCounter<RedisReplyMessage> {
 public:
     RedisReplyMessage() : type(RedisReplyMessageType::NIL) {}
@@ -58,35 +57,38 @@ public:
         value = integer;
     }
 
-    void setValue(const SimpleString& simpleString) {
-        value = simpleString;
+    void setValue(const StringPiece& StringPiece) {
+        value = StringPiece;
     }
 
-    void setValue(const std::vector<SimpleString>& simpleStrings) {
-        value = simpleStrings;
+    void setValue(const std::vector<StringPiece>& StringPieces) {
+        value = StringPieces;
     }
 
     boost::int64_t getInteger() const {
         if (type == RedisReplyMessageType::INTEGER) {
             return boost::get<boost::int64_t>(value);
         }
+        else {
+            LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";
+        }
     }
 
-    const SimpleString& getString() const {
+    const StringPiece& getString() const {
         if (type == RedisReplyMessageType::STRING) {
-            return boost::get<SimpleString>(value);
+            return boost::get<StringPiece>(value);
         }
     }
 
-    const SimpleString& getStatus() const {
+    const StringPiece& getStatus() const {
         if (type == RedisReplyMessageType::STATUS) {
-            return boost::get<SimpleString>(value);
+            return boost::get<StringPiece>(value);
         }
     }
 
-    const SimpleString& getError() const {
+    const StringPiece& getError() const {
         if (type == RedisReplyMessageType::ERROR) {
-            return boost::get<SimpleString>(value);
+            return boost::get<StringPiece>(value);
         }
     }
 
@@ -94,15 +96,20 @@ public:
         return type == RedisReplyMessageType::NIL;
     }
 
-    const std::vector<SimpleString>& getArray() const {
+    const std::vector<StringPiece>& getArray() const {
         if (type == RedisReplyMessageType::ARRAY) {
-            return boost::get<std::vector<SimpleString> >(value);
+            return boost::get<std::vector<StringPiece> >(value);
         }
     }
 
 private:
+    typedef boost::variant<boost::int64_t,
+        StringPiece,
+        std::vector<StringPiece> > Value;
+
+private:
     RedisReplyMessageType  type;
-    RedisReplyMessageValue value;
+    Value value;
 };
 
 }

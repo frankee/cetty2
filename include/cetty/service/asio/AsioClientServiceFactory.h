@@ -21,7 +21,6 @@
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
-#include <cetty/util/TimerPtr.h>
 
 namespace cetty {
 namespace channel {
@@ -72,7 +71,6 @@ private:
 
     std::vector<ChannelPtr> channels;
 
-    TimerFactoryPtr timerFactory; // keep the life cycle
     AsioTcpSocketAddressImplFactory* socketAddressFactory;
     AsioIpAddressImplFactory* ipAddressFactory;
 };

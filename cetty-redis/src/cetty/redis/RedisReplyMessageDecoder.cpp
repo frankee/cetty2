@@ -16,10 +16,12 @@
 
 #include <cetty/redis/RedisReplyMessageDecoder.h>
 
+#include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 
 #include <cetty/handler/codec/TooLongFrameException.h>
 
@@ -45,8 +47,8 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 //static const char REDIS_WHITESPACE                " \f\n\r\t\v"
 
 RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
-    const ReplayingDecoderBufferPtr& buffer,
-    int state) {
+        const ReplayingDecoderBufferPtr& buffer,
+        int state) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
     int minFrameLength = Integer::MAX_VALUE;
 
@@ -61,7 +63,7 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
         if (arry[0] == REDIS_PREFIX_STATUS_REPLY) {
             reply->setType(RedisReplyMessageType::STATUS);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(SimpleString(arry.data(1), frameLength-1));
+            reply->setValue(StringPiece(arry.data(1), frameLength-1));
         }
         else if (arry[0] == REDIS_PREFIX_INTEGER_REPLY) {
             reply->setType(RedisReplyMessageType::INTEGER);
@@ -71,7 +73,7 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
         else if (arry[0] == REDIS_PREFIX_ERROR_REPLY) {
             reply->setType(RedisReplyMessageType::ERROR);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(SimpleString(arry.data(1), frameLength-1));
+            reply->setValue(StringPiece(arry.data(1), frameLength-1));
         }
         else if (arry[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
             if (arry[1] != '-') {
@@ -85,7 +87,7 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
                     Array data;
                     buffer->readableBytes(data);
                     buffer->skipBytes(strSize + 2);
-                    reply->setValue(SimpleString(data.data(), strSize));
+                    reply->setValue(StringPiece(data.data(), strSize));
                 }
                 else {
                     return UserEvent::EMPTY_EVENT;
@@ -101,7 +103,7 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
                 reply->setType(RedisReplyMessageType::ARRAY);
                 arry[frameLength] = '\0';
                 int arrayCount = atoi(arry.data(1));
-                std::vector<SimpleString> stringArray;
+                std::vector<StringPiece> stringArray;
                 stringArray.reserve(arrayCount);
 
                 buffer->skipBytes(frameLength + 2);
@@ -127,14 +129,14 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
                             data[strSize] = '\0';
                             buffer->skipBytes(strSize + 2);
 
-                            stringArray.push_back(SimpleString(data.data(), strSize));
+                            stringArray.push_back(StringPiece(data.data(), strSize));
                         }
                         else {
                             break;
                         }
                     }
                     else {
-                        stringArray.push_back(SimpleString());
+                        stringArray.push_back(StringPiece());
                         buffer->skipBytes(frameLength + 2);
                     }
                 }
@@ -174,26 +176,18 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
 }
 
 void RedisReplyMessageDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
-    std::string msg;
-    msg.reserve(64);
-
     if (frameLength > 0) {
-        msg.append("frame length exceeds ");
-        Integer::appendString(maxFrameLength, &msg);
-        msg.append(": ");
-        Integer::appendString(frameLength, &msg);
-        msg.append(" - discarded");
-
-        ChannelPipelines::fireExceptionCaught(ctx.getChannel(),
-                                      TooLongFrameException(msg));
+        ctx.fireExceptionCaught(ctx,
+                                TooLongFrameException(StringUtil::strprintf(
+                                            "frame length exceeds %d: %d - discarded",
+                                            maxFrameLength,
+                                            frameLength)));
     }
     else {
-        msg.append("frame length exceeds ");
-        Integer::appendString(maxFrameLength, &msg);
-        msg.append(" - discarded");
-
-        ChannelPipelines::fireExceptionCaught(ctx.getChannel(),
-                                      TooLongFrameException(msg));
+        ctx.fireExceptionCaught(ctx,
+                                TooLongFrameException(StringUtil::strprintf(
+                                            "frame length exceeds %d - discarded",
+                                            maxFrameLength)));
     }
 }
 
