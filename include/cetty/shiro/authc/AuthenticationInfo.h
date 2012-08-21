@@ -102,6 +102,19 @@ public:
                        const std::string &hashedCredentials,
                        const ByteSource &credentialsSalt);
 
+    AuthenticationInfo(const AuthenticationInfo &info){
+        this->principals = info.principals;
+        this->credentials = info.credentials;
+        this->credentialsSalt = info.credentialsSalt;
+    }
+
+    AuthenticationInfo& operator=(const AuthenticationInfo &info){
+        this->principals = info.principals;
+        this->credentials = info.credentials;
+        this->credentialsSalt = info.credentialsSalt;
+        return *this;
+    }
+
     /**
      * Returns all principals associated with the corresponding Subject.  Each principal is an identifying piece of
      * information useful to the application such as a username, or user id, a given name, etc - anything useful

@@ -109,6 +109,22 @@ public:
         init(principal, credentials, host, rememberMe);
     }
 
+    AuthenticationToken(const AuthenticationToken &token){
+        this->principal = token.principal;
+        this->credentials = token.credentials;
+        this->rememberMe = token.rememberMe;
+        this->host = token.host;
+    }
+
+
+    AuthenticationToken& operator=(const AuthenticationToken &token){
+        this->principal = token.principal;
+        this->credentials = token.credentials;
+        this->rememberMe = token.rememberMe;
+        this->host = token.host;
+
+        return *this;
+    }
 
     void init(const std::string &principal,
               const std::string& credentials,

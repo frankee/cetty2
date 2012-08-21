@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_MODULARREALMAUTHENTICATION_H)
-#define CETTY_SHIRO_MODULARREALMAUTHENTICATION_H
+#if !defined(CETTY_SHIRO_AUTHC_MODULARREALMAUTHENTICATION_H)
+#define CETTY_SHIRO_AUTHC_MODULARREALMAUTHENTICATION_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,6 +19,8 @@
  * under the License.
  */
 #include <vector>
+
+#include <cetty/shiro/authc/Authenticator.h>
 #include <cetty/shiro/subject/PrincipalCollection.h>
 
 namespace cetty { namespace shiro {namespace realm {
@@ -58,41 +60,15 @@ using namespace cetty::shiro::realm;
  * <p/>
  * As most multi-realm applications require at least one Realm authenticates successfully, the default
  * implementation is the {@link AtLeastOneSuccessfulStrategy}.
- *
- * @see #setRealms
- * @see AtLeastOneSuccessfulStrategy
- * @see AllSuccessfulStrategy
- * @see FirstSuccessfulStrategy
- * @since 0.1
  */
-class ModularRealmAuthenticator : public AbstractAuthenticator {
-
-    /**
-     * List of realms that will be iterated through when a user authenticates.
-     */
-private:
-    std::vector<AuthenticatingRealm> realms;
-
-    /**
-     * The authentication strategy to use during authentication attempts, defaults to a
-     * {@link org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy} instance.
-     */
-    AuthenticationStrategy authenticationStrategy;
-
+class ModularRealmAuthenticator : public Authenticator {
 public:
-    /*--------------------------------------------
-    |         C O N S T R U C T O R S           |
-    ============================================*/
-
     /**
      * Default no-argument constructor which
      * {@link #setAuthenticationStrategy(AuthenticationStrategy) enables}  an
      * {@link org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy} by default.
      */
     ModularRealmAuthenticator() {}
-    /*--------------------------------------------
-    |  A C C E S S O R S / M O D I F I E R S    |
-    ============================================*/
 
     /**
      * Sets all realms used by this Authenticator, providing PAM (Pluggable Authentication Module) configuration.
@@ -112,33 +88,9 @@ public:
         return this->realms;
     }
 
-    /**
-     * Returns the {@code AuthenticationStrategy} utilized by this modular authenticator during a multi-realm
-     * log-in attempt.  This object is only used when two or more Realms are configured.
-     * <p/>
-     * Unless overridden by
-     * the {@link #setAuthenticationStrategy(AuthenticationStrategy)} method, the default implementation
-     * is the {@link org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy}.
-     *
-     * @return the {@code AuthenticationStrategy} utilized by this modular authenticator during a log-in attempt.
-     * @since 0.2
-     */
-    const AuthenticationStrategy &getAuthenticationStrategy() {
-        return authenticationStrategy;
-    }
+    void onLogout(const PrincipalCollection &principals);
 
-    /**
-     * Allows overriding the default {@code AuthenticationStrategy} utilized during multi-realm log-in attempts.
-     * This object is only used when two or more Realms are configured.
-     *
-     * @param authenticationStrategy the strategy implementation to use during log-in attempts.
-     * @since 0.2
-     */
-    void setAuthenticationStrategy(const AuthenticationStrategy &authenticationStrategy) {
-        this->authenticationStrategy = authenticationStrategy;
-    }
-
-    void onLogout(PrincipalCollection principals);
+    virtual ~ModularRealmAuthenticator(){}
 
 
 protected:
@@ -146,29 +98,6 @@ protected:
         std::vector<AuthenticatingRealm> realms = getRealms();
         return !realms.empty();
     }
-
-    /**
-     * Performs the authentication attempt by interacting with the single configured realm, which is significantly
-     * simpler than performing multi-realm logic.
-     *
-     * @param realm the realm to consult for AuthenticationInfo.
-     * @param token the submitted AuthenticationToken representing the subject's (user's) log-in principals and credentials.
-     * @return the AuthenticationInfo associated with the user account corresponding to the specified {@code token}
-     */
-    void doSingleRealmAuthentication(const AuthenticatingRealm &realm, const AuthenticationToken &token, AuthenticationInfo *info);
-
-    /**
-     * Performs the multi-realm authentication attempt by calling back to a {@link AuthenticationStrategy} object
-     * as each realm is consulted for {@code AuthenticationInfo} for the specified {@code token}.
-     *
-     * @param realms the multiple realms configured on this Authenticator instance.
-     * @param token  the submitted AuthenticationToken representing the subject's (user's) log-in principals and credentials.
-     * @return an aggregated AuthenticationInfo instance representing account data across all the successfully
-     *         consulted realms.
-     */
-    void doMultiRealmAuthentication(const std::vector<AuthenticatingRealm> &realms,
-        const AuthenticationToken &token,
-        AuthenticationInfo *info);
 
     /**
      * Attempts to authenticate the given token by iterating over the internal collection of
@@ -192,7 +121,7 @@ protected:
      * @throws AuthenticationException if the user could not be authenticated or the user is denied authentication
      *                                 for the given principal and credentials.
      */
-    bool doAuthenticate(const AuthenticationToken &authenticationToken, AuthenticationInfo *info);
+    virtual bool doAuthenticate(const AuthenticationToken &token, AuthenticationInfo *info);
 
     /**
      * First calls <code>super.onLogout(principals)</code> to ensure a logout notification is issued, and for each
@@ -205,10 +134,17 @@ protected:
      *
      * @param principals the application-specific Subject/user identifier.
      */
+
+private:
+    /**
+     * List of realms that will be iterated through when a user authenticates
+     * notice the lifecycle of AuthenticationRealm.
+     */
+    std::vector<AuthenticatingRealm> realms;
 };
 
 }
 }
 }
 
-#endif // #if !defined(CETTY_SHIRO_MODULARREALMAUTHENTICATION_H)
+#endif // #if !defined(CETTY_SHIRO_AUTHC_MODULARREALMAUTHENTICATION_H)
