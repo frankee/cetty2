@@ -33,9 +33,9 @@ public:
     */
     enum SeekType {
         SEEK_FROM_START=0,
-        stSeekForwards,
-        stSeekBackwards,
-        stSeekFromEnd
+        SEEK_FORWARDS,
+        SEEK_BACKWARDS,
+        SEEK_FROM_END
     };
 
     virtual ~InputStream() {};
