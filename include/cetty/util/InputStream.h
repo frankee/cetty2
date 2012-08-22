@@ -32,7 +32,7 @@ public:
     *seek types
     */
     enum SeekType {
-        stSeekFromStart=0,
+        SEEK_FROM_START=0,
         stSeekForwards,
         stSeekBackwards,
         stSeekFromEnd
@@ -40,21 +40,25 @@ public:
 
     virtual ~InputStream() {};
 
-    virtual void read(boost::int8_t& val);
-    virtual boost::int8_t readByte();
-
-    virtual int read(boost::int8_t* bytes, int length);
-    virtual int read(boost::int8_t* bytes, int offset, int length);
-
-    virtual int skip(int n);
-
-    virtual int available() const {
-        return 0;
+    virtual void read(boost::int8_t* val) = 0;
+    boost::int8_t readByte() {
+        boost::int8_t value = -1;
+        read(&value);
+        return value;
     }
 
-    virtual int  mark(int readlimit);
-    virtual void reset();
-    virtual bool markSupported() const;
+    int read(boost::int8_t* bytes, int length) {
+        return read(bytes, 0, length);
+    }
+    virtual int read(boost::int8_t* bytes, int offset, int length) = 0;
+
+    virtual int skip(int n) = 0;
+
+    virtual int available() const = 0;
+
+    virtual int  mark(int readlimit) = 0;
+    virtual void reset() = 0;
+    virtual bool markSupported() const = 0;
 
     virtual void close() = 0;
 };

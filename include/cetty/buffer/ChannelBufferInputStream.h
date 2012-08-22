@@ -21,6 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/util/InputStream.h>
+
 namespace cetty {
 namespace buffer {
 
@@ -44,15 +47,19 @@ namespace buffer {
  * @apiviz.uses org.jboss.netty.buffer.ChannelBuffer
  */
 
-class ChannelBufferInputStream : public InputStream, public DataInput {
+class ChannelBufferInputStream : public cetty::util::InputStream {
 public:
     /**
      * Creates a new stream which reads data from the specified <tt>buffer</tt>
      * starting at the current <tt>readerIndex</tt> and ending at the current
      * <tt>writerIndex</tt>.
      */
-    ChannelBufferInputStream(const ChannelBuffer& buffer) {
-        this(buffer, buffer.readableBytes());
+    ChannelBufferInputStream(const ChannelBufferPtr& buffer)
+    : buffer(buffer),
+      startIndex(buffer ? buffer->readerIndex() : 0),
+      endIndex(buffer ? buffer->writerIndex() : 0) {
+          BOOST_ASSERT(buffer);
+          buffer->markReaderIndex();
     }
 
     /**
@@ -64,171 +71,76 @@ public:
      *         if <tt>readerIndex + length</tt> is greater than
      *            <tt>writerIndex</tt>
      */
-    ChannelBufferInputStream(const ChannelBuffer& buffer, int length) {
-        if (length < 0) {
-            throw new InvalidArgumentException("length: " + length);
-        }
+    ChannelBufferInputStream(const ChannelBufferPtr& buffer, int length)
+    : buffer(buffer) {
+        BOOST_ASSERT(length >= 0 && buffer && length <= buffer->readableBytes());
 
-        if (length > buffer.readableBytes()) {
-            throw new RangeException();
-        }
-
-        this.buffer = buffer;
-        startIndex = buffer.readerIndex();
+        startIndex = buffer->readerIndex();
         endIndex = startIndex + length;
-        buffer.markReaderIndex();
+        buffer->markReaderIndex();
+    }
+
+    virtual void close() {
+        buffer.reset();
+        startIndex = endIndex = 0;
     }
 
     /**
      * Returns the number of read bytes by this stream so far.
      */
     int readBytes() const {
-        return buffer.readerIndex() - startIndex;
+        if (buffer) {
+            return buffer->readerIndex() - startIndex;
+        }
+        return 0;
     }
 
-    int available() const { /*throws IOException*/
-        return endIndex - buffer.readerIndex();
+    virtual int available() const {
+        if (buffer) {
+            return endIndex - buffer->readerIndex();
+        }
+        return 0;
     }
 
-    void mark(int readlimit) {
-        buffer.markReaderIndex();
+    virtual int mark(int readlimit) {
+        if (buffer) {
+            buffer->markReaderIndex();
+            return buffer->readerIndex();
+        }
+        return 0;
     }
 
-    bool markSupported() const {
+    virtual bool markSupported() const {
         return true;
     }
 
-    int read() { /*throws IOException*/
-        if (!buffer.readable()) {
+    virtual void reset() {
+        if (buffer) {
+            buffer->resetReaderIndex();
+        }
+    }
+
+    virtual void read(boost::int8_t* val) {
+        if (val && buffer && buffer->readable()) {
+                *val = buffer->readByte() & 0xff;
+        }
+    }
+
+    virtual int read(boost::int8_t* bytes, int offset, int length) {
+        int left = available();
+
+        if (left == 0) {
             return -1;
         }
 
-        return buffer.readByte() & 0xff;
+        length = std::min(left, length);
+        Array arry((char*)bytes, length);
+        buffer->readBytes(&arry, offset, length);
+        return length;
     }
 
-    int read(boost::int8_t* b, int off, int len) { /*throws IOException */
-        int available = available();
-
-        if (available == 0) {
-            return -1;
-        }
-
-        len = Math.min(available, len);
-        buffer.readBytes(b, off, len);
-        return len;
-    }
-
-    void reset() { /*throws IOException*/
-        buffer.resetReaderIndex();
-    }
-
-    long skip(long n) { /*throws IOException */
-        if (n > Integer.MAX_VALUE) {
-            return skipBytes(Integer.MAX_VALUE);
-        }
-        else {
-            return skipBytes((int) n);
-        }
-    }
-
-    bool readBoolean() { /*throws IOException */
-        checkAvailable(1);
-        return read() != 0;
-    }
-
-    byte readByte() { /*throws IOException*/
-        if (!buffer.readable()) {
-            throw new EOFException();
-        }
-
-        return buffer.readByte();
-    }
-
-    public char readChar() throws IOException {
-        return (char) readShort();
-    }
-
-    public double readDouble() throws IOException {
-        return Double.longBitsToDouble(readLong());
-    }
-
-    public float readFloat() throws IOException {
-        return Float.intBitsToFloat(readInt());
-    }
-
-    public void readFully(byte[] b) throws IOException {
-        readFully(b, 0, b.length());
-    }
-
-    public void readFully(byte[] b, int off, int len) throws IOException {
-        checkAvailable(len);
-        buffer.readBytes(b, off, len);
-    }
-
-    public int readInt() throws IOException {
-        checkAvailable(4);
-        return buffer.readInt();
-    }
-
-    private final StringBuilder lineBuf = new StringBuilder();
-
-    bool readLine(std::string& line) { /*throws IOException*/
-        lineBuf.setLength(0);
-
-        for (;;) {
-            int b = read();
-
-            if (b < 0 || b == '\n') {
-                break;
-            }
-
-            lineBuf.append((char) b);
-        }
-
-        while (lineBuf.charAt(lineBuf.length() - 1) == '\r') {
-            lineBuf.setLength(lineBuf.length() - 1);
-        }
-
-        return lineBuf.toString();
-    }
-
-    public long readLong() throws IOException {
-        checkAvailable(8);
-        return buffer.readLong();
-    }
-
-    public short readShort() throws IOException {
-        checkAvailable(2);
-        return buffer.readShort();
-    }
-
-    public String readUTF() throws IOException {
-        return DataInputStream.readUTF(this);
-    }
-
-    public int readUnsignedByte() throws IOException {
-        return readByte() & 0xff;
-    }
-
-    public int readUnsignedShort() throws IOException {
-        return readShort() & 0xffff;
-    }
-
-    public int skipBytes(int n) throws IOException {
-        int nBytes = Math.min(available(), n);
-        buffer.skipBytes(nBytes);
-        return nBytes;
-    }
-
-private:
-    void checkAvailable(int fieldSize) throws IOException {
-        if (fieldSize < 0) {
-            throw new RangeException();
-        }
-
-        if (fieldSize > available()) {
-            throw new EOFException();
-        }
+    virtual int skip(int n) {
+        return 0;
     }
 
 private:
