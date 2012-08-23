@@ -12,9 +12,9 @@ namespace util {
 
 using namespace boost::posix_time;
 
-extern const boost::any emptyAny;
-extern const std::string emptyString;
-extern const ptime emptyPtime;
+extern boost::any emptyAny;
+extern std::string emptyString;
+extern ptime emptyPtime;
 }
 }
 }

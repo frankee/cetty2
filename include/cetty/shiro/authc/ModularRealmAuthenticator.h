@@ -21,11 +21,8 @@
 #include <vector>
 
 #include <cetty/shiro/authc/Authenticator.h>
+#include <cetty/shiro/realm/AuthenticatingRealm.h>
 #include <cetty/shiro/subject/PrincipalCollection.h>
-
-namespace cetty { namespace shiro {namespace realm {
-    class AuthenticatingRealm;
-}}}
 
 namespace cetty {
 namespace shiro {
@@ -87,6 +84,8 @@ public:
     const std::vector<AuthenticatingRealm> &getRealms() const{
         return this->realms;
     }
+
+    void clean(){ realms.clear(); }
 
     void onLogout(const PrincipalCollection &principals);
 

@@ -57,6 +57,10 @@ public:
         setCredentialsMatcher(matcher);
     }
 
+    AuthenticatingRealm(const AuthenticatingRealm &authenticationRealm){
+        this->matcher = new Sha256CredentialsMatcher();
+    }
+
 
     /**
      * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
@@ -103,7 +107,7 @@ public:
      *          if there is an error acquiring data or performing
      *          realm-specific authentication logic for the specified <tt>token</tt>
      */
-    bool doGetAuthenticationInfo(AuthenticationToken token, AuthenticationInfo *);
+    bool doGetAuthenticationInfo(const AuthenticationToken &token, AuthenticationInfo *);
 
     /**
      * Default implementation that does nothing (no-op) and exists as a convenience mechanism in case subclasses

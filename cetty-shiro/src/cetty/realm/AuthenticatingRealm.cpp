@@ -7,6 +7,8 @@
 
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
 
+#include <cetty/shiro/dao/RedisDao.h>
+
 namespace cetty {
 namespace shiro {
 namespace realm {
@@ -24,15 +26,23 @@ bool AuthenticatingRealm::getAuthenticationInfo(
 }
 
 bool AuthenticatingRealm::doGetAuthenticationInfo(
-    AuthenticationToken token,
+    const AuthenticationToken &token,
     AuthenticationInfo *info)
 {
-    PrincipalCollection pc;
-    pc.add("chenhl", getName());
-    info->setPrincipals(pc);
-    info->setCredentials("123456");
-    return true;
+    std::string password = ::getPassword(token.getPrincipal());
+
+    if(password == token.getCredentials()){
+        PrincipalCollection pc;
+        pc.add(token.getPrincipal(), getName());
+        info->setPrincipals(pc);
+        info->setCredentials(password);
+        return true;
+    }
+
+    return false;
 }
+
+
 }
 }
 }

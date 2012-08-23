@@ -1,58 +1,67 @@
-/*
- * Subject.cpp
- *
- *  Created on: 2012-8-8
- *      Author: chenhl
- */
-
-
 #include <cetty/shiro/subject/Subject.h>
+#include <cetty/shiro/SecurityManager.h>
+#include <cetty/shiro/session/SessionContext.h>
 
 namespace cetty {
 namespace shiro {
 namespace subject {
-std::string Subject::RUN_AS_PRINCIPALS_SESSION_KEY = "cetty.shiro.subject.Subject.RUN_AS_PRINCIPALS_SESSION_KEY";
 
-bool Subject::login(const AuthenticationToken &token){
-    clearRunAsIdentities();
-    Subject subject = securityManager.login(this, token);
+bool Subject::login(AuthenticationToken &token){
+    Subject subject;
+    if(!securityManager->login(token, *this, &subject)) return false;
 
-          PrincipalCollection principals;
+    PrincipalCollection principals = subject.principals;
+    assert(!principals.isEmpty());
 
-          String host = null;
+    this->principals = principals;
+    this->authenticated = true;
 
-          if (subject instanceof DelegatingSubject) {
-              DelegatingSubject delegating = (DelegatingSubject) subject;
-              //we have to do this in case there are assumed identities - we don't want to lose the 'real' principals:
-              principals = delegating.principals;
-              host = delegating.host;
-          } else {
-              principals = subject.getPrincipals();
-          }
+    host = token.getHost();
+    this->host = host;
 
-          if (principals == null || principals.isEmpty()) {
-              String msg = "Principals returned from securityManager.login( token ) returned a null or " +
-                      "empty value.  This value must be non null and populated with one or more elements.";
-              throw new IllegalStateException(msg);
-          }
-          this.principals = principals;
-          this.authenticated = true;
-          if (token instanceof HostAuthenticationToken) {
-              host = ((HostAuthenticationToken) token).getHost();
-          }
-          if (host != null) {
-              this.host = host;
-          }
-          Session session = subject.getSession(false);
-          if (session != null) {
-              this.session = decorate(session);
-              this.runAsPrincipals = getRunAsPrincipals(this.session);
-          } else {
-              this.session = null;
-          }
-          ThreadContext.bind(this);
+    SessionPtr session = subject.getSession(false);
+    if (session) this->session = session;
+
+    return true;
+}
+
+void Subject::logout(){
+    this->securityManager->logout(*this);
+
+    this->session->release();
+    this->principals.clear();
+    this->authenticated = false;
+
+    //Don't set securityManager to null here - the Subject can still be
+    //used, it is just considered anonymous at this point.  The SecurityManager instance is
+    //necessary if the subject would log in again or acquire a new session.  This is in response to
+    //https://issues.apache.org/jira/browse/JSEC-22
+    //this.securityManager = null;
+}
+
+SessionPtr Subject::getSession(bool create){
+    if (!this->session && create) {
+        SessionContext sessionContext = createSessionContext();
+        SessionPtr session = this->securityManager->start(sessionContext);
+        this->session = session;
+    }
+    return this->session;
+}
+
+SessionContext Subject::createSessionContext(){
+    SessionContext sessionContext;
+    if (!host.empty()) {
+        sessionContext.setHost(host);
+     }
+    return sessionContext;
+}
+
+void Subject::sessionStopped(){
+    this->session->release();
+}
+
 }
 }
 }
-}
+
 

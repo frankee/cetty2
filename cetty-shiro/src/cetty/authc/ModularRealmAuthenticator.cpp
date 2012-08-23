@@ -8,7 +8,6 @@
 #include <assert.h>
 
 #include <cetty/shiro/authc/ModularRealmAuthenticator.h>
-#include <cetty/shiro/realm/AuthenticatingRealm.h>
 
 namespace cetty {
 namespace shiro {

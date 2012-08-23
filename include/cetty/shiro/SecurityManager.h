@@ -18,85 +18,225 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 #include <cetty/shiro/authc/ModularRealmAuthenticator.h>
 #include <cetty/shiro/session/SessionManager.h>
 #include <cetty/shiro/subject/Subject.h>
+#include <cetty/shiro/subject/SubjectFactory.h>
+#include <cetty/shiro/subject/SubjectContext.h>
 
 namespace cetty {
 namespace shiro {
 
-using namespace ::cetty::shiro::authc;
-using namespace ::cetty::shiro::session;
+using namespace cetty::shiro::authc;
+using namespace cetty::shiro::session;
 using namespace cetty::shiro::subject;
+
 /**
- * The Shiro framework's default concrete implementation of the {@link SecurityManager} interface,
- * based around a collection of {@link org.apache.shiro.realm.Realm}s.  This implementation delegates its
- * authentication, authorization, and session operations to wrapped {@link Authenticator}, {@link Authorizer}, and
- * {@link org.apache.shiro.session.mgt.SessionManager SessionManager} instances respectively via superclass
- * implementation.
+ * A {@code SecurityManager} executes all security operations for <em>all</em> Subjects (aka users) across a
+ * single application.
  * <p/>
- * To greatly reduce and simplify configuration, this implementation (and its superclasses) will
- * create suitable defaults for all of its required dependencies, <em>except</em> the required one or more
- * {@link Realm Realm}s.  Because {@code Realm} implementations usually interact with an application's data model,
- * they are almost always application specific;  you will want to specify at least one custom
- * {@code Realm} implementation that 'knows' about your application's data/security model
- * (via {@link #setRealm} or one of the overloaded constructors).  All other attributes in this class hierarchy
- * will have suitable defaults for most enterprise applications.
+ * The interface itself primarily exists as a convenience - it extends the {@link org.apache.shiro.authc.Authenticator},
+ * {@link Authorizer}, and {@link SessionManager} interfaces, thereby consolidating
+ * these behaviors into a single point of reference.  For most Shiro usages, this simplifies configuration and
+ * tends to be a more convenient approach than referencing {@code Authenticator}, {@code Authorizer}, and
+ * {@code SessionManager} instances separately;  instead one only needs to interact with a single
+ * {@code SecurityManager} instance.
  * <p/>
- * <b>RememberMe notice</b>: This class supports the ability to configure a
- * {@link #setRememberMeManager RememberMeManager}
- * for {@code RememberMe} identity services for login/logout, BUT, a default instance <em>will not</em> be created
- * for this attribute at startup.
+ * In addition to the above three interfaces, this interface provides a number of methods supporting
+ * {@link Subject} behavior. A {@link org.apache.shiro.subject.Subject Subject} executes
+ * authentication, authorization, and session operations for a <em>single</em> user, and as such can only be
+ * managed by {@code A SecurityManager} which is aware of all three functions.  The three parent interfaces on the
+ * other hand do not 'know' about {@code Subject}s to ensure a clean separation of concerns.
  * <p/>
- * Because RememberMe services are inherently client tier-specific and
- * therefore aplication-dependent, if you want {@code RememberMe} services enabled, you will have to specify an
- * instance yourself via the {@link #setRememberMeManager(RememberMeManager) setRememberMeManager}
- * mutator.  However if you're reading this JavaDoc with the
- * expectation of operating in a Web environment, take a look at the
- * {@code org.apache.shiro.web.DefaultWebSecurityManager} implementation, which
- * <em>does</em> support {@code RememberMe} services by default at startup.
+ * <b>Usage Note</b>: In actuality the large majority of application programmers won't interact with a SecurityManager
+ * very often, if at all.  <em>Most</em> application programmers only care about security operations for the currently
+ * executing user, usually attained by calling
+ * {@link org.apache.shiro.SecurityUtils#getSubject() SecurityUtils.getSubject()}.
+ * <p/>
+ * Framework developers on the other hand might find working with an actual SecurityManager useful.
  *
+ * @see org.apache.shiro.mgt.DefaultSecurityManager
  * @since 0.2
  */
 class SecurityManager {
-
-private:
-    SubjectFactory *subjectFactory;
-    ModularRealmAuthenticator *authenticator;
-    SessionManager *sessionManager;
-
 public:
+    SecurityManager(): sessionManager(NULL){}
+    SecurityManager(SessionManager *sessionManager){
+        this->sessionManager = sessionManager;
+    }
+
     /**
-     * Default no-arg constructor.
+     * Authenticates a user based on the submitted {@code AuthenticationToken}.
+     * <p/>
+     * If the authentication is successful, an {@link AuthenticationInfo} instance is returned that represents the
+     * user's account data relevant to Shiro.  This returned object is generally used in turn to construct a
+     * {@code Subject} representing a more complete security-specific 'view' of an account that also allows access to
+     * a {@code Session}.
+     *
+     * @param authenticationToken any representation of a user's principals and credentials submitted during an
+     *                            authentication attempt.
+     * @return the AuthenticationInfo representing the authenticating user's account data.
      */
-    SecurityManager() {
-        subjectFactory = new SubjectFactory();
-        authenticator = new ModularRealmAuthenticator();
-        sessionManager = new SessionManager();
+    bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
+
+    /**
+     * Starts a new session based on the specified contextual initialization data, which can be used by the underlying
+     * implementation to determine how exactly to create the internal Session instance.
+     * <p/>
+     * This method is mainly used in framework development, as the implementation will often relay the argument
+     * to an underlying {@link SessionFactory} which could use the context to construct the internal Session
+     * instance in a specific manner.  This allows pluggable {@link org.apache.shiro.session.Session Session} creation
+     * logic by simply injecting a {@code SessionFactory} into the {@code SessionManager} instance.
+     *
+     * @param context the contextual initialization data that can be used by the implementation or underlying
+     *                {@link SessionFactory} when instantiating the internal {@code Session} instance.
+     * @return the newly created session.
+     * @see SessionFactory#createSession(SessionContext)
+     * @since 1.0
+     */
+    SessionPtr start(SessionContext &context);
+
+    /**
+     * Retrieves the session corresponding to the specified contextual data (such as a session ID if applicable), or
+     * {@code null} if no Session could be found.  If a session is found but invalid (stopped or expired), a
+     * {@link SessionException} will be thrown.
+     *
+     * @param key the Session key to use to look-up the Session
+     * @return the {@code Session} instance corresponding to the given lookup key or {@code null} if no session
+     *         could be acquired.
+     * @throws SessionException if a session was found but it was invalid (stopped/expired).
+     * @since 1.0
+     */
+    SessionPtr getSession(const std::string &sessionId);
+
+    /**
+     * Logs in the specified Subject using the given {@code authenticationToken}, returning an updated Subject
+     * instance reflecting the authenticated state if successful or throwing {@code AuthenticationException} if it is
+     * not.
+     * <p/>
+     * Note that most application developers should probably not call this method directly unless they have a good
+     * reason for doing so.  The preferred way to log in a Subject is to call
+     * <code>subject.{@link org.apache.shiro.subject.Subject#login login(authenticationToken)}</code> (usually after
+     * acquiring the Subject by calling {@link org.apache.shiro.SecurityUtils#getSubject() SecurityUtils.getSubject()}).
+     * <p/>
+     * Framework developers on the other hand might find calling this method directly useful in certain cases.
+     *
+     * @param subject             the subject against which the authentication attempt will occur
+     * @param authenticationToken the token representing the Subject's principal(s) and credential(s)
+     * @return the subject instance reflecting the authenticated state after a successful attempt
+     * @throws AuthenticationException if the login attempt failed.
+     * @since 1.0
+     */
+    bool login(AuthenticationToken &token, Subject &existing, Subject *subject);
+
+    /**
+     * Logs out the specified Subject from the system.
+     * <p/>
+     * Note that most application developers should not call this method unless they have a good reason for doing
+     * so.  The preferred way to logout a Subject is to call
+     * <code>{@link org.apache.shiro.subject.Subject#logout Subject.logout()}</code>, not the
+     * {@code SecurityManager} directly.
+     * <p/>
+     * Framework developers on the other hand might find calling this method directly useful in certain cases.
+     *
+     * @param subject the subject to log out.
+     * @since 1.0
+     */
+    void logout(Subject &subject);
+
+    /**
+     * Called when this object is being destroyed, allowing any necessary cleanup of internal resources.
+     *
+     * @throws Exception if an exception occurs during object destruction.
+     */
+    void destroy();
+
+    /**
+     * Convenience method for applications using a single realm that merely wraps the realm in a list and then invokes
+     * the {@link #setRealms} method.
+     *
+     * @param realm the realm to set for a single-realm application.
+     * @since 0.2
+     */
+    void setAuthenticatingRealm(AuthenticatingRealm &realm);
+
+    /**
+     * Sets the realms managed by this <tt>SecurityManager</tt> instance.
+     *
+     * @param realms the realms managed by this <tt>SecurityManager</tt> instance.
+     * @throws IllegalArgumentException if the realms collection is null or empty.
+     */
+    void setAuthenticatingRealms(std::vector<AuthenticatingRealm> &realms);
+
+    void afterRealmsSet() {}
+
+    /**
+     * Returns the {@link Realm Realm}s managed by this SecurityManager instance.
+     *
+     * @return the {@link Realm Realm}s managed by this SecurityManager instance.
+     */
+    std::vector<AuthenticatingRealm> &getRealms() { return realms; }
+
+    /**
+     * Returns the delegate <code>Authenticator</code> instance that this SecurityManager uses to perform all
+     * authentication operations.  Unless overridden by the
+     * {@link #setAuthenticator(org.apache.shiro.authc.Authenticator) setAuthenticator}, the default instance is a
+     * {@link org.apache.shiro.authc.pam.ModularRealmAuthenticator ModularRealmAuthenticator}.
+     *
+     * @return the delegate <code>Authenticator</code> instance that this SecurityManager uses to perform all
+     *         authentication operations.
+     */
+    ModularRealmAuthenticator &getAuthenticator(){
+        return authenticator;
     }
 
-    SecurityManager(SubjectFactory *subjectFactory,
-        ModularRealmAuthenticator *authenticator,
-        SessionManager *sessionManager)
-    {
-       this->subjectFactory = subjectFactory;
-       this->authenticator = authenticator;
-       this->sessionManager = sessionManager;
+    /**
+     * Sets the delegate <code>Authenticator</code> instance that this SecurityManager uses to perform all
+     * authentication operations.  Unless overridden by this method, the default instance is a
+     * {@link org.apache.shiro.authc.pam.ModularRealmAuthenticator ModularRealmAuthenticator}.
+     *
+     * @param authenticator the delegate <code>Authenticator</code> instance that this SecurityManager will use to
+     *                      perform all authentication operations.
+     * @throws IllegalArgumentException if the argument is <code>null</code>.
+     */
+    void setAuthenticator(ModularRealmAuthenticator &authenticator){
+        this->authenticator = authenticator;
     }
 
+    /**
+     * Sets the underlying delegate {@link SessionManager} instance that will be used to support this implementation's
+     * <tt>SessionManager</tt> method calls.
+     * <p/>
+     * This <tt>SecurityManager</tt> implementation does not provide logic to support the inherited
+     * <tt>SessionManager</tt> interface, but instead delegates these calls to an internal
+     * <tt>SessionManager</tt> instance.
+     * <p/>
+     * If a <tt>SessionManager</tt> instance is not set, a default one will be automatically created and
+     * initialized appropriately for the the existing runtime environment.
+     *
+     * @param sessionManager delegate instance to use to support this manager's <tt>SessionManager</tt> method calls.
+     */
+    void setSessionManager(SessionManager *sessionManager);
 
-    SubjectFactory *getSubjectFactory() {
-        return subjectFactory;
-    }
+    void afterSessionManagerSet() {}
 
-    void setSubjectFactory(SubjectFactory *subjectFactory) {
+    /**
+     * Returns this security manager's internal delegate {@link SessionManager SessionManager}.
+     *
+     * @return this security manager's internal delegate {@link SessionManager SessionManager}.
+     * @see #setSessionManager(org.apache.shiro.session.mgt.SessionManager) setSessionManager
+     */
+    SessionManager *getSessionManager() { return this->sessionManager; }
+
+
+    SubjectFactory &getSubjectFactory() { return subjectFactory;}
+
+    void setSubjectFactory(const SubjectFactory &subjectFactory) {
         this->subjectFactory = subjectFactory;
     }
 
-protected:
-    SubjectContext *createSubjectContext() {
-        return new SubjectContext();
-    }
+    SubjectContext createSubjectContext();
 
     /**
      * Creates a {@code Subject} instance for the user represented by the given method arguments.
@@ -107,16 +247,7 @@ protected:
      * @return the {@code Subject} instance that represents the context and session data for the newly
      *         authenticated subject.
      */
-    Subject *createSubject(AuthenticationToken *token, AuthenticationInfo *info, Subject *existing) {
-        SubjectContext *context = createSubjectContext();
-        context->setAuthenticated(true);
-        context->setAuthenticationToken(token);
-        context->setAuthenticationInfo(info);
-        if (existing != NULL) {
-            context->setSubject(existing);
-        }
-        return createSubject(context);
-    }
+    void createSubject(AuthenticationToken &token, AuthenticationInfo &info, Subject &existing, Subject *subject);
 
     /**
      * Binds a {@code Subject} instance created after authentication to the application for later use.
@@ -127,81 +258,6 @@ protected:
      * @param subject the {@code Subject} instance created after authentication to be bound to the application
      *                for later use.
      */
-    void bind(Subject *subject) {
-        // TODO consider refactoring to use Subject.Binder.
-        // This implementation was copied from SessionSubjectBinder that was removed
-        PrincipalCollection *principals = subject->getPrincipals();
-        if (principals != NULL && !principals->isEmpty()) {
-            Session *session = subject->getSession();
-            bindPrincipalsToSession(principals, session);
-        } else {
-            Session *session = subject->getSession(false);
-            if (session != NULL) {
-                session->removeAttribute(SubjectContext::PRINCIPALS_SESSION_KEY);
-            }
-        }
-
-        if (subject->isAuthenticated()) {
-            Session *session = subject->getSession();
-            session->setAttribute(SubjectContext::AUTHENTICATED_SESSION_KEY, subject->isAuthenticated());
-        } else {
-            Session *session = subject.getSession(false);
-            if (session != NULL) {
-                session->removeAttribute(SubjectContext::AUTHENTICATED_SESSION_KEY);
-            }
-        }
-    }
-
-    /**
-     * Saves the specified identity to the given session, making the session no longer anonymous.
-     *
-     * @param principals the Subject identity to save to the session
-     * @param session    the Session to retain the Subject identity.
-     * @throws IllegalArgumentException if the principals are null or empty or the session is null
-     * @since 1.0
-     */
-    void bindPrincipalsToSession(PrincipalCollection *principals, Session *session){
-        session->setAttribute(SubjectContext::PRINCIPALS_SESSION_KEY, principals);
-    }
-
-    /**
-     * First authenticates the {@code AuthenticationToken} argument, and if successful, constructs a
-     * {@code Subject} instance representing the authenticated account's identity.
-     * <p/>
-     * Once constructed, the {@code Subject} instance is then {@link #bind bound} to the application for
-     * subsequent access before being returned to the caller.
-     *
-     * @param token the authenticationToken to process for the login attempt.
-     * @return a Subject representing the authenticated user.
-     * @throws AuthenticationException if there is a problem authenticating the specified {@code token}.
-     */
-    Subject *login(Subject *subject, AuthenticationToken *token) {
-        AuthenticationInfo *info =  authenticate(token);
-        if(info == NULL) {
-            onFailedLogin(token, ae, subject);
-            return NULL;
-        }
-
-        Subject *loggedIn = createSubject(token, info, subject);
-        bind(loggedIn);
-        onSuccessfulLogin(token, info, loggedIn);
-        return loggedIn;
-    }
-
-    void onSuccessfulLogin(AuthenticationToken *token, AuthenticationInfo *info, Subject *subject) {
-        rememberMeSuccessfulLogin(token, info, subject);
-    }
-
-    void rememberMeSuccessfulLogin(AuthenticationToken *token, AuthenticationInfo *info, Subject *subject);
-
-    void onFailedLogin(AuthenticationToken *token, AuthenticationException ae, Subject *subject);
-    void rememberMeFailedLogin(AuthenticationToken *token, AuthenticationException ae, Subject *subject);
-
-    void beforeLogout(Subject *subject);
-
-    void rememberMeLogout(Subject *subject);
-
-    SubjectContext *copy(SubjectContext *subjectContext);
 
     /**
      * This implementation attempts to resolve any session ID that may exist in the context by
@@ -216,24 +272,27 @@ protected:
      * @see SubjectFactory#createSubject
      * @since 1.0
      */
-    Subject *createSubject(SubjectContext *subjectContext) {
-        //create a copy so we don't modify the argument's backing map:
-        SubjectContext *context = copy(subjectContext);
+    void createSubject(SubjectContext &context, Subject *subject);
 
-        //ensure that the context has a SecurityManager instance, and if not, add one:
-        context = ensureSecurityManager(context);
+    void bind(Subject &subject);
 
-        //Resolve an associated Session (usually based on a referenced session ID), and place it in the context before
-        //sending to the SubjectFactory.  The SubjectFactory should not need to know how to acquire sessions as the
-        //process is often environment specific - better to shield the SF from these details:
-        context = resolveSession(context);
-
-        //Similarly, the SubjectFactory should not require any concept of RememberMe - translate that here first
-        //if possible before handing off to the SubjectFactory:
-        context = resolvePrincipals(context);
-
-        return getSubjectFactory().createSubject(context);
+    /**
+     * Saves the specified identity to the given session, making the session no longer anonymous.
+     *
+     * @param principals the Subject identity to save to the session
+     * @param session    the Session to retain the Subject identity.
+     * @throws IllegalArgumentException if the principals are null or empty or the session is null
+     * @since 1.0
+     */
+    void bindPrincipalsToSession(const PrincipalCollection &principals, SessionPtr &session){
+        session->setAttribute(SubjectContext::PRINCIPALS_SESSION_KEY, principals);
     }
+
+    void onSuccessfulLogin(const AuthenticationToken &token, const AuthenticationInfo &info, const  Subject &subject) {};
+
+    void onFailedLogin(const AuthenticationToken &token, const  Subject &subject){};
+
+    void beforeLogout(const Subject &subject){};
 
     /**
      * Determines if there is a {@code SecurityManager} instance in the context, and if not, adds 'this' to the
@@ -244,11 +303,7 @@ protected:
      * @return The SubjectContext to use to pass to a {@link SubjectFactory} for subject creation.
      * @since 1.0
      */
-    SubjectContext *ensureSecurityManager(SubjectContext *context) {
-        if (context->resolveSecurityManager() != NULL)  return context;
-        context->setSecurityManager(this);
-        return context;
-    }
+    void ensureSecurityManager(SubjectContext &context);
 
     /**
      * Attempts to resolve any associated session based on the context and returns a
@@ -263,22 +318,11 @@ protected:
      * @return The context to use to pass to a {@link SubjectFactory} for subject creation.
      * @since 1.0
      */
-    SubjectContext *resolveSession(SubjectContext *context) {
-        if (context->resolveSession() != NULL) {
-            return context;
-        }
+    void resolveSession(SubjectContext &context);
 
-        Session *session = resolveContextSession(context);
-        if (session != NULL) {
-                context->setSession(session);
-        return context;
-    }
-        return context;
-    }
+    SessionPtr resolveContextSession(SubjectContext &context);
 
-    Session *resolveContextSession(SubjectContext *context);
-
-    SessionKey *getSessionKey(SubjectContext *context);
+    std::string getSessionId(SubjectContext &context);
 
     /**
      * Attempts to resolve an identity (a {@link PrincipalCollection}) for the context using heuristics.  The
@@ -298,7 +342,7 @@ protected:
      * @since 1.0
      */
 
-    SubjectContext *resolvePrincipals(SubjectContext *context);
+    void resolvePrincipals(SubjectContext &context);
     /**
      * Satisfies SHIRO-157: associate a known identity with the current session to ensure that we don't need to
      * continually perform rememberMe operations for sessions that already have an identity.  Doing this prevents the
@@ -313,12 +357,11 @@ protected:
      * @param context    the context to use to locate or create a session to which the principals will be saved
      * @since 1.0
      */
-    void bindPrincipalsToSession(PrincipalCollection *principals, SubjectContext *context);
+    void bindPrincipalsToSession(PrincipalCollection &principals, SubjectContext &context);
 
-    SessionContext *createSessionContext(SubjectContext *subjectContext);
-    void logout(Subject *subject);
+    SessionContext createSessionContext(SubjectContext &subjectContext);
 
-    void stopSession(Subject *subject);
+    void stopSession(Subject &subject);
 
     /**
      * Unbinds or removes the Subject's state from the application, typically called during {@link #logout}.
@@ -329,12 +372,16 @@ protected:
      *
      * @param subject the subject to unbind from the application as it will no longer be used.
      */
-    void unbind(Subject *subject);
+    void unbind(Subject &subject);
 
-    Session *start(SessionContext *context);
+private:
+    SubjectFactory subjectFactory;
+    ModularRealmAuthenticator authenticator;
+    SessionManager *sessionManager;
 
-    PrincipalCollection *getRememberedIdentity(SubjectContext *subjectContext);
+    std::vector<AuthenticatingRealm> realms;
 };
+
 }
 }
 #endif // #if !defined(CETTY_SHIRO_SECURITYMANAGER_H)

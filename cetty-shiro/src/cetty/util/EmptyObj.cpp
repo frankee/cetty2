@@ -12,9 +12,9 @@ namespace cetty {
 namespace shiro {
 namespace util {
 
-const boost::any emptyAny;
-const std::string emptyString;
-const ptime emptyPtime;
+boost::any emptyAny;
+std::string emptyString;
+ptime emptyPtime;
 
 }
 }
