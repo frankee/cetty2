@@ -22,29 +22,27 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/RedisReplyMessage.h>
+#include <cetty/redis/command/Transactions.h>
 
 namespace cetty {
 namespace redis {
 
 using namespace cetty::channel;
-using namespace cetty::bootstrap;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::redis::command;
 
-void dummyCallBack(const RedisReplyMessagePtr& reply) {
-#if defined(_DEBUG)
-    printf("reply.\n");
-#endif
+void dummySetCallback(const RedisServiceFuture& future,
+                      const RedisReplyMessagePtr& reply) {
+    LOG_DEBUG << "redis replied the set command";
 }
 
-void dummyStatusCallBack(int status) {
-
-}
-
-void statusCallBack(const RedisReplyMessagePtr& reply, const RedisClient::StatusCallBack& callback) {
+void RedisClient::statusCallBack(const RedisServiceFuture& future,
+                    const RedisReplyMessagePtr& reply,
+                    const RedisClient::StatusCallBack& callback) {
     if (!reply) {
         callback(-1);
     }
@@ -56,7 +54,8 @@ void statusCallBack(const RedisReplyMessagePtr& reply, const RedisClient::Status
     }
 }
 
-void integerCallBack(const RedisReplyMessagePtr& reply, const RedisClient::StatusCallBack& callback) {
+void integerCallBack(const RedisReplyMessagePtr& reply,
+                     const RedisClient::StatusCallBack& callback) {
     if (!reply) {
         callback(-1);
     }
@@ -71,12 +70,14 @@ void integerCallBack(const RedisReplyMessagePtr& reply, const RedisClient::Statu
     }
 }
 
-void stringCallBack(const RedisReplyMessagePtr& reply, const RedisClient::StringCallBack& callback) {
+void RedisClient::bulkCallBack(const RedisServiceFuture& future,
+                  const RedisReplyMessagePtr& reply,
+                  const RedisClient::BulkCallBack& callback) {
     if (!reply) {
-        callback(-1, SimpleString());
+        callback(-1, StringPiece());
     }
     else if (reply->getType() == RedisReplyMessageType::NIL) {
-        callback(-1, SimpleString());
+        callback(-1, StringPiece());
     }
     else if (reply->getType() == RedisReplyMessageType::STATUS) {
         callback(0, reply->getStatus());
@@ -86,12 +87,14 @@ void stringCallBack(const RedisReplyMessagePtr& reply, const RedisClient::String
     }
 }
 
-void arrayCallBack(const RedisReplyMessagePtr& reply, const RedisClient::ArrayCallBack& callback) {
+void RedisClient::multiBulkCallBack(const RedisServiceFuture& future,
+                                    const RedisReplyMessagePtr& reply,
+                                    const MultiBulkCallBack& callback) {
     if (!reply) {
-        callback(-1, std::vector<SimpleString>());
+        callback(-1, std::vector<StringPiece>());
     }
     else if (reply->getType() == RedisReplyMessageType::NIL) {
-        callback(-1, std::vector<SimpleString>());
+        callback(-1, std::vector<StringPiece>());
     }
     else if (reply->getType() == RedisReplyMessageType::ARRAY) {
         callback(0, reply->getArray());
@@ -99,107 +102,36 @@ void arrayCallBack(const RedisReplyMessagePtr& reply, const RedisClient::ArrayCa
 }
 
 void RedisClient::request(const RedisCommandPtr& command,
-    const RedisServiceFuturePtr& future) {
+                          const RedisServiceFuturePtr& future) {
     callMethod(clientService, command, future);
 }
 
-void RedisClient::set(const std::string& key, const SimpleString& value) {
-    request(new RedisCommand("SET", key, value), boost::bind(dummyCallBack, _1));
+void RedisClient::set(const std::string& key, const StringPiece& value) {
+    RedisServiceFuturePtr future(
+        new RedisServiceFuture(boost::bind(dummySetCallback, _1, _2)));
+
+    request(stringsCommandSet(key, value), future);
 }
 
-void RedisClient::set(const std::string& key, const std::string& value) {
-    request(RedisCommand("SET") << key << value, boost::bind(dummyCallBack, _1));
+void RedisClient::get(const std::string& key, const BulkCallBack& callback) {
+    RedisServiceFuturePtr future(new RedisServiceFuture(
+        boost::bind(&RedisClient::bulkCallBack, _1, _2, callback)));
+
+    request(stringsCommandGet(key), future);
 }
 
-void RedisClient::get(const std::string& key, const StringCallBack& done) {
-    request(RedisCommand("GET") << key, boost::bind(stringCallBack, _1, done));
+void RedisClient::beginTransaction(const StatusCallBack& callback) {
+    RedisServiceFuturePtr future(new RedisServiceFuture(
+        boost::bind(&RedisClient::statusCallBack, _1, _2, callback)));
+
+    request(transactionsCommandMulti(), future);
 }
 
-void RedisClient::mget(const std::vector<std::string>& keys, const ArrayCallBack& done) {
-    RedisCommand maker("MGET");
+void RedisClient::commitTransaction(const StatusCallBack& callback) {
+    RedisServiceFuturePtr future(new RedisServiceFuture(
+        boost::bind(&RedisClient::statusCallBack, _1, _2, callback)));
 
-    for (std::size_t i = 0; i < keys.size(); ++i) {
-        maker << keys[i];
-    }
-
-    request(maker, boost::bind(arrayCallBack, _1, done));
-}
-
-void RedisClient::rename(const std::string& key, const std::string& newKey, const StatusCallBack& done) {
-    request(RedisCommand("RENAME") << key << newKey,boost::bind(statusCallBack, _1, done));
-}
-
-void RedisClient::beginTransaction(const StatusCallBack& done) {
-    request(RedisCommand("MULTI"), boost::bind(statusCallBack, _1, done));
-}
-
-void RedisClient::commitTransaction(const StatusCallBack& done) {
-    request(RedisCommand("EXEC"), boost::bind(statusCallBack, _1, done));
-}
-
-void RedisClient::hset(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done) {
-    request(RedisCommand("HSET") << key << field << value, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::hset(const std::string& key, const std::string& field, const SimpleString& value, const StatusCallBack& done) {
-    request(RedisCommand("HSET") << key << field << value, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::hmset(const std::string& key, const std::vector<std::pair<std::string, std::string> >& fields, const StatusCallBack& done /*= DUMY_STATUS_CALL_BACK*/) {
-    RedisCommand maker("HMSET");
-
-    maker << key;
-
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        maker << fields[i].first << fields[i].second;
-    }
-
-    request(maker, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::hmset(const std::string& key, const std::vector<std::pair<std::string, SimpleString> >& fields, const StatusCallBack& done /*= DUMY_STATUS_CALL_BACK*/) {
-    RedisCommand maker("HMSET");
-
-    maker << key;
-
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        maker << fields[i].first << fields[i].second;
-    }
-
-    request(maker, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::hget(const std::string& key, const std::string& field, const StringCallBack& done) {
-    request(RedisCommand("HGET") << key << field, boost::bind(stringCallBack, _1, done));
-}
-
-void RedisClient::hmget(const std::string& key, const std::vector<std::string>& fields, const ArrayCallBack& done) {
-    RedisCommand maker("HMGET");
-
-    maker << key;
-
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        maker << fields[i];
-    }
-
-    request(maker, boost::bind(arrayCallBack, _1, done));
-}
-
-void RedisClient::hsetnx(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done /*= DUMY_STATUS_CALL_BACK*/) {
-    command(RedisCommand("HSETNX") << key << field << value, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::hsetnx(const std::string& key, const std::string& field, const SimpleString& value, const StatusCallBack& done /*= DUMY_STATUS_CALL_BACK*/) {
-    hsetnx(key, field, value).request()
-    command(RedisCommand("HSETNX") << key << field << value, boost::bind(integerCallBack, _1, done));
-}
-
-void RedisClient::setnx(const std::string& key, const std::string& value) {
-    command(RedisCommand("SETNX") << key << value, boost::bind(dummyCallBack, _1));
-}
-
-void RedisClient::setnx(const std::string& key, const SimpleString& value) {
-    request(RedisCommand("SETNX") << key << value, boost::bind(dummyCallBack, _1));
+    request(transactionsCommandExec(), future);
 }
 
 }

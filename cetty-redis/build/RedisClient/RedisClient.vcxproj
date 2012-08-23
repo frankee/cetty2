@@ -11,42 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Connection.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Hashes.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Keys.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Scripting.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Server.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\SortedSets.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Strings.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\command\Transactions.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessageDecoder.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Connection.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Hashes.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Keys.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Scripting.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Server.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\SortedSets.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Strings.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\command\Transactions.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommand.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommandEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommandPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisRequestHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessageDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisReplyMessagePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisServiceFuture.h" />
+    <ClCompile Include="..\..\example\client\Redis.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}</ProjectGuid>
-    <RootNamespace>redis</RootNamespace>
+    <ProjectGuid>{32D488B0-BB56-48F6-B965-EC1D67CE078F}</ProjectGuid>
+    <RootNamespace>EchoClient</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -56,7 +25,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -71,7 +40,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../lib</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../bin</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
@@ -88,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../include;../../src;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../example/echo;../../../include;../../src;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;BOOST_ALL_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -97,16 +66,15 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cettyd.lib;serviced.lib;redisd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -124,9 +92,6 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>

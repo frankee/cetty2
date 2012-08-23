@@ -19,11 +19,16 @@
 
 #include <string>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
 
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
+#include <cetty/util/ReferenceCounter.h>
+
+#include <cetty/redis/RedisCommandPtr.h>
 
 namespace cetty {
 namespace redis {
@@ -31,7 +36,7 @@ namespace redis {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class RedisCommand {
+class RedisCommand : public cetty::util::ReferenceCounter<RedisCommand, int> {
 public:
     RedisCommand(const std::string& name)
         : paramCnt(0), name(name) {
@@ -40,16 +45,12 @@ public:
         append(name);
     }
 
-    RedisCommand(const std::string& name, const std::string& key, const std::string& value);
-    RedisCommand(const std::string& name, const std::string& key, const StringPiece& value);
-
     ~RedisCommand() {}
 
     const std::string& getCommandName() const {
         return this->name;
     }
 
-public:
     RedisCommand& append(const char* param, int size) {
         if (NULL == param || size <= 0) {
             return *this;
@@ -80,6 +81,10 @@ public:
         return append(param);
     }
 
+    RedisCommand& operator<< (const StringPiece& param) {
+        return append(param.data(), param.length());
+    }
+
     template <typename T>
     RedisCommand& operator<<(T const& datum) {
         return append(boost::lexical_cast<std::string>(datum));
@@ -88,6 +93,14 @@ public:
     RedisCommand& operator<<(const std::vector<std::string>& data) {
         for (std::size_t i = 0; i < data.size(); ++i) {
             append(data[i]);
+        }
+
+        return *this;
+    }
+
+    RedisCommand& operator<<(const std::vector<StringPiece>& data) {
+        for (std::size_t i = 0; i < data.size(); ++i) {
+            append(data[i].data(), data[i].length());
         }
 
         return *this;
@@ -102,15 +115,16 @@ public:
         return *this;
     }
 
-    const ChannelBufferPtr& done() {
+    void done() {
         std::string header;
         StringUtil::strprintf(&header, "*%d\r\n", paramCnt);
 
         BOOST_ASSERT(buffer->aheadWritableBytes() >= (int)header.size());
 
         buffer->writeBytesAhead(header);
-        return buffer;
     }
+
+    const ChannelBufferPtr& getBuffer() const { return buffer; }
 
 private:
     int paramCnt;

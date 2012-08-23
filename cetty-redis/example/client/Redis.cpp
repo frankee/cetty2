@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,11 +16,14 @@
 
 #include <string>
 #include <boost/bind.hpp>
-#include "RedisClient.h"
+#include <cetty/redis/RedisClient.h>
+#include <cetty/redis/builder/RedisClientBuilder.h>
 
 using namespace cetty::redis;
+using namespace cetty::redis::builder;
+using namespace cetty::util;
 
-void myCallback(int code, const SimpleString& reply) {
+void myCallback(int code, const StringPiece& reply) {
     if (code < 0) {
         printf("the value not exist.\n");
     }
@@ -30,7 +32,7 @@ void myCallback(int code, const SimpleString& reply) {
     }
 }
 
-void myArrayCallback(int code, const std::vector<SimpleString>& replies) {
+void myArrayCallback(int code, const std::vector<StringPiece>& replies) {
     if (code < 0) {
         printf("the array value not exist.\n");
     }
@@ -42,10 +44,11 @@ void myArrayCallback(int code, const std::vector<SimpleString>& replies) {
 }
 
 int main(int argc, char** argv) {
-    RedisClient client;
-    client.addServer("127.0.0.1", 6379);
-
     std::vector<std::string> keys;
+    RedisClientBuilder builder;
+    builder.addConnection("127.0.0.1", 6379);
+
+    RedisClient client(builder.build());
 
     /*
     std::string buffer(1024* 100, 0xff);
@@ -73,13 +76,16 @@ int main(int argc, char** argv) {
     client.hmget("ht", keys, boost::bind(myArrayCallback, _1, _2));
     */
 
-    client.set("mset1", std::string("1---"));
-    client.set("mset2", std::string("sdksalsdj888788**&&^^2"));
+    client.set("mset1", "1---");
+    //client.set("mset2", "sdksalsdj888788**&&^^2");
 
+#if 0
     keys.clear();
     keys.push_back("mset1");
     keys.push_back("mset2");
-    client.mget(keys, boost::bind(myArrayCallback, _1, _2));
+    client.get(keys.begin(), keys.end(), boost::bind(myArrayCallback, _1, _2));
+#endif
+    //service->getCloseFuture()->awaitUninterruptibly();
 
     system("PAUSE");
 

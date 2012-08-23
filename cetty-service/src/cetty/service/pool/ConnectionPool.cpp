@@ -28,7 +28,7 @@ using namespace cetty::channel;
 using namespace cetty::service;
 
 ConnectionPool::ConnectionPool(const Connections& connections)
-    : connections(connections) {
+    : connections(connections), connecting(false) {
 
 }
 
@@ -38,12 +38,16 @@ ConnectionPool::~ConnectionPool() {
 
 ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
     if (channels.empty()) {
-        ChannelFuturePtr future =
-            bootstrap.connect(connections[0].host, connections[0].port);
-        callbacks.push_back(callback);
+        if (!connecting) {
+            ChannelFuturePtr future =
+                bootstrap.connect(connections[0].host, connections[0].port);
+            callbacks.push_back(callback);
 
-        future->addListener(boost::bind(
-                                &ConnectionPool::connectedCallback, this, _1));
+            connecting = true;
+
+            future->addListener(boost::bind(
+                &ConnectionPool::connectedCallback, this, _1));
+        }
 
         return ChannelPtr();
     }
@@ -52,7 +56,16 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
     }
 }
 
+cetty::channel::ChannelPtr ConnectionPool::getChannel() {
+    if (!channels.empty()) {
+        return channels.begin()->second->channel;
+    }
+    return ChannelPtr();
+}
+
 void ConnectionPool::connectedCallback(const ChannelFuture& future) {
+    connecting = false;
+
     ChannelConnection* conn = new ChannelConnection;
     ChannelPtr channel = future.getChannel();
     

@@ -9,6 +9,12 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="command">
+      <UniqueIdentifier>{5a4e1c38-d4f9-452e-829d-3c2e8e393430}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="builder">
+      <UniqueIdentifier>{35b967c5-1adc-4c48-8b92-fffe67705091}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp">
@@ -19,6 +25,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\redis\RedisReplyMessageDecoder.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Hashes.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Keys.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\SortedSets.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Strings.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Server.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Connection.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Scripting.cpp">
+      <Filter>command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\command\Transactions.cpp">
+      <Filter>command</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +78,36 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\redis\RedisCommandPtr.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Hashes.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Keys.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\SortedSets.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Strings.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisCommandEncoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Server.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Connection.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Scripting.h">
+      <Filter>command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\command\Transactions.h">
+      <Filter>command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

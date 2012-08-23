@@ -17,9 +17,85 @@
  * under the License.
  */
 
+#include <boost/cstdint.hpp>
+#include <cetty/util/StringPiece.h>
+#include <cetty/redis/RedisCommand.h>
+
 namespace cetty {
 namespace redis {
 namespace command {
+
+    extern const std::string MGET;
+    extern const std::string MSET;
+    extern const std::string MSETNX;
+
+    using namespace cetty::util;
+    using namespace cetty::redis;
+
+    RedisCommandPtr stringsCommandAppend(const std::string& key, const StringPiece& value);
+
+    RedisCommandPtr stringsCommandBitcount(const std::string& key, int start, int end);
+    RedisCommandPtr stringsCommandDecrement(const std::string& key);
+    RedisCommandPtr stringsCommandDecrementBy(const std::string& key, boost::int64_t value);
+
+    RedisCommandPtr stringsCommandGet(const std::string& key);
+
+    template<typename Iterator>
+    RedisCommandPtr stringsCommandGet(const Iterator& begin, const Iterator& end) {
+        RedisCommandPtr command(new RedisCommand(MGET));
+        for (Iterator itr = begin; itr != end; ++itr) {
+            *command << *itr;
+        }
+        
+        command->done();
+        return command;
+    }
+
+    RedisCommandPtr stringsCommandGetBit(const std::string& key, int offset);
+    RedisCommandPtr stringsCommandGetRange(const std::string& key, int start, int end);
+
+    RedisCommandPtr stringsCommandGetset(const std::string& key, const StringPiece& value);
+
+    RedisCommandPtr stringsCommandIncrement(const std::string& key);
+    RedisCommandPtr stringsCommandIncrement(const std::string& key, boost::int64_t value);
+    RedisCommandPtr stringsCommandIncrement(const std::string& key, double value);
+
+    template<typename Iterator>
+    RedisCommandPtr stringsCommandSet(const std::string& key, const Iterator& begin, const Iterator& end) {
+        RedisCommandPtr command(new RedisCommand(MSET));
+        *command << key;
+
+        for (Iterator itr = begin; itr != end; ++itr) {
+            *command << *itr;
+        }
+
+        command->done();
+        return command;
+    }
+
+    RedisCommandPtr stringsCommandSet(const std::string& key, const StringPiece& value, int expiration);
+
+    RedisCommandPtr stringsCommandSet(const std::string& key, const StringPiece& value);
+
+    RedisCommandPtr stringCommandSetBit(const std::string& key, const StringPiece& value, int offset);
+
+    template<typename Iterator>
+    RedisCommandPtr stringsCommandSetNx(const std::string& key, const Iterator& begin, const Iterator& end) {
+        RedisCommandPtr command(new RedisCommand(MSETNX));
+        *command << key;
+
+        for (Iterator itr = begin; itr != end; ++itr) {
+            *command << *itr;
+        }
+
+        command->done();
+        return command;
+    }
+    
+    RedisCommandPtr stringsCommandSetNx(const std::string& key, const StringPiece& value);
+    RedisCommandPtr stringsCommandSetRange(const std::string& key, int offset, const StringPiece& value);
+
+    RedisCommandPtr stringsCommandStrlen(const std::string& key);
 
 }
 }

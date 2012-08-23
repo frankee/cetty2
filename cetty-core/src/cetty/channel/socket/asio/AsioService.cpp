@@ -21,7 +21,6 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-
 void AsioService::stop() {
     EventLoop::stop();
     ioService.stop();

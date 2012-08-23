@@ -46,8 +46,12 @@ public:
 public:
     ServiceFuture() {}
     ServiceFuture(int timeout) {}
-    ServiceFuture(const CompletedCallback& listener) {}
-    ServiceFuture(const CompletedCallback& listener, int timeout) {}
+    ServiceFuture(const CompletedCallback& listener) {
+        addListener(listener);
+    }
+    ServiceFuture(const CompletedCallback& listener, int timeout) {
+        addListener(listener);
+    }
 
     virtual ~ServiceFuture() {}
 

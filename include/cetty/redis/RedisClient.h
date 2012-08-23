@@ -18,11 +18,15 @@
  */
 
 #include <map>
+#include <boost/bind.hpp>
+
 #include <cetty/util/StringPiece.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/redis/RedisCommandPtr.h>
+#include <cetty/redis/RedisReplyMessagePtr.h>
 #include <cetty/redis/RedisServiceFuture.h>
 
+#include <cetty/redis/command/Strings.h>
 
 namespace cetty {
 namespace redis {
@@ -32,38 +36,70 @@ using namespace cetty::service;
 
 class RedisClient {
 public:
-    RedisClient(const ClientServicePtr& clientService) {}
+    RedisClient(const ClientServicePtr& clientService)
+        : clientService(clientService) {}
     ~RedisClient() {}
+
+    typedef boost::function2<void,
+        const RedisServiceFuture&,
+        const RedisReplyMessagePtr&> ReplyCallback;
+
+    typedef boost::function1<void, int> StatusCallBack;
+    typedef boost::function2<void, int, const StringPiece&> BulkCallBack;
+    typedef boost::function2<void, int, const std::vector<StringPiece>&> MultiBulkCallBack;
 
 public:
     void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future);
 
     // Strings Command
-    void set(const std::string& key, const std::string& value, const RedisServiceFuturePtr& future);
-    void set(const std::string& key, const StringPiece& value, const RedisServiceFuturePtr& future);
+    void set(const std::string& key, const StringPiece& value);
 
-    void setnx(const std::string& key, const std::string& value, const RedisServiceFuturePtr& future);
-    void setnx(const std::string& key, const StringPiece& value, const RedisServiceFuturePtr& future);
+    void setnx(const std::string& key, const StringPiece& value);
 
-    void get(const std::string& key, const StringCallBack& done);
-    void mget(const std::vector<std::string>& keys, const ArrayCallBack& done);
+    void get(const std::string& key, const BulkCallBack& callback);
 
-    void hset(const std::string& key, const std::string& field, const std::string& value, const RedisServiceFuturePtr& done);
-    void hset(const std::string& key, const std::string& field, const SimpleString& value, const RedisServiceFuturePtr& done);
+    template<typename Iterator>
+    void get(const Iterator& keyBegin, const Iterator& keyEnd, const MultiBulkCallBack& callback) {
+        RedisCommandPtr command =
+            cetty::redis::command::stringsCommandGet<Iterator>(keyBegin, keyEnd);
 
-    void hmset(const std::string& key, const std::vector<std::pair<std::string, std::string> >& fields, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
-    void hmset(const std::string& key, const std::vector<std::pair<std::string, SimpleString> >& fields, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
+        RedisServiceFuturePtr future(new RedisServiceFuture(
+            boost::bind(&RedisClient::multiBulkCallBack, _1, _2, callback)));
 
-    void hsetnx(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
-    void hsetnx(const std::string& key, const std::string& field, const SimpleString& value, const StatusCallBack& done = DUMY_STATUS_CALL_BACK);
+        request(command, future);
+    }
 
-    void hget(const std::string& key, const std::string& field, const StringCallBack& done);
-    void hmget(const std::string& key, const std::vector<std::string>& fields, const ArrayCallBack& done);
+#if 0
+    void hset(const std::string& key, const std::string& field, const std::string& value);
+    void hset(const std::string& key, const std::string& field, const StringPiece& value);
+
+    void hmset(const std::string& key, const std::vector<std::pair<std::string, std::string> >& fields, const StatusCallBack& done);
+    void hmset(const std::string& key, const std::vector<std::pair<std::string, StringPiece> >& fields, const StatusCallBack& done);
+
+    void hsetnx(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done);
+    void hsetnx(const std::string& key, const std::string& field, const StringPiece& value, const StatusCallBack& done);
+
+    void hget(const std::string& key, const std::string& field, const BulkCallBack& done);
+    void hmget(const std::string& key, const std::vector<std::string>& fields, const MultiBulkCallBack& done);
 
     void rename(const std::string& key, const std::string& newKey, const StatusCallBack& done);
+#endif
 
-    void beginTransaction(const StatusCallBack& done);
-    void commitTransaction(const StatusCallBack& done);
+    void beginTransaction(const StatusCallBack& callback);
+    void commitTransaction(const StatusCallBack& callback);
+
+private:
+    static void statusCallBack(const RedisServiceFuture& future,
+        const RedisReplyMessagePtr& reply,
+        const RedisClient::StatusCallBack& callback);
+
+    static void bulkCallBack(const RedisServiceFuture& future,
+        const RedisReplyMessagePtr& reply,
+        const RedisClient::BulkCallBack& callback);
+
+    static void multiBulkCallBack(const RedisServiceFuture& future,
+        const RedisReplyMessagePtr& reply,
+        const MultiBulkCallBack& callback);
 
 private:
     ClientServicePtr clientService;

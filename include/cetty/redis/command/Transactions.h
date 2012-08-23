@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
-#define CETTY_REDIS_COMMAND_KEYS_H
+#if !defined(CETTY_REDIS_COMMAND_TRANSACTIONS_H)
+#define CETTY_REDIS_COMMAND_TRANSACTIONS_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,9 +17,9 @@
  * under the License.
  */
 
-#include <vector>
 #include <string>
-#include <cetty/redis/RedisCommandPtr.h>
+#include <cetty/util/StringPiece.h>
+#include <cetty/redis/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
@@ -27,16 +27,31 @@ namespace command {
 
 using namespace cetty::redis;
 
-RedisCommandPtr keysCommandDel(const std::string& key);
-RedisCommandPtr keysCommandDel(const std::vector<std::string>& keys);
-RedisCommandPtr keysCommandRename(const std::string& key, const std::string& newKey);
-RedisCommandPtr keysCommandRenameNx(const std::string& key, const std::string& newKey);
+RedisCommandPtr transactionsCommandDiscard();
+RedisCommandPtr transactionsCommandExec();
+RedisCommandPtr transactionsCommandMulti();
+
+RedisCommandPtr transactionsCommandUnwatch();
+RedisCommandPtr transactionsCommandWatch(const std::string& key);
+
+template<typename Iterator>
+RedisCommandPtr transactionsCommandWatch(const Iterator& begin,
+        const Iterator& end) {
+    RedisCommandPtr command(new RedisCommand(WATCH));
+
+    for (Iterator itr = begin; itr != end; ++itr) {
+        (*command) << *itr;
+    }
+
+    command->done();
+    return command;
+}
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
+#endif //#if !defined(CETTY_REDIS_COMMAND_TRANSACTIONS_H)
 
 // Local Variables:
 // mode: c++

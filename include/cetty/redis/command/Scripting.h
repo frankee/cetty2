@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
-#define CETTY_REDIS_COMMAND_KEYS_H
+#if !defined(CETTY_REDIS_COMMAND_SCRIPTING_H)
+#define CETTY_REDIS_COMMAND_SCRIPTING_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,26 +17,18 @@
  * under the License.
  */
 
-#include <vector>
 #include <string>
-#include <cetty/redis/RedisCommandPtr.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace redis {
 namespace command {
 
-using namespace cetty::redis;
-
-RedisCommandPtr keysCommandDel(const std::string& key);
-RedisCommandPtr keysCommandDel(const std::vector<std::string>& keys);
-RedisCommandPtr keysCommandRename(const std::string& key, const std::string& newKey);
-RedisCommandPtr keysCommandRenameNx(const std::string& key, const std::string& newKey);
-
 }
 }
 }
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
+#endif //#if !defined(CETTY_REDIS_COMMAND_SCRIPTING_H)
 
 // Local Variables:
 // mode: c++

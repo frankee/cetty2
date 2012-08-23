@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <string>
+
 namespace cetty {
 namespace redis {
 namespace command {

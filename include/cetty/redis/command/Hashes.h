@@ -17,9 +17,73 @@
  * under the License.
  */
 
+#include <vector>
+#include <string>
+
+#include <boost/cstdint.hpp>
+#include <cetty/util/StringPiece.h>
+#include <cetty/redis/RedisCommandPtr.h>
+
 namespace cetty {
 namespace redis {
 namespace command {
+
+using namespace cetty::util;
+using namespace cetty::redis;
+
+RedisCommandPtr hashesCommandDel(const std::string& key, const std::string& field);
+RedisCommandPtr hashesCommandDel(const std::string& key, const std::vector<std::string>& fields);
+
+RedisCommandPtr hashesCommandExist(const std::string& key, const std::string& field);
+
+RedisCommandPtr hashesCommandGet(const std::string& key, const std::string& field);
+RedisCommandPtr hashesCommandGet(const std::string& key, const std::vector<std::string>& fields);
+
+RedisCommandPtr hashesCommandGetAll(const std::string& key);
+RedisCommandPtr hashesCommandIncrementBy(const std::string& key,
+        const std::string& field,
+        boost::int64_t increment);
+
+RedisCommandPtr hashesCommandIncrementBy(const std::string& key,
+        const std::string& field,
+        double increment);
+
+RedisCommandPtr hashesCommandKeys(const std::string& key);
+
+RedisCommandPtr hashesCommandFieldCnt(const std::string& key);
+
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+    const std::vector<std::pair<std::string, std::string> >& values);
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+    const std::vector<std::pair<std::string, StringPiece> >& values);
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+    const std::vector<std::string>& fields,
+    const std::vector<std::string>& values);
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+    const std::vector<std::string>& fields,
+    const std::vector<StringPiece>& values);
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+                                 const std::string& field,
+                                 const std::string& value);
+
+RedisCommandPtr hashesCommandSet(const std::string& key,
+                                 const std::string& field,
+                                 const StringPiece& value);
+
+RedisCommandPtr hashesCommandSetNx(const std::string& key,
+                                   const std::string& field,
+                                   const std::string& value);
+
+RedisCommandPtr hashesCommandSetNx(const std::string& key,
+                                   const std::string& field,
+                                   const StringPiece& value);
+
+RedisCommandPtr hashesCommandValues(const std::string& key);
 
 }
 }

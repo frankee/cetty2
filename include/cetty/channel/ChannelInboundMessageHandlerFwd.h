@@ -68,6 +68,8 @@ public:
 
             inboundQueue.pop_front();
         }
+
+        ctx.fireMessageUpdated();
     }
 
     virtual void beforeAdd(ChannelHandlerContext& ctx) {}

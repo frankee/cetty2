@@ -38,7 +38,7 @@ class ServiceRequestHandler
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
     ReqT> {
 
-        using ChannelMessageHandlerAdapter<ReqT,
+        using ChannelMessageHandlerAdapter<RepT,
             VoidChannelMessage,
             boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
             ReqT>::outboundTransfer;

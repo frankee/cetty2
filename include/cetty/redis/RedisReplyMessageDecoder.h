@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <vector>
+#include <cetty/util/StringPiece.h>
 #include <cetty/handler/codec/ReplayingDecoder.h>
 #include <cetty/redis/RedisReplyMessagePtr.h>
 
@@ -36,8 +38,11 @@ public:
     };
 
 public:
-    RedisReplyMessageDecoder() {}
-    RedisReplyMessageDecoder(int maxSize) {}
+    RedisReplyMessageDecoder()
+    : maxBulkSize(1024*1024), bulkSize(0), multiBulkSize(0) {}
+    RedisReplyMessageDecoder(int maxBulkSize)
+    : maxBulkSize(maxBulkSize), bulkSize(0), multiBulkSize(0) {}
+
     virtual ~RedisReplyMessageDecoder() {}
 
     virtual ChannelHandlerPtr clone();
@@ -49,6 +54,14 @@ protected:
                                         int state);
 
 private:
+    RedisReplyMessagePtr readMultiBukls(const ReplayingDecoderBufferPtr& buffer,
+                                        Array& arry,
+                                        std::vector<StringPiece>* bulks);
+
+    bool readMultiBulkElement(const ReplayingDecoderBufferPtr& buffer,
+            Array& arry,
+            std::vector<StringPiece>* bulks);
+
     void fail(ChannelHandlerContext& ctx, long frameLength);
 
     /**
@@ -58,12 +71,14 @@ private:
      */
     int indexOf(const Array& arry, int offset);
 
-private:
-    bool stripDelimiter;
-    bool discardingTooLongFrame;
+    RedisReplyMessagePtr reset();
 
-    int maxFrameLength;
-    int tooLongFrameLength;
+private:
+    int maxBulkSize;
+
+    int bulkSize;
+    int multiBulkSize;
+    RedisReplyMessagePtr reply;
 };
 
 }

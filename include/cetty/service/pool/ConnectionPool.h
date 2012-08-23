@@ -45,6 +45,7 @@ public:
     virtual ~ConnectionPool();
 
 public:
+    ChannelPtr getChannel();
     ChannelPtr getChannel(const ConnectedCallback& callback);
 
     ClientBootstrap& getBootstrap() {
@@ -74,6 +75,8 @@ protected:
     ClientBootstrap bootstrap;
 
 private:
+    bool connecting;
+
     std::deque<ConnectedCallback> callbacks;
     
     boost::ptr_map<int, ChannelConnection> channels;

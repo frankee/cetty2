@@ -23,6 +23,13 @@
 #include <cetty/util/Enum.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/redis/RedisReplyMessagePtr.h>
+
+#if defined(WIN32)
+#if defined(ERROR)
+#undef ERROR
+#endif
+#endif
 
 namespace cetty {
 namespace redis {
@@ -65,14 +72,7 @@ public:
         value = StringPieces;
     }
 
-    boost::int64_t getInteger() const {
-        if (type == RedisReplyMessageType::INTEGER) {
-            return boost::get<boost::int64_t>(value);
-        }
-        else {
-            LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";
-        }
-    }
+    boost::int64_t getInteger() const;
 
     const StringPiece& getString() const {
         if (type == RedisReplyMessageType::STRING) {
@@ -101,6 +101,8 @@ public:
             return boost::get<std::vector<StringPiece> >(value);
         }
     }
+
+    std::vector<StringPiece>* getMutableArray();
 
 private:
     typedef boost::variant<boost::int64_t,

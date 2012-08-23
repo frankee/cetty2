@@ -84,40 +84,46 @@ public:
         pool.getBootstrap().setPipeline(pipeline);
         pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(eventLoop));
     }
+    
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+        while (!inboundQueue.empty()) {
+            OutstandingCallPtr msg = inboundQueue.front();
+            inboundTransfer.unfoldAndAdd(ctx, msg);
+            inboundQueue.pop_front();
+        }
 
-    //virtual void messageUpdated(InboundMessageContext& ctx) {
-    //}
+        ctx.fireMessageUpdated();
+    }
 
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
         bool notify = false;
-        ChannelPtr ch = pool.getChannel(ConnectionPool::ConnectedCallback());
-        BufferingCall bufferingCall;
+        ChannelPtr ch = pool.getChannel();
 
-        while (!outboundQueue.empty()) {
-            OutstandingCallPtr& request = outboundQueue.front();
+        if (ch) {
+            while (!outboundQueue.empty()) {
+                OutstandingCallPtr& request = outboundQueue.front();
 
-            if (ch) {
                 ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
                 outStandingCalls.insert(std::make_pair(request->getId(), request));
                 notify = true;
-            }
-            else {
-                bufferingCall.calls.push_back(request);
+
+                outboundQueue.pop_front();
             }
 
-            outboundQueue.pop_front();
-        }
-
-        if (notify) {
-            ch->flush(future);
+            if (notify) {
+                ch->flush(future);
+            }
         }
         else {
+            BufferingCall bufferingCall;
+            bufferingCall.calls = outboundQueue;
             bufferingCall.future = future;
             bufferingCalls.push_back(bufferingCall);
-
+            
+            outboundQueue.clear();
             pool.getChannel(boost::bind(
-                                &ClientServiceDispatcherType::connectedCallback, this, _1, boost::ref(ctx)));
+                &ClientServiceDispatcherType::connectedCallback, this, _1, boost::ref(ctx)));
         }
     }
 

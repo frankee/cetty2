@@ -16,6 +16,8 @@
 
 #include <cetty/redis/RedisReplyMessage.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace redis {
 
@@ -25,6 +27,27 @@ const RedisReplyMessageType RedisReplyMessageType::INTEGER = 2;
 const RedisReplyMessageType RedisReplyMessageType::NIL     = 3;
 const RedisReplyMessageType RedisReplyMessageType::STATUS  = 4;
 const RedisReplyMessageType RedisReplyMessageType::ERROR   = 5;
+
+
+boost::int64_t RedisReplyMessage::getInteger() const {
+    if (type == RedisReplyMessageType::INTEGER) {
+        return boost::get<boost::int64_t>(value);
+    }
+    else {
+        LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";
+    }
+}
+
+std::vector<StringPiece>* RedisReplyMessage::getMutableArray() {
+    if (type == RedisReplyMessageType::ARRAY) {
+        if (value.which() == 0) {
+            value = std::vector<StringPiece>();
+        }
+
+        return boost::get<std::vector<StringPiece> >(&value);
+    }
+    return NULL;
+}
 
 }
 }

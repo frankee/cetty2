@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_MISC_H)
-#define CETTY_REDIS_COMMAND_MISC_H
+#if !defined(CETTY_REDIS_COMMAND_SERVER_H)
+#define CETTY_REDIS_COMMAND_SERVER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,6 +17,9 @@
  * under the License.
  */
 
+#include <string>
+#include <cetty/util/StringPiece.h>
+
 namespace cetty {
 namespace redis {
 namespace command {
@@ -25,7 +28,7 @@ namespace command {
 }
 }
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_MISC_H)
+#endif //#if !defined(CETTY_REDIS_COMMAND_SERVER_H)
 
 // Local Variables:
 // mode: c++

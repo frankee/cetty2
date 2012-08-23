@@ -51,7 +51,7 @@ ChannelPipelinePtr ChannelPipelines::pipeline() {
 
 ChannelPipelinePtr ChannelPipelines::pipeline(const ChannelPipelinePtr& pipeline) {
     ChannelPipelinePtr newPipeline = ChannelPipelines::pipeline();
-    BOOST_ASSERT(newPipeline);
+    BOOST_ASSERT(pipeline && "the input pipe should not be NULL");
 
     ChannelPipeline::ChannelHandlers handlers = pipeline->getChannelHandles();
     ChannelPipeline::ChannelHandlers::iterator itr = handlers.begin();
