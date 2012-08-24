@@ -38,7 +38,7 @@ void SessionManager::validateSessions(){
     getActiveSessions(&v);
     if(v.size() > 0){
         std::vector<SessionPtr>::iterator it = v.begin();
-        for(; it < v.end(); ++it) {
+        for(; it != v.end(); ++it) {
             Session::SessionState state = validate(*it);
             if(state == Session::STOPPED || state == Session::EXPIRED)
                 invalidCount ++;

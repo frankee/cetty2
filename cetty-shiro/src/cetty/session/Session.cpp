@@ -48,6 +48,34 @@ Session::SessionState Session::validate(){
     }
     return Session::ACTIVE;
 }
+
+void Session::stop() {
+    if (this->stopTimestamp.is_not_a_date_time()) {
+        this->stopTimestamp =  ptime( second_clock::local_time() );
+    }
+}
+
+const boost::any &Session::getAttribute(const std::string& key) {
+    std::map<std::string, boost::any>::iterator it = attributes.find(key);
+    if (it == attributes.end()) { return cetty::shiro::util::emptyAny; }
+    return it->second;
+}
+
+void Session::setAttribute(const std::string& key, const boost::any& value){
+    if(key.empty()) return;
+    attributes.insert(std::pair<std::string, boost::any>(key, value));
+}
+
+void Session::removeAttribute(const std::string& key){
+    if(key.empty()) return;
+    attributes.erase(key);
+}
+
+void Session::expire() {
+    stop();
+    this->expired = true;
+}
+
 }
 }
 }

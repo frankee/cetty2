@@ -123,7 +123,6 @@ void SecurityManager::createSubject(SubjectContext &context, Subject *subject){
 }
 
 
-
 void SecurityManager::bind(Subject &subject){
     // TODO consider refactoring to use Subject.Binder.
     // This implementation was copied from SessionSubjectBinder that was removed
