@@ -45,38 +45,25 @@ int main(int argc, char* argv[]) {
 
     // Set up the pipeline factory.
     bootstrap.getPipeline()->addLast(
-        "discard", ChannelHandlerPtr(new DiscardServerHandler));
+        "discard", new DiscardServerHandler);
 
     // Bind and start to accept incoming connections.
-    Channel* c = bootstrap.bind(SocketAddress(IpAddress::IPv4, 1980));
+    ChannelFuturePtr f = bootstrap.bind(1980);
 
-    if (c->isBound()) {
-        printf("Server is running...\n");
-        printf("To quit server, please enter 'q'.\n");
+    printf("Server is running...\n");
+    printf("To quit server, please enter 'q'.\n");
 
-        char input;
+    char input;
 
-        do {
-            input = getchar();
+    do {
+        input = getchar();
 
-            if (input == 'q' || input == 'Q') {
-                printf("Are you sure to quit?\n\t\tplease enter y/n?\n");
-                input = getchar();
-                input = getchar();
-
-                if (input == 'y' || input == 'Y') {
-                    printf("Closing the server...\n");
-                    c->close()->awaitUninterruptibly();
-                    return 0;
-                }
-                else {
-                    printf("Server is continue to running...\n");
-                }
-            }
+        if (input == 'q') {
+            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            return 0;
         }
-        while (true);
     }
+    while (true);
 
-    bootstrap.releaseExternalResources();
     return -1;
 };

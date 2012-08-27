@@ -11,7 +11,6 @@
 #include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelMessage.h>
-#include <cetty/channel/DefaultChannelPipeline.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
@@ -125,12 +124,4 @@ TEST(ProtobufServiceMessageCodecTest2,decode)
 
 	}
 }
-//GTEST_API_
-GTEST_API_ int main(int argc, char **argv) {
-	std::cout << "Running main() from gtest_main.cc\n";
 
-	testing::InitGoogleTest(&argc, argv);
-	RUN_ALL_TESTS();
-	getchar();
-	return 0;
-}

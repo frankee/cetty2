@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -14,8 +14,9 @@
  * under the License.
  */
 
-#include "DiscardServerHandler.h"
-#include "cetty/logging/InternalLoggerFactory.h"
+#include "cetty/handler/codec/frame/AsioSocketFixedLengthEchoTest.h"
 
-InternalLogger* DiscardServerHandler::logger =
-    InternalLoggerFactory::getInstance("DiscardServerHandler");
+using namespace cetty::handler::codec::frame;
+
+#define CHANNEL_SOCKET_FIXED_LENGTH_ECHO_IMPL_TEST AsioSocketFixedLengthEchoTest
+#include "cetty/handler/codec/frame/AbstractSocketFixedLengthEchoTest.inc.h"

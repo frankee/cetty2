@@ -979,9 +979,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerPtr.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
@@ -1074,6 +1071,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\SmallFile.h">
       <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h">
+      <Filter>channel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -211,6 +211,7 @@
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerAdapter.h" />
@@ -224,7 +225,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerFwd.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />

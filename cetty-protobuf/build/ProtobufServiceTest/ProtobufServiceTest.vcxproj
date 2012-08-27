@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ProtobufServiceTest2</RootNamespace>
+    <RootNamespace>ProtobufServiceTest</RootNamespace>
     <ProjectName>ProtobufServiceTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -78,17 +78,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\test\BenchMark.cpp" />
     <ClCompile Include="..\..\test\codec.pb.cc" />
     <ClCompile Include="..\..\test\CodecTest.cpp" />
-    <ClCompile Include="..\..\test\NullChannelHandlerContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\codec.pb.h" />
-    <ClInclude Include="..\..\test\NullChannelHandlerContext.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
