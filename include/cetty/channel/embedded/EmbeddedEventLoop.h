@@ -38,6 +38,11 @@ public:
 
 
     virtual void post(const Functor& handler) {}
+    virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
+        const Functor& timerCallback) {}
+
+    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) {}
+    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) {}
 };
 
 }

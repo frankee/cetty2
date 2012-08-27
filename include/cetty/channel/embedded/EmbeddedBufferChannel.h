@@ -35,22 +35,22 @@ template<typename InboundOutT>
 class EmbeddedBufferChannel
         : public AbstractEmbeddedChannel<InboundOutT, ChannelBufferPtr> {
 public:
+    virtual ~EmbeddedBufferChannel() {}
 
     const ChannelBufferPtr& getLastOutboundBuffer() {
         return lastOutboundBuffer;
     }
 
     ChannelBufferPtr readOutbound() {
-        if (!lastOutboundBuffer().readable()) {
-            return null;
+        if (!lastOutboundBuffer->readable()) {
+            return ChannelBufferPtr();
         }
 
-        try {
-            return lastOutboundBuffer().readBytes(lastOutboundBuffer().readableBytes());
-        } finally {
+        ChannelBufferPtr buffer
+            = lastOutboundBuffer->readBytes(lastOutboundBuffer->readableBytes());
 
-            lastOutboundBuffer().clear();
-        }
+        lastOutboundBuffer->clear();
+        return buffer;
     }
 
     template<T>
@@ -70,14 +70,14 @@ public:
     bool finish() {
         close();
         checkException();
-        return lastInboundByteBuffer().readable() || !lastInboundMessageBuffer().isEmpty() ||
-               lastOutboundBuffer().readable();
+        return getLastInboundChannelBuffer()->readable()
+               || !getLastInboundMessageQueue().empty()
+               || lastOutboundBuffer->readable();
     }
 
 private:
-    //protected final Object lastOutboundBuffer;
+    ChannelBufferPtr lastOutboundBuffer;
 };
-
 
 }
 }

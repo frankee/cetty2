@@ -32,35 +32,42 @@ template<typename InboundOutT,
 class EmbeddedMessageChannel
     : public AbstractEmbeddedChannel<InboundOutT, OutboundOutT> {
 public:
+    virtual ~EmbeddedMessageChannel() {}
 
     std::deque<OutboundOutT>& getLastOutboundBuffer() {
-        //return (MessageBuf<Object>) lastOutboundBuffer;
+        return lastOutboundQueue;
     }
 
     OutboundOutT readOutbound() {
-        return lastOutboundBuffer().poll();
+        OutboundOutT out = lastOutboundQueue.front();
+        lastOutboundQueue.pop_front();
+        return out;
     }
 
     template<T>
     bool writeOutbound(const T& msg) {
         write(msg);
         checkException();
-        return !lastOutboundBuffer().isEmpty();
+        return !lastOutboundBuffer.empty();
     }
 
     template<>
     bool writeOutbound(const ChannelBufferPtr& msg) {
         write(msg);
         checkException();
-        return lastOutboundBuffer().readable();
+        return lastOutboundBuffer.empty();
     }
 
     bool finish() {
         close();
         checkException();
-        return lastInboundByteBuffer().readable() || !lastInboundMessageBuffer().isEmpty() ||
-               !lastOutboundBuffer().isEmpty();
+        return getLastInboundChannelBuffer()->readable()
+            || !getLastInboundMessageQueue().empty()
+            || !lastOutboundQueue.empty();
     }
+
+private:
+    std::deque<OutboundOutT> lastOutboundQueue;
 
 };
 

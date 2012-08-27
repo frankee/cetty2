@@ -25,6 +25,7 @@
 
 #include <cetty/channel/AbstractChannel.h>
 #include <cetty/channel/embedded/EmbeddedSocketAddressImpl.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
@@ -37,29 +38,38 @@ template<typename InboundOutT,
 class AbstractEmbeddedChannel : public AbstractChannel {
 public:
     class LastInboundMessageHandler : public ChannelInboundMessageHandler<InboundOutT> {
-        LastInboundMessageHandler() {
-
+        LastInboundMessageHandler(AbstractEmbeddedChannel& channel)
+        : channel(channel) {
+            channel.lastInboundMessageQueue = &inboundQueue;
         }
 
-        void inboundBufferUpdated(ChannelHandlerContext ctx) {
+        virtual void ChannelHandlerPtr clone();
+
+        virtual std::string toString() const;
+
+        virtual void messageUpdated(ChannelHandlerContext& ctx) {
             // Do nothing.
         }
 
-        void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause) {
-            if (lastException == null) {
-                lastException = cause;
+        virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                     const ChannelException& cause) {
+            if (channel.lastException == null) {
+                channel.lastException = new Exception(cause);
             }
             else {
-                //    logger.warn(
-                //            "More than one exception was raised. " +
-                //            "Will report only the first one and log others.", cause);
+                LOG_WARN_E(cause) <<  "More than one exception was raised. "
+                                  "Will report only the first one and log others.";
             }
         }
+
+    private:
+        AbstractEmbeddedChannel& channel;
     };
 
     class LastInboundBufferHandler : public ChannelInboundBufferHandler {
     public:
-        LastInboundBufferHandler();
+        LastInboundBufferHandler(AbstractEmbeddedChannel& channel)
+            : channel(channel) {}
 
         virtual void ChannelHandlerPtr clone();
 
@@ -68,10 +78,18 @@ public:
         virtual void messageUpdated(ChannelHandlerContext& ctx) {}
 
     protected:
-        virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
+        virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
+            buffer->readBytes(channel.lastInboundChannelBuffer);
+        }
+
+    private:
+        AbstractEmbeddedChannel& channel;
     };
 
     typedef LastInboundMessageHandler::MessageQueue InboundMessageQueue;
+
+    friend class LastInboundMessageHandler;
+    friend class LastInboundBufferHandler;
 
 public:
     AbstractEmbeddedChannel(const ChannelHandlerPtr& handler)
@@ -93,8 +111,8 @@ public:
                             const ChannelPipelinePtr& pipeline)
         : AbstractChannel(eventLoop, parent, factory, pipeline) {
 
-        pipeline->addLast("lastMesssage", new LastInboundMessageHandler);
-        pipeline->addLast("lastBuffer", new LastInboundBufferHandler);
+        pipeline->addLast("lastMesssage", new LastInboundMessageHandler(*this));
+        pipeline->addLast("lastBuffer", new LastInboundBufferHandler(*this));
     }
 
     virtual ChannelConfig& getConfig() { return config; }
@@ -119,20 +137,22 @@ public:
 
     template<typename T>
     bool writeInbound(const T& data) {
-
         inboundBuffer().add(msg);
-        pipeline().fireInboundBufferUpdated();
+        pipeline()->fireMessageUpdated();
 
         checkException();
-        return getLastInboundByteBuffer().readable() || !getLastInboundMessageBuffer().isEmpty();
+        return getLastInboundChannelBuffer()->readable()
+            || !getLastInboundMessageQueue().empty();
     }
 
     template<>
     bool writeInbound<ChannelBufferPtr>(const ChannelBufferPtr& data) {
         inboundBuffer().writeBytes(data);
-        pipeline().fireInboundBufferUpdated();
+        pipeline()->fireMessageUpdated();
+
         checkException();
-        return lastInboundByteBuffer().readable() || !lastInboundMessageBuffer().isEmpty();
+        return getLastInboundChannelBuffer()->readable()
+            || !getLastInboundMessageQueue().empty();
     }
 
     InboundOutT readInbound() {
