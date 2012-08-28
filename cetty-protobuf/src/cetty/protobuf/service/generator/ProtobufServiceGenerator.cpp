@@ -46,6 +46,7 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <boost/filesystem.hpp>
 
 namespace google {
 namespace protobuf {
@@ -84,6 +85,7 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
     std::vector<std::pair<std::string, std::string> > output_types;
     std::vector<std::string> method_names;
     int j = descriptor_->method_count();
+
     for (int i = 0; i < j; ++i) {
         const MethodDescriptor* method = descriptor_->method(i);
         input_types.push_back(std::make_pair(ClassName(method->input_type(), true),
@@ -92,30 +94,32 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                                               ClassName(method->output_type(), false)));
         method_names.push_back(method->name());
     }
+
     for (int i = 0; i < j; ++i) {
-            map<string, string> sub_vars;
-            sub_vars["type"] = input_types[i].first;
-            sub_vars["typedef"] = input_types[i].second;
-            sub_vars["out_type"] = output_types[i].first;
-            sub_vars["out_typedef"] = output_types[i].second;
-            sub_vars["method"] = method_names[i];
-            printer->Print(sub_vars, 
-                "typedef $type$* $typedef$Ptr;\n"
-                "typedef $type$ const* Const$typedef$Ptr;\n"
-                "typedef $out_type$* $out_typedef$Ptr;\n"
-                "typedef ::cetty::service::ServiceFuture<$out_typedef$Ptr> $method$ServiceFuture;\n"
-                "typedef boost::intrusive_ptr<$method$ServiceFuture> $method$ServiceFuturePtr;\n"
-                );
+        map<string, string> sub_vars;
+        sub_vars["type"] = input_types[i].first;
+        sub_vars["typedef"] = input_types[i].second;
+        sub_vars["out_type"] = output_types[i].first;
+        sub_vars["out_typedef"] = output_types[i].second;
+        sub_vars["method"] = method_names[i];
+        printer->Print(sub_vars,
+                       "typedef $type$* $typedef$Ptr;\n"
+                       "typedef $type$ const* Const$typedef$Ptr;\n"
+                       "typedef $out_type$* $out_typedef$Ptr;\n"
+                       "typedef ::cetty::service::ServiceFuture<$out_typedef$Ptr> $method$ServiceFuture;\n"
+                       "typedef boost::intrusive_ptr<$method$ServiceFuture> $method$ServiceFuturePtr;\n"
+                      );
     }
+
     printer->Print("\n");
-    
+
     GenerateInterface(printer);
     GenerateStubDefinition(printer);
 }
 
 void ServiceGenerator::GenerateInterface(io::Printer* printer) {
     printer->Print(vars_,
-        "class $dllexport$$classname$ : public ::cetty::protobuf::service::ProtobufService {\n"
+                   "class $dllexport$$classname$ : public ::cetty::protobuf::service::ProtobufService {\n"
                    " protected:\n"
                    "  // This class should be treated as an abstract interface.\n"
                    "  inline $classname$() {};\n"
@@ -163,7 +167,7 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Indent();
 
     printer->Print(vars_,
-        "$classname$_Stub(const ::cetty::service::ClientServicePtr& service);\n"
+                   "$classname$_Stub(const ::cetty::service::ClientServicePtr& service);\n"
                    "~$classname$_Stub();\n"
                    "\n"
                    "inline const ::cetty::service::ClientServicePtr& channel() {\n"
@@ -198,14 +202,14 @@ void ServiceGenerator::GenerateMethodSignatures(
 
         if (stub_or_non == NON_STUB) {
             printer->Print(sub_vars,
-                "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                "                     const $output_type$Ptr& response,\n"
+                           "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
+                           "                     const $output_type$Ptr& response,\n"
                            "                     const DoneCallback& done);\n");
         }
         else {
             printer->Print(sub_vars,
                            "using $classname$::$name$;\n"
-                           
+
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
                            "                     const $name$ServiceFuturePtr& future);\n");
         }
@@ -249,7 +253,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-        "$classname$_Stub::$classname$_Stub(const cetty::service::ClientServicePtr& service)\n"
+                   "$classname$_Stub::$classname$_Stub(const cetty::service::ClientServicePtr& service)\n"
                    "  : channel_(service), owns_channel_(false) {\n"
                    "    static int init = 0;\n"
                    "    if (!init) {\n"
@@ -267,10 +271,10 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
         printer->Print(sub_vars,
 
-            "       serviceRegister.registerResponsePrototype(\"$classname$\",\n"
-            "                                                 \"$name$\",\n"
-            "                                                 &$response$::default_instance());\n"
-            "\n");
+                       "       serviceRegister.registerResponsePrototype(\"$classname$\",\n"
+                       "                                                 \"$name$\",\n"
+                       "                                                 &$response$::default_instance());\n"
+                       "\n");
     }
 
     printer->Print(vars_,
@@ -411,25 +415,29 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
 namespace gpb = google::protobuf;
 namespace gpbc = google::protobuf::compiler;
 
-void findProtoFiles(int argc, char* argv[], std::vector<std::string>* files) {
-    if (NULL == files || argc < 2) return;
+void findProtoFiles(int argc,
+                    char* argv[],
+                    std::vector<std::string>* files) {
+    if (NULL == files || argc < 2) { return; }
 
     for (int i = 1; i < argc; ++i) {
         std::string str(argv[i]);
+
         if (str.rfind(".proto") == str.size() - strlen(".proto")) { //end with ".proto"
             files->push_back(str);
         }
     }
 }
 
-void findOutput(int argc, char* argv[], std::string* path) {
-    if (NULL == path || argc < 2) return;
+void findCmdParam(int argc, char* argv[], const char* cmd, std::string* param) {
+    if (NULL == param || NULL == cmd || argc < 2) { return; }
 
     for (int i = 1; i < argc; ++i) {
         std::string str(argv[i]);
-        std::string::size_type pos = str.find("--cpp_out=");
+        std::string::size_type pos = str.find(cmd);
+
         if (pos != str.npos) {
-            *path = str.substr(10);
+            *param = str.substr(strlen(cmd));
         }
     }
 }
@@ -437,10 +445,11 @@ void findOutput(int argc, char* argv[], std::string* path) {
 void changeHeader(const std::string& proto) {
     std::string hfile(proto);
     hfile.replace(hfile.end() - 6, hfile.end(), ".pb.h");
-    
+
     std::vector<std::string> lines;
     std::fstream file;
     file.open(hfile, std::fstream::in);
+
     while (!file.eof()) {
         std::string line;
         std::getline(file, line);
@@ -455,12 +464,15 @@ void changeHeader(const std::string& proto) {
             lines.push_back(line);
         }
     }
+
     file.close();
 
     std::fstream wfile(hfile, std::fstream::out);
+
     for (std::size_t i = 0; i < lines.size(); ++i) {
         wfile << lines[i] << "\n";
     }
+
     wfile << "\n";
     wfile << "// Local Variables:\n";
     wfile << "// mode: c++\n";
@@ -470,17 +482,18 @@ void changeHeader(const std::string& proto) {
     wfile.close();
 }
 
-void changeSource(const std::string& proto) {
+std::string changeSource(const std::string& proto) {
     std::string hfile(proto);
     hfile.replace(hfile.end() - 6, hfile.end(), ".pb.cc");
 
     std::vector<std::string> lines;
     std::fstream file;
     file.open(hfile, std::fstream::in);
+
     while (!file.eof()) {
         std::string line;
         std::getline(file, line);
-        
+
         if (line.find("google/protobuf/wire_format.h") != line.npos) {
             lines.push_back("#include <google/protobuf/wire_format.h>");
             lines.push_back("#include <cetty/protobuf/service/ProtobufServiceRegister.h>");
@@ -489,22 +502,33 @@ void changeSource(const std::string& proto) {
             lines.push_back(line);
         }
     }
+
     file.close();
 
     std::fstream wfile(hfile, std::fstream::out);
+
     for (std::size_t i = 0; i < lines.size(); ++i) {
         wfile << lines[i] << "\n";
     }
+
     wfile << "\n";
     wfile.close();
+
+    return hfile;
 }
 
-void changeGeneratedFiles(int argc, char* argv[]) {
+void changeGeneratedFiles(int argc, char* argv[], bool moveSource) {
     std::vector<std::string> files;
+
     std::string path;
+    std::string sourcePath;
 
     findProtoFiles(argc, argv, &files);
-    findOutput(argc, argv, &path);
+    findCmdParam(argc, argv, "--cpp_out=", &path);
+
+    if (moveSource) {
+        findCmdParam(argc, argv, "--src=", &sourcePath);
+    }
 
     if (path[path.size() - 1] == '\\' || path[path.size() - 1] == '/') {
         path[path.size() - 1] = '/';
@@ -513,11 +537,44 @@ void changeGeneratedFiles(int argc, char* argv[]) {
         path.append("/");
     }
 
+    if (sourcePath.empty()) {
+        sourcePath = "./";
+    }
+    else {
+        char& last = sourcePath[sourcePath.size() - 1];
+        if (last == '\\' || last == '/') {
+            last = '/';
+        }
+        else {
+            sourcePath.append("/");
+        }
+    }
+
     int j = files.size();
+
     for (int i = 0; i < j; ++i) {
         changeHeader(path + files[i]);
-        changeSource(path + files[i]);
+        std::string source = changeSource(path + files[i]);
+
+        if (moveSource) {
+            std::string hfile(files[i]);
+            hfile.replace(hfile.end() - 6, hfile.end(), ".pb.cc");
+            hfile = sourcePath + hfile;
+            boost::filesystem::rename(boost::filesystem::path(source),
+                boost::filesystem::path(hfile));
+        }
     }
+}
+
+bool findCmd(int argc, char* argv[], const char* shortCmd, const char* cmd) {
+    for (int i = 0; i < argc; ++i) {
+        if ((shortCmd && strstr(argv[i], shortCmd))
+                || (cmd && strstr(argv[i], cmd))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int main(int argc, char* argv[]) {
@@ -529,9 +586,33 @@ int main(int argc, char* argv[]) {
     // Proto2 C++
     gpbc::cpp::CppGenerator generator;
     cli.RegisterGenerator("--cpp_out", &generator,
-        "Generate C++ header and source.");
+                          "Generate C++ header and source.");
 
-    if (!cli.Run(argc, argv)) {
-        changeGeneratedFiles(argc, argv);
+    if (findCmd(argc, argv, "-h", "--help")) {
+        cli.Run(argc, argv);
+        printf("  --src=SOURCE_DIR            move the *.pb.cc to SOURCE_DIR\n");
+        return 0;
+    }
+
+    if (findCmd(argc, argv, NULL, "--src")) {
+        int newArgc = argc - 1;
+        const char* newArgv[128];
+        for (int i = 0, j = 0; i < argc; ++i) {
+            if (strstr(argv[i], "--src")) {
+                continue;
+            }
+
+            newArgv[j] = strdup(argv[i]);
+            ++j;
+        }
+
+        if (!cli.Run(newArgc, newArgv)) {
+            changeGeneratedFiles(argc, argv, true);
+        }
+    }
+    else {
+        if (!cli.Run(argc, argv)) {
+            changeGeneratedFiles(argc, argv, false);
+        }
     }
 }
