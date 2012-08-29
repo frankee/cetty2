@@ -18,19 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <unistd.h>
-#include <sys/types.h>
 
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <string>
 
-#include <cetty/shiro/session/Session.h>
+#include <cetty/shiro/session/SessionPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace session {
-
-using namespace boost::posix_time;
 
 /**
  * Generates session IDs by using a host name, nanoseconds passed from 1970-1-1 00:00:00
@@ -44,18 +39,10 @@ public:
      * @param session the {@link Session} instance to which the ID will be applied.
      * @return the String value of the session id
      */
-    static std::string generateId(SessionPtr session){
-        std::stringstream sid;
-        std::string host = (session ? session->getHost() : "");
-        ptime epoch(boost::gregorian::date(1970,1,1));
-        ptime now = microsec_clock::local_time();
-        time_duration::tick_type x = (now - epoch).total_nanoseconds();
-        pid_t pid = getpid();
+    static std::string generateId(SessionPtr session);
 
-        sid << host << x << pid;
-        return sid.str();
-    }
 };
+
 }
 }
 }

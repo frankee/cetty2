@@ -5,11 +5,18 @@
  *      Author: chenhl
  */
 
+#include <cetty/shiro/session/SessionIdGenerator.h>
 
+#include <unistd.h>
+#include <sys/types.h>
 
-/*
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <cetty/shiro/session/Session.h>
+
 namespace cetty {
-namespace shrio {
+namespace shiro {
 namespace session {
 
 using namespace boost::posix_time;
@@ -29,6 +36,6 @@ std::string SessionIdGenerator::generateId(SessionPtr session){
 }
 }
 }
-*/
+
 
 
