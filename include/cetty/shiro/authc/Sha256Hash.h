@@ -38,6 +38,9 @@ using namespace cetty::shiro::codec;
  */
 class Sha256Hash{
 public:
+    static const int SHA_DIGEST_LEN;
+
+public:
     Sha256Hash(){}
     /**
      * Creates an {@code algorithmName}-specific hash of the specified {@code source} with no {@code salt} using a

@@ -40,28 +40,20 @@ namespace codec {
  */
 class Hex {
 
-private:
-    /**
-     * Used to build output as Hex
-     */
-    static const char DIGITS[16];
-
 public:
     /**
-     * Encodes the specifed byte array to a character array and then returns that character array
-     * as a String.
+     * Encodes the specifed string to a Hex string and then returns that hex String.
      *
-     * @param bytes the byte array to Hex-encode.
+     * @param in the binary array to Hex-encode.
      * @return A String representation of the resultant hex-encoded char array.
      */
-    static std::string encode(const std::string &in) { return in; };
+    static std::string encode(const std::string &in);
 
     /**
      * Converts an array of character bytes representing hexidecimal values into an
      * array of bytes of those same values. The returned array will be half the
      * length of the passed array, as it takes two characters to represent any
-     * given byte. An exception is thrown if the passed char array has an odd
-     * number of elements.
+     * given byte.
      *
      * @param array An array of character bytes containing hexidecimal digits
      * @return A byte array containing binary data decoded from
@@ -70,7 +62,7 @@ public:
      *                                  to this function
      * @see #decode(char[])
      */
-    static std::string decode(const std::string &in){ return in; };
+    static std::string decode(const std::string &in);
 
     /**
      * Converts a hexadecimal character to an integer.
