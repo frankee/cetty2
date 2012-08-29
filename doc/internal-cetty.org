@@ -1,0 +1,161 @@
+
+
+
+@startuml
+
+interface ChannelHandler {
+void beforeAdd(ChannelHandlerContext&)
+void afterAdd(ChannelHandlerContext&)
+void beforeRemove(ChannelHandlerContext&)
+void afterRemove(ChannelHandlerContext&)
+void exceptionCaught(ChannelHandlerContext&, const ChannelException&)
+void userEventTriggered(ChannelHandlerContext&, const UserEvent&)
+ChannelHandlerPtr clone()
+std::string toString() const
+}
+
+interface ChannelInboundHandler {
+void channelCreated(ChannelHandlerContext&)
+void channelActive(ChannelHandlerContext&)
+void channelInactive(ChannelHandlerContext&)
+void messageUpdated(ChannelHandlerContext&)
+void writeCompleted(ChannelHandlerContext&)
+}
+
+interface ChannelOutboundHandler {
+void bind(ChannelHandlerContext&, const SocketAddress&, const ChannelFuturePtr&)
+void connect(ChannelHandlerContext&, const SocketAddress&, const SocketAddress&, const ChannelFuturePtr&)
+void disconnect(ChannelHandlerContext&, const ChannelFuturePtr&)
+void close(ChannelHandlerContext&, const ChannelFuturePtr&)
+void flush(ChannelHandlerContext&, const ChannelFuturePtr&)
+}
+
+abstract ChannelInboundBufferHandler {
+void setInboundChannelBuffer(const ChannelBufferPtr&)
+#const ChannelBufferPtr& getInboundChannelBuffer() const
+}
+
+abstract ChannelInboundMessageHandler<InboundInT> {
+void addInboundMessage(const InboundInT&)
+#void messageReceived(ChannelHandlerContext&, const InboundInT&)
+#MessageQueue inboundQueue
+}
+
+abstract ChannelOutboundBufferHandler {
+void setOutboundChannelBuffer(const ChannelBufferPtr&)
+#const ChannelBufferPtr& getOutboundChannelBuffer() const
+}
+
+abstract ChannelOutboundMessageHandler<OutboundInT> {
+void addOutboundMessage(const OutboundInT&)
+#MessageQueue outboundQueue;
+}
+
+abstract ChannelInboundBufferHandlerAdapter<InboundOutT, InboundContext, OutboundOutT, OutboundContext> {
+#ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer
+#ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer
+}
+
+abstract ChannelInboundMessageHandlerAdapter<InboundOutT, InboundContext, OutboundOutT, OutboundContext> {
+#ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer
+#ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer
+}
+
+abstract ChannelOutboundBufferHandlerAdapter {
+#ChannelPipelineMessageTransfer<ChannelBufferPtr, NextOutboundContext> outboundTransfer
+}
+
+abstract ChannelOutboundMessageHandlerAdapter<OutboundInT, OutboundOutT, OutboundContext> {
+#ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer
+}
+
+abstract ChannelBufferHandler
+abstract ChannelBufferHandlerAdapter<InboundOutT, InboundContext, OutboundOutT, OutboundContext> {
+#ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+#ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+}
+abstract ChannelMessageHandler<InboundInT, OutboundInT>
+abstract ChannelMessageHandlerAdapter<InboundInT, InboundOutT, OutboundInT, OutboundOutT, OutboundContext> {
+#ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+#ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+}
+
+abstract AbstractChannelInboundHandler<<Event>>
+abstract AbstractChannelOutboundHandler<<Event>>
+abstract AbstractChannelHandler<<Event>>
+
+interface ChannelOutboundInvoker {
+}
+interface ChannelInboundInvoker {
+void fireChannelCreated();
+void fireChannelActive();
+void fireChannelInactive();
+void fireExceptionCaught(const ChannelException&);
+void fireUserEventTriggered(const UserEvent&);
+void fireMessageUpdated();
+void fireWriteCompleted();
+}
+
+class ChannelHandlerContext {
+}
+ChannelHandlerContext --|> ChannelInboundInvoker
+ChannelHandlerContext --|> ChannelOutboundInvoker
+
+class ChannelInboundBufferHandlerContext <<Data>> {
+void setInboundChannelBuffer(const ChannelBufferPtr&);
+}
+ChannelInboundBufferHandlerContext --|> ChannelHandlerContext
+
+class ChannelInboundMessageHandlerContext<InboundInT> <<Data>> {
+void addInboundMessage(const InboundInT&)
+}
+ChannelInboundMessageHandlerContext --|> ChannelHandlerContext
+
+class ChannelOutboundBufferHandlerContext <<Data>> {
+void setOutboundChannelBuffer(const ChannelBufferPtr&);
+}
+ChannelOutboundBufferHandlerContext --|> ChannelHandlerContext
+
+class ChannelOutboundMessageHandlerContext<OutboundInT> <<Data>> {
+void addOutboundMessage(const OutboundInT&)
+}
+ChannelOutboundMessageHandlerContext --|> ChannelHandlerContext
+
+class ChannelBufferHandlerContext<<Data>>
+ChannelBufferHandlerContext --|> ChannelInboundBufferHandlerContext
+ChannelBufferHandlerContext --|> ChannelOutboundBufferHandlerContext
+
+class ChannelMessageHandlerContext<InboundInT, OutboundInT> <<Data>>
+ChannelMessageHandlerContext --|> ChannelInboundMessageHandlerContext
+ChannelMessageHandlerContext --|> ChannelOutboundMessageHandlerContext
+
+
+ChannelHandler <|-- ChannelInboundHandler
+ChannelHandler <|-- ChannelOutboundHandler
+
+
+ChannelInboundHandler <|-- ChannelInboundBufferHandler
+ChannelInboundHandler <|-- ChannelInboundMessageHandler
+
+ChannelInboundMessageHandler <|-- ChannelInboundMessageHandlerAdapter
+ChannelInboundBufferHandler <|-- ChannelInboundBufferHandlerAdapter
+
+ChannelOutboundHandler <|-- ChannelOutboundBufferHandler
+ChannelOutboundHandler <|-- ChannelOutboundMessageHandler
+
+ChannelOutboundBufferHandler <|-- ChannelOutboundBufferHandlerAdapter
+ChannelOutboundMessageHandler <|-- ChannelOutboundMessageHandlerAdapter
+
+ChannelBufferHandler --|> ChannelInboundBufferHandler
+ChannelBufferHandler --|> ChannelOutboundBufferHandler
+
+ChannelMessageHandler --|> ChannelInboundMessageHandler
+ChannelMessageHandler --|> ChannelOutboundMessageHandler
+
+ChannelBufferHandlerAdapter --|> ChannelBufferHandler
+ChannelMessageHandlerAdapter --|> ChannelMessageHandler
+
+ChannelInboundHandler <|-- AbstractChannelInboundHandler
+ChannelOutboundHandler <|-- AbstractChannelOutboundHandler
+AbstractChannelInboundHandler <|-- AbstractChannelHandler
+AbstractChannelOutboundHandler <|-- AbstractChannelHandler

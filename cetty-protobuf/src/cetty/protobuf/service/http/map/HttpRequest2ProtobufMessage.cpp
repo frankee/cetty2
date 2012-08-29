@@ -22,6 +22,8 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/util/StringUtil.h>
+#include <cetty/logging/LoggerHelper.h>
+
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/protobuf/service/http/map/ServiceRequestMapper.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
@@ -55,7 +57,7 @@ void HttpRequest2ProtobufMessage::setRequestMapper(
 ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     const HttpRequestPtr& request) {
     HttpServiceTemplate* tmpl = templates->match(request->getMethod(), request->getPathSegments());
-    methodFullName.clear();
+    fieldNameScope.clear();
 
     if (tmpl) {
         const Message* prototype =
@@ -64,9 +66,6 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 tmpl->getMethod());
 
         if (prototype) {
-            methodFullName = prototype->GetTypeName();
-            methodFullName += ".";
-
             Message* req = prototype->New();
 
             if (req && parseMessage(*tmpl, request, req)) {
@@ -78,15 +77,18 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 return message;
             }
             else {
-                printf("can not parse the message.");
+                LOG_ERROR << "can not parse the message: "
+                    << prototype->GetDescriptor()->full_name();
             }
         }
         else {
-            printf("has no such service register.");
+            LOG_ERROR << "has no such service register: "
+                << tmpl->getService() << ":" << tmpl->getMethod();
         }
     }
     else {
-        printf("wrong uri format.");
+        LOG_ERROR << "wrong uri format, can not match any template."
+            << request->getUri();
     }
 
     return ProtobufServiceMessagePtr();
@@ -96,20 +98,43 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpServiceTemplate& tmpl,
         const HttpRequestPtr& request,
         Message* message) {
     BOOST_ASSERT(message && "Message should not be NULL.");
+    
     const google::protobuf::Reflection* reflection = message->GetReflection();
     const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
+    BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
 
     int fieldCnt = descriptor->field_count();
     std::string fieldName;
 
     for (int i = 0; i < fieldCnt; ++i) {
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
-        fieldName = field->full_name().substr(methodFullName.size());
-
+        const std::string& fieldFullName = field->full_name();
+        fieldName = fieldNameScope + field->name();
         if (tmpl.hasField(fieldName)) {
-            if (!parseField(tmpl, request, field, fieldName, NULL, message)) {
+            if (!parseField(tmpl, request, field, fieldName, message)) {
+                LOG_ERROR << "parse filed: " << fieldName << " error.";
                 return false;
             }
+        }
+    }
+
+    // remove this message name in field name scope.
+    if (!fieldNameScope.empty()) {
+        std::string::size_type size = fieldNameScope.size();
+        if (fieldNameScope[size - 1] == '.' && size > 1) {
+            std::string::size_type pos = fieldNameScope.rfind('.', size - 2);
+            if (pos == fieldNameScope.npos) {
+                fieldNameScope.clear();
+            }
+            else {
+                fieldNameScope.erase(pos + 1, size - pos - 1);
+            }
+        }
+        else {
+            LOG_ERROR << "the fieldNameScope ("
+                << fieldNameScope
+                << ") not end with '.', should NOT happened";
+            return false;
         }
     }
 
@@ -149,7 +174,6 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
         const HttpRequestPtr& request,
         const FieldDescriptor* field,
         const std::string& fieldName,
-        const FieldDescriptor* fatherField,
         Message* message) {
     const google::protobuf::Reflection* reflection = message->GetReflection();
 
@@ -165,6 +189,11 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpServiceTemplate& tmpl,
         google::protobuf::Message* msg
             = field->is_repeated() ? reflection->AddMessage(message, field)
               : reflection->MutableMessage(message, field);
+
+        // append the father filed name to name scope.
+        fieldNameScope += field->name();
+        fieldNameScope += ".";
+
         return parseMessage(tmpl, request, msg);
     }
 

@@ -162,6 +162,16 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         response->setContent(content);
 
+        // for jsonp
+        if (format == "json") {
+            std::string jquery = req->getQueryParameters().get("jsoncallback");
+            if (!jquery.empty()) {
+                jquery.append("(");
+                content->writeBytesAhead(jquery);
+                content->writeByte(')');
+            }
+        }
+
         // Decide whether to close the connection or not.
         bool keepAlive = HttpHeaders::isKeepAlive(*req);
 
