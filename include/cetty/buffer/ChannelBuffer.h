@@ -1467,6 +1467,9 @@ public:
 
     int writeBytesAhead(const std::string& src);
 
+    int writeBytes(const char* src, int length);
+    int writeBytesAhead(const char* src, int length);
+
     /**
      * Transfers the specified source array's data to this buffer starting at
      * the current <tt>writerIndex</tt> and increases the <tt>writerIndex</tt>

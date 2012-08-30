@@ -64,6 +64,7 @@ void HttpMessage::setChunked(bool chunked) {
 void HttpMessage::setContent(const ChannelBufferPtr& content) {
     if (!content) {
         this->content = ChannelBuffers::EMPTY_BUFFER;
+        return;
     }
 
     if (content->readable() && isChunked()) {

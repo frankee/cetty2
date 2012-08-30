@@ -44,6 +44,11 @@ using namespace cetty::protobuf::serialization;
 using google::protobuf::Message;
 
 class MessageFieldFormatter : public boost::static_visitor<ChannelBufferPtr> {
+private:
+    static const int RESERVED_MIN_SIZE = 512;
+    static const int RESERVED_WRITE_SIZE = 12;
+    static const int RESERVED_AHEAD_WRITE_SIZE = 512;
+
 public:
     MessageFieldFormatter(ProtobufFormatter* formatter, const Message* message)
         : formatter(formatter), message(message)  {
@@ -54,37 +59,69 @@ public:
     }
 
     ChannelBufferPtr operator()(boost::int64_t value) const {
-        return ChannelBufferPtr();
+        ChannelBufferPtr content = ChannelBuffers::buffer(
+                                       fieldName.size() + 16 + RESERVED_WRITE_SIZE,
+                                       RESERVED_AHEAD_WRITE_SIZE);
+
+        formatter->format(fieldName, value, content);
+
+        return content;
     }
 
     ChannelBufferPtr operator()(double value) const {
-        return ChannelBufferPtr();
+        ChannelBufferPtr content = ChannelBuffers::buffer(
+                                       fieldName.size() + 32 + RESERVED_WRITE_SIZE,
+                                       RESERVED_AHEAD_WRITE_SIZE);
+
+        formatter->format(fieldName, value, content);
+
+        return content;
     }
 
     ChannelBufferPtr operator()(const std::string* value) const {
         ChannelBufferPtr content;
 
         if (value) {
-            content = ChannelBuffers::buffer(value->size());
+            content = ChannelBuffers::buffer(
+                          value->size() + fieldName.size() + RESERVED_WRITE_SIZE,
+                          RESERVED_AHEAD_WRITE_SIZE);
+
             formatter->format(fieldName, *value, content);
         }
+
         return content;
     }
 
     ChannelBufferPtr operator()(const Message* value) const {
-        std::string content;
-        formatter->format(*value, &content);
-        return ChannelBuffers::copiedBuffer(content);
+        ChannelBufferPtr content;
+
+        if (value) {
+            int size = value->ByteSize();
+            content = ChannelBuffers::dynamicBuffer(size * 4 + RESERVED_MIN_SIZE,
+                                                    RESERVED_AHEAD_WRITE_SIZE);
+            formatter->format(*value, content);
+        }
+
+        return content;
     }
 
     ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) const {
-        ChannelBufferPtr content = ChannelBuffers::buffer(1024);
+        ChannelBufferPtr content = ChannelBuffers::buffer(
+                                       fieldName.size() + 16 * value.size() + RESERVED_WRITE_SIZE,
+                                       RESERVED_AHEAD_WRITE_SIZE);
+
         formatter->format(fieldName, value, content);
         return content;
     }
 
     ChannelBufferPtr operator()(const std::vector<double>& value) const {
-        return ChannelBufferPtr();
+        ChannelBufferPtr content = ChannelBuffers::buffer(
+                                       fieldName.size() + 32 * value.size() + RESERVED_WRITE_SIZE,
+                                       RESERVED_AHEAD_WRITE_SIZE);
+
+        formatter->format(fieldName, value, content);
+
+        return content;
     }
 
     ChannelBufferPtr operator()(const std::vector<const std::string*>& value) const {
@@ -149,15 +186,15 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         ChannelBufferPtr content;
         MessageFieldFormatter f(formatter, paylod);
 
-        if (!tmpl->content.empty()) {
+        if (tmpl->content.empty()) {
+            content = f((const Message*)paylod);
+        }
+        else {
             ProtobufUtil::FieldValue field
                 = ProtobufUtil::getMessageField(tmpl->content, *paylod);
             f.setFieldName(tmpl->content);
 
             content = field.apply_visitor(f);
-        }
-        else {
-            content = f((const Message*)paylod);
         }
 
         response->setContent(content);
@@ -165,6 +202,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         // for jsonp
         if (format == "json") {
             std::string jquery = req->getQueryParameters().get("jsoncallback");
+
             if (!jquery.empty()) {
                 jquery.append("(");
                 content->writeBytesAhead(jquery);

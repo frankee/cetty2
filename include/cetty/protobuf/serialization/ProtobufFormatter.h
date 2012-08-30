@@ -82,6 +82,14 @@ public:
                 const std::vector<double>& value,
                 const ChannelBufferPtr& buffer);
 
+    void format(const std::string& key,
+                const std::vector<std::string>& value,
+                std::string* str);
+
+    void format(const std::string& key,
+                const std::vector<std::string>& value,
+                const ChannelBufferPtr& buffer);
+
     virtual void format(const std::string& key,
                         const std::vector<const std::string*>& value,
                         std::string* str) = 0;
