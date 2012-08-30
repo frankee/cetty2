@@ -138,7 +138,8 @@ public:
      * reallocation overhead.  The new buffer's <tt>readerIndex</tt> and
      * <tt>writerIndex</tt> are <tt>0</tt>.
      */
-    static ChannelBufferPtr dynamicBuffer(int estimatedLength);
+    static ChannelBufferPtr dynamicBuffer(int estimatedLength,
+        int aheadBytes = DEFAULT_AHEAD_BYTES);
 
     /**
      * Creates a new dynamic buffer with the specified endianness and

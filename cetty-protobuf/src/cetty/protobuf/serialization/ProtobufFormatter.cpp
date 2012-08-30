@@ -51,6 +51,7 @@ struct ProtobufFormatterRegister {
     void unregister(const std::string& name) {
         ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(name);
         ProtobufFormatter::unregisterFormatter(name);
+
         if (formatter) {
             delete formatter;
         }
@@ -58,38 +59,120 @@ struct ProtobufFormatterRegister {
 
 } formatterRegister;
 
-void ProtobufFormatter::format(const std::string& key, boost::int64_t value, std::string* str) {
+void ProtobufFormatter::format(const std::string& key,
+                               boost::int64_t value,
+                               std::string* str) {
     std::string v;
     StringUtil::strprintf(&v, "%lld", key);
     format(key, v, str);
 }
 
-void ProtobufFormatter::format(const std::string& key, boost::int64_t value, const ChannelBufferPtr& buffer) {
-
+void ProtobufFormatter::format(const std::string& key,
+                               boost::int64_t value,
+                               const ChannelBufferPtr& buffer) {
+    std::string v;
+    StringUtil::strprintf(&v, "%lld", key);
+    format(key, v, buffer);
 }
 
-void ProtobufFormatter::format(const std::string& key, double value, std::string* str) {
-
+void ProtobufFormatter::format(const std::string& key,
+                               double value,
+                               std::string* str) {
+    std::string v;
+    StringUtil::strprintf(&v, "%lf", key);
+    format(key, v, str);
 }
 
-void ProtobufFormatter::format(const std::string& key, double value, const ChannelBufferPtr& buffer) {
-
+void ProtobufFormatter::format(const std::string& key,
+                               double value,
+                               const ChannelBufferPtr& buffer) {
+    std::string v;
+    StringUtil::strprintf(&v, "%lf", key);
+    format(key, v, buffer);
 }
 
-void ProtobufFormatter::format(const std::string& key, const std::vector<boost::int64_t>& value, std::string* str) {
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<boost::int64_t>& value,
+                               std::string* str) {
+    std::vector<std::string> strValues;
+    std::size_t j = value.size();
+    strValues.resize(j);
 
+    for (std::size_t i = 0; i < j; ++i) {
+        StringUtil::strprintf(&strValues[i], "%lld", value[i]);
+    }
+
+    format(key, strValues, str);
 }
 
-void ProtobufFormatter::format(const std::string& key, const std::vector<boost::int64_t>& value, const ChannelBufferPtr& buffer) {
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<boost::int64_t>& value,
+                               const ChannelBufferPtr& buffer) {
+    std::vector<std::string> strValues;
+    std::size_t j = value.size();
+    strValues.resize(j);
 
+    for (std::size_t i = 0; i < j; ++i) {
+        StringUtil::strprintf(&strValues[i], "%lld", value[i]);
+    }
+
+    format(key, strValues, buffer);
 }
 
-void ProtobufFormatter::format(const std::string& key, const std::vector<double>& value, std::string* str) {
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<double>& value,
+                               std::string* str) {
+    std::vector<std::string> strValues;
+    std::size_t j = value.size();
+    strValues.resize(j);
 
+    for (std::size_t i = 0; i < j; ++i) {
+        StringUtil::strprintf(&strValues[i], "%lf", value[i]);
+    }
+
+    format(key, strValues, str);
 }
 
-void ProtobufFormatter::format(const std::string& key, const std::vector<double>& value, const ChannelBufferPtr& buffer) {
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<double>& value,
+                               const ChannelBufferPtr& buffer) {
+    std::vector<std::string> strValues;
+    std::size_t j = value.size();
+    strValues.resize(j);
 
+    for (std::size_t i = 0; i < j; ++i) {
+        StringUtil::strprintf(&strValues[i], "%lf", value[i]);
+    }
+
+    format(key, strValues, buffer);
+}
+
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<std::string>& value,
+                               std::string* str) {
+    std::vector<const std::string*> ptrValues;
+    std::size_t j = value.size();
+    ptrValues.reserve(j);
+
+    for (std::size_t i = 0; i < j; i < j) {
+        ptrValues.push_back(&value[i]);
+    }
+
+    format(key, ptrValues, str);
+}
+
+void ProtobufFormatter::format(const std::string& key,
+                               const std::vector<std::string>& value,
+                               const ChannelBufferPtr& buffer) {
+    std::vector<const std::string*> ptrValues;
+    std::size_t j = value.size();
+    ptrValues.reserve(j);
+
+    for (std::size_t i = 0; i < j; i < j) {
+        ptrValues.push_back(&value[i]);
+    }
+
+    format(key, ptrValues, buffer);
 }
 
 ProtobufFormatter* ProtobufFormatter::getFormatter(const std::string& name) {
@@ -103,7 +186,8 @@ ProtobufFormatter* ProtobufFormatter::getFormatter(const std::string& name) {
     return NULL;
 }
 
-void ProtobufFormatter::registerFormatter(const std::string& name, ProtobufFormatter* formatter) {
+void ProtobufFormatter::registerFormatter(const std::string& name,
+        ProtobufFormatter* formatter) {
     if (!name.empty() && NULL != formatter) {
         formatters.insert(std::make_pair(name, formatter));
     }

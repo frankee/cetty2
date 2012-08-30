@@ -17,15 +17,12 @@
  * under the License.
  */
 
+#include <google/protobuf/message.h>
+#include <google/protobuf/descriptor.h>
+
 #include <cetty/protobuf/serialization/ProtobufFormatter.h>
 
 #define JSON_FORMATTER_PLUGIN 1
-
-namespace google {
-namespace protobuf {
-class FieldDescriptor;
-}
-}
 
 namespace cetty {
 namespace protobuf {
@@ -34,11 +31,14 @@ namespace json {
 
 using namespace cetty::protobuf::serialization;
 
+template<typename T, int Style>
 class JsonPrinter;
 
 class ProtobufJsonFormatter : public ProtobufFormatter {
 public:
-    ProtobufJsonFormatter() {}
+    ProtobufJsonFormatter() : style(false) {}
+    ProtobufJsonFormatter(bool style) : style(style) {}
+
     virtual ~ProtobufJsonFormatter() {}
 
     // if the value is binary, in json or xml will using base64
@@ -69,28 +69,8 @@ public:
     virtual void format(const std::string& key,
                         const std::vector<const google::protobuf::Message*>& value,
                         const ChannelBufferPtr& buffer);
-
 private:
-    void printMessage(const google::protobuf::Message& message,
-                      JsonPrinter& printer);
-
-    bool printField(const google::protobuf::Message& message,
-                    const google::protobuf::FieldDescriptor* field,
-                    JsonPrinter& printer);
-
-    void printSingleField(const google::protobuf::Message& message,
-                          const google::protobuf::FieldDescriptor* field,
-                          JsonPrinter& printer);
-
-    void printFieldRepeatedValue(const google::protobuf::Message& message,
-                                 const google::protobuf::FieldDescriptor* field,
-                                 JsonPrinter& printer);
-
-    void printFieldValue(const google::protobuf::Message& message,
-                         const google::protobuf::FieldDescriptor* field,
-                         JsonPrinter& printer);
-
-    bool utf8Check(const std::string& str);
+    bool style;
 };
 
 }

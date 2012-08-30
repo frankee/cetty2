@@ -102,7 +102,8 @@ ChannelBufferPtr ChannelBuffers::dynamicBuffer() {
     return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, 256);
 }
 
-ChannelBufferPtr ChannelBuffers::dynamicBuffer(int estimatedLength) {
+ChannelBufferPtr ChannelBuffers::dynamicBuffer(int estimatedLength,
+    int aheadBytes) {
     return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, estimatedLength);
 }
 

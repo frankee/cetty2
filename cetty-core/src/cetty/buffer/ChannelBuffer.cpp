@@ -685,6 +685,14 @@ int ChannelBuffer::writeBytes(InputStream* in, int length) {
     return 0;
 }
 
+int ChannelBuffer::writeBytes(const char* src, int length) {
+    BOOST_ASSERT(src && length > 0 && length <= strlen(src));
+    if (src && length > 0) {
+        return writeBytes(ConstArray(src, length), 0, length);
+    }
+    return 0;
+}
+
 int ChannelBuffer::writeZero(int length) {
     if (length <= 0) {
         // log here
@@ -917,6 +925,14 @@ int ChannelBuffer::writeBytesAhead(const std::string& src) {
 
 int ChannelBuffer::writeBytesAhead(const std::string& src, int srcIndex, int length) {
     return writeBytesAhead(ConstArray::fromString(src), srcIndex, length);
+}
+
+int ChannelBuffer::writeBytesAhead(const char* src, int length) {
+    BOOST_ASSERT(src && length > 0 && length <= strlen(src));
+    if (src && length > 0) {
+        return writeBytesAhead(ConstArray(src, length), 0, length);
+    }
+    return 0;
 }
 
 int ChannelBuffer::writeZeroAhead(int length) {
