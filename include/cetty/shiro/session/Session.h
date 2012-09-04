@@ -34,6 +34,7 @@ namespace session {
 
 using namespace boost::posix_time;
 using namespace cetty::util;
+
 /**
  * A {@code Session} is a stateful data context associated with a single Subject (user, daemon process,
  * etc) who interacts with a software system over a period of time.
@@ -41,7 +42,7 @@ using namespace cetty::util;
  * A {@code Session} is intended to be managed by the business tier and accessible via other
  * tiers without being tied to any given client technology.
  */
-class Session : public ReferenceCounter<Session, int>{
+class Session : public ReferenceCounter<Session, int> {
 public:
     enum SessionState {
         START,

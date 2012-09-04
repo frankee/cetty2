@@ -14,13 +14,26 @@
  * under the License.
  */
 
-#include "cetty/bootstrap/ServerBootstrap.h"
-#include "cetty/channel/socket/asio/AsioServerSocketChannelFactory.h"
-#include "TelnetServerPipelineFactory.h"
+#include <cetty/bootstrap/ServerBootstrap.h>
 
-using namespace cetty::bootstrap;
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/IpAddress.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelFactory.h>
+#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
+#include <cetty/handler/codec/Delimiters.h>
+#include <TelnetServerHandler.h>
+
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
+
+using namespace cetty::bootstrap;
+using namespace cetty::handler::codec;
+
+using namespace cetty::util;
 
 /**
  * Simplistic telnet server.
@@ -30,37 +43,42 @@ using namespace cetty::channel::socket::asio;
  *
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
  */
-
 int main(int argc, char* argv[]) {
-    // Configure the server.
-    ServerBootstrap bootstrap(
-        ChannelFactoryPtr(new AsioServerSocketChannelFactory(-1)));
+    int threadCount = 1;
 
-    // Configure the pipeline factory.
-    bootstrap.setPipelineFactory(
-        ChannelPipelineFactoryPtr(new TelnetServerPipelineFactory()));
-
-    // Bind and start to accept incoming connections.
-    Channel* c = bootstrap.bind(SocketAddress(IpAddress::IPv4, 8080));
-
-    if (c->isBound()) {
-        printf("Server is running...\n");
-        printf("To quit server, press 'q'.\n");
-
-        char input;
-
-        do {
-            input = getchar();
-
-            if (input == 'q') {
-                c->close()->awaitUninterruptibly();
-                bootstrap.releaseExternalResources();
-                return 0;
-            }
-        }
-        while (true);
+    if (argc == 2) {
+        threadCount = atoi(argv[1]);
     }
 
-    bootstrap.releaseExternalResources();
+    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
+
+    ServerBootstrap bootstrap(factory);
+
+    bootstrap.setPipeline(ChannelPipelines::pipeline(
+        new DelimiterBasedFrameDecoder(8192, Delimiters::lineDelimiter()),
+        new TelnetServerHandler));
+
+    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
+        .setOption(ChannelOption::CO_SO_REUSEADDR, true)
+        .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+
+    // Bind and start to accept incoming connections.
+    ChannelFuturePtr f = bootstrap.bind(8080)->await();
+
+    printf("Server is running...\n");
+    printf("To quit server, press 'q'.\n");
+
+    char input;
+
+    do {
+        input = getchar();
+
+        if (input == 'q') {
+            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            return 0;
+        }
+    }
+    while (true);
+
     return -1;
 }

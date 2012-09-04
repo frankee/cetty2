@@ -16,22 +16,20 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <time.h>
 
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ChannelEvent.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
-#include "cetty/channel/ChannelFutureListener.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/logging/InternalLogger.h"
+#include <boost/date_time/posix_time/ptime.hpp>
+
+#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
+#include <cetty/channel/ChannelFutureListener.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/util/StringUtil.h>
 
 using namespace cetty::channel;
-using namespace cetty::logging;
+using namespace cetty::util;
+using namespace cetty::buffer;
 
 /**
  * Handles a server-side channel.
@@ -41,49 +39,42 @@ using namespace cetty::logging;
  *
  * @version $Rev: 2121 $, $Date: 2010-02-02 09:38:07 +0900 (Tue, 02 Feb 2010) $
  */
-class TelnetServerHandler : public SimpleChannelUpstreamHandler {
+class TelnetServerHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
     TelnetServerHandler() {}
     virtual ~TelnetServerHandler() {}
 
-    virtual void channelStateChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        logger->info(e.toString());
-        SimpleChannelUpstreamHandler::channelStateChanged(ctx, e);
-    }
-
-    virtual void channelConnected(
-            ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
+    virtual void channelActive(ChannelHandlerContext& ctx) {
         // Send greeting for a new connection.
-        std::string str("Welcome to ");
-        str.append(e.getChannel().getLocalAddress().toString());
-        str.append("!\r\n");
-        e.getChannel().write(str);
+        std::string str;
+        StringUtil::strprintf(&str, "Welcome to %s !\r\n",
+                              ctx.getChannel()->getLocalAddress().toString().c_str());
 
-        time_t now = time(0);
+        outboundTransfer.write(ctx,
+                               ChannelBuffers::copiedBuffer(str),
+                               ctx.getChannel()->newSucceededFuture());
+
+        boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
         str.clear();
-        str += "It is ";
-        str += ctime(&now);
-		str[str.size() - 1] = ' '; //eat the last '\n' of the ctime string.
-        str += "now.\r\n";
-        e.getChannel().write(str);
+        StringUtil::strprintf(&str, "It is %s now.\r\n",
+                              boost::posix_time::to_iso_string(now).c_str());
+
+        outboundTransfer.write(ctx,
+                               ChannelBuffers::copiedBuffer(str),
+                               ctx.getChannel()->newSucceededFuture());
     }
 
-    virtual void messageReceived(
-            ChannelHandlerContext& ctx, const MessageEvent& e) {
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
 
-        // Cast to a String first.
-        // We know it is a String because we put some codec in TelnetPipelineFactory.
-        if (!e.getMessage().isString()) {
-            // log here.
-        }
-
-        std::string& request = e.getMessage().value<std::string>();
+        ChannelBufferPtr buff = getInboundChannelBuffer();
+        std::string request;
+        buff->readBytes(&request);
 
         // Generate and write a response.
         std::string response;
         bool close = false;
-        
-        if (request.length() == 0) {
+
+        if (request.empty()) {
             response = "Please type something.\r\n";
         }
         else if (request.compare("bye") == 0) {
@@ -98,7 +89,10 @@ public:
 
         // We do not need to write a ChannelBuffer here.
         // We know the encoder inserted at TelnetPipelineFactory will do the conversion.
-        ChannelFuturePtr future = e.getChannel().write(response);
+        ChannelFuturePtr future = ctx.getChannel()->newFuture();
+        outboundTransfer.write(ctx,
+                               ChannelBuffers::copiedBuffer(response),
+                               future);
 
         // Close the connection after sending 'Have a good day!'
         // if the client has sent 'bye'.
@@ -107,16 +101,18 @@ public:
         }
     }
 
-    virtual void exceptionCaught(
-            ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        logger->warn(
-                "Unexpected exception from downstream.",
-                e.getCause());
-        e.getChannel().close();
+    virtual void exceptionCaught(ChannelHandlerContext& ctx) {
+        LOG_WARN_E(e) << "Unexpected exception from downstream.";
+        ctx.getChannel()->close();
     }
 
-private:
-    static InternalLogger* logger;
+    virtual ChannelHandlerPtr clone() {
+        return shared_from_this();
+    }
+
+    virtual std::string toString() const {
+        return "TelentServerHandler";
+    }
 };
 
 

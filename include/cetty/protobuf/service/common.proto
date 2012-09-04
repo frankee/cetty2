@@ -1,0 +1,31 @@
+package cetty.protobuf.service;
+
+option java_package = "cetty.protobuf.service";
+option java_outer_classname = "ServiceProto";
+
+message KeyValue {
+	optional string   key = 1;
+	optional string value = 2;
+}
+
+message Status {
+	message SubError {
+		optional string    code = 1;
+		optional string message = 2;
+	}
+	
+    optional int32          code = 1 [default = 0];
+    optional string      message = 2;
+	repeated SubError sub_errors = 3;
+}
+
+message Session {
+	required string id      = 1;
+	repeated KeyValue items = 2;
+}
+
+enum Lang {
+    zh_CN = 0;
+    zh_TW = 1;
+	en_US = 2;
+}

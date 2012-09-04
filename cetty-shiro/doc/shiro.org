@@ -1,0 +1,42 @@
+
+** cetty-shiro
+shiro主要负责认证、鉴权及Session管理。提供Lib库以及REST HTTP/RPC远程调用接口，并且提供用户注册、认证服务。
+
+** cetty-shiro适用场景
+1. 通常的网站应用
+   网站拥有自己的用户管理系统，也就是说，网站的用户通常需要注册之后才能成为该网站的合法用户（OAuth除外）。用户需要登入网站，才能使用网站提供的各项服务。
+
+2. 提供各个平台（Web、Android、iOS、WindowsPhone）应用使用
+   所有的认证及鉴权都是以用户的应用名为主。
+
+3. 提供Server到Server的API调用，适用于合作方的授权
+
+** 网站q应用使用流程（通常情况下，未使用OAuth）
+1. 用户注册
+
+2. 用户登录（WSSE， HTTPS）
+   1. 发送prelogin请求
+      输入：username
+      输出：nonce及servertime
+      session:session_id
+   2. 发送login请求
+      输入：用户名、nonce、servertime、SHA256(SHA1(SHA1(passwd)) + nonce + servertime)、encode
+      输出：
+      session:session_id
+
+3. 用户登出
+   1. 发送logout请求
+      输入：
+      输出：
+
+4. 用户鉴权
+   1. 接收到服务请求
+      提取session id，获取session信息，获取session中的用户信息，对用户进行鉴权。
+
+** APP应用场景
+   1. 可以参考TOP的方式，采用AppKey及AppSecret，且HTTP请求需要使用AppSecret签名
+   2. 可以弱化安全的方式，及只采用AppKey的方式
+
+** server对server的场景
+   1. 可以使用APP的方式
+   2. 可以使用CustomerKey以及host白名单方式

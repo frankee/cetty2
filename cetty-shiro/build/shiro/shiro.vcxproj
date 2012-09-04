@@ -51,7 +51,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\subject\SubjectContext.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}</ProjectGuid>
+    <ProjectGuid>{3DE1111F-B927-483B-AD82-385EF564E967}</ProjectGuid>
     <RootNamespace>shiro</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

@@ -1,5 +1,6 @@
 #if !defined(CETTY_SHIRO_SESSION_SESSIONCONTEXT_H)
 #define CETTY_SHIRO_SESSION_SESSIONCONTEXT_H
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file

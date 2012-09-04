@@ -54,7 +54,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../example/echo;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../example/telnet/server;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -108,11 +108,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\example\telnet\server\TelnetServer.cpp" />
-    <ClCompile Include="..\..\example\telnet\server\TelnetServerHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\telnet\server\TelnetServerHandler.h" />
-    <ClInclude Include="..\..\example\telnet\server\TelnetServerPipelineFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_FRAME_DELIMITERS_H)
-#define CETTY_HANDLER_CODEC_FRAME_DELIMITERS_H
+#if !defined(CETTY_HANDLER_CODEC_DELIMITERS_H)
+#define CETTY_HANDLER_CODEC_DELIMITERS_H
 
 /*
  * Copyright 2009 Red Hat, Inc.
@@ -23,7 +23,6 @@
 namespace cetty {
 namespace handler {
 namespace codec {
-namespace frame {
 
 /**
  * A set of commonly used delimiters for {@link DelimiterBasedFrameDecoder}.
@@ -83,9 +82,8 @@ private:
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_FRAME_DELIMITERS_H)
+#endif //#if !defined(CETTY_HANDLER_CODEC_DELIMITERS_H)
 
 // Local Variables:
 // mode: c++

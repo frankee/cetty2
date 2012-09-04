@@ -1,0 +1,17 @@
+* cetty-doto
+
+** cetty-protobuf
+   1. HTTP与protobuf之间转换时，field的验证（参数的绑定与校验）
+      具体做法，在定义protobuf时，增加field相关的验证option
+      regexp = "\\w{4,30}"
+      DecimalMin("1000.00")
+      DecimalMax("100000.00")
+      NumberFormat(pattern = "#,###.##")
+
+      字段校验的方式：
+      1. 在Nginx端，对Url的parameter校验，可以使用lua脚本编写；
+         此种方法的校验很强大也很灵活，缺点是lua脚本的编写与定义服务接口不在同一个地方。
+      2. 在HTTP转换为protobuf时，进行校验，使用proto的option选项；
+         可以支持自定义的一些方法或者正则表达式，功能比较受限制，但是在编写接口的时候就可以将限制规定下来。
+      3. 在service方法的实现内，由开发者自行校验。
+         增加开发的复杂度，而且并不能保证所有的参数安装规定校验。

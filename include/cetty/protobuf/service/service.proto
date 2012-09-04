@@ -1,4 +1,4 @@
-package cetty.protobuf.service.proto;
+package cetty.protobuf.service;
 
 option java_package = "cetty.protobuf.service";
 option java_outer_classname = "ServiceProto";
@@ -12,6 +12,7 @@ enum MessageType {
 }
 
 enum ErrorCode {
+  NO_ERROR         = 0;
   WRONG_PROTO      = 1;
   NO_SERVICE       = 2;
   NO_METHOD        = 3;
