@@ -1,36 +1,66 @@
-#if !defined(CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFBSONFORMATTER_H)
-#define CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFBSONFORMATTER_H
-
+#if !defined(CETTY_PROTOBUF_SERIALIZATION_BSON_PROTOBUFBSONFORMATTER_H)
+#define CETTY_PROTOBUF_SERIALIZATION_BSON_PROTOBUFBSONFORMATTER_H
+/*
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
+ *
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 #include <string>
 
-#include "ProtobufJsonFormatter.h"
-
 namespace mongo {
-	class BSONObj;
-	class BSONObjBuilder;
+class BSONObj;
+class BSONObjBuilder;
 }
-namespace google { namespace protobuf {
-	class Message;
-	class FieldDescriptor;
-}}
 
-namespace cetty { namespace handler { namespace rpc { namespace protobuf {
+namespace google {
+namespace protobuf {
+class Message;
+class FieldDescriptor;
+}
+}
 
-	using namespace mongo;
+namespace cetty {
+namespace protobuf {
+namespace serialization {
+namespace bson {
 
-	class ProtobufBsonFormatter {
-	public:
-		static void serializeToBsonObjWithJsonString(const google::protobuf::Message& message, BSONObj* obj);
+using namespace mongo;
 
-		static void serializeToBsonObj(const google::protobuf::Message& message, BSONObj* obj);
+class ProtobufBsonFormatter {
+public:
+    static void format(const google::protobuf::Message& message, BSONObj* obj);
 
-	private:
-		static void serializeMessage(const google::protobuf::Message& message, BSONObjBuilder& builder);
-		static bool serializeField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, BSONObjBuilder& builder);
-		static void serializeSingleField(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, BSONObjBuilder& builder);
-	};
+private:
+    static void formatMessage(const google::protobuf::Message& message,
+        BSONObjBuilder& builder);
 
-}}}}
+    static bool formatField(const google::protobuf::Message& message,
+        const google::protobuf::FieldDescriptor* field, BSONObjBuilder& builder);
 
+    static void formatSingleField(const google::protobuf::Message& message,
+        const google::protobuf::FieldDescriptor* field, BSONObjBuilder& builder);
 
-#endif //CETTY_HANDLER_RPC_PROTOBUF_PROTOBUFBSONFORMATTER_H
+private:
+    ProtobufBsonFormatter();
+};
+
+}
+}
+}
+}
+
+#endif //#if !defined(CETTY_PROTOBUF_SERIALIZATION_BSON_PROTOBUFBSONFORMATTER_H)
+
+// Local Variables:
+// mode: c++
+// End:

@@ -11,7 +11,7 @@ shiro主要负责认证、鉴权及Session管理。提供Lib库以及REST HTTP/RPC远程调用接口，并
 
 3. 提供Server到Server的API调用，适用于合作方的授权
 
-** 网站q应用使用流程（通常情况下，未使用OAuth）
+** 网站应用使用流程（通常情况下，未使用OAuth）
 1. 用户注册
 
 2. 用户登录（WSSE， HTTPS）
@@ -35,7 +35,7 @@ shiro主要负责认证、鉴权及Session管理。提供Lib库以及REST HTTP/RPC远程调用接口，并
 
 ** APP应用场景
    1. 可以参考TOP的方式，采用AppKey及AppSecret，且HTTP请求需要使用AppSecret签名
-   2. 可以弱化安全的方式，及只采用AppKey的方式
+   2. 可以弱化安全的方式，及只采用AppKey的方式，不需要签名
 
 ** server对server的场景
    1. 可以使用APP的方式
