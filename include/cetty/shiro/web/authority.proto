@@ -1,0 +1,16 @@
+package cetty.shiro.web;
+
+import "cetty/protobuf/service/common.proto";
+
+option java_package = "cetty.shiro.web";
+option java_outer_classname = "AuthorityProto";
+
+message Authority {
+	optional cetty.protobuf.service.Session session = 1;
+	
+    optional string         key = 2;
+    optional string   signature = 3;
+
+	optional string          ip = 8;
+	optional string domain_name = 9;
+}

@@ -1,0 +1,51 @@
+package cetty.shiro.web;
+
+import "cetty/protobuf/service/common.proto";
+
+option java_package = "cetty.shiro.web";
+option java_outer_classname = "AuthProto";
+
+option py_generic_services = true;
+option cc_generic_services = true;
+option java_generic_services = true;
+
+message PreLoginRequest {
+	optional string      host = 1;
+	optional string user_name = 2;
+}
+
+message PreLoginResponse {
+	optional cetty.protobuf.service.Status   status = 1;
+	optional cetty.protobuf.service.Session session = 2;
+	
+	optional string       nonce = 3;
+	optional string server_time = 4;
+}
+
+message LoginRequest {
+	optional string      user_name = 1;
+	optional string          nonce = 2;
+	optional string    server_time = 3;
+	
+	optional string    encode_type = 8;
+	optional string encoded_passwd = 9;
+}
+
+message LoginResponse {
+	optional cetty.protobuf.service.Status   status = 1;
+	optional cetty.protobuf.service.Session session = 2;
+}
+
+message LogoutRequest {
+	optional cetty.protobuf.service.Session session = 1;
+}
+
+message LogoutResponse {
+	optional cetty.protobuf.service.Status status = 1;
+}
+
+service AuthenticationService {
+	rpc preLogin (PreLoginRequest) returns (PreLoginResponse);
+	rpc login (LoginRequest) returns (LoginResponse);
+	rpc logout (LogoutRequest) returns (LogoutResponse);
+}
