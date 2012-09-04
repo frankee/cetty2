@@ -30,7 +30,7 @@
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/proto/service.pb.h>
+#include <cetty/protobuf/service/service.pb.h>
 
 namespace cetty {
 namespace protobuf {
@@ -40,7 +40,6 @@ namespace handler {
 using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::protobuf::service;
-using namespace cetty::protobuf::service::proto;
 using namespace google::protobuf;
 
 ProtobufServiceMessageHandler::ProtobufServiceMessageHandler() {
@@ -53,7 +52,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& msg) {
     const ServiceMessage& rpc = msg->getServiceMessage();
 
-    if (rpc.type() == cetty::protobuf::service::proto::REQUEST) {
+    if (rpc.type() == cetty::protobuf::service::REQUEST) {
         const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
 
@@ -80,7 +79,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
             printf("has no such service or method.\n");
         }
     }
-    else if (rpc.type() == cetty::protobuf::service::proto::ERROR) {
+    else if (rpc.type() == cetty::protobuf::service::ERROR) {
     }
     else {
         //ctx.sendUpstream(e);

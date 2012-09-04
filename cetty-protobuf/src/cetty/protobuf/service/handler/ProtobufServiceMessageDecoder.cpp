@@ -18,7 +18,7 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/protobuf/service/proto/service.pb.h>
+#include <cetty/protobuf/service/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
@@ -31,7 +31,6 @@ namespace handler {
 using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
-using namespace cetty::protobuf::service::proto;
 
 ChannelHandlerPtr ProtobufServiceMessageDecoder::clone() {
     return shared_from_this();

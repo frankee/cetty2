@@ -24,9 +24,7 @@
 namespace cetty {
 namespace protobuf {
 namespace service {
-namespace proto {
 class ServiceMessage;
-}
 }
 }
 }
@@ -39,7 +37,7 @@ namespace handler {
 using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
-using namespace cetty::protobuf::service::proto;
+using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
 class ProtobufServiceMessageDecoder

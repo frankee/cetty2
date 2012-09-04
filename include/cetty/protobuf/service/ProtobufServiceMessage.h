@@ -24,19 +24,10 @@
 namespace cetty {
 namespace protobuf {
 namespace service {
-namespace proto {
-class ServiceMessage;
-}
-}
-}
-}
-
-namespace cetty {
-namespace protobuf {
-namespace service {
 
 using namespace cetty::protobuf::service;
-using namespace cetty::protobuf::service::proto;
+
+class ServiceMessage;
 
 class ProtobufServiceMessage : public cetty::util::ReferenceCounter<ProtobufServiceMessage> {
 public:

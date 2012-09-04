@@ -22,7 +22,7 @@
 #include <cetty/service/ClientService.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/proto/service.pb.h>
+#include <cetty/protobuf/service/service.pb.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -31,7 +31,7 @@ namespace service {
 
 using namespace google::protobuf;
 using namespace cetty::service;
-using namespace cetty::protobuf::service::proto;
+using namespace cetty::protobuf::service;
 using namespace cetty::util;
 
 // Call the given method of the remote service.  The signature of this
