@@ -18,6 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <string>
 
 namespace cetty {
 namespace shiro {
@@ -42,155 +43,15 @@ namespace codec {
  * @since 0.9
  */
 class Base64 {
-private:
-    /**
-     * Chunk size per RFC 2045 section 6.8.
-     * <p/>
-     * The character limit does not count the trailing CRLF, but counts all other characters, including any
-     * equal signs.
-     *
-     * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045 section 6.8</a>
-     */
-    static const int CHUNK_SIZE = 76;
-
-    /**
-     * Chunk separator per RFC 2045 section 2.1.
-     *
-     * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045 section 2.1</a>
-     */
-    static const std::string CHUNK_SEPARATOR;
-
-    /**
-     * The base length.
-     */
-    static const int BASELENGTH = 255;
-
-    /**
-     * Lookup length.
-     */
-    static const int LOOKUPLENGTH = 64;
-
-    /**
-     * Used to calculate the number of bits in a byte.
-     */
-    static const int EIGHTBIT = 8;
-
-    /**
-     * Used when encoding something which has fewer than 24 bits.
-     */
-    static const int SIXTEENBIT = 16;
-
-    /**
-     * Used to determine how many bits data contains.
-     */
-    static const int TWENTYFOURBITGROUP = 24;
-
-    /**
-     * Used to get the number of Quadruples.
-     */
-    static const int FOURBYTE = 4;
-
-    /**
-     * Used to test the sign of a byte.
-     */
-    static const int SIGN = -128;
-
-    /**
-     * Byte used to pad output.
-     */
-    static const std::string PAD;
-
-    /**
-     * Contains the Base64 values <code>0</code> through <code>63</code> accessed by using character encodings as
-     * indices.
-     * <p/>
-     * <p>For example, <code>base64Alphabet['+']</code> returns <code>62</code>.</p>
-     * <p/>
-     * <p>The value of undefined encodings is <code>-1</code>.</p>
-     */
-    static char base64Alphabet[BASELENGTH];
-
-    /**
-     * <p>Contains the Base64 encodings <code>A</code> through <code>Z</code>, followed by <code>a</code> through
-     * <code>z</code>, followed by <code>0</code> through <code>9</code>, followed by <code>+</code>, and
-     * <code>/</code>.</p>
-     * <p/>
-     * <p>This array is accessed by using character values as indices.</p>
-     * <p/>
-     * <p>For example, <code>lookUpBase64Alphabet[62] </code> returns <code>'+'</code>.</p>
-     */
-    static char lookUpBase64Alphabet[LOOKUPLENGTH];
-
-    // Populating the lookup and character arrays
-/*
-    static {
-        for (int i = 0; i < BASELENGTH; i++) {
-            base64Alphabet[i] = -1;
-        }
-        for (int i = 'Z'; i >= 'A'; i--) {
-            base64Alphabet[i] = (byte) (i - 'A');
-        }
-        for (int i = 'z'; i >= 'a'; i--) {
-            base64Alphabet[i] = (byte) (i - 'a' + 26);
-        }
-        for (int i = '9'; i >= '0'; i--) {
-            base64Alphabet[i] = (byte) (i - '0' + 52);
-        }
-
-        base64Alphabet['+'] = 62;
-        base64Alphabet['/'] = 63;
-
-        for (int i = 0; i <= 25; i++) {
-            lookUpBase64Alphabet[i] = (byte) ('A' + i);
-        }
-
-        for (int i = 26, j = 0; i <= 51; i++, j++) {
-            lookUpBase64Alphabet[i] = (byte) ('a' + j);
-        }
-
-        for (int i = 52, j = 0; i <= 61; i++, j++) {
-            lookUpBase64Alphabet[i] = (byte) ('0' + j);
-        }
-
-        lookUpBase64Alphabet[62] = (byte) '+';
-        lookUpBase64Alphabet[63] = (byte) '/';
-    }
-*/
-
-    /**
-     * Returns whether or not the <code>octect</code> is in the base 64 alphabet.
-     *
-     * @param octect The value to test
-     * @return <code>true</code> if the value is defined in the the base 64 alphabet, <code>false</code> otherwise.
-     */
-    static bool isBase64(char octect){ return false; }
-
-    /**
-     * Tests a given byte array to see if it contains only valid characters within the Base64 alphabet.
-     *
-     * @param arrayOctect byte array to test
-     * @return <code>true</code> if all bytes are valid characters in the Base64 alphabet or if the byte array is
-     *         empty; false, otherwise
-     */
 public:
-    static bool isBase64(const std::string &arrayOctect){ return false; }
-
-    /**
-     * Discards any whitespace from a base-64 encoded block.
-     *
-     * @param data The base-64 encoded data to discard the whitespace from.
-     * @return The data, less whitespace (see RFC 2045).
-     */
-    static std::string discardWhitespace(const std::string &data){ return data; }
-
     /**
      * Encodes binary data using the base64 algorithm and chunks the encoded output into 76 character blocks
      *
      * @param binaryData binary data to encodeToChars
      * @return Base64 characters chunked in 76 character blocks
      */
-    static std::string encodeChunked(const std::string &binaryData) {
-        return encode(binaryData, true);
+    static std::string encodeChunked(const std::string &binary) {
+        return encode(binary, true);
     }
 
     /**
@@ -209,9 +70,8 @@ public:
      * @param binaryData Array containing binary data to encodeToChars.
      * @param isChunked  if <code>true</code> this encoder will chunk the base64 output into 76 character blocks
      * @return Base64-encoded data.
-     * @throws IllegalArgumentException Thrown when the input array needs an output array bigger than {@link Integer#MAX_VALUE}
      */
-    static std::string encode(const std::string &in, bool isChunked){ return in; }
+    static std::string encode(const std::string &in, bool isChunked);
 
     /**
      * Converts the specified UTF-8 Base64 encoded String and decodes it to a raw Base64 decoded byte array.
@@ -219,18 +79,7 @@ public:
      * @param base64Encoded a UTF-8 Base64 encoded String
      * @return the raw Base64 decoded byte array.
      */
-    static std::string decode(const std::string &in){ return in; };
-
-    /**
-     * Discards any characters outside of the base64 alphabet, per the requirements on page 25 of RFC 2045 - "Any
-     * characters outside of the base64 alphabet are to be ignored in base64 encoded data."
-     *
-     * @param data The base-64 encoded data to groom
-     * @return The data, less non-base64 characters (see RFC 2045).
-     */
-    static std::string discardNonBase64(const std::string &data){
-        return data;
-    }
+    static std::string decode(const std::string &in);
 };
 }
 }
