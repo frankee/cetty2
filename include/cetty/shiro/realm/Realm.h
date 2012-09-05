@@ -64,11 +64,11 @@ namespace realm {
  */
 class Realm{
 public:
-    Realm() { this->name = autoName(); }
+    Realm(): isCached(false) { this->name = autoName(); }
+    Realm(bool isCached, std::string name);
 
     const std::string &getName() const{ return name; }
     void setName(const std::string &name) { this->name = name; }
-
 
 private:
     std::string name;
@@ -77,6 +77,8 @@ private:
      * Generator name based on the current time.
      */
     std::string autoName();
+
+    bool isCached;
 };
 }
 }

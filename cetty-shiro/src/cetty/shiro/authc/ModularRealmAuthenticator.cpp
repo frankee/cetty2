@@ -13,11 +13,13 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-void ModularRealmAuthenticator::onLogout(const PrincipalCollection &principals){
+void ModularRealmAuthenticator::onLogout(const std::string &userId){
+    /*
     Authenticator::onLogout(principals);
     std::vector<AuthenticatingRealm>::iterator it;
     for(it = realms.begin(); it != realms.end(); ++it)
         it->onLogout(principals);
+        */
 }
 
 bool ModularRealmAuthenticator::doAuthenticate(const AuthenticationToken &token,

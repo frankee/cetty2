@@ -157,7 +157,6 @@ public:
      */
     std::string toBase64() {
         if (this->base64Encoded.empty()) {
-            //cache result in case this method is called multiple times.
             this->base64Encoded = Base64::encode(getBytes());
         }
         return this->base64Encoded;
@@ -186,14 +185,6 @@ public:
     }
 
 protected:
-    /**
-     * Returns the JDK MessageDigest instance to use for executing the hash.
-     *
-     * @param algorithmName the algorithm to use for the hash, provided by subclasses.
-     * @return the MessageDigest object for the specified {@code algorithm}.
-     */
-   // MessageDigest getDigest();
-
     /**
      * Hashes the specified byte array without a salt for a single iteration.
      *

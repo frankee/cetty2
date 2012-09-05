@@ -31,10 +31,8 @@ bool AuthenticatingRealm::doGetAuthenticationInfo(
 {
     std::string password = ::getPassword(token.getPrincipal());
 
-    if(password == token.getCredentials()){
-        PrincipalCollection pc;
-        pc.add(token.getPrincipal(), getName());
-        info->setPrincipals(pc);
+    if(!password.empty()){
+        info->setUserId(token.getPrincipal());
         info->setCredentials(password);
         return true;
     }

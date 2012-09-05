@@ -18,7 +18,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/shiro/subject/Subject.h>
 
 namespace cetty { namespace shiro {
     class SecurityManager;
@@ -28,7 +27,6 @@ namespace cetty {
 namespace shiro {
 namespace util {
 
-using namespace cetty::shiro::subject;
 using namespace cetty::shiro;
 /**
  * Accesses the currently accessible {@code Subject} for the calling code depending on runtime environment.
@@ -45,22 +43,6 @@ private:
 
 public:
     SecurityUtils(){}
-
-    /**
-     * Returns the currently accessible {@code Subject} available to the calling code depending on
-     * runtime environment.
-     * <p/>
-     * This method is provided as a way of obtaining a {@code Subject} without having to resort to
-     * implementation-specific methods.  It also allows the Shiro team to change the underlying implementation of
-     * this method in the future depending on requirements/updates without affecting your code that uses it.
-     *
-     * @return the currently accessible {@code Subject} accessible to the calling code.
-     * @throws IllegalStateException if no {@link Subject Subject} instance or
-     *                               {@link SecurityManager SecurityManager} instance is available with which to obtain
-     *                               a {@code Subject}, which which is considered an invalid application configuration
-     *                               - a Subject should <em>always</em> be available to the caller.
-     */
-    static Subject *getSubject(){ return NULL; }
 
     /**
      * Sets a VM (static) singleton SecurityManager, specifically for transparent use in the

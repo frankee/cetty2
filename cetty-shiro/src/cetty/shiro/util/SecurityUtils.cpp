@@ -10,7 +10,6 @@
 namespace cetty {
 namespace shiro {
 namespace util {
-SecurityManager *SecurityUtils::securityManager = NULL;
 }
 }
 }

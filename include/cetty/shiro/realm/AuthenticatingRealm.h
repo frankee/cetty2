@@ -27,7 +27,7 @@ namespace shiro {
 namespace realm {
 
 using namespace cetty::shiro::authc;
-using namespace cetty::shiro::subject;
+
 /**
  * A top-level abstract implementation of the <tt>Realm</tt> interface that only implements authentication support
  * (log-in) operations and leaves authorization (access control) behavior to subclasses.
@@ -125,7 +125,7 @@ public:
      *
      * @param principals the application-specific Subject/user identifier that is logging out.
      */
-    void onLogout(const PrincipalCollection &principals) {
+    void onLogout(const std::string &sessionId) {
         //no-op, here for subclass override if desired.
     }
 

@@ -22,13 +22,11 @@
 
 #include <cetty/shiro/authc/Authenticator.h>
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
-#include <cetty/shiro/subject/PrincipalCollection.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
 
-using namespace cetty::shiro::subject;
 using namespace cetty::shiro::realm;
 /**
  * A {@code ModularRealmAuthenticator} delgates account lookups to a pluggable (modular) collection of
@@ -85,9 +83,13 @@ public:
         return this->realms;
     }
 
+    void addRealm(const AuthenticatingRealm &realm){
+        this->realms.push_back(realm);
+    }
+
     void clean(){ realms.clear(); }
 
-    void onLogout(const PrincipalCollection &principals);
+    void onLogout(const std::string &user);
 
     virtual ~ModularRealmAuthenticator(){}
 

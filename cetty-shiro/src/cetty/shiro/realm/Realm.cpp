@@ -17,19 +17,26 @@ namespace cetty {
 namespace shiro {
 namespace realm {
 
-    using namespace boost::posix_time;
+using namespace boost::posix_time;
 
-    std::string Realm::autoName(){
-        std::stringstream sid;
+Realm::Realm(bool isCached, std::string name)
+    :isCached(isCached), name(name)
+{
+    if(name.empty()) name = autoName();
+}
 
-        ptime epoch(boost::gregorian::date(1970,1,1));
-        ptime now = microsec_clock::local_time();
-        time_duration::tick_type x = (now - epoch).total_nanoseconds();
-        pid_t pid = getpid();
+std::string Realm::autoName(){
+    std::stringstream sid;
 
-        sid << x << pid;
-        return sid.str();
-    }
+    ptime epoch(boost::gregorian::date(1970,1,1));
+    ptime now = microsec_clock::local_time();
+    time_duration::tick_type x = (now - epoch).total_nanoseconds();
+    pid_t pid = getpid();
+
+    sid << x << pid;
+    return sid.str();
+}
+
 }
 }
 }

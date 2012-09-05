@@ -41,7 +41,7 @@ std::string Base64::decode(const std::string &in){
     if(size) {
         decoder.Get(ch, size);
         return std::string((const char *)ch, size);
-    }
+       }
 
     return std::string();
 }

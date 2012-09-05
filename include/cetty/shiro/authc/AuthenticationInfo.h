@@ -33,188 +33,43 @@
  * @since 0.9
  */
 
-#include <cetty/shiro/subject/PrincipalCollection.h>
-#include <cetty/shiro/util/ByteSource.h>
+#include <string>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
 
-using namespace cetty::shiro::subject;
-using namespace cetty::shiro::util;
-
-/**
- * Simple AuthenticationInfo that holds the principals and credentials.
- */
 class AuthenticationInfo {
+
+public:
+    static const std::string USER_ID;
+    static const std::string CREDENTIALS;
+    static const std::string CREDENTIALS_SALT;
+    static const std::string CODE_TYPE;
+
 
 public:
     AuthenticationInfo(){}
 
-    /**
-     * Constructor that takes in a single 'primary' principal of the account and its corresponding credentials,
-     * associated with the specified realm.
-     * <p/>
-     * This is a convenience constructor and will construct a {@link PrincipalCollection PrincipalCollection} based
-     * on the {@code principal} and {@code realmName} argument.
-     *
-     * @param principal   the 'primary' principal associated with the specified realm.
-     * @param credentials the credentials that verify the given principal.
-     * @param realmName   the realm from where the principal and credentials were acquired.
-     */
-    AuthenticationInfo(const std::string &principal, const std::string &credentials, const std::string &realmName);
 
-    /**
-     * Constructor that takes in a single 'primary' principal of the account, its corresponding hashed credentials,
-     * the salt used to hash the credentials, and the name of the realm to associate with the principals.
-     * <p/>
-     * This is a convenience constructor and will construct a {@link PrincipalCollection PrincipalCollection} based
-     * on the <code>principal</code> and <code>realmName</code> argument.
-     *
-     * @param principal         the 'primary' principal associated with the specified realm.
-     * @param hashedCredentials the hashed credentials that verify the given principal.
-     * @param credentialsSalt   the salt used when hashing the given hashedCredentials
-     * @param realmName         the realm from where the principal and credentials were acquired.
-     */
-    AuthenticationInfo(const std::string &principal,
-                       const std::string &hashedCredentials,
-                       const ByteSource &credentialsSalt,
-                       const std::string &realmName);
+    const std::string &getUserId() const { return userId; }
+    void setUserId(const std::string &userId){ this->userId = userId; }
 
-    /**
-     * Constructor that takes in an account's identifying principal(s) and its corresponding credentials that verify
-     * the principals.
-     *
-     * @param principals  a Realm's account's identifying principal(s)
-     * @param credentials the accounts corresponding principals that verify the principals.
-     */
-    AuthenticationInfo(const PrincipalCollection &principals, const std::string &credentials);
-
-    /**
-     * Constructor that takes in an account's identifying principal(s), hashed credentials used to verify the
-     * principals, and the salt used when hashing the credentials.
-     *
-     * @param principals        a Realm's account's identifying principal(s)
-     * @param hashedCredentials the hashed credentials that verify the principals.
-     * @param credentialsSalt   the salt used when hashing the hashedCredentials.
-     */
-    AuthenticationInfo(const PrincipalCollection &principals,
-                       const std::string &hashedCredentials,
-                       const ByteSource &credentialsSalt);
-
-    AuthenticationInfo(const AuthenticationInfo &info){
-        this->principals = info.principals;
-        this->credentials = info.credentials;
-        this->credentialsSalt = info.credentialsSalt;
-    }
-
-    AuthenticationInfo& operator=(const AuthenticationInfo &info){
-        this->principals = info.principals;
-        this->credentials = info.credentials;
-        this->credentialsSalt = info.credentialsSalt;
-        return *this;
-    }
-
-    /**
-     * Returns all principals associated with the corresponding Subject.  Each principal is an identifying piece of
-     * information useful to the application such as a username, or user id, a given name, etc - anything useful
-     * to the application to identify the current <code>Subject</code>.
-     * <p/>
-     * The returned PrincipalCollection should <em>not</em> contain any credentials used to verify principals, such
-     * as passwords, private keys, etc.  Those should be instead returned by {@link #getCredentials() getCredentials()}.
-     *
-     * @return all principals associated with the corresponding Subject.
-     */
-    const PrincipalCollection &getPrincipals() const{ return principals; }
-
-    /**
-     * Sets the identifying principal(s) represented by this instance.
-     *
-     * @param principals the indentifying attributes of the corresponding Realm account.
-     */
-    void setPrincipals(const PrincipalCollection &principals) {
-        this->principals = principals;
-    }
-
-    /**
-     * Returns the credentials associated with the corresponding Subject.  A credential verifies one or more of the
-     * {@link #getPrincipals() principals} associated with the Subject, such as a password or private key.  Credentials
-     * are used by Shiro particularly during the authentication process to ensure that submitted credentials
-     * during a login attempt match exactly the credentials here in the <code>AuthenticationInfo</code> instance.
-     *
-     * @return the credentials associated with the corresponding Subject.
-     */
     const std::string &getCredentials() const{ return credentials; }
-
-    /**
-     * Sets the credentials that verify the principals/identity of the associated Realm account.
-     *
-     * @param credentials attribute(s) that verify the account's identity/principals, such as a password or private key.
-     */
     void setCredentials(const std::string &credentials) { this->credentials = credentials; }
 
-    /**
-     * Merges the given {@link AuthenticationInfo} into this instance.  The specific way
-     * that the merge occurs is up to the implementation, but typically it involves combining
-     * the principals and credentials together in this instance.  The <code>info</code> argument should
-     * not be modified in any way.
-     *
-     * @param info the info that should be merged into this instance.
-     */
-    void merge(const AuthenticationInfo &info){}
+    const std::string &getCredentialsSalt() const{ return credentialsSalt; }
+    void setCredentialsSalt(const std::string &salt){ this->credentialsSalt = salt; }
 
-    /**
-     * Returns the salt used to hash the credentials, or {@code null} if no salt was used or credentials were not
-     * hashed at all.
-     * <p/>
-     * Note that this attribute is <em>NOT</em> handled in the
-     * {@link #merge(AuthenticationInfo) merge} method - a hash salt is only useful within a single realm (as each
-     * realm will perform it's own Credentials Matching logic), and once finished in that realm, Shiro has no further
-     * use for salts.  Therefore it doesn't make sense to 'merge' salts in a multi-realm scenario.
-     *
-     * @return the salt used to hash the credentials, or {@code null} if no salt was used or credentials were not
-     *         hashed at all.
-     * @since 1.1
-     */
-    const ByteSource& getCredentialsSalt() const{ return credentialsSalt; }
-
-    /**
-     * Sets the salt used to hash the credentials, or {@code null} if no salt was used or credentials were not
-     * hashed at all.
-     * <p/>
-     * Note that this attribute is <em>NOT</em> handled in the
-     * {@link #merge(AuthenticationInfo) merge} method - a hash salt is only useful within a single realm (as each
-     * realm will perform it's own Credentials Matching logic), and once finished in that realm, Shiro has no further
-     * use for salts.  Therefore it doesn't make sense to 'merge' salts in a multi-realm scenario.
-     *
-     * @param salt the salt used to hash the credentials, or {@code null} if no salt was used or credentials were not
-     *             hashed at all.
-     * @since 1.1
-     */
-    void setCredentialsSalt(const ByteSource &salt){ this->credentialsSalt = salt; }
+    const std::string &getCodeType() const { return codeType; }
+    void setCodeType(const std::string &codeType) { this->codeType = codeType; }
 
 
-    /*
-
-    int compare(const AuthenticationInfo& info);
-
-    bool operator<(const AuthenticationInfo& info) {
-            return compare(info) < 0;
-    }
-    */
 private:
-    /**
-     * The principals identifying the account associated with this AuthenticationInfo instance.
-     */
-    PrincipalCollection principals;
-
-    /**
-     * The credentials verifying the account principals.
-     */
+    std::string userId;
     std::string credentials;
-
-    /* Any salt used in hashing the credentials.*/
-    ByteSource credentialsSalt;
+    std::string credentialsSalt;
+    std::string codeType;
 };
 
 }

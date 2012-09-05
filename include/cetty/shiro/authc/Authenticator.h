@@ -18,8 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/shiro/subject/PrincipalCollection.h>
+
 #include <boost/function.hpp>
+#include <vector>
 
 namespace cetty {
 namespace shiro {
@@ -28,7 +29,6 @@ namespace authc {
 class AuthenticationToken;
 class AuthenticationInfo;
 
-using namespace cetty::shiro::subject;
 
 /**
  * An Authenticator is responsible for authenticating accounts in an application.  It
@@ -52,7 +52,7 @@ class Authenticator {
 public:
     typedef boost::function2<void, const AuthenticationToken&, const AuthenticationInfo*> LoginSuccessCallback;
     typedef boost::function1<void, const AuthenticationToken&> LoginFailureCallback;
-    typedef boost::function1<void, const PrincipalCollection&> LogoutCallback;
+    typedef boost::function1<void, std::string> LogoutCallback;
 
 public:
     /**
@@ -115,7 +115,7 @@ public:
      *
      * @param principals the identifying principals of the {@code Subject}/account logging out.
      */
-    virtual void onLogout(const PrincipalCollection &principals) { notifyLogout(principals); }
+    virtual void onLogout(const std::string &user) { notifyLogout(user); }
 
     /**
      * Implementation of the {@link Authenticator} interface that functions in the following manner:
@@ -183,9 +183,9 @@ protected:
      *
      * @param principals the identifying principals of the {@code Subject}/account logging out.
      */
-    void notifyLogout(const PrincipalCollection &principals) {
+    void notifyLogout(const std::string &user) {
         std::vector<LogoutCallback>::iterator it = this->logoutListeners.begin();
-        for (; it != this->logoutListeners.end(); ++it) (*it)(principals);
+        for (; it != this->logoutListeners.end(); ++it) (*it)(user);
     }
 
     /**

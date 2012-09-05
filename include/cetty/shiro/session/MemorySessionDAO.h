@@ -18,7 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <cstdlib>
+
+#include <cetty/shiro/session/SessionDAO.h>
+
 namespace cetty {
 namespace shiro {
 namespace session {
@@ -43,48 +45,27 @@ namespace session {
  */
 class MemorySessionDAO : public SessionDAO {
 public:
-    virtual void getActiveSessions(std::vector<SessionPtr> *actives){
-        if(actives == NULL) return;
-        std::map<std::string, SessionPtr>::iterator it = sessions.begin();
-        for(; it != sessions.end(); ++it)
-            actives->push_back(it->second);
-    }
+    virtual void getActiveSessions(std::vector<SessionPtr> *actives);
+
+    virtual void remove(SessionPtr &session);
+
     virtual void update(SessionPtr &session){
         storeSession(session->getId(), session);
     }
 
-    virtual void remove(SessionPtr &session) {
-        std::string id = session->getId();
-        if (!id.empty()) {
-            sessions.erase(id);
-        }
-    }
+    virtual ~MemorySessionDAO(){}
 
 protected:
-    virtual std::string doCreate(SessionPtr &session) {
-        std::string sessionId = generateSessionId(session);
-        assignSessionId(session, sessionId);
-        storeSession(sessionId, session);
-        return sessionId;
-    }
+    virtual std::string doCreate(SessionPtr &session);
 
-    void storeSession(const std::string &id, SessionPtr &session) {
-        if (id.empty()) return;
-        if(sessions.count(session->getId()) > 0) {
-            sessions.erase(session->getId());
-        }
-        sessions.insert(std::pair<std::string, SessionPtr>(id, session));
-    }
+    void storeSession(const std::string &id, SessionPtr &session);
 
-    virtual SessionPtr doReadSession(const std::string &sessionId) {
-        std::map<std::string, SessionPtr >::iterator ret = sessions.find(sessionId);
-        if(ret == sessions.end()) return SessionPtr();
-        return ret->second;
-    }
+    virtual SessionPtr doReadSession(const std::string &sessionId);
 
 private:
     std::map<std::string, SessionPtr> sessions;
 };
+
 }
 }
 }

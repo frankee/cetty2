@@ -63,16 +63,6 @@ public:
      * @see #decode(char[])
      */
     static std::string decode(const std::string &in);
-
-    /**
-     * Converts a hexadecimal character to an integer.
-     *
-     * @param ch    A character to convert to an integer digit
-     * @param index The index of the character in the source
-     * @return An integer
-     * @throws IllegalArgumentException if ch is an illegal hex character
-     */
-    static int toDigit(char ch, int index){ return 0;};
 };
 }
 }

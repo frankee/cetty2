@@ -51,8 +51,7 @@ public:
      * @return the session identified by <tt>sessionId</tt> in the EIS.
      */
     SessionPtr readSession(const std::string &sessionId){
-        SessionPtr s = doReadSession(sessionId);
-        return s;
+        return doReadSession(sessionId);
     }
 
 
@@ -63,9 +62,10 @@ public:
      * @param session Session object to create in the EIS and associate with an ID.
      */
     const std::string create(SessionPtr &session) {
-        std::string sessionId = doCreate(session);
-        return sessionId;
+        return doCreate(session);
     }
+
+
     virtual void getActiveSessions(std::vector<SessionPtr> *actives) = 0;
     virtual void update(SessionPtr &session) = 0;
     virtual void remove(SessionPtr &session) = 0;

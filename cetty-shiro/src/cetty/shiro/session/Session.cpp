@@ -7,6 +7,8 @@
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionManager.h>
 
+#include <cetty/shiro/util/EmptyObj.h>
+
 namespace cetty {
 namespace shiro {
 namespace session {
@@ -55,15 +57,15 @@ void Session::stop() {
     }
 }
 
-const boost::any &Session::getAttribute(const std::string& key) {
-    std::map<std::string, boost::any>::iterator it = attributes.find(key);
-    if (it == attributes.end()) { return cetty::shiro::util::emptyAny; }
+const std::string &Session::getAttribute(const std::string& key) {
+    std::map<std::string, std::string>::iterator it = attributes.find(key);
+    if (it == attributes.end()) { return cetty::shiro::util::emptyString; }
     return it->second;
 }
 
-void Session::setAttribute(const std::string& key, const boost::any& value){
+void Session::setAttribute(const std::string& key, const std::string& value){
     if(key.empty()) return;
-    attributes.insert(std::pair<std::string, boost::any>(key, value));
+    attributes.insert(std::pair<std::string, std::string>(key, value));
 }
 
 void Session::removeAttribute(const std::string& key){

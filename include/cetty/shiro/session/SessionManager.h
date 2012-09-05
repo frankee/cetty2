@@ -113,9 +113,9 @@ public:
 
     void getAttributeKeys(const std::string &id, std::vector<std::string> *keys);
 
-    const boost::any& getAttribute(const std::string &id, std::string key);
+    const std::string& getAttribute(const std::string &id, std::string &key);
 
-    void setAttribute(const std::string &id, const std::string &key, const boost::any &value);
+    void setAttribute(const std::string &id, const std::string &key, const std::string &value);
 
     void removeAttribute(const std::string &id, const std::string &key);
 
@@ -219,7 +219,7 @@ public:
 
     void validateSessions();
 
-    SessionPtr start(SessionContext &context);
+    SessionPtr start();
 
     SessionValidationScheduler *createSessionValidationScheduler(){
         SessionValidationScheduler *svs = new SessionValidationScheduler(this);
@@ -232,8 +232,8 @@ public:
     }
 
 protected:
-    SessionPtr doCreateSession(SessionContext &context) {
-        SessionPtr s = SessionFactory::createSession(context);
+    SessionPtr doCreateSession() {
+        SessionPtr s = new Session();
         create(s);
         return s;
     }
@@ -291,7 +291,7 @@ protected:
      * @param session the session that was just {@link #createSession created}.
      * @param context the {@link SessionContext SessionContext} that was used to start the session.
      */
-    void onStart(SessionPtr session, const SessionContext &context) {}
+    void onStart(SessionPtr session) {}
     void onInvalidation(SessionPtr &session, Session::SessionState state);
 
     /**
@@ -350,9 +350,9 @@ protected:
      * @throws AuthorizationException if the system access control policy does not allow the currently executing
      *                                caller to start sessions.
      */
-    SessionPtr createSession(SessionContext &context) {
+    SessionPtr createSession() {
         enableSessionValidationIfNecessary();
-        return doCreateSession(context);
+        return doCreateSession();
     }
 
 

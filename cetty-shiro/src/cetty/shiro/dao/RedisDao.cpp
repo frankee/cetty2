@@ -14,7 +14,7 @@ std::string getPassword(std::string username){
     if(!username.empty()){
         redisContext *conn = redisConnect("127.0.0.1", 6379);
         if(conn->err){
-            printf("connection error: %s", conn->err);
+            printf("connection error: %s", conn->errstr);
             return password;
         }
 

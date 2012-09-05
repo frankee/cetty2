@@ -5,6 +5,15 @@ namespace cetty {
 namespace shiro {
 namespace session {
 
+using namespace cetty::shiro::util;
+
+const int SessionManager::MILLIS_PER_SECOND = 1000;
+const int SessionManager::MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
+const int SessionManager::MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
+const int SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT = 30 * MILLIS_PER_MINUTE;
+const int SessionManager::DEFAULT_SESSION_VALIDATION_INTERVAL = MILLIS_PER_HOUR;
+
+
 SessionManager::SessionManager()
   :deleteInvalidSessions(true),
    sessionValidationSchedulerEnabled(true),
@@ -24,12 +33,6 @@ SessionManager::~SessionManager(){
         sessionValidationScheduler = NULL;
     }
 }
-
-const int SessionManager::MILLIS_PER_SECOND = 1000;
-const int SessionManager::MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
-const int SessionManager::MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
-const int SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT = 30 * MILLIS_PER_MINUTE;
-const int SessionManager::DEFAULT_SESSION_VALIDATION_INTERVAL = MILLIS_PER_HOUR;
 
 void SessionManager::validateSessions(){
     int invalidCount = 0;
@@ -147,13 +150,13 @@ void SessionManager::getAttributeKeys(const std::string &id, std::vector<std::st
     s->getAttributeKeys(keys);
 }
 
-const boost::any& SessionManager::getAttribute(const std::string &id, std::string key){
+const std::string& SessionManager::getAttribute(const std::string &id, std::string &key){
     SessionPtr s = lookupRequiredSession(id);
-    if(!s) return cetty::shiro::util::emptyAny;
+    if(!s) return emptyString;
     return s->getAttribute(key);
 }
 
-void SessionManager::setAttribute(const std::string &id, const std::string &key, const boost::any &value) {
+void SessionManager::setAttribute(const std::string &id, const std::string &key, const std::string &value) {
     if (value.empty()) {
         removeAttribute(id, key);
     } else {
@@ -180,11 +183,11 @@ void SessionManager::stop(const std::string &id){
     afterStopped(s);
 }
 
-SessionPtr SessionManager::start(SessionContext &context) {
-    SessionPtr session = createSession(context);
+SessionPtr SessionManager::start() {
+    SessionPtr session = createSession();
     if(session){
         applyGlobalSessionTimeout(session);
-        onStart(session, context);
+        onStart(session);
         notifyStart(session);
     }
     return session;
