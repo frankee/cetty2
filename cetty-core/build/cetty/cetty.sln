@@ -94,6 +94,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CettyTest", "..\test\CettyT
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shiro", "..\..\..\cetty-shiro\build\shiro\shiro.vcxproj", "{3DE1111F-B927-483B-AD82-385EF564E967}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AuthenticationServer", "..\..\..\cetty-shiro\build\authentication\AuthenticationServer.vcxproj", "{D0328897-B173-4C15-B68A-66AF98224381}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufBsonSerialization", "..\..\..\cetty-protobuf\build\ProtobufBsonSerialization\ProtobufBsonSerialization.vcxproj", "{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -228,6 +232,14 @@ Global
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Debug|Win32.Build.0 = Debug|Win32
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Release|Win32.ActiveCfg = Release|Win32
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Release|Win32.Build.0 = Release|Win32
+		{D0328897-B173-4C15-B68A-66AF98224381}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D0328897-B173-4C15-B68A-66AF98224381}.Debug|Win32.Build.0 = Debug|Win32
+		{D0328897-B173-4C15-B68A-66AF98224381}.Release|Win32.ActiveCfg = Release|Win32
+		{D0328897-B173-4C15-B68A-66AF98224381}.Release|Win32.Build.0 = Release|Win32
+		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Debug|Win32.Build.0 = Debug|Win32
+		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Release|Win32.ActiveCfg = Release|Win32
+		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

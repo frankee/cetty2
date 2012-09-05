@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\common.pb.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
@@ -37,11 +38,12 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceRegister.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufUtil.h" />
-    <ClInclude Include="..\..\src\cetty\protobuf\service\proto\service.pb.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\service.pb.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\common.pb.cc" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
@@ -60,7 +62,7 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufUtil.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\proto\service.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\service.pb.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}</ProjectGuid>
