@@ -113,11 +113,14 @@ public:
 
     void getAttributeKeys(const std::string &id, std::vector<std::string> *keys);
 
-    const std::string& getAttribute(const std::string &id, std::string &key);
+    std::string& getAttribute(const std::string &id, const std::string &key);
 
     void setAttribute(const std::string &id, const std::string &key, const std::string &value);
 
     void removeAttribute(const std::string &id, const std::string &key);
+
+    bool isLogin(const std::string &id);
+    void setLogin(const std::string &id, bool login);
 
     bool isValid(const std::string &id) { return checkValid(id); }
     bool checkValid(const std::string &id) { return !lookupRequiredSession(id); }
@@ -224,7 +227,7 @@ public:
     SessionValidationScheduler *createSessionValidationScheduler(){
         SessionValidationScheduler *svs = new SessionValidationScheduler(this);
         return svs;
-        }
+    }
 
     SessionPtr getSession(const std::string &id){
         SessionPtr session = doGetSession(id);

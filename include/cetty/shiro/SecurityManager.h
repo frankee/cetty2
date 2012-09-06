@@ -20,8 +20,17 @@
  */
 
 #include <cetty/shiro/authc/ModularRealmAuthenticator.h>
-#include <cetty/shiro/session/SessionManager.h>
 #include <cetty/shiro/authz/Authorizer.h>
+
+#include <cetty/shiro/session/SessionManager.h>
+
+namespace cetty {
+namespace shiro {
+namespace session {
+    class DelegateSession;
+}
+}
+}
 
 namespace cetty {
 namespace shiro {
@@ -38,7 +47,7 @@ public:
     SecurityManager(): sessionManager(NULL) {init();}
 
     /// login by session id
-    SessionPtr getSession(const std::string &sessionId);
+    bool getSession(const std::string &id, DelegateSession*);
 
     /// login by user name and password
     const std::string &login(AuthenticationToken &token);
@@ -61,7 +70,7 @@ private:
     void init();
 
     bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
-    void bind(AuthenticationInfo &info, SessionPtr &session);
+    void bind(AuthenticationInfo &info, DelegateSession &session);
 
     void onSuccessfulLogin(const AuthenticationToken &token, const AuthenticationInfo &info) {};
     void onFailedLogin(const AuthenticationToken &token){};

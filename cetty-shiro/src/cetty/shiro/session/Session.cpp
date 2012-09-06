@@ -57,7 +57,7 @@ void Session::stop() {
     }
 }
 
-const std::string &Session::getAttribute(const std::string& key) {
+std::string &Session::getAttribute(const std::string& key) {
     std::map<std::string, std::string>::iterator it = attributes.find(key);
     if (it == attributes.end()) { return cetty::shiro::util::emptyString; }
     return it->second;

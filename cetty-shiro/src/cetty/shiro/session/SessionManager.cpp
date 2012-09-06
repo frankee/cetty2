@@ -150,7 +150,7 @@ void SessionManager::getAttributeKeys(const std::string &id, std::vector<std::st
     s->getAttributeKeys(keys);
 }
 
-const std::string& SessionManager::getAttribute(const std::string &id, std::string &key){
+std::string& SessionManager::getAttribute(const std::string &id, const std::string &key){
     SessionPtr s = lookupRequiredSession(id);
     if(!s) return emptyString;
     return s->getAttribute(key);
@@ -174,9 +174,23 @@ void SessionManager::removeAttribute(const std::string &id, const std::string &k
     onChange(s);
 }
 
+bool SessionManager::isLogin(const std::string &id){
+    if(id.empty()) return false;
+    SessionPtr s = lookupRequiredSession(id);
+    if(s == NULL) return false;
+    return s->isLogin();
+}
+
+void SessionManager::setLogin(const std::string &id, bool login){
+    if(id.empty()) return;
+    SessionPtr s = lookupRequiredSession(id);
+    if(s == NULL) return;
+    s->setLogin(login);
+}
+
 void SessionManager::stop(const std::string &id){
     SessionPtr s = lookupRequiredSession(id);
-    if(!s) return;
+    if(s == NULL) return;
     s->stop();
     onStop(s);
     notifyStop(s);
