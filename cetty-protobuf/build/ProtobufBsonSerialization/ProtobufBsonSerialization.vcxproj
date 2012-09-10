@@ -11,40 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessagePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceRegister.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufUtil.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\service.pb.h" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\bson\ProtobufBsonFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\serialization\bson\ProtobufBsonParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufUtil.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\service.pb.cc" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\bson\ProtobufBsonFormatter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\bson\ProtobufBsonParser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}</ProjectGuid>
-    <RootNamespace>ProtobufService</RootNamespace>
+    <ProjectGuid>{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}</ProjectGuid>
+    <RootNamespace>ProtobufSerialization</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>ProtobufBsonSerialization</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

@@ -18,8 +18,7 @@
 
 #include <cetty/buffer/Array.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/protobuf/service/proto/service.pb.h>
-
+#include <cetty/protobuf/service/service.pb.h>
 
 namespace cetty {
 namespace protobuf {

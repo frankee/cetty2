@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) {
     ProtobufServerBuilder builder;
     builder.registerService(new echo::EchoServiceImpl);
     builder.buildRpc(1980);
-    builder.buildHttp(8080);
 
     //builder.buildAll();
     builder.waitingForExit();

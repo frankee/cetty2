@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="builder">
+      <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="http">
+      <UniqueIdentifier>{dee23f7c-063d-475c-b071-ba9c811c0306}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\HttpRequest2ProtobufMessage.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\HttpResponse2ProtobufMessage.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ProtobufClientServiceFilter.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ProtobufMessage2HttpRequest.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ProtobufMessage2HttpResponse.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceMapperPtr.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceRequestMapper.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceRequestMapperConfig.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapper.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapperConfig.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\HttpServiceFilter.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\HttpRequestTemplate.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\craft\http\HttpRequest2ProtobufMessage.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\HttpResponse2ProtobufMessage.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ProtobufMessage2HttpRequest.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ProtobufMessage2HttpResponse.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ServiceRequestMapper.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ServiceRequestMapperConfig.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapper.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapperConfig.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\HttpServiceFilter.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\HttpRequestTemplate.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\builder\CraftServerBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\builder\CraftClientBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

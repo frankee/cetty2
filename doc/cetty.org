@@ -47,10 +47,6 @@ ServerBootstrap watchdog(factory);
 ** cetty-service
 cetty-service主要侧重于在分布式环境中，
 
-** cetty-protobuf
-
-** cetty-gearman
-
 ** cetty-shiro
 *** authc
 *** authz
@@ -58,13 +54,80 @@ cetty-service主要侧重于在分布式环境中，
 
 ** cetty-soci
 
-** cetty-redis
+** cetty-thrift
 
-** cetty-beantalkd
+** cetty-protobuf-service
+基于protobuf的RPC系统
+
+** cetty-protobuf-serialization
 
 ** cetty-zookeeper
 
+** cetty-craft
+craft主要应用在web应用开发方面，主要的应用场景包含传统的WEB应用（RESTful风格），也包含API开放平台WEB应用，与类型的系统TOP、ROP最大的不同在于，craft对外发布的协议可以采用HTTP协议，同时也可以提供基于Google Protobuf的RPC调用，在移动的应用端可以进一步减少流量。
+
+  HTTP（REST） -- map validate signature -> RPC -- validate signature --> 服务实现
+
+*** 概述
+**** 快速认识craft
+**** 使用craft开发一个服务
+     1. 下载craft（cetty）及其依赖（boost、protobuf、yaml）
+     2. 开发一个服务方法
+        a. 编写proto文件，定义交互协议
+        b. 在proto文件中，编写uri template
+        c. 在proto文件中，编写field的约束及校验方式
+        d. 使用generator生成服务基本的框架代码。
+        e. 编写服务实现的业务代码。
+     3. 访问craft服务
+        a. 
+
+class ServiceClient {
+public:
+      ServiceClient() {
+      setService();
+      setMethod();
+      setAppKey();
+      setAppSecret();
+      addParameter();
+      }
+
+      request();
+private:
+static const char* URI_TEMPLATE = "";
+};
+
+*** 请求服务模型
+
+*** 应用授权及验证
+
+*** 服务会话管理
+
+*** 错误模型
+基于HTTP的错误模型。
+
+*** 响应报文控制
+
+*** 服务安全控制
+
+*** filter插件模式
+
+** cetty-gearman
+基于gearman的任务管理系统，cetty-gearman-protobuf与protobuf集成，是分布式的RPC系统。
+
+** cetty-redis
+redis客户端，与cetty系统集成，方便使用。
+
+** cetty-beantalk
+beantalk的客户端，
+
 ** cetty-zurg
+后端服务进程管理系统。
+
+** cetty-tair
+基于tair的分布式kv数据库。
+
+** cetty-scribe
+基于scribe的日志系统，包含日志收集、处理、分析子系统。
 
 
 * 框架运行流程说明

@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
+#include <cetty/craft/builder/CraftServerBuilder.h>
 
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
@@ -30,10 +30,10 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
+#include <cetty/craft/http/HttpServiceFilter.h>
 
 namespace cetty {
-namespace protobuf {
-namespace service {
+namespace craft {
 namespace builder {
 
 using namespace cetty::channel;
@@ -42,51 +42,56 @@ using namespace cetty::handler::codec::http;
 using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::protobuf::service::handler;
+using namespace cetty::protobuf::service::builder;
+using namespace cetty::craft::http;
 
-static const std::string PROTOBUF_SERVICE_RPC("rpc");
+static const std::string PROTOBUF_SERVICE_HTTP("http");
 
-ProtobufServerBuilder::ProtobufServerBuilder()
-    : ServerBuilder() {
+CraftServerBuilder::CraftServerBuilder()
+    : ProtobufServerBuilder() {
     init();
 }
 
-ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt)
-    : ServerBuilder(parentThreadCnt, childThreadCnt) {
+CraftServerBuilder::CraftServerBuilder(int parentThreadCnt, int childThreadCnt)
+    : ProtobufServerBuilder(parentThreadCnt, childThreadCnt) {
     init();
 }
 
-ProtobufServerBuilder::~ProtobufServerBuilder() {
+CraftServerBuilder::~CraftServerBuilder() {
 }
 
-ProtobufServerBuilder& ProtobufServerBuilder::registerService(
-    const ProtobufServicePtr& service) {
-    ProtobufServiceRegister::instance().registerService(service);
-    return *this;
+ChannelPtr CraftServerBuilder::buildHttp(int port) {
+    return build(PROTOBUF_SERVICE_HTTP, port);
 }
 
-ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
-    return build(PROTOBUF_SERVICE_RPC, port);
+void CraftServerBuilder::init() {
+    registerPipeline(PROTOBUF_SERVICE_HTTP, createHttpServicePipeline());
+    //printf("has not set the configCenter, so can't inti the http service.\n");
 }
 
-void ProtobufServerBuilder::init() {
-    registerPipeline(PROTOBUF_SERVICE_RPC, createProtobufServicePipeline());
-}
-
-ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
+ChannelPipelinePtr CraftServerBuilder::createHttpServicePipeline() {
     ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
-    pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));
+    //if (ssl) {
+    //}
 
-    pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
-    pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
+    pipeline->addLast("decoder", new HttpRequestDecoder());
+
+    // Uncomment the following line if you don't want to handle HttpChunks.
+    pipeline->addLast("aggregator", new HttpChunkAggregator(1048576));
+
+    pipeline->addLast("encoder", new HttpResponseEncoder());
+
+    // Remove the following line if you don't want automatic content compression.
+    //pipeline.addLast("deflater", new HttpContentCompressor());
+
+    pipeline->addLast("protobufFilter", new HttpServiceFilter());
 
     pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 
     return pipeline;
 }
 
-}
 }
 }
 }

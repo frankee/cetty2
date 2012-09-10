@@ -45,12 +45,12 @@ using namespace cetty::handler::codec::http;
  *
  * @version $Rev: 2189 $, $Date: 2010-02-19 18:02:57 +0900 (Fri, 19 Feb 2010) $
  */
-class HttpResponseHandler : public SimpleChannelUpstreamHandler {
+class HttpResponseHandler : public ChannelInboundMessageHandler {
 public:
     HttpResponseHandler() : readingChunks(false) {}
     virtual ~HttpResponseHandler() {}
 
-    void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+    void messageReceived(ChannelHandlerContext& ctx) {
         if (!readingChunks) {
             HttpResponsePtr response =
                 e.getMessage().smartPointer<HttpResponse, HttpMessage>();

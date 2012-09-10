@@ -1,0 +1,44 @@
+package cetty.craft;
+
+option java_package = "cetty.craft";
+option java_outer_classname = "CraftProto";
+
+message KeyValue {
+	optional string   key = 1;
+	optional string value = 2;
+}
+
+message Error {
+	message SubError {
+		optional string    code = 1;
+		optional string message = 2;
+	}
+	
+	optional int32        status = 1 [default = 200];
+    optional int32          code = 2 [default = 0];
+    optional string      message = 3;
+	optional string    more_info = 4;
+	
+	repeated SubError sub_errors = 9;
+}
+
+message Session {
+	required string id      = 1;
+	repeated KeyValue items = 2;
+}
+
+message Authority {
+	optional Session    session = 1;
+	
+    optional string         key = 2;
+    optional string   signature = 3;
+
+	optional string          ip = 8;
+	optional string domain_name = 9;
+}
+
+enum Lang {
+    zh_CN = 0;
+    zh_TW = 1;
+	en_US = 2;
+}

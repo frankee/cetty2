@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_BUILDER_PROTOBUFSERVERBUILDER_H)
-#define CETTY_PROTOBUF_SERVICE_BUILDER_PROTOBUFSERVERBUILDER_H
+#if !defined(CETTY_CRAFT_BUILDER_CRAFTSERVERBUILDER_H)
+#define CETTY_CRAFT_BUILDER_CRAFTSERVERBUILDER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -19,8 +19,8 @@
 
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelPipelinePtr.h>
-#include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
+#include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 
 namespace cetty {
 namespace config {
@@ -29,37 +29,32 @@ class ConfigCenter;
 }
 
 namespace cetty {
-namespace protobuf {
-namespace service {
+namespace craft {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::service;
-using namespace cetty::config;
 using namespace cetty::protobuf::service;
 
-class ProtobufServerBuilder : public cetty::service::builder::ServerBuilder {
+class CraftServerBuilder
+    : public cetty::protobuf::service::builder::ProtobufServerBuilder {
 public:
-    ProtobufServerBuilder();
-    ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt);
+    CraftServerBuilder();
+    CraftServerBuilder(int parentThreadCnt, int childThreadCnt);
 
-    virtual ~ProtobufServerBuilder();
+    virtual ~CraftServerBuilder();
 
-    ProtobufServerBuilder& registerService(const ProtobufServicePtr& service);
-
-    ChannelPtr buildRpc(int port);
+    ChannelPtr buildHttp(int port);
 
 private:
     void init();
-    ChannelPipelinePtr createProtobufServicePipeline();
+    ChannelPipelinePtr createHttpServicePipeline();
 };
 
 }
 }
 }
-}
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_BUILDER_PROTOBUFSERVERBUILDER_H)
+#endif //#if !defined(CETTY_CRAFT_BUILDER_CRAFTSERVERBUILDER_H)
 
 // Local Variables:
 // mode: c++
