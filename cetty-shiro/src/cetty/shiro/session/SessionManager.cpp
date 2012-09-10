@@ -20,7 +20,8 @@ SessionManager::SessionManager()
    globalSessionTimeout(DEFAULT_GLOBAL_SESSION_TIMEOUT),
    sessionValidationInterval(DEFAULT_SESSION_VALIDATION_INTERVAL),
    sessionDAO(NULL),
-   sessionValidationScheduler(NULL){
+   sessionValidationScheduler(NULL)
+{
     sessionDAO = new MemorySessionDAO();
 }
 SessionManager::~SessionManager(){
@@ -186,6 +187,7 @@ void SessionManager::setLogin(const std::string &id, bool login){
     SessionPtr s = lookupRequiredSession(id);
     if(s == NULL) return;
     s->setLogin(login);
+    onChange(s);
 }
 
 void SessionManager::stop(const std::string &id){
