@@ -51,8 +51,14 @@ public:
     };
 
 public:
-    Session() { init(); }
-    Session(const std::string& host) : host(host) { init(); }
+    Session(): expired(false), login(false) { init(); }
+    Session(const std::string& host)
+        : host(host),
+          expired(false),
+          login(false)
+    {
+        init();
+    }
 
 
     /**
@@ -252,7 +258,7 @@ public:
      * @throws InvalidSessionException if this session has stopped or expired prior to calling
      *                                 this method.
      */
-    const std::string &getAttribute(const std::string& key);
+    std::string &getAttribute(const std::string& key);
 
     /**
      * Binds the specified {@code value} to this session, uniquely identified by the specifed
@@ -282,6 +288,9 @@ public:
 
     SessionState validate();
 
+    bool isLogin(){ return login; }
+    void setLogin(bool login) { this->login = login; }
+
 protected:
     void expire();
 
@@ -307,12 +316,13 @@ private:
 
 private:
     std::string id;
+    std::string host;
     ptime startTimestamp;
     ptime stopTimestamp;
     ptime lastAccessTime;
     int timeout;
     bool expired;
-    std::string host;
+    bool login;
 
     std::map<std::string, std::string> attributes;
 };
