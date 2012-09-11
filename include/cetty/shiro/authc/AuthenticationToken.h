@@ -177,6 +177,11 @@ public:
      */
     void setCredentials(const std::string &credentials){ this->credentials = credentials; }
 
+    const std::string& getEncodeType() const { return encodeType; }
+    void setEncodeType(const std::string& encodeType){
+        this->encodeType = encodeType;
+    }
+
     /**
      * Returns the host name of the client from where the
      * authentication attempt originates or if the Shiro environment cannot or
@@ -224,6 +229,12 @@ public:
      */
     void setRememberMe(bool rememberMe) { this->rememberMe = rememberMe; }
 
+    const std::string& getNonce() const{ return nonce; }
+    void setNonce(const std::string& nonce){ this->nonce = nonce; }
+
+    const std::string& getServerTime() const { return serverTime; }
+    void setServerTime(const std::string& serverTime){ this->serverTime = serverTime; }
+
     /**
      * Clears out the principal, credentials, rememberMe, and inetAddress.
      */
@@ -240,8 +251,16 @@ public:
     std::string toString();
 
 private:
+
+    /** user name and password*/
     std::string principal;
     std::string credentials;
+
+    /** credentials's encode type*/
+    std::string encodeType;
+
+    std::string nonce;
+    std::string serverTime;
 
     /**
      * Whether or not 'rememberMe' should be enabled for the corresponding login attempt;

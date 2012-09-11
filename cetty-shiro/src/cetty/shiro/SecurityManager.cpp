@@ -34,11 +34,9 @@ bool SecurityManager::authoriseUser(const std::string &sessionId,
                                     const std::string &operation
                                    )
 {
-    DelegateSession delegateSession;
-    if(!getSession(sessionId, &delegateSession)) return false;
-
-    SessionPtr session = delegateSession.getSession();
+    SessionPtr session = getSession(sessionId);
     if(session == NULL) return false;
+
     return authorizer.authoriseUser(session, operation);
 }
 
@@ -49,15 +47,10 @@ bool SecurityManager::authoriseApp(const std::string &appKey,
     return authorizer.authoriseApp(appKey, operation);
 }
 
-bool SecurityManager::getSession(const std::string &sessionId, DelegateSession *delegateSession){
+SessionPtr SecurityManager::getSession(const std::string &sessionId){
     SessionPtr session = this->sessionManager->getSession(sessionId);
-    if(session == NULL) return false;
-
-    assert(delegateSession != NULL);
-    delegateSession->setId(sessionId);
-    delegateSession->setSessionManager(this->sessionManager);
-
-    return true;
+    if(session == NULL) return SessionPtr();
+    return session;
 }
 
 const std::string &SecurityManager::login(AuthenticationToken &token){
@@ -70,24 +63,20 @@ const std::string &SecurityManager::login(AuthenticationToken &token){
     SessionPtr session = sessionManager->start();
     assert(session != NULL);
 
-    DelegateSession delegateSession;
-    delegateSession.setId(session->getId());
-    delegateSession.setSessionManager(sessionManager);
-
-    bind(info, delegateSession);
+    bind(info, session);
     onSuccessfulLogin(token, info);
 
-    return delegateSession.getId();
+    return session->getId();
 }
 
 void SecurityManager::logout(const std::string &sessionId){
     beforeLogout(sessionId);
 
-    DelegateSession session;
-    if(getSession(sessionId, &session)){
-        std::string userId = session.getAttribute(AuthenticationInfo::USER_ID);
+    SessionPtr session = getSession(sessionId);
+    if(session != NULL){
+        std::string userId = session->getAttribute(AuthenticationInfo::USER_ID);
         authenticator.onLogout(userId);
-        session.stop();
+        session->stop();
     }
 }
 
@@ -98,11 +87,11 @@ void SecurityManager::destroy(){
     }
 }
 
-void SecurityManager::bind(AuthenticationInfo &info, DelegateSession &session){
-    session.setAttribute(AuthenticationInfo::USER_ID, info.getUserId());
-    session.setAttribute(AuthenticationInfo::CREDENTIALS, info.getCredentials());
-    session.setAttribute(AuthenticationInfo::CREDENTIALS_SALT, info.getCredentialsSalt());
-    session.setAttribute(AuthenticationInfo::CODE_TYPE, info.getCodeType());
+void SecurityManager::bind(AuthenticationInfo &info, SessionPtr &session){
+    session->setAttribute(AuthenticationInfo::USER_ID, info.getUserId());
+    session->setAttribute(AuthenticationInfo::CREDENTIALS, info.getCredentials());
+    session->setAttribute(AuthenticationInfo::CREDENTIALS_SALT, info.getCredentialsSalt());
+    session->setAttribute(AuthenticationInfo::CODE_TYPE, info.getCodeType());
 }
 
 

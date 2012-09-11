@@ -20,9 +20,18 @@ bool Sha256CredentialsMatcher::doCredentialsMatch(
     const AuthenticationToken &token,
     const AuthenticationInfo &info)
 {
+    /*
    std::string tokenHashedCredentials = hashProvidedCredentials(token, info);
    std::string accountCredentials = getCredentials(info);
-   return equals(tokenHashedCredentials, accountCredentials);
+   */
+    std::string tokenCredentials = token.getCredentials();
+    std::string infoCredentials = getCredentials(info);
+    infoCredentials.append(token.getNonce());
+    infoCredentials.append(token.getServerTime());
+
+    std::string credentials = hashProvidedCredentials(infoCredentials, std::string(), 1);
+
+   return equals(tokenCredentials, infoCredentials);
    }
 
 std::string Sha256CredentialsMatcher::getCredentials(const AuthenticationInfo &info){

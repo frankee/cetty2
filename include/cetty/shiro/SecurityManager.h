@@ -47,7 +47,7 @@ public:
     SecurityManager(): sessionManager(NULL) {init();}
 
     /// login by session id
-    bool getSession(const std::string &id, DelegateSession*);
+    SessionPtr getSession(const std::string &id);
 
     /// login by user name and password
     const std::string &login(AuthenticationToken &token);
@@ -55,7 +55,6 @@ public:
 
     /// judge user's operation
     bool authoriseUser(const std::string &sessionId, const std::string &operation);
-
     /// judge user and third app's operation
     bool authoriseApp(const std::string &appkey, const std::string &operation);
 
@@ -71,7 +70,7 @@ private:
     void init();
 
     bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
-    void bind(AuthenticationInfo &info, DelegateSession &session);
+    void bind(AuthenticationInfo &info, SessionPtr &session);
 
     void onSuccessfulLogin(const AuthenticationToken &token, const AuthenticationInfo &info) {};
     void onFailedLogin(const AuthenticationToken &token){};
