@@ -14,11 +14,11 @@
  * under the License.
  */
 
-#include <cetty/service/http/UriTemplate.h>
+#include <cetty/craft/http/UriTemplate.h>
 #include <cetty/util/StringUtil.h>
 
 namespace cetty {
-namespace service {
+namespace craft {
 namespace http {
 
 using namespace cetty::util;

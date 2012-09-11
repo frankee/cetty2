@@ -23,34 +23,20 @@ namespace cetty {
 namespace shiro {
 namespace session {
 
-class SessionManager;
-
 class SessionValidationScheduler{
 public:
     SessionValidationScheduler();
-
-    SessionValidationScheduler(SessionManager *sessionManager);
-
-
     ~SessionValidationScheduler(){}
 
-    SessionManager *getSessionManager() const{
-        return sessionManager;
-    }
-
-    void setSessionManager(SessionManager *sessionManager) {
-        this->sessionManager = sessionManager;
-    }
-
-    long getInterval() {
+    int getInterval() const{
         return interval;
     }
 
-    void setInterval(long interval) {
+    void setInterval(int interval) {
         this->interval = interval;
     }
 
-    bool isEnabled() {
+    bool isEnabled() const {
         return this->enabled;
     }
 
@@ -60,16 +46,16 @@ public:
      */
     //TODO Implement an integration test to test for jvm exit as part of the standalone example
     // (so we don't have to change the unit test execution model for the core module)
-    void enableSessionValidation(){};
+    void enableSessionValidation() {};
 
-    void run(){};
-    void disableSessionValidation(){};
+    void run() {};
+    void disableSessionValidation() {};
 
 private:
-    cetty::shiro::session::SessionManager *sessionManager;
     bool enabled;
-    long interval;
+    int  interval;
 };
+
 }
 }
 }

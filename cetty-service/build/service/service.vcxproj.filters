@@ -27,12 +27,6 @@
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp">
       <Filter>service\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\http\CookieTemplate.cpp">
-      <Filter>service\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\http\UriTemplate.cpp">
-      <Filter>service\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp">
       <Filter>service\pool</Filter>
     </ClCompile>
@@ -89,13 +83,7 @@
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h">
       <Filter>service\builder</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\http\CookieTemplate.h">
-      <Filter>service\http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h">
-      <Filter>service\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\http\UriTemplate.h">
       <Filter>service\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h">

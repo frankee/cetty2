@@ -179,13 +179,16 @@ int main(int argc, char* argv[]) {
 }
 #+END_EXAMPLE
 
-* 基于Google Protobuf的Service栈
+* 基于Google Protobuf的RPC系统
   支持Protobuf RPC，REST，SOAP1.1
 ** 简要说明
 ** Protobuf RPC
 *** 服务器端
 *** 客户端
     其他语言的实现Java、Ruby、Python
+
+* 基于Google Protobuf的Web开发框架（craft）
+
 ** REST
 *** request输入方式
     1. 通过Uri模板获取获取service、mothod以及相应的参数；
@@ -193,10 +196,12 @@ int main(int argc, char* argv[]) {
     3. 通过http header的cookie获取相应的参数，主要认证及鉴权相关参数。
 
 ** SOAP1.1
+
 ** Service框架代码的自动生成
-   1. proto文件自动生成 {服务}.pb.h/cc {服务}Impl.h/cpp {服务}Server.cpp
+   1. proto文件自动生成 {服务}.pb.h/cc {服务}ServiceImpl.h/cpp {服务}Server.cpp {服务}.yml {服务}.md {服务}Server.conf
 
 ** Service的开发示例
+
 
 * 框架运维
 ** 单个服务实例的监控

@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_HTTP_COOKIETEMPLATE_H)
-#define CETTY_SERVICE_HTTP_COOKIETEMPLATE_H
+#if !defined(CETTY_CRAFT_HTTP_COOKIETEMPLATE_H)
+#define CETTY_CRAFT_HTTP_COOKIETEMPLATE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,7 +20,7 @@
 #include <string>
 
 namespace cetty {
-namespace service {
+namespace craft {
 namespace http {
 
 // [name:alias]={}:{param:alias}:{:alias}
@@ -33,7 +33,7 @@ public:
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_HTTP_COOKIETEMPLATE_H)
+#endif //#if !defined(CETTY_CRAFT_HTTP_COOKIETEMPLATE_H)
 
 // Local Variables:
 // mode: c++

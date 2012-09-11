@@ -28,6 +28,7 @@
 #include <cetty/redis/RedisCommand.h>
 #include <cetty/redis/RedisReplyMessage.h>
 #include <cetty/redis/command/Transactions.h>
+#include <cetty/redis/command/Keys.h>
 
 namespace cetty {
 namespace redis {
@@ -118,6 +119,13 @@ void RedisClient::get(const std::string& key, const BulkCallBack& callback) {
         boost::bind(&RedisClient::bulkCallBack, _1, _2, callback)));
 
     request(stringsCommandGet(key), future);
+}
+
+void RedisClient::del(const std::string& key) {
+    RedisServiceFuturePtr future(
+        new RedisServiceFuture(boost::bind(dummySetCallback, _1, _2)));
+
+    request(keysCommandDel(key), future);
 }
 
 void RedisClient::beginTransaction(const StatusCallBack& callback) {

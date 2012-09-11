@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_HTTP_URITEMPLATE_H)
-#define CETTY_SERVICE_HTTP_URITEMPLATE_H
+#if !defined(CETTY_CRAFT_HTTP_URITEMPLATE_H)
+#define CETTY_CRAFT_HTTP_URITEMPLATE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -22,7 +22,7 @@
 #include <cetty/util/NameValueCollection.h>
 
 namespace cetty {
-namespace service {
+namespace craft {
 namespace http {
 
 using namespace cetty::util;
@@ -92,7 +92,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_HTTP_URITEMPLATE_H)
+#endif //#if !defined(CETTY_CRAFT_HTTP_URITEMPLATE_H)
 
 // Local Variables:
 // mode: c++

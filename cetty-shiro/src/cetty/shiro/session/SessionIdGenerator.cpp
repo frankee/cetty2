@@ -21,7 +21,7 @@ namespace session {
 
 using namespace boost::posix_time;
 
-std::string SessionIdGenerator::generateId(SessionPtr session){
+std::string SessionIdGenerator::generateId(const SessionPtr& session){
     std::stringstream sid;
     std::string host = (session ? session->getHost() : "");
     ptime epoch(boost::gregorian::date(1970,1,1));

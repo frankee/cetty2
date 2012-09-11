@@ -18,15 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <cstdlib>
-#include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/shiro/session/SessionDAO.h>
-#include <cetty/shiro/session/SessionListener.h>
-#include <cetty/shiro/session/SessionValidationScheduler.h>
-#include <cetty/shiro/session/MemorySessionDAO.h>
-#include <cetty/shiro/session/SessionContext.h>
-#include <cetty/shiro/session/SessionFactory.h>
+#include <cstdlib>
+#include <vector>
+#include <boost/function.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <cetty/shiro/session/SessionPtr.h>
 
 namespace cetty {
 namespace shiro {
@@ -35,25 +32,48 @@ namespace session {
 using namespace boost::posix_time;
 
 /**
+ *   int SessionState
+ */
+typedef boost::function2<void, const SessionPtr&, int> SessionChangeCallback;
+
+class SessionDAO;
+class SessionContext;
+class SessionValidationScheduler;
+
+/**
  * A SessionManager manages the creation, maintenance, and clean-up of all application
  * Sessions.
  */
-class SessionManager{
+class SessionManager {
 public:
-    /**
-     * Default main session timeout value, equal to {@code 30} minutes.
-     */
-    static const int MILLIS_PER_SECOND ;
-    static const int MILLIS_PER_MINUTE;
-    static const int MILLIS_PER_HOUR;
     static const int DEFAULT_GLOBAL_SESSION_TIMEOUT;
     static const int DEFAULT_SESSION_VALIDATION_INTERVAL;
 
-    SessionManager();
-    ~SessionManager();
+    typedef boost::function1<void, const SessionPtr&> SessionCallback;
+    typedef std::vector<SessionChangeCallback> SessionChangeCallbacks;
 
-    void setSessionDAO(SessionDAO *sessionDAO) { this->sessionDAO = sessionDAO; }
-    SessionDAO *getSessionDAO() { return this->sessionDAO; }
+public:
+    SessionManager();
+    virtual ~SessionManager();
+
+    /**
+     * Starts a new session based on the specified contextual initialization data, which can be used by the underlying
+     * implementation to determine how exactly to create the internal Session instance.
+     * <p/>
+     * This method is mainly used in framework development, as the implementation will often relay the argument
+     * to an underlying {@link SessionFactory} which could use the context to construct the internal Session
+     * instance in a specific manner.  This allows pluggable {@link org.apache.shiro.session.Session Session} creation
+     * logic by simply injecting a {@code SessionFactory} into the {@code SessionManager} instance.
+     *
+     * @param context the contextual initialization data that can be used by the implementation or underlying
+     *                {@link SessionFactory} when instantiating the internal {@code Session} instance.
+     * @return the newly created session.
+     * @see SessionFactory#createSession(SessionContext)
+     * @since 1.0
+     */
+    void start(const std::string& host, const SessionCallback& callback);
+
+    void getSession(const std::string& id, const SessionCallback& callback);
 
     /**
      * Returns {@code true} if sessions should be automatically deleted after they are discovered to be invalid,
@@ -72,7 +92,7 @@ public:
      * @return {@code true} if sessions should be automatically deleted after they are discovered to be invalid,
      *         {@code false} if invalid sessions will be manually deleted by some process external to Shiro's control.
      */
-    bool isDeleteInvalidSessions() const { return deleteInvalidSessions; }
+    bool isDeleteInvalidSessions() const;
 
     /**
      * Sets whether or not sessions should be automatically deleted after they are discovered to be invalid.  Default
@@ -85,47 +105,13 @@ public:
      * @param deleteInvalidSessions whether or not sessions should be automatically deleted after they are discovered
      *                              to be invalid.
      */
-    void setDeleteInvalidSessions(bool deleteInvalidSessions) {
-        this->deleteInvalidSessions = deleteInvalidSessions;
-    }
+    void setDeleteInvalidSessions(bool deleteInvalidSessions);
 
-    void setSessionListeners(const std::vector<SessionChangeCallback> &listeners) {
-        if(!listeners.empty())
-            this->listeners.assign(listeners.begin(), listeners.end());
-    }
+    void addSessionListeners(const SessionChangeCallback& callback);
 
-    const std::vector<SessionChangeCallback> &getSessionListeners() const{
-        return this->listeners;
-    }
+    const std::vector<SessionChangeCallback>& getSessionListeners() const;
 
-    ptime getStartTimestamp(const std::string &sessionId);
-
-    ptime getLastAccessTime(const std::string &sessionId);
-
-    /** return -1 represent no session found*/
-    int getTimeout(const std::string &sessionId);
-
-    void setTimeout(const std::string &id, int maxIdleTimeInMillis);
-
-    void touch(const std::string &id);
-
-    std::string getHost(const std::string &id);
-
-    void getAttributeKeys(const std::string &id, std::vector<std::string> *keys);
-
-    std::string& getAttribute(const std::string &id, const std::string &key);
-
-    void setAttribute(const std::string &id, const std::string &key, const std::string &value);
-
-    void removeAttribute(const std::string &id, const std::string &key);
-
-    bool isLogin(const std::string &id);
-    void setLogin(const std::string &id, bool login);
-
-    bool isValid(const std::string &id) { return checkValid(id); }
-    bool checkValid(const std::string &id) { return !lookupRequiredSession(id); }
-
-    void stop(const std::string &id);
+    void clearSessionListeners();
 
     /**
      * Returns the system-wide default time in milliseconds that any session may remain idle before expiring. This
@@ -141,7 +127,7 @@ public:
      *
      * @return the time in milliseconds that any session may remain idle before expiring.
      */
-    int getGlobalSessionTimeout() const { return this->globalSessionTimeout; }
+    int getGlobalSessionTimeout() const;
 
     /**
      * Sets the system-wide default time in milliseconds that any session may remain idle before expiring. This
@@ -157,32 +143,15 @@ public:
      *
      * @param globalSessionTimeout the time in milliseconds that any session may remain idel before expiring.
      */
-    void setGlobalSessionTimeout(int globalSessionTimeout) {
-        this->globalSessionTimeout = globalSessionTimeout;
-    }
+    void setGlobalSessionTimeout(int globalSessionTimeout);
 
-    bool isSessionValidationSchedulerEnabled() const {
-        return sessionValidationSchedulerEnabled;
-    }
+    bool isSessionValidationSchedulerEnabled() const;
 
-    void setSessionValidationSchedulerEnabled(bool sessionValidationSchedulerEnabled) {
-        this->sessionValidationSchedulerEnabled = sessionValidationSchedulerEnabled;
-    }
+    void setSessionValidationSchedulerEnabled(bool sessionValidationSchedulerEnabled);
 
-    void setSessionValidationScheduler(SessionValidationScheduler *sessionValidationScheduler) {
-        this->sessionValidationScheduler = sessionValidationScheduler;
-    }
+    void setSessionValidationScheduler(SessionValidationScheduler* sessionValidationScheduler);
 
-    SessionValidationScheduler *getSessionValidationScheduler() const{
-        return sessionValidationScheduler;
-    }
-
-    void enableSessionValidationIfNecessary() {
-        SessionValidationScheduler *scheduler = getSessionValidationScheduler();
-        if (isSessionValidationSchedulerEnabled() && (scheduler == NULL || !scheduler->isEnabled())) {
-            enableSessionValidation();
-        }
-    }
+    SessionValidationScheduler* getSessionValidationScheduler() const;
 
     /**
      * If using the underlying default <tt>SessionValidationScheduler</tt> (that is, the
@@ -198,93 +167,21 @@ public:
      *
      * @param sessionValidationInterval the time in milliseconds between checking for valid sessions to reap orphans.
      */
-    void setSessionValidationInterval(int sessionValidationInterval) {
-        this->sessionValidationInterval = sessionValidationInterval;
-    }
+    void setSessionValidationInterval(int sessionValidationInterval);
 
-    int getSessionValidationInterval() const {
-        return sessionValidationInterval;
-    }
+    int getSessionValidationInterval() const;
 
-    /**
-     * Subclass template hook in case per-session timeout is not based on
-     * {@link oSession#getTimeout()}.
-     * <p/>
-     * <p>This implementation merely returns {@link Session#getTimeout()}</p>
-     *
-     * @param session the session for which to determine session timeout.
-     * @return the time in milliseconds the specified session may remain idle before expiring.
-     */
-    int getTimeout(const SessionPtr &session) {
-        if(!session) return -1;
-        return session->getTimeout();
-    }
+    void setSessionDAO(SessionDAO* sessionDAO);
+    SessionDAO* getSessionDAO();
 
     void validateSessions();
 
-    SessionPtr start();
-
-    SessionValidationScheduler *createSessionValidationScheduler(){
-        SessionValidationScheduler *svs = new SessionValidationScheduler(this);
-        return svs;
-    }
-
-    SessionPtr getSession(const std::string &id){
-        SessionPtr session = doGetSession(id);
-        return session;
-    }
+    void enableSessionValidation();
+    void disableSessionValidation();
 
 protected:
-    SessionPtr doCreateSession() {
-        SessionPtr s = new Session();
-        create(s);
-        return s;
-    }
-
-    SessionPtr doGetSession(const std::string &id){
-        enableSessionValidationIfNecessary();
-        SessionPtr s = retrieveSession(id);
-        if (s) validate(s);
-        return s;
-    }
-
-    Session::SessionState validate(SessionPtr &session);
-
-    void beforeSessionValidationDisabled() {}
-
-    void afterSessionValidationEnabled() {}
-    void afterStopped(SessionPtr &session) {
-        if (isDeleteInvalidSessions())
-            remove(session);
-    }
-
-    void afterExpired(SessionPtr &session) {
-        if (isDeleteInvalidSessions())
-            remove(session);
-    }
-
-    void onStop(SessionPtr &session) {
-        ptime stopTs = session->getStopTimestamp();
-        session->setLastAccessTime(stopTs);
-        onChange(session);
-    }
-
-    // void onStop(SessionPtr session, const std::string &id) { onStop(session); }
-
-    void onExpiration(SessionPtr session) {
-        session->setExpired(true);
-        onChange(session);
-    }
-
-    void onChange(SessionPtr &session) {
-        sessionDAO->update(session);
-    }
-
-    void onExpiration(SessionPtr &session, const std::string &id) {
-        onExpiration(session);
-        notifyExpiration(session);
-        afterExpired(session);
-   }
+    virtual void beforeSessionValidationDisabled() { /*NOOP*/ }
+    virtual void afterSessionValidationEnabled() { /*NOOP*/ }
 
     /**
      * Template method that allows subclasses to react to a new session being created.
@@ -294,96 +191,139 @@ protected:
      * @param session the session that was just {@link #createSession created}.
      * @param context the {@link SessionContext SessionContext} that was used to start the session.
      */
-    void onStart(SessionPtr session) {}
-    void onInvalidation(SessionPtr &session, Session::SessionState state);
+    virtual void onStart(const SessionPtr& session) { /*NOOP*/ }
 
-    /**
-     * Persists the given session instance to an underlying EIS (Enterprise Information System).  This implementation
-     * delegates and calls
-     * <code>this.{@link SessionDAO sessionDAO}.{@link SessionDAO#create(Session) create}(session);<code>
-     *
-     * @param session the Session instance to persist to the underlying EIS.
-     */
-    void create(SessionPtr &session) { sessionDAO->create(session); }
+    virtual void onStop(const SessionPtr& session);
 
-    /**
-     * Looks up a session from the underlying data store based on the specified session key.
-     *
-     * @param key the session key to use to look up the target session.
-     * @return the session identified by {@code sessionId}.
-     * @throws UnknownSessionException if there is no session identified by {@code sessionId}.
-     */
+    virtual void afterStopped(const SessionPtr& session);
 
-    SessionPtr retrieveSession(const std::string &id){ return sessionDAO->readSession(id); }
+    virtual void onExpiration(const SessionPtr& session);
 
-    void remove(SessionPtr &session) { sessionDAO->remove(session); }
+    virtual void afterExpired(const SessionPtr& session);
 
-    void getActiveSessions(std::vector<SessionPtr> *actives) { return sessionDAO->getActiveSessions(actives); }
+    virtual void onChange(const SessionPtr& session);
 
-    void applyGlobalSessionTimeout(SessionPtr session) {
-        session->setTimeout(getGlobalSessionTimeout());
-        onChange(session);
-    }
-
-
-
-    /**
-     * Notifies any interested {@link SessionListener}s that a Session has started.  This method is invoked
-     * <em>after</em> the {@link #onStart onStart} method is called.
-     *
-     * @param session the session that has just started that will be delivered to any
-     *                {@link #setSessionListeners(java.util.Collection) registered} session listeners.
-     * @see SessionListener#onStart(Session)
-     */
-    void notifyStart(const SessionPtr &session);
-    void notifyStop(const SessionPtr &session);
-    void notifyExpiration(const SessionPtr &session);
-
-    /**
-     * Creates a new {@code Session Session} instance based on the specified (possibly {@code null})
-     * initialization data.  Implementing classes must manage the persistent state of the returned session such that it
-     * could later be acquired via the {@link #getSession(SessionKey)} method.
-     *
-     * @param context the initialization data that can be used by the implementation or underlying
-     *                {@link SessionFactory} when instantiating the internal {@code Session} instance.
-     * @return the new {@code Session} instance.
-     * @throws org.apache.shiro.authz.HostUnauthorizedException
-     *                                if the system access control policy restricts access based
-     *                                on client location/IP and the specified hostAddress hasn't been enabled.
-     * @throws AuthorizationException if the system access control policy does not allow the currently executing
-     *                                caller to start sessions.
-     */
-    SessionPtr createSession() {
-        enableSessionValidationIfNecessary();
-        return doCreateSession();
-    }
-
-
-
-    void enableSessionValidation();
-    void disableSessionValidation();
+    virtual void onInvalidation(const SessionPtr& session, int state);
 
 private:
-    SessionPtr lookupRequiredSession(const std::string &id){
-        return doGetSession(id);
-    }
+    void applyGlobalSessionTimeout(const SessionPtr& session);
+
+    void remove(const SessionPtr& session);
+    void stop(const SessionPtr& session);
+    void expire(const SessionPtr& session);
+
+    int validate(const SessionPtr& session);
+
+    void enableSessionValidationIfNecessary();
+
+    void getActiveSessions(std::vector<SessionPtr>* actives);
+
+    SessionValidationScheduler* createSessionValidationScheduler();
+
+    /**
+      * Notifies any interested {@link SessionListener}s that a Session has started.  This method is invoked
+      * <em>after</em> the {@link #onStart onStart} method is called.
+      *
+      * @param session the session that has just started that will be delivered to any
+      *                {@link #setSessionListeners(java.util.Collection) registered} session listeners.
+      * @see SessionListener#onStart(Session)
+      */
+    void notifyStart(const SessionPtr& session);
+    void notifyStop(const SessionPtr& session);
+    void notifyExpiration(const SessionPtr& session);
+
+    void createSessionCallback(int result,
+                               const SessionPtr& session,
+                               const SessionCallback& callback);
+
+    void readSessionCallback(int result,
+                             const SessionPtr& session,
+                             const SessionCallback& callback);
 
 private:
     bool deleteInvalidSessions;
     bool sessionValidationSchedulerEnabled;
 
-
-
     int globalSessionTimeout;
     int sessionValidationInterval;
 
+    SessionDAO* sessionDAO;
+    SessionValidationScheduler* validationScheduler;
 
-
-    SessionDAO *sessionDAO;
-    SessionValidationScheduler *sessionValidationScheduler;
-
+    std::map<std::string, SessionPtr> sessions;
     std::vector<SessionChangeCallback> listeners;
 };
+
+inline
+bool SessionManager::isDeleteInvalidSessions() const {
+    return this->deleteInvalidSessions;
+}
+
+inline
+const std::vector<SessionChangeCallback>& SessionManager::getSessionListeners() const {
+    return this->listeners;
+}
+
+inline
+void SessionManager::clearSessionListeners() {
+    listeners.clear();
+}
+
+inline
+void SessionManager::setDeleteInvalidSessions(bool deleteInvalidSessions) {
+    this->deleteInvalidSessions = deleteInvalidSessions;
+}
+
+inline
+int SessionManager::getGlobalSessionTimeout() const {
+    return this->globalSessionTimeout;
+}
+
+inline
+void SessionManager::setGlobalSessionTimeout(int globalSessionTimeout) {
+    this->globalSessionTimeout = globalSessionTimeout;
+}
+
+inline
+bool SessionManager::isSessionValidationSchedulerEnabled() const {
+    return sessionValidationSchedulerEnabled;
+}
+
+inline
+void SessionManager::setSessionValidationSchedulerEnabled(bool sessionValidationSchedulerEnabled) {
+    this->sessionValidationSchedulerEnabled = sessionValidationSchedulerEnabled;
+}
+
+inline
+void SessionManager::setSessionValidationScheduler(SessionValidationScheduler* sessionValidationScheduler) {
+    this->validationScheduler = sessionValidationScheduler;
+}
+
+inline
+SessionValidationScheduler* SessionManager::getSessionValidationScheduler() const {
+    return validationScheduler;
+}
+
+inline
+void SessionManager::setSessionValidationInterval(int sessionValidationInterval) {
+    this->sessionValidationInterval = sessionValidationInterval;
+}
+
+inline
+int SessionManager::getSessionValidationInterval() const {
+    return sessionValidationInterval;
+}
+
+inline
+void SessionManager::setSessionDAO(SessionDAO* sessionDAO) {
+    this->sessionDAO = sessionDAO;
+}
+
+inline
+SessionDAO* SessionManager::getSessionDAO() {
+    return this->sessionDAO;
+}
+
 }
 }
 }

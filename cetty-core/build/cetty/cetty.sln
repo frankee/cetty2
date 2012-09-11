@@ -100,6 +100,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufBsonSerialization",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "craft", "..\..\..\cetty-craft\build\craft\craft.vcxproj", "{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "startup", "..\..\..\cetty-craft\build\startup\startup.vcxproj", "{C69120B2-A181-4455-B0CE-2BDC58B2B557}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotoc", "..\..\..\..\thirdparty\protobuf-2.4.1\vsprojects\libprotoc.vcxproj", "{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -246,6 +250,14 @@ Global
 		{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}.Debug|Win32.Build.0 = Debug|Win32
 		{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}.Release|Win32.ActiveCfg = Release|Win32
 		{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}.Release|Win32.Build.0 = Release|Win32
+		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Debug|Win32.Build.0 = Debug|Win32
+		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Release|Win32.ActiveCfg = Release|Win32
+		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Release|Win32.Build.0 = Release|Win32
+		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.Build.0 = Debug|Win32
+		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.ActiveCfg = Release|Win32
+		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

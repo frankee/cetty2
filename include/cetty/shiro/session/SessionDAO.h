@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+#include <boost/function.hpp>
 #include <cetty/shiro/session/SessionPtr.h>
-#include <cetty/shiro/session/SessionIdGenerator.h>
-#include <cetty/shiro/session/Session.h>
 
 namespace cetty {
 namespace shiro {
@@ -40,7 +40,10 @@ namespace session {
  */
 class SessionDAO {
 public:
-    virtual ~SessionDAO(){}
+    typedef boost::function2<void, int, const SessionPtr&> SessionCallback;
+
+public:
+    virtual ~SessionDAO() {}
 
     /**
      * Retrieves the Session object from the underlying EIS identified by <tt>sessionId</tt> by delegating to
@@ -50,25 +53,29 @@ public:
      * @param sessionId the id of the session to retrieve from the EIS.
      * @return the session identified by <tt>sessionId</tt> in the EIS.
      */
-    SessionPtr readSession(const std::string &sessionId){
-        return doReadSession(sessionId);
-    }
-
-
+    virtual void readSession(const std::string &sessionId, const SessionCallback& callback) = 0;
+    
     /**
-     * Creates the session by delegating EIS creation to subclasses via the {@link #doCreate} method, and then
-     * asserting that the returned sessionId is not null.
+     * Inserts a new Session record into the underling EIS (e.g. Relational database, file system, persistent cache,
+     * etc, depending on the DAO implementation).
+     * <p/>
+     * After this method is invoked, the {@link org.apache.shiro.session.Session#getId()}
+     * method executed on the argument must return a valid session identifier.  That is, the following should
+     * always be true:
+     * <pre>
+     * Serializable id = create( session );
+     * id.equals( session.getId() ) == true</pre>
+     * <p/>
+     * Implementations are free to throw any exceptions that might occur due to
+     * integrity violation constraints or other EIS related errors.
      *
-     * @param session Session object to create in the EIS and associate with an ID.
+     * @param session the {@link org.apache.shiro.session.Session} object to create in the EIS.
+     * @return the EIS id (e.g. primary key) of the created {@code Session} object.
      */
-    const std::string create(SessionPtr &session) {
-        return doCreate(session);
-    }
-
-
-    virtual void getActiveSessions(std::vector<SessionPtr> *actives) = 0;
-    virtual void update(SessionPtr &session) = 0;
-    virtual void remove(SessionPtr &session) = 0;
+    virtual void create(const SessionPtr &session, const SessionCallback& callback) = 0;
+    
+    virtual void update(const SessionPtr &session, const SessionCallback& callback) = 0;
+    virtual void remove(const SessionPtr &session, const SessionCallback& callback) = 0;
 
 protected:
     /**
@@ -87,9 +94,7 @@ protected:
      * @param session the new session instance for which an ID will be generated and then assigned
      * @return the generated ID to assign
      */
-    std::string generateSessionId(SessionPtr &session) {
-        return SessionIdGenerator::generateId(session);
-    }
+    std::string generateSessionId(const SessionPtr &session);
 
     /**
      * Utility method available to subclasses that wish to
@@ -102,30 +107,9 @@ protected:
      * @param session   the session instance to which the sessionId will be applied
      * @param sessionId the id to assign to the specified session instance.
      */
-    void assignSessionId(SessionPtr &session, const std::string &sessionId) {
-        session->setId(sessionId);
-    }
-
-    /**
-     * Subclass hook to actually persist the given <tt>Session</tt> instance to the underlying EIS.
-     *
-     * @param session the Session instance to persist to the EIS.
-     * @return the id of the session created in the EIS (i.e. this is almost always a primary key and should be the
-     *         value returned from {@link Session#getId() Session.getId()}.
-     */
-    virtual std::string doCreate(SessionPtr &session) = 0;
-
-    /**
-     * Subclass implementation hook that retrieves the Session object from the underlying EIS or {@code null} if a
-     * session with that ID could not be found.
-     *
-     * @param sessionId the id of the <tt>Session</tt> to retrieve.
-     * @return the Session in the EIS identified by <tt>sessionId</tt> or {@code null} if a
-     *         session with that ID could not be found.
-     */
-    virtual SessionPtr doReadSession(const std::string &sessionId) = 0;
-
+    void assignSessionId(const SessionPtr &session, const std::string &sessionId);
 };
+
 }
 }
 }

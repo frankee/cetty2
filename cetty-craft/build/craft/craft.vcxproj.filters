@@ -54,6 +54,13 @@
     <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h">
       <Filter>builder</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\craft.pb.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\http\CookieTemplate.h">
+      <Filter>http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\http\UriTemplate.h">
+      <Filter>http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\http\HttpRequest2ProtobufMessage.cpp">
@@ -94,6 +101,13 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp">
       <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\craft.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\craft\http\CookieTemplate.cpp">
+      <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\http\UriTemplate.cpp">
+      <Filter>http</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

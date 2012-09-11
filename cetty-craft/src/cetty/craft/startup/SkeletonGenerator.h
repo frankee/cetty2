@@ -1,3 +1,6 @@
+#if !defined(CETTY_CRAFT_STARTUP_SKELETONGENERATOR_H)
+#define CETTY_CRAFT_STARTUP_SKELETONGENERATOR_H
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,10 +17,21 @@
  * under the License.
  */
 
-#include <cetty/service/http/CookieTemplate.h>
-
 namespace cetty {
-namespace http {
+namespace craft {
+namespace startup {
+
+class SkeletonGenerator {
+public:
+
+};
 
 }
 }
+}
+
+#endif //#if !defined(CETTY_CRAFT_STARTUP_SKELETONGENERATOR_H)
+
+// Local Variables:
+// mode: c++
+// End:

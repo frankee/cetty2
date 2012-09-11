@@ -1,5 +1,6 @@
 #if !defined(CETTY_SHIRO_SESSION_SESSIONIDGENERATOR_H)
 #define CETTY_SHIRO_SESSION_SESSIONIDGENERATOR_H
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -39,7 +40,7 @@ public:
      * @param session the {@link Session} instance to which the ID will be applied.
      * @return the String value of the session id
      */
-    static std::string generateId(SessionPtr session);
+    static std::string generateId(const SessionPtr& session);
 
 };
 

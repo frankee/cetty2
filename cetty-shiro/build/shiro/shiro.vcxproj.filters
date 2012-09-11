@@ -13,6 +13,9 @@
     <Filter Include="shiro\session">
       <UniqueIdentifier>{d5db2292-1775-4bbb-bed9-6afc0decf835}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shiro\authz">
+      <UniqueIdentifier>{e63c2559-8ac2-4dd6-8856-893f3449b1bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AbstractAuthenticator.h">
@@ -54,32 +57,8 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealm.h">
       <Filter>shiro\realm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealm.h">
-      <Filter>shiro\realm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\Realm.h">
       <Filter>shiro\realm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractNativeSessionManager.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractSessionManager.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractValidatingSessionManager.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\DelegatingSession.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\ExecutorServiceSessionValidationScheduler.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\MemorySessionDAO.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\ProxiedSession.h">
-      <Filter>shiro\session</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\Session.h">
       <Filter>shiro\session</Filter>
@@ -90,16 +69,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionDAO.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionFactory.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionIdGenerator.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionKey.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionListener.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionManager.h">
@@ -108,26 +78,43 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionValidationScheduler.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\PrincipalCollection.h">
-      <Filter>shiro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\Subject.h">
-      <Filter>shiro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\SubjectContext.h">
-      <Filter>shiro</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManager.h">
-      <Filter>shiro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\SecurityUtils.h">
-      <Filter>shiro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\SubjectFactory.h">
       <Filter>shiro</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionPtr.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\Authorizer.h">
+      <Filter>shiro\authz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorisingRealm.h">
+      <Filter>shiro\realm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h">
+      <Filter>shiro\session</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionContext.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionIdGenerator.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionManager.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionValidationScheduler.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionDAO.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\session\RedisSessionDAO.cpp">
+      <Filter>shiro\session</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

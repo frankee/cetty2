@@ -23,32 +23,28 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\FirstSuccessfulStrategy.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\ModularRealmAuthenticator.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256CredentialsMatcher.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\Authorizer.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealm.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealm.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorisingRealm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\Realm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManager.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\SecurityUtils.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractNativeSessionManager.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractSessionManager.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\AbstractValidatingSessionManager.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\DelegatingSession.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\ExecutorServiceSessionValidationScheduler.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\MemorySessionDAO.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\ProxiedSession.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\Session.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionContext.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionDAO.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionIdGenerator.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionKey.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionListener.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionManager.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionValidationScheduler.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\SubjectFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\PrincipalCollection.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\Subject.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\subject\SubjectContext.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\shiro\session\RedisSessionDAO.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionContext.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionDAO.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionIdGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionManager.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\session\SessionValidationScheduler.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3DE1111F-B927-483B-AD82-385EF564E967}</ProjectGuid>

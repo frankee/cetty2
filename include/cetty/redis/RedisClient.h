@@ -69,6 +69,8 @@ public:
         request(command, future);
     }
 
+    void del(const std::string& key);
+
 #if 0
     void hset(const std::string& key, const std::string& field, const std::string& value);
     void hset(const std::string& key, const std::string& field, const StringPiece& value);

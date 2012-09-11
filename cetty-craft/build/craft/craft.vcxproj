@@ -14,6 +14,8 @@
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\craft.pb.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\http\CookieTemplate.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\HttpRequest2ProtobufMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\HttpResponse2ProtobufMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ProtobufClientServiceFilter.h" />
@@ -26,11 +28,14 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceRequestMapperConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapperConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\http\UriTemplate.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftServerBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\craft\craft.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\craft\http\CookieTemplate.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\HttpRequest2ProtobufMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\HttpResponse2ProtobufMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\ProtobufMessage2HttpRequest.cpp" />
@@ -41,6 +46,7 @@
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceRequestMapperConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapperConfig.cpp" />
+    <ClCompile Include="..\..\src\cetty\craft\http\UriTemplate.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}</ProjectGuid>

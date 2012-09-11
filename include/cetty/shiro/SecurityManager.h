@@ -55,6 +55,7 @@ public:
 
     /// judge user's operation
     bool authoriseUser(const std::string &sessionId, const std::string &operation);
+
     /// judge user and third app's operation
     bool authoriseApp(const std::string &appkey, const std::string &operation);
 

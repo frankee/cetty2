@@ -21,11 +21,12 @@
 
 #include <vector>
 
+#include <boost/function.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/any.hpp>
 
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/shiro/session/SessionPtr.h>
 
 namespace cetty {
 namespace shiro {
@@ -41,7 +42,7 @@ using namespace cetty::util;
  * A {@code Session} is intended to be managed by the business tier and accessible via other
  * tiers without being tied to any given client technology.
  */
-class Session : public ReferenceCounter<Session, int>{
+class Session : public ReferenceCounter<Session, int> {
 public:
     enum SessionState {
         START,
@@ -50,16 +51,17 @@ public:
         EXPIRED
     };
 
-public:
-    Session(): expired(false), login(false) { init(); }
-    Session(const std::string& host)
-        : host(host),
-          expired(false),
-          login(false)
-    {
-        init();
-    }
+    typedef boost::function1<void, const SessionPtr&> UpdateCallback;
+    typedef boost::function1<void, const SessionPtr&> ExpireCallback;
+    typedef boost::function1<void, const SessionPtr&> StopCallback;
 
+public:
+    Session();
+    Session(const std::string& host);
+    Session(const std::string& host,
+            const StopCallback& stopCallback,
+            const UpdateCallback& updateCallback,
+            const ExpireCallback& expireCallback);
 
     /**
      * Returns the unique identifier assigned by the system upon session creation.
@@ -71,18 +73,16 @@ public:
      *
      * @return The unique identifier assigned to the session upon creation.
      */
-    const std::string& getId() const { return this->id; }
-    void setId(const std::string& id) { this->id = id; }
-
+    const std::string& getId() const;
+    void setId(const std::string& id);
 
     /**
      * Returns the time the session was started; that is, the time the system created the instance.
      *
      * @return The time the system created the session.
      */
-    const ptime& getStartTimestamp() const { return startTimestamp; }
-    void setStartTimestamp(const ptime& startTimestamp) { this->startTimestamp = startTimestamp; }
-
+    const ptime& getStartTimestamp() const;
+    void setStartTimestamp(const ptime& startTimestamp);
 
     /**
      * Returns the time the session was stopped, or <tt>null</tt> if the session is still active.
@@ -101,11 +101,8 @@ public:
      * @return The time the session was stopped, or <tt>null</tt> if the session is still
      *         active.
      */
-    const ptime& getStopTimestamp() const { return stopTimestamp; }
-    void setStopTimestamp(const ptime& stopTimestamp) {
-        this->stopTimestamp = stopTimestamp;
-    }
-
+    const ptime& getStopTimestamp() const;
+    void setStopTimestamp(const ptime& stopTimestamp);
 
     /**
      * Returns the last time the application received a request or method invocation from the user associated
@@ -114,11 +111,8 @@ public:
      * @return The time the user last interacted with the system.
      * @see #touch()
      */
-    const ptime& getLastAccessTime() const { return lastAccessTime; }
-    void setLastAccessTime(ptime& lastAccessTime) {
-        this->lastAccessTime = lastAccessTime;
-    }
-
+    const ptime& getLastAccessTime() const;
+    void setLastAccessTime(ptime& lastAccessTime);
 
     /**
      * Returns true if this session has expired, false otherwise.  If the session has
@@ -126,9 +120,7 @@ public:
      *
      * @return true if this session has expired, false otherwise.
      */
-    bool isExpired() { return expired; }
-    void setExpired(bool expired) { this->expired = expired; }
-
+    bool isExpired() const;
 
     /**
      * Returns the time in milliseconds that the session session may remain idle before expiring.
@@ -145,7 +137,7 @@ public:
      * @throws InvalidSessionException if the session has been stopped or expired prior to calling this method.
      * @since 0.2
      */
-    int getTimeout() const{ return timeout; }
+    int getTimeout() const;
 
     /**
      * Sets the time in milliseconds that the session may remain idle before expiring.
@@ -163,7 +155,7 @@ public:
      * @throws InvalidSessionException if the session has been stopped or expired prior to calling this method.
      * @since 0.2
      */
-    void setTimeout(int timeout) { this->timeout = timeout; }
+    void setTimeout(int timeout);
 
     /**
      * Returns the host name or IP string of the host that originated this session, or {@code null}
@@ -172,17 +164,13 @@ public:
      * @return the host name or IP string of the host that originated this session, or {@code null}
      *         if the host address is unknown.
      */
-    const std::string& getHost() const { return host; }
-    void setHost(const std::string& host) { this->host = host; }
+    const std::string& getHost() const;
+    void setHost(const std::string& host);
 
+    bool isLogin() const;
+    void setLogin(bool login);
 
-    const std::map<std::string, std::string>& getAttributes() const {
-        return attributes;
-    }
-    void setAttributes(const std::map<std::string,std::string>& attributes) {
-        this->attributes.insert(attributes.begin(), attributes.end());
-    }
-
+    const std::map<std::string, std::string>& getAttributes() const;
 
     /**
      * Explicitly updates the {@link #getLastAccessTime() lastAccessTime} of this session to the current time when
@@ -214,9 +202,7 @@ public:
      *
      * @throws InvalidSessionException if this session has stopped or expired prior to calling this method.
      */
-    void touch() {
-        this->lastAccessTime =  ptime(second_clock::local_time());
-    }
+    void touch();
 
     /**
      * Explicitly stops (invalidates) this session and releases all associated resources.
@@ -237,6 +223,8 @@ public:
      */
     void stop();
 
+    void expire();
+
     /**
      * Returns the keys of all the attributes stored under this session.  If there are no
      * attributes, this returns an empty collection.
@@ -246,7 +234,7 @@ public:
      * @throws InvalidSessionException if this session has stopped or expired prior to calling this method.
      * @since 0.2
      */
-    void getAttributeKeys(std::vector<std::string>* keys){}
+    void getAttributeKeys(std::vector<std::string>* keys) {}
 
     /**
      * Returns the object bound to this session identified by the specified key.  If there is no
@@ -258,7 +246,7 @@ public:
      * @throws InvalidSessionException if this session has stopped or expired prior to calling
      *                                 this method.
      */
-    std::string &getAttribute(const std::string& key);
+    const std::string& getAttribute(const std::string& key) const;
 
     /**
      * Binds the specified {@code value} to this session, uniquely identified by the specifed
@@ -286,46 +274,88 @@ public:
      */
     void removeAttribute(const std::string& key);
 
+
     SessionState validate();
 
-    bool isLogin(){ return login; }
-    void setLogin(bool login) { this->login = login; }
+    void toJson(std::string* json) const;
+    void fromJson(const char* json);
 
-protected:
-    void expire();
-
+private:
     /**
      * Determines if this session is expired.
      *
      * @return true if the specified session has expired, false otherwise.
      */
-    bool isTimedOut();
+    bool isTimedOut() const;
+    bool isStopped() const;
+    bool isValid() const;
 
-    bool isStopped() { return !getStopTimestamp().is_not_a_date_time(); }
-    bool isValid() { return !isStopped() && !isExpired(); }
-
-protected:
-    static const int MILLIS_PER_SECOND;
-    static const int MILLIS_PER_MINUTE;
-    static const int MILLIS_PER_HOUR;
+    void doStop();
+    void doExpire();
 
 private:
-    void init();
-
-    const std::map<std::string, std::string>& getAttributesLazy(){ return getAttributes(); };
-
-private:
-    std::string id;
-    std::string host;
-    ptime startTimestamp;
-    ptime stopTimestamp;
-    ptime lastAccessTime;
-    int timeout;
     bool expired;
     bool login;
 
+    int timeout;
+
+    std::string id;
+    std::string host;
+    ptime startTime;
+    ptime stopTime;
+    ptime lastAccessTime;
+
     std::map<std::string, std::string> attributes;
+
+    StopCallback stopCallback;
+    UpdateCallback updateCallback;
+    ExpireCallback expireCallback;
 };
+
+inline
+const std::string& Session::getId() const {
+    return this->id;
+}
+
+inline
+const ptime& Session::getStartTimestamp() const {
+    return startTime;
+}
+
+inline
+const ptime& Session::getStopTimestamp() const {
+    return stopTime;
+}
+
+inline
+const ptime& Session::getLastAccessTime() const {
+    return lastAccessTime;
+}
+
+inline
+bool Session::isExpired() const {
+    return expired;
+}
+
+inline
+int Session::getTimeout() const {
+    return timeout;
+}
+
+inline
+const std::string& Session::getHost() const {
+    return host;
+}
+
+inline
+bool Session::isLogin() const {
+    return login;
+}
+
+inline
+const std::map<std::string, std::string>& Session::getAttributes() const {
+    return attributes;
+}
 
 }
 }
