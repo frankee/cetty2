@@ -31,7 +31,7 @@ bool Sha256CredentialsMatcher::doCredentialsMatch(
 
     std::string credentials = hashProvidedCredentials(infoCredentials, std::string(), 1);
 
-   return equals(tokenCredentials, infoCredentials);
+   return equals(tokenCredentials, credentials);
    }
 
 std::string Sha256CredentialsMatcher::getCredentials(const AuthenticationInfo &info){

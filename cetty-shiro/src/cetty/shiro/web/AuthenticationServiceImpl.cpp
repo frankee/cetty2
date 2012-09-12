@@ -16,27 +16,99 @@
  */
 
 #include <cetty/shiro/web/AuthenticationServiceImpl.h>
+#include <cetty/shiro/authc/AuthenticationToken.h>
+#include <cetty/shiro/util/LoginUtil.h>
+#include <cetty/shiro/SecurityManager.h>
+#include <cetty/protobuf/service/common.pb.h>
 
 namespace cetty {
 namespace shiro {
 namespace web {
 
-void AuthenticationServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
-        const PreLoginResponsePtr& response,
-        const DoneCallback& done) {
+using namespace cetty::shiro::authc;
+using namespace cetty::shiro::util;
+using namespace cetty::shiro;
 
+void AuthenticationServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
+                                         const PreLoginResponsePtr& response,
+                                         const DoneCallback& done){
+    std::string host = request->host();
+    std::string userName = request->user_name();
+
+    std::string nonce = LoginUtil::getNonce();
+    std::string serverTime = LoginUtil::getServerTime();
+
+    response->set_nonce(nonce);
+    response->set_server_time(serverTime);
+
+    LoginUtil::saveNonceServerTime(userName, host, nonce, serverTime);
+    done(response);
 }
 
 void AuthenticationServiceImpl::login(const ConstLoginRequestPtr& request,
                                       const LoginResponsePtr& response,
                                       const DoneCallback& done) {
+    const std::string& userName = request->user_name();
+    const std::string& nonce = request->nonce();
+    std::string serverTime = request->server_time();
+    std::string encodeType = request->encode_type();
+    std::string encodedPasswd = request->encoded_passwd();
 
+    std::string userInfo = LoginUtil::getUserInfo(userName);
+    std::string storeHost = LoginUtil::getHost(userInfo);
+    std::string storeNonce = LoginUtil::getNonce(userInfo);
+    std::string storeServerTime = LoginUtil::getServerTime(userInfo);
+
+    if(nonce == storeNonce &&
+       serverTime == storeServerTime &&
+       LoginUtil::verifyServerTime(serverTime, LoginUtil::getServerTime())) {
+        AuthenticationToken token(userName, encodedPasswd, storeHost);
+        token.setEncodeType(encodeType);
+        token.setNonce(nonce);
+        token.setServerTime(serverTime);
+
+        SecurityManager *sm = SecurityUtils::getSecurityManager();
+        std::string sessionId = sm->login(token);
+        if(!sessionId.empty()){
+            SessionPtr sessionPtr = sm->getSession(sessionId);
+            if(sessionPtr){
+                cetty::protobuf::service::Session *session = response->mutable_session();
+                session->set_id(sessionId.c_str());
+                cetty::protobuf::service::KeyValue *item = session->add_items();
+                item->set_key("username");
+                item->set_value(userName);
+            } // if(sessionPtr)
+            else{
+                cetty::protobuf::service::Status *status = response->mutable_status();
+                //status->set_status();
+                status->set_code(LoginUtil::NO_SESSION_CODE);
+                status->set_message(LoginUtil::NO_SESSION_MESSAGE);
+            } // end
+        } // if(!sessionId.empty())
+        else{
+            cetty::protobuf::service::Status *status = response->mutable_status();
+
+            status->set_code(LoginUtil::LOGIN_FAILED_CODE);
+            status->set_message(LoginUtil::LOGIN_FAILED_MESSAGE);
+        }// end
+    }// if(nonce == storeNonce ...)
+    else {
+        cetty::protobuf::service::Status *status = response->mutable_status();
+
+        status->set_code(LoginUtil::LOGIN_REFUSED_CODE);
+        status->set_message(LoginUtil::LOGIN_REFUSED_MESSAGE);
+    } // end
+
+    done(response);
 }
 
 void AuthenticationServiceImpl::logout(const ConstLogoutRequestPtr& request,
                                        const LogoutResponsePtr& response,
                                        const DoneCallback& done) {
-
+    cetty::protobuf::service::Session session = request->session();
+    std::string sessionId = session.id();
+    SecurityManager *sm = SecurityUtils::getSecurityManager();
+    sm->logout(sessionId);
 }
 
 }

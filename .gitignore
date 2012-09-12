@@ -21,3 +21,4 @@ Release/
 ipch/
 CMakeFiles/
 .project
+.cproject
