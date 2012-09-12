@@ -19,6 +19,8 @@
  * under the License.
  */
 
+#include <cstdlib>
+
 namespace cetty { namespace shiro {
     class SecurityManager;
 }}
@@ -26,6 +28,8 @@ namespace cetty { namespace shiro {
 namespace cetty {
 namespace shiro {
 namespace util {
+
+class LoginUtil;
 
 using namespace cetty::shiro;
 /**
@@ -40,9 +44,10 @@ private:
      * ThreadContext should always be the primary source for Subject instances when possible.
      */
    static SecurityManager *securityManager;
+   static LoginUtil *loginUtil;
 
 public:
-    SecurityUtils(){}
+    SecurityUtils():securityManager(NULL), loginUtil(NULL){}
 
     /**
      * Sets a VM (static) singleton SecurityManager, specifically for transparent use in the
@@ -97,6 +102,10 @@ public:
      *          calling code, which typically indicates an invalid application configuration.
      */
     static SecurityManager *getSecurityManager(){ return securityManager; }
+
+    static void setLoginUtil(LoginUtil *loginUtil){ this->loginUtil = loginUtil; }
+    static LoginUtil *getLoginUtil(){ return loginUtil; }
+
 };
 }
 }

@@ -8,35 +8,57 @@
 #if !defined(CETTY_SHIRO_UTIL_LOGINUTIL_H)
 #define CETTY_SHIRO_UTIL_LOGINUTIL_H
 
+#include <string>
+#include <boost/function.hpp>
+
 namespace cetty {
 namespace shiro {
 namespace util {
 
-
 class LoginUtil {
 public:
+    typedef boost::function4<void,
+                             const std::string&,
+                             const std::string&,
+                             const std::string&,
+                             const std::string&
+                             > saveInfo;
+
+    typedef boost::function2<const std::string&,
+                             const std::string&,
+                             const std::string&
+                             > getStoreInfo;
+
+public:
+    LoginUtil(const saveInfo& save,
+              const getStoreInfo& retrieveNonce,
+              const getStoreInfo& retrieveServerTime,
+              const getStoreInfo& retrieveHost);
+
     /// produce random nonce and server time
-    static std::string getNonce();
-    static std::string getServerTime();
+    std::string getNonce();
+    std::string getServerTime();
 
     /// save user name, host, nonce produced by #getNonce,
     /// server time produced by #getServerTime() to db.
-    static void saveNonceServerTime(const std::string& userName,
-                                    const std::string& host,
-                                    const std::string& nonce,
-                                    const std::string& serverTime);
-
-    /// get user info saved by #saveNonceServerTime
-    static std::string getUserInfo(const std::string& userName);
+    void saveNonceServerTime(const std::string& userName,
+                             const std::string& host,
+                             const std::string& nonce,
+                             const std::string& serverTime);
 
     /// get token{nonce, server time, host} from user info
     /// return from #getUserInfo
-    static std::string getNonce(const std::string& userInfo);
-    static std::string getServerTime(const std::string& userInfo);
-    static std::string getHost(const std::string& userInfo);
+    std::string getNonce(const std::string& username, const std::string& serverTime);
+    std::string getServerTime(const std::string& username, const std::string& serverTime);
+    std::string getHost(const std::string& username, const std::string& serverTime);
 
-    static bool verifyServerTime(const std::string& oldTime,
-                                 const std::string& newTime);
+    bool verifyServerTime(const std::string& oldTime,
+                          const std::string& newTime);
+
+    void setSaveInfo(const saveInfo& save);
+    void setGetNonce(const getStoreInfo& retrieveNonce);
+    void setGerServerTime(const getStoreInfo& retrieveServerTime);
+    void setGetHost(const getStoreInfo& retrieveHost);
 
 public:
     static const int NO_SESSION_CODE;
@@ -46,7 +68,58 @@ public:
     static const std::string NO_SESSION_MESSAGE;
     static const std::string LOGIN_FAILED_MESSAGE;
     static const std::string LOGIN_REFUSED_MESSAGE;
+
+    saveInfo save;
+    getStoreInfo retrieveNonce;
+    getStoreInfo retrieveServerTime;
+    getStoreInfo retrieveHost;
 };
+
+inline
+void LoginUtil::saveNonceServerTime(const std::string& userName,
+                                    const std::string& host,
+                                    const std::string& nonce,
+                                    const std::string& serverTime){
+    save(userName, host, nonce, serverTime);
+}
+
+inline
+std::string LoginUtil::getNonce(const std::string& username,
+                                const std::string& serverTime){
+    return retrieveNonce(username, serverTime);
+}
+
+inline
+std::string LoginUtil::getServerTime(const std::string& username,
+                                     const std::string& serverTime){
+    return retrieveServerTime(username, serverTime);
+}
+
+inline
+std::string LoginUtil::getHost(const std::string& username,
+                               const std::string& serverTime){
+    return retrieveHost(username, serverTime);
+}
+
+inline
+void LoginUtil::setSaveInfo(const saveInfo& save){
+    this->save = save;
+}
+
+inline
+void LoginUtil::setGetNonce(const getStoreInfo& retrieveNonce){
+    this->retrieveNonce = retrieveNonce;
+}
+
+inline
+void LoginUtil::setGerServerTime(const getStoreInfo& retrieveServerTime){
+    this->retrieveServerTime = retrieveServerTime;
+}
+
+inline
+void LoginUtil::setGetHost(const getStoreInfo& retrieveHost){
+    this->retrieveHost = retrieveHost;
+}
 
 }
 }

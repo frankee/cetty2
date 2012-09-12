@@ -19,7 +19,7 @@
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/util/LoginUtil.h>
 #include <cetty/shiro/SecurityManager.h>
-#include <cetty/protobuf/service/common.pb.h>
+//#include <cetty/protobuf/service/common.pb.h>
 
 namespace cetty {
 namespace shiro {
@@ -35,13 +35,14 @@ void AuthenticationServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
     std::string host = request->host();
     std::string userName = request->user_name();
 
-    std::string nonce = LoginUtil::getNonce();
-    std::string serverTime = LoginUtil::getServerTime();
+    LoginUtil *loginUtil = SecurityUtils::getLoginUtil();
+    std::string nonce = loginUtil->getNonce();
+    std::string serverTime = loginUtil->getServerTime();
 
     response->set_nonce(nonce);
     response->set_server_time(serverTime);
 
-    LoginUtil::saveNonceServerTime(userName, host, nonce, serverTime);
+    loginUtil->saveNonceServerTime(userName, host, nonce, serverTime);
     done(response);
 }
 
@@ -50,18 +51,19 @@ void AuthenticationServiceImpl::login(const ConstLoginRequestPtr& request,
                                       const DoneCallback& done) {
     const std::string& userName = request->user_name();
     const std::string& nonce = request->nonce();
-    std::string serverTime = request->server_time();
-    std::string encodeType = request->encode_type();
-    std::string encodedPasswd = request->encoded_passwd();
+    const std::string& serverTime = request->server_time();
+    const std::string& encodeType = request->encode_type();
+    const std::string& encodedPasswd = request->encoded_passwd();
 
-    std::string userInfo = LoginUtil::getUserInfo(userName);
-    std::string storeHost = LoginUtil::getHost(userInfo);
-    std::string storeNonce = LoginUtil::getNonce(userInfo);
-    std::string storeServerTime = LoginUtil::getServerTime(userInfo);
+    LoginUtil *loginUtil = SecurityUtils::getLoginUtil();
+
+    std::string storeHost = loginUtil->getHost(userName, serverTime);
+    std::string storeNonce = loginUtil->getNonce(userName, serverTime);
+    std::string storeServerTime = loginUtil->getServerTime(userName, serverTime);
 
     if(nonce == storeNonce &&
        serverTime == storeServerTime &&
-       LoginUtil::verifyServerTime(serverTime, LoginUtil::getServerTime())) {
+       loginUtil->verifyServerTime(serverTime, loginUtil->getServerTime())) {
         AuthenticationToken token(userName, encodedPasswd, storeHost);
         token.setEncodeType(encodeType);
         token.setNonce(nonce);
