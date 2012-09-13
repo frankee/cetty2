@@ -30,9 +30,9 @@
 namespace cetty {
 namespace shiro {
 
-    namespace authc {
-        class AuthenticationToken;
-    }
+namespace authc {
+class AuthenticationToken;
+}
 
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::authz;
@@ -78,7 +78,7 @@ public:
 
     /// login by user name and password
     void login(const AuthenticationToken& token, const LoginCallback& callback);
-    void logout(const std::string &sessionId);
+    void logout(const std::string& sessionId);
 
     void authenticate(const AuthenticationToken& token, const AuthenticateCallback& callback);
 
@@ -91,27 +91,27 @@ public:
 
 private:
     /// login by session id
-    bool getSession(const std::string &id);
+    bool getSession(const std::string& id);
 
-    void bind(AuthenticationInfo &info, const SessionPtr& session);
+    void bind(AuthenticationInfo& info, const SessionPtr& session);
 
-    void fireFailedLoginEvent( const AuthenticationToken& token);
+    void fireFailedLoginEvent(const AuthenticationToken& token);
     void fireSuccessfulLoginEvent(const AuthenticationToken& token, const AuthenticationInfoPtr& info);
 
     void onAuthenticate(const AuthenticationInfoPtr& info,
-        const AuthenticationToken& token,
-        const LoginCallback& callback);
+                        const AuthenticationToken& token,
+                        const LoginCallback& callback);
 
     void onStartSession(const SessionPtr& session,
-        const AuthenticationInfoPtr& info,
-        const AuthenticationToken& token,
-        const LoginCallback& callback);
+                        const AuthenticationInfoPtr& info,
+                        const AuthenticationToken& token,
+                        const LoginCallback& callback);
 
 private:
     Authenticator authenticator;
     Authorizer    authorizer;
 
-    SessionManager *sessionManager;
+    SessionManager* sessionManager;
 
     RealmPtr realms;
 };
