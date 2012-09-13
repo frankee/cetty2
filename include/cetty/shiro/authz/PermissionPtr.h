@@ -24,7 +24,7 @@ namespace shiro {
 namespace authz {
 
 class Permission;
-typename boost::intrusive_ptr<Permission> PermissionPtr;
+typedef boost::intrusive_ptr<Permission> PermissionPtr;
 
 }
 }

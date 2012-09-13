@@ -21,16 +21,23 @@
  */
 
 #include <boost/function.hpp>
-#include <cetty/shiro/authc/Authenticator.h>
+
 #include <cetty/shiro/authz/Authorizer.h>
 #include <cetty/shiro/session/SessionManager.h>
+#include <cetty/shiro/authc/Authenticator.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
 
 namespace cetty {
 namespace shiro {
 
+namespace authc {
+class AuthenticationToken;
+}
+
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::authz;
 using namespace cetty::shiro::session;
+
 
 /**
  * A {@code SecurityManager} executes all security operations for <em>all</em> Subjects (aka users) across a
@@ -61,40 +68,52 @@ using namespace cetty::shiro::session;
  */
 class SecurityManager {
 public:
-    typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfo&, const SessionPtr&)> LoginCallback;
+    typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&)> LoginCallback;
     typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
+    typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
 
 public:
-    SecurityManager(): sessionManager(NULL) {init();}
-    virtual ~SecurityManager(){ destroy(); }
+    SecurityManager(): sessionManager() { }
+    virtual ~SecurityManager() {}
 
     /// login by user name and password
     void login(const AuthenticationToken& token, const LoginCallback& callback);
-    void logout(const std::string &sessionId);
+    void logout(const std::string& sessionId);
+
+    void authenticate(const AuthenticationToken& token, const AuthenticateCallback& callback);
 
     SessionManager& getSessionManager();
     Authenticator& getAuthenticator();
     Authorizer& getAuthorizer();
 
     void setRealm();
-    void setRealms();
-    const std::vector<RealmPtr>& getRealms() const;
+    const RealmPtr& getRealms() const;
 
 private:
     /// login by session id
-    bool getSession(const std::string &id);
+    bool getSession(const std::string& id);
 
-    void init();
-    void destroy();
+    void bind(AuthenticationInfo& info, const SessionPtr& session);
 
-    void bind(AuthenticationInfo &info, const SessionPtr& session);
+    void fireFailedLoginEvent(const AuthenticationToken& token);
+    void fireSuccessfulLoginEvent(const AuthenticationToken& token, const AuthenticationInfoPtr& info);
+
+    void onAuthenticate(const AuthenticationInfoPtr& info,
+                        const AuthenticationToken& token,
+                        const LoginCallback& callback);
+
+    void onStartSession(const SessionPtr& session,
+                        const AuthenticationInfoPtr& info,
+                        const AuthenticationToken& token,
+                        const LoginCallback& callback);
 
 private:
     Authenticator authenticator;
     Authorizer    authorizer;
-    SessionManager *sessionManager;
 
-    std::vector<RealmPtr> realms;
+    SessionManager* sessionManager;
+
+    RealmPtr realms;
 };
 
 }

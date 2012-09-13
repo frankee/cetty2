@@ -101,107 +101,24 @@ namespace authz {
  * @since 0.9
  */
 class WildcardPermission : public Permission {
+public:
+    typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
 
-    //TODO - JavaDoc methods
-
-    /*--------------------------------------------
-    |             C O N S T A N T S             |
-    ============================================*/
-    protected static final String WILDCARD_TOKEN = "*";
-    protected static final String PART_DIVIDER_TOKEN = ":";
-    protected static final String SUBPART_DIVIDER_TOKEN = ",";
-    protected static final boolean DEFAULT_CASE_SENSITIVE = false;
-
-    /*--------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
-    private List<Set<String>> parts;
-
-    /*--------------------------------------------
-    |         C O N S T R U C T O R S           |
-    ============================================*/
-    /**
-     * Default no-arg constructor for subclasses only - end-user developers instantiating Permission instances must
-     * provide a wildcard string at a minimum, since Permission instances are immutable once instantiated.
-     * <p/>
-     * Note that the WildcardPermission class is very robust and typically subclasses are not necessary unless you
-     * wish to create type-safe Permission objects that would be used in your application, such as perhaps a
-     * {@code UserPermission}, {@code SystemPermission}, {@code PrinterPermission}, etc.  If you want such type-safe
-     * permission usage, consider subclassing the {@link DomainPermission DomainPermission} class for your needs.
-     */
-    protected WildcardPermission() {
-    }
-
-    public WildcardPermission(String wildcardString) {
-        this(wildcardString, DEFAULT_CASE_SENSITIVE);
-    }
-
-    public WildcardPermission(String wildcardString, boolean caseSensitive) {
-        setParts(wildcardString, caseSensitive);
-    }
-
-    protected void setParts(String wildcardString) {
+public:
+    WildcardPermission(const std::string& wildcardString) {
         setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
     }
 
-    protected void setParts(String wildcardString, boolean caseSensitive) {
-        if (wildcardString == null || wildcardString.trim().length() == 0) {
-            throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
-        }
-
-        wildcardString = wildcardString.trim();
-
-        List<String> parts = CollectionUtils.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-
-        this.parts = new ArrayList<Set<String>>();
-
-for (String part : parts) {
-            Set<String> subparts = CollectionUtils.asSet(part.split(SUBPART_DIVIDER_TOKEN));
-
-            if (!caseSensitive) {
-                subparts = lowercase(subparts);
-            }
-
-            if (subparts.isEmpty()) {
-                throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
-            }
-
-            this.parts.add(subparts);
-        }
-
-        if (this.parts.isEmpty()) {
-            throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
-        }
+    WildcardPermission(const std::string& wildcardString, bool caseSensitive) {
+        setParts(wildcardString, caseSensitive);
     }
 
-    private Set<String> lowercase(Set<String> subparts) {
-        Set<String> lowerCasedSubparts = new LinkedHashSet<String>(subparts.size());
-
-for (String subpart : subparts) {
-            lowerCasedSubparts.add(subpart.toLowerCase());
-        }
-
-        return lowerCasedSubparts;
-    }
-
-    /*--------------------------------------------
-    |  A C C E S S O R S / M O D I F I E R S    |
-    ============================================*/
-    protected List<Set<String>> getParts() {
-        return this.parts;
-    }
-
-    /*--------------------------------------------
-    |               M E T H O D S               |
-    ============================================*/
-
-    public boolean implies(Permission p) {
+    virtual bool implies(const PermissionPtr& p) {
         // By default only supports comparisons with other WildcardPermissions
-        if (!(p instanceof WildcardPermission)) {
+        WildcardPermissionPtr permission = boost::dynamic_pointer_cast<WildcardPermission>(p);
+        if (!permission) {
             return false;
         }
-
-        WildcardPermission wp = (WildcardPermission) p;
 
         List<Set<String>> otherParts = wp.getParts();
 
@@ -236,7 +153,7 @@ for (Set<String> otherPart : otherParts) {
         return true;
     }
 
-    public String toString() {
+    std::string toString() const {
         StringBuilder buffer = new StringBuilder();
 
 for (Set<String> part : parts) {
@@ -250,18 +167,79 @@ for (Set<String> part : parts) {
         return buffer.toString();
     }
 
-    public boolean equals(Object o) {
-        if (o instanceof WildcardPermission) {
-            WildcardPermission wp = (WildcardPermission) o;
-            return parts.equals(wp.parts);
+private:
+    /**
+     * Default no-arg constructor for subclasses only - end-user developers instantiating Permission instances must
+     * provide a wildcard string at a minimum, since Permission instances are immutable once instantiated.
+     * <p/>
+     * Note that the WildcardPermission class is very robust and typically subclasses are not necessary unless you
+     * wish to create type-safe Permission objects that would be used in your application, such as perhaps a
+     * {@code UserPermission}, {@code SystemPermission}, {@code PrinterPermission}, etc.  If you want such type-safe
+     * permission usage, consider subclassing the {@link DomainPermission DomainPermission} class for your needs.
+     */
+    WildcardPermission() {}
+
+    List<Set<String>> getParts() {
+        return this.parts;
+    }
+
+    void setParts(const std::string& wildcardString) {
+        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
+    }
+
+    void setParts(const std::string& wildcardString, bool caseSensitive) {
+        if (wildcardString == null || wildcardString.trim().length() == 0) {
+            throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
         }
 
-        return false;
+        wildcardString = wildcardString.trim();
+
+        List<String> parts = CollectionUtils.asList(wildcardString.split(PART_DIVIDER_TOKEN));
+
+        this.parts = new ArrayList<Set<String>>();
+
+        for (String part : parts) {
+            Set<String> subparts = CollectionUtils.asSet(part.split(SUBPART_DIVIDER_TOKEN));
+
+            if (!caseSensitive) {
+                subparts = lowercase(subparts);
+            }
+
+            if (subparts.isEmpty()) {
+                throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
+            }
+
+            this.parts.add(subparts);
+        }
+
+        if (this.parts.isEmpty()) {
+            throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
+        }
     }
 
-    public int hashCode() {
-        return parts.hashCode();
+private:
+    Set<String> lowercase(Set<String> subparts) {
+        Set<String> lowerCasedSubparts = new LinkedHashSet<String>(subparts.size());
+
+        for (String subpart : subparts) {
+            lowerCasedSubparts.add(subpart.toLowerCase());
+        }
+
+        return lowerCasedSubparts;
     }
+
+    /*--------------------------------------------
+    |             C O N S T A N T S             |
+    ============================================*/
+    protected static final String WILDCARD_TOKEN = "*";
+    protected static final String PART_DIVIDER_TOKEN = ":";
+    protected static final String SUBPART_DIVIDER_TOKEN = ",";
+    protected static final boolean DEFAULT_CASE_SENSITIVE = false;
+
+    /*--------------------------------------------
+    |    I N S T A N C E   V A R I A B L E S    |
+    ============================================*/
+    private List<Set<String>> parts;
 
 };
 

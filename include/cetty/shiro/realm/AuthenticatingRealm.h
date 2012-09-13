@@ -19,9 +19,18 @@
  * under the License.
  */
 
-#include <cetty/shiro/authc/Sha256CredentialsMatcher.h>
+#include <boost/function.hpp>
 #include <cetty/shiro/realm/Realm.h>
 #include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+
+namespace cetty {
+namespace shiro {
+namespace authc {
+class AuthenticationToken;
+}
+}
+}
 
 namespace cetty {
 namespace shiro {
@@ -50,60 +59,15 @@ using namespace cetty::shiro::authc;
  */
 class AuthenticatingRealm : public Realm {
 public:
-    AuthenticatingRealm() { matcher = new Sha256CredentialsMatcher(); }
-    AuthenticatingRealm(Sha256CredentialsMatcher *matcher) {
-        setCredentialsMatcher(matcher);
-    }
-    AuthenticatingRealm(const AuthenticatingRealm &authenticationRealm){
-        this->matcher = new Sha256CredentialsMatcher();
-    }
+    typedef boost::function1<void, const AuthenticationInfoPtr&> GetAuthenticationInfoCallback;
 
-    /**
-     * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
-     * credentials with those stored in the system.
-     *
-     * <p>Unless overridden by the {@link #setCredentialsMatcher setCredentialsMatcher} method, the default
-     * value is a {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher SimpleCredentialsMatcher} instance.
-     *
-     * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
-     *         credentials with those stored in the system.
-     */
-    Sha256CredentialsMatcher *getCredentialsMatcher() const { return matcher; }
-
-    /**
-     * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
-     * stored in the system.  The implementation of this matcher can be switched via configuration to
-     * support any number of schemes, including plain text comparisons, hashing comparisons, and others.
-     *
-     * <p>Unless overridden by this method, the default value is a
-     * {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher} instance.
-     *
-     * @param credentialsMatcher the matcher to use.
-     */
-    void setCredentialsMatcher(Sha256CredentialsMatcher *matcher) {
-        this->matcher = matcher;
+public:
+    AuthenticatingRealm() {}
+    virtual ~AuthenticatingRealm() {
     }
 
-    bool getAuthenticationInfo(const AuthenticationToken &token, AuthenticationInfo *);
-
-    /**
-     * Retrieves authentication data from an implementation-specific datasource (RDBMS, LDAP, etc) for the given
-     * authentication token.
-     *
-     * <p>For most datasources, this means just 'pulling' authentication data for an associated subject/user and nothing
-     * more and letting Shiro do the rest.  But in some systems, this method could actually perform EIS specific
-     * log-in logic in addition to just retrieving data - it is up to the Realm implementation.
-     *
-     * <p>A <tt>null</tt> return value means that no account could be associated with the specified token.
-     *
-     * @param token the authentication token containing the user's principal and credentials.
-     * @return an {@link AuthenticationInfo} object containing account data resulting from the
-     *         authentication ONLY if the lookup is successful (i.e. account exists and is valid, etc.)
-     * @throws org.apache.shiro.authc.AuthenticationException
-     *          if there is an error acquiring data or performing
-     *          realm-specific authentication logic for the specified <tt>token</tt>
-     */
-    bool doGetAuthenticationInfo(const AuthenticationToken &token, AuthenticationInfo *);
+    virtual void getAuthenticationInfo(const AuthenticationToken& token,
+                                       const GetAuthenticationInfoCallback& callback) = 0;
 
     /**
      * Default implementation that does nothing (no-op) and exists as a convenience mechanism in case subclasses
@@ -121,23 +85,12 @@ public:
      *
      * @param principals the application-specific Subject/user identifier that is logging out.
      */
-    void onLogout(const std::string &sessionId) {
+    void onLogout(const std::string& sessionId) {
         //no-op, here for subclass override if desired.
     }
 
-    virtual ~AuthenticatingRealm(){
-        if(matcher){
-            delete matcher;
-            matcher = NULL;
-        }
-    }
-
 private:
-    /**
-     * Password matcher used to determine if the provided password matches
-     * the password stored in the data store.
-     */
-    Sha256CredentialsMatcher *matcher;
+
 };
 
 }

@@ -13,6 +13,7 @@
 
 #include <cetty/shiro/PrincipalCollection.h>
 #include <cetty/shiro/session/SessionPtr.h>
+#include <cetty/shiro/authz/PermissionPtr.h>
 #include <cetty/shiro/realm/AuthorizingRealmPtr.h>
 
 namespace cetty {
@@ -47,12 +48,10 @@ using namespace cetty::shiro::session;
  */
 class Authorizer {
 public:
-    typedef boost::funtion1<PermissionPtr, const std::string&> ResolvePermissionFunctor;
+    typedef boost::function1<PermissionPtr, const std::string&> ResolvePermissionFunctor;
 
 public:
     Authorizer() {}
-    Authorizer(const RealmPtr& realm);
-    Authorizer(const RealmPtr& realm, PermissionResolver&)
 
     /**
      * Constructor that accepts the <code>Realm</code>s to consult during an authorization check.  Immediately calls
@@ -60,9 +59,8 @@ public:
      *
      * @param realms the realms to consult during an authorization check.
      */
-    Authorizer(const std::vector<RealmPtr>& realms) {
-        setRealms(realms);
-    }
+    Authorizer(const RealmPtr& realm);
+    Authorizer(const RealmPtr& realm, const ResolvePermissionFunctor& functor);
 
     virtual ~Authorizer() {}
 
@@ -80,19 +78,7 @@ public:
      * @since 0.9
      */
     bool isPermitted(const PrincipalCollection& principals,
-                     const std::string& permission) const {
-                         assertRealmsConfigured();
-
-                         for (Realm realm : getRealms()) {
-                             if (!(realm instanceof Authorizer)) { continue; }
-
-                             if (((Authorizer) realm).isPermitted(principals, permission)) {
-                                 return true;
-                             }
-                         }
-
-                         return false;
-    }
+                     const std::string& permission) const;
 
     /**
      * Returns <tt>true</tt> if the corresponding subject/user is permitted to perform an action or access a resource
@@ -220,7 +206,7 @@ public:
      *
      * @return the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      */
-    const std::vector<RealmPtr>& getRealms() const {
+    const RealmPtr& getRealm() const {
     }
 
     /**
@@ -228,10 +214,6 @@ public:
      *
      * @param realms the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      */
-    void setRealms(const std::vector<RealmPtr>& realms) {
-        this.realms = realms;
-    }
-
     void setRealm(const RealmPtr& realm) {
 
     }
@@ -248,7 +230,7 @@ public:
      *                           {@link org.apache.shiro.authz.permission.PermissionResolverAware PermissionResolverAware} interface.
      */
     void setPermissionResolver(const ResolvePermissionFunctor& permissionResolver) {
-        this.permissionResolver = permissionResolver;
+        this->permissionResolver = permissionResolver;
     }
 
 private:
@@ -259,7 +241,7 @@ private:
      * @throws IllegalStateException if the <tt>realms</tt> property is configured incorrectly.
      */
     void assertRealmsConfigured() {
-        if (realms.empty()) {
+        if (!realm) {
             //String msg = "Configuration error:  No realms have been configured!  One or more realms must be " +
             //"present to execute an authorization operation.";
             //throw new IllegalStateException(msg);
@@ -270,7 +252,7 @@ protected:
     /**
      * The realms to consult during any authorization check.
      */
-    std::vector<AuthorizingRealmPtr> realms;
+    AuthorizingRealmPtr realm;
 
     /**
      * A PermissionResolver to be used by <em>all</em> configured realms.  Leave <code>null</code> if you wish
@@ -282,8 +264,5 @@ protected:
 }
 }
 }
-
-
-
 
 #endif // !defined(CETTY_SHIRO_AUTHZ_AUTHORIZER_H)

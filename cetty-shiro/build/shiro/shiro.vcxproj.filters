@@ -16,9 +16,6 @@
     <Filter Include="shiro\authz">
       <UniqueIdentifier>{e63c2559-8ac2-4dd6-8856-893f3449b1bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shiro\authz\permission">
-      <UniqueIdentifier>{efeb26a6-0180-4740-bfb2-b81eb3d1d0d2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfo.h">
@@ -78,24 +75,6 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h">
       <Filter>shiro\authz</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\RealmAuthenticator.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\AllPermission.h">
-      <Filter>shiro\authz\permission</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\DomainPermission.h">
-      <Filter>shiro\authz\permission</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\PermissionResolver.h">
-      <Filter>shiro\authz\permission</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\WildcardPermission.h">
-      <Filter>shiro\authz\permission</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\WildcardPermissionResolver.h">
-      <Filter>shiro\authz\permission</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\Permission.h">
       <Filter>shiro\authz</Filter>
     </ClInclude>
@@ -110,6 +89,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealmPtr.h">
       <Filter>shiro\realm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h">
+      <Filter>shiro\authz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\WildcardPermission.h">
+      <Filter>shiro\authz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h">
+      <Filter>shiro\authc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -157,9 +145,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\realm\AuthorizingRealm.cpp">
       <Filter>shiro\realm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\shiro\authc\RealmAuthenticator.cpp">
-      <Filter>shiro\authc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp">
       <Filter>shiro\authz</Filter>

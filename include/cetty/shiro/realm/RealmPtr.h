@@ -24,7 +24,7 @@ namespace shiro {
 namespace realm {
 
 class Realm;
-typename boost::intrusive_ptr<Realm> RealmPtr;
+typedef boost::intrusive_ptr<Realm> RealmPtr;
 
 }
 }

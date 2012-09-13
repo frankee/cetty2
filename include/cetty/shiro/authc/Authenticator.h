@@ -20,8 +20,11 @@
  * under the License.
  */
 
-#include <boost/function.hpp>
 #include <vector>
+#include <boost/function.hpp>
+#include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+#include <cetty/shiro/authc/Sha256CredentialsMatcher.h>
 
 namespace cetty {
 namespace shiro {
@@ -29,6 +32,8 @@ namespace authc {
 
 class AuthenticationToken;
 class AuthenticationInfo;
+
+using namespace cetty::shiro::realm;
 
 /**
  * An Authenticator is responsible for authenticating accounts in an application.  It
@@ -54,6 +59,8 @@ public:
     typedef boost::function1<void, const AuthenticationToken&> LoginFailureCallback;
     typedef boost::function1<void, std::string> LogoutCallback;
 
+    typedef boost::function1<void, const AuthenticationInfoPtr&> AuthenticateCallback;
+
 public:
     /**
      * Default no-argument constructor. Ensures the internal
@@ -61,9 +68,34 @@ public:
      */
     Authenticator() {}
     Authenticator(const RealmPtr& realm);
-    Authenticator(const std::vector<RealmPtr>& realms);
 
     virtual ~Authenticator() {}
+
+    /**
+     * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
+     * credentials with those stored in the system.
+     *
+     * <p>Unless overridden by the {@link #setCredentialsMatcher setCredentialsMatcher} method, the default
+     * value is a {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher SimpleCredentialsMatcher} instance.
+     *
+     * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
+     *         credentials with those stored in the system.
+     */
+    Sha256CredentialsMatcher *getCredentialsMatcher() const { return matcher; }
+
+    /**
+     * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
+     * stored in the system.  The implementation of this matcher can be switched via configuration to
+     * support any number of schemes, including plain text comparisons, hashing comparisons, and others.
+     *
+     * <p>Unless overridden by this method, the default value is a
+     * {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher} instance.
+     *
+     * @param credentialsMatcher the matcher to use.
+     */
+    void setCredentialsMatcher(Sha256CredentialsMatcher *matcher) {
+        this->matcher = matcher;
+    }
 
     /**
      * This implementation merely calls
@@ -94,15 +126,14 @@ public:
      * @throws AuthenticationException if there is any problem during the authentication process - see the
      *                                 interface's JavaDoc for a more detailed explanation.
      */
-    bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
+    bool authenticate(const AuthenticationToken &token, const AuthenticateCallback& callback);
 
     /**
      * Sets all realms used by this Authenticator, providing PAM (Pluggable Authentication Module) configuration.
      *
      * @param realms the realms to consult during authentication attempts.
      */
-    void setRealms(const std::vector<AuthenticatingRealm> &realms) {
-        this->realms.assign(realms.begin(), realms.end());
+    void setRealm(const AuthenticatingRealm&realm) {
     }
 
     /**
@@ -110,12 +141,8 @@ public:
      *
      * @return the realm(s) used by this {@code Authenticator} during an authentication attempt.
      */
-    const std::vector<AuthenticatingRealm> &getRealms() const{
-        return this->realms;
-    }
-
-    void addRealm(const AuthenticatingRealm &realm){
-        this->realms.push_back(realm);
+    const AuthenticatingRealmPtr& getRealm() const{
+        return this->realm;
     }
 
     /**
@@ -200,27 +227,7 @@ protected:
         for (; it != this->logoutListeners.end(); ++it) (*it)(user);
     }
 
-    /**
-     * Template design pattern hook for subclasses to implement specific authentication behavior.
-     * <p/>
-     * Common behavior for most authentication attempts is encapsulated in the
-     * {@link #authenticate} method and that method invokes this one for custom behavior.
-     * <p/>
-     * <b>N.B.</b> Subclasses <em>should</em> throw some kind of
-     * {@code AuthenticationException} if there is a problem during
-     * authentication instead of returning {@code null}.  A {@code null} return value indicates
-     * a configuration or programming error, since {@code AuthenticationException}s should
-     * indicate any expected problem (such as an unknown account or username, or invalid password, etc).
-     *
-     * @param token the authentication token encapsulating the user's login information.
-     * @return an {@code AuthenticationInfo} object encapsulating the user's account information
-     *         important to Shiro.
-     * @throws AuthenticationException if there is a problem logging in the user.
-     */
-    virtual bool doAuthenticate(const AuthenticationToken &token, AuthenticationInfo *info) = 0;
-
 private:
-
     /**
      * Any registered listeners that wish to know about things during the authentication process.
      */
@@ -232,7 +239,13 @@ private:
      * List of realms that will be iterated through when a user authenticates
      * notice the lifecycle of AuthenticationRealm.
      */
-    std::vector<AuthenticatingRealmPtr> realms;
+    AuthenticatingRealmPtr realm;
+
+    /**
+     * Password matcher used to determine if the provided password matches
+     * the password stored in the data store.
+     */
+    Sha256CredentialsMatcher *matcher;
 };
 
 }
