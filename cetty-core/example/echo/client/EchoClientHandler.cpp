@@ -39,8 +39,9 @@ void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     //ctx.getPipeline().write(firstMessage);
 }
 
-EchoClientHandler::EchoClientHandler(int firstMessageSize) : transferredBytes(0),
-    firstMessageSize(firstMessageSize) {
+EchoClientHandler::EchoClientHandler(int firstMessageSize)
+    :firstMessageSize(firstMessageSize), 
+     transferredBytes(0) {
     if (firstMessageSize <= 0) {
         throw InvalidArgumentException("firstMessageSize must > 0.");
     }

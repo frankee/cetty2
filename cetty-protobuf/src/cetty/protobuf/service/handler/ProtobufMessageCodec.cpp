@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -59,9 +59,9 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     while (true) {
         temp = buffer->readByte();
 
-        //如果有后续的字节需要拼接
+        //����к������ֽ���Ҫƴ��
         if (temp & 0x80) {
-            //先左右移一下去掉mab，然后再右移指定的位数，因为varint是低位在前，高位在后
+            //��������һ��ȥ��mab��Ȼ��������ָ����λ������Ϊvarint�ǵ�λ��ǰ����λ�ں�
             ret |= (temp << 1 >> 1) << (7 * i);
             ++i;
         }
@@ -69,7 +69,7 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
 			off = 7*i;
 			ret = ret + (temp<<off);
             //ret = ret + (temp<<0);
-            //达到最后一个数据，并且是最高位
+            //�ﵽ���һ�����ݣ����������λ
             break;
         }
     }

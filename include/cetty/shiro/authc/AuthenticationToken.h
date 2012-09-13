@@ -47,7 +47,6 @@ namespace authc {
  */
 class AuthenticationToken {
 public:
-
     AuthenticationToken(): rememberMe(false) {}
 
     /**
@@ -58,8 +57,9 @@ public:
      * @param principal the principal submitted for authentication
      * @param credential the credential character array submitted for authentication
      */
-    AuthenticationToken(const std::string &principal, const std::string &credentials) {
-        init(principal, credentials, std::string(), false);
+    AuthenticationToken(const std::string& principal,
+                        const std::string& credentials)
+        : rememberMe(false), principal(principal), credentials(credentials) {
     }
 
     /**
@@ -73,8 +73,11 @@ public:
      */
     AuthenticationToken(const std::string &principal,
         const std::string &credentials,
-        const std::string& host) {
-        init(principal, credentials, host, false);
+                        const std::string& host)
+        : rememberMe(false),
+          principal(principal),
+          credentials(credentials),
+          host(host) {
     }
 
     /**
@@ -88,8 +91,10 @@ public:
      */
     AuthenticationToken(const std::string &principal,
         const std::string &credentials,
-        bool rememberMe) {
-        init(principal, credentials, std::string(), rememberMe);
+                        bool rememberMe)
+        : rememberMe(rememberMe),
+          principal(principal),
+          credentials(credentials) {
     }
 
     /**
@@ -105,8 +110,11 @@ public:
     AuthenticationToken(const std::string &principal,
         const std::string &credentials,
         const std::string& host,
-        bool rememberMe) {
-        init(principal, credentials, host, rememberMe);
+                        bool rememberMe)
+        : rememberMe(rememberMe),
+          principal(principal),
+          credentials(credentials),
+          host(host) {
     }
 
     AuthenticationToken(const AuthenticationToken &token){
@@ -116,7 +124,6 @@ public:
         this->host = token.host;
     }
 
-
     AuthenticationToken& operator=(const AuthenticationToken &token){
         this->principal = token.principal;
         this->credentials = token.credentials;
@@ -125,11 +132,6 @@ public:
 
         return *this;
     }
-
-    void init(const std::string &principal,
-              const std::string& credentials,
-              const std::string& host,
-              bool rememberMe);
 
     /**
      * Returns the account identity submitted during the authentication process.
@@ -176,11 +178,6 @@ public:
      * @param credentials the credentials to be used for submission during an authentication attemp.
      */
     void setCredentials(const std::string &credentials){ this->credentials = credentials; }
-
-    const std::string& getEncodeType() const { return encodeType; }
-    void setEncodeType(const std::string& encodeType){
-        this->encodeType = encodeType;
-    }
 
     /**
      * Returns the host name of the client from where the
@@ -229,12 +226,6 @@ public:
      */
     void setRememberMe(bool rememberMe) { this->rememberMe = rememberMe; }
 
-    const std::string& getNonce() const{ return nonce; }
-    void setNonce(const std::string& nonce){ this->nonce = nonce; }
-
-    const std::string& getServerTime() const { return serverTime; }
-    void setServerTime(const std::string& serverTime){ this->serverTime = serverTime; }
-
     /**
      * Clears out the principal, credentials, rememberMe, and inetAddress.
      */
@@ -251,22 +242,14 @@ public:
     std::string toString();
 
 private:
-
-    /** user name and password*/
-    std::string principal;
-    std::string credentials;
-
-    /** credentials's encode type*/
-    std::string encodeType;
-
-    std::string nonce;
-    std::string serverTime;
-
     /**
      * Whether or not 'rememberMe' should be enabled for the corresponding login attempt;
      * default is <code>false</code>
      */
     bool rememberMe;
+
+    std::string principal;
+    std::string credentials;
 
     /**
      * The location from where the login attempt occurs, or <code>null</code> if not known or explicitly

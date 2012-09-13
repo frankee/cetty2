@@ -18,34 +18,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AbstractAuthenticator.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AllowAllCredentialsMatcher.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AllSuccessfulStrategy.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AtLeastOneSuccessfulStrategy.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfo.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationListener.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationStrategy.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\FirstSuccessfulStrategy.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\ModularRealmAuthenticator.h">
@@ -61,9 +37,6 @@
       <Filter>shiro\realm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\Session.h">
-      <Filter>shiro\session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionContext.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionDAO.h">
@@ -93,12 +66,18 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h">
       <Filter>shiro\session</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h">
+      <Filter>shiro\authc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256Hash.h">
+      <Filter>shiro\authc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\PrincipalCollection.h">
+      <Filter>shiro</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
-      <Filter>shiro\session</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\shiro\session\SessionContext.cpp">
       <Filter>shiro\session</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionIdGenerator.cpp">
@@ -115,6 +94,36 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\session\RedisSessionDAO.cpp">
       <Filter>shiro\session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\SecurityManager.cpp">
+      <Filter>shiro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationInfo.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationToken.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\ModularRealmAuthenticator.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256CredentialsMatcher.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256Hash.cpp">
+      <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\realm\AuthenticatingRealm.cpp">
+      <Filter>shiro\realm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\realm\AuthorisingRealm.cpp">
+      <Filter>shiro\realm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\realm\Realm.cpp">
+      <Filter>shiro\realm</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

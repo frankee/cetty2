@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <boost/static_assert.hpp>
+#include <boost/implicit_cast.hpp>
 
 namespace cetty {
 namespace util {
@@ -21,7 +22,7 @@ namespace util {
 #if defined(_WIN32)
 
 SmallFile::SmallFile(const StringPiece& filename)
-    : err(0), file(0), fd(0) {
+    : fd(0), err(0), file(0) {
     buf[0] = '\0';
     file = std::fopen(filename.data(), "rb");
 }
@@ -73,7 +74,7 @@ int SmallFile::readToBuffer(int* size) {
 #else
 
 SmallFile::SmallFile(const StringPiece& filename)
-    : fd(::open(filename.data(), O_RDONLY | O_CLOEXEC)),
+    : fd(::open(filename.data(), O_RDONLY)),
       err(0),
       file(0) {
     buf[0] = '\0';
@@ -129,7 +130,7 @@ int SmallFile::readToString(int maxSize,
             if (::fstat(fd, &statbuf) == 0) {
                 if (S_ISREG(statbuf.st_mode)) {
                     *fileSize = statbuf.st_size;
-                    content->reserve(static_cast<int>(std::min(implicit_cast<int64_t>(maxSize), *fileSize)));
+                    content->reserve(static_cast<int>(std::min(boost::implicit_cast<int64_t>(maxSize), *fileSize)));
                 }
                 else if (S_ISDIR(statbuf.st_mode)) {
                     err = EISDIR;

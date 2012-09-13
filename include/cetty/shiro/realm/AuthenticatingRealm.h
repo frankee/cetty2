@@ -48,19 +48,14 @@ using namespace cetty::shiro::authc;
  * @since 0.2
  */
 class AuthenticatingRealm : public Realm {
-
 public:
-
     AuthenticatingRealm() { matcher = new Sha256CredentialsMatcher(); }
-
     AuthenticatingRealm(Sha256CredentialsMatcher *matcher) {
         setCredentialsMatcher(matcher);
     }
-
     AuthenticatingRealm(const AuthenticatingRealm &authenticationRealm){
         this->matcher = new Sha256CredentialsMatcher();
     }
-
 
     /**
      * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
@@ -72,7 +67,7 @@ public:
      * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
      *         credentials with those stored in the system.
      */
-    Sha256CredentialsMatcher *getCredentialsMatcher() const{ return matcher; }
+    Sha256CredentialsMatcher *getCredentialsMatcher() const { return matcher; }
 
     /**
      * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
@@ -142,9 +137,8 @@ private:
      * the password stored in the data store.
      */
     Sha256CredentialsMatcher *matcher;
-
-
 };
+
 }
 }
 }

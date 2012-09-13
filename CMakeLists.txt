@@ -11,6 +11,9 @@
 PROJECT(CETTY CXX C)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/cmake)
 
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
 if (MSVC)
@@ -44,7 +47,7 @@ LINK_DIRECTORIES(
 set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package( Boost 1.48.0 COMPONENTS date_time system thread REQUIRED )
+find_package( Boost 1.48.0 COMPONENTS date_time system thread filesystem regex REQUIRED )
 
 INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BOOST_LIB_DIRS})
@@ -53,13 +56,13 @@ LINK_DIRECTORIES(${BOOST_LIB_DIRS})
 # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
 FIND_PACKAGE(Threads)
 
-#find_package(Protobuf REQUIRED)
-#include_directories(${PROTOBUF_INCLUDE_DIRS})
-#LINK_DIRECTORIES(${PROTOBUF_LIB_DIRS})
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+LINK_DIRECTORIES(${PROTOBUF_LIB_DIRS})
 
-#find_package(Log4cplus REQUIRED)
-#include_directories(${LOG4CPLUS_INCLUDE_DIRS})
-#LINK_DIRECTORIES(${LOG4CPLUS_LIBRARY_DIRS})
+find_package(YamlCpp REQUIRED)
+include_directories(${YAMLCPP_INCLUDE_DIRS})
+LINK_DIRECTORIES(${YAMLCPP_LIBRARY_DIRS})
 
 # Defines the compiler/linker flags used to build cetty.  You can
 # tweak these definitions to suit your need.  A variable's value is
@@ -183,6 +186,11 @@ function(cxx_executable name dir lib)
     ${name} "${cxx_default}" ${lib} "${dir}/${name}.cpp" ${ARGN})
 endfunction()
 
+function(cxx_executable_no_link name dir)
+  cxx_executable_with_flags_no_link(
+    ${name} "${cxx_default}" "${dir}/${name}.cpp" ${ARGN})
+endfunction()
+
 function(cxx_executable_current_path name lib)
   cxx_executable_with_flags(
     ${name} "${cxx_default}" ${lib} "${name}.cpp" ${ARGN})
@@ -193,6 +201,27 @@ function(cxx_executable_current_path_no_link name)
     ${name} "${cxx_default}" "${name}.cpp" ${ARGN})
 endfunction()
 
+function(PROTOBUF_GENERATE_RPC SRCS)
+  if(NOT ARGN)
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_RPC() called without any proto files")
+    return()
+  endif(NOT ARGN)
+
+  set(${SRCS})
+  foreach(FIL ${ARGN})
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+
+    add_custom_command(
+      OUTPUT "${FIL_WE}.pb.cc" "${FIL_WE}.pb.h"
+      COMMAND ${PROJECT_BINARY_DIR}/bin/proto-generator
+      ARGS --rpc_out . ${CMAKE_CURRENT_SOURCE_DIR}/${FIL} -I${CMAKE_CURRENT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+      MAIN_DEPENDENCY ${FIL}
+      VERBATIM )
+  endforeach()
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+endfunction()
+
 #if (BUILD_EXAMPLES)
 #	MESSAGE(STATUS "BUILDING SAMPLES...")
 #	ADD_SUBDIRECTORY(example)
@@ -200,6 +229,9 @@ endfunction()
 
 ADD_SUBDIRECTORY(cetty-core)
 ADD_SUBDIRECTORY(cetty-config)
-#ADD_SUBDIRECTORY(cetty-service)
-#ADD_SUBDIRECTORY(cetty-protobuf)
-#ADD_SUBDIRECTORY(cetty-gearman)
+ADD_SUBDIRECTORY(cetty-service)
+ADD_SUBDIRECTORY(cetty-protobuf)
+ADD_SUBDIRECTORY(cetty-gearman)
+ADD_SUBDIRECTORY(cetty-redis)
+ADD_SUBDIRECTORY(cetty-shiro)
+ADD_SUBDIRECTORY(cetty-craft)

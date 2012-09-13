@@ -22,6 +22,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
+HttpPackageEmptyVisitor HttpPackageEmptyVisitor::visitor;
 
 }
 }

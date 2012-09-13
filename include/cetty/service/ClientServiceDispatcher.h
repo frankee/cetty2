@@ -55,6 +55,12 @@ class ClientServiceDispatcher
           boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
           boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundTransfer;
 
+    using ChannelMessageHandlerAdapter<
+        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
+        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundTransfer;
+
     using ChannelInboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundQueue;
     using ChannelOutboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundQueue;
 

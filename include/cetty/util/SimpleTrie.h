@@ -56,7 +56,7 @@ public:
         }
 
         if (data) {
-            delete data;
+            delete (char*)data;
             data = NULL;
         }
     }

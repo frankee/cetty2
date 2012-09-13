@@ -50,10 +50,10 @@ private:
     static const int MAX_BUFFER_SIZE = 65536;
 
 private:
-    FILE* file;
-
     int fd;
     int err;
+    FILE* file;
+
     char buf[MAX_BUFFER_SIZE];
 };
 

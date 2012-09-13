@@ -7,11 +7,10 @@
 
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
 
-#include <cetty/shiro/dao/RedisDao.h>
-
 namespace cetty {
 namespace shiro {
 namespace realm {
+
 bool AuthenticatingRealm::getAuthenticationInfo(
     const AuthenticationToken &token,
     AuthenticationInfo *info)

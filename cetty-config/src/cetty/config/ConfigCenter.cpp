@@ -149,7 +149,7 @@ bool ConfigCenter::getFileContent(const std::vector<std::string>& files, std::st
 
 bool ConfigCenter::getFileContent(const std::string& file, std::string* content) {
     std::fstream filestream;
-    filestream.open(file, std::fstream::in);
+    filestream.open(file.c_str(), std::fstream::in);
 
     if (!filestream.is_open()) {
         filestream.close();

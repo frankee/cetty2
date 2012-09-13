@@ -38,6 +38,7 @@ public:
      * go down below <tt>64</tt>, and does not go up above <tt>65536</tt>.
      */
     AdaptiveReceiveBuffer();
+    virtual ~AdaptiveReceiveBuffer() {}
 
     /**
      * Creates a new predictor with the specified parameters.

@@ -6,12 +6,10 @@
  */
 
 #include <cetty/shiro/SecurityManager.h>
-#include <cetty/shiro/util/EmptyObj.h>
+#include <cetty/shiro/session/Session.h>
 
 namespace cetty {
 namespace shiro {
-
-using namespace cetty::shiro::util;
 
 void SecurityManager::init(){
     sessionManager = new SessionManager();
@@ -24,9 +22,7 @@ void SecurityManager::init(){
 }
 
 bool SecurityManager::authenticate(const AuthenticationToken &token,
-                                   AuthenticationInfo *info
-                                  )
-{
+                                   AuthenticationInfo* info) {
     return this->authenticator.authenticate(token, info);
 }
 
@@ -42,8 +38,7 @@ bool SecurityManager::authoriseUser(const std::string &sessionId,
 
 bool SecurityManager::authoriseApp(const std::string &appKey,
                                    const std::string &operation
-                                  )
-{
+                                  ) {
     return authorizer.authoriseApp(appKey, operation);
 }
 
@@ -87,16 +82,11 @@ void SecurityManager::destroy(){
     }
 }
 
-void SecurityManager::bind(AuthenticationInfo &info, SessionPtr &session){
+void SecurityManager::bind(AuthenticationInfo& info, const SessionPtr& session) {
     session->setAttribute(AuthenticationInfo::USER_ID, info.getUserId());
     session->setAttribute(AuthenticationInfo::CREDENTIALS, info.getCredentials());
     session->setAttribute(AuthenticationInfo::CREDENTIALS_SALT, info.getCredentialsSalt());
     session->setAttribute(AuthenticationInfo::CODE_TYPE, info.getCodeType());
-}
-
-
-void SecurityManager::stopSession(const std::string &sessionId){
-    sessionManager->stop(sessionId);
 }
 
 }

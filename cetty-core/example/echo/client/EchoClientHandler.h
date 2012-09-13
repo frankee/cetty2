@@ -68,7 +68,7 @@ public:
 
 private:
     int firstMessageSize;
+    int transferredBytes;
 
     ChannelBufferPtr firstMessage;
-    int transferredBytes;
 };

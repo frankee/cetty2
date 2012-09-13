@@ -275,8 +275,6 @@ int ChannelBuffer::setBytes(int index, const ChannelBufferPtr& src, int length) 
         throw RangeException("exceed readable bytes");
     }
 
-    int srcReaderIdx = src->readerIndex();
-
     if (setBytes(index, src, src->readerIndex(), length)) {
         src->offsetReaderIndex(length);
         return length;
@@ -686,7 +684,7 @@ int ChannelBuffer::writeBytes(InputStream* in, int length) {
 }
 
 int ChannelBuffer::writeBytes(const char* src, int length) {
-    BOOST_ASSERT(src && length > 0 && length <= strlen(src));
+    BOOST_ASSERT(src && length > 0 && length <= (int)strlen(src));
     if (src && length > 0) {
         return writeBytes(ConstArray(src, length), 0, length);
     }
@@ -928,7 +926,7 @@ int ChannelBuffer::writeBytesAhead(const std::string& src, int srcIndex, int len
 }
 
 int ChannelBuffer::writeBytesAhead(const char* src, int length) {
-    BOOST_ASSERT(src && length > 0 && length <= strlen(src));
+    BOOST_ASSERT(src && length > 0 && length <= (int)strlen(src));
     if (src && length > 0) {
         return writeBytesAhead(ConstArray(src, length), 0, length);
     }

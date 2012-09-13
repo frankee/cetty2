@@ -448,7 +448,7 @@ void changeHeader(const std::string& proto) {
 
     std::vector<std::string> lines;
     std::fstream file;
-    file.open(hfile, std::fstream::in);
+    file.open(hfile.c_str(), std::fstream::in);
 
     while (!file.eof()) {
         std::string line;
@@ -467,7 +467,7 @@ void changeHeader(const std::string& proto) {
 
     file.close();
 
-    std::fstream wfile(hfile, std::fstream::out);
+    std::fstream wfile(hfile.c_str(), std::fstream::out);
 
     for (std::size_t i = 0; i < lines.size(); ++i) {
         wfile << lines[i] << "\n";
@@ -488,7 +488,7 @@ std::string changeSource(const std::string& proto) {
 
     std::vector<std::string> lines;
     std::fstream file;
-    file.open(hfile, std::fstream::in);
+    file.open(hfile.c_str(), std::fstream::in);
 
     while (!file.eof()) {
         std::string line;
@@ -505,7 +505,7 @@ std::string changeSource(const std::string& proto) {
 
     file.close();
 
-    std::fstream wfile(hfile, std::fstream::out);
+    std::fstream wfile(hfile.c_str(), std::fstream::out);
 
     for (std::size_t i = 0; i < lines.size(); ++i) {
         wfile << lines[i] << "\n";

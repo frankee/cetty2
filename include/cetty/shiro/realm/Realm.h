@@ -20,6 +20,7 @@
  */
 
 #include <string>
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace shiro {
@@ -62,24 +63,25 @@ namespace realm {
  * @see org.apache.shiro.authc.pam.ModularRealmAuthenticator ModularRealmAuthenticator
  * @since 0.1
  */
-class Realm{
+class Realm : public cetty::util::ReferenceCounter<Realm, int> {
 public:
     Realm(): isCached(false) { this->name = autoName(); }
     Realm(bool isCached, std::string name);
 
-    const std::string &getName() const{ return name; }
+    const std::string &getName() const { return name; }
     void setName(const std::string &name) { this->name = name; }
 
 private:
-    std::string name;
-
     /**
      * Generator name based on the current time.
      */
     std::string autoName();
 
+private:
+    std::string name;
     bool isCached;
 };
+
 }
 }
 }

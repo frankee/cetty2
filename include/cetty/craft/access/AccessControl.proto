@@ -1,9 +1,9 @@
-package cetty.shiro.web;
+package cetty.craft.access;
 
-import "cetty/protobuf/service/common.proto";
+import "cetty/craft/craft.proto";
 
-option java_package = "cetty.shiro.web";
-option java_outer_classname = "AuthProto";
+option java_package = "cetty.craft.access";
+option java_outer_classname = "AccessControlProto";
 
 option py_generic_services = true;
 option cc_generic_services = true;
@@ -15,8 +15,8 @@ message PreLoginRequest {
 }
 
 message PreLoginResponse {
-	optional cetty.protobuf.service.Status   status = 1;
-	optional cetty.protobuf.service.Session session = 2;
+	optional cetty.craft.Error   error = 1;
+	optional cetty.craft.Session session = 2;
 	
 	optional string       nonce = 3;
 	optional string server_time = 4;
@@ -32,19 +32,19 @@ message LoginRequest {
 }
 
 message LoginResponse {
-	optional cetty.protobuf.service.Status   status = 1;
-	optional cetty.protobuf.service.Session session = 2;
+	optional cetty.craft.Error     error = 1;
+	optional cetty.craft.Session session = 2;
 }
 
 message LogoutRequest {
-	optional cetty.protobuf.service.Session session = 1;
+	optional cetty.craft.Session session = 1;
 }
 
 message LogoutResponse {
-	optional cetty.protobuf.service.Status status = 1;
+	optional cetty.craft.Error error = 1;
 }
 
-service AuthenticationService {
+service AccessControlService {
 	rpc preLogin (PreLoginRequest) returns (PreLoginResponse);
 	rpc login (LoginRequest) returns (LoginResponse);
 	rpc logout (LogoutRequest) returns (LogoutResponse);

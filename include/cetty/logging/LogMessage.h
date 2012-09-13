@@ -18,7 +18,16 @@
  */
 
 #include <ctime>
-#include <strstream>
+
+#ifdef __DEPRECATED
+// Make GCC quiet.
+# undef __DEPRECATED
+# include <strstream>
+# define __DEPRECATED
+#else
+# include <strstream>
+#endif
+
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
 #include <cetty/logging/LogLevel.h>

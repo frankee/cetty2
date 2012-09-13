@@ -93,8 +93,8 @@ private:
 
     AbstractChannelSink* sink;
 
-    AsioServicePoolPtr childServicePool;
     ChannelPipelinePtr childPipeline;
+    AsioServicePoolPtr childServicePool;
     ChildChannels childChannels;
 
     AsioServerSocketChannelConfig config;

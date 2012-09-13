@@ -58,7 +58,11 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name, pipeline, shared_from_this(), prev, next);
+        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
+                pipeline,
+                ChannelHandler::shared_from_this(),
+                prev,
+                next);
     }
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
@@ -66,7 +70,12 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name, eventLoop, pipeline, shared_from_this(), prev, next);
+        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
+                eventLoop,
+                pipeline,
+                ChannelHandler::shared_from_this(),
+                prev,
+                next);
     }
 };
 

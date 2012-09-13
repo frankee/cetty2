@@ -34,6 +34,8 @@ RedisCommandPtr transactionsCommandMulti();
 RedisCommandPtr transactionsCommandUnwatch();
 RedisCommandPtr transactionsCommandWatch(const std::string& key);
 
+extern const std::string WATCH;
+
 template<typename Iterator>
 RedisCommandPtr transactionsCommandWatch(const Iterator& begin,
         const Iterator& end) {

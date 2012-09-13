@@ -39,11 +39,13 @@ public:
 
     template <typename T>
     bool operator()(const T& t) const { return false; }
+
+    static HttpPackageEmptyVisitor visitor;
 };
 
 inline
 bool operator !(const HttpPackage& pacakge) {
-    return pacakge.apply_visitor(HttpPackageEmptyVisitor());
+    return pacakge.apply_visitor(HttpPackageEmptyVisitor::visitor);
 }
 
 }

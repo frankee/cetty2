@@ -20,11 +20,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cetty/service/http/UriTemplate.h>
-#include <cetty/service/http/CookieTemplate.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/SimpleTrie.h>
+#include <cetty/craft/http/UriTemplate.h>
+#include <cetty/craft/http/CookieTemplate.h>
 
 namespace cetty {
 namespace craft {
@@ -32,7 +32,6 @@ namespace http {
 
 using namespace cetty::util;
 using namespace cetty::handler::codec::http;
-using namespace cetty::service::http;
 
 // GET uri template
 class HttpRequestTemplate {

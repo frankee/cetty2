@@ -6,37 +6,26 @@
  */
 
 #include <cetty/shiro/authc/AuthenticationToken.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
 
-void AuthenticationToken::init(const std::string &principal,
-                               const std::string& credentials,
-                               const std::string& host,
-                               bool rememberMe){
-    this->principal = principal;
-    this->credentials = credentials;
-    this->host = host;
-    this->rememberMe = rememberMe;
-}
+using namespace cetty::util;
 
-void AuthenticationToken::clear(){
+void AuthenticationToken::clear() {
+    rememberMe = false;
     principal.clear();
     credentials.clear();
     host.clear();
-    rememberMe = false;
 }
 
-std::string AuthenticationToken::toString(){
-    std::string string;
-    string += "principal: ";
-    string += principal;
-    string += " host: ";
-    string += host;
-    string += " rememberMe: ";
-    string += (rememberMe ? std::string("ture") : std::string("false"));
-    return string;
+std::string AuthenticationToken::toString() {
+    return StringUtil::strprintf("principal: %s host: %s rememberMe: ",
+                                 principal.c_str(),
+                                 host.c_str(),
+                                 rememberMe ? "true" : "false");
 }
 
 }

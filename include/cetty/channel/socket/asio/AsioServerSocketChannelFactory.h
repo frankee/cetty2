@@ -126,11 +126,11 @@ private:
     EventLoopPoolPtr parentPool;
     EventLoopPoolPtr childPool;
 
-    AsioTcpSocketAddressImplFactory* socketAddressFactory;
-    AsioIpAddressImplFactory* ipAddressFactory;
-
     ChannelPipelinePtr childPipeline;
     std::vector<ChannelPtr> serverChannels;
+
+    AsioTcpSocketAddressImplFactory* socketAddressFactory;
+    AsioIpAddressImplFactory* ipAddressFactory;
 };
 
 }

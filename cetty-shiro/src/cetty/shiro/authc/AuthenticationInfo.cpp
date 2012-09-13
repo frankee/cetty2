@@ -10,11 +10,6 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-const std::string AuthenticationInfo::USER_ID = "user_id";
-const std::string AuthenticationInfo::CREDENTIALS = "credentials";
-const std::string AuthenticationInfo::CREDENTIALS_SALT = "credentials_salt";
-const std::string AuthenticationInfo::CODE_TYPE = "code_type";
-
 }
 }
 }

@@ -26,14 +26,6 @@
 
 namespace cetty {
 namespace shiro {
-namespace session {
-    class DelegateSession;
-}
-}
-}
-
-namespace cetty {
-namespace shiro {
 
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::authz;
@@ -47,7 +39,7 @@ public:
     SecurityManager(): sessionManager(NULL) {init();}
 
     /// login by session id
-    SessionPtr getSession(const std::string &id);
+    bool getSession(const std::string &id);
 
     /// login by user name and password
     const std::string &login(AuthenticationToken &token);
@@ -55,6 +47,7 @@ public:
 
     /// judge user's operation
     bool authoriseUser(const std::string &sessionId, const std::string &operation);
+
     /// judge user and third app's operation
     bool authoriseApp(const std::string &appkey, const std::string &operation);
 
@@ -70,13 +63,12 @@ private:
     void init();
 
     bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
-    void bind(AuthenticationInfo &info, SessionPtr &session);
+    void bind(AuthenticationInfo &info, const SessionPtr& session);
 
     void onSuccessfulLogin(const AuthenticationToken &token, const AuthenticationInfo &info) {};
     void onFailedLogin(const AuthenticationToken &token){};
 
     void beforeLogout(const std::string &sessionId){};
-    void stopSession(const std::string &sessionId);
 
     void destroy();
 };

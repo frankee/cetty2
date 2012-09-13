@@ -67,7 +67,7 @@ int ConfigIncludeFileFinder::find(const std::string& file,
     }
 
     std::fstream filestream;
-    filestream.open(file, std::fstream::in);
+    filestream.open(file.c_str(), std::fstream::in);
 
     if (!filestream.is_open()) {
         filestream.close();
@@ -189,7 +189,7 @@ int ConfigIncludeFileFinder::getFileIncludes(const std::string& file, std::vecto
 
     std::vector<std::string> lines;
     std::fstream filestream;
-    filestream.open(file, std::fstream::in);
+    filestream.open(file.c_str(), std::fstream::in);
 
     std::string line;
 
