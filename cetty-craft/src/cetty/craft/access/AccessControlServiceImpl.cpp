@@ -15,21 +15,20 @@
  * under the License.
  */
 
-#include <cetty/shiro/web/AuthenticationServiceImpl.h>
+#include <cetty/craft/access/AccessControlServiceImpl.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/util/LoginUtil.h>
 #include <cetty/shiro/SecurityManager.h>
-//#include <cetty/protobuf/service/common.pb.h>
 
 namespace cetty {
-namespace shiro {
-namespace web {
+namespace craft {
+namespace access {
 
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::util;
 using namespace cetty::shiro;
 
-void AuthenticationServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
+void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
                                          const PreLoginResponsePtr& response,
                                          const DoneCallback& done){
     std::string host = request->host();
@@ -46,7 +45,7 @@ void AuthenticationServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
     done(response);
 }
 
-void AuthenticationServiceImpl::login(const ConstLoginRequestPtr& request,
+void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
                                       const LoginResponsePtr& response,
                                       const DoneCallback& done) {
     const std::string& userName = request->user_name();
@@ -104,7 +103,7 @@ void AuthenticationServiceImpl::login(const ConstLoginRequestPtr& request,
     done(response);
 }
 
-void AuthenticationServiceImpl::logout(const ConstLogoutRequestPtr& request,
+void AccessControlServiceImpl::logout(const ConstLogoutRequestPtr& request,
                                        const LogoutResponsePtr& response,
                                        const DoneCallback& done) {
     cetty::protobuf::service::Session session = request->session();

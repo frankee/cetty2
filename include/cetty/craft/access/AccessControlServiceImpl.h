@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_WEB_AUTHENTICATIONSERVICEIMPL_H)
-#define CETTY_SHIRO_WEB_AUTHENTICATIONSERVICEIMPL_H
+#if !defined(CETTY_CRAFT_ACCESS_ACCESSCONTROLSERVICEIMPL_H)
+#define CETTY_CRAFT_ACCESS_ACCESSCONTROLSERVICEIMPL_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,16 +17,16 @@
  * under the License.
  */
 
-#include <cetty/shiro/web/authentication.pb.h>
+#include <cetty/craft/access/AccessControl.pb.h>
 
 namespace cetty {
-namespace shiro {
-namespace web {
+namespace craft {
+namespace access {
 
-class AuthenticationServiceImpl : public cetty::shiro::web::AuthenticationService {
+class AccessControlServiceImpl : public AccessControlService {
 public:
-    AuthenticationServiceImpl() {}
-    virtual ~AuthenticationServiceImpl() {}
+    AccessControlServiceImpl() {}
+    virtual ~AccessControlServiceImpl() {}
 
     virtual void preLogin(const ConstPreLoginRequestPtr& request,
                           const PreLoginResponsePtr& response,
@@ -45,7 +45,7 @@ public:
 }
 }
 
-#endif //#if !defined(CETTY_SHIRO_WEB_AUTHENTICATIONSERVICEIMPL_H)
+#endif //#if !defined(CETTY_CRAFT_ACCESS_ACCESSCONTROLSERVICEIMPL_H)
 
 // Local Variables:
 // mode: c++

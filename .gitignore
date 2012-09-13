@@ -14,10 +14,17 @@
 *.lib
 *.exe
 *.cmake
+*#
+*.pb.cc
+*.pb.h
+*-
 
 CMakeCache.txt
+bin/
+lib/
 Debug/
 Release/
+build/
 ipch/
 CMakeFiles/
 .project

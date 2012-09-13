@@ -16,7 +16,7 @@
 
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
-#include <cetty/shiro/web/AuthenticationServiceImpl.h>
+#include <cetty/craft/access/AccessControlServiceImpl.h>
 
 using namespace cetty::config;
 using namespace cetty::protobuf::service::builder;
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
 
     ProtobufServerBuilder builder;
-    builder.registerService(new cetty::shiro::web::AuthenticationServiceImpl);
+    builder.registerService(new cetty::craft::access::AuthenticationServiceImpl);
     builder.buildRpc(1980);
     builder.buildHttp(8080);
 
