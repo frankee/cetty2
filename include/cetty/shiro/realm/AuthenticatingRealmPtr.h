@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_REALM_REALMPTR_H)
-#define CETTY_SHIRO_REALM_REALMPTR_H
+#if !defined(CETTY_SHIRO_REALM_AUTHENTICATINGREALMPTR_H)
+#define CETTY_SHIRO_REALM_AUTHENTICATINGREALMPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,19 +18,20 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
+#include <cetty/shiro/realm/RealmPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace realm {
 
-class Realm;
-typename boost::intrusive_ptr<Realm> RealmPtr;
+class AuthenticatingRealm;
+typedef boost::intrusive_ptr<AuthenticatingRealm> AuthenticatingRealmPtr;
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_SHIRO_REALM_REALMPTR_H)
+#endif //#if !defined(CETTY_SHIRO_REALM_AUTHENTICATINGREALMPTR_H)
 
 // Local Variables:
 // mode: c++

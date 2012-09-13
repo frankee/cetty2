@@ -71,8 +71,8 @@ public:
      * @param host     the host name or IP string from where the attempt is occuring
      * @since 0.2
      */
-    AuthenticationToken(const std::string &principal,
-        const std::string &credentials,
+    AuthenticationToken(const std::string& principal,
+                        const std::string& credentials,
                         const std::string& host)
         : rememberMe(false),
           principal(principal),
@@ -89,8 +89,8 @@ public:
      * @param rememberMe if the user wishes their identity to be remembered across sessions
      * @since 0.9
      */
-    AuthenticationToken(const std::string &principal,
-        const std::string &credentials,
+    AuthenticationToken(const std::string& principal,
+                        const std::string& credentials,
                         bool rememberMe)
         : rememberMe(rememberMe),
           principal(principal),
@@ -107,9 +107,9 @@ public:
      * @param host       the host name or IP string from where the attempt is occuring
      * @since 1.0
      */
-    AuthenticationToken(const std::string &principal,
-        const std::string &credentials,
-        const std::string& host,
+    AuthenticationToken(const std::string& principal,
+                        const std::string& credentials,
+                        const std::string& host,
                         bool rememberMe)
         : rememberMe(rememberMe),
           principal(principal),
@@ -117,14 +117,14 @@ public:
           host(host) {
     }
 
-    AuthenticationToken(const AuthenticationToken &token){
+    AuthenticationToken(const AuthenticationToken& token) {
         this->principal = token.principal;
         this->credentials = token.credentials;
         this->rememberMe = token.rememberMe;
         this->host = token.host;
     }
 
-    AuthenticationToken& operator=(const AuthenticationToken &token){
+    AuthenticationToken& operator=(const AuthenticationToken& token) {
         this->principal = token.principal;
         this->credentials = token.credentials;
         this->rememberMe = token.rememberMe;
@@ -154,7 +154,7 @@ public:
      *
      * @param principal the principal to be used for submission during an authentication attempt.
      */
-    void setPrincipal(const std::string &principal) { this->principal = principal; }
+    void setPrincipal(const std::string& principal) { this->principal = principal; }
 
     /**
      * Returns the credentials submitted by the user during the authentication process that verifies
@@ -177,7 +177,7 @@ public:
      *
      * @param credentials the credentials to be used for submission during an authentication attemp.
      */
-    void setCredentials(const std::string &credentials){ this->credentials = credentials; }
+    void setCredentials(const std::string& credentials) { this->credentials = credentials; }
 
     /**
      * Returns the host name of the client from where the
@@ -193,7 +193,7 @@ public:
      *         of the client's IP address is hostname resolution is not
      *         available or disabled.
      */
-    const std::string &getHost() const{ return host; }
+    const std::string& getHost() const { return host; }
 
     /**
      * Sets the host name or IP string from where the authentication attempt occurs.  It is up to the Authenticator
@@ -205,7 +205,7 @@ public:
      * @param host the host name or IP string from where the attempt is occuring
      * @since 1.0
      */
-    void setHost(const std::string &host){ this->host = host; }
+    void setHost(const std::string& host) { this->host = host; }
 
     /**
      * Returns {@code true} if the submitting user wishes their identity (principal(s)) to be remembered
@@ -214,7 +214,7 @@ public:
      * @return {@code true} if the submitting user wishes their identity (principal(s)) to be remembered
      *         across sessions, {@code false} otherwise.
      */
-    bool isRememberMe() const{ return rememberMe; }
+    bool isRememberMe() const { return rememberMe; }
 
     /**
      * Sets if the submitting user wishes their identity (pricipal(s)) to be remembered across sessions.  Unless

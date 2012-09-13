@@ -21,6 +21,7 @@
 
 #include <cetty/shiro/authc/Sha256CredentialsMatcher.h>
 #include <cetty/shiro/realm/Realm.h>
+#include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
 
 namespace cetty {
 namespace shiro {

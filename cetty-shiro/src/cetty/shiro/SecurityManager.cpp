@@ -17,29 +17,8 @@ void SecurityManager::init(){
     AuthenticatingRealm authcRealm;
     authenticator.addRealm(authcRealm);
 
-    AuthorisingRealm authzRealm;
+    AuthorizingRealm authzRealm;
     authorizer.addRealm(authzRealm);
-}
-
-bool SecurityManager::authenticate(const AuthenticationToken &token,
-                                   AuthenticationInfo* info) {
-    return this->authenticator.authenticate(token, info);
-}
-
-bool SecurityManager::authoriseUser(const std::string &sessionId,
-                                    const std::string &operation
-                                   )
-{
-    SessionPtr session = getSession(sessionId);
-    if(session == NULL) return false;
-
-    return authorizer.authoriseUser(session, operation);
-}
-
-bool SecurityManager::authoriseApp(const std::string &appKey,
-                                   const std::string &operation
-                                  ) {
-    return authorizer.authoriseApp(appKey, operation);
 }
 
 SessionPtr SecurityManager::getSession(const std::string &sessionId){

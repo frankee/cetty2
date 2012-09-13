@@ -1,5 +1,6 @@
 #if !defined(CETTY_SHIRO_AUTHC_ABSTRACTAUTHENTICATOR_H)
 #define CETTY_SHIRO_AUTHC_ABSTRACTAUTHENTICATOR_H
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,7 +29,6 @@ namespace authc {
 
 class AuthenticationToken;
 class AuthenticationInfo;
-
 
 /**
  * An Authenticator is responsible for authenticating accounts in an application.  It
@@ -60,53 +60,10 @@ public:
      * {@link AuthenticationListener AuthenticationListener} collection is a non-null {@code ArrayList}.
      */
     Authenticator() {}
+    Authenticator(const RealmPtr& realm);
+    Authenticator(const std::vector<RealmPtr>& realms);
 
-    /**
-     * Sets the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     * attempts.
-     *
-     * @param listeners one or more {@code AuthenticationListener}s that should be notified due to an
-     *                  authentication attempt.
-     */
-
-    void setAuthenticationListeners(const std::vector<LoginSuccessCallback> &successListeners,
-                                    const std::vector<LoginFailureCallback> &failureListeners,
-                                    const std::vector<LogoutCallback> &logoutListeners) {
-        this->successListeners.assign(successListeners.begin(), successListeners.end());
-        this->failureListeners.assign(failureListeners.begin(), failureListeners.end());
-        this->logoutListeners.assign(logoutListeners.begin(), logoutListeners.end());
-    }
-
-    void setSuccessListener(const std::vector<LoginSuccessCallback> &successListeners){
-        this->successListeners.assign(successListeners.begin(), successListeners.end());
-    }
-
-    void setFailureListener(const std::vector<LoginFailureCallback> &failureListeners){
-        this->failureListeners.assign(failureListeners.begin(), failureListeners.end());
-    }
-
-    void setLogoutListener(const std::vector<LogoutCallback> &logoutListeners){
-        this->logoutListeners.assign(logoutListeners.begin(), logoutListeners.end());
-    }
-
-    /**
-     * Returns the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     * attempts.
-     *
-     * @return the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     *         attempts.
-     */
-    const std::vector<LoginSuccessCallback>& getSuccessListener() const{
-        return this->successListeners;
-    }
-
-    const std::vector<LoginFailureCallback>& getFailureListener() const{
-        return this->failureListeners;
-    }
-
-    const std::vector<LogoutCallback>& getLogoutListener() const {
-        return this->logoutListeners;
-    }
+    virtual ~Authenticator() {}
 
     /**
      * This implementation merely calls
@@ -139,7 +96,62 @@ public:
      */
     bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
 
-    virtual ~Authenticator(){}
+    /**
+     * Sets all realms used by this Authenticator, providing PAM (Pluggable Authentication Module) configuration.
+     *
+     * @param realms the realms to consult during authentication attempts.
+     */
+    void setRealms(const std::vector<AuthenticatingRealm> &realms) {
+        this->realms.assign(realms.begin(), realms.end());
+    }
+
+    /**
+     * Returns the realm(s) used by this {@code Authenticator} during an authentication attempt.
+     *
+     * @return the realm(s) used by this {@code Authenticator} during an authentication attempt.
+     */
+    const std::vector<AuthenticatingRealm> &getRealms() const{
+        return this->realms;
+    }
+
+    void addRealm(const AuthenticatingRealm &realm){
+        this->realms.push_back(realm);
+    }
+
+    /**
+     * Sets the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
+     * attempts.
+     *
+     * @param listeners one or more {@code AuthenticationListener}s that should be notified due to an
+     *                  authentication attempt.
+     */
+    void addSuccessListener(const LoginSuccessCallback& successListeners){
+    }
+
+    void addFailureListener(const LoginFailureCallback& failureListeners){
+    }
+
+    void addLogoutListener(const LogoutCallback& logoutListeners){
+    }
+
+    /**
+     * Returns the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
+     * attempts.
+     *
+     * @return the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
+     *         attempts.
+     */
+    const std::vector<LoginSuccessCallback>& getSuccessListener() const{
+        return this->successListeners;
+    }
+
+    const std::vector<LoginFailureCallback>& getFailureListener() const{
+        return this->failureListeners;
+    }
+
+    const std::vector<LogoutCallback>& getLogoutListener() const {
+        return this->logoutListeners;
+    }
 
 protected:
     /**
@@ -215,6 +227,12 @@ private:
     std::vector<LoginSuccessCallback> successListeners;
     std::vector<LoginFailureCallback> failureListeners;
     std::vector<LogoutCallback> logoutListeners;
+
+     /**
+     * List of realms that will be iterated through when a user authenticates
+     * notice the lifecycle of AuthenticationRealm.
+     */
+    std::vector<AuthenticatingRealmPtr> realms;
 };
 
 }

@@ -1,5 +1,6 @@
 #if !defined(CETTY_SHIRO_SECURITYMANAGER_H)
 #define CETTY_SHIRO_SECURITYMANAGER_H
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,9 +20,9 @@
  * under the License.
  */
 
-#include <cetty/shiro/authc/ModularRealmAuthenticator.h>
-#include <cetty/shiro/authz/Authorizer.h>
-
+#include <boost/function.hpp>
+#include <cetty/shiro/authc/RealmAuthenticator.h>
+#include <cetty/shiro/authz/RealmAuthorizer.h>
 #include <cetty/shiro/session/SessionManager.h>
 
 namespace cetty {
@@ -32,45 +33,68 @@ using namespace cetty::shiro::authz;
 using namespace cetty::shiro::session;
 
 /**
- * exec authentication and authorisation
+ * A {@code SecurityManager} executes all security operations for <em>all</em> Subjects (aka users) across a
+ * single application.
+ * <p/>
+ * The interface itself primarily exists as a convenience - it extends the {@link org.apache.shiro.authc.Authenticator},
+ * {@link Authorizer}, and {@link SessionManager} interfaces, thereby consolidating
+ * these behaviors into a single point of reference.  For most Shiro usages, this simplifies configuration and
+ * tends to be a more convenient approach than referencing {@code Authenticator}, {@code Authorizer}, and
+ * {@code SessionManager} instances separately;  instead one only needs to interact with a single
+ * {@code SecurityManager} instance.
+ * <p/>
+ * In addition to the above three interfaces, this interface provides a number of methods supporting
+ * {@link Subject} behavior. A {@link org.apache.shiro.subject.Subject Subject} executes
+ * authentication, authorization, and session operations for a <em>single</em> user, and as such can only be
+ * managed by {@code A SecurityManager} which is aware of all three functions.  The three parent interfaces on the
+ * other hand do not 'know' about {@code Subject}s to ensure a clean separation of concerns.
+ * <p/>
+ * <b>Usage Note</b>: In actuality the large majority of application programmers won't interact with a SecurityManager
+ * very often, if at all.  <em>Most</em> application programmers only care about security operations for the currently
+ * executing user, usually attained by calling
+ * {@link org.apache.shiro.SecurityUtils#getSubject() SecurityUtils.getSubject()}.
+ * <p/>
+ * Framework developers on the other hand might find working with an actual SecurityManager useful.
+ *
+ * @see org.apache.shiro.mgt.DefaultSecurityManager
+ * @since 0.2
  */
 class SecurityManager {
 public:
-    SecurityManager(): sessionManager(NULL) {init();}
+    typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfo&, const SessionPtr&)> LoginCallback;
+    typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
 
+public:
+    SecurityManager(): sessionManager(NULL) {init();}
+    virtual ~SecurityManager(){ destroy(); }
+
+    /// login by user name and password
+    void login(const AuthenticationToken& token, const LoginCallback& callback);
+    void logout(const std::string &sessionId);
+
+    SessionManager& getSessionManager();
+    Authenticator& getAuthenticator();
+    Authorizer& getAuthorizer();
+
+    void setRealm();
+    void setRealms();
+    const std::vector<RealmPtr>& getRealms() const;
+
+private:
     /// login by session id
     bool getSession(const std::string &id);
 
-    /// login by user name and password
-    const std::string &login(AuthenticationToken &token);
-    void logout(const std::string &sessionId);
-
-    /// judge user's operation
-    bool authoriseUser(const std::string &sessionId, const std::string &operation);
-
-    /// judge user and third app's operation
-    bool authoriseApp(const std::string &appkey, const std::string &operation);
-
-    ~SecurityManager(){ destroy(); }
-
-private:
-
-    ModularRealmAuthenticator authenticator;
-    Authorizer authorizer;
-    SessionManager *sessionManager;
-
-private:
     void init();
+    void destroy();
 
-    bool authenticate(const AuthenticationToken &token, AuthenticationInfo *info);
     void bind(AuthenticationInfo &info, const SessionPtr& session);
 
-    void onSuccessfulLogin(const AuthenticationToken &token, const AuthenticationInfo &info) {};
-    void onFailedLogin(const AuthenticationToken &token){};
+private:
+    Authenticator authenticator;
+    Authorizer    authorizer;
+    SessionManager *sessionManager;
 
-    void beforeLogout(const std::string &sessionId){};
-
-    void destroy();
+    std::vector<RealmPtr> realms;
 };
 
 }

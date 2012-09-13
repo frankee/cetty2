@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_REALM_REALMPTR_H)
-#define CETTY_SHIRO_REALM_REALMPTR_H
+#if !defined(CETTY_SHIRO_AUTHZ_PERMISSIONPTR_H)
+#define CETTY_SHIRO_AUTHZ_PERMISSIONPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,16 +21,16 @@
 
 namespace cetty {
 namespace shiro {
-namespace realm {
+namespace authz {
 
-class Realm;
-typename boost::intrusive_ptr<Realm> RealmPtr;
+class Permission;
+typename boost::intrusive_ptr<Permission> PermissionPtr;
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_SHIRO_REALM_REALMPTR_H)
+#endif //#if !defined(CETTY_SHIRO_AUTHZ_PERMISSIONPTR_H)
 
 // Local Variables:
 // mode: c++

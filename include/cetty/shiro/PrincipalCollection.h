@@ -38,6 +38,10 @@ namespace shiro {
  */
 class PrincipalCollection {
 public:
+    typedef std::vector<std::string> Principals;
+    typedef std::map<std::string, Principals> RealmPrincipals;
+
+public:
     PrincipalCollection() {}
 
     PrincipalCollection(const std::string& principal, const std::string& realmName) {
@@ -162,9 +166,6 @@ public:
     bool isEmpty() const;
 
 private:
-    typedef std::vector<std::string> Principals;
-    typedef std::map<std::string, Principals> RealmPrincipals;
-
     RealmPrincipals realmPrincipals;
 };
 
