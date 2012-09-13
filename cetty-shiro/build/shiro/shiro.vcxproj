@@ -12,21 +12,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfo.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\RealmAuthenticator.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256CredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256Hash.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfoPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\Authorizer.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\Permission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\PermissionPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\AllPermission.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\DomainPermission.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\PermissionResolver.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\WildcardPermission.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authz\permission\WildcardPermissionResolver.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authz\WildcardPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\PrincipalCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealmPtr.h" />
@@ -46,7 +43,6 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationInfo.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationToken.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\RealmAuthenticator.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256CredentialsMatcher.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256Hash.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp" />

@@ -1,12 +1,17 @@
 #if !defined(CETTY_SHIRO_REALM_AUTHORISINGREALM_H)
 #define CETTY_SHIRO_REALM_AUTHORISINGREALM_H
 
+#include <map>
+#include <boost/function.hpp>
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
 #include <cetty/shiro/realm/AuthorizingRealmPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace realm {
+
+using namespace cetty::shiro::authz;
 
 /**
  * An {@code AuthorizingRealm} extends the {@code AuthenticatingRealm}'s capabilities by adding Authorization
@@ -29,7 +34,10 @@ namespace realm {
  */
 class AuthorizingRealm : public AuthenticatingRealm {
 public:
-    AuthorizingRealm(){}
+    typedef boost::function1<void, const AuthorizationInfoPtr&> GetAuthorizationInfoCallback;
+
+public:
+    AuthorizingRealm() {}
     AuthorizingRealm(bool isCached, std::string name);
 
     /**
@@ -77,52 +85,20 @@ public:
      * @return the authorization information for the account associated with the specified {@code principals},
      *         or {@code null} if no account could be found.
      */
-    AuthorizationInfo getAuthorizationInfo(const PrincipalCollection& principals) {
-
-        if (principals == null) {
-            return null;
-        }
-
-        AuthorizationInfo info = null;
-
-        if (log.isTraceEnabled()) {
-            log.trace("Retrieving AuthorizationInfo for principals [" + principals + "]");
-        }
-
-        Cache<Object, AuthorizationInfo> cache = getAvailableAuthorizationCache();
-        if (cache != null) {
-            if (log.isTraceEnabled()) {
-                log.trace("Attempting to retrieve the AuthorizationInfo from cache.");
-            }
-            Object key = getAuthorizationCacheKey(principals);
-            info = cache.get(key);
-            if (log.isTraceEnabled()) {
-                if (info == null) {
-                    log.trace("No AuthorizationInfo found in cache for principals [" + principals + "]");
-                } else {
-                    log.trace("AuthorizationInfo found in cache for principals [" + principals + "]");
-                }
-            }
-        }
-
-        if (info == null) {
-            // Call template method if the info was not found in a cache
-            info = doGetAuthorizationInfo(principals);
-            // If the info is not null and the cache has been created, then cache the authorization info.
-            if (info != null && cache != null) {
-                if (log.isTraceEnabled()) {
-                    log.trace("Caching authorization info for principals: [" + principals + "].");
-                }
-                Object key = getAuthorizationCacheKey(principals);
-                cache.put(key, info);
-            }
-        }
-
-        return info;
-    }
+    void getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback);
 
 protected:
+    virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,
+                                        const GetAuthorizationInfoCallback& callback) = 0;
 
+private:
+    void onGetAuthorizationInfo(
+        const AuthorizationInfoPtr& info,
+        const PrincipalCollection& principals,
+        const GetAuthorizationInfoCallback& callback);
+
+protected:
+    std::map<std::string, AuthorizationInfoPtr> authorizations;
 };
 
 }

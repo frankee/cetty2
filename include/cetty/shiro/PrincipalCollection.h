@@ -19,6 +19,10 @@
  * under the License.
  */
 
+#include <map>
+#include <string>
+#include <vector>
+
 namespace cetty {
 namespace shiro {
 
@@ -91,7 +95,7 @@ public:
      * @return the primary principal used to uniquely identify the owning account/Subject
      * @since 1.0
      */
-    const std::string& getPrimaryPrincipal();
+    const std::string& getPrimaryPrincipal() const;
 
     /**
      * Adds the given principal to this collection.
@@ -163,7 +167,9 @@ public:
      *
      * @return {@code true} if this collection is empty, {@code false} otherwise.
      */
-    bool isEmpty() const;
+    bool empty() const;
+
+    std::string toString() const;
 
 private:
     RealmPrincipals realmPrincipals;
