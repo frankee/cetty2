@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C69120B2-A181-4455-B0CE-2BDC58B2B557}</ProjectGuid>
+    <ProjectGuid>{06DDCB99-EF84-4267-8EB9-6D2FF6730305}</ProjectGuid>
     <RootNamespace>AccessControlServer</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
@@ -107,12 +107,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\craft\startup\ConfigGenerator.h" />
-    <ClInclude Include="..\..\src\cetty\craft\startup\ReferenceGenerator.h" />
-    <ClInclude Include="..\..\src\cetty\craft\startup\SkeletonGenerator.h" />
+    <ClCompile Include="..\..\src\cetty\craft\access\AccessControl.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\craft\access\AccessControlServer.cpp" />
+    <ClCompile Include="..\..\src\cetty\craft\access\AccessControlServiceImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\craft\startup\Startup.cpp" />
+    <ClInclude Include="..\..\..\include\cetty\craft\access\AccessControl.pb.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\access\AccessControlServiceImpl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

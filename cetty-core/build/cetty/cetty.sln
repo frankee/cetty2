@@ -94,8 +94,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CettyTest", "..\test\CettyT
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shiro", "..\..\..\cetty-shiro\build\shiro\shiro.vcxproj", "{3DE1111F-B927-483B-AD82-385EF564E967}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AuthenticationServer", "..\..\..\cetty-shiro\build\authentication\AuthenticationServer.vcxproj", "{D0328897-B173-4C15-B68A-66AF98224381}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufBsonSerialization", "..\..\..\cetty-protobuf\build\ProtobufBsonSerialization\ProtobufBsonSerialization.vcxproj", "{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "craft", "..\..\..\cetty-craft\build\craft\craft.vcxproj", "{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}"
@@ -103,6 +101,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "startup", "..\..\..\cetty-craft\build\startup\startup.vcxproj", "{C69120B2-A181-4455-B0CE-2BDC58B2B557}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotoc", "..\..\..\..\thirdparty\protobuf-2.4.1\vsprojects\libprotoc.vcxproj", "{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AccessControlServer", "..\..\..\cetty-craft\build\access\AccessControlServer.vcxproj", "{06DDCB99-EF84-4267-8EB9-6D2FF6730305}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -238,10 +238,6 @@ Global
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Debug|Win32.Build.0 = Debug|Win32
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Release|Win32.ActiveCfg = Release|Win32
 		{3DE1111F-B927-483B-AD82-385EF564E967}.Release|Win32.Build.0 = Release|Win32
-		{D0328897-B173-4C15-B68A-66AF98224381}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D0328897-B173-4C15-B68A-66AF98224381}.Debug|Win32.Build.0 = Debug|Win32
-		{D0328897-B173-4C15-B68A-66AF98224381}.Release|Win32.ActiveCfg = Release|Win32
-		{D0328897-B173-4C15-B68A-66AF98224381}.Release|Win32.Build.0 = Release|Win32
 		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Debug|Win32.Build.0 = Debug|Win32
 		{28EF2617-B001-4DF3-A9CE-F25F89ABD0E7}.Release|Win32.ActiveCfg = Release|Win32
@@ -258,6 +254,10 @@ Global
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.Build.0 = Debug|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.ActiveCfg = Release|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.Build.0 = Release|Win32
+		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Debug|Win32.ActiveCfg = Debug|Win32
+		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Debug|Win32.Build.0 = Debug|Win32
+		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Release|Win32.ActiveCfg = Release|Win32
+		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

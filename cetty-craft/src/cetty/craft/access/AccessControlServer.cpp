@@ -15,17 +15,17 @@
  */
 
 #include <cetty/config/ConfigCenter.h>
-#include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
+#include <cetty/craft/builder/CraftServerBuilder.h>
 #include <cetty/craft/access/AccessControlServiceImpl.h>
 
 using namespace cetty::config;
-using namespace cetty::protobuf::service::builder;
+using namespace cetty::craft::builder;
 
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
 
-    ProtobufServerBuilder builder;
-    builder.registerService(new cetty::craft::access::AuthenticationServiceImpl);
+    CraftServerBuilder builder;
+    builder.registerService(new cetty::craft::access::AccessControlServiceImpl);
     builder.buildRpc(1980);
     builder.buildHttp(8080);
 
