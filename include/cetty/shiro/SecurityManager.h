@@ -21,8 +21,8 @@
  */
 
 #include <boost/function.hpp>
-#include <cetty/shiro/authc/RealmAuthenticator.h>
-#include <cetty/shiro/authz/RealmAuthorizer.h>
+#include <cetty/shiro/authc/Authenticator.h>
+#include <cetty/shiro/authz/Authorizer.h>
 #include <cetty/shiro/session/SessionManager.h>
 
 namespace cetty {

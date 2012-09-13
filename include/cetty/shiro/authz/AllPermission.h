@@ -39,7 +39,7 @@ namespace authz {
 class AllPermission : public Permission {
 public:
     AllPermission() {}
-    virtual AllPermission() {}
+    virtual ~AllPermission() {}
 
     /**
      * Always returns <tt>true</tt>, indicating any Subject granted this permission can do anything.
