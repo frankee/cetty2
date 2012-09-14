@@ -24,6 +24,10 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\Permission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\PermissionPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\WildcardPermission.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\DigestEngine.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\HMACEngine.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\MD5Engine.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\SHA1Engine.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\PrincipalCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealmPtr.h" />
@@ -46,6 +50,9 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256CredentialsMatcher.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256Hash.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\DigestEngine.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\MD5Engine.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\SHA1Engine.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\realm\AuthenticatingRealm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\realm\AuthorizingRealm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\realm\Realm.cpp" />

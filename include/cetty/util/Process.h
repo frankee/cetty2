@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <boost/config.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/system/config.hpp>
 

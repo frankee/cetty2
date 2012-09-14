@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\Base64.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Integer.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
@@ -366,8 +367,10 @@
     <ClInclude Include="..\..\..\include\cetty\logging\LogPatternFormatter.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogScribeSink.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\Base64.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\Platform.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Process.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h" />
