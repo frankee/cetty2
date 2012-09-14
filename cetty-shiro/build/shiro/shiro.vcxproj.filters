@@ -16,6 +16,9 @@
     <Filter Include="shiro\authz">
       <UniqueIdentifier>{e63c2559-8ac2-4dd6-8856-893f3449b1bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shiro\crypt">
+      <UniqueIdentifier>{54d128ac-a1f2-40e1-99da-cd327307d0fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfo.h">
@@ -99,6 +102,18 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\DigestEngine.h">
+      <Filter>shiro\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\HMACEngine.h">
+      <Filter>shiro\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\MD5Engine.h">
+      <Filter>shiro\crypt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\crypt\SHA1Engine.h">
+      <Filter>shiro\crypt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
@@ -148,6 +163,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp">
       <Filter>shiro\authz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\DigestEngine.cpp">
+      <Filter>shiro\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\MD5Engine.cpp">
+      <Filter>shiro\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\crypt\SHA1Engine.cpp">
+      <Filter>shiro\crypt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
