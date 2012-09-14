@@ -27,7 +27,7 @@ bool Sha256CredentialsMatcher::doCredentialsMatch(
     std::string tokenCredentials = token.getCredentials();
     std::string infoCredentials = getCredentials(info);
     infoCredentials.append(token.getNonce());
-    infoCredentials.append(token.getServerTime());
+    infoCredentials.append(token.getSeries());
 
     std::string credentials = hashProvidedCredentials(infoCredentials, std::string(), 1);
 

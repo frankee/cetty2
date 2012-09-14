@@ -63,13 +63,13 @@ void SecurityManager::onStartSession(const SessionPtr& session,
 void SecurityManager::logout(const std::string& sessionId) {
     //beforeLogout(sessionId);
 
-    //SessionPtr session = getSession(sessionId);
+    SessionPtr session = sessionManager->getSession(sessionId);
 
-    //if (session != NULL) {
+    if (session) {
     //    std::string userId = session->getAttribute(AuthenticationInfo::USER_ID);
     //    authenticator.onLogout(userId);
     //    session->stop();
-    //}
+    }
 }
 
 void SecurityManager::bind(AuthenticationInfo& info, const SessionPtr& session) {

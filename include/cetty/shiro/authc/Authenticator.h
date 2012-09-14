@@ -126,7 +126,8 @@ public:
      * @throws AuthenticationException if there is any problem during the authentication process - see the
      *                                 interface's JavaDoc for a more detailed explanation.
      */
-    bool authenticate(const AuthenticationToken &token, const AuthenticateCallback& callback);
+    void authenticate(const AuthenticationToken &token,
+        const AuthenticateCallback& callback);
 
     /**
      * Sets all realms used by this Authenticator, providing PAM (Pluggable Authentication Module) configuration.

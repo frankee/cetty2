@@ -52,6 +52,7 @@ public:
     bool isError() const;
 
     void setType(int type);
+    int getType() const;
 
     boost::int64_t getId() const;
     void setId(boost::int64_t id);

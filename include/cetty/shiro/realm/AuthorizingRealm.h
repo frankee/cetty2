@@ -8,9 +8,16 @@
 #include <cetty/shiro/authz/AuthorizationInfoPtr.h>
 
 namespace cetty {
+    namespace shiro {
+        class PrincipalCollection;
+    }
+}
+
+namespace cetty {
 namespace shiro {
 namespace realm {
 
+using namespace cetty::shiro;
 using namespace cetty::shiro::authz;
 
 /**
@@ -85,7 +92,8 @@ public:
      * @return the authorization information for the account associated with the specified {@code principals},
      *         or {@code null} if no account could be found.
      */
-    void getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback);
+    void getAuthorizationInfo(const PrincipalCollection& principals,
+        const GetAuthorizationInfoCallback& callback);
 
 protected:
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,

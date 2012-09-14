@@ -6,27 +6,50 @@
  */
 
 #include <cetty/shiro/authz/Authorizer.h>
+#include <cetty/shiro/authz/Permission.h>
+#include <cetty/shiro/realm/AuthorizingRealm.h>
 
 namespace cetty {
 namespace shiro {
 namespace authz {
 
+using namespace cetty::shiro::realm;
 
-    bool Authorizer::isPermitted(const PrincipalCollection& principals, const std::string& permission) const {
-        assertRealmsConfigured();
+void Authorizer::isPermitted(const std::string& principal,
+                             const std::string& permission,
+                             const AuthorizeCallback& callback) const {
+    if (realmConfigured()) {
+        PrincipalCollection principals(principal, realm->getName());
         PermissionPtr p = permissionResolver(permission);
+        isPermitted(principals, p, callback);
+    }
+}
 
-        return isPermitted(principals, p);
+void Authorizer::isPermitted(const PrincipalCollection& principals,
+                             const std::string& permission,
+                             const AuthorizeCallback& callback) const {
+    if (realmConfigured()) {
+        PermissionPtr p = permissionResolver(permission);
+        isPermitted(principals, p, callback);
+    }
+}
 
-        for (std::size_t i = 0, j = realm.size(); i < j; ++i) {
+void Authorizer::isPermitted(const PrincipalCollection& principal,
+                             const PermissionPtr& permission,
+                             const AuthorizeCallback& callback) const {
 
-            if (((Authorizer) realm).isPermitted(principals, permission)) {
-                return true;
-            }
-        }
+}
 
+bool Authorizer::realmConfigured() const {
+    if (!realm) {
+        //String msg = "Configuration error:  No realms have been configured!  One or more realms must be " +
+        //"present to execute an authorization operation.";
+        //throw new IllegalStateException(msg);
         return false;
     }
+
+    return true;
+}
 
 }
 }

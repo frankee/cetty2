@@ -75,6 +75,9 @@ public:
 
     void getSession(const std::string& id, const SessionCallback& callback);
 
+    // from cache.
+    SessionPtr getSession(const std::string& id);
+
     /**
      * Returns {@code true} if sessions should be automatically deleted after they are discovered to be invalid,
      * {@code false} if invalid sessions will be manually deleted by some process external to Shiro's control.  The

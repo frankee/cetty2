@@ -7,6 +7,9 @@
     <Filter Include="http">
       <UniqueIdentifier>{dee23f7c-063d-475c-b071-ba9c811c0306}</UniqueIdentifier>
     </Filter>
+    <Filter Include="security">
+      <UniqueIdentifier>{bc4e7b70-1727-4a01-98b9-5fc577eeb953}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h">
@@ -61,6 +64,15 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\UriTemplate.h">
       <Filter>http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h">
+      <Filter>security</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ValidateFilter.h">
+      <Filter>security</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\security\AccessController.h">
+      <Filter>security</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\http\HttpRequest2ProtobufMessage.cpp">
@@ -108,6 +120,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\craft\http\UriTemplate.cpp">
       <Filter>http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\craft\security\AccessController.cpp">
+      <Filter>security</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

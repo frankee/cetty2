@@ -71,6 +71,7 @@ public:
     typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&)> LoginCallback;
     typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
     typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
+    typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
     SecurityManager(): sessionManager() { }
@@ -80,7 +81,21 @@ public:
     void login(const AuthenticationToken& token, const LoginCallback& callback);
     void logout(const std::string& sessionId);
 
-    void authenticate(const AuthenticationToken& token, const AuthenticateCallback& callback);
+    void authenticate(const AuthenticationToken& token,
+        const AuthenticateCallback& callback);
+
+    void isPermitted(const std::string& principal,
+        const std::string& permission,
+        const AuthorizeCallback& callback) const;
+
+    void isPermitted(const PrincipalCollection& principals,
+        const std::string& permission,
+        const AuthorizeCallback& callback) const;
+
+    void isPermitted(const PrincipalCollection& principal,
+        const PermissionPtr& permission,
+        const AuthorizeCallback& callback) const;
+
 
     SessionManager& getSessionManager();
     Authenticator& getAuthenticator();
