@@ -29,6 +29,9 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapper.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapperConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\UriTemplate.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\AccessController.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ValidateFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp" />
@@ -47,6 +50,7 @@
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapper.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapperConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\http\UriTemplate.cpp" />
+    <ClCompile Include="..\..\src\cetty\craft\security\AccessController.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}</ProjectGuid>

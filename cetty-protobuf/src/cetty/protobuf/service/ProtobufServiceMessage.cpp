@@ -109,6 +109,11 @@ void ProtobufServiceMessage::setType(int type) {
     message->set_type(MessageType(type));
 }
 
+int ProtobufServiceMessage::getType() const {
+    BOOST_ASSERT(message && "message should not be NULL.");
+    return (int)message->type();
+}
+
 boost::int64_t ProtobufServiceMessage::getId() const {
     BOOST_ASSERT(message && "message should not be NULL.");
     return message->id();

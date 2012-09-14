@@ -7,7 +7,6 @@
 
 #include <cetty/shiro/session/SessionIdGenerator.h>
 
-#include <unistd.h>
 #include <sys/types.h>
 
 #include <boost/date_time/posix_time/ptime.hpp>

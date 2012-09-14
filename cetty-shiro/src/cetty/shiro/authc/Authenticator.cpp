@@ -7,21 +7,27 @@
 
 #include <cetty/shiro/authc/Authenticator.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
+#include <cetty/shiro/realm/AuthenticatingRealm.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
-bool Authenticator::authenticate(const AuthenticationToken &token,
-                                 AuthenticationInfo *info){
-    if(token.getPrincipal().empty()) return false;
-    if(!doAuthenticate(token, info)) {
-        notifyFailure(token);
-        return false;
-    }
-    notifySuccess(token, *info);
-    return true;
-}
 
+    using namespace cetty::shiro::realm;
+
+    void Authenticator::authenticate(const AuthenticationToken &token,
+        const AuthenticateCallback& callback) {
+    if(token.getPrincipal().empty()) {
+        return;
+    }
+
+    //if(!doAuthenticate(token, info)) {
+    //    notifyFailure(token);
+    //    return false;
+    //}
+
+    //notifySuccess(token, *info);
+}
 
 }
 }

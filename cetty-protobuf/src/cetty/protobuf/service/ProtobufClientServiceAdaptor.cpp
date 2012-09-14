@@ -47,7 +47,7 @@ ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ClientServicePt
 ProtobufClientServiceAdaptor::~ProtobufClientServiceAdaptor() {
 }
 
-void ProtobufClientServiceAdaptor::callMethod(
+void ProtobufClientServiceAdaptor::doCallMethod(
     const ::google::protobuf::MethodDescriptor* method,
     const ConstMessagePtr& request,
     const ProtobufServiceFuturePtr& future) {

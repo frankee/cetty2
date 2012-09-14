@@ -49,6 +49,7 @@ using namespace cetty::shiro::session;
 class Authorizer {
 public:
     typedef boost::function1<PermissionPtr, const std::string&> ResolvePermissionFunctor;
+    typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
     Authorizer() {}
@@ -64,6 +65,10 @@ public:
 
     virtual ~Authorizer() {}
 
+    void isPermitted(const std::string& principal,
+                     const std::string& permission,
+                     const AuthorizeCallback& callback) const;
+
     /**
      * Returns <tt>true</tt> if the corresponding subject/user is permitted to perform an action or access a resource
      * summarized by the specified permission string.
@@ -77,8 +82,9 @@ public:
      * @see #isPermitted(PrincipalCollection principals,Permission permission)
      * @since 0.9
      */
-    bool isPermitted(const PrincipalCollection& principals,
-                     const std::string& permission) const;
+    void isPermitted(const PrincipalCollection& principals,
+                     const std::string& permission,
+                     const AuthorizeCallback& callback) const;
 
     /**
      * Returns <tt>true</tt> if the corresponding subject/user is permitted to perform an action or access a resource
@@ -91,115 +97,9 @@ public:
      * @param permission       the permission that is being checked.
      * @return true if the corresponding Subject/user is permitted, false otherwise.
      */
-    bool isPermitted(const PrincipalCollection& subjectPrincipal,
-                     const PermissionPtr& permission) const;
-
-    /**
-     * Checks if the corresponding Subject implies the given permission strings and returns a boolean array
-     * indicating which permissions are implied.
-     *
-     * <p>This is an overloaded method for the corresponding type-safe {@link Permission Permission} variant.
-     * Please see the class-level JavaDoc for more information on these String-based permission methods.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param permissions      the String representations of the Permissions that are being checked.
-     * @return an array of booleans whose indices correspond to the index of the
-     *         permissions in the given list.  A true value at an index indicates the user is permitted for
-     *         for the associated <tt>Permission</tt> string in the list.  A false value at an index
-     *         indicates otherwise.
-     * @since 0.9
-     */
-    void isPermitted(const PrincipalCollection& subjectPrincipal,
-                     const std::vector<std::string>& permissions,
-                     std::vector<bool> permitFlags) const;
-
-    /**
-     * Checks if the corresponding Subject/user implies the given Permissions and returns a boolean array indicating
-     * which permissions are implied.
-     *
-     * <p>More specifically, this method should determine if each <tt>Permission</tt> in
-     * the array is {@link Permission#implies(Permission) implied} by permissions
-     * already associated with the subject.
-     *
-     * <p>This is primarily a performance-enhancing method to help reduce the number of
-     * {@link #isPermitted} invocations over the wire in client/server systems.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param permissions      the permissions that are being checked.
-     * @return an array of booleans whose indices correspond to the index of the
-     *         permissions in the given list.  A true value at an index indicates the user is permitted for
-     *         for the associated <tt>Permission</tt> object in the list.  A false value at an index
-     *         indicates otherwise.
-     */
-    void isPermitted(const PrincipalCollection& subjectPrincipal,
-                     const std::vector<PermissionPtr>& permissions,
-                     std::vector<bool> permitFlags) const;
-
-    /**
-     * Returns <tt>true</tt> if the corresponding Subject/user implies all of the specified permissions, <tt>false</tt>
-     * otherwise.
-     *
-     * <p>More specifically, this method determines if all of the given <tt>Permission</tt>s are
-     * {@link Permission#implies(Permission) implied by} permissions already associated with the subject.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param permissions      the permissions to check.
-     * @return true if the user has all of the specified permissions, false otherwise.
-     */
-    bool isPermittedAll(const PrincipalCollection& principal,
-                        const std::vector<std::string>& permissions) const;
-
-    /**
-     * Returns <tt>true</tt> if the corresponding Subject/user implies all of the specified permissions, <tt>false</tt>
-     * otherwise.
-     *
-     * <p>More specifically, this method determines if all of the given <tt>Permission</tt>s are
-     * {@link Permission#implies(Permission) implied by} permissions already associated with the subject.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param permissions      the permissions to check.
-     * @return true if the user has all of the specified permissions, false otherwise.
-     */
-    bool isPermittedAll(const PrincipalCollection& principal,
-                        const std::vector<PermissionPtr>& permissions) const;
-
-    /**
-     * Returns <tt>true</tt> if the corresponding Subject/user has the specified role, <tt>false</tt> otherwise.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param roleIdentifier   the application-specific role identifier (usually a role id or role name).
-     * @return <tt>true</tt> if the corresponding subject has the specified role, <tt>false</tt> otherwise.
-     */
-    bool hasRole(const PrincipalCollection& principal,
-                 const std::string& roleIdentifier) const;
-
-    /**
-     * Checks if the corresponding Subject/user has the specified roles, returning a boolean array indicating
-     * which roles are associated with the given subject.
-     *
-     * <p>This is primarily a performance-enhancing method to help reduce the number of
-     * {@link #hasRole} invocations over the wire in client/server systems.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param roleIdentifiers  the application-specific role identifiers to check (usually role ids or role names).
-     * @return an array of booleans whose indices correspond to the index of the
-     *         roles in the given identifiers.  A true value indicates the user has the
-     *         role at that index.  False indicates the user does not have the role at that index.
-     */
-    void hasRoles(const PrincipalCollection& principal,
-                  const std::vector<std::string>& roleIdentifiers,
-                  std::vector<bool>* roleFlags) const;
-
-    /**
-     * Returns <tt>true</tt> if the corresponding Subject/user has all of the specified roles, <tt>false</tt> otherwise.
-     *
-     * @param subjectPrincipal the application-specific subject/user identifier.
-     * @param roleIdentifiers  the application-specific role identifiers to check (usually role ids or role names).
-     * @return true if the user has all the roles, false otherwise.
-     */
-    bool hasAllRoles(const PrincipalCollection& subjectPrincipal,
-                     const std::vector<std::string>& roleIdentifiers) const;
-
+    void isPermitted(const PrincipalCollection& principal,
+                     const PermissionPtr& permission,
+                     const AuthorizeCallback& callback) const;
 
     /**
      * Returns the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
@@ -240,13 +140,7 @@ private:
      *
      * @throws IllegalStateException if the <tt>realms</tt> property is configured incorrectly.
      */
-    void assertRealmsConfigured() {
-        if (!realm) {
-            //String msg = "Configuration error:  No realms have been configured!  One or more realms must be " +
-            //"present to execute an authorization operation.";
-            //throw new IllegalStateException(msg);
-        }
-    }
+    bool realmConfigured() const;
 
 protected:
     /**

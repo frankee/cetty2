@@ -112,7 +112,7 @@ public:
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
                     const ReqT& request,
                     const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
-        callMethod(
+        doCallMethod(
             method,
             request,
             ProtobufServiceFuturePtr(
@@ -133,7 +133,7 @@ private:
     // are less strict in one important way:  the request and response objects
     // need not be of any specific class as long as their descriptors are
     // method->input_type() and method->output_type().
-    void callMethod(const ::google::protobuf::MethodDescriptor* method,
+    void doCallMethod(const ::google::protobuf::MethodDescriptor* method,
                     const ConstMessagePtr& request,
                     const ProtobufServiceFuturePtr& future);
 
