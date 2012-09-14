@@ -197,6 +197,7 @@
     <ClCompile Include="..\..\src\cetty\util\Integer.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\Process.cpp" />
     <ClCompile Include="..\..\src\cetty\util\SimpleString.cpp" />
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp" />
     <ClCompile Include="..\..\src\cetty\util\SmallFile.cpp" />
@@ -367,6 +368,7 @@
     <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\Process.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SmallFile.h" />

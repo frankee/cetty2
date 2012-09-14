@@ -386,6 +386,9 @@
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp">
       <Filter>channel\socket\asio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\Process.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -1080,6 +1083,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\Process.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
