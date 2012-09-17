@@ -2,6 +2,21 @@
 #define CETTY_UTIL_BASE64_H
 
 /*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -57,36 +72,56 @@ public:
     static const int URL_SAFE = 8;
 
     /**
-     * Flag to pass to {@link Base64OutputStream} to indicate that it
-     * should not close the output stream it is wrapping when it
-     * itself is closed.
+     * Decode the Base64-encoded data in input and return the data in
+     * a new byte array.
+     *
+     * <p>The padding '=' characters at the end are considered optional, but
+     * if any are present, there must be the correct number of them.
+     *
+     * @param str    the input String to decode, which is converted to
+     *               bytes using the default charset
+     * @param flags  controls certain features of the decoded output.
+     *               Pass {@code DEFAULT} to decode standard Base64.
+     *
+     * @throws IllegalArgumentException if the input contains
+     * incorrect padding
      */
-    static const int NO_CLOSE = 16;
-
-
-    static void decode(const std::string& str, std::string* bytes) {
-        decode(str.c_str(), str.size(), 0, bytes);
+    static bool decode(const std::string& str, std::string* bytes) {
+        return decode(str.c_str(), str.size(), DEFAULT, bytes);
     }
-    static void decode(const std::string& str, int flags, std::string* bytes) {
-        decode(str.c_str(), str.size(), flags, bytes);
+    static bool decode(const std::string& str, int flags, std::string* bytes) {
+        return decode(str.c_str(), str.size(), flags, bytes);
     }
 
-    static void decode(const char* str, int size, std::string* bytes) {
-        decode(str, size, 0, bytes);
+    static bool decode(const char* str, int size, std::string* bytes) {
+        return decode(str, size, DEFAULT, bytes);
     }
-    static void decode(const char* str, int size, int flags, std::string* bytes);
+    static bool decode(const char* str, int size, int flags, std::string* bytes);
 
-
-    static void encode(const std::string& bytes, std::string* str) {
-        encode(bytes, 0, str);
+    static bool encode(const std::string& bytes, std::string* str) {
+        return encode(bytes, DEFAULT, str);
     }
-    static void encode(const std::string& bytes, int flags, std::string* str);
-
-    static void encode(const char* bytes, int size, std::string* str) {
-        encode(bytes, size, 0, str);
+    static bool encode(const std::string& bytes, int flags, std::string* str) {
+        return encode(bytes.c_str(), bytes.size(), flags, str);
     }
 
-    static void encode(const char* bytes, int size, int flags, std::string* str);
+    static bool encode(const char* bytes, int size, std::string* str) {
+        return encode(bytes, size, DEFAULT, str);
+    }
+
+    /**
+     * Base64-encode the given data and return a newly allocated
+     * byte[] with the result.
+     *
+     * @param input  the data to encode
+     * @param offset the position within the input array at which to
+     *               start
+     * @param len    the number of bytes of input to encode
+     * @param flags  controls certain features of the encoded output.
+     *               Passing {@code DEFAULT} results in output that
+     *               adheres to RFC 2045.
+     */
+    static bool encode(const char* bytes, int size, int flags, std::string* str);
 
 private:
     Base64();
