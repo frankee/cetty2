@@ -48,7 +48,7 @@ using namespace cetty::shiro::session;
  */
 class Authorizer {
 public:
-    typedef boost::function1<PermissionPtr, const std::string&> ResolvePermissionFunctor;
+    typedef boost::function1<PermissionPtr, const std::string&> PermissionResolver;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
@@ -61,7 +61,7 @@ public:
      * @param realms the realms to consult during an authorization check.
      */
     Authorizer(const RealmPtr& realm);
-    Authorizer(const RealmPtr& realm, const ResolvePermissionFunctor& functor);
+    Authorizer(const RealmPtr& realm, const PermissionResolver& resolver);
 
     virtual ~Authorizer() {}
 
@@ -129,7 +129,7 @@ public:
      * @param permissionResolver the permissionResolver to set on all of the wrapped realms that implement the
      *                           {@link org.apache.shiro.authz.permission.PermissionResolverAware PermissionResolverAware} interface.
      */
-    void setPermissionResolver(const ResolvePermissionFunctor& permissionResolver) {
+    void setPermissionResolver(const PermissionResolver& permissionResolver) {
         this->permissionResolver = permissionResolver;
     }
 
@@ -152,7 +152,7 @@ protected:
      * A PermissionResolver to be used by <em>all</em> configured realms.  Leave <code>null</code> if you wish
      * to configure different resolvers for different realms.
      */
-    ResolvePermissionFunctor permissionResolver;
+    PermissionResolver permissionResolver;
 };
 
 }

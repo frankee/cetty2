@@ -15,8 +15,8 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256CredentialsMatcher.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256Hash.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfoPtr.h" />
@@ -34,6 +34,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealmPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\Realm.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManagerConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManager.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\Session.h" />
@@ -47,8 +48,7 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationInfo.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationToken.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256CredentialsMatcher.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256Hash.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialMatcher.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\crypt\DigestEngine.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\crypt\MD5Engine.cpp" />

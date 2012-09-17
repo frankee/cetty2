@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H)
-#define CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H
+#if !defined(CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHER_H)
+#define CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHER_H
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,12 +20,21 @@
  */
 #include <string>
 
-#include <cetty/shiro/authc/AuthenticationToken.h>
-#include <cetty/shiro/authc/AuthenticationInfo.h>
+namespace cetty {
+namespace shiro {
+namespace crypt {
+class DigestEngine;
+}
+}
+}
 
 namespace cetty {
 namespace shiro {
 namespace authc {
+
+class AuthenticationInfo;
+class AuthenticationToken;
+
 /**
  * A {@code HashedCredentialMatcher} provides support for hashing of supplied {@code AuthenticationToken} credentials
  * before being compared to those in the {@code AuthenticationInfo} from the data store.
@@ -115,17 +124,17 @@ namespace authc {
  * @see org.apache.shiro.crypto.hash.Sha256Hash
  * @since 0.9
  */
-class Sha256CredentialsMatcher {
+class HashedCredentialsMatcher {
 public:
     /**
      * JavaBeans-compatibile no-arg constructor intended for use in IoC/Dependency Injection environments.  If you
      * use this constructor, you <em>MUST</em> also additionally set the
      * {@link #setHashAlgorithmName(String) hashAlgorithmName} property.
      */
-    Sha256CredentialsMatcher()
-            :hashSalted(false),
-             storedCredentialsHexEncoded(true),//false means Base64-encoded
-             hashIterations(1){}
+    HashedCredentialsMatcher()
+        :hashSalted(false),
+         storedCredentialsHexEncoded(true),//false means Base64-encoded
+         hashIterations(1) {}
 
     /**
      * Returns {@code true} if the provided token credentials match the stored account credentials,
@@ -136,55 +145,31 @@ public:
      * @return {@code true} if the provided token credentials match the stored account credentials,
      *         {@code false} otherwise.
      */
-    bool doCredentialsMatch(const AuthenticationToken &token, const AuthenticationInfo &info);
+    bool match(const AuthenticationToken& token, const AuthenticationInfo& info);
 
     /**
-     * Returns the {@code account}'s credentials.
-     * <p/>
-     * <p>This default implementation merely returns
-     * {@link AuthenticationInfo#getCredentials() account.getCredentials()} and exists as a template hook if subclasses
-     * wish to obtain the credentials in a different way or convert them to a different format before
-     * returning.
+     * Returns the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
+     * when performing hashes for credentials matching.
      *
-     * @param info the {@code AuthenticationInfo} stored in the data store to be compared against the submitted authentication
-     *             token's credentials.
-     * @return the {@code account}'s associated credentials.
+     * @return the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
+     *         when performing hashes for credentials matching.
+     * @since 1.1
      */
-    std::string getCredentials(const AuthenticationInfo &info);
-
-    /**
-     * Returns the {@code token}'s credentials.
-     * <p/>
-     * <p>This default implementation merely returns
-     * {@link AuthenticationToken#getCredentials() authenticationToken.getCredentials()} and exists as a template hook
-     * if subclasses wish to obtain the credentials in a different way or convert them to a different format before
-     * returning.
-     *
-     * @param token the {@code AuthenticationToken} submitted during the authentication attempt.
-     * @return the {@code token}'s associated credentials.
-     */
-    std::string getCredentials(const AuthenticationToken &token) {
-        return token.getCredentials();
+    std::string getHashAlgorithmName() const {
+        return hashAlgorithm;
     }
 
     /**
-     * Returns {@code true} if the {@code tokenCredentials} argument is logically equal to the
-     * {@code accountCredentials} argument.
-     * <p/>
-     * <p>If both arguments are either a byte array (byte[]), char array (char[]) or String, they will be both be
-     * converted to raw byte arrays via the {@link #toBytes toBytes} method first, and then resulting byte arrays
-     * are compared via {@link Arrays#equals(byte[], byte[]) Arrays.equals(byte[],byte[])}.</p>
-     * <p/>
-     * <p>If either argument cannot be converted to a byte array as described, a simple Object <code>equals</code>
-     * comparison is made.</p>
-     * <p/>
-     * <p>Subclasses should override this method for more explicit equality checks.
+     * Sets the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
+     * when performing hashes for credentials matching.
      *
-     * @param tokenCredentials   the {@code AuthenticationToken}'s associated credentials.
-     * @param accountCredentials the {@code AuthenticationInfo}'s stored credentials.
-     * @return {@code true} if the {@code tokenCredentials} are equal to the {@code accountCredentials}.
+     * @param hashAlgorithmName the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName}
+     *                          to use when performing hashes for credentials matching.
+     * @since 1.1
      */
-    bool equals(const std::string &tokenCredentials, const std::string &accountCredentials);
+    void setHashAlgorithmName(const std::string& hashAlgorithmName) {
+        this->hashAlgorithm = hashAlgorithmName;
+    }
 
     /**
      * Returns {@code true} if the system's stored credential hash is Hex encoded, {@code false} if it
@@ -197,7 +182,7 @@ public:
      * @return {@code true} if the system's stored credential hash is Hex encoded, {@code false} if it
      *         is Base64 encoded.  Default is {@code true}
      */
-    bool isStoredCredentialsHexEncoded() {
+    bool isStoredCredentialsHexEncoded() const {
         return storedCredentialsHexEncoded;
     }
 
@@ -241,7 +226,7 @@ public:
      *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
      *             are almost impossible to break.  This method will be removed in Shiro 2.0.
      */
-    bool isHashSalted() {
+    bool isHashSalted() const {
         return hashSalted;
     }
 
@@ -279,7 +264,7 @@ public:
      * @return the number of times a submitted {@code AuthenticationToken}'s credentials will be hashed before
      *         comparing to the credentials stored in the system.
      */
-    int getHashIterations() {
+    int getHashIterations() const {
         return hashIterations;
     }
 
@@ -295,34 +280,37 @@ public:
      * @param hashIterations the number of times to hash a submitted {@code AuthenticationToken}'s credentials.
      */
     void setHashIterations(int hashIterations) {
-        if (hashIterations < 1)  this->hashIterations = 1;
-        else this->hashIterations = hashIterations;
+        if (hashIterations < 1) { this->hashIterations = 1; }
+        else { this->hashIterations = hashIterations; }
     }
 
+private:
     /**
-     * Returns a salt value used to hash the token's credentials.
+     * Returns the {@code account}'s credentials.
      * <p/>
-     * This default implementation merely returns {@code token.getPrincipal()}, effectively using the user's
-     * identity (username, user id, etc) as the salt, a most common technique.  If you wish to provide the
-     * authentication token's salt another way, you may override this method.
+     * <p>This default implementation merely returns
+     * {@link AuthenticationInfo#getCredentials() account.getCredentials()} and exists as a template hook if subclasses
+     * wish to obtain the credentials in a different way or convert them to a different format before
+     * returning.
      *
-     * @param token the AuthenticationToken submitted during the authentication attempt.
-     * @return a salt value to use to hash the authentication token's credentials.
-     * @deprecated since Shiro 1.1.  Hash salting is now expected to be based on if the {@link AuthenticationInfo}
-     *             returned from the {@code Realm} is a {@link SaltedAuthenticationInfo} instance and its
-     *             {@link org.apache.shiro.authc.SaltedAuthenticationInfo#getCredentialsSalt() getCredentialsSalt()} method returns a non-null value.
-     *             This method and the 1.0 behavior still exists for backwards compatibility if the {@code Realm} does not return
-     *             {@code SaltedAuthenticationInfo} instances, but <b>it is highly recommended that {@code Realm} implementations
-     *             that support hashed credentials start returning {@link SaltedAuthenticationInfo SaltedAuthenticationInfo}
-     *             instances as soon as possible</b>.<p/>
-     *             This is because salts should always be obtained from the stored account information and
-     *             never be interpreted based on user/Subject-entered data.  User-entered data is easier to compromise for
-     *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
-     *             are almost impossible to break.  This method will be removed in Shiro 2.0.
+     * @param info the {@code AuthenticationInfo} stored in the data store to be compared against the submitted authentication
+     *             token's credentials.
+     * @return the {@code account}'s associated credentials.
      */
-    std::string getSalt(const AuthenticationToken &token) {
-        return token.getPrincipal();
-    }
+    void getCredentials(const AuthenticationInfo& info, std::string* credentials);
+
+    /**
+     * Returns the {@code token}'s credentials.
+     * <p/>
+     * <p>This default implementation merely returns
+     * {@link AuthenticationToken#getCredentials() authenticationToken.getCredentials()} and exists as a template hook
+     * if subclasses wish to obtain the credentials in a different way or convert them to a different format before
+     * returning.
+     *
+     * @param token the {@code AuthenticationToken} submitted during the authentication attempt.
+     * @return the {@code token}'s associated credentials.
+     */
+    void getCredentials(const AuthenticationToken& token, std::string* credentials);
 
     /**
      * Hash the provided {@code token}'s credentials using the salt stored with the account if the
@@ -342,28 +330,23 @@ public:
      * @return the token credentials hash
      * @since 1.1
      */
-    std::string hashProvidedCredentials(const AuthenticationToken &token, const AuthenticationInfo &info);
+    void hashProvidedCredentials(const AuthenticationToken& token,
+                                 const AuthenticationInfo& info,
+                                 std::string* credentials);
 
-
-    /**
-     * Hashes the provided credentials a total of {@code hashIterations} times, using the given salt.  The hash
-     * implementation/algorithm used is based on the {@link #getHashAlgorithmName() hashAlgorithmName} property.
-     *
-     * @param credentials    the submitted authentication token's credentials to hash
-     * @param salt           the value to salt the hash, or {@code null} if a salt will not be used.
-     * @param hashIterations the number of times to hash the credentials.  At least one hash will always occur though,
-     *                       even if this argument is 0 or negative.
-     * @return the hashed value of the provided credentials, according to the specified salt and hash iterations.
-     */
-    std::string hashProvidedCredentials(const std::string &credentials, const std::string &salt, int hashIterations);
+    cetty::shiro::crypt::DigestEngine* getDigestEngine();
 
 private:
     bool hashSalted;
     bool storedCredentialsHexEncoded;
 
     int hashIterations;
+
+    std::string hashAlgorithm;
 };
+
 }
 }
 }
-#endif // #if !defined(CETTY_SHIRO_AUTHC_SHA256CREDENTIALSMATCHER_H)
+
+#endif // #if !defined(CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHER_H)

@@ -43,6 +43,29 @@ namespace crypt {
 
 using namespace cetty::util;
 
+/**
+ * Lookup table for turning bytes into their position in the
+ * Base64 alphabet.
+ */
+static const int DECODE_HEX[] = {
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0, 10, 11, 12, 13, 14, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+};
+
 DigestEngine::DigestEngine() {
 }
 
@@ -64,7 +87,20 @@ std::string DigestEngine::digestToHex(const Digest& bytes) {
 }
 
 std::string DigestEngine::digestToBase64(const Digest& bytes) {
+    std::string digest(bytes.begin(), bytes.end());
+    std::string out;
+    Base64::encode(digest, &out);
+    return out;
+}
 
+void DigestEngine::digestFromHex(const std::string& hex, std::string* out) {
+    for (std::size_t i = 0, j = hex.size(); i < j - 1; i += 2) {
+        out->append(1, (char)(DECODE_HEX[hex[i]] << 4) | (DECODE_HEX[hex[i+1]]));
+    }
+}
+
+void DigestEngine::digestFromBase64(const std::string& base64, std::string* out) {
+    Base64::decode(base64, out);
 }
 
 }

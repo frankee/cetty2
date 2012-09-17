@@ -24,7 +24,7 @@
 #include <boost/function.hpp>
 #include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
-#include <cetty/shiro/authc/Sha256CredentialsMatcher.h>
+#include <cetty/shiro/authc/CredentialsMatcher.h>
 
 namespace cetty {
 namespace shiro {
@@ -55,8 +55,7 @@ using namespace cetty::shiro::realm;
  */
 class Authenticator {
 public:
-    typedef boost::function2<void, const AuthenticationToken&, const AuthenticationInfo*> LoginSuccessCallback;
-    typedef boost::function1<void, const AuthenticationToken&> LoginFailureCallback;
+    typedef boost::function3<void, int, const AuthenticationToken&, const AuthenticationInfoPtr&> LoginCallback;
     typedef boost::function1<void, std::string> LogoutCallback;
 
     typedef boost::function1<void, const AuthenticationInfoPtr&> AuthenticateCallback;
@@ -68,20 +67,9 @@ public:
      */
     Authenticator() {}
     Authenticator(const RealmPtr& realm);
+    Authenticator(const RealmPtr& realm, const CredentialsMatcher& matcher);
 
     virtual ~Authenticator() {}
-
-    /**
-     * Returns the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
-     * credentials with those stored in the system.
-     *
-     * <p>Unless overridden by the {@link #setCredentialsMatcher setCredentialsMatcher} method, the default
-     * value is a {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher SimpleCredentialsMatcher} instance.
-     *
-     * @return the <code>CredentialsMatcher</code> used during an authentication attempt to verify submitted
-     *         credentials with those stored in the system.
-     */
-    Sha256CredentialsMatcher *getCredentialsMatcher() const { return matcher; }
 
     /**
      * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
@@ -93,18 +81,9 @@ public:
      *
      * @param credentialsMatcher the matcher to use.
      */
-    void setCredentialsMatcher(Sha256CredentialsMatcher *matcher) {
-        this->matcher = matcher;
+    void setCredentialsMatcher(const CredentialsMatcher& matcher) {
+        this->credentialsMatcher = matcher;
     }
-
-    /**
-     * This implementation merely calls
-     * {@link #notifyLogout(org.apache.shiro.subject.PrincipalCollection) notifyLogout} to allow any registered listeners
-     * to react to the logout.
-     *
-     * @param principals the identifying principals of the {@code Subject}/account logging out.
-     */
-    virtual void onLogout(const std::string &user) { notifyLogout(user); }
 
     /**
      * Implementation of the {@link Authenticator} interface that functions in the following manner:
@@ -126,15 +105,18 @@ public:
      * @throws AuthenticationException if there is any problem during the authentication process - see the
      *                                 interface's JavaDoc for a more detailed explanation.
      */
-    void authenticate(const AuthenticationToken &token,
-        const AuthenticateCallback& callback);
+    void authenticate(const AuthenticationToken& token,
+                      const AuthenticateCallback& callback);
 
     /**
      * Sets all realms used by this Authenticator, providing PAM (Pluggable Authentication Module) configuration.
      *
      * @param realms the realms to consult during authentication attempts.
      */
-    void setRealm(const AuthenticatingRealm&realm) {
+    void setRealm(const AuthenticatingRealmPtr& realm) {
+        if (realm) {
+            this->realm = realm;
+        }
     }
 
     /**
@@ -142,111 +124,27 @@ public:
      *
      * @return the realm(s) used by this {@code Authenticator} during an authentication attempt.
      */
-    const AuthenticatingRealmPtr& getRealm() const{
+    const AuthenticatingRealmPtr& getRealm() const {
         return this->realm;
     }
 
-    /**
-     * Sets the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     * attempts.
-     *
-     * @param listeners one or more {@code AuthenticationListener}s that should be notified due to an
-     *                  authentication attempt.
-     */
-    void addSuccessListener(const LoginSuccessCallback& successListeners){
-    }
-
-    void addFailureListener(const LoginFailureCallback& failureListeners){
-    }
-
-    void addLogoutListener(const LogoutCallback& logoutListeners){
-    }
-
-    /**
-     * Returns the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     * attempts.
-     *
-     * @return the {@link AuthenticationListener AuthenticationListener}s that should be notified during authentication
-     *         attempts.
-     */
-    const std::vector<LoginSuccessCallback>& getSuccessListener() const{
-        return this->successListeners;
-    }
-
-    const std::vector<LoginFailureCallback>& getFailureListener() const{
-        return this->failureListeners;
-    }
-
-    const std::vector<LogoutCallback>& getLogoutListener() const {
-        return this->logoutListeners;
-    }
-
-protected:
-    /**
-     * Notifies any registered {@link AuthenticationListener AuthenticationListener}s that
-     * authentication was successful for the specified {@code token} which resulted in the specified
-     * {@code info}.  This implementation merely iterates over the internal {@code listeners} collection and
-     * calls {@link AuthenticationListener#onSuccess(AuthenticationToken, AuthenticationInfo) onSuccess}
-     * for each.
-     *
-     * @param token the submitted {@code AuthenticationToken} that resulted in a successful authentication.
-     * @param info  the returned {@code AuthenticationInfo} resulting from the successful authentication.
-     */
-    void notifySuccess(const AuthenticationToken &token, const AuthenticationInfo &info) {
-        std::vector<LoginSuccessCallback>::iterator it = this->successListeners.begin();
-        for (; it != this->successListeners.end(); ++it) (*it)(token, &info);
-
-    }
-
-    /**
-     * Notifies any registered {@link AuthenticationListener AuthenticationListener}s that
-     * authentication failed for the
-     * specified {@code token} which resulted in the specified {@code ae} exception.  This implementation merely
-     * iterates over the internal {@code listeners} collection and calls
-     * {@link AuthenticationListener#onFailure(AuthenticationToken, AuthenticationException) onFailure}
-     * for each.
-     *
-     * @param token the submitted {@code AuthenticationToken} that resulted in a failed authentication.
-     * @param ae    the resulting {@code AuthenticationException} that caused the authentication to fail.
-     */
-    void notifyFailure(const AuthenticationToken &token) {
-        std::vector<LoginFailureCallback>::iterator it = this->failureListeners.begin();
-        for (; it != this->failureListeners.end(); ++it) (*it)(token);
-    }
-
-    /**
-     * Notifies any registered {@link AuthenticationListener AuthenticationListener}s that a
-     * {@code Subject} has logged-out.  This implementation merely
-     * iterates over the internal {@code listeners} collection and calls
-     * {@link AuthenticationListener#onLogout(org.apache.shiro.subject.PrincipalCollection) onLogout}
-     * for each.
-     *
-     * @param principals the identifying principals of the {@code Subject}/account logging out.
-     */
-    void notifyLogout(const std::string &user) {
-        std::vector<LogoutCallback>::iterator it = this->logoutListeners.begin();
-        for (; it != this->logoutListeners.end(); ++it) (*it)(user);
-    }
+private:
+    void onGetAuthenticationInfo(const AuthenticationInfoPtr& info,
+                                 const AuthenticationToken& token,
+                                 const AuthenticateCallback& callback);
 
 private:
     /**
-     * Any registered listeners that wish to know about things during the authentication process.
-     */
-    std::vector<LoginSuccessCallback> successListeners;
-    std::vector<LoginFailureCallback> failureListeners;
-    std::vector<LogoutCallback> logoutListeners;
-
-     /**
-     * List of realms that will be iterated through when a user authenticates
-     * notice the lifecycle of AuthenticationRealm.
-     */
+    * List of realms that will be iterated through when a user authenticates
+    * notice the lifecycle of AuthenticationRealm.
+    */
     AuthenticatingRealmPtr realm;
 
     /**
      * Password matcher used to determine if the provided password matches
      * the password stored in the data store.
      */
-    Sha256CredentialsMatcher *matcher;
+    CredentialsMatcher credentialsMatcher;
 };
 
 }
