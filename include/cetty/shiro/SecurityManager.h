@@ -68,13 +68,14 @@ using namespace cetty::shiro::session;
  */
 class SecurityManager {
 public:
-    typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&)> LoginCallback;
-    typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
-    typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
+    typedef boost::function4<void, int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&> LoginCallback;
+    typedef boost::function1<void, const SessionPtr&> BeforeLogoutCallback;
+    typedef boost::function1<void, const AuthenticationInfoPtr&> AuthenticateCallback;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
-    SecurityManager(): sessionManager() { }
+    SecurityManager(): sessionManager() {}
+
     virtual ~SecurityManager() {}
 
     /// login by user name and password
@@ -96,13 +97,12 @@ public:
         const PermissionPtr& permission,
         const AuthorizeCallback& callback) const;
 
-
     SessionManager& getSessionManager();
     Authenticator& getAuthenticator();
     Authorizer& getAuthorizer();
 
     void setRealm();
-    const RealmPtr& getRealms() const;
+    const RealmPtr& getRealm() const;
 
 private:
     /// login by session id

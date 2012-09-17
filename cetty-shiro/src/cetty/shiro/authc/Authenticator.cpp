@@ -6,31 +6,50 @@
  */
 
 #include <cetty/shiro/authc/Authenticator.h>
+
+#include <boost/bind.hpp>
+
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
 
-    using namespace cetty::shiro::realm;
+using namespace cetty::shiro::realm;
 
-    void Authenticator::authenticate(const AuthenticationToken &token,
-        const AuthenticateCallback& callback) {
-    if(token.getPrincipal().empty()) {
+void Authenticator::authenticate(const AuthenticationToken& token,
+                                 const AuthenticateCallback& callback) {
+    if (token.getPrincipal().empty()) {
         return;
     }
 
-    //if(!doAuthenticate(token, info)) {
-    //    notifyFailure(token);
-    //    return false;
-    //}
+    if (realm) {
+        realm->getAuthenticationInfo(token,
+                                     boost::bind(&Authenticator::onGetAuthenticationInfo,
+                                             this,
+                                             _1,
+                                             token,
+                                             callback));
+    }
+    else {
 
-    //notifySuccess(token, *info);
+    }
+}
+
+void Authenticator::onGetAuthenticationInfo(const AuthenticationInfoPtr& info,
+        const AuthenticationToken& token,
+        const AuthenticateCallback& callback) {
+    if (info && credentialsMatcher(token, *info)) {
+        callback(info);
+    }
+    else {
+        callback(AuthenticationInfoPtr());
+    }
 }
 
 }
 }
 }
-
-

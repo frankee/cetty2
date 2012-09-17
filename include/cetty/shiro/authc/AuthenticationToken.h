@@ -226,11 +226,9 @@ public:
      */
     void setRememberMe(bool rememberMe) { this->rememberMe = rememberMe; }
 
-    void setNonce(const std::string& nonce) { this->nonce = nonce; }
-    const std::string& getNonce() const { return nonce; }
 
-    void setSeries(const std::string& series) { this->series = series; }
-    const std::string& getSeries() const { return series; }
+    void setSalt(const std::string& salt) { this->salt = salt; }
+    const std::string& getSalt() const { return salt; }
 
     /**
      * Clears out the principal, credentials, rememberMe, and inetAddress.
@@ -257,8 +255,7 @@ private:
     std::string principal;
     std::string credentials;
 
-    std::string nonce;
-    std::string series;
+    std::string salt;
 
     /**
      * The location from where the login attempt occurs, or <code>null</code> if not known or explicitly

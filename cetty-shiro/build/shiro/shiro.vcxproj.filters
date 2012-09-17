@@ -27,9 +27,6 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256CredentialsMatcher.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthenticatingRealm.h">
       <Filter>shiro\realm</Filter>
     </ClInclude>
@@ -64,9 +61,6 @@
       <Filter>shiro\session</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h">
-      <Filter>shiro\authc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\Sha256Hash.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\shiro\PrincipalCollection.h">
@@ -114,6 +108,15 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\crypt\SHA1Engine.h">
       <Filter>shiro\crypt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h">
+      <Filter>shiro\authc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialMatcher.h">
+      <Filter>shiro\authc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManagerConfig.h">
+      <Filter>shiro</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
@@ -146,12 +149,6 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp">
       <Filter>shiro\authc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256CredentialsMatcher.cpp">
-      <Filter>shiro\authc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\shiro\authc\Sha256Hash.cpp">
-      <Filter>shiro\authc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\realm\AuthenticatingRealm.cpp">
       <Filter>shiro\realm</Filter>
     </ClCompile>
@@ -172,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\crypt\SHA1Engine.cpp">
       <Filter>shiro\crypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialMatcher.cpp">
+      <Filter>shiro\authc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include <cetty/util/Process.h>
 #include <cetty/shiro/session/Session.h>
 
 namespace cetty {
@@ -26,7 +27,7 @@ std::string SessionIdGenerator::generateId(const SessionPtr& session){
     ptime epoch(boost::gregorian::date(1970,1,1));
     ptime now = microsec_clock::local_time();
     time_duration::tick_type x = (now - epoch).total_nanoseconds();
-    pid_t pid = getpid();
+    Process::PID pid = Process::id();
 
     sid << host << x << pid;
     return sid.str();

@@ -81,7 +81,11 @@ public:
     static std::string digestToHex(const Digest& bytes);
     /// Converts a message digest into a string of hexadecimal numbers.
 
+    static void digestFromHex(const std::string& hex, std::string* out);
+
     static std::string digestToBase64(const Digest& bytes);
+
+    static void digestFromBase64(const std::string& base64, std::string* out);
 
 protected:
     virtual void updateImpl(const void* data, unsigned int length) = 0;
