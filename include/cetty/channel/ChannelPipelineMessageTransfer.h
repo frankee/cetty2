@@ -47,9 +47,7 @@ using namespace cetty::buffer;
 template<typename T, typename U>
 class ChannelPipelineMessageTransfer {
 public:
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg);
-
-    void write(ChannelHandlerContext& ctx, const T& msg, const ChannelFuturePtr& future);
+    void setContext(ChannelHandlerContext& ctx);
 
     bool unfoldAndAdd(const T& msg);
     void write(const T& msg, const ChannelFuturePtr& future);
@@ -58,12 +56,18 @@ public:
 template<typename T>
 class ChannelPipelineMessageTransfer<T, ChannelInboundMessageHandlerContext<T> > {
 public:
-    ChannelPipelineMessageTransfer() : nextCtx() {}
+    ChannelPipelineMessageTransfer() : ctx(), nextCtx() {}
 
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg) {
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+    bool unfoldAndAdd(const T& msg) {
+        BOOST_ASSERT(ctx && "before unfoldAndAdd, must set ctx");
+
         if (!nextCtx) {
             nextCtx
-                = ctx.nextInboundMessageHandlerContext<ChannelInboundMessageHandlerContext<T> >();
+                = ctx->nextInboundMessageHandlerContext<ChannelInboundMessageHandlerContext<T> >();
         }
 
         if (nextCtx && !!msg) {
@@ -74,25 +78,28 @@ public:
         return false;
     }
 
-    //void write(ChannelHandlerContext& ctx, const T& msg) {
-    //    if (unfoldAndAdd(ctx, msg)) {
-    //        ctx.fireMessageUpdated();
-    //    }
-    //}
+    void write(const T& msg, const ChannelFuturePtr& future) {
+        BOOST_ASSERT("InboundMessage Transfer does not support write");
+    }
 
 private:
+    ChannelHandlerContext* ctx;
     ChannelInboundMessageHandlerContext<T>* nextCtx;
 };
 
 template<typename T>
 class ChannelPipelineMessageTransfer<T, ChannelOutboundMessageHandlerContext<T> > {
 public:
-    ChannelPipelineMessageTransfer() : nextCtx(), nextOutCtx() {}
+    ChannelPipelineMessageTransfer() : ctx(), nextCtx(), nextOutCtx() {}
 
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const T& msg) {
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+    bool unfoldAndAdd(const T& msg) {
         if (!nextCtx) {
             nextCtx
-                = ctx.nextOutboundMessageHandlerContext<ChannelOutboundMessageHandlerContext<T> >();
+                = ctx->nextOutboundMessageHandlerContext<ChannelOutboundMessageHandlerContext<T> >();
         }
 
         if (nextCtx && !!msg) {
@@ -103,19 +110,19 @@ public:
         return false;
     }
 
-    void write(ChannelHandlerContext& ctx,
-               const T& msg,
+    void write(const T& msg,
                const ChannelFuturePtr& future) {
         if (!nextOutCtx) {
-            nextOutCtx = ctx.getNextOutboundContext();
+            nextOutCtx = ctx->getNextOutboundContext();
         }
 
-        if (unfoldAndAdd(ctx, msg) && nextOutCtx) {
+        if (unfoldAndAdd(msg) && nextOutCtx) {
             nextOutCtx->flush(*nextOutCtx, future);
         }
     }
 
 private:
+    ChannelHandlerContext* ctx;
     ChannelOutboundMessageHandlerContext<T>* nextCtx;
     ChannelHandlerContext* nextOutCtx;
 };
@@ -123,11 +130,15 @@ private:
 template<>
 class ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelInboundBufferHandlerContext> {
 public:
-    ChannelPipelineMessageTransfer() : nextCtx() {}
+    ChannelPipelineMessageTransfer() : ctx(), nextCtx() {}
 
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const ChannelBufferPtr& msg) {
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+    bool unfoldAndAdd(const ChannelBufferPtr& msg) {
         if (!nextCtx) {
-            nextCtx = ctx.nextInboundBufferHandlerContext();
+            nextCtx = ctx->nextInboundBufferHandlerContext();
         }
 
         if (nextCtx && msg) {
@@ -139,17 +150,22 @@ public:
     }
 
 private:
+    ChannelHandlerContext* ctx;
     ChannelInboundBufferHandlerContext* nextCtx;
 };
 
 template<>
 class ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelOutboundBufferHandlerContext> {
 public:
-    ChannelPipelineMessageTransfer() : nextCtx(), nextOutCtx() {}
+    ChannelPipelineMessageTransfer() : ctx(), nextCtx(), nextOutCtx() {}
 
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const ChannelBufferPtr& msg) {
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+    bool unfoldAndAdd(const ChannelBufferPtr& msg) {
         if (!nextCtx) {
-            nextCtx = ctx.nextOutboundBufferHandlerContext();
+            nextCtx = ctx->nextOutboundBufferHandlerContext();
         }
 
         if (nextCtx && msg) {
@@ -160,19 +176,19 @@ public:
         return false;
     }
 
-    void write(ChannelHandlerContext& ctx,
-               const ChannelBufferPtr& msg,
+    void write(const ChannelBufferPtr& msg,
                const ChannelFuturePtr& future) {
         if (!nextOutCtx) {
-            nextOutCtx = ctx.getNextOutboundContext();
+            nextOutCtx = ctx->getNextOutboundContext();
         }
 
-        if (unfoldAndAdd(ctx, msg) && nextOutCtx) {
+        if (unfoldAndAdd(msg) && nextOutCtx) {
             nextOutCtx->flush(*nextOutCtx, future);
         }
     }
 
 private:
+    ChannelHandlerContext* ctx;
     ChannelOutboundBufferHandlerContext* nextCtx;
     ChannelHandlerContext* nextOutCtx;
 };
@@ -180,19 +196,40 @@ private:
 template<typename T>
 class ChannelPipelineMessageTransfer<T, ChannelPipeline> {
 public:
+    ChannelPipelineMessageTransfer() : ctx() {}
 
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+private:
+    ChannelHandlerContext* ctx;
 };
 
 template<>
 class ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelPipeline> {
 public:
+    ChannelPipelineMessageTransfer() : ctx() {}
 
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+    }
+
+private:
+    ChannelHandlerContext* ctx;
 };
 
 template<typename T, typename U>
 class ChannelPipelineMessageTransfer<std::vector<T>, U> {
 public:
-    bool unfoldAndAdd(ChannelHandlerContext& ctx, const std::vector<T>& msg) {
+    ChannelPipelineMessageTransfer() : ctx() {}
+
+    void setContext(ChannelHandlerContext& ctx) {
+        this->ctx = &ctx;
+        transfer.setContext(ctx);
+    }
+
+    bool unfoldAndAdd(const std::vector<T>& msg) {
         if (msg.empty()) {
             return false;
         }
@@ -202,13 +239,17 @@ public:
         std::size_t j = msg.size();
 
         for (std::size_t i = 0; i < j; ++i) {
-            if (ChannelPipelineMessageTransfer<T, U>::unfoldAndAdd(ctx, msg[i])) {
+            if (transfer.unfoldAndAdd(msg[i])) {
                 added = true;
             }
         }
 
         return added;
     }
+
+private:
+    ChannelHandlerContext* ctx;
+    ChannelPipelineMessageTransfer<T, U> transfer;
 };
 
 }

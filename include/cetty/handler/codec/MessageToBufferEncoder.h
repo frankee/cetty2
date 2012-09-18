@@ -56,6 +56,10 @@ public:
 
     virtual ~MessageToBufferEncoder() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        outboundTransfer.setContext(ctx);
+    }
+
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
         ChannelBufferPtr out;
 
@@ -86,7 +90,7 @@ public:
                     ChannelBufferPtr decodedBuf = encode(ctx, msg, out);
 
                     if (decodedBuf) {
-                        outboundTransfer.write(ctx, decodedBuf, future);
+                        outboundTransfer.write(decodedBuf, future);
                     }
                 }
             }
@@ -101,7 +105,7 @@ public:
         }
 
         if (hasOutBuffer) {
-            outboundTransfer.write(ctx, out, future);
+            outboundTransfer.write(out, future);
         }
     }
 

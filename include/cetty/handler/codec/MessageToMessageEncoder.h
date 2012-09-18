@@ -50,6 +50,10 @@ class MessageToMessageEncoder
 public:
     virtual ~MessageToMessageEncoder() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        outboundTransfer.setContext(ctx);
+    }
+
 protected:
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
@@ -76,7 +80,7 @@ protected:
                     continue;
                 }
 
-                outboundTransfer.unfoldAndAdd(ctx, omsg);
+                outboundTransfer.unfoldAndAdd(omsg);
 
                 outboundQueue.pop_front();
             }

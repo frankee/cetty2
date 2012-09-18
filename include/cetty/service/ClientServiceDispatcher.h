@@ -94,7 +94,7 @@ public:
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         while (!inboundQueue.empty()) {
             OutstandingCallPtr msg = inboundQueue.front();
-            inboundTransfer.unfoldAndAdd(ctx, msg);
+            inboundTransfer.unfoldAndAdd(msg);
             inboundQueue.pop_front();
         }
 

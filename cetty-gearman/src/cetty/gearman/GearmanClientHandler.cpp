@@ -37,7 +37,7 @@ GearmanClientHandler::~GearmanClientHandler() {
 }
 
 void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
-    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
+    if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
@@ -72,7 +72,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Gea
         data = ChannelBuffers::hexDump(msg->getData());
         std::cout<<"the work complete data is "<< data <<std::endl;
 
-        if (inboundTransfer.unfoldAndAdd(ctx, msg)) {
+        if (inboundTransfer.unfoldAndAdd(msg)) {
             ctx.fireMessageUpdated();
         }
         break;
@@ -137,7 +137,7 @@ void GearmanClientHandler::flush(ChannelHandlerContext& ctx, const ChannelFuture
         GearmanMessagePtr& msg = outboundQueue.front();
         if (msg) {
             msgs.push_back(msg);
-            outboundTransfer.unfoldAndAdd(ctx, msg);
+            outboundTransfer.unfoldAndAdd(msg);
         }
         outboundQueue.pop_front();
     }

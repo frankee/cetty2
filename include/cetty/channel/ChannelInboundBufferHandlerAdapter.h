@@ -35,6 +35,11 @@ class ChannelInboundBufferHandlerAdapter : public ChannelInboundBufferHandler {
 public:
     virtual ~ChannelInboundBufferHandlerAdapter() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+        outboundTransfer.setContext(ctx);
+    }
+
 protected:
     typedef InboundContext NextInboundContext;
     typedef OutboundContext NextOutboundContext;

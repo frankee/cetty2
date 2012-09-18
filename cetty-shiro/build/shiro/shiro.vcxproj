@@ -17,6 +17,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialMatcher.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\SimpleCredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfoPtr.h" />

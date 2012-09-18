@@ -394,6 +394,10 @@ protected:
         return cumulation;
     }
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+    }
+
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx, getInboundChannelBuffer());
     }
@@ -413,7 +417,7 @@ protected:
         }
 
         try {
-            if (inboundTransfer.unfoldAndAdd(ctx,
+            if (inboundTransfer.unfoldAndAdd(
                     decodeLast(ctx, replayable, state))) {
                 fireInboundBufferUpdated(ctx, in);
             }
@@ -479,7 +483,7 @@ protected:
                 replayable->syncIndex();
 
                 // A successful decode
-                if (inboundTransfer.unfoldAndAdd(ctx, result)) {
+                if (inboundTransfer.unfoldAndAdd(result)) {
                     decoded = true;
                 }
             }

@@ -50,6 +50,11 @@ public:
     MessageToMessageDecoder() {}
     virtual ~MessageToMessageDecoder() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+        skipInboundTransfer.setContext(ctx);
+    }
+
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
@@ -62,7 +67,7 @@ public:
                 }
 
                 if (!isDecodable(msg)) {
-                    if (skipInboundTransfer.unfoldAndAdd(ctx, msg)) {
+                    if (skipInboundTransfer.unfoldAndAdd(msg)) {
                         notify = true;
                     }
 
@@ -79,7 +84,7 @@ public:
                     continue;
                 }
 
-                if (inboundTransfer.unfoldAndAdd(ctx, omsg)) {
+                if (inboundTransfer.unfoldAndAdd(omsg)) {
                     notify = true;
                 }
 

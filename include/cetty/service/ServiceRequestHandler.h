@@ -95,7 +95,7 @@ public:
             OutstandingCallPtr& msg = outboundQueue.front();
             outMessages.push_back(msg);
 
-            outboundTransfer.unfoldAndAdd(ctx, msg->request);
+            outboundTransfer.unfoldAndAdd(msg->request);
             outboundQueue.pop_front();
         }
 

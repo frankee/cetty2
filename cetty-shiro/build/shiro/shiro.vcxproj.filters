@@ -117,6 +117,9 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManagerConfig.h">
       <Filter>shiro</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\SimpleCredentialsMatcher.h">
+      <Filter>shiro\authc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
