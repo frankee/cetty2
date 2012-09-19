@@ -98,7 +98,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
                                       req->getMethod(),
                                       response));
 
-    outboundTransfer.write(ctx, message, ctx.getChannel()->newSucceededFuture());
+    outboundTransfer.write(message, ctx.getChannel()->newSucceededFuture());
 }
 
 cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {

@@ -35,13 +35,20 @@ HttpRequestTemplate::HttpRequestTemplate(const std::string& method,
                Parameter::createFromPath(segment.name, segment.alias, i));
        }
        else if (segment.type == UriTemplate::PATH_SEG_ALIAS) {
-           if (service.empty()) {
-               service = segment.alias;
+           if (this->service.empty()) {
+               this->service = segment.alias;
            }
            else if (this->method.empty()){
                this->method = segment.alias;
            }
        }
+   }
+
+   // for only has method alias
+   if (!this->service.empty() && this->method.empty()) {
+       std::string::size_type pos = this->service.find_last_of('.');
+       this->method = this->service.substr(pos + 1);
+       this->service = this->service.substr(0, pos);
    }
 
    const UriTemplate::QueryParams& queryParams = uriTemplate.getQueryParams();

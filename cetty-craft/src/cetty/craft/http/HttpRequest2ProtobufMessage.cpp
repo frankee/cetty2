@@ -29,6 +29,8 @@
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 
+#include <cetty/protobuf/serialization/ProtobufParser.h>
+
 #include <cetty/craft/http/ServiceRequestMapper.h>
 
 namespace cetty {
@@ -38,6 +40,7 @@ namespace http {
 using namespace google::protobuf;
 using namespace cetty::util;
 using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::serialization;
 
 HttpRequest2ProtobufMessage::HttpRequest2ProtobufMessage() {
 
@@ -77,6 +80,24 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 return message;
             }
             else {
+                // deprecated
+                if (request->getQueryParameters().has("req")) {
+                    ProtobufParser* jsonParser = ProtobufParser::getParser("json");
+                    if (jsonParser) {
+                        Message* req = prototype->New();
+                        const std::string& reqStr = request->getQueryParameters().get("req");
+
+                        if (req && !jsonParser->parse(reqStr, req)) {
+                            ProtobufServiceMessagePtr message(
+                                new ProtobufServiceMessage(ProtobufServiceMessage::T_REQUEST,
+                                tmpl->getService(),
+                                tmpl->getMethod()));
+                            message->setPayload(req);
+                            return message;
+                        }
+                    }
+                }
+
                 LOG_ERROR << "can not parse the message: "
                     << prototype->GetDescriptor()->full_name();
             }

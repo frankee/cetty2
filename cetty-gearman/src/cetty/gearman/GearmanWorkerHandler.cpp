@@ -55,7 +55,7 @@ void GearmanWorkerHandler::registerFunction(const std::string& functionName,
         ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createCandoMessage(functionName);
 
-    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
+    if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
@@ -83,7 +83,7 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
             std::cout << "handleJob::the msg is  " << ret << std::endl;
             std::cout << "handleJob::the msg is  " << (message->getParameters())[0] <<std::endl;
 
-            if (outboundTransfer.unfoldAndAdd(ctx, message)) {
+            if (outboundTransfer.unfoldAndAdd(message)) {
                 ctx.flush();
             }
         }
@@ -98,21 +98,21 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
 void GearmanWorkerHandler::grabJob(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobMessage();
-    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
+    if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
 
 void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobUniqMessage();
-    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
+    if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
 
 void GearmanWorkerHandler::preSleep(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createPreSleepMessage();
-    if (outboundTransfer.unfoldAndAdd(ctx, msg)) {
+    if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
@@ -203,7 +203,7 @@ void GearmanWorkerHandler::flush(ChannelHandlerContext& ctx,
 
         switch (message->getType()) {
         case GearmanMessage::WORK_COMPLETE:
-            outboundTransfer.unfoldAndAdd(ctx, message);
+            outboundTransfer.unfoldAndAdd(message);
             break;
 
         default:

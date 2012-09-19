@@ -37,6 +37,11 @@ public:
 public:
     virtual ~ChannelMessageHandlerAdapter() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+        outboundTransfer.setContext(ctx);
+    }
+
 protected:
     ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
     ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;

@@ -84,7 +84,7 @@ public:
             request->setId(++id);
             outMessages.push_back(request);
 
-            outboundTransfer.unfoldAndAdd(ctx, request);
+            outboundTransfer.unfoldAndAdd(request);
             outboundQueue.pop_front();
         }
 

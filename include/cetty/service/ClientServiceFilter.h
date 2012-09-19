@@ -72,7 +72,7 @@ protected:
             ResponseOutT omsg = filterResponse(ctx, reqs.front(), msg);
             reqs.pop_front();
 
-            if (inboundTransfer.unfoldAndAdd(ctx, omsg)) {
+            if (inboundTransfer.unfoldAndAdd(omsg)) {
                 notify = true;
             }
 
@@ -92,7 +92,7 @@ protected:
             reqs.push_back(req);
             RequestOutT oreq = filterRequest(ctx, req);
 
-            outboundTransfer.unfoldAndAdd(ctx, oreq);
+            outboundTransfer.unfoldAndAdd(oreq);
 
             outboundQueue.pop_front();
         }

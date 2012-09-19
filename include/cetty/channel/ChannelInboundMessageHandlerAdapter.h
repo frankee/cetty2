@@ -33,6 +33,11 @@ class ChannelInboundMessageHandlerAdapter
 public:
     virtual ~ChannelInboundMessageHandlerAdapter() {}
 
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+        outboundTransfer.setContext(ctx);
+    }
+
 protected:
     typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
     typedef OutboundContext NextOutboundContext;

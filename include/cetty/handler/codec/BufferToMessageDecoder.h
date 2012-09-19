@@ -48,6 +48,10 @@ using namespace cetty::util;
 template<typename InboundOutT>
 class BufferToMessageDecoder : public ChannelInboundBufferHandler {
 public:
+    virtual void afterAdd(ChannelHandlerContext& ctx) {
+        inboundTransfer.setContext(ctx);
+    }
+
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx);
     }
@@ -60,7 +64,7 @@ public:
         }
 
         try {
-            if (inboundTransfer.unfoldAndAdd(ctx, decodeLast(ctx, in))) {
+            if (inboundTransfer.unfoldAndAdd(decodeLast(ctx, in))) {
                 in->discardReadBytes();
                 ctx.fireMessageUpdated();
             }
@@ -138,7 +142,7 @@ protected:
                     }
                 }
 
-                if (inboundTransfer.unfoldAndAdd(ctx, o)) {
+                if (inboundTransfer.unfoldAndAdd(o)) {
                     decoded = true;
                 }
                 else {

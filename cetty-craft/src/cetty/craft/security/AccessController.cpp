@@ -81,7 +81,7 @@ void AccessController::onAuthorized(bool permitted,
                                     ChannelHandlerContext& ctx,
                                     const ProtobufServiceMessagePtr& req) {
     if (permitted) {
-        inboundTransfer.unfoldAndAdd(ctx, req);
+        inboundTransfer.unfoldAndAdd(req);
         ctx.fireMessageUpdated();
     }
     else {
