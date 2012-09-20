@@ -22,7 +22,7 @@
  */
 
 #include <string>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 
 #include <cetty/buffer/Array.h>
 #include <cetty/buffer/ByteOrder.h>
@@ -516,7 +516,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 1</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual boost::int8_t getByte(int index) const = 0;
+    virtual int8_t getByte(int index) const = 0;
 
     /**
      * Gets an unsigned byte at the specified absolute <tt>index</tt> in this
@@ -527,7 +527,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 1</tt> is greater than <tt>this.capacity</tt>
      */
-    boost::uint8_t getUnsignedByte(int index) const;
+    uint8_t getUnsignedByte(int index) const;
 
     /**
      * Gets a 16-bit short integer at the specified absolute <tt>index</tt> in
@@ -538,7 +538,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 2</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual boost::int16_t getShort(int index) const = 0;
+    virtual int16_t getShort(int index) const = 0;
 
     /**
      * Gets an unsigned 16-bit short integer at the specified absolute
@@ -549,7 +549,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 2</tt> is greater than <tt>this.capacity</tt>
      */
-    boost::uint16_t getUnsignedShort(int index) const;
+    uint16_t getUnsignedShort(int index) const;
 
     /**
      * Gets a 32-bit integer at the specified absolute <tt>index</tt> in
@@ -560,7 +560,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 4</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual boost::int32_t  getInt(int index) const = 0;
+    virtual int32_t  getInt(int index) const = 0;
 
     /**
      * Gets an unsigned 32-bit integer at the specified absolute <tt>index</tt>
@@ -571,7 +571,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 4</tt> is greater than <tt>this.capacity</tt>
      */
-    boost::uint32_t getUnsignedInt(int index) const;
+    uint32_t getUnsignedInt(int index) const;
 
     /**
      * Gets a 64-bit long integer at the specified absolute <tt>index</tt> in
@@ -582,7 +582,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 8</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual boost::int64_t getLong(int index) const = 0;
+    virtual int64_t getLong(int index) const = 0;
 
     /**
      * Gets a 32-bit floating point number at the specified absolute
@@ -850,7 +850,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 8</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual int setLong(int index, boost::int64_t value) = 0;
+    virtual int setLong(int index, int64_t value) = 0;
 
     /**
      * Sets the specified 32-bit floating-point number at the specified
@@ -1029,7 +1029,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>1</tt>
      */
-    boost::int8_t readByte();
+    int8_t readByte();
 
     /**
      * Gets an unsigned byte at the current <tt>readerIndex</tt> and increases
@@ -1038,7 +1038,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>1</tt>
      */
-    boost::uint8_t readUnsignedByte();
+    uint8_t readUnsignedByte();
 
     /**
      * Gets a 16-bit short integer at the current <tt>readerIndex</tt>
@@ -1047,7 +1047,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>2</tt>
      */
-    boost::int16_t readShort();
+    int16_t readShort();
 
     /**
      * Gets an unsigned 16-bit short integer at the current <tt>readerIndex</tt>
@@ -1056,7 +1056,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>2</tt>
      */
-    boost::uint16_t readUnsignedShort();
+    uint16_t readUnsignedShort();
 
     /**
      * Gets a 32-bit integer at the current <tt>readerIndex</tt>
@@ -1065,7 +1065,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>4</tt>
      */
-    boost::int32_t readInt();
+    int32_t readInt();
 
     /**
      * Gets an unsigned 32-bit integer at the current <tt>readerIndex</tt>
@@ -1074,7 +1074,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>4</tt>
      */
-    boost::uint32_t readUnsignedInt();
+    uint32_t readUnsignedInt();
 
     /**
      * Gets a 64-bit integer at the current <tt>readerIndex</tt>
@@ -1083,7 +1083,7 @@ public:
      * @throws RangeException
      *         if <tt>this.readableBytes</tt> is less than <tt>8</tt>
      */
-    boost::int64_t readLong();
+    int64_t readLong();
 
     /**
      * Gets a 32-bit floating point number at the current <tt>readerIndex</tt>
@@ -1341,9 +1341,9 @@ public:
      * @throws RangeException
      *         if <tt>this.writableBytes</tt> is less than <tt>8</tt>
      */
-    int writeLong(boost::int64_t value);
+    int writeLong(int64_t value);
 
-    int writeLongAhead(boost::int64_t value);
+    int writeLongAhead(int64_t value);
 
     /**
      * Sets the specified 32-bit floating point number at the current
@@ -1532,7 +1532,7 @@ public:
      * @return the absolute index of the first occurrence if found.
      *         <tt>-1</tt> otherwise.
      */
-    int indexOf(int fromIndex, int toIndex, boost::int8_t value) const;
+    int indexOf(int fromIndex, int toIndex, int8_t value) const;
 
     /**
      * Locates the first place where the specified <tt>indexFinder</tt>
@@ -1565,7 +1565,7 @@ public:
      * @return the number of bytes between the current <tt>readerIndex</tt>
      *         and the first occurrence if found. <tt>-1</tt> otherwise.
      */
-    int bytesBefore(boost::int8_t value) const;
+    int bytesBefore(int8_t value) const;
 
     /**
      * Locates the first place where the specified <tt>indexFinder</tt> returns
@@ -1596,7 +1596,7 @@ public:
      * @throws RangeException
      *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>
      */
-    int bytesBefore(int length, boost::int8_t value) const;
+    int bytesBefore(int length, int8_t value) const;
 
     /**
      * Locates the first place where the specified <tt>indexFinder</tt> returns
@@ -1631,7 +1631,7 @@ public:
      *         if <tt>index + length</tt> is greater than <tt>this.capacity</tt>,
      *         will only search to this.capacity.
      */
-    int bytesBefore(int index, int length, boost::int8_t value) const;
+    int bytesBefore(int index, int length, int8_t value) const;
 
     /**
      * Locates the first place where the specified <tt>indexFinder</tt> returns

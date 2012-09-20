@@ -33,11 +33,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+#include <cetty/util/URI.h>
+
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include "cetty/util/URI.h"
-#include "cetty/util/Integer.h"
-#include "cetty/util/Exception.h"
+#include <cetty/util/Integer.h>
+#include <cetty/util/Exception.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace util {
@@ -65,6 +67,10 @@ URI::URI(const char* uri):
     parse(std::string(uri));
 }
 
+URI::URI(const StringPiece& uri)
+: _port(0) {
+    parse(std::string(uri.data(), uri.size()));
+}
 
 URI::URI(const std::string& scheme, const std::string& pathEtc):
     _scheme(scheme),
@@ -133,7 +139,6 @@ URI::URI(const URI& baseURI, const std::string& relativeURI):
     _fragment(baseURI._fragment) {
     resolve(relativeURI);
 }
-
 
 URI::~URI() {
 }

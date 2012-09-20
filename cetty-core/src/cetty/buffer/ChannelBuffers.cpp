@@ -54,14 +54,14 @@ public:
 };
 
 ChannelBufferPtr ChannelBuffers::buffer(const ByteOrder& endianness, int capacity, int aheadBytes) {
-    if (endianness == ByteOrder::big_endian) {
+    if (endianness == ByteOrder::BO_BIG_ENDIAN) {
         if (capacity == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(capacity, aheadBytes));
     }
-    else if (endianness == ByteOrder::little_endian) {
+    else if (endianness == ByteOrder::BO_LITTLE_ENDIAN) {
         if (capacity == 0) {
             return EMPTY_BUFFER;
         }
@@ -73,7 +73,7 @@ ChannelBufferPtr ChannelBuffers::buffer(const ByteOrder& endianness, int capacit
 }
 
 cetty::buffer::ChannelBufferPtr ChannelBuffers::buffer(int capacity, int aheadBytes) {
-    return ChannelBuffers::buffer(ByteOrder::big_endian, capacity, aheadBytes);
+    return ChannelBuffers::buffer(ByteOrder::BO_BIG_ENDIAN, capacity, aheadBytes);
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer(ChannelBufferFactory& factory) {
@@ -99,23 +99,23 @@ ChannelBufferPtr ChannelBuffers::dynamicBuffer(const ByteOrder& endianness,
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer() {
-    return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, 256);
+    return ChannelBuffers::dynamicBuffer(ByteOrder::BO_BIG_ENDIAN, 256);
 }
 
 ChannelBufferPtr ChannelBuffers::dynamicBuffer(int estimatedLength,
     int aheadBytes) {
-    return ChannelBuffers::dynamicBuffer(ByteOrder::big_endian, estimatedLength);
+    return ChannelBuffers::dynamicBuffer(ByteOrder::BO_BIG_ENDIAN, estimatedLength);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const ByteOrder& endianness, const Array& arry) {
-    if (endianness == ByteOrder::big_endian) {
+    if (endianness == ByteOrder::BO_BIG_ENDIAN) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(arry));
     }
-    else if (endianness == ByteOrder::little_endian) {
+    else if (endianness == ByteOrder::BO_LITTLE_ENDIAN) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
@@ -281,23 +281,23 @@ ChannelBufferPtr ChannelBuffers::wrappedBuffer(std::string& str) {
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& arry) {
-    return ChannelBuffers::wrappedBuffer(ByteOrder::big_endian, arry);
+    return ChannelBuffers::wrappedBuffer(ByteOrder::BO_BIG_ENDIAN, arry);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& arry, int offset, int length) {
-    return ChannelBuffers::wrappedBuffer(ByteOrder::big_endian, arry, offset, length);
+    return ChannelBuffers::wrappedBuffer(ByteOrder::BO_BIG_ENDIAN, arry, offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& array0, const Array& array1) {
-    return wrappedBuffer(ByteOrder::big_endian, array0, array1);
+    return wrappedBuffer(ByteOrder::BO_BIG_ENDIAN, array0, array1);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(const Array& array0, const Array& array1, const Array& array2) {
-    return wrappedBuffer(ByteOrder::big_endian, array0, array1, array2);
+    return wrappedBuffer(ByteOrder::BO_BIG_ENDIAN, array0, array1, array2);
 }
 
 ChannelBufferPtr ChannelBuffers::wrappedBuffer(std::vector<Array>& arrays) {
-    return wrappedBuffer(ByteOrder::big_endian, arrays);
+    return wrappedBuffer(ByteOrder::BO_BIG_ENDIAN, arrays);
 }
 
 ChannelBufferPtr
@@ -318,14 +318,14 @@ ChannelBuffers::compositeBuffer(const ByteOrder& endianness,
 
 ChannelBufferPtr
 ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const ConstArray& arry) {
-    if (endianness == ByteOrder::big_endian) {
+    if (endianness == ByteOrder::BO_BIG_ENDIAN) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
 
         return ChannelBufferPtr(new BigEndianHeapChannelBuffer(ConstArray::clone(arry), true));
     }
-    else if (endianness == ByteOrder::little_endian) {
+    else if (endianness == ByteOrder::BO_LITTLE_ENDIAN) {
         if (arry.length() == 0) {
             return EMPTY_BUFFER;
         }
@@ -522,27 +522,27 @@ ChannelBuffers::copiedBuffer(const std::vector<ChannelBufferPtr>& buffers) {
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ConstArray& arry) {
-    return copiedBuffer(ByteOrder::big_endian, arry);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, arry);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ConstArray& arry, int offset, int length) {
-    return copiedBuffer(ByteOrder::big_endian, arry, offset, length);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, arry, offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const Array& array0, const Array& array1) {
-    return copiedBuffer(ByteOrder::big_endian, array0, array1);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, array0, array1);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const Array& array0, const Array& array1, const Array& array2) {
-    return copiedBuffer(ByteOrder::big_endian, array0, array1, array2);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, array0, array1, array2);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::vector<Array>& arrays) {
-    return copiedBuffer(ByteOrder::big_endian, arrays);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, arrays);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::string& string) {
-    return copiedBuffer(ByteOrder::big_endian, ConstArray::fromString(string));
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, ConstArray::fromString(string));
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const std::string& string) {
@@ -550,7 +550,7 @@ ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const std::string& string, int offset, int length) {
-    return copiedBuffer(ByteOrder::big_endian, ConstArray::fromString(string), offset, length);
+    return copiedBuffer(ByteOrder::BO_BIG_ENDIAN, ConstArray::fromString(string), offset, length);
 }
 
 ChannelBufferPtr ChannelBuffers::copiedBuffer(const ByteOrder& endianness, const std::string& string, int offset, int length) {
@@ -637,7 +637,7 @@ int ChannelBuffers::hashCode(const ChannelBuffer& buffer) {
     int hashCode = 1;
     int arrayIndex = buffer.readerIndex();
 
-    if (buffer.order() == ByteOrder::big_endian) {
+    if (buffer.order() == ByteOrder::BO_BIG_ENDIAN) {
         for (int i = intCount; i > 0; --i) {
             hashCode = 31 * hashCode + buffer.getInt(arrayIndex);
             arrayIndex += 4;
@@ -735,8 +735,8 @@ int ChannelBuffers::compare(const ConstChannelBufferPtr& lBuffer, const ConstCha
 
     if (lBuffer->order() == rBuffer->order()) {
         for (int i = uintCount; i > 0; --i) {
-            boost::uint32_t va = lBuffer->getUnsignedInt(aIndex);
-            boost::uint32_t vb = rBuffer->getUnsignedInt(bIndex);
+            uint32_t va = lBuffer->getUnsignedInt(aIndex);
+            uint32_t vb = rBuffer->getUnsignedInt(bIndex);
 
             if (va > vb) {
                 return 1;
@@ -751,8 +751,8 @@ int ChannelBuffers::compare(const ConstChannelBufferPtr& lBuffer, const ConstCha
     }
     else {
         for (int i = uintCount; i > 0; --i) {
-            boost::uint32_t va = lBuffer->getUnsignedInt(aIndex);
-            boost::uint32_t vb = swapInt(rBuffer->getInt(bIndex)) & 0xFFFFFFFFL;
+            uint32_t va = lBuffer->getUnsignedInt(aIndex);
+            uint32_t vb = swapInt(rBuffer->getInt(bIndex)) & 0xFFFFFFFFL;
 
             if (va > vb) {
                 return 1;
@@ -767,8 +767,8 @@ int ChannelBuffers::compare(const ConstChannelBufferPtr& lBuffer, const ConstCha
     }
 
     for (int i = byteCount; i > 0; --i) {
-        boost::int8_t va = lBuffer->getByte(aIndex);
-        boost::int8_t vb = rBuffer->getByte(bIndex);
+        int8_t va = lBuffer->getByte(aIndex);
+        int8_t vb = rBuffer->getByte(bIndex);
 
         if (va > vb) {
             return 1;
@@ -784,7 +784,7 @@ int ChannelBuffers::compare(const ConstChannelBufferPtr& lBuffer, const ConstCha
     return aLen - bLen;
 }
 
-int ChannelBuffers::indexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value) {
+int ChannelBuffers::indexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value) {
     if (fromIndex <= toIndex) {
         return firstIndexOf(buffer, fromIndex, toIndex, value);
     }
@@ -802,7 +802,7 @@ int ChannelBuffers::indexOf(const ConstChannelBufferPtr& buffer, int fromIndex, 
     }
 }
 
-boost::int16_t ChannelBuffers::swapShort(boost::int16_t value) {
+int16_t ChannelBuffers::swapShort(int16_t value) {
     return ((value << 8) | ((value >> 8) & 0xff));
 }
 
@@ -811,13 +811,13 @@ int ChannelBuffers::swapMedium(int value) {
 }
 
 int ChannelBuffers::swapInt(int value) {
-    return (swapShort((boost::int16_t)value) <<  16) |
-           (swapShort((boost::int16_t)(value >> 16)) & 0xffff);
+    return (swapShort((int16_t)value) <<  16) |
+           (swapShort((int16_t)(value >> 16)) & 0xffff);
 }
 
-boost::int64_t ChannelBuffers::swapLong(boost::int64_t value) {
-    return ((boost::int64_t)(swapInt((boost::int32_t)value)) << 32) |
-           (swapInt((boost::int32_t)(value >> 32)) & 0xffffffffL);
+int64_t ChannelBuffers::swapLong(int64_t value) {
+    return ((int64_t)(swapInt((int32_t)value)) << 32) |
+           (swapInt((int32_t)(value >> 32)) & 0xffffffffL);
 }
 
 int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, const ChannelBufferIndexFinder::Functor& indexFinder) {
@@ -843,7 +843,7 @@ int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIn
     return -1;
 }
 
-int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value) {
+int ChannelBuffers::firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value) {
     if (!buffer) {
         //log "the input buffer is NULL."
         return -1;
@@ -889,7 +889,7 @@ int ChannelBuffers::lastIndexOf(const ConstChannelBufferPtr& buffer, int fromInd
     return -1;
 }
 
-int ChannelBuffers::lastIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value) {
+int ChannelBuffers::lastIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value) {
     if (!buffer) {
         // log "the input buffer is NULL."
         return -1;

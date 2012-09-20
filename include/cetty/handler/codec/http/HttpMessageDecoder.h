@@ -28,7 +28,7 @@
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 #include <cetty/handler/codec/ReplayingDecoder.h>
-#include <cetty/util/SimpleString.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace handler {
@@ -180,15 +180,15 @@ protected:
 protected:
     virtual bool isDecodingRequest() const = 0;
 
-    virtual HttpMessagePtr createMessage(const char* str1,
-                                         const char* str2,
-                                         const char* str3) = 0;
+    virtual HttpMessagePtr createMessage(const StringPiece& str1,
+                                         const StringPiece& str2,
+                                         const StringPiece& str3) = 0;
 
 private:
     HttpMessagePtr reset();
 
     bool skipControlCharacters(const ReplayingDecoderBufferPtr& buffer) const;
-    bool readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer);
+    HttpPackage readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer);
 
     //throws TooLongFrameException
     int readHeaders(const ReplayingDecoderBufferPtr& buffer);
@@ -197,22 +197,22 @@ private:
     HttpChunkTrailerPtr readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer);
 
     //throws TooLongFrameException
-    SimpleString readHeader(const ReplayingDecoderBufferPtr& buffer);
+    StringPiece readHeader(const ReplayingDecoderBufferPtr& buffer);
 
     //throws TooLongFrameException
-    SimpleString readLine(const ReplayingDecoderBufferPtr& buffer, int maxLineLength);
+    StringPiece readLine(const ReplayingDecoderBufferPtr& buffer, int maxLineLength);
 
-    int getChunkSize(const SimpleString& hex) const;
+    int getChunkSize(const StringPiece& hex) const;
 
     /**
      * @return true can read out a line completely. false means need to read more bytes.
      */
-    bool splitInitialLine(SimpleString& sb, std::vector<SimpleString>* lines);
-    void splitHeader(SimpleString& sb, std::vector<SimpleString>* header);
+    bool splitInitialLine(StringPiece& sb, std::vector<StringPiece>* lines);
+    void splitHeader(StringPiece& sb, std::vector<StringPiece>* header);
 
-    int findNonWhitespace(const SimpleString& sb, int offset);
-    int findWhitespace(const SimpleString& sb, int offset);
-    int findEndOfString(const SimpleString& sb);
+    int findNonWhitespace(const StringPiece& sb, int offset);
+    int findWhitespace(const StringPiece& sb, int offset);
+    int findEndOfString(const StringPiece& sb);
 
 protected:
     static const int MAX_INITIAL_LINE_LENGTH;
@@ -227,6 +227,8 @@ protected:
 private:
     int  chunkSize;
     int  headerSize;
+    int contentRead;
+
     HttpMessagePtr message;
     ChannelBufferPtr content;
 };

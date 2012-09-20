@@ -34,14 +34,14 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type)
     message->set_type(MessageType(type));
 }
 
-ProtobufServiceMessage::ProtobufServiceMessage(int type, boost::int64_t id)
+ProtobufServiceMessage::ProtobufServiceMessage(int type, int64_t id)
     : message(new ServiceMessage), payload() {
     message->set_type(MessageType(type));
     message->set_id(id);
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
-        boost::int64_t id,
+        int64_t id,
         const MessagePtr& payload)
     : message(new ServiceMessage), payload(payload) {
     message->set_type(MessageType(type));
@@ -68,7 +68,7 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
-        boost::int64_t id,
+        int64_t id,
         const std::string& service,
         const std::string& method,
         const MessagePtr& payload)
@@ -114,12 +114,12 @@ int ProtobufServiceMessage::getType() const {
     return (int)message->type();
 }
 
-boost::int64_t ProtobufServiceMessage::getId() const {
+int64_t ProtobufServiceMessage::getId() const {
     BOOST_ASSERT(message && "message should not be NULL.");
     return message->id();
 }
 
-void ProtobufServiceMessage::setId(boost::int64_t id) {
+void ProtobufServiceMessage::setId(int64_t id) {
     BOOST_ASSERT(message && "message should not be NULL.");
     return message->set_id(id);
 }

@@ -76,7 +76,7 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     return ret;
 }
 
-void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data) {
+void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, int64_t data) {
     buffer->writeLong(data);
 }
 
@@ -90,7 +90,7 @@ void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum
 }
 
 void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {
-    boost::uint8_t buf[10];
+    uint8_t buf[10];
     int varintSize = 0;
     do {
         uint8_t byte = val & 0x7f;

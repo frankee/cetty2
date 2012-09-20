@@ -60,7 +60,7 @@ struct ProtobufFormatterRegister {
 } formatterRegister;
 
 void ProtobufFormatter::format(const std::string& key,
-                               boost::int64_t value,
+                               int64_t value,
                                std::string* str) {
     std::string v;
     StringUtil::strprintf(&v, "%lld", key);
@@ -68,7 +68,7 @@ void ProtobufFormatter::format(const std::string& key,
 }
 
 void ProtobufFormatter::format(const std::string& key,
-                               boost::int64_t value,
+                               int64_t value,
                                const ChannelBufferPtr& buffer) {
     std::string v;
     StringUtil::strprintf(&v, "%lld", key);
@@ -92,7 +92,7 @@ void ProtobufFormatter::format(const std::string& key,
 }
 
 void ProtobufFormatter::format(const std::string& key,
-                               const std::vector<boost::int64_t>& value,
+                               const std::vector<int64_t>& value,
                                std::string* str) {
     std::vector<std::string> strValues;
     std::size_t j = value.size();
@@ -106,7 +106,7 @@ void ProtobufFormatter::format(const std::string& key,
 }
 
 void ProtobufFormatter::format(const std::string& key,
-                               const std::vector<boost::int64_t>& value,
+                               const std::vector<int64_t>& value,
                                const ChannelBufferPtr& buffer) {
     std::vector<std::string> strValues;
     std::size_t j = value.size();

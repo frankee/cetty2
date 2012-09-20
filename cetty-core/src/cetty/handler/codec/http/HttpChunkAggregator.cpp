@@ -62,11 +62,15 @@ public:
             //Channels::write(ctx, Channels::succeededFuture(ctx.getChannel()), CONTINUE.duplicate());
         }
 
-        if (value->isChunked()) {
-            // A chunked message - remove 'Transfer-Encoding' header,
+        HttpTransferEncoding te = value->getTransferEncoding();
+        if (te == HttpTransferEncoding::SINGLE) {
+            currentMessage.reset();
+            return value;
+        }
+        else if (te == HttpTransferEncoding::STREAMED
+            || te == HttpTransferEncoding::CHUNKED) {
             // initialize the cumulative buffer, and wait for incoming chunks.
-            value->removeHeader(HttpHeaders::Names::TRANSFER_ENCODING, HttpHeaders::Values::CHUNKED);
-            value->setChunked(false);
+            value->setTransferEncoding(HttpTransferEncoding::SINGLE);
             value->setContent(ChannelBuffers::dynamicBuffer());
 
             currentMessage.reset();
@@ -74,9 +78,7 @@ public:
             return HttpMessagePtr();
         }
         else {
-            // Not a chunked message - pass through.
-            currentMessage.reset();
-            return value;
+            // Error.
         }
     }
 

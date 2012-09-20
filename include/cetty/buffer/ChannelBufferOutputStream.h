@@ -74,7 +74,7 @@ public:
         return -1;
     }
 
-    virtual int write(const boost::int8_t* bytes, int offset, int length) {
+    virtual int write(const int8_t* bytes, int offset, int length) {
         if (length == 0) {
             return 0;
         }

@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/function.hpp>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/ChannelPtr.h>
@@ -164,10 +164,10 @@ using namespace cetty::util;
  *
  * <h3>Do not confuse I/O timeout and await timeout</h3>
  *
- * The timeout value you specify with {@link #await(boost::int64_t)},
- * {@link #await(boost::int64_t, const TimeUnit&)},
- * {@link #awaitUninterruptibly(boost::int64_t)}, or
- * {@link #awaitUninterruptibly(boost::int64_t, const TimeUnit&)} are not related with I/O
+ * The timeout value you specify with {@link #await(int64_t)},
+ * {@link #await(int64_t, const TimeUnit&)},
+ * {@link #awaitUninterruptibly(int64_t)}, or
+ * {@link #awaitUninterruptibly(int64_t, const TimeUnit&)} are not related with I/O
  * timeout at all.  If an I/O operation times out, the future will be marked as
  * 'completed with failure,' as depicted in the diagram above.  For example,
  * connect timeout should be configured via a transport-specific option:

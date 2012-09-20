@@ -151,15 +151,15 @@ void ChannelBuffer::ensureWritableBytes(int wBytes) {
     }
 }
 
-boost::uint8_t ChannelBuffer::getUnsignedByte(int index) const {
-    return (boost::uint8_t)(getByte(index) & 0xFF);
+uint8_t ChannelBuffer::getUnsignedByte(int index) const {
+    return (uint8_t)(getByte(index) & 0xFF);
 }
 
-boost::uint16_t ChannelBuffer::getUnsignedShort(int index) const {
+uint16_t ChannelBuffer::getUnsignedShort(int index) const {
     return getShort(index) & 0xFFFF;
 }
 
-boost::uint32_t ChannelBuffer::getUnsignedInt(int index) const {
+uint32_t ChannelBuffer::getUnsignedInt(int index) const {
     return getInt(index) & 0xFFFFFFFF;
 }
 
@@ -323,8 +323,8 @@ int ChannelBuffer::setZero(int index, int length) {
     return length;
 }
 
-boost::int8_t ChannelBuffer::readByte() {
-    boost::int8_t v = 0;
+int8_t ChannelBuffer::readByte() {
+    int8_t v = 0;
 
     if (checkReadableBytes(1)) {
         v = getByte(readerIdx++);
@@ -333,12 +333,12 @@ boost::int8_t ChannelBuffer::readByte() {
     return v;
 }
 
-boost::uint8_t ChannelBuffer::readUnsignedByte() {
-    return (boost::uint8_t)(readByte() & 0xFF);
+uint8_t ChannelBuffer::readUnsignedByte() {
+    return (uint8_t)(readByte() & 0xFF);
 }
 
-boost::int16_t ChannelBuffer::readShort() {
-    boost::int16_t v = 0;
+int16_t ChannelBuffer::readShort() {
+    int16_t v = 0;
 
     if (checkReadableBytes(2)) {
         v = getShort(readerIdx);
@@ -348,12 +348,12 @@ boost::int16_t ChannelBuffer::readShort() {
     return v;
 }
 
-boost::uint16_t ChannelBuffer::readUnsignedShort() {
-    return boost::uint16_t(readShort() & 0xFFFF);
+uint16_t ChannelBuffer::readUnsignedShort() {
+    return uint16_t(readShort() & 0xFFFF);
 }
 
-boost::int32_t ChannelBuffer::readInt() {
-    boost::int32_t v = 0;
+int32_t ChannelBuffer::readInt() {
+    int32_t v = 0;
 
     if (checkReadableBytes(4)) {
         v = getInt(readerIdx);
@@ -363,12 +363,12 @@ boost::int32_t ChannelBuffer::readInt() {
     return v;
 }
 
-boost::uint32_t ChannelBuffer::readUnsignedInt() {
-    return boost::uint32_t(readInt() & 0xFFFFFFFF);
+uint32_t ChannelBuffer::readUnsignedInt() {
+    return uint32_t(readInt() & 0xFFFFFFFF);
 }
 
-boost::int64_t ChannelBuffer::readLong() {
-    boost::int64_t v = 0;
+int64_t ChannelBuffer::readLong() {
+    int64_t v = 0;
 
     if (checkReadableBytes(8)) {
         v = getLong(readerIdx);
@@ -595,7 +595,7 @@ int ChannelBuffer::writeInt(int value) {
     return 0;
 }
 
-int ChannelBuffer::writeLong(boost::int64_t value) {
+int ChannelBuffer::writeLong(int64_t value) {
     if (setLong(writerIdx, value)) {
         writerIdx += 8;
         return 8;
@@ -751,7 +751,7 @@ cetty::buffer::ChannelBufferPtr ChannelBuffer::duplicate() {
     return slice(0, this->capacity());
 }
 
-int ChannelBuffer::indexOf(int fromIndex, int toIndex, boost::int8_t value) const {
+int ChannelBuffer::indexOf(int fromIndex, int toIndex, int8_t value) const {
     return ChannelBuffers::indexOf(shared_from_this(), fromIndex, toIndex, value);
 }
 
@@ -759,7 +759,7 @@ int ChannelBuffer::indexOf(int fromIndex, int toIndex, const ChannelBufferIndexF
     return ChannelBuffers::indexOf(shared_from_this(), fromIndex, toIndex, indexFinder);
 }
 
-int ChannelBuffer::bytesBefore(boost::int8_t value) const {
+int ChannelBuffer::bytesBefore(int8_t value) const {
     return bytesBefore(readerIndex(), readableBytes(), value);
 }
 
@@ -767,7 +767,7 @@ int ChannelBuffer::bytesBefore(const ChannelBufferIndexFinder::Functor& indexFin
     return bytesBefore(readerIndex(), readableBytes(), indexFinder);
 }
 
-int ChannelBuffer::bytesBefore(int length, boost::int8_t value) const {
+int ChannelBuffer::bytesBefore(int length, int8_t value) const {
     if (checkReadableBytes(length)) {
         return bytesBefore(readerIndex(), length, value);
     }
@@ -783,7 +783,7 @@ int ChannelBuffer::bytesBefore(int length, const ChannelBufferIndexFinder::Funct
     return -1;
 }
 
-int ChannelBuffer::bytesBefore(int index, int length, boost::int8_t value) const {
+int ChannelBuffer::bytesBefore(int index, int length, int8_t value) const {
     int endIndex = indexOf(index, index + length, value);
 
     if (endIndex < index) {
@@ -850,7 +850,7 @@ int ChannelBuffer::writeIntAhead(int value) {
     return 0;
 }
 
-int ChannelBuffer::writeLongAhead(boost::int64_t value) {
+int ChannelBuffer::writeLongAhead(int64_t value) {
     if (setLong(readerIdx - 8, value)) {
         readerIdx -= 8;
         return 8;

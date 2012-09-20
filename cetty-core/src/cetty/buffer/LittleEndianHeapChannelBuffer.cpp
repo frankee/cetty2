@@ -26,66 +26,66 @@ namespace buffer {
 using namespace cetty::util;
 
 ChannelBufferFactory& LittleEndianHeapChannelBuffer::factory() const {
-    return HeapChannelBufferFactory::getInstance(ByteOrder::little_endian);
+    return HeapChannelBufferFactory::getInstance(ByteOrder::BO_LITTLE_ENDIAN);
 }
 
 cetty::buffer::ByteOrder LittleEndianHeapChannelBuffer::order() const {
-    return ByteOrder::little_endian;
+    return ByteOrder::BO_LITTLE_ENDIAN;
 }
 
-boost::int16_t LittleEndianHeapChannelBuffer::getShort(int index) const {
-    return (boost::int16_t)((arry[index] & 0xFF) | (arry[index+1] << 8));
+int16_t LittleEndianHeapChannelBuffer::getShort(int index) const {
+    return (int16_t)((arry[index] & 0xFF) | (arry[index+1] << 8));
 }
 
-boost::int32_t LittleEndianHeapChannelBuffer::getUnsignedMedium(int index) const {
+int32_t LittleEndianHeapChannelBuffer::getUnsignedMedium(int index) const {
     return ((arry[index  ] & 0xff) <<  0) |
            ((arry[index+1] & 0xff) <<  8) |
            ((arry[index+2] & 0xff) << 16);
 }
 
-boost::int32_t LittleEndianHeapChannelBuffer::getInt(int index) const {
+int32_t LittleEndianHeapChannelBuffer::getInt(int index) const {
     return ((arry[index  ] & 0xff) <<  0) |
            ((arry[index+1] & 0xff) <<  8) |
            ((arry[index+2] & 0xff) << 16) |
            ((arry[index+3] & 0xff) << 24);
 }
 
-boost::int64_t LittleEndianHeapChannelBuffer::getLong(int index) const {
-    return (((boost::int64_t) arry[index]   & 0xff) <<  0) |
-           (((boost::int64_t) arry[index+1] & 0xff) <<  8) |
-           (((boost::int64_t) arry[index+2] & 0xff) << 16) |
-           (((boost::int64_t) arry[index+3] & 0xff) << 24) |
-           (((boost::int64_t) arry[index+4] & 0xff) << 32) |
-           (((boost::int64_t) arry[index+5] & 0xff) << 40) |
-           (((boost::int64_t) arry[index+6] & 0xff) << 48) |
-           (((boost::int64_t) arry[index+7] & 0xff) << 56);
+int64_t LittleEndianHeapChannelBuffer::getLong(int index) const {
+    return (((int64_t) arry[index]   & 0xff) <<  0) |
+           (((int64_t) arry[index+1] & 0xff) <<  8) |
+           (((int64_t) arry[index+2] & 0xff) << 16) |
+           (((int64_t) arry[index+3] & 0xff) << 24) |
+           (((int64_t) arry[index+4] & 0xff) << 32) |
+           (((int64_t) arry[index+5] & 0xff) << 40) |
+           (((int64_t) arry[index+6] & 0xff) << 48) |
+           (((int64_t) arry[index+7] & 0xff) << 56);
 }
 
 int LittleEndianHeapChannelBuffer::setShort(int index, int value) {
-    arry[index  ] = (boost::int8_t)(value >> 0);
-    arry[index+1] = (boost::int8_t)(value >> 8);
+    arry[index  ] = (int8_t)(value >> 0);
+    arry[index+1] = (int8_t)(value >> 8);
 
     return 2;
 }
 
 int LittleEndianHeapChannelBuffer::setInt(int index, int value) {
-    arry[index  ] = (boost::int8_t)(value >> 0);
-    arry[index+1] = (boost::int8_t)(value >> 8);
-    arry[index+2] = (boost::int8_t)(value >> 16);
-    arry[index+3] = (boost::int8_t)(value >> 24);
+    arry[index  ] = (int8_t)(value >> 0);
+    arry[index+1] = (int8_t)(value >> 8);
+    arry[index+2] = (int8_t)(value >> 16);
+    arry[index+3] = (int8_t)(value >> 24);
 
     return 4;
 }
 
-int LittleEndianHeapChannelBuffer::setLong(int index, boost::int64_t value) {
-    arry[index  ] = (boost::int8_t)(value >> 0);
-    arry[index+1] = (boost::int8_t)(value >> 8);
-    arry[index+2] = (boost::int8_t)(value >> 16);
-    arry[index+3] = (boost::int8_t)(value >> 24);
-    arry[index+4] = (boost::int8_t)(value >> 32);
-    arry[index+5] = (boost::int8_t)(value >> 40);
-    arry[index+6] = (boost::int8_t)(value >> 48);
-    arry[index+7] = (boost::int8_t)(value >> 56);
+int LittleEndianHeapChannelBuffer::setLong(int index, int64_t value) {
+    arry[index  ] = (int8_t)(value >> 0);
+    arry[index+1] = (int8_t)(value >> 8);
+    arry[index+2] = (int8_t)(value >> 16);
+    arry[index+3] = (int8_t)(value >> 24);
+    arry[index+4] = (int8_t)(value >> 32);
+    arry[index+5] = (int8_t)(value >> 40);
+    arry[index+6] = (int8_t)(value >> 48);
+    arry[index+7] = (int8_t)(value >> 56);
 
     return 8;
 }

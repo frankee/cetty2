@@ -29,11 +29,11 @@ public:
 
     virtual int writeByte(int byte) = 0;
 
-    int write(const boost::int8_t* bytes, int length) {
+    int write(const int8_t* bytes, int length) {
         return write(bytes, 0, length);
     }
 
-    virtual int write(const boost::int8_t* bytes, int offset, int length);
+    virtual int write(const int8_t* bytes, int offset, int length);
 
     virtual void flush() = 0;
     virtual void close() = 0;

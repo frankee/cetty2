@@ -24,9 +24,17 @@
 #include <string>
 
 namespace cetty {
+namespace util {
+class StringPiece;
+}
+}
+
+namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
+
+using namespace cetty::util;
 
 /**
  * The version of HTTP or its derived protocols, such as
@@ -63,6 +71,8 @@ public:
      */
     static HttpVersion valueOf(const std::string& text);
 
+    static HttpVersion valueOf(const StringPiece& text);
+
     /**
      * Creates a new HTTP version with the specified version string.  You will
      * not need to create a new instance unless you are implementing a protocol
@@ -75,6 +85,8 @@ public:
      *        the <tt>"Connection"</tt> header is set to <tt>"close"</tt> explicitly.
      */
     HttpVersion(const std::string& text, bool keepAliveDefault);
+
+    HttpVersion(const StringPiece& text, bool keepAliveDefault);
 
     /**
      * Creates a new HTTP version with the specified protocol name and version

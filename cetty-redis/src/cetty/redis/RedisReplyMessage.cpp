@@ -29,9 +29,9 @@ const RedisReplyMessageType RedisReplyMessageType::STATUS  = 4;
 const RedisReplyMessageType RedisReplyMessageType::ERROR   = 5;
 
 
-boost::int64_t RedisReplyMessage::getInteger() const {
+int64_t RedisReplyMessage::getInteger() const {
     if (type == RedisReplyMessageType::INTEGER) {
-        return boost::get<boost::int64_t>(value);
+        return boost::get<int64_t>(value);
     }
     else {
         LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";

@@ -25,6 +25,7 @@
 #include <vector>
 #include <utility>
 #include <cetty/util/URI.h>
+#include <cetty/util/NameValueCollection.h>
 
 namespace cetty {
 namespace handler {
@@ -65,7 +66,7 @@ public:
      * Adds a parameter with the specified name and value to this encoder.
      */
     void addParam(const std::string& name, const std::string& value) {
-        params.push_back(std::make_pair(name, value));
+        params.add(name, value);
     }
 
     /**
@@ -82,44 +83,17 @@ public:
      * specified in the constructor and the parameters added by
      * {@link #addParam(std::string, std::string)} method.
      */
-    std::string toString() const {
-        if (params.empty()) {
-            return uri;
-        }
-        else {
-            std::string tmpStr;
-            std::string str(uri);
-            str.append("?");
-
-            for (size_t i = 0; i < params.size(); ++i) {
-                const std::pair<std::string, std::string>& param = params[i];
-                encodeComponent(param.first, tmpStr, str);
-                str.append("=");
-                encodeComponent(param.second, tmpStr, str);
-
-                if (i != params.size() - 1) {
-                    str.append("&");
-                }
-            }
-
-            return str;
-        }
-    }
+    std::string toString() const;
 
 private:
     void encodeComponent(const std::string& s,
                          std::string& tmp,
-                         std::string& output) const {
-        static std::string RESERVED;
-
-        tmp.clear();
-        URI::encode(s, RESERVED, tmp);
-        output.append(tmp);
-    }
+                         std::string& output) const;
 
 private:
     std::string uri;
-    std::vector<std::pair<std::string, std::string> > params;
+    NameValueCollection params;
+    //std::vector<std::pair<std::string, std::string> > params;
 };
 
 }

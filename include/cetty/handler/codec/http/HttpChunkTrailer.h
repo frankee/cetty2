@@ -30,7 +30,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
 /**
  * The last {@link HttpChunk} which has trailing headers.

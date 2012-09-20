@@ -174,9 +174,9 @@ int SmallFile::readToString(int maxSize,
 int SmallFile::readFile(const StringPiece& filename,
                         int maxSize,
                         std::string* content,
-                        boost::int64_t* fileSize /*= NULL*/,
-                        boost::int64_t* modifyTime /*= NULL*/,
-                        boost::int64_t* createTime /*= NULL*/) {
+                        int64_t* fileSize /*= NULL*/,
+                        int64_t* modifyTime /*= NULL*/,
+                        int64_t* createTime /*= NULL*/) {
     SmallFile file(filename);
     return file.readToString(maxSize, content, fileSize, modifyTime, createTime);
 }

@@ -118,9 +118,9 @@ public:
     virtual std::string toString() const;
 
 protected:
-    virtual HttpMessagePtr createMessage(const char* str1,
-                                         const char* str2,
-                                         const char* str3);
+    virtual HttpMessagePtr createMessage(const StringPiece& str1,
+        const StringPiece& str2,
+        const StringPiece& str3);
 
     virtual bool isDecodingRequest() const;
 

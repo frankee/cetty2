@@ -18,7 +18,7 @@
  */
 
 #include <vector>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/variant.hpp>
 #include <google/protobuf/stubs/common.h>
 
@@ -36,11 +36,11 @@ using google::protobuf::Message;
 
 class ProtobufUtil {
 public:
-    typedef boost::variant<boost::int64_t,
+    typedef boost::variant<int64_t,
             double,
             const std::string*,
             const Message*,
-            std::vector<boost::int64_t>,
+            std::vector<int64_t>,
             std::vector<double>,
             std::vector<const std::string*>,
             std::vector<const Message*> > FieldValue;

@@ -120,13 +120,13 @@ public:
         }
     }
 
-    virtual void read(boost::int8_t* val) {
+    virtual void read(int8_t* val) {
         if (val && buffer && buffer->readable()) {
                 *val = buffer->readByte() & 0xff;
         }
     }
 
-    virtual int read(boost::int8_t* bytes, int offset, int length) {
+    virtual int read(int8_t* bytes, int offset, int length) {
         int left = available();
 
         if (left == 0) {

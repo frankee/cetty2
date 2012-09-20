@@ -1,42 +1,35 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPCONTENTDECODER_H)
-#define CETTY_HANDLER_CODEC_HTTP_HTTPCONTENTDECODER_H
-
 /*
- * Copyright 2009 Red Hat, Inc.
+ * Copyright 2012 The Netty Project
  *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
- * Distributed under under the Apache License, version 2.0 (the "License").
- */
+package io.netty.handler.codec.http;
 
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
-
-namespace cetty {
-namespace handler {
-namespace codec {
-namespace http {
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.embedded.EmbeddedByteChannel;
+import io.netty.handler.codec.MessageToMessageDecoder;
 
 /**
  * Decodes the content of the received {@link HttpRequest} and {@link HttpChunk}.
  * The original content is replaced with the new content decoded by the
- * {@link DecoderEmbedder}, which is created by {@link #newContentDecoder(std::string)}.
+ * {@link DecoderEmbedder}, which is created by {@link #newContentDecoder(String)}.
  * Once decoding is finished, the value of the <tt>'Content-Encoding'</tt>
- * header is set to the target content encoding, as returned by {@link #getTargetContentEncoding(std::string)}.
+ * header is set to the target content encoding, as returned by {@link #getTargetContentEncoding(String)}.
  * Also, the <tt>'Content-Length'</tt> header is updated to the length of the
  * decoded content.  If the content encoding of the original is not supported
- * by the decoder, {@link #newContentDecoder(String)} should return <tt>null</tt>
+ * by the decoder, {@link #newContentDecoder(String)} should return {@code null}
  * so that no decoding occurs (i.e. pass-through).
  * <p>
  * Please note that this is an abstract class.  You have to extend this class
@@ -45,165 +38,158 @@ namespace http {
  * <p>
  * This handler must be placed after {@link HttpMessageDecoder} in the pipeline
  * so that this handler can intercept HTTP requests after {@link HttpMessageDecoder}
- * converts {@link ChannelBuffer}s into HTTP requests.
- *
- *
- * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
+ * converts {@link ByteBuf}s into HTTP requests.
  */
+public abstract class HttpContentDecoder extends MessageToMessageDecoder<Object, Object> {
 
-class HttpContentDecoder : public cetty::channel::SimpleChannelUpstreamHandler {
-public:
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        Object msg = e.getMessage();
+    private EmbeddedByteChannel decoder;
 
+    /**
+     * Creates a new instance.
+     */
+    protected HttpContentDecoder() {
+    }
+
+    @Override
+    public boolean isDecodable(Object msg) throws Exception {
+        return msg instanceof HttpMessage || msg instanceof HttpChunk;
+    }
+
+    @Override
+    public Object decode(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpResponse && ((HttpResponse) msg).getStatus().getCode() == 100) {
             // 100-continue response must be passed through.
-            ctx.sendDownstream(e);
-        }
-        else if (msg instanceof HttpMessage) {
+            return msg;
+        } else if (msg instanceof HttpMessage) {
             HttpMessage m = (HttpMessage) msg;
 
-            decoder = null;
+            cleanup();
 
             // Determine the content encoding.
-            std::string contentEncoding = m.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
-
+            String contentEncoding = m.getHeader(HttpHeaders.Names.CONTENT_ENCODING);
             if (contentEncoding != null) {
                 contentEncoding = contentEncoding.trim();
-            }
-            else {
-                contentEncoding = HttpHeaders::Values::IDENTITY;
+            } else {
+                contentEncoding = HttpHeaders.Values.IDENTITY;
             }
 
-            bool hasContent = m.isChunked() || m.getContent().readable();
-
+            boolean hasContent =
+                    m.getTransferEncoding().isMultiple() || m.getContent().readable();
             if (hasContent && (decoder = newContentDecoder(contentEncoding)) != null) {
                 // Decode the content and remove or replace the existing headers
                 // so that the message looks like a decoded message.
                 m.setHeader(
-                    HttpHeaders.Names.CONTENT_ENCODING,
-                    getTargetContentEncoding(contentEncoding));
+                        HttpHeaders.Names.CONTENT_ENCODING,
+                        getTargetContentEncoding(contentEncoding));
 
-                if (!m.isChunked()) {
-                    ChannelBuffer content = m.getContent();
+                if (m.getTransferEncoding().isSingle()) {
+                    ByteBuf content = m.getContent();
                     // Decode the content
-                    content = ChannelBuffers::wrappedBuffer(
-                                  decode(content), finishDecode());
+                    ByteBuf newContent = Unpooled.buffer();
+                    decode(content, newContent);
+                    finishDecode(newContent);
 
                     // Replace the content.
-                    m.setContent(content);
-
+                    m.setContent(newContent);
                     if (m.containsHeader(HttpHeaders.Names.CONTENT_LENGTH)) {
                         m.setHeader(
-                            HttpHeaders.Names.CONTENT_LENGTH,
-                            Integer.toString(content.readableBytes()));
+                                HttpHeaders.Names.CONTENT_LENGTH,
+                                Integer.toString(newContent.readableBytes()));
                     }
                 }
             }
-
-            // Because HttpMessage is a mutable object, we can simply forward the received event.
-            ctx.sendUpstream(e);
-        }
-        else if (msg instanceof HttpChunk) {
+        } else if (msg instanceof HttpChunk) {
             HttpChunk c = (HttpChunk) msg;
-            ChannelBuffer content = c.getContent();
+            ByteBuf content = c.getContent();
 
             // Decode the chunk if necessary.
             if (decoder != null) {
                 if (!c.isLast()) {
-                    content = decode(content);
-
-                    if (content.readable()) {
-                        c.setContent(content);
-                        ctx.sendUpstream(e);
+                    ByteBuf newContent = Unpooled.buffer();
+                    decode(content, newContent);
+                    if (newContent.readable()) {
+                        c.setContent(newContent);
+                    } else {
+                        return null;
                     }
-                }
-                else {
-                    ChannelBuffer lastProduct = finishDecode();
+                } else {
+                    ByteBuf lastProduct = Unpooled.buffer();
+                    finishDecode(lastProduct);
 
                     // Generate an additional chunk if the decoder produced
                     // the last product on closure,
                     if (lastProduct.readable()) {
-                        Channels.fireMessageReceived(
-                            ctx, new DefaultHttpChunk(lastProduct), e.getRemoteAddress());
+                        return new Object[] { new DefaultHttpChunk(lastProduct), c };
                     }
-
-                    // Emit the last chunk.
-                    ctx.sendUpstream(e);
                 }
             }
-            else {
-                ctx.sendUpstream(e);
-            }
         }
-        else {
-            ctx.sendUpstream(e);
-        }
-    }
 
-protected:
-    /**
-     * Creates a new instance.
-     */
-    HttpContentDecoder() {
+        // Because HttpMessage and HttpChunk is a mutable object, we can simply forward it.
+        return msg;
     }
 
     /**
      * Returns a new {@link DecoderEmbedder} that decodes the HTTP message
      * content encoded in the specified <tt>contentEncoding</tt>.
      *
-     * @param contentEncoding the value of the <tt>"Content-Encoding"</tt> header
+     * @param contentEncoding the value of the {@code "Content-Encoding"} header
      * @return a new {@link DecoderEmbedder} if the specified encoding is supported.
-     *         <tt>null</tt> otherwise (alternatively, you can throw an exception
+     *         {@code null} otherwise (alternatively, you can throw an exception
      *         to block unknown encoding).
      */
-    virtual DecoderEmbedder<ChannelBuffer> newContentDecoder(std::string contentEncoding) = 0;
+    protected abstract EmbeddedByteChannel newContentDecoder(String contentEncoding) throws Exception;
 
     /**
      * Returns the expected content encoding of the decoded content.
-     * This method returns <tt>"identity"</tt> by default, which is the case for
+     * This method returns {@code "identity"} by default, which is the case for
      * most decoders.
      *
-     * @param contentEncoding the value of the <tt>"Content-Encoding"</tt> header
+     * @param contentEncoding the value of the {@code "Content-Encoding"} header
      * @return the expected content encoding of the new content
      */
-    std::string getTargetContentEncoding(std::string contentEncoding) {
+    protected String getTargetContentEncoding(String contentEncoding) throws Exception {
         return HttpHeaders.Values.IDENTITY;
     }
 
-private:
-    ChannelBuffer decode(ChannelBuffer buf) {
-        decoder.offer(buf);
-        return ChannelBuffers.wrappedBuffer(decoder.pollAll(new ChannelBuffer[decoder.size()]));
+    @Override
+    public void afterRemove(ChannelHandlerContext ctx) throws Exception {
+        cleanup();
+        super.afterRemove(ctx);
     }
 
-    ChannelBuffer finishDecode() {
-        ChannelBuffer result;
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        cleanup();
+        super.channelInactive(ctx);
+    }
 
+    private void cleanup() {
+        if (decoder != null) {
+            // Clean-up the previous decoder if not cleaned up correctly.
+            finishDecode(Unpooled.buffer());
+        }
+    }
+
+    private void decode(ByteBuf in, ByteBuf out) {
+        decoder.writeInbound(in);
+        fetchDecoderOutput(out);
+    }
+
+    private void finishDecode(ByteBuf out) {
         if (decoder.finish()) {
-            result = ChannelBuffers.wrappedBuffer(decoder.pollAll(new ChannelBuffer[decoder.size()]));
+            fetchDecoderOutput(out);
         }
-        else {
-            result = ChannelBuffers.EMPTY_BUFFER;
-        }
-
         decoder = null;
-        return result;
     }
 
-private:
-    DecoderEmbedder<ChannelBuffer> decoder;
-};
-
-
+    private void fetchDecoderOutput(ByteBuf out) {
+        for (;;) {
+            ByteBuf buf = (ByteBuf) decoder.readInbound();
+            if (buf == null) {
+                break;
+            }
+            out.writeBytes(buf);
+        }
+    }
 }
-}
-}
-}
-
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPCONTENTDECODER_H)
-
-// Local Variables:
-// mode: c++
-// End:

@@ -42,7 +42,8 @@ using namespace cetty::util;
 HttpMessageEncoder::~HttpMessageEncoder() {
 }
 
-HttpMessageEncoder::HttpMessageEncoder() {
+HttpMessageEncoder::HttpMessageEncoder()
+    : lastTE(HttpTransferEncoding::SINGLE) {
 }
 
 class HttpPackageEncodeVisitor : public boost::static_visitor<ChannelBufferPtr> {
@@ -55,9 +56,15 @@ public:
     }
 
     ChannelBufferPtr operator()(const HttpMessagePtr& value) const {
-        bool chunked = encoder.chunked =
-                           HttpCodecUtil::isTransferEncodingChunked(*value);
+        HttpTransferEncoding te = value->getTransferEncoding();
+        encoder.lastTE = te;
 
+        // Calling setTransferEncoding() will sanitize the headers and the content.
+        // For example, it will remove the cases such as 'Transfer-Encoding' and 'Content-Length'
+        // coexist.  It also removes the content if the transferEncoding is not SINGLE.
+        value->setTransferEncoding(te);
+
+        // Encode the message.
         ChannelBufferPtr header = ChannelBuffers::dynamicBuffer();
 
         encoder.encodeInitialLine(*header, *value);
@@ -69,10 +76,6 @@ public:
 
         if (!content->readable()) {
             return header; // no content
-        }
-        else if (chunked) {
-            throw InvalidArgumentException(
-                "HttpMessage.content must be empty if Transfer-Encoding is chunked.");
         }
         else {
             if (content->aheadWritableBytes() >= header->readableBytes()) {
@@ -87,7 +90,22 @@ public:
     }
 
     ChannelBufferPtr operator()(const HttpChunkPtr& value) const {
-        if (encoder.chunked) {
+        HttpTransferEncoding te = encoder.lastTE;
+
+        if (te == HttpTransferEncoding::SINGLE) {
+            //throw IllegalArgumentException(
+            //    "The transfer encoding of the last encoded HttpMessage is SINGLE.");
+        }
+        else if (te == HttpTransferEncoding::STREAMED) {
+            //ByteBuf content = chunk.getContent();
+            //out.writeBytes(content, content.readerIndex(), content.readableBytes());
+        }
+        else if (te == HttpTransferEncoding::CHUNKED) {
+            if (value->isLast()) {
+                //encoder.chunked = false;
+                return ChannelBuffers::EMPTY_BUFFER;
+            }
+
             ChannelBufferPtr content = value->getContent();
             int contentLength = content->readableBytes();
             std::string lengthStr = Integer::toHexString(contentLength);
@@ -115,25 +133,15 @@ public:
                 buffer->writeByte(HttpCodecUtil::LF);
                 return buffer;
             }
-
-            if (value->isLast()) {
-                encoder.chunked = false;
-                return ChannelBuffers::EMPTY_BUFFER;
-            }
         }
-        else { // if (this->chunked) {
-            if (value->isLast()) {
-                return ChannelBufferPtr();
-            }
-            else {
-                return value->getContent();
-            }
+        else {
+            // error.
         }
     }
 
     ChannelBufferPtr operator()(const HttpChunkTrailerPtr& value) const {
-        if (encoder.chunked) {
-            encoder.chunked = false;
+        if (value->isLast()) {
+            //encoder.chunked = false;
 
             if (value) {
                 ChannelBufferPtr trailer = ChannelBuffers::dynamicBuffer(1024);

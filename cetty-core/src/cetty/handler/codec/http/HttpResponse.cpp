@@ -44,8 +44,8 @@ std::string HttpResponse::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-                          "HttpResponse (chunked: %s)\r\n%s %s",
-                          isChunked() ? "true" : "false",
+                          "HttpResponse (TransferEncoding: %s)\r\n%s %s",
+                          getTransferEncoding().toString().c_str(),
                           getProtocolVersion().getText().c_str(),
                           getStatus().toString().c_str());
 

@@ -40,11 +40,11 @@ public:
 public:
     ProtobufServiceMessage();
     ProtobufServiceMessage(int type);
-    ProtobufServiceMessage(int type, boost::int64_t id);
-    ProtobufServiceMessage(int type, boost::int64_t id, const MessagePtr& payload);
+    ProtobufServiceMessage(int type, int64_t id);
+    ProtobufServiceMessage(int type, int64_t id, const MessagePtr& payload);
     ProtobufServiceMessage(int type, const std::string& service, const std::string& method);
     ProtobufServiceMessage(int type, const std::string& service, const std::string& method, const MessagePtr& payload);
-    ProtobufServiceMessage(int type, boost::int64_t id, const std::string& service, const std::string& method, const MessagePtr& payload);
+    ProtobufServiceMessage(int type, int64_t id, const std::string& service, const std::string& method, const MessagePtr& payload);
     ~ProtobufServiceMessage();
 
     bool isRequest() const;
@@ -54,8 +54,8 @@ public:
     void setType(int type);
     int getType() const;
 
-    boost::int64_t getId() const;
-    void setId(boost::int64_t id);
+    int64_t getId() const;
+    void setId(int64_t id);
 
     const std::string& getService() const;
     std::string* mutableService();

@@ -61,7 +61,7 @@ void ReplayingDecoderBuffer::ensureWritableBytes(int writableBytes) {
     throw UnreplayableOperationException();
 }
 
-boost::int8_t ReplayingDecoderBuffer::getByte(int index) const {
+int8_t ReplayingDecoderBuffer::getByte(int index) const {
     if (checkIndex(index, 1)) {
         return buffer->getByte(index);
     }
@@ -89,7 +89,7 @@ int ReplayingDecoderBuffer::getBytes(int index, OutputStream* out, int length) c
     throw UnreplayableOperationException();
 }
 
-boost::int32_t ReplayingDecoderBuffer::getInt(int index) const {
+int32_t ReplayingDecoderBuffer::getInt(int index) const {
     if (checkIndex(index, 4)) {
         return buffer->getInt(index);
     }
@@ -97,7 +97,7 @@ boost::int32_t ReplayingDecoderBuffer::getInt(int index) const {
     return 0;
 }
 
-boost::int64_t ReplayingDecoderBuffer::getLong(int index) const {
+int64_t ReplayingDecoderBuffer::getLong(int index) const {
     if (checkIndex(index, 8)) {
         return buffer->getLong(index);
     }
@@ -105,7 +105,7 @@ boost::int64_t ReplayingDecoderBuffer::getLong(int index) const {
     return 0;
 }
 
-boost::int16_t ReplayingDecoderBuffer::getShort(int index) const {
+int16_t ReplayingDecoderBuffer::getShort(int index) const {
     if (checkIndex(index, 2)) {
         return buffer->getShort(index);
     }
@@ -113,7 +113,7 @@ boost::int16_t ReplayingDecoderBuffer::getShort(int index) const {
     return 0;
 }
 
-int ReplayingDecoderBuffer::indexOf(int fromIndex, int toIndex, boost::int8_t value) const {
+int ReplayingDecoderBuffer::indexOf(int fromIndex, int toIndex, int8_t value) const {
     int endIndex = buffer->indexOf(fromIndex, toIndex, value);
     needMore = (endIndex < 0);
 
@@ -169,7 +169,7 @@ int ReplayingDecoderBuffer::setInt(int index, int value) {
     throw UnreplayableOperationException();
 }
 
-int ReplayingDecoderBuffer::setLong(int index, boost::int64_t value) {
+int ReplayingDecoderBuffer::setLong(int index, int64_t value) {
     throw UnreplayableOperationException();
 }
 

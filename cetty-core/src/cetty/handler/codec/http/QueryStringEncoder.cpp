@@ -24,6 +24,41 @@ QueryStringEncoder::QueryStringEncoder(const std::string& uri) : uri(uri) {
 
 }
 
+std::string QueryStringEncoder::toString() const {
+    if (params.empty()) {
+        return uri;
+    }
+    else {
+        std::string tmpStr;
+        std::string str(uri);
+        str.append("?");
+
+        NameValueCollection::ConstIterator itr = params.begin();
+        NameValueCollection::ConstIterator end = params.end();
+        for (; itr != end; ++itr) {
+            encodeComponent(itr->first, tmpStr, str);
+            str.append("=");
+            encodeComponent(itr->second, tmpStr, str);
+
+            if (itr + 1 != end) {
+                str.append("&");
+            }
+        }
+
+        return str;
+    }
+}
+
+void QueryStringEncoder::encodeComponent(const std::string& s,
+        std::string& tmp,
+        std::string& output) const {
+    static std::string RESERVED;
+
+    tmp.clear();
+    URI::encode(s, RESERVED, tmp);
+    output.append(tmp);
+}
+
 }
 }
 }

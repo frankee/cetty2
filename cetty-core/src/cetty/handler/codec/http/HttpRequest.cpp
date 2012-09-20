@@ -17,6 +17,7 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace handler {
@@ -33,6 +34,16 @@ HttpRequest::HttpRequest(const HttpVersion& httpVersion,
       method(method),
       uriStr(uri),
       uri(uri) {
+}
+
+HttpRequest::HttpRequest(const HttpVersion& httpVersion,
+    const HttpMethod& method,
+    const StringPiece& uri)
+: HttpMessage(httpVersion),
+method(method),
+uriStr(uri.data(), uri.size()),
+uri(uri) {
+
 }
 
 HttpRequest::~HttpRequest() {
@@ -78,8 +89,8 @@ std::string HttpRequest::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-                          "HttpRequest (chunked: %s)\r\n%s %s %s",
-                          isChunked() ? "true" : "false",
+                          "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
+                          getTransferEncoding().toString().c_str(),
                           getMethod().toString().c_str(),
                           getUri().c_str(),
                           getProtocolVersion().getText().c_str());
@@ -95,6 +106,13 @@ std::string HttpRequest::toString() const {
 
 const std::string& HttpRequest::getLabel() const {
     return label;
+}
+
+void HttpRequest::setUri(const StringPiece& uri) {
+    if (!uri.empty()) {
+        this->uriStr.assign(uri.data(), uri.size());
+        this->uri = this->uriStr;
+    }
 }
 
 }

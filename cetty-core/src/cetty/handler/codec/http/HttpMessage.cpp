@@ -31,34 +31,17 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 HttpMessage::HttpMessage(const HttpVersion& version)
-    : chunked(false),
-      version(version),
-      content(ChannelBuffers::EMPTY_BUFFER) {
+    : version(version),
+      content(ChannelBuffers::EMPTY_BUFFER),
+      transferEncoding(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 HttpMessage::HttpMessage()
-    : chunked(false),
-      version(HttpVersion::HTTP_1_1),
-      content(ChannelBuffers::EMPTY_BUFFER) {
+    : version(HttpVersion::HTTP_1_1),
+      content(ChannelBuffers::EMPTY_BUFFER),
+      transferEncoding(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
-}
-
-bool HttpMessage::isChunked() const {
-    if (chunked) {
-        return true;
-    }
-    else {
-        return HttpCodecUtil::isTransferEncodingChunked(*this);
-    }
-}
-
-void HttpMessage::setChunked(bool chunked) {
-    this->chunked = chunked;
-
-    if (chunked) {
-        setContent(ChannelBuffers::EMPTY_BUFFER);
-    }
 }
 
 void HttpMessage::setContent(const ChannelBufferPtr& content) {
@@ -67,7 +50,7 @@ void HttpMessage::setContent(const ChannelBufferPtr& content) {
         return;
     }
 
-    if (content->readable() && isChunked()) {
+    if (content->readable() && transferEncoding.isMultiple()) {
         throw InvalidArgumentException(
             "non-empty content disallowed if this.chunked == true");
     }
@@ -80,10 +63,10 @@ std::string HttpMessage::toString() const {
     buf.reserve(2048);
 
     StringUtil::strprintf(&buf,
-                          "HttpMessage (version: %d, keepAlive: %s,  chunked: %s)",
+                          "HttpMessage (version: %d, keepAlive: %s,  transferEncoding: %s)",
                           getProtocolVersion().getText().c_str(),
                           HttpHeaders::isKeepAlive(*this) ? "true" : "false",
-                          isChunked() ? "true" : "false");
+                          transferEncoding.toString().c_str());
 
     ConstHeaderIterator end = getLastHeader();
 
@@ -96,6 +79,32 @@ std::string HttpMessage::toString() const {
 
 void HttpMessage::setHeader(const std::string& name, int value) {
     httpHeader.set(name, StringUtil::strprintf("%d", value));
+}
+
+HttpTransferEncoding HttpMessage::getTransferEncoding() const {
+    return transferEncoding;
+}
+
+void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
+    this->transferEncoding = te;
+    const std::string& transferEnocodingStr = HttpHeaders::Names::TRANSFER_ENCODING;
+    const std::string& chunkedStr = HttpHeaders::Values::CHUNKED;
+
+    if (te == HttpTransferEncoding::SINGLE) {
+        httpHeader.erase(transferEnocodingStr, chunkedStr);
+    }
+    else if (te == HttpTransferEncoding::STREAMED) {
+        httpHeader.erase(transferEnocodingStr, chunkedStr);
+        setContent(ChannelBuffers::EMPTY_BUFFER);
+    }
+    else if (te == HttpTransferEncoding::CHUNKED) {
+        if (!httpHeader.has(transferEnocodingStr, chunkedStr)) {
+            addHeader(transferEnocodingStr, chunkedStr);
+        }
+
+        removeHeader(HttpHeaders::Names::CONTENT_LENGTH);
+        setContent(ChannelBuffers::EMPTY_BUFFER);
+    }
 }
 
 }

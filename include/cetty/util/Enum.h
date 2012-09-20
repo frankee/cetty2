@@ -47,15 +47,15 @@ public:
         return lhs.value() >= rhs.value();
     }
 
-    int value() const { return m_value; }
+    int value() const { return v; }
 
 protected:
-    Enum(int i) : m_value(i) {}
-    Enum(const Enum& rhs) : m_value(rhs.m_value) {}
-    Enum& operator=(const Enum& rhs) { m_value = rhs.m_value; return *this; }
+    Enum(int i) : v(i) {}
+    Enum(const Enum& rhs) : v(rhs.v) {}
+    Enum& operator=(const Enum& rhs) { v = rhs.v; return *this; }
 
 protected:
-    int m_value;
+    int v;
 };
 
 }

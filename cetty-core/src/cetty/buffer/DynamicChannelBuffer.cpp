@@ -28,8 +28,8 @@ namespace buffer {
 using namespace cetty::util;
 
 DynamicChannelBuffer::DynamicChannelBuffer(int estimatedLength)
-    : endianness(ByteOrder::big_endian),
-      bufferFactory(HeapChannelBufferFactory::getInstance(ByteOrder::big_endian)) {
+    : endianness(ByteOrder::BO_BIG_ENDIAN),
+      bufferFactory(HeapChannelBufferFactory::getInstance(ByteOrder::BO_BIG_ENDIAN)) {
     if (estimatedLength < 0) {
         throw InvalidArgumentException("estimatedLength is negtive: " /*+ estimatedLength*/);
     }
@@ -109,19 +109,19 @@ bool DynamicChannelBuffer::hasArray() const {
     return buffer->hasArray();
 }
 
-boost::int8_t DynamicChannelBuffer::getByte(int index) const {
+int8_t DynamicChannelBuffer::getByte(int index) const {
     return buffer->getByte(index);
 }
 
-boost::int16_t DynamicChannelBuffer::getShort(int index) const {
+int16_t DynamicChannelBuffer::getShort(int index) const {
     return buffer->getShort(index);
 }
 
-boost::int32_t DynamicChannelBuffer::getInt(int index) const {
+int32_t DynamicChannelBuffer::getInt(int index) const {
     return buffer->getInt(index);
 }
 
-boost::int64_t DynamicChannelBuffer::getLong(int index) const {
+int64_t DynamicChannelBuffer::getLong(int index) const {
     return buffer->getLong(index);
 }
 
@@ -149,7 +149,7 @@ int DynamicChannelBuffer::setInt(int index, int value) {
     return buffer->setInt(index, value);
 }
 
-int DynamicChannelBuffer::setLong(int index, boost::int64_t value) {
+int DynamicChannelBuffer::setLong(int index, int64_t value) {
     return buffer->setLong(index, value);
 }
 

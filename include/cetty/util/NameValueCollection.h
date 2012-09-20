@@ -116,6 +116,8 @@ public:
     /// Returns true if there is at least one name-value pair
     /// with the given name.
 
+    bool has(const std::string& name, const std::string& value) const;
+
     ConstIterator find(const std::string& name) const;
     /// Returns an iterator pointing to the first name-value pair
     /// with the given name.

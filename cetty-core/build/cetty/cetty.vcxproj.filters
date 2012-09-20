@@ -161,9 +161,6 @@
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\SimpleString.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
@@ -392,6 +389,9 @@
     <ClCompile Include="..\..\src\cetty\util\Base64.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpTransferEncoding.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -578,9 +578,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\SimpleString.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h">
@@ -1057,15 +1054,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerAdapter.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioDeadlineTimeout.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\TimeoutPtr.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
@@ -1096,8 +1084,15 @@
     <ClInclude Include="..\..\..\include\cetty\util\Base64.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Platform.h">
-      <Filter>util</Filter>
+    <ClInclude Include="..\..\..\include\cetty\Types.h" />
+    <ClInclude Include="..\..\..\include\cetty\Platform.h" />
+    <ClInclude Include="..\..\..\include\cetty\PlatformWin32.h" />
+    <ClInclude Include="..\..\..\include\cetty\Version.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpTransferEncoding.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaderDateFormat.h">
+      <Filter>handler\codec\http</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -113,32 +113,32 @@ int CompositeChannelBuffer::capacity() const {
     return indices[components.size()];
 }
 
-boost::int8_t CompositeChannelBuffer::getByte(int index) const {
+int8_t CompositeChannelBuffer::getByte(int index) const {
     int componentId = getComponentId(index);
     return components[componentId]->getByte(index - indices[componentId]);
 }
 
-boost::int16_t CompositeChannelBuffer::getShort(int index) const {
+int16_t CompositeChannelBuffer::getShort(int index) const {
     int componentId = getComponentId(index);
 
     if (index + 2 <= indices[componentId + 1]) {
         return components[componentId]->getShort(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::big_endian) {
-        return (boost::int16_t)(((getByte(index) & 0xff) << 8) | (getByte(index + 1) & 0xff));
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
+        return (int16_t)(((getByte(index) & 0xff) << 8) | (getByte(index + 1) & 0xff));
     }
     else {
-        return (boost::int16_t)((getByte(index) & 0xff) | ((getByte(index + 1) & 0xff) << 8));
+        return (int16_t)((getByte(index) & 0xff) | ((getByte(index + 1) & 0xff) << 8));
     }
 }
 
-boost::int32_t CompositeChannelBuffer::getInt(int index) const {
+int32_t CompositeChannelBuffer::getInt(int index) const {
     int componentId = getComponentId(index);
 
     if (index + 4 <= indices[componentId + 1]) {
         return components[componentId]->getInt(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::big_endian) {
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
         return ((getShort(index) & 0xffff) << 16) | (getShort(index + 2) & 0xffff);
     }
     else {
@@ -146,17 +146,17 @@ boost::int32_t CompositeChannelBuffer::getInt(int index) const {
     }
 }
 
-boost::int64_t CompositeChannelBuffer::getLong(int index) const {
+int64_t CompositeChannelBuffer::getLong(int index) const {
     int componentId = getComponentId(index);
 
     if (index + 8 <= indices[componentId + 1]) {
         return components[componentId]->getLong(index - indices[componentId]);
     }
-    else if (order() == ByteOrder::big_endian) {
-        return (((boost::int64_t)getInt(index) & 0xffffffffL) << 32) | (getInt(index + 4) & 0xffffffffL);
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
+        return (((int64_t)getInt(index) & 0xffffffffL) << 32) | (getInt(index + 4) & 0xffffffffL);
     }
     else {
-        return (getInt(index) & 0xFFFFFFFFL) | (((boost::int64_t)getInt(index + 4) & 0xFFFFFFFFL) << 32);
+        return (getInt(index) & 0xFFFFFFFFL) | (((int64_t)getInt(index + 4) & 0xFFFFFFFFL) << 32);
     }
 }
 
@@ -248,7 +248,7 @@ int CompositeChannelBuffer::setShort(int index, int value) {
     if (index + 2 <= indices[componentId + 1]) {
         return components[componentId]->setShort(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::big_endian) {
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
         setByte(index, (value >> 8));
         setByte(index + 1, value);
     }
@@ -266,7 +266,7 @@ int CompositeChannelBuffer::setInt(int index, int value) {
     if (index + 4 <= indices[componentId + 1]) {
         return components[componentId]->setInt(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::big_endian) {
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
         setShort(index, (value >> 16));
         setShort(index + 2, value);
     }
@@ -278,13 +278,13 @@ int CompositeChannelBuffer::setInt(int index, int value) {
     return 4;
 }
 
-int CompositeChannelBuffer::setLong(int index, boost::int64_t value) {
+int CompositeChannelBuffer::setLong(int index, int64_t value) {
     int componentId = getComponentId(index);
 
     if (index + 8 <= indices[componentId + 1]) {
         return components[componentId]->setLong(index - indices[componentId], value);
     }
-    else if (order() == ByteOrder::big_endian) {
+    else if (order() == ByteOrder::BO_BIG_ENDIAN) {
         setInt(index, (int)(value >> 32));
         setInt(index + 4, (int) value);
     }

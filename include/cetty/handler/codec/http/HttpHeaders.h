@@ -245,6 +245,18 @@ public:
          */
         static const std::string SEC_WEBSOCKET_PROTOCOL;
         /**
+         * {@code "Sec-WebSocket-Version"}
+         */
+        static const std::string SEC_WEBSOCKET_VERSION;
+        /**
+         * {@code "Sec-WebSocket-Key"}
+         */
+        static const std::string SEC_WEBSOCKET_KEY;
+        /**
+         * {@code "Sec-WebSocket-Accept"}
+         */
+        static const std::string SEC_WEBSOCKET_ACCEPT;
+        /**
          * <tt>"Server"</tt>
          */
         static const std::string SERVER;

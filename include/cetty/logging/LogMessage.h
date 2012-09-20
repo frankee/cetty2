@@ -66,7 +66,7 @@ public:
     int getSouceLine() const { return line; }
 
 private:
-    //static boost::int64_t messageCounter[];
+    //static int64_t messageCounter[];
 
 private:
     LogLevel level;

@@ -22,7 +22,7 @@
  */
 
 #include <vector>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cetty/buffer/Array.h>
 #include <cetty/buffer/ChannelBuffer.h>
@@ -455,7 +455,7 @@ public:
      * The default implementation of {@link ChannelBuffer#indexOf(int, int, byte)}.
      * This method is useful when implementing a new buffer type.
      */
-    static int indexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value);
+    static int indexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value);
 
     /**
      * The default implementation of {@link ChannelBuffer#indexOf(int, int, ChannelBufferIndexFinder)}.
@@ -466,7 +466,7 @@ public:
     /**
      * Toggles the endianness of the specified 16-bit short integer.
      */
-    static boost::int16_t swapShort(boost::int16_t value);
+    static int16_t swapShort(int16_t value);
 
     /**
      * Toggles the endianness of the specified 24-bit medium integer.
@@ -481,13 +481,13 @@ public:
     /**
      * Toggles the endianness of the specified 64-bit long integer.
      */
-    static boost::int64_t swapLong(boost::int64_t value);
+    static int64_t swapLong(int64_t value);
 
 private:
     static ChannelBufferPtr compositeBuffer(const ByteOrder& endianness, const std::vector<ChannelBufferPtr>& components);
 
-    static int firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value);
-    static int lastIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, boost::int8_t value);
+    static int firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value);
+    static int lastIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, int8_t value);
 
     static int firstIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, const ChannelBufferIndexFinder::Functor& indexFinder);
     static int lastIndexOf(const ConstChannelBufferPtr& buffer, int fromIndex, int toIndex, const ChannelBufferIndexFinder::Functor& indexFinder);

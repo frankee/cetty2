@@ -224,6 +224,18 @@ const std::string HttpHeaders::Names::SEC_WEBSOCKET_ORIGIN = "Sec-WebSocket-Orig
  */
 const std::string HttpHeaders::Names::SEC_WEBSOCKET_PROTOCOL = "Sec-WebSocket-Protocol";
 /**
+ * {@code "Sec-WebSocket-Version"}
+ */
+const std::string HttpHeaders::Names::SEC_WEBSOCKET_VERSION = "Sec-WebSocket-Version";
+/**
+ * {@code "Sec-WebSocket-Key"}
+ */
+const std::string HttpHeaders::Names::SEC_WEBSOCKET_KEY = "Sec-WebSocket-Key";
+/**
+ * {@code "Sec-WebSocket-Accept"}
+ */
+const std::string HttpHeaders::Names::SEC_WEBSOCKET_ACCEPT = "Sec-WebSocket-Accept";
+/**
  * <tt>"Server"</tt>
  */
 const std::string HttpHeaders::Names::SERVER = "Server";

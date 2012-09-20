@@ -97,7 +97,7 @@ void HeapChannelBuffer::aheadWritableBytes(Array* arry) {
     }
 }
 
-boost::int8_t HeapChannelBuffer::getByte(int index) const {
+int8_t HeapChannelBuffer::getByte(int index) const {
     return this->arry[index];
 }
 
@@ -124,7 +124,7 @@ int HeapChannelBuffer::getBytes(int index, Array* dst, int dstIndex, int length)
 
 int HeapChannelBuffer::getBytes(int index, OutputStream* out, int length) const {
     if (out) {
-        return out->write((const boost::int8_t*)arry.data(), index, length);
+        return out->write((const int8_t*)arry.data(), index, length);
     }
 
     return 0;
@@ -165,7 +165,7 @@ int HeapChannelBuffer::setBytes(int index, InputStream* in, int length) {
     }
 
     do {
-        int localReadBytes = in->read((boost::int8_t*)arry.data(), index, length);
+        int localReadBytes = in->read((int8_t*)arry.data(), index, length);
 
         if (localReadBytes < 0) {
             if (readBytes == 0) {

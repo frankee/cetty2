@@ -22,7 +22,7 @@
  */
 
 #include <boost/function.hpp>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 
 #include <cetty/handler/codec/BufferToMessageDecoder.h>
 
@@ -30,7 +30,7 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-    using namespace cetty::channel;
+using namespace cetty::channel;
 
 /**
  * A decoder that splits the received {@link ChannelBuffer}s dynamically by the
@@ -199,7 +199,7 @@ namespace codec {
  */
 class LengthFieldBasedFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
 public:
-    typedef boost::function2<boost::uint32_t, const boost::uint8_t*, int> ChecksumFunction;
+    typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 
 public:
     /**
@@ -275,12 +275,12 @@ public:
     }
 
     LengthFieldBasedFrameDecoder(int maxFrameLength,
-        int lengthFieldOffset,
-        int lengthFieldLength,
-        int lengthAdjustment,
-        int initialBytesToStrip,
-        const std::string& header1,
-        const std::string& header2);
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 int lengthAdjustment,
+                                 int initialBytesToStrip,
+                                 const std::string& header1,
+                                 const std::string& header2);
 
     LengthFieldBasedFrameDecoder(int maxFrameLength,
                                  int lengthFieldOffset,
@@ -346,7 +346,7 @@ public:
 
 protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in);
+                                    const ChannelBufferPtr& in);
 
     /**
      * Extract the sub-region of the specified buffer. This method is called by
@@ -372,7 +372,7 @@ private:
 private:
     bool discardingTooLongFrame;
     int  maxFrameLength;
-    
+
     int  lengthFieldOffset;
     int  lengthFieldLength;
     int  lengthFieldEndOffset;

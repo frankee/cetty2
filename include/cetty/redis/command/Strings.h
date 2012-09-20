@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/redis/RedisCommand.h>
 
@@ -36,7 +36,7 @@ namespace command {
 
     RedisCommandPtr stringsCommandBitcount(const std::string& key, int start, int end);
     RedisCommandPtr stringsCommandDecrement(const std::string& key);
-    RedisCommandPtr stringsCommandDecrementBy(const std::string& key, boost::int64_t value);
+    RedisCommandPtr stringsCommandDecrementBy(const std::string& key, int64_t value);
 
     RedisCommandPtr stringsCommandGet(const std::string& key);
 
@@ -57,7 +57,7 @@ namespace command {
     RedisCommandPtr stringsCommandGetset(const std::string& key, const StringPiece& value);
 
     RedisCommandPtr stringsCommandIncrement(const std::string& key);
-    RedisCommandPtr stringsCommandIncrement(const std::string& key, boost::int64_t value);
+    RedisCommandPtr stringsCommandIncrement(const std::string& key, int64_t value);
     RedisCommandPtr stringsCommandIncrement(const std::string& key, double value);
 
     template<typename Iterator>

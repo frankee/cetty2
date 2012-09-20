@@ -51,7 +51,7 @@ ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
     int msgLength = headerLength + msg->readableBytes() + checksumFieldLength;
     int contentLength = msgLength - (lengthFieldOffset + lengthFieldLength - lengthAdjustment);
 
-    boost::uint32_t cs = 0;
+    uint32_t cs = 0;
 
     if (checksumFieldLength > 0) {
         Array arry;
@@ -59,7 +59,7 @@ ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
         BOOST_ASSERT(!arry.empty());
 
         if (checksumCalcOffset == headerLength) {
-            cs = checksumFunction((const boost::uint8_t*)arry.data(), arry.length());
+            cs = checksumFunction((const uint8_t*)arry.data(), arry.length());
         }
         else {
             //TODO
@@ -297,7 +297,7 @@ const ChannelBufferPtr& LengthFieldPrepender::writeMessage(const ChannelBufferPt
         const ChannelBufferPtr& msg,
         int contentLength,
         int headerPos,
-        boost::uint32_t cs) {
+        uint32_t cs) {
     writeHeader(out, contentLength, headerPos);
     msg->readBytes(out);
 

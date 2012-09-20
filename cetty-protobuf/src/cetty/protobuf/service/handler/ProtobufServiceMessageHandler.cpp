@@ -60,7 +60,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
             ProtobufServiceRegister::instance().getMethodDescriptor(service,
                     rpc.method());
 
-        boost::int64_t id = rpc.id();
+        int64_t id = rpc.id();
 
         if (method) {
             service->CallMethod(method,
@@ -89,7 +89,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
 void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         ChannelHandlerContext& ctx,
         ProtobufServiceMessagePtr req,
-        boost::int64_t id) {
+        int64_t id) {
 
     ProtobufServiceMessagePtr message(
         new ProtobufServiceMessage(RESPONSE,

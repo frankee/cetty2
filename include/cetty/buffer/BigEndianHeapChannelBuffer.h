@@ -64,13 +64,13 @@ public:
     virtual ChannelBufferFactory& factory() const;
     virtual ByteOrder order() const;
 
-    virtual boost::int16_t getShort(int index) const;
-    virtual boost::int32_t getInt(int index) const;
-    virtual boost::int64_t getLong(int index) const;
+    virtual int16_t getShort(int index) const;
+    virtual int32_t getInt(int index) const;
+    virtual int64_t getLong(int index) const;
 
     virtual int setShort(int index, int value);
     virtual int setInt(int index, int value);
-    virtual int setLong(int index, boost::int64_t value);
+    virtual int setLong(int index, int64_t value);
 
     virtual ChannelBufferPtr copy(int index, int length) const;
 

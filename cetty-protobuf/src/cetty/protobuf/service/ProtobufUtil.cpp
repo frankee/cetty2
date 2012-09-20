@@ -59,7 +59,7 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
             if (!field->is_repeated()) {
                 switch (field->cpp_type()) {
                 case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-                    return (boost::int64_t)reflection->GetInt32(message, field);
+                    return (int64_t)reflection->GetInt32(message, field);
                     break;
 
                 case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
@@ -85,7 +85,7 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
                 int i = 0;
                 int fieldCnt = reflection->FieldSize(message, field);
 
-                std::vector<boost::int64_t> integers;
+                std::vector<int64_t> integers;
                 std::vector<double> doubles;
                 std::vector<const std::string*> strings;
                 std::vector<const Message*> messages;

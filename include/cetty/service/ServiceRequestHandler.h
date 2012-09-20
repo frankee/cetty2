@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelOutboundMessageHandler.h>

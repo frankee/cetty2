@@ -19,7 +19,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
@@ -40,9 +40,9 @@ public:
         return getField<int>(object, field);
     }
 
-    boost::int64_t getInt64(const ConfigObject& object,
+    int64_t getInt64(const ConfigObject& object,
                             const ConfigFieldDescriptor* field) const {
-        return getField<boost::int64_t>(object, field);
+        return getField<int64_t>(object, field);
     }
 
     double getDouble(const ConfigObject& object,
@@ -67,8 +67,8 @@ public:
     }
     void setInt64(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  boost::int64_t value) const {
-        setField<boost::int64_t>(object, field, value);
+                  int64_t value) const {
+        setField<int64_t>(object, field, value);
     }
     void setDouble(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
@@ -98,8 +98,8 @@ public:
     }
     void addInt64(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  boost::int64_t value) const {
-        addField<boost::int64_t>(object, field, value);
+                  int64_t value) const {
+        addField<int64_t>(object, field, value);
     }
     void addDouble(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
@@ -136,14 +136,14 @@ private:
     template <typename Type>
     inline Type* mutableRaw(ConfigObject* object,
                             const ConfigFieldDescriptor* field) const {
-        void* ptr = reinterpret_cast<boost::uint8_t*>(object) + field->offset;
+        void* ptr = reinterpret_cast<uint8_t*>(object) + field->offset;
         return reinterpret_cast<Type*>(ptr);
     }
 
     template <typename Type>
     inline const Type& getRaw(const ConfigObject& object,
                               const ConfigFieldDescriptor* field) const {
-        const void* ptr = reinterpret_cast<const boost::uint8_t*>(&object) +
+        const void* ptr = reinterpret_cast<const uint8_t*>(&object) +
                           field->offset;
         return *reinterpret_cast<const Type*>(ptr);
     }

@@ -43,22 +43,22 @@ SlicedChannelBuffer::SlicedChannelBuffer(const ChannelBufferPtr& buffer,
     writerIndex(length);
 }
 
-boost::int8_t SlicedChannelBuffer::getByte(int index) const {
+int8_t SlicedChannelBuffer::getByte(int index) const {
     checkIndex(index);
     return buffer->getByte(index + adjustment);
 }
 
-boost::int16_t SlicedChannelBuffer::getShort(int index) const {
+int16_t SlicedChannelBuffer::getShort(int index) const {
     checkIndex(index, 2);
     return buffer->getShort(index + adjustment);
 }
 
-boost::int32_t SlicedChannelBuffer::getInt(int index) const {
+int32_t SlicedChannelBuffer::getInt(int index) const {
     checkIndex(index, 4);
     return buffer->getInt(index + adjustment);
 }
 
-boost::int64_t SlicedChannelBuffer::getLong(int index) const {
+int64_t SlicedChannelBuffer::getLong(int index) const {
     checkIndex(index, 8);
     return buffer->getLong(index + adjustment);
 }
@@ -118,7 +118,7 @@ int SlicedChannelBuffer::setInt(int index, int value) {
     return buffer->setInt(index + adjustment, value);
 }
 
-int SlicedChannelBuffer::setLong(int index, boost::int64_t value) {
+int SlicedChannelBuffer::setLong(int index, int64_t value) {
     checkIndex(index, 8);
     return buffer->setLong(index + adjustment, value);
 }

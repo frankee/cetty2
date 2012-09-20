@@ -26,19 +26,19 @@ namespace buffer {
 using namespace cetty::util;
 
 ChannelBufferFactoryPtr HeapChannelBufferFactory::INSTANCE_BE =
-    new HeapChannelBufferFactory(ByteOrder::big_endian);
+    new HeapChannelBufferFactory(ByteOrder::BO_BIG_ENDIAN);
 ChannelBufferFactoryPtr HeapChannelBufferFactory::INSTANCE_LE =
-    new HeapChannelBufferFactory(ByteOrder::little_endian);
+    new HeapChannelBufferFactory(ByteOrder::BO_LITTLE_ENDIAN);
 
 ChannelBufferFactory& HeapChannelBufferFactory::getInstance() {
     return *INSTANCE_BE;
 }
 
 ChannelBufferFactory& HeapChannelBufferFactory::getInstance(const ByteOrder& endianness) {
-    if (endianness == ByteOrder::big_endian) {
+    if (endianness == ByteOrder::BO_BIG_ENDIAN) {
         return *INSTANCE_BE;
     }
-    else if (endianness == ByteOrder::little_endian) {
+    else if (endianness == ByteOrder::BO_LITTLE_ENDIAN) {
         return *INSTANCE_LE;
     }
     else {

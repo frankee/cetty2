@@ -20,7 +20,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/redis/RedisCommandPtr.h>
 
@@ -42,7 +42,7 @@ RedisCommandPtr hashesCommandGet(const std::string& key, const std::vector<std::
 RedisCommandPtr hashesCommandGetAll(const std::string& key);
 RedisCommandPtr hashesCommandIncrementBy(const std::string& key,
         const std::string& field,
-        boost::int64_t increment);
+        int64_t increment);
 
 RedisCommandPtr hashesCommandIncrementBy(const std::string& key,
         const std::string& field,

@@ -47,7 +47,7 @@ public:
     virtual void writableBytes(Array* arry);
     virtual void aheadWritableBytes(Array* arry);
 
-    virtual boost::int8_t getByte(int index) const;
+    virtual int8_t getByte(int index) const;
 
     virtual int getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const;
     virtual int getBytes(int index, Array* dst, int dstIndex, int length) const;

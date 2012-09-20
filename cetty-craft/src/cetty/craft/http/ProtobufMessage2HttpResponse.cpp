@@ -18,7 +18,7 @@
 
 #include <google/protobuf/message.h>
 #include <boost/variant.hpp>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBuffers.h>
@@ -57,7 +57,7 @@ public:
         this->fieldName = fieldName;
     }
 
-    ChannelBufferPtr operator()(boost::int64_t value) const {
+    ChannelBufferPtr operator()(int64_t value) const {
         ChannelBufferPtr content = ChannelBuffers::buffer(
                                        fieldName.size() + 16 + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);
@@ -104,7 +104,7 @@ public:
         return content;
     }
 
-    ChannelBufferPtr operator()(const std::vector<boost::int64_t>& value) const {
+    ChannelBufferPtr operator()(const std::vector<int64_t>& value) const {
         ChannelBufferPtr content = ChannelBuffers::buffer(
                                        fieldName.size() + 16 * value.size() + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);

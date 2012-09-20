@@ -28,6 +28,12 @@
 #include <cetty/util/NameValueCollection.h>
 
 namespace cetty {
+namespace util {
+class StringPiece;
+}
+}
+
+namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
@@ -65,6 +71,10 @@ public:
                 const HttpMethod& method,
                 const std::string& uri);
 
+    HttpRequest(const HttpVersion& httpVersion,
+        const HttpMethod& method,
+        const StringPiece& uri);
+
     virtual ~HttpRequest();
 
     /**
@@ -97,12 +107,7 @@ public:
         this->uri = uri;
     }
 
-    void setUri(const char* uri) {
-        if (uri) {
-            this->uriStr = uri;
-            this->uri = this->uriStr;
-        }
-    }
+    void setUri(const StringPiece& uri);
 
     /**
     * Get the Query parameter of the URI of this request.
