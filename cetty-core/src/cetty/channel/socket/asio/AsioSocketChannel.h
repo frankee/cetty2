@@ -36,7 +36,6 @@
 #include <cetty/channel/socket/asio/AsioHandlerAllocator.h>
 #include <cetty/channel/socket/asio/AsioSocketChannelConfig.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
 
 namespace cetty {
 namespace channel  {

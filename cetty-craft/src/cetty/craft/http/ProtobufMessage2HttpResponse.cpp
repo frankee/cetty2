@@ -21,7 +21,7 @@
 #include <cetty/Types.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
@@ -58,7 +58,7 @@ public:
     }
 
     ChannelBufferPtr operator()(int64_t value) const {
-        ChannelBufferPtr content = ChannelBuffers::buffer(
+        ChannelBufferPtr content = Unpooled::buffer(
                                        fieldName.size() + 16 + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);
 
@@ -68,7 +68,7 @@ public:
     }
 
     ChannelBufferPtr operator()(double value) const {
-        ChannelBufferPtr content = ChannelBuffers::buffer(
+        ChannelBufferPtr content = Unpooled::buffer(
                                        fieldName.size() + 32 + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);
 
@@ -81,7 +81,7 @@ public:
         ChannelBufferPtr content;
 
         if (value) {
-            content = ChannelBuffers::buffer(
+            content = Unpooled::buffer(
                           value->size() + fieldName.size() + RESERVED_WRITE_SIZE,
                           RESERVED_AHEAD_WRITE_SIZE);
 
@@ -96,7 +96,7 @@ public:
 
         if (value) {
             int size = value->ByteSize();
-            content = ChannelBuffers::dynamicBuffer(size * 4 + RESERVED_MIN_SIZE,
+            content = Unpooled::buffer(size * 4 + RESERVED_MIN_SIZE,
                                                     RESERVED_AHEAD_WRITE_SIZE);
             formatter->format(*value, content);
         }
@@ -105,7 +105,7 @@ public:
     }
 
     ChannelBufferPtr operator()(const std::vector<int64_t>& value) const {
-        ChannelBufferPtr content = ChannelBuffers::buffer(
+        ChannelBufferPtr content = Unpooled::buffer(
                                        fieldName.size() + 16 * value.size() + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);
 
@@ -114,7 +114,7 @@ public:
     }
 
     ChannelBufferPtr operator()(const std::vector<double>& value) const {
-        ChannelBufferPtr content = ChannelBuffers::buffer(
+        ChannelBufferPtr content = Unpooled::buffer(
                                        fieldName.size() + 32 * value.size() + RESERVED_WRITE_SIZE,
                                        RESERVED_AHEAD_WRITE_SIZE);
 

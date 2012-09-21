@@ -134,8 +134,7 @@ public:
         }
 
         length = std::min(left, length);
-        Array arry((char*)bytes, length);
-        buffer->readBytes(&arry, offset, length);
+        buffer->readBytes(bytes, offset, length);
         return length;
     }
 

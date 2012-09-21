@@ -4,13 +4,48 @@
     <Filter Include="util">
       <UniqueIdentifier>{b33635c6-1f59-493d-87e8-c6a9d7d0b9f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{43da1635-e87d-4b65-a965-c2efdf57bef0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\cetty\util\Base64Test.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\cetty\util\RandomTest.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\cetty\buffer\ChannelBufferIndexFinderTest.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractChannelBufferTest.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractChannelBufferTest.inc.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractCompositeChannelBufferTest.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractCompositeChannelBufferTest.inc.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\ArrayUtil.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\BigEndianCompositeChannelBufferTest.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

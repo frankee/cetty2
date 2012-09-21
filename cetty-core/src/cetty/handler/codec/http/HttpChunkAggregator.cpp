@@ -16,8 +16,7 @@
 
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelConfig.h>
@@ -71,7 +70,7 @@ public:
             || te == HttpTransferEncoding::CHUNKED) {
             // initialize the cumulative buffer, and wait for incoming chunks.
             value->setTransferEncoding(HttpTransferEncoding::SINGLE);
-            value->setContent(ChannelBuffers::dynamicBuffer());
+            value->setContent(Unpooled::buffer());
 
             currentMessage.reset();
             currentMessage = value;
@@ -194,7 +193,7 @@ void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
     }
 
 #endif
-    currentMessage->setContent(ChannelBuffers::wrappedBuffer(cumulation, input));
+    currentMessage->setContent(Unpooled::wrappedBuffer(cumulation, input));
 }
 
 ChannelHandlerPtr HttpChunkAggregator::clone() {

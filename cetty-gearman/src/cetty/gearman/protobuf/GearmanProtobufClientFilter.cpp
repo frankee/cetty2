@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -52,7 +52,7 @@ GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
     const ProtobufServiceMessagePtr& req) {
     const std::string& method = req->getMethod();
     ChannelBufferPtr buffer
-        = ChannelBuffers::buffer(req->getMessageSize() + 8);
+        = Unpooled::buffer(req->getMessageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
     ProtobufServiceMessageEncoder::encodeMessage(buffer, req);

@@ -15,7 +15,6 @@
  */
 #include <cetty/channel/socket/asio/AsioSocketChannelConfig.h>
 
-#include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
 

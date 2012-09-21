@@ -21,8 +21,10 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/SocketAddress.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/gearman/GearmanMessage.h>
 
@@ -67,9 +69,9 @@ void GearmanWorkerHandler::registerWorker(const std::string& functionName,
 
 void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
                                      ChannelHandlerContext& ctx) {
-    const std::string& functionName = gearmanMessage->getParamater(1);
-    CallbackMap::iterator itr;
-    itr = workerFunctors.find(functionName);
+    const std::vector<std::string>& parameters = gearmanMessage->getParameters();
+    const std::string& functionName = parameters[1];
+    CallbackMap::iterator itr = workerFunctors.find(functionName);
 
     if (itr != workerFunctors.end()) {
         const GrabJobCallback& callback = itr->second;
@@ -77,11 +79,8 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
         if (callback) {
             GearmanMessagePtr message = callback(gearmanMessage);
 
-            std::string ret;
-            ret = ChannelBuffers::hexDump(message->getData());
-            std::cout<<"the ret is  "<< ret <<std::endl;
-            std::cout << "handleJob::the msg is  " << ret << std::endl;
-            std::cout << "handleJob::the msg is  " << (message->getParameters())[0] <<std::endl;
+            DLOG_DEBUG << "handler: " << parameters.front()
+                       << "result: " << ChannelBufferUtil::hexDump(message->getData());
 
             if (outboundTransfer.unfoldAndAdd(message)) {
                 ctx.flush();
@@ -98,6 +97,7 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
 
 void GearmanWorkerHandler::grabJob(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobMessage();
+
     if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
@@ -105,6 +105,7 @@ void GearmanWorkerHandler::grabJob(ChannelHandlerContext& ctx) {
 
 void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createGrabJobUniqMessage();
+
     if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
@@ -112,6 +113,7 @@ void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
 
 void GearmanWorkerHandler::preSleep(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = GearmanMessage::createPreSleepMessage();
+
     if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
@@ -126,12 +128,12 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
     if (msg) {
         switch (msg->getType()) {
         case GearmanMessage::NOOP:
-            std::cout<<"the NOOP is received, wake up to do job"<< std::endl;
+            LOG_INFO << "the NOOP is received, wake up to do job";
             grabJob(ctx);
             break;
 
         case GearmanMessage::NO_JOB:
-            std::cout<<"the GRAB_JOB  RSP is NO_JOB "<< std::endl;
+            LOG_INFO << "the GRAB_JOB  RSP is NO_JOB";
 
             if (++grabIdleCount > maxGrabIdleCount) {
                 preSleep(ctx);
@@ -143,15 +145,12 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
             break;
 
         case GearmanMessage::JOB_ASSIGN:
-            std::cout<<"the GRAB_JOB  RSP  is JOB_ASSIGN,do the job now "<< std::endl;
+            LOG_INFO << "the response of GRAB_JOB is JOB_ASSIGN, do the job now";
 
-#if defined(_DEBUG)
-            params = msg->getParameters();
-            std::cout<<"the job-handler is "<<params[0]<<std::endl;
-            std::cout<<"the function name is "<<params[1]<<std::endl;
-            data = ChannelBuffers::hexDump(msg->getData());
-            std::cout<<"the arg data is "<<data<<std::endl;
-#endif
+            DLOG_DEBUG << "JOB_ASSIGN, job-handler: " << params[0]
+                       << "function name: " << params[1]
+                       << "arg data: " << ChannelBufferUtil::hexDump(msg->getData());
+
             handleJob(msg, ctx);
             grabIdleCount = 0;
             grabJob(ctx);
@@ -159,27 +158,25 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
 
 
         case GearmanMessage::JOB_ASSIGN_UNIQ:
-            std::cout<<"the GRAB_JOB_UNIQ  RSP  is JOB_ASSIGN_UNIQ which have uniqId assined from client "<< std::endl;
-            params = msg->getParameters();
-            std::cout<<"the job-handler is "<<params[0]<<std::endl;
-            std::cout<<"the function name is "<<params[1]<<std::endl;
-            std::cout<<"the unique ID is "<<params[2]<<std::endl;
-            data = ChannelBuffers::hexDump(msg->getData());
-            std::cout<<"the arg data is "<<data<<std::endl;
+            LOG_INFO << "the GRAB_JOB_UNIQ  RSP  is JOB_ASSIGN_UNIQ which have uniqId assigned from client";
+
+            DLOG_DEBUG << "JOB_ASSIGN_UNIQ, job-handler: " << params[0]
+                       << "function name: " << params[1]
+                       << "unique ID: " << params[2]
+                       << "arg data: " << ChannelBufferUtil::hexDump(msg->getData());
 
             grabIdleCount = 0;
             handleJob(msg, ctx);
             break;
 
         case GearmanMessage::ECHO_RES:
-            data = ChannelBuffers::hexDump(msg->getData());
-            std::cout<<"the ECHO_RES is ok "<< std::endl;
-            std::cout<<"the data is  "<<data<<std::endl;
+            LOG_INFO << "the ECHO_RES is ok";
+
+            DLOG_DEBUG << "ECHO_RES, data: " << ChannelBufferUtil::hexDump(msg->getData());
             break;
 
         case GearmanMessage::ERROR:
-
-            //do something
+            LOG_WARN << "ERROR";
             break;
 
         default:

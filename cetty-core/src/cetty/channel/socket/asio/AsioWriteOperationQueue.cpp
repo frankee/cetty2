@@ -19,7 +19,6 @@
 #include <boost/asio/buffer.hpp>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>

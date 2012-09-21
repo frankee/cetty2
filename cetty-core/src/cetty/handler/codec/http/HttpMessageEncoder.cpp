@@ -14,9 +14,7 @@
  * under the License.
  */
 
-#include <cetty/buffer/Array.h>
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/util/Exception.h>
@@ -65,7 +63,7 @@ public:
         value->setTransferEncoding(te);
 
         // Encode the message.
-        ChannelBufferPtr header = ChannelBuffers::dynamicBuffer();
+        ChannelBufferPtr header = Unpooled::buffer();
 
         encoder.encodeInitialLine(*header, *value);
         encoder.encodeHeaders(*header, value->getFirstHeader(), value->getLastHeader());
@@ -103,7 +101,7 @@ public:
         else if (te == HttpTransferEncoding::CHUNKED) {
             if (value->isLast()) {
                 //encoder.chunked = false;
-                return ChannelBuffers::EMPTY_BUFFER;
+                return Unpooled::EMPTY_BUFFER;
             }
 
             ChannelBufferPtr content = value->getContent();
@@ -123,7 +121,7 @@ public:
                 return content;
             }
             else {
-                ChannelBufferPtr buffer = ChannelBuffers::buffer(contentLength + lengthPartSize + 2);
+                ChannelBufferPtr buffer = Unpooled::buffer(contentLength + lengthPartSize + 2);
                 buffer->writeBytes(lengthStr);
                 buffer->writeByte(HttpCodecUtil::CR);
                 buffer->writeByte(HttpCodecUtil::LF);
@@ -144,7 +142,7 @@ public:
             //encoder.chunked = false;
 
             if (value) {
-                ChannelBufferPtr trailer = ChannelBuffers::dynamicBuffer(1024);
+                ChannelBufferPtr trailer = Unpooled::buffer(1024);
 
                 trailer->writeByte('0');
                 trailer->writeByte(HttpCodecUtil::CR);
@@ -203,7 +201,7 @@ void HttpMessageEncoder::encodeHeader(ChannelBuffer& buf,
 }
 
 static std::string lastStr("0\r\n\r\n");
-ChannelBufferPtr HttpMessageEncoder::LAST_CHUNK = ChannelBuffers::wrappedBuffer(lastStr);
+ChannelBufferPtr HttpMessageEncoder::LAST_CHUNK = Unpooled::wrappedBuffer(lastStr);
 
 }
 }

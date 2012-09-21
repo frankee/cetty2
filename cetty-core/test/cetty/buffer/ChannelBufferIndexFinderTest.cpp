@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-#include "cetty/buffer/ChannelBuffers.h"
+#include "cetty/buffer/Unpooled.h"
 #include "cetty/buffer/ChannelBufferIndexFinder.h"
 
 using namespace cetty::buffer;
@@ -24,7 +24,7 @@ using namespace cetty::buffer;
 static const char str[] = "abc\r\n\ndef\r\rghi\n\njkl\0\0mno  \t\tx";
 
 TEST(ChannelBufferIndexFinderTest, testForward) {
-    ChannelBufferPtr buf = ChannelBuffers::copiedBuffer(Array((char*)str, 29));
+    ChannelBufferPtr buf = Unpooled::copiedBuffer(str, 29);
 
     EXPECT_EQ(3, buf->indexOf(INT_MIN, buf->capacity(), ChannelBufferIndexFinder::CRLF));
     EXPECT_EQ(6, buf->indexOf(3, buf->capacity(), ChannelBufferIndexFinder::NOT_CRLF));
@@ -41,7 +41,7 @@ TEST(ChannelBufferIndexFinderTest, testForward) {
 }
 
 TEST(ChannelBufferIndexFinderTest, testBackward) {
-    ChannelBufferPtr buf = ChannelBuffers::copiedBuffer(Array((char*)str, 29));
+    ChannelBufferPtr buf = Unpooled::copiedBuffer(str, 29);
 
     EXPECT_EQ(27, buf->indexOf(INT_MAX, 0, ChannelBufferIndexFinder::LINEAR_WHITESPACE));
     EXPECT_EQ(23, buf->indexOf(28, 0, ChannelBufferIndexFinder::NOT_LINEAR_WHITESPACE));

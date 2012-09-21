@@ -38,7 +38,7 @@ class ProtobufParser {
 public:
     virtual ~ProtobufParser() {}
 
-    virtual int parse(const char* buffer, Message* message) = 0;
+    virtual int parse(const char* buffer, int bufferSize, Message* message) = 0;
 
     int parse(const std::string& buffer, Message* message);
     int parse(const ChannelBufferPtr& buffer, Message* message);

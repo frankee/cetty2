@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
-#include "cetty/util/Base64::h"
+#include "cetty/util/Base64.h"
 
 using namespace cetty::util;
 
@@ -33,7 +33,7 @@ std::string encodeToString(const std::string& in, int flags) {
     std::string b64;
     Base64::encode(in, flags, &b64);
 
-    ASSERT_STREQ(b64, decodeString(b64));
+    ASSERT_STREQ(b64.c_str(), decodeString(b64).c_str());
     return b64;
 }
 
@@ -45,44 +45,44 @@ void assertBad(const std::string& in) {
 
 TEST(Base64Test, testDecodeExtraChars) {
     // padding 0
-    ASSERT_STREQ("hello, world", decodeString("aGVsbG8sIHdvcmxk"));
+    ASSERT_STREQ("hello, world", decodeString("aGVsbG8sIHdvcmxk").c_str());
     assertBad("aGVsbG8sIHdvcmxk=");
     assertBad("aGVsbG8sIHdvcmxk==");
     assertBad("aGVsbG8sIHdvcmxk =");
     assertBad("aGVsbG8sIHdvcmxk = = ");
-    ASSERT_STREQ("hello, world", decodeString(" aGVs bG8s IHdv cmxk  "));
-    ASSERT_STREQ("hello, world", decodeString(" aGV sbG8 sIHd vcmx k "));
-    ASSERT_STREQ("hello, world", decodeString(" aG VsbG 8sIH dvcm xk "));
-    ASSERT_STREQ("hello, world", decodeString(" a GVsb G8sI Hdvc mxk "));
-    ASSERT_STREQ("hello, world", decodeString(" a G V s b G 8 s I H d v c m x k "));
-    ASSERT_STREQ("hello, world", decodeString("_a*G_V*s_b*G_8*s_I*H_d*v_c*m_x*k_"));
-    ASSERT_STREQ("hello, world", decodeString("aGVsbG8sIHdvcmxk"));
+    ASSERT_STREQ("hello, world", decodeString(" aGVs bG8s IHdv cmxk  ").c_str());
+    ASSERT_STREQ("hello, world", decodeString(" aGV sbG8 sIHd vcmx k ").c_str());
+    ASSERT_STREQ("hello, world", decodeString(" aG VsbG 8sIH dvcm xk ").c_str());
+    ASSERT_STREQ("hello, world", decodeString(" a GVsb G8sI Hdvc mxk ").c_str());
+    ASSERT_STREQ("hello, world", decodeString(" a G V s b G 8 s I H d v c m x k ").c_str());
+    ASSERT_STREQ("hello, world", decodeString("_a*G_V*s_b*G_8*s_I*H_d*v_c*m_x*k_").c_str());
+    ASSERT_STREQ("hello, world", decodeString("aGVsbG8sIHdvcmxk").c_str());
 
     // padding 1
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPyE="));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPyE"));
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPyE=").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPyE").c_str());
     assertBad("aGVsbG8sIHdvcmxkPyE==");
     assertBad("aGVsbG8sIHdvcmxkPyE ==");
     assertBad("aGVsbG8sIHdvcmxkPyE = = ");
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E="));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E"));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E ="));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E "));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E = "));
-    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E   "));
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E=").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E =").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E ").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E = ").c_str());
+    ASSERT_STREQ("hello, world?!", decodeString("aGVsbG8sIHdvcmxkPy E   ").c_str());
 
     // padding 2
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkLg=="));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkLg"));
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkLg==").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkLg").c_str());
     assertBad("aGVsbG8sIHdvcmxkLg=");
     assertBad("aGVsbG8sIHdvcmxkLg =");
     assertBad("aGVsbG8sIHdvcmxkLg = ");
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g=="));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g"));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g =="));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g "));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g = = "));
-    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g   "));
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g==").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g ==").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g ").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g = = ").c_str());
+    ASSERT_STREQ("hello, world.", decodeString("aGVsbG8sIHdvcmxkL g   ").c_str());
 }
 
 static const char BYTES[] = {

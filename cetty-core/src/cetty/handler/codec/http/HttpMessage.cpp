@@ -15,7 +15,7 @@
  */
 #include <cetty/handler/codec/http/HttpMessage.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/Exception.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
@@ -32,21 +32,21 @@ using namespace cetty::util;
 
 HttpMessage::HttpMessage(const HttpVersion& version)
     : version(version),
-      content(ChannelBuffers::EMPTY_BUFFER),
+      content(Unpooled::EMPTY_BUFFER),
       transferEncoding(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 HttpMessage::HttpMessage()
     : version(HttpVersion::HTTP_1_1),
-      content(ChannelBuffers::EMPTY_BUFFER),
+      content(Unpooled::EMPTY_BUFFER),
       transferEncoding(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 void HttpMessage::setContent(const ChannelBufferPtr& content) {
     if (!content) {
-        this->content = ChannelBuffers::EMPTY_BUFFER;
+        this->content = Unpooled::EMPTY_BUFFER;
         return;
     }
 
@@ -95,7 +95,7 @@ void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
     }
     else if (te == HttpTransferEncoding::STREAMED) {
         httpHeader.erase(transferEnocodingStr, chunkedStr);
-        setContent(ChannelBuffers::EMPTY_BUFFER);
+        setContent(Unpooled::EMPTY_BUFFER);
     }
     else if (te == HttpTransferEncoding::CHUNKED) {
         if (!httpHeader.has(transferEnocodingStr, chunkedStr)) {
@@ -103,7 +103,7 @@ void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
         }
 
         removeHeader(HttpHeaders::Names::CONTENT_LENGTH);
-        setContent(ChannelBuffers::EMPTY_BUFFER);
+        setContent(Unpooled::EMPTY_BUFFER);
     }
 }
 

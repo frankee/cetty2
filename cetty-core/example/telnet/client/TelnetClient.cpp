@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         line.append("\r\n");
 
         // Sends the received line to the server.
-        lastWriteFuture = channel.write(ChannelBuffers::copiedBuffer(line));
+        lastWriteFuture = channel.write(Unpooled::copiedBuffer(line));
 
         // this method will happend two content copies.
         //lastWriteFuture = channel.write(line);

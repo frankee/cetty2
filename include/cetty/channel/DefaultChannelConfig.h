@@ -26,8 +26,6 @@
 namespace cetty {
 namespace channel {
 
-using namespace cetty::buffer;
-
 /**
  * The default {@link SocketChannelConfig} implementation.
  *

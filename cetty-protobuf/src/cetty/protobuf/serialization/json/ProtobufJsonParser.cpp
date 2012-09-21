@@ -28,13 +28,22 @@ namespace json {
 using namespace cetty::protobuf::serialization;
 
 int ProtobufJsonParser::parse(const char* buffer,
+                              int bufferSize,
                               google::protobuf::Message* message) {
-    if (!buffer || strlen(buffer) == 0 || !message) {
+    if (!buffer || bufferSize <= 0 || !message) {
         return -1;
     }
 
-    YAML::Node root = YAML::Load(buffer);
-
+    YAML::Node root;
+    
+    if (buffer + bufferSize == '\0') {
+        root = YAML::Load(buffer);
+    }
+    else { //FIXME: add YAML::Load(const char*, int)?
+        std::string str(buffer, bufferSize);
+        root = YAML::Load(str);
+    }
+    
     if (root) {
         return parseMessage(root, message);
     }

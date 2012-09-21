@@ -44,7 +44,7 @@ public:
     /**
      * Returns this buffer's parent that this buffer is wrapping.
      */
-    virtual ChannelBufferPtr& unwrap() = 0;
+    virtual const ChannelBufferPtr& unwrap() = 0;
 };
 
 }

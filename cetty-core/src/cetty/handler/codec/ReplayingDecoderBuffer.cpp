@@ -17,9 +17,12 @@
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 #include <cetty/handler/codec/UnreplayableOperationException.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace handler {
@@ -37,8 +40,8 @@ int ReplayingDecoderBuffer::capacity() const {
     }
 }
 
-bool ReplayingDecoderBuffer::hasArray() const {
-    return buffer->hasArray();
+void ReplayingDecoderBuffer::capacity(int newCapacity) {
+    buffer->capacity(newCapacity);
 }
 
 void ReplayingDecoderBuffer::clear() {
@@ -50,7 +53,7 @@ cetty::buffer::ChannelBufferPtr ReplayingDecoderBuffer::copy(int index, int leng
         return buffer->copy(index, length);
     }
 
-    return ChannelBuffers::EMPTY_BUFFER;
+    return Unpooled::EMPTY_BUFFER;
 }
 
 void ReplayingDecoderBuffer::discardReadBytes() {
@@ -69,7 +72,7 @@ int8_t ReplayingDecoderBuffer::getByte(int index) const {
     return 0;
 }
 
-int ReplayingDecoderBuffer::getBytes(int index, Array* dst, int dstIndex, int length) const {
+int ReplayingDecoderBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
     if (checkIndex(index, length)) {
         return buffer->getBytes(index, dst, dstIndex, length);
     }
@@ -127,14 +130,6 @@ int ReplayingDecoderBuffer::indexOf(int fromIndex, int toIndex, const ChannelBuf
     return endIndex;
 }
 
-ChannelBufferFactory& ReplayingDecoderBuffer::factory() const {
-    return buffer->factory();
-}
-
-cetty::buffer::ByteOrder ReplayingDecoderBuffer::order() const {
-    return buffer->order();
-}
-
 int ReplayingDecoderBuffer::readableBytes() const {
     if (terminated) {
         return ChannelBuffer::readableBytes();
@@ -144,16 +139,16 @@ int ReplayingDecoderBuffer::readableBytes() const {
     }
 }
 
-void ReplayingDecoderBuffer::readableBytes(Array* arry) {
+void ReplayingDecoderBuffer::readableBytes(StringPiece* bytes) {
     syncIndex();
-    return buffer->readableBytes(arry);
+    return buffer->readableBytes(bytes);
 }
 
 int ReplayingDecoderBuffer::setByte(int index, int value) {
     throw UnreplayableOperationException();
 }
 
-int ReplayingDecoderBuffer::setBytes(int index, const ConstArray& src, int srcIndex, int length) {
+int ReplayingDecoderBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
     throw UnreplayableOperationException();
 }
 
@@ -182,7 +177,7 @@ ChannelBufferPtr ReplayingDecoderBuffer::slice(int index, int length) {
         return buffer->slice(index, length);
     }
 
-    return ChannelBuffers::EMPTY_BUFFER;
+    return Unpooled::EMPTY_BUFFER;
 }
 
 int ReplayingDecoderBuffer::slice(int index, int length, GatheringBuffer* gatheringBuffer) {
@@ -198,7 +193,7 @@ std::string ReplayingDecoderBuffer::toString() const {
                                  readerIndex(), writerIndex());
 }
 
-void ReplayingDecoderBuffer::writableBytes(Array* arry) {
+char* ReplayingDecoderBuffer::writableBytes(int* length) {
     throw UnreplayableOperationException();
 }
 
@@ -210,7 +205,7 @@ int ReplayingDecoderBuffer::aheadWritableBytes() const {
     throw UnreplayableOperationException();
 }
 
-void ReplayingDecoderBuffer::aheadWritableBytes(Array* arry) {
+char* ReplayingDecoderBuffer::aheadWritableBytes(int* length) {
     throw UnreplayableOperationException();
 }
 
@@ -232,6 +227,10 @@ bool ReplayingDecoderBuffer::checkReadableBytes(int readableBytes) const {
 
     needMore = true;
     return false;
+}
+
+ChannelBufferPtr ReplayingDecoderBuffer::newBuffer(int initialCapacity) {
+    return shared_from_this();
 }
 
 }

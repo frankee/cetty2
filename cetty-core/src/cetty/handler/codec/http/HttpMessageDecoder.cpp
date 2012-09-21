@@ -15,7 +15,7 @@
  */
 #include <cetty/handler/codec/http/HttpMessageDecoder.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/Character.h>
 #include <cetty/util/Exception.h>
@@ -79,8 +79,8 @@ HttpMessageDecoder::HttpMessageDecoder(int maxInitialLineLength,
 }
 
 HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
-    const ReplayingDecoderBufferPtr& buffer,
-    int state) {
+                                       const ReplayingDecoderBufferPtr& buffer,
+                                       int state) {
     switch (state) {
     case SKIP_CONTROL_CHARS: {
         if (skipControlCharacters(buffer)) {
@@ -108,9 +108,9 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             break;
         }
 
-        message = createMessage(initialLine[0].c_str(),
-            initialLine[1].c_str(),
-            initialLine[2].c_str());
+        message = createMessage(initialLine[0],
+                                initialLine[1],
+                                initialLine[2]);
         checkpoint(READ_HEADER);
 
         // clear data, then step into the READ_HEADER state.
@@ -141,7 +141,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
             int contentLength = HttpHeaders::getContentLength(*message, -1);
 
             if (contentLength == 0 || (contentLength == -1 && isDecodingRequest())) {
-                content = ChannelBuffers::EMPTY_BUFFER;
+                content = Unpooled::EMPTY_BUFFER;
                 return reset();
             }
 
@@ -223,6 +223,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
                 return chunk;
             }
         }
+
         return chunk;
     }
 
@@ -246,26 +247,31 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         int toRead = chunkSize;
+
         if (toRead > maxChunkSize) {
             toRead = maxChunkSize;
         }
+
         if (toRead > readLimit) {
             toRead = readLimit;
         }
 
-        
+
         ChannelBufferPtr buff = buffer->readSlice(toRead);
+
         if (buffer->needMoreBytes()) {
             return HttpMessagePtr();
         }
 
         HttpChunkPtr chunk = HttpChunkPtr(new HttpChunk(buff));
+
         if (chunkSize > toRead) {
             chunkSize -= toRead;
         }
         else {
             chunkSize = 0;
         }
+
         this->chunkSize = chunkSize;
 
         if (chunkSize == 0) {
@@ -294,6 +300,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         chunkSize = getChunkSize(line);
+
         if (chunkSize == 0) {
             checkpoint(READ_CHUNK_FOOTER);
             return HttpMessagePtr();
@@ -337,24 +344,30 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         int toRead = chunkSize;
+
         if (toRead > maxChunkSize) {
             toRead = maxChunkSize;
         }
+
         if (toRead > readLimit) {
             toRead = readLimit;
         }
 
         ChannelBufferPtr buff = buffer->readSlice(toRead);
+
         if (buffer->needMoreBytes()) {
             return HttpMessagePtr();
         }
 
         HttpChunkPtr chunk = HttpChunkPtr(new HttpChunk(buff));
+
         if (chunkSize > toRead) {
             chunkSize -= toRead;
-        } else {
+        }
+        else {
             chunkSize = 0;
         }
+
         this->chunkSize = chunkSize;
 
         if (chunkSize == 0) {
@@ -430,11 +443,12 @@ bool HttpMessageDecoder::isContentAlwaysEmpty(const HttpMessage& msg) const {
         //     - http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html Section 4.4
         if (code >= 100 && code < 200) {
             if (code == 101
-                && !response->containsHeader(
-                HttpHeaders::Names::SEC_WEBSOCKET_ACCEPT)) {
+                    && !response->containsHeader(
+                        HttpHeaders::Names::SEC_WEBSOCKET_ACCEPT)) {
                 // It's Hixie 76 websocket handshake response
                 return false;
             }
+
             return true;
         }
 
@@ -487,9 +501,11 @@ HttpPackage HttpMessageDecoder::readFixedLengthContent(const ReplayingDecoderBuf
     int readLimit = buffer->readableBytes();
 
     int toRead = (int) length - contentRead;
+
     if (toRead > readLimit) {
         toRead = readLimit;
     }
+
     contentRead += toRead;
     //content.reset();
     //content = buffer->readSlice(toRead);
@@ -524,18 +540,20 @@ HttpPackage HttpMessageDecoder::readFixedLengthContent(const ReplayingDecoderBuf
  */
 #if 0
 ChannelBufferPtr read(const ChannelPtr& buffer, int len) {
-        ByteBuf internal = internalBuffer();
-        if (internal.readableBytes() >= len) {
-            int index = internal.readerIndex();
-            ByteBuf buf = internal.slice(index, len);
+    ByteBuf internal = internalBuffer();
 
-            // update the readerindex so an the next read its on the correct position
-            buffer.readerIndex(index + len);
-            return buf;
-        } else {
-            return buffer.readBytes(len);
-        }
+    if (internal.readableBytes() >= len) {
+        int index = internal.readerIndex();
+        ByteBuf buf = internal.slice(index, len);
+
+        // update the readerindex so an the next read its on the correct position
+        buffer.readerIndex(index + len);
+        return buf;
     }
+    else {
+        return buffer.readBytes(len);
+    }
+}
 #endif
 
 int HttpMessageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
@@ -588,7 +606,8 @@ int HttpMessageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
             if (buffer->needMoreBytes()) { // need more data
                 return READ_HEADER;
             }
-        } while (!line.empty());
+        }
+        while (!line.empty());
 
         // Add the last header.
         if (!name.empty()) {
@@ -642,7 +661,7 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
                 //    current.set(lastPos, newString);
                 //}
                 //else {
-                    // Content-Length, Transfer-Encoding, or Trailer
+                // Content-Length, Transfer-Encoding, or Trailer
                 //}
             }
             else {
@@ -671,13 +690,13 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
 
 StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buffer) {
     StringPiece str;
-    Array arry;
-    buffer->readableBytes(&arry);
+    StringPiece bytes;
+    buffer->readableBytes(&bytes);
 
     int headerSize = this->headerSize;
     int strSize = 0;
 
-    for (int i = 0, j = arry.length() - 1; i < j; ++i, ++headerSize) {
+    for (int i = 0, j = bytes.length() - 1; i < j; ++i, ++headerSize) {
         // Abort decoding if the header part is too large.
         if (headerSize >= maxHeaderSize) {
             // TODO: Respond with Bad Request and discard the traffic
@@ -688,9 +707,9 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
                 StringUtil::strprintf("HTTP header is larger than %d bytes.", maxHeaderSize));
         }
 
-        if (arry[i] == HttpCodecUtil::CR && arry[i+1] == HttpCodecUtil::LF) {
+        if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
             buffer->offsetReaderIndex(i+2);
-            return StringPiece(arry.data(), i);
+            return StringPiece(bytes.data(), i);
         }
     }
 
@@ -713,11 +732,11 @@ int HttpMessageDecoder::getChunkSize(const StringPiece& hex) const {
 }
 
 StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer,
-    int maxLineLength) {
-    Array arry;
-    buffer->readableBytes(&arry);
+        int maxLineLength) {
+    StringPiece bytes;
+    buffer->readableBytes(&bytes);
 
-    if (arry.length() >= maxLineLength) {
+    if (bytes.length() >= maxLineLength) {
         // TODO: Respond with Bad Request and discard the traffic
         //    or close the connection.
         //       No need to notify the upstream handlers - just log.
@@ -726,10 +745,10 @@ StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer
             StringUtil::strprintf("An HTTP line is larger than %d bytes.", maxLineLength));
     }
 
-    for (int i = 0, j = arry.length() - 1; i < j; ++i) {
-        if (arry[i] == HttpCodecUtil::CR && arry[i+1] == HttpCodecUtil::LF) {
+    for (int i = 0, j = bytes.length() - 1; i < j; ++i) {
+        if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
             buffer->offsetReaderIndex(i+2);
-            return StringPiece(arry.data(), i);
+            return StringPiece(bytes.data(), i);
         }
     }
 
@@ -757,9 +776,9 @@ bool HttpMessageDecoder::splitInitialLine(StringPiece& sb, std::vector<StringPie
     cStart = findNonWhitespace(sb, bEnd);
     cEnd = findEndOfString(sb);
 
-    lines->push_back(sb.substr(aStart, aEnd));
-    lines->push_back(sb.substr(bStart, bEnd));
-    lines->push_back(sb.substr(cStart, cEnd));
+    lines->push_back(sb.substr(aStart, aEnd - aStart));
+    lines->push_back(sb.substr(bStart, bEnd - bStart));
+    lines->push_back(sb.substr(cStart, cEnd - cStart));
 
     return true;
 }

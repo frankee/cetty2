@@ -22,7 +22,7 @@
  */
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
@@ -388,7 +388,7 @@ protected:
      */
     const ChannelBufferPtr& internalBuffer() const {
         if (!cumulation) {
-            return ChannelBuffers::EMPTY_BUFFER;
+            return Unpooled::EMPTY_BUFFER;
         }
 
         return cumulation;

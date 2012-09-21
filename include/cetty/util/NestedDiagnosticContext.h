@@ -159,11 +159,9 @@ inline NDCScope::NDCScope(const std::string& info) {
     NestedDiagnosticContext::current().push(info);
 }
 
-
 inline NDCScope::NDCScope(const std::string& info, int line, const char* filename) {
     NestedDiagnosticContext::current().push(info, line, filename);
 }
-
 
 inline NDCScope::~NDCScope() {
     NestedDiagnosticContext::current().pop();
@@ -172,14 +170,24 @@ inline NDCScope::~NDCScope() {
 //
 // helper macros
 //
-#define CETTY_NDC_SCOPE(func) \
-    cetty::util::NDCScope _theNdcScope(#func, __LINE__, __FILE__)
+#if defined(_MSC_VER)
+    #define CETTY_NDC_SCOPE() \
+        cetty::util::NDCScope _theNdcScope(__FUNCTION__, __LINE__, __FILE__)
+#else
+    #define CETTY_NDC_SCOPE() \
+        cetty::util::NDCScope _theNdcScope(__func__, __LINE__, __FILE__)
+#endif
 
 #if defined(_DEBUG)
-#define CETTY_NDC_SCOPE_D(func) \
-    cetty::util::NDCScope _theNdcScope(#func, __LINE__, __FILE__)
+    #if defined(_MSC_VER)
+    #define CETTY_NDC_SCOPE_D() \
+        cetty::util::NDCScope _theNdcScope(__FUNCTION__, __LINE__, __FILE__)
+    #else
+    #define CETTY_NDC_SCOPE_D() \
+        cetty::util::NDCScope _theNdcScope(__func__, __LINE__, __FILE__)
+    #endif
 #else
-#define CETTY_NDC_SCOPE_D(func)
+    #define CETTY_NDC_SCOPE_D()
 #endif
 
 }

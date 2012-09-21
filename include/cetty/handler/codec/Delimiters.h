@@ -18,7 +18,7 @@
  */
 
 #include <vector>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 
 namespace cetty {
 namespace handler {
@@ -43,7 +43,7 @@ public:
         static std::vector<ChannelBufferPtr> buffers;
 
         if (buffers.size() == 0) {
-            ChannelBufferPtr tmp = ChannelBuffers::buffer(1);
+            ChannelBufferPtr tmp = Unpooled::buffer(1);
             tmp->writeByte(0);
             buffers.push_back(tmp);
         }
@@ -59,11 +59,11 @@ public:
         static std::vector<ChannelBufferPtr> buffers;
 
         if (buffers.size() == 0) {
-            ChannelBufferPtr cr = ChannelBuffers::buffer(2);
+            ChannelBufferPtr cr = Unpooled::buffer(2);
             cr->writeByte('\r');
             cr->writeByte('\n');
 
-            ChannelBufferPtr lf = ChannelBuffers::buffer(1);
+            ChannelBufferPtr lf = Unpooled::buffer(1);
             lf->writeByte('\n');
 
             buffers.push_back(cr);

@@ -17,7 +17,7 @@
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/Exception.h>
@@ -146,7 +146,7 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
 
 ChannelBufferPtr
 LengthFieldBasedFrameDecoder::extractFrame(const ChannelBufferPtr& buffer, int index, int length) {
-    ChannelBufferPtr frame = buffer->factory().getBuffer(length);
+    ChannelBufferPtr frame = Unpooled::buffer(length);
     frame->writeBytes(buffer, index, length);
     return frame;
 }

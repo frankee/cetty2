@@ -16,11 +16,14 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+#include <cetty/buffer/SwappedChannelBuffer.h>
+
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StlUtil.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 
 namespace cetty {
@@ -28,13 +31,29 @@ namespace buffer {
 
 using namespace cetty::util;
 
+int ChannelBuffer::maxCapacity() const {
+    return this->maximumCapacity;
+}
+
+const ByteOrder& ChannelBuffer::order() const {
+    return this->byteOrder;
+}
+
+ChannelBufferPtr ChannelBuffer::order(const ByteOrder& endianness) {
+    if (endianness == byteOrder) {
+        return shared_from_this();
+    }
+    
+    return new SwappedChannelBuffer(shared_from_this());
+}
+
 int ChannelBuffer::readerIndex() const {
     return this->readerIdx;
 }
 
 void ChannelBuffer::readerIndex(int readerIdx) {
     if (readerIdx < 0 || readerIdx > this->writerIdx) {
-        CETTY_NDC_SCOPE(readerIndex);
+        CETTY_NDC_SCOPE();
         throw RangeException("readerIndex");
     }
 
@@ -45,7 +64,7 @@ void ChannelBuffer::offsetReaderIndex(int offset) {
     int newReaderIdx = readerIdx + offset;
 
     if (newReaderIdx < 0 || newReaderIdx > writerIdx) {
-        CETTY_NDC_SCOPE(offsetReaderIndex);
+        CETTY_NDC_SCOPE();
         throw RangeException("offsetReaderIndex");
     }
 
@@ -144,11 +163,48 @@ void ChannelBuffer::discardReadBytes() {
     }
 }
 
-void ChannelBuffer::ensureWritableBytes(int wBytes) {
-    if (wBytes > writableBytes()) {
-        CETTY_NDC_SCOPE(ensureWritableBytes);
-        throw RangeException("has no enough capacity to write");
+void ChannelBuffer::ensureWritableBytes(int minWritableBytes) {
+    if (minWritableBytes <= writableBytes()) {
+        return;
     }
+
+    if (minWritableBytes > maximumCapacity - writerIdx) {
+        CETTY_NDC_SCOPE(ensureWritableBytes);
+        throw RangeException(
+            StringUtil::strprintf(
+                "writerIndex(%d) + minWritableBytes(%d) exceeds maxCapacity(%d)",
+                writerIdx, minWritableBytes, maximumCapacity));
+    }
+
+    // Normalize the current capacity to the power of 2.
+    int newCapacity = calculateNewCapacity(writerIdx + minWritableBytes);
+
+    // Adjust to the new capacity.
+    capacity(newCapacity);
+}
+
+int ChannelBuffer::ensureWritableBytes(int minWritableBytes, bool force) {
+    if (minWritableBytes <= writableBytes()) {
+        return 1;
+    }
+
+    if (minWritableBytes + writerIdx > maximumCapacity) {
+        if (force) {
+            if (capacity() == maxCapacity()) {
+                return -1;
+            }
+
+            capacity(maxCapacity());
+            return -2;
+        }
+    }
+
+    // Normalize the current capacity to the power of 2.
+    int newCapacity = calculateNewCapacity(writerIdx + minWritableBytes);
+
+    // Adjust to the new capacity.
+    capacity(newCapacity);
+    return 2;
 }
 
 uint8_t ChannelBuffer::getUnsignedByte(int index) const {
@@ -168,20 +224,17 @@ float ChannelBuffer::getFloat(int index) const {
     CETTY_NDC_SCOPE(getFloat);
     throw UnsupportedOperationException("getFloat");
     return 0;
-
-    //return Float.intBitsToFloat(getInt(index));
 }
 
 double ChannelBuffer::getDouble(int index) const {
     CETTY_NDC_SCOPE(getFloat);
     throw UnsupportedOperationException("getDouble");
     return 0;
-    //return Double.longBitsToDouble(getLong(index));
 }
 
-int ChannelBuffer::getBytes(int index, Array* dst) const {
+int ChannelBuffer::getBytes(int index, char* dst, int length) const {
     if (dst) {
-        return getBytes(index, dst, 0, dst->length());
+        return getBytes(index, dst, 0, length);
     }
 
     return 0;
@@ -189,19 +242,12 @@ int ChannelBuffer::getBytes(int index, Array* dst) const {
 
 int ChannelBuffer::getBytes(int index, std::string* dst, int length) const {
     if (dst) {
-        dst->resize(length);
-        Array arry = Array::wrappedArray(*dst);
-        return getBytes(index, &arry);
-    }
+        int oldSize = dst->size();
 
-    return 0;
-}
+        STLStringResizeUninitialized(dst, oldSize + length);
+        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
 
-int ChannelBuffer::getBytes(int index, std::string* dst, int dstIndex, int length) const {
-    if (dst) {
-        dst->resize(dstIndex + length);
-        Array arry = Array::wrappedArray(*dst);
-        return getBytes(index, &arry, dstIndex, length);
+        return getBytes(index, start, 0, length);
     }
 
     return 0;
@@ -234,7 +280,6 @@ int ChannelBuffer::setFloat(int index, float value) {
     throw NotImplementedException("setFloat has not implement.");
     return 0;
     //TODO
-    //setInt(index, Float.floatToRawIntBits(value));
 }
 
 int ChannelBuffer::setDouble(int index, double value) {
@@ -242,19 +287,27 @@ int ChannelBuffer::setDouble(int index, double value) {
     throw NotImplementedException("setFloat has not implement.");
     return 0;
     //TODO
-    //setLong(index, Double.doubleToRawLongBits(value));
 }
 
-int ChannelBuffer::setBytes(int index, const ConstArray& src) {
+int ChannelBuffer::setBytes(int index, const StringPiece& src) {
     return setBytes(index, src, 0, src.length());
 }
 
-int ChannelBuffer::setBytes(int index, const std::string& src) {
-    return setBytes(index, ConstArray::fromString(src));
+int ChannelBuffer::setBytes(int index, const char* src, int length) {
+    if (src) {
+        return setBytes(index, StringPiece(src, length), 0, length);
+    }
 }
 
-int ChannelBuffer::setBytes(int index, const std::string& src, int srcIndex, int length) {
-    return setBytes(index, ConstArray::fromString(src), srcIndex, length);
+int ChannelBuffer::setBytes(int index,
+                            const char* src,
+                            int srcIndex,
+                            int length) {
+    if (src) {
+        return setBytes(index, StringPiece(src + srcIndex, length), 0, length);
+    }
+
+    return 0;
 }
 
 int ChannelBuffer::setBytes(int index, const ChannelBufferPtr& src) {
@@ -406,11 +459,11 @@ ChannelBufferPtr ChannelBuffer::readBytes() {
 
 ChannelBufferPtr ChannelBuffer::readBytes(int length) {
     if (0 == length) {
-        return ChannelBuffers::EMPTY_BUFFER;
+        return Unpooled::EMPTY_BUFFER;
     }
 
     if (checkReadableBytes(length)) {
-        ChannelBufferPtr buf = factory().getBuffer(order(), length);
+        ChannelBufferPtr buf = Unpooled::buffer(length);
         buf->writeBytes(shared_from_this(), readerIdx, length);
         readerIdx += length;
 
@@ -421,10 +474,10 @@ ChannelBufferPtr ChannelBuffer::readBytes(int length) {
         return buf;
     }
 
-    return ChannelBuffers::EMPTY_BUFFER;
+    return Unpooled::EMPTY_BUFFER;
 }
 
-int ChannelBuffer::readBytes(Array* dst, int dstIndex, int length) {
+int ChannelBuffer::readBytes(char* dst, int dstIndex, int length) {
     if (!dst || 0 == length) {
         return 0;
     }
@@ -438,43 +491,39 @@ int ChannelBuffer::readBytes(Array* dst, int dstIndex, int length) {
     return 0;
 }
 
-int ChannelBuffer::readBytes(Array* dst) {
-    if (!dst || dst->empty()) {
+int ChannelBuffer::readBytes(char* dst, int length) {
+    if (!dst || length <= 0) {
         return 0;
     }
 
-    return readBytes(dst, 0, dst->length());
+    return readBytes(dst, 0, length);
 }
 
 int ChannelBuffer::readBytes(std::string* dst) {
     if (dst) {
-        dst->resize(readableBytes());
+        int oldSize = dst->size();
+        int length = readableBytes();
 
-        Array arry = Array::wrappedArray(*dst);
-        return readBytes(&arry, 0, arry.length());
+        STLStringResizeUninitialized(dst, oldSize + length);
+        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
+
+        return readBytes(start, 0, length);
     }
 
     return 0;
 }
 
 int ChannelBuffer::readBytes(std::string* dst, int length) {
-    if (!dst || 0 == length) {
-        return 0;
+    if (dst && length > 0) {
+        int oldSize = dst->size();
+
+        STLStringResizeUninitialized(dst, oldSize + length);
+        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
+
+        return readBytes(start, 0, length);
     }
 
-    dst->resize(length);
-    Array arry = Array::wrappedArray(*dst);
-    return readBytes(&arry, 0, length);
-}
-
-int ChannelBuffer::readBytes(std::string* dst, int dstIndex, int length) {
-    if (!dst || 0 == length) {
-        return 0;
-    }
-
-    dst->resize(dstIndex + length);
-    Array arry = Array::wrappedArray(*dst);
-    return readBytes(&arry, dstIndex, length);
+    return 0;
 }
 
 int ChannelBuffer::readBytes(const ChannelBufferPtr& dst) {
@@ -532,7 +581,7 @@ ChannelBufferPtr ChannelBuffer::readSlice(int length) {
         return sliceBuffer;
     }
 
-    return ChannelBuffers::EMPTY_BUFFER;
+    return Unpooled::EMPTY_BUFFER;
 }
 
 int ChannelBuffer::readSlice(GatheringBuffer* gatheringBuffer) {
@@ -569,7 +618,7 @@ int ChannelBuffer::skipBytes(int length) {
 }
 
 int ChannelBuffer::writeByte(int value) {
-    if (setByte(writerIdx, value)) {
+    if (ensureWritableBytes(1, false) > 0 && setByte(writerIdx, value)) {
         ++writerIdx;
         return 1;
     }
@@ -578,7 +627,7 @@ int ChannelBuffer::writeByte(int value) {
 }
 
 int ChannelBuffer::writeShort(int value) {
-    if (setShort(writerIdx, value)) {
+    if (ensureWritableBytes(2, false) > 0 && setShort(writerIdx, value)) {
         writerIdx += 2;
         return 2;
     }
@@ -587,7 +636,7 @@ int ChannelBuffer::writeShort(int value) {
 }
 
 int ChannelBuffer::writeInt(int value) {
-    if (setInt(writerIdx, value)) {
+    if (ensureWritableBytes(4, false) > 0 && setInt(writerIdx, value)) {
         writerIdx += 4;
         return 4;
     }
@@ -596,7 +645,7 @@ int ChannelBuffer::writeInt(int value) {
 }
 
 int ChannelBuffer::writeLong(int64_t value) {
-    if (setLong(writerIdx, value)) {
+    if (ensureWritableBytes(8, false) > 0 && setLong(writerIdx, value)) {
         writerIdx += 8;
         return 8;
     }
@@ -605,7 +654,7 @@ int ChannelBuffer::writeLong(int64_t value) {
 }
 
 int ChannelBuffer::writeFloat(float value) {
-    if (setFloat(writerIdx, value)) {
+    if (ensureWritableBytes(4, false) > 0 && setFloat(writerIdx, value)) {
         writerIdx += 4;
         return 4;
     }
@@ -614,7 +663,7 @@ int ChannelBuffer::writeFloat(float value) {
 }
 
 int ChannelBuffer::writeDouble(double value) {
-    if (setDouble(writerIdx, value)) {
+    if (ensureWritableBytes(8, false) > 0 && setDouble(writerIdx, value)) {
         writerIdx += 8;
         return 8;
     }
@@ -622,8 +671,8 @@ int ChannelBuffer::writeDouble(double value) {
     return 0;
 }
 
-int ChannelBuffer::writeBytes(const ConstArray& src, int srcIndex, int length) {
-    if (setBytes(this->writerIdx, src, srcIndex, length)) {
+int ChannelBuffer::writeBytes(const StringPiece& src, int srcIndex, int length) {
+    if (ensureWritableBytes(length, false) > 0 && setBytes(this->writerIdx, src, srcIndex, length)) {
         this->writerIdx += length;
         return length;
     }
@@ -631,16 +680,16 @@ int ChannelBuffer::writeBytes(const ConstArray& src, int srcIndex, int length) {
     return 0;
 }
 
-int ChannelBuffer::writeBytes(const ConstArray& src) {
+int ChannelBuffer::writeBytes(const StringPiece& src) {
     return writeBytes(src, 0, src.length());
 }
 
-int ChannelBuffer::writeBytes(const std::string& src) {
-    return writeBytes(ConstArray::fromString(src), 0, (int)src.length());
-}
+int ChannelBuffer::writeBytes(const char* src, int srcIndex, int length) {
+    if (src) {
+        return writeBytes(StringPiece(src + srcIndex, length), 0, length);
+    }
 
-int ChannelBuffer::writeBytes(const std::string& src, int srcIndex, int length) {
-    return writeBytes(ConstArray::fromString(src), srcIndex, length);
+    return 0;
 }
 
 int ChannelBuffer::writeBytes(const ChannelBufferPtr& src) {
@@ -652,7 +701,9 @@ int ChannelBuffer::writeBytes(const ChannelBufferPtr& src) {
 }
 
 int ChannelBuffer::writeBytes(const ChannelBufferPtr& src, int length) {
-    if (src && writeBytes(src, src->readerIndex(), length)) {
+    if (src
+        && ensureWritableBytes(length, false) > 0
+        && writeBytes(src, src->readerIndex(), length)) {
         src->readerIndex(src->readerIndex() + length);
         return length;
     }
@@ -660,8 +711,12 @@ int ChannelBuffer::writeBytes(const ChannelBufferPtr& src, int length) {
     return 0;
 }
 
-int ChannelBuffer::writeBytes(const ConstChannelBufferPtr& src, int srcIndex, int length) {
-    if (src && setBytes(writerIdx, src, srcIndex, length)) {
+int ChannelBuffer::writeBytes(const ConstChannelBufferPtr& src,
+                              int srcIndex,
+                              int length) {
+    if (src
+        && ensureWritableBytes(length, false) > 0
+        && setBytes(writerIdx, src, srcIndex, length)) {
         writerIdx += length;
         return length;
     }
@@ -670,7 +725,7 @@ int ChannelBuffer::writeBytes(const ConstChannelBufferPtr& src, int srcIndex, in
 }
 
 int ChannelBuffer::writeBytes(InputStream* in, int length) {
-    if (in) {
+    if (in && ensureWritableBytes(length, false) > 0) {
         int writtenBytes = setBytes(writerIdx, in, length);
 
         if (writtenBytes > 0) {
@@ -680,14 +735,6 @@ int ChannelBuffer::writeBytes(InputStream* in, int length) {
         return writtenBytes;
     }
 
-    return 0;
-}
-
-int ChannelBuffer::writeBytes(const char* src, int length) {
-    BOOST_ASSERT(src && length > 0 && length <= (int)strlen(src));
-    if (src && length > 0) {
-        return writeBytes(ConstArray(src, length), 0, length);
-    }
     return 0;
 }
 
@@ -752,11 +799,11 @@ cetty::buffer::ChannelBufferPtr ChannelBuffer::duplicate() {
 }
 
 int ChannelBuffer::indexOf(int fromIndex, int toIndex, int8_t value) const {
-    return ChannelBuffers::indexOf(shared_from_this(), fromIndex, toIndex, value);
+    return ChannelBufferUtil::indexOf(shared_from_this(), fromIndex, toIndex, value);
 }
 
 int ChannelBuffer::indexOf(int fromIndex, int toIndex, const ChannelBufferIndexFinder::Functor& indexFinder) const {
-    return ChannelBuffers::indexOf(shared_from_this(), fromIndex, toIndex, indexFinder);
+    return ChannelBufferUtil::indexOf(shared_from_this(), fromIndex, toIndex, indexFinder);
 }
 
 int ChannelBuffer::bytesBefore(int8_t value) const {
@@ -804,12 +851,12 @@ int ChannelBuffer::bytesBefore(int index, int length, const ChannelBufferIndexFi
 }
 
 int ChannelBuffer::compare(const ChannelBufferPtr& that) const {
-    return ChannelBuffers::compare(shared_from_this(), that);
+    return ChannelBufferUtil::compare(shared_from_this(), that);
 }
 
 bool ChannelBuffer::checkReadableBytes(int minReadableBytes) const {
     if (readableBytes() < minReadableBytes) {
-        CETTY_NDC_SCOPE(writeBytes);
+        CETTY_NDC_SCOPE();
         throw RangeException("no data to read");
     }
 
@@ -904,32 +951,24 @@ int ChannelBuffer::writeBytesAhead(const ConstChannelBufferPtr& src, int srcInde
     return 0;
 }
 
-int ChannelBuffer::writeBytesAhead(const ConstArray& src) {
+int ChannelBuffer::writeBytesAhead(const StringPiece& src) {
     return writeBytesAhead(src, 0, src.length());
 }
 
-int ChannelBuffer::writeBytesAhead(const ConstArray& src, int srcIndex, int length) {
+int ChannelBuffer::writeBytesAhead(const char* src, int srcIndex, int length) {
+    if (src) {
+        return writeBytesAhead(StringPiece(src + srcIndex, length), 0, length);
+    }
+    
+    return 0;
+}
+
+int ChannelBuffer::writeBytesAhead(const StringPiece& src, int srcIndex, int length) {
     if (setBytes(readerIdx - length, src, srcIndex, length)) {
         readerIdx -= length;
         return length;
     }
 
-    return 0;
-}
-
-int ChannelBuffer::writeBytesAhead(const std::string& src) {
-    return writeBytesAhead(ConstArray::fromString(src), 0, (int)src.length());
-}
-
-int ChannelBuffer::writeBytesAhead(const std::string& src, int srcIndex, int length) {
-    return writeBytesAhead(ConstArray::fromString(src), srcIndex, length);
-}
-
-int ChannelBuffer::writeBytesAhead(const char* src, int length) {
-    BOOST_ASSERT(src && length > 0 && length <= (int)strlen(src));
-    if (src && length > 0) {
-        return writeBytesAhead(ConstArray(src, length), 0, length);
-    }
     return 0;
 }
 
@@ -968,6 +1007,38 @@ int ChannelBuffer::writeZeroAhead(int length) {
     }
 
     return length;
+}
+
+int ChannelBuffer::calculateNewCapacity(int minNewCapacity) {
+    int maximumCapacity = this->maximumCapacity;
+    int threshold = 1048576 * 4; // 4 MiB page
+
+    if (minNewCapacity == threshold) {
+        return minNewCapacity;
+    }
+
+    // If over threshold, do not double but just increase by threshold.
+    if (minNewCapacity > threshold) {
+        int newCapacity = minNewCapacity / threshold * threshold;
+
+        if (newCapacity > maximumCapacity - threshold) {
+            newCapacity = maximumCapacity;
+        }
+        else {
+            newCapacity += threshold;
+        }
+
+        return newCapacity;
+    }
+
+    // Not over threshold. Double up to 4 MiB, starting from 64.
+    int newCapacity = 64;
+
+    while (newCapacity < minNewCapacity) {
+        newCapacity <<= 1;
+    }
+
+    return std::min(newCapacity, maximumCapacity);
 }
 
 }

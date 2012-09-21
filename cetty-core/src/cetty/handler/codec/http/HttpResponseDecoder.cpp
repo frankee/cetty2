@@ -60,7 +60,7 @@ HttpMessagePtr HttpResponseDecoder::createMessage(const StringPiece& str1,
     const StringPiece& str3) {
     response->clear();
     response->setProtocolVersion(HttpVersion::valueOf(str1));
-    response->setStatus(HttpResponseStatus(StringUtil::atoi(str2), str3));
+    response->setStatus(HttpResponseStatus((int)StringUtil::atoi(str2), str3));
     return response;
 }
 

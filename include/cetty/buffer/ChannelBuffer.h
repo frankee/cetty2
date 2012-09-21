@@ -23,16 +23,14 @@
 
 #include <string>
 #include <cetty/Types.h>
-
-#include <cetty/buffer/Array.h>
 #include <cetty/buffer/ByteOrder.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/buffer/ChannelBufferIndexFinder.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace util {
-class Charset;
 class InputStream;
 class OutputStream;
 }
@@ -263,21 +261,41 @@ public:
     virtual ~ChannelBuffer() {}
 
     /**
-     * Returns the factory which creates a {@link ChannelBuffer} whose
-     * type and default {@link ByteOrder} are same with this buffer.
-     */
-    virtual ChannelBufferFactory& factory() const = 0;
-
-    /**
      * Returns the number of bytes (octets) this buffer can contain.
      */
     virtual int capacity() const = 0;
 
     /**
+     * Adjusts the capacity of this buffer.  If the {@code newCapacity} is less than the current
+     * capacity, the content of this buffer is truncated.  If the {@code newCapacity} is greater
+     * than the current capacity, the buffer is appended with unspecified data whose length is
+     * {@code (newCapacity - currentCapacity)}.
+     */
+    virtual void capacity(int newCapacity) = 0;
+
+    /**
+     * Returns the maximum allowed capacity of this buffer.  If a user attempts to increase the
+     * capacity of this buffer beyond the maximum capacity using {@link #capacity(int)} or
+     * {@link #ensureWritableBytes(int)}, those methods will raise an
+     * {@link IllegalArgumentException}.
+     */
+    int maxCapacity() const;
+
+    /**
      * Returns the <a href="http://en.wikipedia.org/wiki/Endianness">endianness</a>
      * of this buffer.
      */
-    virtual ByteOrder order() const = 0;
+    const ByteOrder& order() const;
+
+    /**
+     * Returns a buffer with the specified {@code endianness} which shares the whole region,
+     * indexes, and marks of this buffer.  Modifying the content, the indexes, or the marks of the
+     * returned buffer or this buffer affects each other's content, indexes, and marks.  If the
+     * specified {@code endianness} is identical to this buffer's byte order, this method can
+     * return {@code this}.  This method does not modify {@code readerIndex} or {@code writerIndex}
+     * of this buffer.
+     */
+    virtual ChannelBufferPtr order(const ByteOrder& endianness);
 
     /**
      * Returns the <tt>readerIndex</tt> of this buffer.
@@ -390,10 +408,10 @@ public:
      * Returns the number of readable bytes which is equal to
      * <tt>(this.writerIndex - this.readerIndex)</tt>.
      */
-    int  readableBytes() const;
+    int readableBytes() const;
 
 
-    virtual void readableBytes(Array* arry) = 0;
+    virtual void readableBytes(StringPiece* bytes) = 0;
 
     /**
      * Returns the number of writable bytes which is equal to
@@ -407,16 +425,16 @@ public:
      */
     int aheadWritableBytes() const;
 
-    virtual void writableBytes(Array* arry) = 0;
+    virtual char* writableBytes(int* length) = 0; 
 
-    virtual void aheadWritableBytes(Array* arry) = 0;
+    virtual char* aheadWritableBytes(int* length) = 0;
 
     /**
      * Returns <tt>true</tt> if and only if this buffer has a backing byte array.
      * If this method returns true, you can safely call {@link #array()} and
      * {@link #arrayOffset()}.
      */
-    virtual bool hasArray() const = 0;
+    //virtual bool hasArray() const = 0;
 
     /**
      * Returns <tt>true</tt>
@@ -505,7 +523,28 @@ public:
      *         buffer is less than the specified value and if this buffer is
      *         not a dynamic buffer
      */
-    virtual void ensureWritableBytes(int writableBytes);
+    virtual void ensureWritableBytes(int minWritableBytes);
+
+    /**
+     * Tries to make sure the number of {@linkplain #writableBytes() the writable bytes}
+     * is equal to or greater than the specified value.  Unlike {@link #ensureWritableBytes(int)},
+     * this method does not raise an exception but returns a code.
+     *
+     * @param minWritableBytes
+     *        the expected minimum number of writable bytes
+     * @param force
+     *        When {@link #writerIndex()} + {@code minWritableBytes} > {@link #maxCapacity()}:
+     *        <ul>
+     *        <li>{@code true} - the capacity of the buffer is expanded to {@link #maxCapacity()}</li>
+     *        <li>{@code false} - the capacity of the buffer is unchanged</li>
+     *        </ul>
+     * @return {@code 1} if the buffer has enough writable bytes, and its capacity is unchanged.
+     *         {@code 2} if the buffer has enough writable bytes, and its capacity has been increased.
+     *         {@code -1} if the buffer does not have enough bytes, and its capacity is unchanged.
+     *         {@code -2} if the buffer does not have enough bytes, but its capacity has been
+     *                   increased to its maximum.
+     */
+    virtual int ensureWritableBytes(int minWritableBytes, bool force);
 
     /**
      * Gets a byte at the specified absolute <tt>index</tt> in this buffer.
@@ -560,7 +599,7 @@ public:
      *         if the specified <tt>index</tt> is less than <tt>0</tt> or
      *         <tt>index + 4</tt> is greater than <tt>this.capacity</tt>
      */
-    virtual int32_t  getInt(int index) const = 0;
+    virtual int32_t getInt(int index) const = 0;
 
     /**
      * Gets an unsigned 32-bit integer at the specified absolute <tt>index</tt>
@@ -674,7 +713,7 @@ public:
      *         if <tt>index + dst.length()</tt> is greater than
      *            <tt>this.capacity</tt>
      */
-    int getBytes(int index, Array* dst) const;
+    int getBytes(int index, char* dst, int length) const;
 
     /**
      * Transfers this buffer's data to the specified destination starting at
@@ -694,7 +733,7 @@ public:
      *         if <tt>dstIndex + length</tt> is greater than
      *            <tt>dst.length()</tt>
      */
-    virtual int getBytes(int index, Array* dst, int dstIndex, int length) const = 0;
+    virtual int getBytes(int index, char* dst, int dstIndex, int length) const = 0;
 
     /**
      * Transfers this buffer's data to the specified destination starting at
@@ -710,23 +749,6 @@ public:
      *            <tt>this->capacity</tt>
      */
     int getBytes(int index, std::string* dst, int length) const;
-
-    /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute <tt>index</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt>
-     * of this buffer.
-     *
-     * @param dstIndex the first index of the destination
-     * @param length   the number of bytes to transfer
-     *
-     * @throws RangeException
-     *         if the specified <tt>index</tt> is less than <tt>0</tt>,
-     *         if the specified <tt>dstIndex</tt> is less than <tt>0</tt>,
-     *         if <tt>index + length</tt> is greater than
-     *            <tt>this->capacity</tt>
-     */
-    int getBytes(int index, std::string* dst, int dstIndex, int length) const;
 
     /**
      * Transfers this buffer's data to the specified stream starting at the
@@ -781,7 +803,13 @@ public:
      */
     virtual ChannelBufferPtr slice(int index, int length) = 0;
 
-
+    /**
+     * Returns a slice of this buffer's sub-region. Modifying the content of
+     * the returned buffer or this buffer affects each other's content while
+     * they maintain separate indexes and marks.
+     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
+     * this buffer.
+     */
     int slice(GatheringBuffer* gatheringBuffer);
 
     /**
@@ -944,7 +972,7 @@ public:
      *         if <tt>index + src.length()</tt> is greater than
      *            <tt>this.capacity</tt>
      */
-    int setBytes(int index, const ConstArray& src);
+    int setBytes(int index, const StringPiece& src);
 
     /**
      * Transfers the specified source array's data to this buffer starting at
@@ -959,35 +987,24 @@ public:
      *            <tt>this.capacity</tt>, or
      *         if <tt>srcIndex + length</tt> is greater than <tt>src.length()</tt>
      */
-    virtual int setBytes(int index, const ConstArray& src, int srcIndex, int length) = 0;
+    virtual int setBytes(int index, const StringPiece& src, int srcIndex, int length) = 0;
+
+    int setBytes(int index, const char* src, int length);
 
     /**
      * Transfers the specified source array's data to this buffer starting at
-     * the specified absolute <tt>index</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
+     * the specified absolute {@code index}.
+     * This method does not modify {@code readerIndex} or {@code writerIndex} of
      * this buffer.
      *
-     * @throws RangeException
-     *         if the specified <tt>index</tt> is less than <tt>0</tt> or
-     *         if <tt>index + src.length()()</tt> is greater than
-     *            <tt>this.capacity</tt>
+     * @throws IndexOutOfBoundsException
+     *         if the specified {@code index} is less than {@code 0},
+     *         if the specified {@code srcIndex} is less than {@code 0},
+     *         if {@code index + length} is greater than
+     *            {@code this.capacity}, or
+     *         if {@code srcIndex + length} is greater than {@code src.length}
      */
-    int setBytes(int index, const std::string& src);
-
-    /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the specified absolute <tt>index</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @throws RangeException
-     *         if the specified <tt>index</tt> is less than <tt>0</tt>,
-     *         if the specified <tt>srcIndex</tt> is less than <tt>0</tt>,
-     *         if <tt>index + length</tt> is greater than
-     *            <tt>this.capacity</tt>, or
-     *         if <tt>srcIndex + length</tt> is greater than <tt>src.length()</tt>
-     */
-    int setBytes(int index, const std::string& src, int srcIndex, int length);
+    int setBytes(int index, const char* src, int srcIndex, int length);
 
     /**
      * Transfers the content of the specified source stream to this buffer
@@ -1190,7 +1207,7 @@ public:
      * @throws RangeException
      *         if <tt>dst.length()</tt> is greater than <tt>this.readableBytes</tt>
      */
-    int readBytes(Array* dst);
+    int readBytes(char* dst, int length);
 
     /**
      * Transfers this buffer's data to the specified destination starting at
@@ -1205,7 +1222,7 @@ public:
      *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>, or
      *         if <tt>dstIndex + length</tt> is greater than <tt>dst.length()</tt>
      */
-    int readBytes(Array* dst, int dstIndex, int length);
+    int readBytes(char* dst, int dstIndex, int length);
 
     /**
      * Transfers this buffer's data to the specified destination starting at
@@ -1226,21 +1243,6 @@ public:
      *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>
      */
     int readBytes(std::string* dst, int length);
-
-    /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current <tt>readerIndex</tt> and increases the <tt>readerIndex</tt>
-     * by the number of the transferred bytes (= <tt>length</tt>).
-     *
-     * @param dstIndex the first index of the destination
-     * @param length   the number of bytes to transfer
-     *
-     * @throws RangeException
-     *         if the specified <tt>dstIndex</tt> is less than <tt>0</tt>,
-     *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>, or
-     *         if <tt>dstIndex + length</tt> is greater than <tt>dst.length()</tt>
-     */
-    int readBytes(std::string* dst, int dstIndex, int length);
 
     /**
      * Transfers this buffer's data to the specified stream starting at the
@@ -1286,7 +1288,11 @@ public:
      */
     int readSlice(GatheringBuffer* gatheringBuffer);
 
-
+    /**
+     * Assign a new slice of this buffer's sub-region starting at the current
+     * <tt>readerIndex</tt> and increases the <tt>readerIndex</tt> by the
+     * {@link #readableBytes() readableBytes} to a GatheringBuffer.
+     */
     int readSlice(GatheringBuffer* gatheringBuffer, int length);
 
     /**
@@ -1433,42 +1439,19 @@ public:
      * @throws RangeException
      *         if <tt>src.length()</tt> is greater than <tt>this.writableBytes</tt>
      */
-    int writeBytes(const ConstArray& src);
+    int writeBytes(const StringPiece& src);
+    int writeBytesAhead(const StringPiece& src);
 
-    int writeBytesAhead(const ConstArray& src);
+    int writeBytes(const char* src, int length) {
+        return writeBytes(src, 0, length);
+    }
+    int writeBytesAhead(const char* src, int length) {
+        return writeBytesAhead(src, 0, length);
+    }
 
-    /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the current <tt>writerIndex</tt> and increases the <tt>writerIndex</tt>
-     * by the number of the transferred bytes (= <tt>length</tt>).
-     *
-     * @param srcIndex the first index of the source
-     * @param length   the number of bytes to transfer
-     *
-     * @throws RangeException
-     *         if the specified <tt>srcIndex</tt> is less than <tt>0</tt>,
-     *         if <tt>srcIndex + length</tt> is greater than
-     *            <tt>src.length()</tt>, or
-     *         if <tt>length</tt> is greater than <tt>this.writableBytes</tt>
-     */
-    int writeBytes(const ConstArray& src, int srcIndex, int length);
+    int writeBytes(const char* src, int srcIndex, int length);
 
-    int writeBytesAhead(const ConstArray& src, int srcIndex, int length);
-
-    /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the current <tt>writerIndex</tt> and increases the <tt>writerIndex</tt>
-     * by the number of the transferred bytes (= <tt>src.length()</tt>).
-     *
-     * @throws RangeException
-     *         if <tt>src.length()</tt> is greater than <tt>this.writableBytes</tt>
-     */
-    int writeBytes(const std::string& src);
-
-    int writeBytesAhead(const std::string& src);
-
-    int writeBytes(const char* src, int length);
-    int writeBytesAhead(const char* src, int length);
+    int writeBytesAhead(const char* src, int srcIndex, int length);
 
     /**
      * Transfers the specified source array's data to this buffer starting at
@@ -1484,9 +1467,9 @@ public:
      *            <tt>src.length()</tt>, or
      *         if <tt>length</tt> is greater than <tt>this.writableBytes</tt>
      */
-    int writeBytes(const std::string& src, int srcIndex, int length);
+    int writeBytes(const StringPiece& src, int srcIndex, int length);
 
-    int writeBytesAhead(const std::string& src, int srcIndex, int length);
+    int writeBytesAhead(const StringPiece& src, int srcIndex, int length);
 
     /**
      * Transfers the content of the specified stream to this buffer
@@ -1662,6 +1645,13 @@ public:
     int compare(const ChannelBufferPtr& buffer) const;
 
     /**
+     * Returns a new buffer whose type is identical to the callee.
+     *
+     * @param initialCapacity the initial capacity of the new buffer
+     */
+    virtual ChannelBufferPtr newBuffer(int initialCapacity) = 0;
+
+    /**
      * Returns the string representation of this buffer.  This method does not
      * necessarily return the whole content of the buffer but returns
      * the values of the key properties such as {@link #readerIndex()},
@@ -1677,24 +1667,45 @@ protected:
      */
     virtual bool checkReadableBytes(int minReadableBytes) const;
 
+    int calculateNewCapacity(int minNewCapacity);
+
 protected:
     ChannelBuffer()
         : readerIdx(0),
         writerIdx(0),
         markedReaderIndex(0),
-        markedWriterIndex(0) {}
+        markedWriterIndex(0),
+        maximumCapacity(0),
+        byteOrder(ByteOrder::BO_BIG_ENDIAN) {}
 
-    ChannelBuffer(int readerIdx, int writerIdx)
+    ChannelBuffer(int maximumCapacity,
+        ByteOrder byteOrder)
+        : readerIdx(0),
+        writerIdx(0),
+        markedReaderIndex(0),
+        markedWriterIndex(0),
+        maximumCapacity(maximumCapacity),
+        byteOrder(byteOrder) {}
+
+    ChannelBuffer(int readerIdx,
+        int writerIdx,
+        int maximumCapacity,
+        ByteOrder byteOrder)
         : readerIdx(readerIdx),
           writerIdx(writerIdx),
           markedReaderIndex(0),
-          markedWriterIndex(0) {}
+          markedWriterIndex(0),
+          maximumCapacity(maximumCapacity),
+          byteOrder(byteOrder) {}
 
 protected:
     int readerIdx;
     int writerIdx;
     int markedReaderIndex;
     int markedWriterIndex;
+
+    int maximumCapacity;
+    ByteOrder byteOrder;
 };
 
 }

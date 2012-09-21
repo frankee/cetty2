@@ -101,34 +101,16 @@
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannel.cpp">
       <Filter>channel\socket\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\Array.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\BigEndianHeapChannelBuffer.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\ByteOrder.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferIndexFinder.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffers.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\CompositeChannelBuffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\DynamicChannelBuffer.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\HeapChannelBuffer.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\HeapChannelBufferFactory.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\LittleEndianHeapChannelBuffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\SlicedChannelBuffer.cpp">
@@ -162,9 +144,6 @@
       <Filter>util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferFactory.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\AbstractServerChannel.cpp">
@@ -278,9 +257,6 @@
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipelines.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\AdaptiveReceiveBuffer.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandlerContext.cpp">
       <Filter>channel</Filter>
     </ClCompile>
@@ -392,6 +368,12 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpTransferEncoding.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferUtil.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\buffer\Unpooled.cpp">
+      <Filter>buffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -401,9 +383,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerLifeCycleException.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineException.h">
@@ -490,43 +469,22 @@
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannel.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\Array.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\BigEndianHeapChannelBuffer.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ByteOrder.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactory.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferIndexFinder.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffers.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\CompositeChannelBuffer.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\DynamicChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\GatheringBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBuffer.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBufferFactory.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\LittleEndianHeapChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\SlicedChannelBuffer.h">
@@ -695,9 +653,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h">
@@ -813,9 +768,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AdaptiveReceiveBuffer.h">
-      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h">
       <Filter>channel</Filter>
@@ -945,9 +897,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h">
       <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryPtr.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
       <Filter>handler\codec\http</Filter>
@@ -1094,5 +1043,18 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaderDateFormat.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\StlUtil.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferUtil.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\Unpooled.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\buffer\SwappedChannelBuffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\Common.h" />
   </ItemGroup>
 </Project>

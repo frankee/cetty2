@@ -1,7 +1,7 @@
-#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H)
-#define CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H
+#if !defined(CETTY_COMMON_H)
+#define CETTY_COMMON_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -17,12 +17,9 @@
  * under the License.
  */
 
-namespace cetty { namespace buffer { 
-    class ChannelBufferFactory;
-    typedef ChannelBufferFactory* ChannelBufferFactoryPtr;
-}}
 
-#endif //#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H)
+
+#endif //#if !defined(CETTY_COMMON_H)
 
 // Local Variables:
 // mode: c++

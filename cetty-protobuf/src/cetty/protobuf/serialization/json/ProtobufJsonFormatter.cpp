@@ -183,7 +183,7 @@ public:
 
     OutputStream& append(const char* str) {
         if (str) {
-            output->writeBytes(str, strlen(str));
+            output->writeBytes(str);
         }
 
         return *this;
@@ -214,7 +214,7 @@ public:
             }
         }
         else {
-            output->writeBytes("null", 4);
+            output->writeBytes("null");
         }
 
         return *this;

@@ -46,7 +46,7 @@ EchoClientHandler::EchoClientHandler(int firstMessageSize)
         throw InvalidArgumentException("firstMessageSize must > 0.");
     }
 
-    firstMessage = ChannelBuffers::buffer(firstMessageSize);
+    firstMessage = Unpooled::buffer(firstMessageSize);
     BOOST_ASSERT(firstMessage);
     int capacity = firstMessage->writableBytes();
 

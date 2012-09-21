@@ -32,7 +32,9 @@
 #include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
-#include <cetty/channel/AdaptiveReceiveBuffer.h>
+
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -41,6 +43,7 @@
 namespace cetty {
 namespace channel {
 
+using namespace cetty::buffer;
 using namespace cetty::util;
 
 class SinkHandler : public ChannelOutboundBufferHandler {
@@ -112,8 +115,7 @@ ChannelPipeline::ChannelPipeline()
       tail(NULL),
       inboundHead(NULL),
       outboundHead(NULL),
-      receiveBuffer() {
-    this->receiveBuffer = new AdaptiveReceiveBuffer();
+      receiveBuffer(Unpooled::buffer(1024*16)) {
 }
 
 void ChannelPipeline::attach(const ChannelPtr& channel) {

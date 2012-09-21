@@ -18,13 +18,12 @@
 
 #include <boost/assert.hpp>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/GatheringBuffer.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
-#include <cetty/buffer/HeapChannelBufferFactory.h>
 
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/util/NestedDiagnosticContext.h>
 
 namespace cetty {
@@ -32,12 +31,13 @@ namespace buffer {
 
 using namespace cetty::util;
 
-CompositeChannelBuffer::CompositeChannelBuffer(ByteOrder endianness, const std::vector<ChannelBufferPtr>& buffers) : byteOrder(endianness) {
+CompositeChannelBuffer::CompositeChannelBuffer(
+    const std::vector<ChannelBufferPtr>& buffers) {
     setComponents(buffers);
 }
 
-CompositeChannelBuffer::CompositeChannelBuffer(CompositeChannelBuffer& buffer) : byteOrder(buffer.byteOrder),
-    components(buffer.components),
+CompositeChannelBuffer::CompositeChannelBuffer(CompositeChannelBuffer& buffer)
+    : components(buffer.components),
     indices(buffer.indices),
     lastAccessedComponentId(0) {
     setIndex(buffer.readerIndex(), buffer.writerIndex());
@@ -97,20 +97,12 @@ std::vector<ChannelBufferPtr> CompositeChannelBuffer::decompose() {
     return decompose(ChannelBuffer::readerIndex(), ChannelBuffer::readableBytes());
 }
 
-ChannelBufferFactory& CompositeChannelBuffer::factory() const {
-    return HeapChannelBufferFactory::getInstance(order());
-}
-
-cetty::buffer::ByteOrder CompositeChannelBuffer::order() const {
-    return this->byteOrder;
-}
-
-bool CompositeChannelBuffer::hasArray() const {
-    return false;
-}
-
 int CompositeChannelBuffer::capacity() const {
     return indices[components.size()];
+}
+
+void CompositeChannelBuffer::capacity(int newCapacity) {
+    BOOST_ASSERT(false && "has not implement.");
 }
 
 int8_t CompositeChannelBuffer::getByte(int index) const {
@@ -160,10 +152,10 @@ int64_t CompositeChannelBuffer::getLong(int index) const {
     }
 }
 
-int CompositeChannelBuffer::getBytes(int index, Array* dst, int dstIndex, int length) const {
+int CompositeChannelBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
     int componentId = getComponentId(index);
 
-    if (index > (capacity() - length) || dstIndex > (dst->length() - length)) {
+    if (index > (capacity() - length)) {
         CETTY_NDC_SCOPE("getBytes(int, Array*, int, int)");
         throw RangeException("CompositeChannelBuffer getBytes out of range.");
     }
@@ -296,7 +288,7 @@ int CompositeChannelBuffer::setLong(int index, int64_t value) {
     return 8;
 }
 
-int CompositeChannelBuffer::setBytes(int index, const ConstArray& src, int srcIndex, int length) {
+int CompositeChannelBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
     int componentId = getComponentId(index);
 
     if (index > capacity() - length || srcIndex > src.length() - length) {
@@ -400,7 +392,7 @@ ChannelBufferPtr CompositeChannelBuffer::copy(int index, int length) const {
         throw RangeException("CompositeChannelBuffer copy out of range.");
     }
 
-    ChannelBufferPtr dst = factory().getBuffer(order(), length);
+    ChannelBufferPtr dst = Unpooled::buffer(length);
     BOOST_ASSERT(dst);
 
     copyTo(index, length, componentId, dst);
@@ -409,7 +401,7 @@ ChannelBufferPtr CompositeChannelBuffer::copy(int index, int length) const {
 
 ChannelBufferPtr CompositeChannelBuffer::slice(int index, int length) {
     if (length == 0) {
-        return ChannelBuffers::EMPTY_BUFFER;
+        return Unpooled::EMPTY_BUFFER;
     }
 
     if (index < 0 || index > (capacity() - length)) {
@@ -421,14 +413,14 @@ ChannelBufferPtr CompositeChannelBuffer::slice(int index, int length) {
 
     switch (components.size()) {
     case 0:
-        return ChannelBuffers::EMPTY_BUFFER;
+        return Unpooled::EMPTY_BUFFER;
 
     case 1:
         return components[0];
 
     default:
         return ChannelBufferPtr(
-                   new CompositeChannelBuffer(order(), components));
+                   new CompositeChannelBuffer(components));
     }
 }
 
@@ -443,13 +435,13 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
     }
 
     size_t i,j;
-    Array arry;
+    StringPiece arry;
 
     if (index == readerIdx && length == ChannelBuffer::readableBytes()) {
         for (i = 0, j = components.size(); i < j; ++i) {
             if (components[i]->readable()) {
                 components[i]->readableBytes(&arry);
-                gatheringBuffer->append(arry.data(), arry.length());
+                gatheringBuffer->append((char*)arry.data(), arry.length());
             }
         }
     }
@@ -459,7 +451,7 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
         for (i = 0, j = decomposeds.size(); i < j; ++i) {
             if (decomposeds[i]->readable()) {
                 decomposeds[i]->readableBytes(&arry);
-                gatheringBuffer->append(arry.data(), arry.length());
+                gatheringBuffer->append((char*)arry.data(), arry.length());
             }
         }
     }
@@ -467,17 +459,17 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
     return length;
 }
 
-void CompositeChannelBuffer::readableBytes(Array* arry) {
+void CompositeChannelBuffer::readableBytes(StringPiece* bytes) {
     CETTY_NDC_SCOPE("readableBytes(Array*)");
     throw UnsupportedOperationException();
 }
 
-void CompositeChannelBuffer::writableBytes(Array* arry) {
+char* CompositeChannelBuffer::writableBytes(int* length) {
     CETTY_NDC_SCOPE("writableBytes(Array*)");
     throw UnsupportedOperationException();
 }
 
-void CompositeChannelBuffer::aheadWritableBytes(Array* arry) {
+char* CompositeChannelBuffer::aheadWritableBytes(int* length) {
     CETTY_NDC_SCOPE("aheadWritableBytes(Array*)");
     throw UnsupportedOperationException();
 }
@@ -501,7 +493,7 @@ void CompositeChannelBuffer::discardReadBytes() {
     // Add a new buffer so that the capacity of this composite buffer does
     // not decrease due to the discarded components.
     // XXX Might create too many components if discarded by small amount.
-    ChannelBufferPtr padding = ChannelBuffers::buffer(order(), localReaderIndex);
+    ChannelBufferPtr padding = Unpooled::buffer(localReaderIndex);
     padding->writerIndex(localReaderIndex);
     list.push_back(padding);
 
@@ -642,6 +634,10 @@ int CompositeChannelBuffer::getComponentId(int index) {
 
     CETTY_NDC_SCOPE("getComponentId(int)");
     throw RangeException("CompositeChannelBuffer getComponentId out of range.");
+}
+
+ChannelBufferPtr CompositeChannelBuffer::newBuffer(int initialCapacity) {
+    return Unpooled::EMPTY_BUFFER;
 }
 
 }

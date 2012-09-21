@@ -15,11 +15,11 @@
  */
 
 #include <cetty/buffer/SlicedChannelBuffer.h>
-#include <cetty/buffer/Array.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace buffer {
@@ -43,6 +43,43 @@ SlicedChannelBuffer::SlicedChannelBuffer(const ChannelBufferPtr& buffer,
     writerIndex(length);
 }
 
+const ChannelBufferPtr& SlicedChannelBuffer::unwrap() {
+    return buffer;
+}
+
+int SlicedChannelBuffer::capacity() const {
+    return length;
+}
+
+void SlicedChannelBuffer::capacity(int newCapacity) {
+    throw UnsupportedOperationException("sliced buffer");
+}
+
+void SlicedChannelBuffer::readableBytes(StringPiece* bytes) {
+    if (bytes) {
+        int count;
+        char* data = buffer->aheadWritableBytes(&count);
+
+        bytes->set(data + readerIdx + adjustment, length - readerIdx);
+    }
+}
+
+char* SlicedChannelBuffer::writableBytes(int* length) {
+    return NULL;
+}
+
+char* SlicedChannelBuffer::aheadWritableBytes(int* length) {
+    if (length) {
+        int count;
+        char* bytes = buffer->aheadWritableBytes(&count);
+
+        *length = readerIdx;
+        return bytes + adjustment;
+    }
+
+    return NULL;
+}
+
 int8_t SlicedChannelBuffer::getByte(int index) const {
     checkIndex(index);
     return buffer->getByte(index + adjustment);
@@ -63,16 +100,16 @@ int64_t SlicedChannelBuffer::getLong(int index) const {
     return buffer->getLong(index + adjustment);
 }
 
-cetty::buffer::ChannelBufferPtr SlicedChannelBuffer::copy(int index, int length) const {
+ChannelBufferPtr SlicedChannelBuffer::copy(int index, int length) const {
     checkIndex(index, length);
     return buffer->copy(index + adjustment, length);
 }
 
-cetty::buffer::ChannelBufferPtr SlicedChannelBuffer::slice(int index, int length) {
+ChannelBufferPtr SlicedChannelBuffer::slice(int index, int length) {
     checkIndex(index, length);
 
     if (length == 0) {
-        return ChannelBuffers::EMPTY_BUFFER;
+        return Unpooled::EMPTY_BUFFER;
     }
 
     return ChannelBufferPtr(
@@ -93,7 +130,7 @@ int SlicedChannelBuffer::getBytes(int index, const ChannelBufferPtr& dst, int ds
     return buffer->getBytes(index + adjustment, dst, dstIndex, length);
 }
 
-int SlicedChannelBuffer::getBytes(int index, Array* dst, int dstIndex, int length) const {
+int SlicedChannelBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
     checkIndex(index, length);
     return buffer->getBytes(index + adjustment, dst, dstIndex, length);
 }
@@ -123,7 +160,7 @@ int SlicedChannelBuffer::setLong(int index, int64_t value) {
     return buffer->setLong(index + adjustment, value);
 }
 
-int SlicedChannelBuffer::setBytes(int index, const ConstArray& src, int srcIndex, int length) {
+int SlicedChannelBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
     checkIndex(index, length);
     return buffer->setBytes(index + adjustment, src, srcIndex, length);
 }
@@ -159,47 +196,8 @@ void SlicedChannelBuffer::checkIndex(int startIndex, int length) const {
     }
 }
 
-ChannelBufferPtr& SlicedChannelBuffer::unwrap() {
-    return buffer;
-}
-
-ChannelBufferFactory& SlicedChannelBuffer::factory() const {
-    return buffer->factory();
-}
-
-cetty::buffer::ByteOrder SlicedChannelBuffer::order() const {
-    return buffer->order();
-}
-
-int SlicedChannelBuffer::capacity() const {
-    return length;
-}
-
-void SlicedChannelBuffer::readableBytes(Array* arry) {
-    if (arry) {
-        Array underArry;
-        buffer->aheadWritableBytes(&underArry);
-
-        arry->reset(underArry.data() + readerIdx + adjustment, length - readerIdx);
-    }
-}
-
-void SlicedChannelBuffer::writableBytes(Array* arry) {
-    if (arry) {
-        arry->reset(0, 0);
-    }
-}
-
-void SlicedChannelBuffer::aheadWritableBytes(Array* arry) {
-    if (arry) {
-        Array underArry;
-        buffer->aheadWritableBytes(&underArry);
-        arry->reset(underArry.data(adjustment), readerIdx);
-    }
-}
-
-bool SlicedChannelBuffer::hasArray() const {
-    return buffer->hasArray();
+ChannelBufferPtr SlicedChannelBuffer::newBuffer(int initialCapacity) {
+    return buffer->newBuffer(initialCapacity);
 }
 
 }

@@ -16,7 +16,6 @@
 
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
-#include <cetty/buffer/Array.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/service/service.pb.h>
 
@@ -107,8 +106,8 @@ void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val)
     while (val);
 
 	//write to buffer
-	Array array((char*)buf, varintSize);
-	buffer->writeBytes(array);
+	StringPiece bytes((const char*)buf, varintSize);
+	buffer->writeBytes(bytes);
 }
 
 }

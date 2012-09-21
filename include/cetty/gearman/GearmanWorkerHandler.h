@@ -34,10 +34,10 @@ class GearmanWorkerHandler;
 typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
 
 class GearmanWorkerHandler
-        : public ChannelMessageHandlerAdapter<GearmanMessagePtr,
-        GearmanMessagePtr,
-        GearmanMessagePtr,
-        GearmanMessagePtr> {
+    : public ChannelMessageHandlerAdapter<GearmanMessagePtr,
+      GearmanMessagePtr,
+      GearmanMessagePtr,
+          GearmanMessagePtr> {
 public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
@@ -84,8 +84,6 @@ private:
     int grabIdleCount;
     ChannelPtr channel;
     CallbackMap workerFunctors;
-    //record the job handle of gearman Message
-    //std::stack<std::string>jobHandles;
 };
 
 }

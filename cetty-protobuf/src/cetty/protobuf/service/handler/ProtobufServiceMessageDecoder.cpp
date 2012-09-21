@@ -16,11 +16,12 @@
 
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
 #include <cetty/protobuf/service/service.pb.h>
-#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
 namespace cetty {
@@ -56,7 +57,7 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
     }
 
     google::protobuf::Message* payload = prototype->New();
-    Array arry;
+    StringPiece arry;
     buffer->readableBytes(&arry);
     payload->ParseFromArray(arry.data(), arry.length());
     buffer->offsetReaderIndex(arry.length());
@@ -95,7 +96,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
 
             case 2:
                 id = ProtobufMessageCodec::decodeFixed64(buffer);
-                id = ChannelBuffers::swapLong(id);
+                id = ChannelBufferUtil::swapLong(id);
                 serviceMessage->set_id(id);
                 break;
 

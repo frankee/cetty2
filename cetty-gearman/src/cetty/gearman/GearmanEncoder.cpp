@@ -17,7 +17,10 @@
 #include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanMessage.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace gearman {
@@ -50,7 +53,6 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
 
     int parametersLength = caculateParametersLength(msg);
     int headerLength = 12;
-    //int bodyLenth = parametersLength;
     int bodyLenth = 0;
     int messageLength = 0;
 
@@ -65,13 +67,11 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
             }
 
             writeHeaderAhead(data, msg->getType(), messageLength);
-            //to check the data
-            std::string ret = ChannelBuffers::hexDump(data);
-            std::cout<<"the send data is "<<ret<<std::endl;
+            DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(data);
             return data;
         }
         else {
-            ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength + headerLength);
+            ChannelBufferPtr buffer = Unpooled::buffer(messageLength + headerLength);
 
             writeHeader(buffer, msg->getType(), messageLength);
 
@@ -80,9 +80,7 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
             }
 
             buffer->writeBytes(data);
-            //to check the data
-            std::string ret = ChannelBuffers::hexDump(buffer);
-            std::cout<<"the send data is "<<ret<<std::endl;
+            DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(data);
             return buffer;
         }
     }
@@ -94,16 +92,14 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
             messageLength =  parametersLength;
         }
 
-        ChannelBufferPtr buffer = ChannelBuffers::buffer(messageLength+headerLength);
+        ChannelBufferPtr buffer = Unpooled::buffer(messageLength+headerLength);
         writeHeader(buffer, msg->getType(), messageLength);
 
         if ((parametersLength - 1) > 0) {
             writeParameters(buffer, msg->getParameters(), false);
         }
-
-        //to check the data
-        std::string ret = ChannelBuffers::hexDump(buffer);
-        std::cout<<"the send data is "<<ret<<std::endl;
+        DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(buffer);
+        
         return buffer;
     }
 
@@ -123,13 +119,17 @@ int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
     return length;
 }
 
-void GearmanEncoder::writeHeader(const ChannelBufferPtr& buffer, int type, int length) {
+void GearmanEncoder::writeHeader(const ChannelBufferPtr& buffer,
+    int type,
+    int length) {
     buffer->writeBytes(GearmanMessage::REQUEST_MAGIC);
     buffer->writeInt(type);
     buffer->writeInt(length);
 }
 
-void GearmanEncoder::writeHeaderAhead(const ChannelBufferPtr& buffer, int type, int length) {
+void GearmanEncoder::writeHeaderAhead(const ChannelBufferPtr& buffer,
+    int type,
+    int length) {
     buffer->writeIntAhead(length);
     buffer->writeIntAhead(type);
     buffer->writeBytesAhead(GearmanMessage::REQUEST_MAGIC);

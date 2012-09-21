@@ -15,13 +15,16 @@
  */
 
 #include <cetty/gearman/GearmanClientHandler.h>
+
+#include <string>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/GearmanWorker.h>
-#include <string>
-#include <iostream>
+
 
 
 namespace cetty {
@@ -36,41 +39,35 @@ GearmanClientHandler::GearmanClientHandler(): channel(0) {
 GearmanClientHandler::~GearmanClientHandler() {
 }
 
-void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
+void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx,
+    const GearmanMessagePtr& msg) {
     if (outboundTransfer.unfoldAndAdd(msg)) {
         ctx.flush();
     }
 }
 
-void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg) {
+void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx,
+    const GearmanMessagePtr& msg) {
     std::string  data;
-    std::vector<std::string> params;
+    const std::vector<std::string>& params = msg->getParameters();
 
     switch (msg->getType()) {
     case GearmanMessage::JOB_CREATED:
-        std::cout<<"the JOB_SUBMIT is ok "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        //can store the job-handler for match the result
+        DLOG_DEBUG << "JOB_SUBMIT, job-handler:" << params.front();
         break;
 
     case GearmanMessage::WORK_STATUS:
-        std::cout<<"the  WORK_STATUS"<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        std::cout<<"the percent complete numerator is "<<params[1]<<std::endl;
-        std::cout<<"the Percent complete denominator is "<<params[2]<<std::endl;
-        //to monitor the Percent complete of job
+        DLOG_DEBUG << "WORK_STATUS, "
+            << "job-handler:" << params[0] << ", "
+            << "complete numerator:" << params[1] << ", "
+            << "complete denominator:" << params[2];
         break;
 
         //use job handler to identify a job  define a map<Ö÷job£¬vector<·Öjob handler> > for split
     case GearmanMessage::WORK_COMPLETE:
-        std::cout<<"the WORK_COMPLETE! "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-
-        data = ChannelBuffers::hexDump(msg->getData());
-        std::cout<<"the work complete data is "<< data <<std::endl;
+        DLOG_DEBUG << "WORK_COMPLETE, "
+            << "job-handler:" << params[0] << ", "
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
 
         if (inboundTransfer.unfoldAndAdd(msg)) {
             ctx.fireMessageUpdated();
@@ -78,45 +75,38 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx, const Gea
         break;
 
     case GearmanMessage::WORK_WARNING:
-        std::cout<<"the client receiver the WORK_WARNING, handler it "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        data = ChannelBuffers::hexDump(msg->getData());
-        std::cout<<"the work data is "<<data<<std::endl;
+        DLOG_DEBUG << "WORK_WARNING, "
+            << "job-handler:" << params[0] << ", "
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
+
         break;
 
     case GearmanMessage::WORK_FAIL:
-        std::cout<<"the WORK_FAIL! "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
+        DLOG_DEBUG << "WORK_FAIL, " << "job-handler:" << params[0];
         break;
 
     case GearmanMessage::WORK_EXCEPTION:
-        std::cout<<"the WORK_EXCEPTION! "<< std::endl;
+        DLOG_DEBUG << "WORK_EXCEPTION, " << "job-handler:" << params[0];
         break;
 
     case GearmanMessage::WORK_DATA:
-        std::cout<<"the client receiver the WORK_DATA, handler it "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        data = ChannelBuffers::hexDump(msg->getData());
-        std::cout<<"the work data is "<<data<<std::endl;
+        DLOG_DEBUG << "WORK_DATA, "
+            << "job-handler:" << params[0] << ", "
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
+
         break;
 
     case GearmanMessage::STATUS_RES:
-        std::cout<<"the GET_STATUS is ok,only for bg way"<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the job-handler is "<<params[0]<<std::endl;
-        std::cout<<"the known status is "<<params[1]<<std::endl;
-        std::cout<<"the running status is "<<params[2]<<std::endl;
-        std::cout<<"the  complete numerator is "<<params[3]<<std::endl;
-        std::cout<<"the  complete denominator is "<<params[4]<<std::endl;
+        DLOG_DEBUG << "STATUS_RES, "
+            << "job-handler:" << params[0] << ", "
+            << "known status" << params[1] << ", "
+            << "running status" << params[2] << ", "
+            << "complete numerator:" << params[3] << ", "
+            << "complete denominator:" << params[4];
         break;
 
     case GearmanMessage::OPTION_RES:
-        std::cout<<"the OPTION_REQ is ok "<< std::endl;
-        params = msg->getParameters();
-        std::cout<<"the name of the option is "<<params[0]<<std::endl;
+        DLOG_DEBUG << "OPTION_RES, option:" << params.front();
         break;
 
     default:

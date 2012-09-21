@@ -29,7 +29,7 @@ namespace gearman {
 using namespace cetty::channel;
 
 class GearmanClientHandler
-    : public ChannelMessageHandlerAdapter<GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr> {
+        : public ChannelMessageHandlerAdapter<GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr> {
 
 public:
     GearmanClientHandler();
@@ -42,10 +42,10 @@ public:
     virtual std::string toString() const;
 
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const GearmanMessagePtr& msg);
+                                 const GearmanMessagePtr& msg);
 
     virtual void flush(ChannelHandlerContext& ctx,
-        const ChannelFuturePtr& future);
+                       const ChannelFuturePtr& future);
 
 private:
     void submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg);

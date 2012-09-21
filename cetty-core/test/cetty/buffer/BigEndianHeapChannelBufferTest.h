@@ -18,11 +18,12 @@
  */
 #include "cetty/buffer/AbstractChannelBufferTest.h"
 
-namespace cetty { namespace buffer { 
+namespace cetty {
+namespace buffer {
 
 /**
  *
- * 
+ *
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
  *
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
@@ -31,10 +32,10 @@ class BigEndianHeapChannelBufferTest : public AbstractChannelBufferTest {
 public:
     BigEndianHeapChannelBufferTest() {}
     virtual ~BigEndianHeapChannelBufferTest() {}
-    
+
 protected:
     virtual void newBuffer(int length) {
-        buffer = ChannelBuffers::buffer(length);
+        buffer = Unpooled::buffer(length);
 
         BOOST_ASSERT(0 == buffer->writerIndex());
         buffers.push_back(buffer);
@@ -48,7 +49,7 @@ private:
     std::vector<ChannelBufferPtr> buffers;
 };
 
-
-}}
+}
+}
 
 #endif //#if !defined(CETTY_BUFFER_BIGENDIANHEAPCHANNELBUFFERTEST_H)

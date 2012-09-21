@@ -93,14 +93,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferFactory.cpp" />
+    <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannelHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannelInboundHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannelOutboundHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannelSink.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractServerChannel.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\AdaptiveReceiveBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelBufferHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelException.cpp" />
@@ -140,16 +139,11 @@
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioServerSocketChannelConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannelConfig.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\Array.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\BigEndianHeapChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ByteOrder.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferIndexFinder.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffers.cpp" />
+    <ClCompile Include="..\..\src\cetty\buffer\Unpooled.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\CompositeChannelBuffer.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\DynamicChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\HeapChannelBuffer.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\HeapChannelBufferFactory.cpp" />
-    <ClCompile Include="..\..\src\cetty\buffer\LittleEndianHeapChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\SlicedChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\bootstrap\Bootstrap.cpp" />
     <ClCompile Include="..\..\src\cetty\bootstrap\ClientBootstrap.cpp" />
@@ -207,10 +201,11 @@
     <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactoryPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferUtil.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\SwappedChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h" />
@@ -223,7 +218,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AdaptiveReceiveBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerContext.h" />
@@ -300,6 +294,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\Common.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferEncoder.h" />
@@ -373,6 +368,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\Process.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SimpleTrie.h" />
     <ClInclude Include="..\..\..\include\cetty\util\SmallFile.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\StlUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\util\StringPiece.h" />
     <ClInclude Include="..\..\..\include\cetty\util\StringUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h" />
@@ -389,19 +385,13 @@
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h" />
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioServerSocketChannelConfig.h" />
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioHandlerAllocator.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\Array.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\BigEndianHeapChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ByteOrder.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffer.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferIndexFinder.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffers.h" />
+    <ClInclude Include="..\..\..\include\cetty\buffer\Unpooled.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\CompositeChannelBuffer.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\DynamicChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\GatheringBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBuffer.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBufferFactory.h" />
-    <ClInclude Include="..\..\..\include\cetty\buffer\LittleEndianHeapChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\SlicedChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\WrappedChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\Bootstrap.h" />

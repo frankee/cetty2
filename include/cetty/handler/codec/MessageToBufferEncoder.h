@@ -32,7 +32,7 @@
  */
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
@@ -64,7 +64,7 @@ public:
         ChannelBufferPtr out;
 
         if (hasOutBuffer) {
-            out = ChannelBuffers::dynamicBuffer(initBufferSize);
+            out = Unpooled::buffer(initBufferSize);
         }
 
         while (!outboundQueue.empty()) {

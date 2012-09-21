@@ -61,12 +61,8 @@ public:
         buffer->setIndex(readerIdx, writerIdx);
     }
 
-    virtual ChannelBufferFactory& factory() const;
-    virtual ByteOrder order() const;
     virtual int capacity() const;
-
-    virtual bool hasArray() const;
-
+    virtual void capacity(int newCapacity);
 
     virtual ChannelBufferPtr copy(int index, int length) const;
 
@@ -78,7 +74,7 @@ public:
     virtual int32_t  getInt(int index) const;
     virtual int64_t  getLong(int index) const;
 
-    virtual int getBytes(int index, Array* dst, int dstIndex, int length) const;
+    virtual int getBytes(int index, char* dst, int dstIndex, int length) const;
     virtual int getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const;
     virtual int getBytes(int index, OutputStream* out, int length) const;
 
@@ -87,27 +83,28 @@ public:
                         int toIndex,
                         const ChannelBufferIndexFinder::Functor& indexFinder) const;
 
-
     int readableBytes() const;
     int writableBytes() const;
     int aheadWritableBytes() const;
 
-    virtual void readableBytes(Array* arry);
-    virtual void writableBytes(Array* arry);
-    virtual void aheadWritableBytes(Array* arry);
+    virtual void readableBytes(StringPiece* bytes);
+    virtual char* writableBytes(int* length);
+    virtual char* aheadWritableBytes(int* length);
 
     virtual int setByte(int index, int value);
     virtual int setShort(int index, int value);
     virtual int setInt(int index, int value);
     virtual int setLong(int index, int64_t value);
 
-    virtual int setBytes(int index, const ConstArray& src, int srcIndex, int length);
+    virtual int setBytes(int index, const StringPiece& src, int srcIndex, int length);
     virtual int setBytes(int index, const ConstChannelBufferPtr& src, int srcIndex, int length);
     virtual int setBytes(int index, InputStream* in, int length);
 
     virtual ChannelBufferPtr slice(int index, int length);
     virtual int slice(int index, int length, cetty::buffer::GatheringBuffer* gatheringBuffer);
     
+    virtual ChannelBufferPtr newBuffer(int initialCapacity);
+
     void clear();
 
     virtual std::string toString() const;

@@ -33,6 +33,8 @@ std::string QueryStringEncoder::toString() const {
         std::string str(uri);
         str.append("?");
 
+        int i = 0;
+        int size = params.size();
         NameValueCollection::ConstIterator itr = params.begin();
         NameValueCollection::ConstIterator end = params.end();
         for (; itr != end; ++itr) {
@@ -40,9 +42,11 @@ std::string QueryStringEncoder::toString() const {
             str.append("=");
             encodeComponent(itr->second, tmpStr, str);
 
-            if (itr + 1 != end) {
+            if (i + 1 != size) {
                 str.append("&");
             }
+
+            ++i;
         }
 
         return str;

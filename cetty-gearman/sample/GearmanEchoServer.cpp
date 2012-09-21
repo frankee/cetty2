@@ -2,18 +2,17 @@
 #include <string>
 #include <vector>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/ChannelBufferUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 #include <cetty/gearman/GearmanMessage.h>
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
+using namespace cetty::buffer;
 using namespace cetty::gearman;
 using namespace cetty::gearman::builder;
-//using namespace cetty::buffer;
 
 GearmanMessagePtr echo(const GearmanMessagePtr& message) {
-    std::string ret;
-    ret = ChannelBuffers::hexDump(message->getData());
-    std::cout<<"the ret is  "<< ret <<std::endl;
+    LOG_DEBUG << "the result is " << ChannelBufferUtil::hexDump(message->getData());
 
     GearmanMessagePtr msgRet = GearmanMessage::createWorkCompleteMessage(
         message->getParameters().front(),
@@ -30,4 +29,3 @@ int main(int argc, char* argv[]) {
     getchar();
     return 0;
 }
-

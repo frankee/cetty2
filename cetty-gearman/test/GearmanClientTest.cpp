@@ -5,12 +5,9 @@
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 
-#include <cetty/gearman/GearmanPipelineFactory.h>
-#include <cetty/gearman/GearmanTask.h>
 #include <vector>
 
 using namespace cetty::channel;
@@ -25,7 +22,7 @@ using namespace cetty::gearman;
 void test4Echo(ChannelPtr& c)
 {
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr buffer = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr buffer = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 20; ++i) {
 		buffer->writeByte('0');
 	}
@@ -40,7 +37,7 @@ void test4submitJob(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -54,7 +51,7 @@ void test4submitJobHigh(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -69,7 +66,7 @@ void test4submitJobLow(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -84,7 +81,7 @@ void test4submitJobBG(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -99,7 +96,7 @@ void test4submitJobHighBG(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -114,7 +111,7 @@ void test4submitJobLowBG(ChannelPtr& c)
 	const std::string functionName = "hello";
 	const std::string uniqueId = "123456";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}
@@ -136,7 +133,7 @@ void test4OptionReq(ChannelPtr& c)
 {
 	const std::string option = "exception";
 	GearmanTaskPtr task(new GearmanTask);
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024, 64);
+	ChannelBufferPtr payload = Unpooled::buffer(1024, 64);
 	for (int i = 0; i < 10; ++i) {
 		payload->writeByte('0');
 	}

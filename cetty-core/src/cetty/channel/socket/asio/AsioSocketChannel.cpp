@@ -26,7 +26,6 @@
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/AdaptiveReceiveBuffer.h>
 
 #include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
@@ -36,7 +35,6 @@
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -150,9 +148,9 @@ bool AsioSocketChannel::setClosed() {
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
     if (!error) {
-        AdaptiveReceiveBuffer& buffer = pipeline->getReceiveBuffer();
-        buffer.setReceiveBufferSize(bytes_transferred);
-        pipeline->setInboundChannelBuffer(buffer.channelBuffer());
+        const ChannelBufferPtr& buffer = pipeline->getReceiveBuffer();
+        buffer->offsetWriterIndex(bytes_transferred);
+        pipeline->setInboundChannelBuffer(buffer);
 
         pipeline->fireMessageUpdated();
 
@@ -313,11 +311,11 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 }
 
 void AsioSocketChannel::beginRead() {
-    Array arry;
-    pipeline->getReceiveBuffer().writableBytes(&arry);
-    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size" << arry.length();
+    int size;
+    char* buf = pipeline->getReceiveBuffer()->writableBytes(&size);
+    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : " << size;
     tcpSocket.async_read_some(
-        boost::asio::buffer(arry.data(), arry.length()),
+        boost::asio::buffer(buf, size),
         boost::bind(&AsioSocketChannel::handleRead,
                     this,
                     boost::asio::placeholders::error,

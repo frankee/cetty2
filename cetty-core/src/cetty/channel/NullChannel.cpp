@@ -22,7 +22,6 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/FailedChannelFuture.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {

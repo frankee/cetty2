@@ -23,9 +23,12 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/OutputStream.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace buffer {
+
+using namespace cetty::util;
 
 /**
  * An {@link OutputStream} which writes data to a {@link ChannelBuffer}.
@@ -79,9 +82,8 @@ public:
             return 0;
         }
 
-        if (buffer) {
-            Array arry((char*)bytes, length);
-            return buffer->writeBytes(arry, offset, length);
+        if (buffer && bytes) {
+            return buffer->writeBytes((const char*)bytes, offset, length);
         }
         return -1;
     }

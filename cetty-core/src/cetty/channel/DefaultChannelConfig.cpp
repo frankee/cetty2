@@ -15,15 +15,11 @@
  */
 
 #include <cetty/channel/DefaultChannelConfig.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
-#include <cetty/buffer/HeapChannelBufferFactory.h>
-#include <cetty/channel/ChannelPipelineFactory.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace channel {
 
-using namespace cetty::buffer;
 using namespace cetty::util;
 
 DefaultChannelConfig::DefaultChannelConfig()

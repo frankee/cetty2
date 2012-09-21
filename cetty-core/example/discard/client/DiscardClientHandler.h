@@ -51,7 +51,7 @@ public:
             throw InvalidArgumentException(std::string("messageSize: ") +
                                            Integer::toString(messageSize));
         }
-        content = ChannelBuffers::buffer(messageSize);
+        content = Unpooled::buffer(messageSize);
     }
     virtual ~DiscardClientHandler() {}
 
