@@ -98,7 +98,7 @@ int ChannelBufferUtil::hashCode(const ChannelBufferPtr& buffer) {
     int hashCode = 1;
     int arrayIndex = buffer->readerIndex();
 
-    if (buffer->order() == ByteOrder::BO_BIG_ENDIAN) {
+    if (buffer->order() == ByteOrder::BIG) {
         for (int i = intCount; i > 0; --i) {
             hashCode = 31 * hashCode + buffer->getInt(arrayIndex);
             arrayIndex += 4;

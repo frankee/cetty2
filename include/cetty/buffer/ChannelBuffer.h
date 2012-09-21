@@ -1676,7 +1676,7 @@ protected:
         markedReaderIndex(0),
         markedWriterIndex(0),
         maximumCapacity(0),
-        byteOrder(ByteOrder::BO_BIG_ENDIAN) {}
+        byteOrder(ByteOrder::BIG) {}
 
     ChannelBuffer(int maximumCapacity,
         ByteOrder byteOrder)

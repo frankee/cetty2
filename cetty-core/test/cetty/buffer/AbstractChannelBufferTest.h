@@ -1066,12 +1066,12 @@ public:
             Unpooled::wrappedBuffer(value, LENGTH)));
 
         ASSERT_TRUE(ChannelBufferUtil::equals(buffer,
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)));
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)));
 
         value[0] ++;
         ASSERT_FALSE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) == 0);
         ASSERT_FALSE(buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)) == 0);
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) == 0);
     }
     
     void testCompareTo() {
@@ -1094,27 +1094,27 @@ public:
 
         ASSERT_EQ(0, buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)));
         ASSERT_EQ(0, buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)));
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)));
 
         value[0] ++;
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) < 0);
         ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)) < 0);
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
 
         value[0] -= 2;
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) > 0);
         ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)) > 0);
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) > 0);
         value[0] ++;
 
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, 0, 31)) > 0);
         ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, 0, 31)->order(ByteOrder::BO_LITTLE_ENDIAN)) > 0);
+            Unpooled::wrappedBuffer(value, 0, 31)->order(ByteOrder::LITTLE)) > 0);
 
         ASSERT_TRUE(buffer->slice(0, 31)->compare(
             Unpooled::wrappedBuffer(value, LENGTH)) < 0);
         ASSERT_TRUE(buffer->slice(0, 31)->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::BO_LITTLE_ENDIAN)) < 0);
+            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
     }
 
     void testIndexOf() {

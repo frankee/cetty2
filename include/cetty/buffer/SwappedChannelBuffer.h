@@ -40,16 +40,16 @@ public:
             throw NullPointerException("buf");
         }
 
-        if (buf->order() == ByteOrder::BO_BIG_ENDIAN) {
+        if (buf->order() == ByteOrder::BIG) {
             this->buf = buf;
-            this->byteOrder = ByteOrder::BO_LITTLE_ENDIAN;
+            this->byteOrder = ByteOrder::LITTLE;
         }
         else {
             boost::intrusive_ptr<SwappedChannelBuffer> swapped
                 = boost::dynamic_pointer_cast<SwappedChannelBuffer>(buf);
 
             this->buf = swapped->unwrap();
-            this->byteOrder = ByteOrder::BO_LITTLE_ENDIAN;
+            this->byteOrder = ByteOrder::LITTLE;
         }
     }
 

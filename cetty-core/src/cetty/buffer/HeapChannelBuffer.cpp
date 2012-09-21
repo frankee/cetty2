@@ -35,7 +35,7 @@ namespace buffer {
 using namespace cetty::util;
 
 HeapChannelBuffer::HeapChannelBuffer(int initialCapacity, int aheadBytes, int maximunCapacity)
-    : ChannelBuffer(maximunCapacity, ByteOrder::BO_BIG_ENDIAN),
+    : ChannelBuffer(maximunCapacity, ByteOrder::BIG),
       ownBuffer(true),
       buf(NULL),
       bufSize(0) {
@@ -59,7 +59,7 @@ HeapChannelBuffer::HeapChannelBuffer(int initialCapacity, int aheadBytes, int ma
 }
 
 HeapChannelBuffer::HeapChannelBuffer(char* buf, int length)
-    : ChannelBuffer(length, ByteOrder::BO_BIG_ENDIAN),
+    : ChannelBuffer(length, ByteOrder::BIG),
       ownBuffer(false),
       buf(NULL),
       bufSize(0)  {
@@ -67,7 +67,7 @@ HeapChannelBuffer::HeapChannelBuffer(char* buf, int length)
 }
 
 HeapChannelBuffer::HeapChannelBuffer(char* buf, int length, int maximunCapacity, bool takeCare)
-    : ChannelBuffer(maximunCapacity, ByteOrder::BO_BIG_ENDIAN),
+    : ChannelBuffer(maximunCapacity, ByteOrder::BIG),
       ownBuffer(takeCare),
       buf(NULL),
       bufSize(0)  {
@@ -80,7 +80,7 @@ HeapChannelBuffer::HeapChannelBuffer(char* buf,
                                      int writerIndex,
                                      int maximunCapacity,
                                      bool takeCare)
-    : ChannelBuffer(maximunCapacity, ByteOrder::BO_BIG_ENDIAN),
+    : ChannelBuffer(maximunCapacity, ByteOrder::BIG),
       ownBuffer(takeCare) {
     init(buf, length, maximunCapacity, readerIndex, writerIndex);
 }
