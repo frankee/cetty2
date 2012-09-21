@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
@@ -65,7 +65,7 @@ public:
         while (!inboundQueue.empty()) {
             OutstandingCallPtr& response = inboundQueue.front();
 
-            boost::int64_t id = response->getId();
+            int64_t id = response->getId();
             const OutstandingCallPtr& out = outMessages.front();
 
             if (out->future) {
@@ -100,7 +100,7 @@ public:
     }
 
 private:
-    boost::int64_t id;
+    int64_t id;
     std::deque<OutstandingCallPtr> outMessages;
 };
 

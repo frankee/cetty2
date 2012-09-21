@@ -5,7 +5,7 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
- * you may not use this file except in compliance with the License.  
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
@@ -18,37 +18,48 @@
  */
 
 #include <stdarg.h>
-#include "cetty/buffer/Array.h"
+#include <string>
 
-namespace cetty { namespace buffer { 
+namespace cetty {
+namespace buffer {
 
-class ArrayUtil{
+using namespace cetty::util;
+
+class ArrayUtil {
 public:
-    static Array create(int cnt, ...) {
-        if (cnt <= 0) return Array();
+    static std::string create(int cnt, ...) {
+        if (cnt <= 0) { return std::string(); }
 
         char* buf = new char[cnt];
         va_list argp;
         int argno = 0;
         int charect;
         va_start(argp, cnt);
-        while(argno < cnt) {
+
+        while (argno < cnt) {
             charect = va_arg(argp, int);
+
             if (charect > 255) {
                 charect = 0;
             }
+
             if (charect < -128) {
                 charect = 0;
             }
+
             buf[argno] = (char)charect;
             ++argno;
         }
+
         va_end(argp);
 
-        return Array(buf, cnt);
+        std::string str(buf, cnt);
+        delete [] buf;
+        return str;
     }
 };
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_BUFFER_ARRAYUTIL_H)

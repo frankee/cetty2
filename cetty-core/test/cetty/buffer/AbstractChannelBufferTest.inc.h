@@ -1,8 +1,3 @@
-// #if !defined(CETTY_BUFFER_ABSTRACTCHANNELBUFFERTEST_INC_H)
-// #define CETTY_BUFFER_ABSTRACTCHANNELBUFFERTEST_INC_H
-
-//#define CHANNEL_BUFFER_IMPL_TEST
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, readerIndexBoundaryCheck1) {
     readerIndexBoundaryCheck1();
 }
@@ -51,14 +46,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, getShortBoundaryCheck2) {
     getShortBoundaryCheck2();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getMediumBoundaryCheck1) {
-    getMediumBoundaryCheck1();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getMediumBoundaryCheck2) {
-    getMediumBoundaryCheck2();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, getIntBoundaryCheck1) {
     getIntBoundaryCheck1();
 }
@@ -85,14 +72,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteArrayBoundaryCheck2) {
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteArrayBoundaryCheck3) {
     getByteArrayBoundaryCheck3();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteArrayBoundaryCheck4) {
-    getByteArrayBoundaryCheck4();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteBufferBoundaryCheck) {
-    getByteBufferBoundaryCheck();
 }
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, copyBoundaryCheck1) {
@@ -123,18 +102,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, setIndexBoundaryCheck3) {
     setIndexBoundaryCheck3();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteBufferState) {
-    getByteBufferState();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getDirectByteBufferBoundaryCheck) {
-    getDirectByteBufferBoundaryCheck();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getDirectByteBufferState) {
-    getDirectByteBufferState();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomByteAccess) {
     testRandomByteAccess();
 }
@@ -149,14 +116,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomShortAccess) {
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomUnsignedShortAccess) {
     testRandomUnsignedShortAccess();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomMediumAccess) {
-    testRandomMediumAccess();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomUnsignedMediumAccess) {
-    testRandomUnsignedMediumAccess();
 }
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomIntAccess) {
@@ -191,14 +150,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialUnsignedShortAccess) {
     testSequentialUnsignedShortAccess();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialMediumAccess) {
-    testSequentialMediumAccess();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialUnsignedMediumAccess) {
-    testSequentialUnsignedMediumAccess();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialIntAccess) {
     testSequentialIntAccess();
 }
@@ -231,14 +182,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomHeapBufferTransfer2) {
     testRandomHeapBufferTransfer2();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomDirectBufferTransfer) {
-    testRandomDirectBufferTransfer();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testRandomByteBufferTransfer) {
-    testRandomByteBufferTransfer();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialByteArrayTransfer1) {
     testSequentialByteArrayTransfer1();
 }
@@ -253,26 +196,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialHeapBufferTransfer1) {
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialHeapBufferTransfer2) {
     testSequentialHeapBufferTransfer2();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialDirectBufferTransfer1) {
-    testSequentialDirectBufferTransfer1();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialDirectBufferTransfer2) {
-    testSequentialDirectBufferTransfer2();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialByteBufferBackedHeapBufferTransfer1) {
-    testSequentialByteBufferBackedHeapBufferTransfer1();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialByteBufferBackedHeapBufferTransfer2) {
-    testSequentialByteBufferBackedHeapBufferTransfer2();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialByteBufferTransfer) {
-    testSequentialByteBufferTransfer();
 }
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSequentialCopiedBufferTransfer1) {
@@ -327,41 +250,10 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, testCompareTo) {
     testCompareTo();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToString) {
-    testToString();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testIndexOf) {
     testIndexOf();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToByteBuffer1) {
-    testToByteBuffer1();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToByteBuffer2) {
-    testToByteBuffer2();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToByteBuffer3) {
-    testToByteBuffer3();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToByteBuffers1) {
-    testToByteBuffers1();
-}
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testToByteBuffers2) {
-    testToByteBuffers2();
 }
 
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, testSkipBytes1) {
     testSkipBytes1();
 }
-
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, testHashCode) {
-    testHashCode();
-}
-
-
-//#endif //#if !defined(CETTY_BUFFER_ABSTRACTCHANNELBUFFERTEST_INC_H)

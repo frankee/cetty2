@@ -85,6 +85,7 @@ public:
     static bool validateHeaderName(const std::string& name);
     static bool validateHeaderValue(const std::string& value);
     static bool isTransferEncodingChunked(const HttpMessage& m);
+    static bool isContentLengthSet(const HttpMessage& m);
 
     //static void splitElements(const std::string& s, std::vector<std::string>& elements, bool ignoreEmpty = true);
     /// Splits the given string into separate elements. Elements are expected

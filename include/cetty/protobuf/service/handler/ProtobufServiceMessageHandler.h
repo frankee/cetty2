@@ -18,7 +18,7 @@
  */
 
 #include <deque>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/channel/ChannelInboundMessageHandlerAdapter.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
@@ -73,7 +73,7 @@ private:
     void doneCallback(const MessagePtr& response,
                       ChannelHandlerContext& ctx,
                       ProtobufServiceMessagePtr req,
-                      boost::int64_t id);
+                      int64_t id);
 };
 
 }

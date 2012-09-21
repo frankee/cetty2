@@ -17,7 +17,7 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 
 #include <boost/assert.hpp>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 #include <cetty/protobuf/service/service.pb.h>
@@ -40,25 +40,25 @@ std::string ProtobufServiceMessageEncoder::toString() const {
 }
 
 ChannelBufferPtr ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ctx,
-    const ProtobufServiceMessagePtr& msg) {
-        if (msg) {
-            int msgSize = msg->getMessageSize();
-            ChannelBufferPtr buffer = ChannelBuffers::buffer(msgSize + 8);
-            encodeMessage(buffer, msg);
+        const ProtobufServiceMessagePtr& msg) {
+    if (msg) {
+        int msgSize = msg->getMessageSize();
+        ChannelBufferPtr buffer = Unpooled::buffer(msgSize + 8);
+        encodeMessage(buffer, msg);
 
-            return buffer;
-        }
-        else {
-            return ChannelBufferPtr();
-        }
+        return buffer;
+    }
+    else {
+        return ChannelBufferPtr();
+    }
 }
 
 void ProtobufServiceMessageEncoder::encodeProtobufMessage(const ChannelBufferPtr& buffer,
         const google::protobuf::Message& message) {
-    Array arry;
-    buffer->writableBytes(&arry);
+    int length;
+    char* bytes = buffer->writableBytes(&length);
     int messageSize = message.GetCachedSize();
-    message.SerializeWithCachedSizesToArray((google::protobuf::uint8*)arry.data());
+    message.SerializeWithCachedSizesToArray((google::protobuf::uint8*)bytes);
     buffer->offsetWriterIndex(messageSize);
 }
 

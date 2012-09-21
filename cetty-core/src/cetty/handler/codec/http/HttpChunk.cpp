@@ -17,7 +17,7 @@
 #include <cetty/handler/codec/http/HttpChunk.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -28,14 +28,14 @@ namespace http {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-HttpChunkPtr HttpChunk::LAST_CHUNK(new HttpChunk(ChannelBuffers::EMPTY_BUFFER));
+HttpChunkPtr HttpChunk::LAST_CHUNK(new HttpChunk(Unpooled::EMPTY_BUFFER));
 
 HttpChunk::HttpChunk(const ChannelBufferPtr& content) {
     if (content) {
         setContent(content);
     }
     else {
-        setContent(ChannelBuffers::EMPTY_BUFFER);
+        setContent(Unpooled::EMPTY_BUFFER);
     }
 }
 

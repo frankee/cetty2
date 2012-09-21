@@ -60,7 +60,7 @@
 // documentation and/or software.
 //
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/shiro/crypt/DigestEngine.h>
 
 namespace cetty { namespace shiro { namespace crypt { 
@@ -86,13 +86,13 @@ protected:
 	virtual void updateImpl(const void* data, unsigned int length);
 
 private:
-	static void transform(boost::uint32_t state[4], const unsigned char block[64]);
-	static void encode(unsigned char* output, const boost::uint32_t* input, unsigned int len);
-	static void decode(boost::uint32_t* output, const unsigned char* input, unsigned int len);
+	static void transform(uint32_t state[4], const unsigned char block[64]);
+	static void encode(unsigned char* output, const uint32_t* input, unsigned int len);
+	static void decode(uint32_t* output, const unsigned char* input, unsigned int len);
 
 	struct Context {
-		boost::uint32_t state[4];  // state (ABCD)
-		boost::uint32_t count[2];  // number of bits, modulo 2^64 (lsb first)
+		uint32_t state[4];  // state (ABCD)
+		uint32_t count[2];  // number of bits, modulo 2^64 (lsb first)
 		unsigned char buffer[64]; // input buffer
 	};
 

@@ -84,7 +84,7 @@ int parseField(const ConfigFieldDescriptor* field,
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection->addInt64(object, field, itr->as<boost::int64_t>());
+                reflection->addInt64(object, field, itr->as<int64_t>());
                 break;
 
             case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
@@ -113,7 +113,7 @@ int parseField(const ConfigFieldDescriptor* field,
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT64:
-            reflection->setInt64(object, field, node.as<boost::int64_t>());
+            reflection->setInt64(object, field, node.as<int64_t>());
             break;
 
         case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:

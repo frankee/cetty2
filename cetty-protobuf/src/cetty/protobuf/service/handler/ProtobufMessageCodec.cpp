@@ -16,7 +16,6 @@
 
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
-#include <cetty/buffer/Array.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/service/service.pb.h>
 
@@ -76,7 +75,7 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     return ret;
 }
 
-void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data) {
+void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, int64_t data) {
     buffer->writeLong(data);
 }
 
@@ -90,7 +89,7 @@ void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum
 }
 
 void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {
-    boost::uint8_t buf[10];
+    uint8_t buf[10];
     int varintSize = 0;
     do {
         uint8_t byte = val & 0x7f;
@@ -107,8 +106,8 @@ void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val)
     while (val);
 
 	//write to buffer
-	Array array((char*)buf, varintSize);
-	buffer->writeBytes(array);
+	StringPiece bytes((const char*)buf, varintSize);
+	buffer->writeBytes(bytes);
 }
 
 }

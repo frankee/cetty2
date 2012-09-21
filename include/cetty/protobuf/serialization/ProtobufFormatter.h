@@ -20,7 +20,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace google {
@@ -40,10 +40,10 @@ public:
     virtual ~ProtobufFormatter() {}
 
     void format(const std::string& key,
-                boost::int64_t value,
+                int64_t value,
                 std::string* str);
     void format(const std::string& key,
-                boost::int64_t value,
+                int64_t value,
                 const ChannelBufferPtr& buffer);
 
     void format(const std::string& key,
@@ -69,10 +69,10 @@ public:
                         const ChannelBufferPtr& buffer) = 0;
 
     void format(const std::string& key,
-                const std::vector<boost::int64_t>& value,
+                const std::vector<int64_t>& value,
                 std::string* str);
     void format(const std::string& key,
-                const std::vector<boost::int64_t>& value,
+                const std::vector<int64_t>& value,
                 const ChannelBufferPtr& buffer);
 
     void format(const std::string& key,

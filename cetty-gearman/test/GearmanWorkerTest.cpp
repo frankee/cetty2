@@ -4,7 +4,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/gearman/GearmanPipelineFactory.h>
 #include <cetty/gearman/GearmanTask.h>
@@ -90,7 +90,7 @@ void testForWorkStauts(ChannelPtr&  c)
 void testForWorkComplete(ChannelPtr&  c)
 {
 	const std::string jobHandle = "hd:112";
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024,60);
+	ChannelBufferPtr payload = Unpooled::buffer(1024,60);
 	const std::string  msg = "complete";
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
@@ -111,7 +111,7 @@ void testForWorkFail(ChannelPtr&  c)
 void testForWorkWarning(ChannelPtr&  c)
 {
 	const std::string jobHandle = "hd:112";
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024,60);
+	ChannelBufferPtr payload = Unpooled::buffer(1024,60);
 	const std::string  msg = "warning";
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
@@ -123,7 +123,7 @@ void testForWorkWarning(ChannelPtr&  c)
 void testForWorkException(ChannelPtr&  c)
 {
 	const std::string jobHandle = "hd:112";
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024,60);
+	ChannelBufferPtr payload = Unpooled::buffer(1024,60);
 	const std::string  msg = "exception";
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);
@@ -135,7 +135,7 @@ void testForWorkException(ChannelPtr&  c)
 void testForWorkData(ChannelPtr&  c)
 {
 	const std::string jobHandle = "H:localhost.localdomain:8";
-	ChannelBufferPtr payload = ChannelBuffers::buffer(1024,60);
+	ChannelBufferPtr payload = Unpooled::buffer(1024,60);
 	const std::string  msg = "work_data";
 	payload->writeBytes(msg);
 	GearmanTaskPtr task(new GearmanTask);

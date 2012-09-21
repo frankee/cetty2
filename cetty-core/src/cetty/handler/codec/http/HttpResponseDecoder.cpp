@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,7 +16,8 @@
 
 #include <cetty/handler/codec/http/HttpResponseDecoder.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace handler {
@@ -55,10 +55,12 @@ std::string HttpResponseDecoder::toString() const {
     return "HttpResponseDecoder";
 }
 
-cetty::handler::codec::http::HttpMessagePtr HttpResponseDecoder::createMessage(const char* str1, const char* str2, const char* str3) {
+HttpMessagePtr HttpResponseDecoder::createMessage(const StringPiece& str1,
+    const StringPiece& str2,
+    const StringPiece& str3) {
     response->clear();
     response->setProtocolVersion(HttpVersion::valueOf(str1));
-    response->setStatus(HttpResponseStatus(Integer::parse(str2), str3));
+    response->setStatus(HttpResponseStatus((int)StringUtil::atoi(str2), str3));
     return response;
 }
 

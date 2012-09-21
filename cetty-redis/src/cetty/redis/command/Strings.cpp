@@ -65,7 +65,7 @@ RedisCommandPtr stringsCommandDecrement(const std::string& key) {
     return command;
 }
 
-RedisCommandPtr stringsCommandDecrementBy(const std::string& key, boost::int64_t value) {
+RedisCommandPtr stringsCommandDecrementBy(const std::string& key, int64_t value) {
     RedisCommandPtr command(new RedisCommand(DECRBY));
     (*command << key << value).done();
     return command;
@@ -101,7 +101,7 @@ RedisCommandPtr stringsCommandIncrement(const std::string& key) {
     return command;
 }
 
-RedisCommandPtr stringsCommandIncrement(const std::string& key, boost::int64_t value) {
+RedisCommandPtr stringsCommandIncrement(const std::string& key, int64_t value) {
     RedisCommandPtr command(new RedisCommand(INCRBY));
     (*command << key << value).done();
     return command;

@@ -53,13 +53,13 @@ struct ProtobufParserRegister {
 } parserRegister;
 
 int ProtobufParser::parse(const std::string& buffer, Message* message) {
-    return parse(buffer.c_str(), message);
+    return parse(buffer.c_str(), (int)buffer.size(), message);
 }
 
 int ProtobufParser::parse(const ChannelBufferPtr& buffer, Message* message) {
-    Array arry;
-    buffer->readableBytes(&arry);
-    return parse(arry.data(), message);
+    StringPiece bytes;
+    buffer->readableBytes(&bytes);
+    return parse(bytes.data(), bytes.size(), message);
 }
 
 ProtobufParser* ProtobufParser::getParser(const std::string& name) {

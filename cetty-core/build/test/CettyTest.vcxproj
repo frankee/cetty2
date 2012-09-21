@@ -54,7 +54,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../example/echo;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../test;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -66,7 +66,7 @@
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>cettyd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cettyd.lib;gtestd.lib;gtest_maind.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
@@ -107,8 +107,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\cetty\util\Base64Test.cpp" />
+    <ClCompile Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\buffer\ChannelBufferIndexFinderTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp" />
     <ClCompile Include="..\..\test\cetty\util\RandomTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractChannelBufferTest.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractChannelBufferTest.inc.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractCompositeChannelBufferTest.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\AbstractCompositeChannelBufferTest.inc.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\ArrayUtil.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\BigEndianCompositeChannelBufferTest.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.h" />
+    <ClInclude Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -19,8 +19,8 @@ cxx_static_library(craft "${cxx_default}" ${libcraftsources})
 SET(CRAFT_APP_DEPENDENCIES craft protobufservice protobufserialization cettyservice cettyconfig
 cetty protobuf yaml-cpp)
 
-cxx_executable_no_link(startup ${CRAFT_STARTUP_DIR})
-target_link_libraries(startup ${CRAFT_APP_DEPENDENCIES})
+#cxx_executable_no_link(startup ${CRAFT_STARTUP_DIR})
+#target_link_libraries(startup ${CRAFT_APP_DEPENDENCIES})
 
-cxx_executable_no_link(AccessControlServer ${CRAFT_ACCESS_DIR})
-target_link_libraries(AccessControlServer ${CRAFT_APP_DEPENDENCIES})
+#cxx_executable_no_link(AccessControlServer ${CRAFT_ACCESS_DIR})
+#target_link_libraries(AccessControlServer ${CRAFT_APP_DEPENDENCIES})

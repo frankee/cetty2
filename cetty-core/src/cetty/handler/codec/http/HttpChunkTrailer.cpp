@@ -21,7 +21,7 @@
 
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Exception.h>
 
 namespace cetty {
@@ -49,7 +49,7 @@ static bool validateHeaderName(const std::string& name) {
 }
 
 HttpChunkTrailer::HttpChunkTrailer()
-    : HttpChunk(ChannelBuffers::EMPTY_BUFFER) {
+    : HttpChunk(Unpooled::EMPTY_BUFFER) {
     httpHeader.setValidateNameFunctor(validateHeaderName);
 }
 

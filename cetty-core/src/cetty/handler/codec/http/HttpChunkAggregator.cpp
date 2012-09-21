@@ -16,8 +16,7 @@
 
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
 
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelConfig.h>
@@ -62,21 +61,23 @@ public:
             //Channels::write(ctx, Channels::succeededFuture(ctx.getChannel()), CONTINUE.duplicate());
         }
 
-        if (value->isChunked()) {
-            // A chunked message - remove 'Transfer-Encoding' header,
+        HttpTransferEncoding te = value->getTransferEncoding();
+        if (te == HttpTransferEncoding::SINGLE) {
+            currentMessage.reset();
+            return value;
+        }
+        else if (te == HttpTransferEncoding::STREAMED
+            || te == HttpTransferEncoding::CHUNKED) {
             // initialize the cumulative buffer, and wait for incoming chunks.
-            value->removeHeader(HttpHeaders::Names::TRANSFER_ENCODING, HttpHeaders::Values::CHUNKED);
-            value->setChunked(false);
-            value->setContent(ChannelBuffers::dynamicBuffer());
+            value->setTransferEncoding(HttpTransferEncoding::SINGLE);
+            value->setContent(Unpooled::buffer());
 
             currentMessage.reset();
             currentMessage = value;
             return HttpMessagePtr();
         }
         else {
-            // Not a chunked message - pass through.
-            currentMessage.reset();
-            return value;
+            // Error.
         }
     }
 
@@ -192,7 +193,7 @@ void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
     }
 
 #endif
-    currentMessage->setContent(ChannelBuffers::wrappedBuffer(cumulation, input));
+    currentMessage->setContent(Unpooled::wrappedBuffer(cumulation, input));
 }
 
 ChannelHandlerPtr HttpChunkAggregator::clone() {

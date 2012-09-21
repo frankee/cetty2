@@ -25,9 +25,17 @@
 #include <stdexcept>
 
 namespace cetty {
+namespace util {
+class StringPiece;
+}
+}
+
+namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
+
+using namespace cetty::util;
 
 /**
  * The response code and its description of HTTP or its derived protocols, such as
@@ -305,7 +313,7 @@ public:
      * Creates a new instance with the specified <tt>code</tt> and its
      * <tt>reasonPhrase</tt>.
      */
-    HttpResponseStatus(int code, const std::string& reasonPhrase);
+    HttpResponseStatus(int code, const StringPiece& reasonPhrase);
 
     /**
      * Returns the code of this status.

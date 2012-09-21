@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 #include <stdarg.h>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/util/Character.h>
 
 namespace cetty {
 namespace util {
+
+class StringPiece;
 
 class StringUtil {
 public:
@@ -126,7 +128,7 @@ public:
     /**
      *
      */
-    static inline boost::int64_t atoi(const std::string& str) {
+    static inline int64_t atoi(const std::string& str) {
         return StringUtil::atoi(str.c_str());
     }
 
@@ -135,7 +137,9 @@ public:
      * @param str the decimal string.
      * @return the integer.  If the string does not contain numeric expression, 0 is returned.
      */
-    static boost::int64_t atoi(const char* str);
+    static int64_t atoi(const char* str);
+
+    static int64_t atoi(const StringPiece& str);
 
     /**
      *

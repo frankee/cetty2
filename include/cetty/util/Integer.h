@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 #include <boost/assert.hpp>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/limits.hpp>
 
 namespace cetty {
@@ -78,25 +78,25 @@ public:
      *
      *  @return
      */
-    static std::string toString(boost::int64_t value);
-    static std::string toBinaryString(boost::int64_t value);
-    static std::string toHexString(boost::int64_t value);
-    static std::string toOctalString(boost::int64_t value);
+    static std::string toString(int64_t value);
+    static std::string toBinaryString(int64_t value);
+    static std::string toHexString(int64_t value);
+    static std::string toOctalString(int64_t value);
 
-    static std::string toString(boost::int64_t value, int width, bool zeroPadded = false);
-    static std::string toBinaryString(boost::int64_t value, int width, bool zeroPadded = false);
-    static std::string toOctalString(boost::int64_t value, int width, bool zeroPadded = false);
-    static std::string toHexString(boost::int64_t value, int width, bool zeroPadded = false);
+    static std::string toString(int64_t value, int width, bool zeroPadded = false);
+    static std::string toBinaryString(int64_t value, int width, bool zeroPadded = false);
+    static std::string toOctalString(int64_t value, int width, bool zeroPadded = false);
+    static std::string toHexString(int64_t value, int width, bool zeroPadded = false);
 
-    static void appendString(boost::int64_t value, std::string* str);
-    static void appendBinaryString(boost::int64_t value, std::string* str);
-    static void appendOctalString(boost::int64_t value, std::string* str);
-    static void appendHexString(boost::int64_t value, std::string* str);
+    static void appendString(int64_t value, std::string* str);
+    static void appendBinaryString(int64_t value, std::string* str);
+    static void appendOctalString(int64_t value, std::string* str);
+    static void appendHexString(int64_t value, std::string* str);
 
-    static void appendString(boost::int64_t value, int width, bool zeroPadded, std::string* str);
-    static void appendBinaryString(boost::int64_t value, int width, bool zeroPadded, std::string* str);
-    static void appendOctalString(boost::int64_t value, int width, bool zeroPadded, std::string* str);
-    static void appendHexString(boost::int64_t value, int width, bool zeroPadded, std::string* str);
+    static void appendString(int64_t value, int width, bool zeroPadded, std::string* str);
+    static void appendBinaryString(int64_t value, int width, bool zeroPadded, std::string* str);
+    static void appendOctalString(int64_t value, int width, bool zeroPadded, std::string* str);
+    static void appendHexString(int64_t value, int width, bool zeroPadded, std::string* str);
 
 private:
     int value;

@@ -124,6 +124,7 @@ const int NameValueCollection::get(const std::string& name, std::vector<std::str
         std::pair<ConstIterator, ConstIterator> range = _map.equal_range(name);
 
         ConstIterator itr = range.first;
+
         for (; itr != _map.end() && itr != range.second; ++itr) {
             values->push_back(itr->second);
             ++count;
@@ -159,6 +160,16 @@ const int NameValueCollection::getNames(std::vector<std::string>* names) const {
 
 bool NameValueCollection::has(const std::string& name) const {
     return _map.find(name) != _map.end();
+}
+
+bool NameValueCollection::has(const std::string& name, const std::string& value) const {
+    for (ConstIterator itr = _map.find(name); itr != _map.end(); ++itr) {
+        if (boost::algorithm::iequals(itr->second, value)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 NameValueCollection::ConstIterator NameValueCollection::find(const std::string& name) const {

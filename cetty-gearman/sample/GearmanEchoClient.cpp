@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include <boost/bind.hpp>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/gearman/builder/GearmanClientBuilder.h>
 #include <cetty/gearman/GearmanMessage.h>
@@ -26,7 +26,7 @@ public:
     virtual ~GearmanEchoClient() {}
 
     void sendRequest() {
-        ChannelBufferPtr buf = ChannelBuffers::buffer(10);
+        ChannelBufferPtr buf = Unpooled::buffer(10);
         buf->writeBytes("hello");
 
         callMethod(service,GearmanMessage::createsubmitJobMessage("echo","1234",buf),future);

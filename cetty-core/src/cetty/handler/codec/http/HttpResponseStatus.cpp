@@ -14,9 +14,11 @@
  * under the License.
  */
 
+#include <cetty/handler/codec/http/HttpResponseStatus.h>
+
 #include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
-#include <cetty/handler/codec/http/HttpResponseStatus.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace handler {
@@ -257,8 +259,8 @@ cetty::handler::codec::http::HttpResponseStatus HttpResponseStatus::valueOf(int 
     return HttpResponseStatus(code, reasonPhrase);
 }
 
-HttpResponseStatus::HttpResponseStatus(int code, const std::string& reasonPhrase)
-    : code(code), reasonPhrase(reasonPhrase) {
+HttpResponseStatus::HttpResponseStatus(int code, const StringPiece& reasonPhrase)
+    : code(code), reasonPhrase(reasonPhrase.data(), reasonPhrase.size()) {
     if (code < 0) {
         throw InvalidArgumentException("code: < 0 (expected: 0+)");
     }

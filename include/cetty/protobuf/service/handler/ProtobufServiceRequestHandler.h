@@ -28,12 +28,12 @@ namespace service {
 using namespace cetty::protobuf::service;
 
 template<>
-boost::int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::getId() const {
+int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::getId() const {
     return request->getId(); //future->getResponse()->getId();
 }
 
 template<>
-void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(boost::int64_t id) {
+void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(int64_t id) {
     request->setId(id);
 }
 

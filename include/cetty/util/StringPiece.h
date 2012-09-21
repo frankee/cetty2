@@ -42,15 +42,12 @@
 #include <string.h>
 #include <string>
 #include <iosfwd>    // for ostream forward-declaration
+#include <boost/assert.hpp>
 
 namespace cetty {
 namespace util {
 
 class StringPiece {
-private:
-    const char*   ptr_;
-    int           length_;
-
 public:
     // We provide non-explicit singleton constructors so users can pass
     // in a "const char*" or a "string" wherever a "StringPiece" is
@@ -91,6 +88,10 @@ public:
     }
 
     char operator[](int i) const { return ptr_[i]; }
+    char at(int i) const {
+        BOOST_ASSERT(i < length_);
+        return ptr_[i];
+    }
 
     void remove_prefix(int n) {
         ptr_ += n;
@@ -151,6 +152,69 @@ public:
     bool starts_with(const StringPiece& x) const {
         return ((length_ >= x.length_) && (memcmp(ptr_, x.ptr_, x.length_) == 0));
     }
+
+    StringPiece substr(int pos, int cnt = -1) {
+        if (pos < 0 || cnt == 0) {
+            return StringPiece();
+        }
+
+        if (cnt < 0) {
+            cnt = length_ - pos;
+        }
+
+        return StringPiece(ptr_ + pos, cnt);
+    }
+
+    StringPiece trim() const {
+        const char* newData = ptr_;
+        int   newSize = length_;
+
+        while ((*newData == ' ' || *newData == '\t') && newSize > 0) {
+            newData++;
+            --newData;
+        }
+
+        while ((newData[newSize - 1] == ' ' || newData[newSize - 1] == '\t')
+                && newSize > 0) {
+            --newSize;
+        }
+
+        return StringPiece(newData, newSize);
+    }
+
+    bool equals(const StringPiece& str) const {
+        if (ptr_ == NULL || str.ptr_ == NULL || length_ != str.length_) {
+            return false;
+        }
+
+        for (int i = 0, j = length_; i < j; ++i) {
+            if (ptr_[i] != str[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool iequals(const StringPiece& str) const {
+        if (ptr_ == NULL || str.ptr_ == NULL || length_ != str.length_) {
+            return false;
+        }
+
+        for (int i = 0, j = length_; i < j; ++i) {
+            if (ptr_[i] != str[i]
+                    && ptr_[i] + 0x20 != str[i]
+                    && ptr_[i] != str[i] + 0x20) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+private:
+    const char*   ptr_;
+    int           length_;
 };
 
 } // namespace util

@@ -39,6 +39,7 @@
 #include <cetty/channel/ChannelOutboundInvoker.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace util {
@@ -463,8 +464,8 @@ public:
      */
     std::string toString() const;
 
-    AdaptiveReceiveBuffer& getReceiveBuffer() {
-        return *receiveBuffer;
+    const ChannelBufferPtr& getReceiveBuffer() {
+        return receiveBuffer;
     }
 
     template<typename T>
@@ -657,7 +658,7 @@ private:
     ChannelHandlerContext* inboundHead; //< upstream single list.
     ChannelHandlerContext* outboundHead; //< downstream single list.
 
-    AdaptiveReceiveBuffer* receiveBuffer;
+    ChannelBufferPtr receiveBuffer;
     ChannelHandlerPtr sinkHandler;
 
     AttachmentMap attachments;
@@ -689,11 +690,15 @@ const ChannelFuturePtr& ChannelPipeline::write<ChannelBufferPtr>(
                 //context->outboundHandler->flush(*context, future);
             }
             catch (const Exception& e) {
-                //logger.warn(
-                //    "An exception was thrown by a user handler's " +
-                //    "exceptionCaught() method while handling the following exception:", cause);
+                LOG_WARN << "An exception was thrown by a user handler's "
+                    << "exceptionCaught() method while handling the following exception: "
+                    << e.what();
             }
             catch (const std::exception& e) {
+                LOG_WARN << "An exception was thrown by a user handler's "
+                    << "exceptionCaught() method while handling the following exception: "
+                    << e.what();
+
                 //notifyHandlerException(e);
             }
             catch (...) {

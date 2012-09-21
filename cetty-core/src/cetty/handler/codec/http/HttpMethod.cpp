@@ -18,8 +18,9 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 #include <cetty/util/Character.h>
-#include <cetty/util/StringUtil.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 
 
@@ -107,6 +108,16 @@ static const HttpMethod* getHttpMethod(const std::string& name) {
     return NULL;
 }
 
+static const HttpMethod* getHttpMethod(const StringPiece& name) {
+    for (int i = 0; i < HTTP_METHODS_CNT; ++i) {
+        if (name.iequals(HTTP_METHODS[i]->getName())) {
+            return HTTP_METHODS[i];
+        }
+    }
+
+    return NULL;
+}
+
 HttpMethod HttpMethod::valueOf(const std::string& name) {
     std::string method = boost::trim_copy(name);
     boost::to_upper(method);
@@ -123,6 +134,19 @@ HttpMethod HttpMethod::valueOf(const std::string& name) {
     else {
         return HttpMethod(name);
     }
+}
+
+HttpMethod HttpMethod::valueOf(const StringPiece& name) {
+    StringPiece trimed = name.trim();
+
+    if (!trimed.empty()) {
+        const HttpMethod* method = getHttpMethod(name);
+        if (NULL != method) {
+            return *method;
+        }
+    }
+
+    BOOST_ASSERT(false && "NO such HTTP method");
 }
 
 HttpMethod::HttpMethod(const std::string& name) {

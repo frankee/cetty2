@@ -135,6 +135,11 @@ bool HttpCodecUtil::isTransferEncodingChunked(const HttpMessage& m) {
 
     return false;
 }
+
+bool HttpCodecUtil::isContentLengthSet(const HttpMessage& m) {
+    return m.hasHeader(HttpHeaders::Names::CONTENT_LENGTH);
+}
+
 #if 0
 void HttpCodecUtil::splitElements(const std::string& s, std::vector<std::string>& elements, bool ignoreEmpty) {
     elements.clear();
@@ -271,6 +276,7 @@ void HttpCodecUtil::quote(const std::string& value, std::string& result, bool al
 
     if (mustQuote) { result += '"'; }
 }
+
 #endif
 }
 }

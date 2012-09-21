@@ -47,6 +47,17 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 
 //static const char REDIS_WHITESPACE                " \f\n\r\t\v"
 
+static inline
+int getFrameInt(const StringPiece& frame, int frameLength) {
+    StringPiece value(frame.data() + 1, frameLength - 1);
+    return (int)StringUtil::atoi(value);
+}
+
+static inline
+StringPiece getFrameBytes(const StringPiece& frame, int frameLength) {
+    return StringPiece(frame.data() + 1, frameLength - 1);
+}
+
 RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
         const ReplayingDecoderBufferPtr& buffer,
         int state) {
@@ -57,15 +68,15 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
         reply = RedisReplyMessagePtr(new RedisReplyMessage);
     }
 
-    Array arry;
-    buffer->readableBytes(&arry);
+    StringPiece bytes;
+    buffer->readableBytes(&bytes);
 
-    int frameLength = indexOf(arry, 0);
+    int frameLength = indexOf(bytes, 0);
 
     if (frameLength < 0) {
         LOG_DEBUG << "has not find the \"\\r\\n\", continue to reading";
 
-        if (arry.length() > maxBulkSize) {
+        if (bytes.length() > maxBulkSize) {
             LOG_ERROR << "reading the data has bigger then the maxBulkSize";
             //buffer->skipBytes(buffer->readableBytes());
         }
@@ -81,25 +92,24 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
     }
 
     if (READ_INITIAL == state) {
-        if (arry[0] == REDIS_PREFIX_STATUS_REPLY) {
+        if (bytes[0] == REDIS_PREFIX_STATUS_REPLY) {
             reply->setType(RedisReplyMessageType::STATUS);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(StringPiece(arry.data(1), frameLength-1));
+            reply->setValue(getFrameBytes(bytes, frameLength));
         }
-        else if (arry[0] == REDIS_PREFIX_INTEGER_REPLY) {
+        else if (bytes[0] == REDIS_PREFIX_INTEGER_REPLY) {
             reply->setType(RedisReplyMessageType::INTEGER);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(StringUtil::atoi(arry.data(1)));
+            reply->setValue(getFrameInt(bytes, frameLength));
         }
-        else if (arry[0] == REDIS_PREFIX_ERROR_REPLY) {
+        else if (bytes[0] == REDIS_PREFIX_ERROR_REPLY) {
             reply->setType(RedisReplyMessageType::ERROR);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(StringPiece(arry.data(1), frameLength-1));
+            reply->setValue(getFrameBytes(bytes, frameLength));
         }
-        else if (arry[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
+        else if (bytes[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
             reply->setType(RedisReplyMessageType::STRING);
-            arry[frameLength] = '\0';
-            bulkSize = (int)StringUtil::atoi(arry.data(1));
+            bulkSize = getFrameInt(bytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
             if (bulkSize < 0) {
@@ -112,8 +122,8 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
                 return reset();
             }
 
-            if (arry.length() >= frameLength + 4 + bulkSize) {
-                Array data;
+            if (bytes.length() >= frameLength + 4 + bulkSize) {
+                StringPiece data;
                 buffer->readableBytes(&data);
                 buffer->skipBytes(bulkSize + 2);
                 reply->setValue(StringPiece(data.data(), bulkSize));
@@ -123,11 +133,10 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
                 return RedisReplyMessagePtr();
             }
         }
-        else if (arry[0] == REDIS_PREFIX_MULTI_BULK_REPLY) {
+        else if (bytes[0] == REDIS_PREFIX_MULTI_BULK_REPLY) {
             reply->setType(RedisReplyMessageType::ARRAY);
-            arry[frameLength] = '\0';
             bulkSize = 0;
-            multiBulkSize = (int)StringUtil::atoi(arry.data(1));
+            multiBulkSize = getFrameInt(bytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
             if (multiBulkSize < 0) {
@@ -142,12 +151,12 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
 
             std::vector<StringPiece>* bulks = reply->getMutableArray();
             BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
-            return readMultiBukls(buffer, arry, bulks);
+            return readMultiBukls(buffer, bytes, bulks);
         }
     }
     else if (READ_BULK == state) {
-        if (arry.length() >= bulkSize + 2) {
-            Array data;
+        if (bytes.length() >= bulkSize + 2) {
+            StringPiece data;
             buffer->readableBytes(&data);
             buffer->skipBytes(bulkSize + 2);
             reply->setValue(StringPiece(data.data(), bulkSize));
@@ -164,14 +173,14 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx
         if (bulkSize > 0) {
             DLOG_DEBUG << "bulkSize is not empty, directly to read the bulk data";
 
-            if (!readMultiBulkElement(buffer, arry, bulks)) {
+            if (!readMultiBulkElement(buffer, bytes, bulks)) {
                 DLOG_TRACE << "data has not read completely - bulk size, continue to reading";
                 checkpoint(READ_MULTI_BULK);
                 return RedisReplyMessagePtr();
             }
         }
 
-        return readMultiBukls(buffer, arry, bulks);
+        return readMultiBukls(buffer, bytes, bulks);
     }
 
     return reset();
@@ -193,13 +202,13 @@ void RedisReplyMessageDecoder::fail(ChannelHandlerContext& ctx, long frameLength
     }
 }
 
-int RedisReplyMessageDecoder::indexOf(const Array& arry, int offset) {
-    for (int i = offset; i < arry.length(); ++i) {
-        if (arry[i] == '\r' || arry[i] == '\0') {
-            if (i+1 == arry.length()) {
+int RedisReplyMessageDecoder::indexOf(const StringPiece& bytes, int offset) {
+    for (int i = offset; i < bytes.length(); ++i) {
+        if (bytes[i] == '\r' || bytes[i] == '\0') {
+            if (i+1 == bytes.length()) {
                 return -1;
             }
-            else if (arry[i+1] == '\n') {
+            else if (bytes[i+1] == '\n') {
                 return i;
             }
         }
@@ -225,15 +234,13 @@ ChannelHandlerPtr RedisReplyMessageDecoder::clone() {
 
 bool RedisReplyMessageDecoder::readMultiBulkElement(
     const ReplayingDecoderBufferPtr& buffer,
-    Array& arry,
+    const StringPiece& bytes,
     std::vector<StringPiece>* bulks) {
 
-    if (arry.length() >= bulkSize + 2) {
-        Array data;
+    if (bytes.length() >= bulkSize + 2) {
+        StringPiece data;
         buffer->readableBytes(&data);
-        data[bulkSize] = '\0';
         buffer->skipBytes(bulkSize + 2);
-
         bulks->push_back(StringPiece(data.data(), bulkSize));
         bulkSize = 0;
         --multiBulkSize;
@@ -245,14 +252,14 @@ bool RedisReplyMessageDecoder::readMultiBulkElement(
 
 RedisReplyMessagePtr RedisReplyMessageDecoder::readMultiBukls(
     const ReplayingDecoderBufferPtr& buffer,
-    Array& arry,
+    const StringPiece& bytes,
     std::vector<StringPiece>* bulks) {
     int j = multiBulkSize;
 
     for (int i = 0; i < j; ++i) {
-        Array subArry;
-        buffer->readableBytes(&subArry);
-        int frameLength = indexOf(subArry, 0);
+        StringPiece subBytes;
+        buffer->readableBytes(&subBytes);
+        int frameLength = indexOf(subBytes, 0);
 
         if (frameLength < 0) {
             DLOG_TRACE << "data has not read completely - multi-bulk size, continue to reading";
@@ -260,7 +267,7 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::readMultiBukls(
             return RedisReplyMessagePtr();
         }
 
-        if (frameLength == 0 || subArry[0] != REDIS_PREFIX_SINGLE_BULK_REPLY) {
+        if (frameLength == 0 || subBytes[0] != REDIS_PREFIX_SINGLE_BULK_REPLY) {
             LOG_ERROR << frameLength ?
                       "parsing multi-bulk, but the first line not begin with the '$'"
                       : "parsing multi-bulk, but is empty line";
@@ -271,13 +278,12 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::readMultiBukls(
             return reset();
         }
 
-        if (subArry[1] != '-') {
-            subArry[frameLength] = '\0';
-            bulkSize = (int)StringUtil::atoi(subArry.data(1));
+        if (subBytes[1] != '-') {
+            bulkSize = getFrameInt(subBytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
-            if (arry.length() >= frameLength + 4 + bulkSize) {
-                readMultiBulkElement(buffer, arry, bulks);
+            if (bytes.length() >= frameLength + 4 + bulkSize) {
+                readMultiBulkElement(buffer, bytes, bulks);
             }
             else {
                 DLOG_TRACE << "data has not read completely - bulk size, continue to reading";

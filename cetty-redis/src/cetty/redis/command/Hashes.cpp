@@ -44,7 +44,7 @@ RedisCommandPtr hashesCommandGetAll(const std::string& key) {
     return command;
 }
 
-RedisCommandPtr hashesCommandIncrementBy(const std::string& key, const std::string& field, boost::int64_t increment) {
+RedisCommandPtr hashesCommandIncrementBy(const std::string& key, const std::string& field, int64_t increment) {
     RedisCommandPtr command(new RedisCommand(HINCRBY));
     (*command << key << field << increment).done();
     return command;

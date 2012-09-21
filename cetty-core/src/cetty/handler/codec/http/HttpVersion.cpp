@@ -21,6 +21,7 @@
 #include <cetty/util/Character.h>
 #include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringPiece.h>
 
 #include <cetty/handler/codec/http/HttpVersion.h>
 
@@ -48,6 +49,21 @@ cetty::handler::codec::http::HttpVersion HttpVersion::valueOf(const std::string&
 
     return HttpVersion(version, true);
 }
+
+HttpVersion HttpVersion::valueOf(const StringPiece& text) {
+    StringPiece version = text.trim();
+    if (version.iequals("HTTP/1.1")) {
+        return HTTP_1_1;
+    }
+
+    if (version.iequals("HTTP/1.0")) {
+        return HTTP_1_0;
+    }
+
+    BOOST_ASSERT(false && "no such http version");
+    //return HttpVersion(version, true);
+}
+
 
 HttpVersion::HttpVersion(const std::string& text, bool keepAliveDefault)
     : keepAliveDefault(keepAliveDefault),

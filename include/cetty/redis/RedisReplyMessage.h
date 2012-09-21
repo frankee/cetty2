@@ -18,7 +18,7 @@
  */
 
 #include <vector>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/variant.hpp>
 #include <cetty/util/Enum.h>
 #include <cetty/util/StringPiece.h>
@@ -60,7 +60,7 @@ public:
         return this->type;
     }
 
-    void setValue(boost::int64_t integer) {
+    void setValue(int64_t integer) {
         value = integer;
     }
 
@@ -72,7 +72,7 @@ public:
         value = StringPieces;
     }
 
-    boost::int64_t getInteger() const;
+    int64_t getInteger() const;
 
     const StringPiece& getString() const {
         if (type == RedisReplyMessageType::STRING) {
@@ -105,7 +105,7 @@ public:
     std::vector<StringPiece>* getMutableArray();
 
 private:
-    typedef boost::variant<boost::int64_t,
+    typedef boost::variant<int64_t,
         StringPiece,
         std::vector<StringPiece> > Value;
 

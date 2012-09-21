@@ -1,7 +1,7 @@
-#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H)
-#define CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H
+#if !defined(CETTY_VERSION_H)
+#define CETTY_VERSION_H
 
-/**
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -17,12 +17,18 @@
  * under the License.
  */
 
-namespace cetty { namespace buffer { 
-    class ChannelBufferFactory;
-    typedef ChannelBufferFactory* ChannelBufferFactoryPtr;
-}}
 
-#endif //#if !defined(CETTY_BUFFER_CHANNELBUFFERFACTORYPTR_H)
+//
+// Version Information
+//
+// Version format is 0xAABBCC, where
+//    - AA is the major version number,
+//    - BB is the minor version number,
+//    - CC is the revision number.
+
+#define CETTY_VERSION 0x000803
+
+#endif //#if !defined(CETTY_VERSION_H)
 
 // Local Variables:
 // mode: c++

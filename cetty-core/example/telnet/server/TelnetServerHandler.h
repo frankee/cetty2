@@ -19,7 +19,7 @@
 
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/channel/ChannelFutureListener.h>
@@ -51,7 +51,7 @@ public:
                               ctx.getChannel()->getLocalAddress().toString().c_str());
 
         outboundTransfer.write(ctx,
-                               ChannelBuffers::copiedBuffer(str),
+                               Unpooled::copiedBuffer(str),
                                ctx.getChannel()->newSucceededFuture());
 
         boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
@@ -60,7 +60,7 @@ public:
                               boost::posix_time::to_iso_string(now).c_str());
 
         outboundTransfer.write(ctx,
-                               ChannelBuffers::copiedBuffer(str),
+                               Unpooled::copiedBuffer(str),
                                ctx.getChannel()->newSucceededFuture());
     }
 
@@ -91,7 +91,7 @@ public:
         // We know the encoder inserted at TelnetPipelineFactory will do the conversion.
         ChannelFuturePtr future = ctx.getChannel()->newFuture();
         outboundTransfer.write(ctx,
-                               ChannelBuffers::copiedBuffer(response),
+                               Unpooled::copiedBuffer(response),
                                future);
 
         // Close the connection after sending 'Have a good day!'

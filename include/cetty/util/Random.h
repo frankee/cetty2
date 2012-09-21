@@ -70,7 +70,7 @@ public:
      * to be distinct from any other invocation of this constructor.
      */
     Random() {
-        static boost::int64_t seedUniquifier = 8682522807148012L;
+        static int64_t seedUniquifier = 8682522807148012L;
         time_t t;
         /*this(++seedUniquifier + System.nanoTime());*/
         setSeed(++seedUniquifier + time(&t));
@@ -89,7 +89,7 @@ public:
      * @param seed the initial seed
      * @see   #setSeed(long)
      */
-    Random(boost::int64_t seed) {
+    Random(int64_t seed) {
         //this.seed = new AtomicLong(0L);
         setSeed(seed);
     }
@@ -113,7 +113,7 @@ public:
      *
      * @param seed the initial seed
      */
-    void setSeed(boost::int64_t seed) {
+    void setSeed(int64_t seed) {
         // TODO: need lock here.
 
         seed = (seed ^ multiplier) & mask;
@@ -237,7 +237,7 @@ public:
         //return rand() % n;
 
         if ((n & -n) == n) {// i.e., n is a power of 2
-            return (int)((n * ((boost::int64_t)next(31))) >> 31);
+            return (int)((n * ((int64_t)next(31))) >> 31);
         }
 
         int bits, val;
@@ -270,9 +270,9 @@ public:
      * @return the next pseudorandom, uniformly distributed <tt>long</tt>
      *         value from this random number generator's sequence
      */
-    boost::int64_t nextLong() {
+    int64_t nextLong() {
         // it's okay that the bottom word remains signed.
-        return ((boost::int64_t)(next(32)) << 32) + next(32);
+        return ((int64_t)(next(32)) << 32) + next(32);
     }
 
     /**
@@ -382,7 +382,7 @@ public:
      * @see Math#random
      */
     double nextDouble() {
-        return (((boost::int64_t)(next(26)) << 27) + next(27)) / (double)(0x0020000000000000); // 1 << 53
+        return (((int64_t)(next(26)) << 27) + next(27)) / (double)(0x0020000000000000); // 1 << 53
     }
 
 protected:
@@ -412,9 +412,9 @@ protected:
      * @since  1.1
      */
     int next(int bits) {
-        boost::int64_t oldseed, nextseed;
+        int64_t oldseed, nextseed;
 
-        //boost::int64_t/*AtomicLong*/ seed = this->seed;
+        //int64_t/*AtomicLong*/ seed = this->seed;
         do {
             oldseed = seed;
             nextseed = (oldseed * multiplier + addend) & mask;
@@ -431,18 +431,18 @@ protected:
     }
 
 private:
-    static const boost::int64_t multiplier = 0x5DEECE66D;
-    static const boost::int64_t addend = 0xB;
-    static const boost::int64_t mask = 0x0000FFFFFFFFFFFF;
+    static const int64_t multiplier = 0x5DEECE66D;
+    static const int64_t addend = 0xB;
+    static const int64_t mask = 0x0000FFFFFFFFFFFF;
 
-    //static boost::int64_t seedUniquifier;//;
+    //static int64_t seedUniquifier;//;
 
     /**
      * The internal state associated with this pseudorandom number generator.
      * (The specs for the methods in this class describe the ongoing
      * computation of this value.)
      */
-    boost::int64_t/*AtomicLong*/ seed;
+    int64_t/*AtomicLong*/ seed;
 };
 
 }

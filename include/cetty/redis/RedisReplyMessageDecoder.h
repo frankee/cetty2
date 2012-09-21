@@ -55,11 +55,11 @@ protected:
 
 private:
     RedisReplyMessagePtr readMultiBukls(const ReplayingDecoderBufferPtr& buffer,
-                                        Array& arry,
+                                        const StringPiece& bytes,
                                         std::vector<StringPiece>* bulks);
 
     bool readMultiBulkElement(const ReplayingDecoderBufferPtr& buffer,
-            Array& arry,
+            const StringPiece& bytes,
             std::vector<StringPiece>* bulks);
 
     void fail(ChannelHandlerContext& ctx, long frameLength);
@@ -69,7 +69,7 @@ private:
      * the first "\r\n" found in the haystack.  -1 is returned if no "\r\n" is
      * found in the haystack.
      */
-    int indexOf(const Array& arry, int offset);
+    int indexOf(const StringPiece& bytes, int offset);
 
     RedisReplyMessagePtr reset();
 

@@ -21,7 +21,7 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
@@ -40,7 +40,7 @@ class RedisCommand : public cetty::util::ReferenceCounter<RedisCommand, int> {
 public:
     RedisCommand(const std::string& name)
         : paramCnt(0), name(name) {
-        buffer = ChannelBuffers::buffer(512*1024);
+        buffer = Unpooled::buffer(512*1024);
         buffer->setIndex(12, 12);
         append(name);
     }
@@ -57,7 +57,7 @@ public:
         }
 
         buffer->writeBytes(StringUtil::strprintf("$%d\r\n", size));
-        buffer->writeBytes(ConstArray(param, size));
+        buffer->writeBytes(param, size);
         buffer->writeBytes("\r\n");
 
         ++paramCnt;

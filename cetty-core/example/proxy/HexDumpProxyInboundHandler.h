@@ -78,7 +78,7 @@ public:
 
     virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
         const ChannelBufferPtr& msg = e.getMessage().value<ChannelBufferPtr>();
-        printf(">>> %s\n", ChannelBuffers::hexDump(*msg).c_str());
+        printf(">>> %s\n", Unpooled::hexDump(*msg).c_str());
         
         outboundChannel->write(msg->readBytes());
     }
@@ -112,7 +112,7 @@ public:
 
         virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
             const ChannelBufferPtr& msg = e.getMessage().value<ChannelBufferPtr>();
-            printf("<<< %s\n", ChannelBuffers::hexDump(*msg).c_str());
+            printf("<<< %s\n", Unpooled::hexDump(*msg).c_str());
 
             inboundChannel.write(msg->readBytes());
         }
@@ -144,7 +144,7 @@ public:
      */
     static void closeOnFlush(Channel& ch) {
         if (ch.isConnected()) {
-            ch.write(ChannelBuffers::EMPTY_BUFFER)->addListener(ChannelFutureListener::CLOSE);
+            ch.write(Unpooled::EMPTY_BUFFER)->addListener(ChannelFutureListener::CLOSE);
         }
     }
 

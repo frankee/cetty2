@@ -120,13 +120,13 @@ public:
         }
     }
 
-    virtual void read(boost::int8_t* val) {
+    virtual void read(int8_t* val) {
         if (val && buffer && buffer->readable()) {
                 *val = buffer->readByte() & 0xff;
         }
     }
 
-    virtual int read(boost::int8_t* bytes, int offset, int length) {
+    virtual int read(int8_t* bytes, int offset, int length) {
         int left = available();
 
         if (left == 0) {
@@ -134,8 +134,7 @@ public:
         }
 
         length = std::min(left, length);
-        Array arry((char*)bytes, length);
-        buffer->readBytes(&arry, offset, length);
+        buffer->readBytes(bytes, offset, length);
         return length;
     }
 

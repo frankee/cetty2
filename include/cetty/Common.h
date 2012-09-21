@@ -1,4 +1,7 @@
-/**
+#if !defined(CETTY_COMMON_H)
+#define CETTY_COMMON_H
+
+/*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
@@ -14,15 +17,10 @@
  * under the License.
  */
 
-#include <cetty/buffer/ChannelBufferFactory.h>
-#include <cetty/buffer/ChannelBuffer.h>
 
-namespace cetty {
-namespace buffer {
 
-ChannelBufferPtr ChannelBufferFactory::getBuffer(int capacity) {
-    return getBuffer(getDefaultOrder(), capacity);
-}
+#endif //#if !defined(CETTY_COMMON_H)
 
-}
-}
+// Local Variables:
+// mode: c++
+// End:

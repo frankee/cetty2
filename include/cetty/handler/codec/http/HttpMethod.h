@@ -31,9 +31,17 @@
 #endif
 
 namespace cetty {
+    namespace util {
+        class StringPiece;
+    }
+}
+
+namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
+
+using namespace cetty::util;
 
 /**
  * The request method of HTTP or its derived protocols, such as
@@ -110,6 +118,8 @@ public:
      * will be returned.  Otherwise, a new instance will be returned.
      */
     static HttpMethod valueOf(const std::string& name);
+
+    static HttpMethod valueOf(const StringPiece& name);
 
     /**
      * Creates a new HTTP method with the specified name.  You will not need to

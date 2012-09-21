@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/system/config.hpp>
 
 #include <sys/types.h>
@@ -39,7 +39,7 @@ public:
 
     /// Returns the number of seconds spent by the
     /// current process in user and kernel mode.
-    static void times(boost::int64_t* userTime, boost::int64_t* kernelTime);
+    static void times(int64_t* userTime, int64_t* kernelTime);
 
     static void terminate(PID pid, bool force = false);
 

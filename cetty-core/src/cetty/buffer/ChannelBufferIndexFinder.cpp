@@ -68,7 +68,7 @@ static bool notLfFinder(const ChannelBuffer& buffer, int guessedIndex) {
  * Index finder which locates a <tt>CR ('\r')</tt> or <tt>LF ('\n')</tt>.
  */
 static bool crLfFinder(const ChannelBuffer& buffer, int guessedIndex) {
-    boost::int8_t b = buffer.getByte(guessedIndex);
+    int8_t b = buffer.getByte(guessedIndex);
     return b == '\r' || b == '\n';
 }
 
@@ -77,7 +77,7 @@ static bool crLfFinder(const ChannelBuffer& buffer, int guessedIndex) {
  * nor a <tt>LF ('\n')</tt>.
  */
 static bool notCrLfFinder(const ChannelBuffer& buffer, int guessedIndex) {
-    boost::int8_t b = buffer.getByte(guessedIndex);
+    int8_t b = buffer.getByte(guessedIndex);
     return b != '\r' && b != '\n';
 }
 
@@ -86,7 +86,7 @@ static bool notCrLfFinder(const ChannelBuffer& buffer, int guessedIndex) {
  * (<tt>' '</tt> and <tt>'\t'</tt>).
  */
 static bool linearWhitespaceFinder(const ChannelBuffer& buffer, int guessedIndex) {
-    boost::int8_t b = buffer.getByte(guessedIndex);
+    int8_t b = buffer.getByte(guessedIndex);
     return b == ' ' || b == '\t';
 }
 
@@ -95,7 +95,7 @@ static bool linearWhitespaceFinder(const ChannelBuffer& buffer, int guessedIndex
  * (neither <tt>' '</tt> nor <tt>'\t'</tt>).
  */
 static bool notLinearWhitespaceFinder(const ChannelBuffer& buffer, int guessedIndex) {
-    boost::int8_t b = buffer.getByte(guessedIndex);
+    int8_t b = buffer.getByte(guessedIndex);
     return b != ' ' && b != '\t';
 }
 

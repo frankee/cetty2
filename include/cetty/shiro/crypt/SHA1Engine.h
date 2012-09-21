@@ -43,7 +43,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/shiro/crypt/DigestEngine.h>
 
 namespace cetty {
@@ -72,16 +72,16 @@ protected:
 
 private:
     void transform();
-    static void byteReverse(boost::uint32_t* buffer, int byteCount);
+    static void byteReverse(uint32_t* buffer, int byteCount);
 
-    typedef boost::uint8_t BYTE;
+    typedef uint8_t BYTE;
 
     struct Context {
-        boost::uint32_t digest[5]; // Message digest
-        boost::uint32_t countLo;   // 64-bit bit count
-        boost::uint32_t countHi;
-        boost::uint32_t data[16];  // SHA data buffer
-        boost::uint32_t slop;      // # of bytes saved in data[]
+        uint32_t digest[5]; // Message digest
+        uint32_t countLo;   // 64-bit bit count
+        uint32_t countHi;
+        uint32_t data[16];  // SHA data buffer
+        uint32_t slop;      // # of bytes saved in data[]
     };
 
     Context _context;

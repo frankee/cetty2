@@ -16,7 +16,7 @@
 
 #include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 
 
 #include <cetty/buffer/ChannelBuffer.h>
@@ -45,10 +45,10 @@ public:
     OutputStream& appendValue(const char* text);
     OutputStream& appendValue(const std::string& text);
     OutputStream& appendValue(const std::string* value);
-    OutputStream& appendValue(boost::int32_t value);
-    OutputStream& appendValue(boost::uint32_t value);
-    OutputStream& appendValue(boost::int64_t value);
-    OutputStream& appendValue(boost::uint64_t value);
+    OutputStream& appendValue(int32_t value);
+    OutputStream& appendValue(uint32_t value);
+    OutputStream& appendValue(int64_t value);
+    OutputStream& appendValue(uint64_t value);
     OutputStream& appendValue(float value);
     OutputStream& appendValue(double value);
     OutputStream& appendValue(bool value);
@@ -126,22 +126,22 @@ public:
         return *this;
     }
 
-    OutputStream& appendValue(boost::int32_t value) {
+    OutputStream& appendValue(int32_t value) {
         StringUtil::strprintf(output, "%d", value);
         return *this;
     }
 
-    OutputStream& appendValue(boost::uint32_t value) {
+    OutputStream& appendValue(uint32_t value) {
         StringUtil::strprintf(output, "%u", value);
         return *this;
     }
 
-    OutputStream& appendValue(boost::int64_t value) {
+    OutputStream& appendValue(int64_t value) {
         StringUtil::strprintf(output, "%lld", value);
         return *this;
     }
 
-    OutputStream& appendValue(boost::uint64_t value) {
+    OutputStream& appendValue(uint64_t value) {
         StringUtil::strprintf(output, "%llu", value);
         return *this;
     }
@@ -183,7 +183,7 @@ public:
 
     OutputStream& append(const char* str) {
         if (str) {
-            output->writeBytes(str, strlen(str));
+            output->writeBytes(str);
         }
 
         return *this;
@@ -214,7 +214,7 @@ public:
             }
         }
         else {
-            output->writeBytes("null", 4);
+            output->writeBytes("null");
         }
 
         return *this;
@@ -246,22 +246,22 @@ public:
         return *this;
     }
 
-    OutputStream& appendValue(boost::uint32_t value) {
+    OutputStream& appendValue(uint32_t value) {
         output->writeBytes(StringUtil::strprintf("%u", value));
         return *this;
     }
 
-    OutputStream& appendValue(boost::int32_t value) {
+    OutputStream& appendValue(int32_t value) {
         output->writeBytes(StringUtil::strprintf("%d", value));
         return *this;
     }
 
-    OutputStream& appendValue(boost::int64_t value) {
+    OutputStream& appendValue(int64_t value) {
         output->writeBytes(StringUtil::strprintf("%lld", value));
         return *this;
     }
 
-    OutputStream& appendValue(boost::uint64_t value) {
+    OutputStream& appendValue(uint64_t value) {
         output->writeBytes(StringUtil::strprintf("%llu", value));
         return *this;
     }

@@ -78,47 +78,47 @@ bool Integer::tryParseHex(const char* s, unsigned int& value) {
     return sscanf(s, "%x%c", &value, &temp) == 1;
 }
 
-std::string Integer::toBinaryString(boost::int64_t value) {
+std::string Integer::toBinaryString(int64_t value) {
     throw NotImplementedException("toBinaryString");
 }
 
-std::string Integer::toBinaryString(boost::int64_t value, int width, bool zeroPadded /*= false*/) {
+std::string Integer::toBinaryString(int64_t value, int width, bool zeroPadded /*= false*/) {
     throw NotImplementedException("toBinaryString");
 }
 
-std::string Integer::toHexString(boost::int64_t value) {
+std::string Integer::toHexString(int64_t value) {
     std::string buf;
     appendHexString(value, &buf);
     return buf;
 }
 
-std::string Integer::toHexString(boost::int64_t value, int width, bool zeroPadded /*= false*/) {
+std::string Integer::toHexString(int64_t value, int width, bool zeroPadded /*= false*/) {
     std::string buf;
     appendHexString(value, width, zeroPadded, &buf);
     return buf;
 }
 
-std::string Integer::toOctalString(boost::int64_t value) {
+std::string Integer::toOctalString(int64_t value) {
     throw NotImplementedException("toOctalString");
 }
 
-std::string Integer::toOctalString(boost::int64_t value, int width, bool zeroPadded /*= false*/) {
+std::string Integer::toOctalString(int64_t value, int width, bool zeroPadded /*= false*/) {
     throw NotImplementedException("toOctalString");
 }
 
-std::string Integer::toString(boost::int64_t value) {
+std::string Integer::toString(int64_t value) {
     std::string buf;
     appendString(value, &buf);
     return buf;
 }
 
-std::string Integer::toString(boost::int64_t value, int width, bool zeroPadded /*= false*/) {
+std::string Integer::toString(int64_t value, int width, bool zeroPadded /*= false*/) {
     std::string buf;
     appendString(value, width, zeroPadded, &buf);
     return buf;
 }
 
-void Integer::appendString(boost::int64_t value, std::string* str) {
+void Integer::appendString(int64_t value, std::string* str) {
     if (str) {
         char buf[64] = {0};
         sprintf(buf, "%lld", value);
@@ -126,7 +126,7 @@ void Integer::appendString(boost::int64_t value, std::string* str) {
     }
 }
 
-void Integer::appendString(boost::int64_t value, int width, bool zeroPadded, std::string* str) {
+void Integer::appendString(int64_t value, int width, bool zeroPadded, std::string* str) {
     if (str) {
         BOOST_ASSERT(width > 0 && width < 64);
         char buffer[64];
@@ -142,15 +142,15 @@ void Integer::appendString(boost::int64_t value, int width, bool zeroPadded, std
     }
 }
 
-void Integer::appendBinaryString(boost::int64_t value, std::string* str) {
+void Integer::appendBinaryString(int64_t value, std::string* str) {
     throw NotImplementedException("appendBinaryString");
 }
 
-void Integer::appendBinaryString(boost::int64_t value, int width, bool zeroPadded, std::string* str) {
+void Integer::appendBinaryString(int64_t value, int width, bool zeroPadded, std::string* str) {
     throw NotImplementedException("appendBinaryString");
 }
 
-void Integer::appendHexString(boost::int64_t value, std::string* str) {
+void Integer::appendHexString(int64_t value, std::string* str) {
     if (str) {
         char buffer[64] = {0};
         sprintf(buffer, "%X", value);
@@ -158,7 +158,7 @@ void Integer::appendHexString(boost::int64_t value, std::string* str) {
     }
 }
 
-void Integer::appendHexString(boost::int64_t value, int width, bool zeroPadded, std::string* str) {
+void Integer::appendHexString(int64_t value, int width, bool zeroPadded, std::string* str) {
     if (str) {
         BOOST_ASSERT(width > 0 && width < 64);
         char buffer[64] = {0};
@@ -174,11 +174,11 @@ void Integer::appendHexString(boost::int64_t value, int width, bool zeroPadded, 
     }
 }
 
-void Integer::appendOctalString(boost::int64_t value, std::string* str) {
+void Integer::appendOctalString(int64_t value, std::string* str) {
     throw NotImplementedException("appendOctalString");
 }
 
-void Integer::appendOctalString(boost::int64_t value, int width, bool zeroPadded, std::string* str) {
+void Integer::appendOctalString(int64_t value, int width, bool zeroPadded, std::string* str) {
     throw NotImplementedException("appendOctalString");
 }
 

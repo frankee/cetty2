@@ -178,7 +178,7 @@ private:
     ConnectionPool pool;
 
     std::deque<BufferingCall> bufferingCalls;
-    std::map<boost::int64_t, OutstandingCallPtr> outStandingCalls;
+    std::map<int64_t, OutstandingCallPtr> outStandingCalls;
 };
 
 }

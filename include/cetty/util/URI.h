@@ -33,6 +33,8 @@
 namespace cetty {
 namespace util {
 
+class StringPiece;
+
 class URI {
     /// A Uniform Resource Identifier, as specified in RFC 3986.
     ///
@@ -57,6 +59,8 @@ public:
     explicit URI(const char* uri);
     /// Parses an URI from the given string. Throws a
     /// SyntaxException if the uri is not valid.
+
+    explicit URI(const StringPiece& uri);
 
     URI(const std::string& scheme, const std::string& pathEtc);
     /// Creates an URI from its parts.

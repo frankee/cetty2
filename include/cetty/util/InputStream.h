@@ -40,17 +40,17 @@ public:
 
     virtual ~InputStream() {};
 
-    virtual void read(boost::int8_t* val) = 0;
-    boost::int8_t readByte() {
-        boost::int8_t value = -1;
+    virtual void read(int8_t* val) = 0;
+    int8_t readByte() {
+        int8_t value = -1;
         read(&value);
         return value;
     }
 
-    int read(boost::int8_t* bytes, int length) {
+    int read(int8_t* bytes, int length) {
         return read(bytes, 0, length);
     }
-    virtual int read(boost::int8_t* bytes, int offset, int length) = 0;
+    virtual int read(int8_t* bytes, int offset, int length) = 0;
 
     virtual int skip(int n) = 0;
 

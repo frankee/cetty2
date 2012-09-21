@@ -68,7 +68,7 @@ using namespace cetty::util;
 
 class LengthFieldPrepender : public MessageToBufferEncoder<ChannelBufferPtr> {
 public:
-    typedef boost::function2<boost::uint32_t, const boost::uint8_t*, int> ChecksumFunction;
+    typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 
 public:
     /**
@@ -146,7 +146,7 @@ private:
                                          const ChannelBufferPtr& msg,
                                          int contentLength,
                                          int headerPos,
-                                         boost::uint32_t cs);
+                                         uint32_t cs);
 
 private:
     int  lengthFieldOffset;

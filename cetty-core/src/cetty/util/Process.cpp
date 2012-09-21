@@ -40,7 +40,7 @@ Process::PID Process::id() {
 #endif
 }
 
-void Process::times(boost::int64_t* userTime, boost::int64_t* kernelTime) {
+void Process::times(int64_t* userTime, int64_t* kernelTime) {
 #if defined(BOOST_WINDOWS_API)
     FILETIME creationFt;
     FILETIME exitFt;
@@ -53,14 +53,14 @@ void Process::times(boost::int64_t* userTime, boost::int64_t* kernelTime) {
         time.HighPart = kernelFt.dwHighDateTime;
 
         if (kernelTime) {
-            *kernelTime = boost::int64_t(time.QuadPart/10000000L);
+            *kernelTime = int64_t(time.QuadPart/10000000L);
         }
 
         time.LowPart  = userFt.dwLowDateTime;
         time.HighPart = userFt.dwHighDateTime;
 
         if (userTime) {
-            *userTime = boost::int64_t(time.QuadPart/10000000L);
+            *userTime = int64_t(time.QuadPart/10000000L);
         }
     }
     else {
@@ -70,8 +70,8 @@ void Process::times(boost::int64_t* userTime, boost::int64_t* kernelTime) {
 #elif defined(BOOST_POSIX_API)
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
-    *userTime   = (boost::int64_t)usage.ru_utime.tv_sec;
-    *kernelTime = (boost::int64_t)usage.ru_stime.tv_sec;
+    *userTime   = (int64_t)usage.ru_utime.tv_sec;
+    *kernelTime = (int64_t)usage.ru_stime.tv_sec;
 #endif
 }
 

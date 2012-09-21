@@ -180,7 +180,7 @@ private:
         HttpResponsePtr response = 
             HttpResponsePtr(new DefaultHttpResponse(HttpVersion::HTTP_1_1,
                                                     HttpResponseStatus::OK));
-        response->setContent(ChannelBuffers::copiedBuffer(buf));
+        response->setContent(Unpooled::copiedBuffer(buf));
         response->setHeader(HttpHeaders::Names::CONTENT_TYPE, "text/plain; charset=UTF-8");
 
         if (keepAlive) {

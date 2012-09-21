@@ -14,7 +14,7 @@
 
 #include <cstdio>
 #include <string>
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <boost/noncopyable.hpp>
 #include <cetty/util/StringPiece.h>
 
@@ -29,9 +29,9 @@ public:
     // return errno
     int readToString(int maxSize,
                      std::string* content,
-                     boost::int64_t* fileSize,
-                     boost::int64_t* modifyTime,
-                     boost::int64_t* createTime);
+                     int64_t* fileSize,
+                     int64_t* modifyTime,
+                     int64_t* createTime);
 
     // return errno
     int readToBuffer(int* size);
@@ -42,9 +42,9 @@ public:
     static int readFile(const StringPiece& filename,
                         int maxSize,
                         std::string* content,
-                        boost::int64_t* fileSize = NULL,
-                        boost::int64_t* modifyTime = NULL,
-                        boost::int64_t* createTime = NULL);
+                        int64_t* fileSize = NULL,
+                        int64_t* modifyTime = NULL,
+                        int64_t* createTime = NULL);
 
 private:
     static const int MAX_BUFFER_SIZE = 65536;

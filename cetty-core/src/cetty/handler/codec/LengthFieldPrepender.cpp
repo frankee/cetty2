@@ -20,8 +20,7 @@
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/util/StringUtil.h>
 
 namespace cetty {
@@ -51,15 +50,15 @@ ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
     int msgLength = headerLength + msg->readableBytes() + checksumFieldLength;
     int contentLength = msgLength - (lengthFieldOffset + lengthFieldLength - lengthAdjustment);
 
-    boost::uint32_t cs = 0;
+    uint32_t cs = 0;
 
     if (checksumFieldLength > 0) {
-        Array arry;
-        msg->readableBytes(&arry);
-        BOOST_ASSERT(!arry.empty());
+        StringPiece bytes;
+        msg->readableBytes(&bytes);
+        BOOST_ASSERT(!bytes.empty());
 
         if (checksumCalcOffset == headerLength) {
-            cs = checksumFunction((const boost::uint8_t*)arry.data(), arry.length());
+            cs = checksumFunction((const uint8_t*)bytes.data(), bytes.length());
         }
         else {
             //TODO
@@ -88,7 +87,7 @@ ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
             return msg;
         }
         else {
-            ChannelBufferPtr buffer = ChannelBuffers::buffer(msgLength);
+            ChannelBufferPtr buffer = Unpooled::buffer(msgLength);
             return writeMessage(buffer, msg, contentLength, headerPos, cs);
         }
     }
@@ -297,7 +296,7 @@ const ChannelBufferPtr& LengthFieldPrepender::writeMessage(const ChannelBufferPt
         const ChannelBufferPtr& msg,
         int contentLength,
         int headerPos,
-        boost::uint32_t cs) {
+        uint32_t cs) {
     writeHeader(out, contentLength, headerPos);
     msg->readBytes(out);
 

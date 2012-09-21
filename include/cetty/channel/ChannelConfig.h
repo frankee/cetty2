@@ -23,12 +23,9 @@
 
 #include <cetty/channel/ChannelOption.h>
 #include <cetty/channel/ChannelPipelineFactoryPtr.h>
-#include <cetty/buffer/ChannelBufferFactoryPtr.h>
 
 namespace cetty {
 namespace channel {
-
-using namespace cetty::buffer;
 
 /**
  * A set of configuration properties of a {@link Channel}.

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <boost/cstdint.hpp>
+#include <cetty/Types.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
@@ -39,11 +39,11 @@ public:
     };
 
 public:
-    inline static int getTagWireType(boost::int64_t tag) {
+    inline static int getTagWireType(int64_t tag) {
         return static_cast<int>(tag & TAG_TYPE_MASK);
     }
 
-    inline static int getTagFieldNumber(boost::int64_t tag) {
+    inline static int getTagFieldNumber(int64_t tag) {
         return static_cast<int>(tag >> TAG_TYPE_BITS);
     }
 
@@ -52,11 +52,11 @@ public:
         int* fieldNumber,
         int* fieldLength);
 
-    static boost::int64_t decodeFixed64(const ChannelBufferPtr& buffer);
+    static int64_t decodeFixed64(const ChannelBufferPtr& buffer);
     static int decodeFixed32(const ChannelBufferPtr& buffer);
     static int decodeVarint(const ChannelBufferPtr& buffer);
 
-    static void encodeFixed64(const ChannelBufferPtr& buffer, boost::int64_t data);
+    static void encodeFixed64(const ChannelBufferPtr& buffer, int64_t data);
     static void encodeFixed32(const ChannelBufferPtr& buffer, int data);
 
     static void encodeTag(const ChannelBufferPtr& buffer, int fieldNum, int type);

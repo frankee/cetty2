@@ -17,9 +17,10 @@
  * under the License.
  */
 
-#include "cetty/buffer/AbstractChannelBufferTest.h"
+#include <cetty/buffer/AbstractChannelBufferTest.h>
 
-namespace cetty { namespace buffer {
+namespace cetty {
+namespace buffer {
 
 
 class SlicedChannelBufferTest : public AbstractChannelBufferTest {
@@ -31,8 +32,9 @@ protected:
     virtual void newBuffer(int length) {
         char* buf = new char[length * 2];
         memset(buf, 0, (length * 2) * sizeof(char));
-        buffer = ChannelBuffers::wrappedBuffer(
-                Array(buf, length*2), random.nextInt(length - 1) + 1, length);
+
+        buffer = Unpooled::wrappedBuffer(
+                     buf, random.nextInt(length - 1) + 1, length);
 
         //ASSERT_EQ(length, buffer->writerIndex());
         buffers.push_back(buffer);
@@ -47,6 +49,7 @@ private:
     std::vector<ChannelBufferPtr> buffers;
 };
 
-}}
+}
+}
 
 #endif //#if !defined(CETTY_BUFFER_SLICEDCHANNELBUFFERTEST_H)

@@ -14,11 +14,13 @@
  * under the License.
  */
 
+#include <cetty/util/StringUtil.h>
+
 #include <limits>
 #include <cmath>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
-#include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace util {
@@ -271,7 +273,7 @@ bool StringUtil::strbwm(const std::string& str, const std::string& key) {
     return !std::memcmp(str.data() + str.size() - ksiz, key.data(), ksiz);
 }
 
-boost::int64_t StringUtil::atoi(const char* str) {
+int64_t StringUtil::atoi(const char* str) {
     BOOST_ASSERT(str);
     while (*str > '\0' && *str <= ' ') {
         str++;
@@ -289,6 +291,30 @@ boost::int64_t StringUtil::atoi(const char* str) {
         num = num * 10 + *str - '0';
         str++;
     }
+    return num * sign;
+}
+
+int64_t StringUtil::atoi(const StringPiece& str) {
+    BOOST_ASSERT(!str.empty());
+
+    int32_t sign = 1;
+    int64_t num = 0;
+
+    for (int i = 0, j = str.length(); i < j; ++i) {
+        char c = str[i];
+        if (c > '\0' && c <= ' ') continue;
+        if (c == '-') {
+            sign = -1;
+            continue;
+        }
+        else if (c == '+') {
+            continue;
+        }
+
+        if (c < '0' || c > '9') break;
+        num = num * 10 + c - '0';
+    }
+
     return num * sign;
 }
 

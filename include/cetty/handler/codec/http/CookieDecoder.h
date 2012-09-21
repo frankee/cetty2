@@ -1,32 +1,26 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_COOKIEDECODER_H)
-#define CETTY_HANDLER_CODEC_HTTP_COOKIEDECODER_H
-
 /*
- * Copyright 2009 Red Hat, Inc.
+ * Copyright 2012 The Netty Project
  *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
- * Distributed under under the Apache License, version 2.0 (the "License").
- */
+package io.netty.handler.codec.http;
 
-#include <string>
-
-namespace cetty {
-namespace handler {
-namespace codec {
-namespace http {
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Decodes an HTTP header value into {@link Cookie}s.  This decoder can decode
@@ -38,38 +32,24 @@ namespace http {
  * Set&lt;{@link Cookie}&gt; cookies = new {@link CookieDecoder}().decode(value);
  * </pre>
  *
- *
- * @author Andy Taylor (andy.taylor@jboss.org)
- * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
- * @see CookieEncoder
+ * @see ClientCookieEncoder
+ * @see ServerCookieEncoder
  *
  * @apiviz.stereotype utility
- * @apiviz.has        org.jboss.netty.handler.codec.http.Cookie oneway - - decodes
+ * @apiviz.has        io.netty.handler.codec.http.Cookie oneway - - decodes
  */
+public final class CookieDecoder {
 
-class CookieDecoder {
-public:
-    private final static Pattern PATTERN =
-        Pattern.compile("(?:\\s|[;,])*\\$*([^;=]+)(?:=(?:[\"']((?:\\\\.|[^\"])*)[\"']|([^;,]*)))?(\\s*(?:[;,]+\\s*|$))");
-
-    private final static std::string COMMA = ",";
-
-    /**
-     * Creates a new decoder.
-     */
-    CookieDecoder() {
-        super();
-    }
+    private static final String COMMA = ",";
 
     /**
      * Decodes the specified HTTP header value into {@link Cookie}s.
      *
      * @return the decoded {@link Cookie}s
      */
-    Set<Cookie> decode(const std::string& header) {
-        List<std::string> names = new ArrayList<std::string>(8);
-        List<std::string> values = new ArrayList<String>(8);
+    public static Set<Cookie> decode(String header) {
+        List<String> names = new ArrayList<String>(8);
+        List<String> values = new ArrayList<String>(8);
         extractKeyValuePairs(header, names, values);
 
         if (names.isEmpty()) {
@@ -81,17 +61,14 @@ public:
 
         // $Version is the only attribute that can appear before the actual
         // cookie name-value pair.
-        if (names.get(0).equalsIgnoreCase(CookieHeaderNames::COOKIE_VERSION)) {
+        if (names.get(0).equalsIgnoreCase(CookieHeaderNames.VERSION)) {
             try {
-                version = Integer.parse(values.get(0));
-            }
-            catch (NumberFormatException e) {
+                version = Integer.parseInt(values.get(0));
+            } catch (NumberFormatException e) {
                 // Ignore.
             }
-
             i = 1;
-        }
-        else {
+        } else {
             i = 0;
         }
 
@@ -101,90 +78,70 @@ public:
         }
 
         Set<Cookie> cookies = new TreeSet<Cookie>();
-
         for (; i < names.size(); i ++) {
             String name = names.get(i);
             String value = values.get(i);
-
             if (value == null) {
                 value = "";
             }
 
             Cookie c = new DefaultCookie(name, value);
-            cookies.add(c);
 
-            bool discard = false;
-            bool secure = false;
-            bool httpOnly = false;
+            boolean discard = false;
+            boolean secure = false;
+            boolean httpOnly = false;
             String comment = null;
             String commentURL = null;
             String domain = null;
             String path = null;
-            int maxAge = -1;
+            long maxAge = Long.MIN_VALUE;
             List<Integer> ports = new ArrayList<Integer>(2);
 
             for (int j = i + 1; j < names.size(); j++, i++) {
                 name = names.get(j);
                 value = values.get(j);
 
-                if (CookieHeaderNames::COOKIE_DISCARD.equalsIgnoreCase(name)) {
+                if (CookieHeaderNames.DISCARD.equalsIgnoreCase(name)) {
                     discard = true;
-                }
-                else if (CookieHeaderNames::COOKIE_SECURE.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.SECURE.equalsIgnoreCase(name)) {
                     secure = true;
-                }
-                else if (CookieHeaderNames::COOKIE_HTTP_ONLY.equalsIgnoreCase(name)) {
-                    httpOnly = true;
-                }
-                else if (CookieHeaderNames::COOKIE_COMMENT.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.HTTPONLY.equalsIgnoreCase(name)) {
+                   httpOnly = true;
+                } else if (CookieHeaderNames.COMMENT.equalsIgnoreCase(name)) {
                     comment = value;
-                }
-                else if (CookieHeaderNames::COOKIE_COMMENT_URL.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.COMMENTURL.equalsIgnoreCase(name)) {
                     commentURL = value;
-                }
-                else if (CookieHeaderNames::COOKIE_DOMAIN.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.DOMAIN.equalsIgnoreCase(name)) {
                     domain = value;
-                }
-                else if (CookieHeaderNames::COOKIE_PATH.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.PATH.equalsIgnoreCase(name)) {
                     path = value;
-                }
-                else if (CookieHeaderNames::COOKIE_EXPIRES.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.EXPIRES.equalsIgnoreCase(name)) {
                     try {
                         long maxAgeMillis =
-                            new CookieDateFormat().parse(value).getTime() -
-                        System.currentTimeMillis();
-
+                            new HttpHeaderDateFormat().parse(value).getTime() -
+                            System.currentTimeMillis();
                         if (maxAgeMillis <= 0) {
                             maxAge = 0;
+                        } else {
+                            maxAge = maxAgeMillis / 1000 + (maxAgeMillis % 1000 != 0? 1 : 0);
                         }
-                        else {
-                            maxAge = (int)(maxAgeMillis / 1000) +
-                                     (maxAgeMillis % 1000 != 0? 1 : 0);
-                        }
-                    }
-                    catch (ParseException e) {
+                    } catch (ParseException e) {
                         // Ignore.
                     }
-                }
-                else if (CookieHeaderNames::COOKIE_MAX_AGE.equalsIgnoreCase(name)) {
-                    maxAge = Integer.parse(value);
-                }
-                else if (CookieHeaderNames::COOKIE_VERSION.equalsIgnoreCase(name)) {
-                    version = Integer.parse(value);
-                }
-                else if (CookieHeaderNames::COOKIE_PORT.equalsIgnoreCase(name)) {
+                } else if (CookieHeaderNames.MAX_AGE.equalsIgnoreCase(name)) {
+                    maxAge = Integer.parseInt(value);
+                } else if (CookieHeaderNames.VERSION.equalsIgnoreCase(name)) {
+                    version = Integer.parseInt(value);
+                } else if (CookieHeaderNames.PORT.equalsIgnoreCase(name)) {
                     String[] portList = value.split(COMMA);
-
-for (String s1: portList) {
+                    for (String s1: portList) {
                         try {
                             ports.add(Integer.valueOf(s1));
-                        }
-                        catch (NumberFormatException e) {
+                        } catch (NumberFormatException e) {
                             // Ignore.
                         }
                     }
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -195,90 +152,146 @@ for (String s1: portList) {
             c.setDomain(domain);
             c.setSecure(secure);
             c.setHttpOnly(httpOnly);
-
             if (version > 0) {
                 c.setComment(comment);
             }
-
             if (version > 1) {
                 c.setCommentUrl(commentURL);
                 c.setPorts(ports);
                 c.setDiscard(discard);
             }
+
+            cookies.add(c);
         }
 
         return cookies;
     }
 
-private:
-    void extractKeyValuePairs(String header, List<String> names, List<String> values) {
-        Matcher m = PATTERN.matcher(header);
-        int pos = 0;
-        String name = null;
-        String value = null;
-        String separator = null;
+    private static void extractKeyValuePairs(
+            final String header, final List<String> names, final List<String> values) {
 
-        while (m.find(pos)) {
-            pos = m.end();
+        final int headerLen  = header.length();
+        loop: for (int i = 0;;) {
 
-            // Extract name and value pair from the match.
-            String newName = m.group(1);
-            String newValue = m.group(3);
-
-            if (newValue == null) {
-                newValue = decodeValue(m.group(2));
+            // Skip spaces and separators.
+            for (;;) {
+                if (i == headerLen) {
+                    break loop;
+                }
+                switch (header.charAt(i)) {
+                case '\t': case '\n': case 0x0b: case '\f': case '\r':
+                case ' ':  case ',':  case ';':
+                    i ++;
+                    continue;
+                }
+                break;
             }
 
-            String newSeparator = m.group(4);
-
-            if (name == null) {
-                name = newName;
-                value = newValue == null? "" : newValue;
-                separator = newSeparator;
-                continue;
+            // Skip '$'.
+            for (;;) {
+                if (i == headerLen) {
+                    break loop;
+                }
+                if (header.charAt(i) == '$') {
+                    i ++;
+                    continue;
+                }
+                break;
             }
 
-            if (newValue == null &&
-                    !CookieHeaderNames::COOKIE_DISCARD.equalsIgnoreCase(newName) &&
-                    !CookieHeaderNames::COOKIE_SECURE.equalsIgnoreCase(newName) &&
-                    !CookieHeaderNames::COOKIE_HTTP_ONLY.equalsIgnoreCase(newName)) {
-                value = value + separator + newName;
-                separator = newSeparator;
-                continue;
+            String name;
+            String value;
+
+            if (i == headerLen) {
+                name = null;
+                value = null;
+            } else {
+                int newNameStart = i;
+                keyValLoop: for (;;) {
+                    switch (header.charAt(i)) {
+                    case ';':
+                        // NAME; (no value till ';')
+                        name = header.substring(newNameStart, i);
+                        value = null;
+                        break keyValLoop;
+                    case '=':
+                        // NAME=VALUE
+                        name = header.substring(newNameStart, i);
+                        i ++;
+                        if (i == headerLen) {
+                            // NAME= (empty value, i.e. nothing after '=')
+                            value = "";
+                            break keyValLoop;
+                        }
+
+                        int newValueStart = i;
+                        char c = header.charAt(i);
+                        if (c == '"' || c == '\'') {
+                            // NAME="VALUE" or NAME='VALUE'
+                            StringBuilder newValueBuf = new StringBuilder(header.length() - i);
+                            final char q = c;
+                            boolean hadBackslash = false;
+                            i ++;
+                            for (;;) {
+                                if (i == headerLen) {
+                                    value = newValueBuf.toString();
+                                    break keyValLoop;
+                                }
+                                if (hadBackslash) {
+                                    hadBackslash = false;
+                                    c = header.charAt(i ++);
+                                    switch (c) {
+                                    case '\\': case '"': case '\'':
+                                        // Escape last backslash.
+                                        newValueBuf.setCharAt(newValueBuf.length() - 1, c);
+                                        break;
+                                    default:
+                                        // Do not escape last backslash.
+                                        newValueBuf.append(c);
+                                    }
+                                } else {
+                                    c = header.charAt(i ++);
+                                    if (c == q) {
+                                        value = newValueBuf.toString();
+                                        break keyValLoop;
+                                    }
+                                    newValueBuf.append(c);
+                                    if (c == '\\') {
+                                        hadBackslash = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            // NAME=VALUE;
+                            int semiPos = header.indexOf(';', i);
+                            if (semiPos > 0) {
+                                value = header.substring(newValueStart, semiPos);
+                                i = semiPos;
+                            } else {
+                                value = header.substring(newValueStart);
+                                i = headerLen;
+                            }
+                        }
+                        break keyValLoop;
+                    default:
+                        i ++;
+                    }
+
+                    if (i == headerLen) {
+                        // NAME (no value till the end of string)
+                        name = header.substring(newNameStart);
+                        value = null;
+                        break;
+                    }
+                }
             }
 
-            names.add(name);
-            values.add(value);
-
-            name = newName;
-            value = newValue;
-            separator = newSeparator;
-        }
-
-        // The last entry
-        if (name != null) {
             names.add(name);
             values.add(value);
         }
     }
 
-    std::string decodeValue(std::string value) {
-        if (value == null) {
-            return value;
-        }
-
-        return value.replace("\\\"", "\"").replace("\\\\", "\\");
+    private CookieDecoder() {
+        // Unused
     }
-};
-
-
 }
-}
-}
-}
-
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_COOKIEDECODER_H)
-
-// Local Variables:
-// mode: c++
-// End:
