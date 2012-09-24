@@ -19,6 +19,7 @@
  * under the License.
  */
 
+#include <string>
 #include <cetty/shiro/authz/Permission.h>
 
 namespace cetty {
@@ -105,8 +106,8 @@ public:
     typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
 
 public:
-    WildcardPermission(const std::string& wildcardString) {
-        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
+    WildcardPermission() {
+
     }
 
     WildcardPermission(const std::string& wildcardString, bool caseSensitive) {
@@ -228,18 +229,14 @@ private:
         return lowerCasedSubparts;
     }
 
-    /*--------------------------------------------
-    |             C O N S T A N T S             |
-    ============================================*/
-    protected static final String WILDCARD_TOKEN = "*";
-    protected static final String PART_DIVIDER_TOKEN = ":";
-    protected static final String SUBPART_DIVIDER_TOKEN = ",";
-    protected static final boolean DEFAULT_CASE_SENSITIVE = false;
+private:
+    static const std::string WILDCARD_TOKEN;
+    static const std::string PART_DIVIDER_TOKEN;
+    static const std::string SUBPART_DIVIDER_TOKEN;
 
-    /*--------------------------------------------
-    |    I N S T A N C E   V A R I A B L E S    |
-    ============================================*/
-    private List<Set<String>> parts;
+    static const bool DEFAULT_CASE_SENSITIVE;
+
+    std::vector<<String>> parts;
 
 };
 

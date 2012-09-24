@@ -29,12 +29,12 @@ using namespace cetty::shiro::util;
 using namespace cetty::shiro;
 
 void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
-                                         const PreLoginResponsePtr& response,
-                                         const DoneCallback& done){
+                                        const PreLoginResponsePtr& response,
+                                        const DoneCallback& done){
     std::string host = request->host();
     std::string userName = request->user_name();
 
-    LoginUtil *loginUtil = SecurityUtils::getLoginUtil();
+    LoginUtil *loginUtil = (SecurityUtils::getInstance())->getLoginUtil();
     std::string nonce = loginUtil->getNonce();
     std::string serverTime = loginUtil->getServerTime();
 
@@ -46,69 +46,86 @@ void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
 }
 
 void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
-                                      const LoginResponsePtr& response,
-                                      const DoneCallback& done) {
+                                     const LoginResponsePtr& response,
+                                     const DoneCallback& done) {
     const std::string& userName = request->user_name();
     const std::string& nonce = request->nonce();
     const std::string& serverTime = request->server_time();
     const std::string& encodeType = request->encode_type();
     const std::string& encodedPasswd = request->encoded_passwd();
 
-    LoginUtil *loginUtil = SecurityUtils::getLoginUtil();
+    LoginUtil *loginUtil = (SecurityUtils::getInstance())->getLoginUtil();
 
     std::string storeHost = loginUtil->getHost(userName, serverTime);
     std::string storeNonce = loginUtil->getNonce(userName, serverTime);
     std::string storeServerTime = loginUtil->getServerTime(userName, serverTime);
 
-    if(nonce == storeNonce &&
-       serverTime == storeServerTime &&
-       loginUtil->verifyServerTime(serverTime, loginUtil->getServerTime())) {
+    if (nonce == storeNonce &&
+        serverTime == storeServerTime &&
+        loginUtil->verifyServerTime(serverTime, loginUtil->getServerTime())) {
+
         AuthenticationToken token(userName, encodedPasswd, storeHost);
         token.setEncodeType(encodeType);
         token.setNonce(nonce);
         token.setServerTime(serverTime);
 
-        SecurityManager *sm = SecurityUtils::getSecurityManager();
-        std::string sessionId = sm->login(token);
-        if(!sessionId.empty()){
-            SessionPtr sessionPtr = sm->getSession(sessionId);
-            if(sessionPtr){
-                cetty::protobuf::service::Session *session = response->mutable_session();
-                session->set_id(sessionId.c_str());
-                cetty::protobuf::service::KeyValue *item = session->add_items();
-                item->set_key("username");
-                item->set_value(userName);
-            } // if(sessionPtr)
-            else{
-                cetty::protobuf::service::Status *status = response->mutable_status();
-                //status->set_status();
-                status->set_code(LoginUtil::NO_SESSION_CODE);
-                status->set_message(LoginUtil::NO_SESSION_MESSAGE);
-            } // end
-        } // if(!sessionId.empty())
-        else{
-            cetty::protobuf::service::Status *status = response->mutable_status();
-
-            status->set_code(LoginUtil::LOGIN_FAILED_CODE);
-            status->set_message(LoginUtil::LOGIN_FAILED_MESSAGE);
-        }// end
-    }// if(nonce == storeNonce ...)
+        SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
+        sm->login(token, boost::bind(&AccessControlServiceImpl::onLogin,
+                                     this,
+                                     _1,
+                                     _2,
+                                     _3,
+                                     _4,
+                                     response,
+                                     done));
+    }
     else {
         cetty::protobuf::service::Status *status = response->mutable_status();
 
-        status->set_code(LoginUtil::LOGIN_REFUSED_CODE);
+        //todo modify code and message
+        status->set_code(0x00);
         status->set_message(LoginUtil::LOGIN_REFUSED_MESSAGE);
+        done(response);
     } // end
+}
 
+void AccessControlServiceImpl::onLogin(int code,
+                                       const AuthenticationToken& token,
+                                       const AuthenticationInfoPtr& info,
+                                       const SessionPtr& session,
+                                       const LoginResponsePtr& response,
+                                       const DoneCallback& done){
+    if(!code){
+        if(sessionPtr){
+            cetty::protobuf::service::Session *session = response->mutable_session();
+            session->set_id(session->getId().c_str(););
+            cetty::protobuf::service::KeyValue *item = session->add_items();
+            tem->set_key("username");
+            item->set_value(userName);
+        }
+        else{
+            cetty::protobuf::service::Status *status = response->mutable_status();
+            //status->set_status();
+            // todo modify status code and status message
+            status->set_code(code);
+            status->set_message("");
+        }
+    }else{
+        cetty::protobuf::service::Status *status = response->mutable_status();
+        //status->set_status();
+        // todo modify status code and status message
+        status->set_code(code);
+        status->set_message("");
+    }
     done(response);
 }
 
 void AccessControlServiceImpl::logout(const ConstLogoutRequestPtr& request,
-                                       const LogoutResponsePtr& response,
-                                       const DoneCallback& done) {
+                                      const LogoutResponsePtr& response,
+                                      const DoneCallback& done) {
     cetty::protobuf::service::Session session = request->session();
     std::string sessionId = session.id();
-    SecurityManager *sm = SecurityUtils::getSecurityManager();
+    SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
     sm->logout(sessionId);
 }
 

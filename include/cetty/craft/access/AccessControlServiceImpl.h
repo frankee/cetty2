@@ -36,6 +36,13 @@ public:
                        const LoginResponsePtr& response,
                        const DoneCallback& done);
 
+    virtual void onLogin(int code,
+                         const AuthenticationToken&,
+                         const AuthenticationInfoPtr&,
+                         const SessionPtr&,
+                         const LoginResponsePtr& response,
+                         const DoneCallback& done);
+
     virtual void logout(const ConstLogoutRequestPtr& request,
                         const LogoutResponsePtr& response,
                         const DoneCallback& done);
