@@ -19,7 +19,8 @@
  * under the License.
  */
 
-#include <string>
+#include <vector>
+
 #include <cetty/shiro/authz/Permission.h>
 
 namespace cetty {
@@ -106,139 +107,36 @@ public:
     typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
 
 public:
-    WildcardPermission() {
-
+    WildcardPermission(){}
+    WildcardPermission(std::string& wildcardString) {
+        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
     }
-
-    WildcardPermission(const std::string& wildcardString, bool caseSensitive) {
+    WildcardPermission(std::string& wildcardString, bool caseSensitive) {
         setParts(wildcardString, caseSensitive);
     }
 
-    virtual bool implies(const PermissionPtr& p) {
-        // By default only supports comparisons with other WildcardPermissions
-        WildcardPermissionPtr permission = boost::dynamic_pointer_cast<WildcardPermission>(p);
-        if (!permission) {
-            return false;
-        }
+    virtual bool implies(const PermissionPtr& p);
 
-        List<Set<String>> otherParts = wp.getParts();
-
-        int i = 0;
-
-for (Set<String> otherPart : otherParts) {
-            // If this permission has less parts than the other permission, everything after the number of parts contained
-            // in this permission is automatically implied, so return true
-            if (getParts().size() - 1 < i) {
-                return true;
-            }
-            else {
-                Set<String> part = getParts().get(i);
-
-                if (!part.contains(WILDCARD_TOKEN) && !part.containsAll(otherPart)) {
-                    return false;
-                }
-
-                i++;
-            }
-        }
-
-        // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
-        for (; i < getParts().size(); i++) {
-            Set<String> part = getParts().get(i);
-
-            if (!part.contains(WILDCARD_TOKEN)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    std::string toString() const {
-        StringBuilder buffer = new StringBuilder();
-
-for (Set<String> part : parts) {
-            if (buffer.length() > 0) {
-                buffer.append(":");
-            }
-
-            buffer.append(part);
-        }
-
-        return buffer.toString();
-    }
+    virtual std::string toString() const;
 
 private:
-    /**
-     * Default no-arg constructor for subclasses only - end-user developers instantiating Permission instances must
-     * provide a wildcard string at a minimum, since Permission instances are immutable once instantiated.
-     * <p/>
-     * Note that the WildcardPermission class is very robust and typically subclasses are not necessary unless you
-     * wish to create type-safe Permission objects that would be used in your application, such as perhaps a
-     * {@code UserPermission}, {@code SystemPermission}, {@code PrinterPermission}, etc.  If you want such type-safe
-     * permission usage, consider subclassing the {@link DomainPermission DomainPermission} class for your needs.
-     */
-    WildcardPermission() {}
-
-    List<Set<String>> getParts() {
-        return this.parts;
-    }
-
-    void setParts(const std::string& wildcardString) {
-        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
-    }
-
-    void setParts(const std::string& wildcardString, bool caseSensitive) {
-        if (wildcardString == null || wildcardString.trim().length() == 0) {
-            throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
-        }
-
-        wildcardString = wildcardString.trim();
-
-        List<String> parts = CollectionUtils.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-
-        this.parts = new ArrayList<Set<String>>();
-
-        for (String part : parts) {
-            Set<String> subparts = CollectionUtils.asSet(part.split(SUBPART_DIVIDER_TOKEN));
-
-            if (!caseSensitive) {
-                subparts = lowercase(subparts);
-            }
-
-            if (subparts.isEmpty()) {
-                throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
-            }
-
-            this.parts.add(subparts);
-        }
-
-        if (this.parts.isEmpty()) {
-            throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
-        }
-    }
-
-private:
-    Set<String> lowercase(Set<String> subparts) {
-        Set<String> lowerCasedSubparts = new LinkedHashSet<String>(subparts.size());
-
-        for (String subpart : subparts) {
-            lowerCasedSubparts.add(subpart.toLowerCase());
-        }
-
-        return lowerCasedSubparts;
-    }
+    void setParts(std::string &wildcardString, bool caseSensitive);
+    void lowercase(std::string *part);
+    const std::vector<std::string>& getParts() const;
 
 private:
     static const std::string WILDCARD_TOKEN;
     static const std::string PART_DIVIDER_TOKEN;
-    static const std::string SUBPART_DIVIDER_TOKEN;
-
     static const bool DEFAULT_CASE_SENSITIVE;
 
-    std::vector<<String>> parts;
+    std::vector<std::string> parts;
 
 };
+
+inline
+const std::vector<std::string>& WildcardPermission::getParts() const{
+    return parts;
+}
 
 }
 }

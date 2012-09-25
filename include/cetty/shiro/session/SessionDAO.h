@@ -20,6 +20,7 @@
  */
 
 #include <boost/function.hpp>
+#include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionPtr.h>
 
 namespace cetty {

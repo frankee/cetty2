@@ -1,6 +1,7 @@
 
 #include <cetty/shiro/session/RedisSessionDAO.h>
 #include <cetty/shiro/session/Session.h>
+#include <boost/ref.hpp>
 
 namespace cetty {
 namespace shiro {
@@ -28,6 +29,9 @@ void RedisSessionDAO::readSession(const std::string& sessionId,
 void RedisSessionDAO::create(const SessionPtr& session,
                              const SessionCallback& callback) {
     if (redis && session) {
+        std::string sessionId = generateSessionId(session);
+        assignSessionId(session, sessionId);
+
         std::string key(KEY_PREFIX);
         std::string value;
 
@@ -35,9 +39,11 @@ void RedisSessionDAO::create(const SessionPtr& session,
         session->toJson(&value);
 
         redis->set(key, value);
+
+        callback(0, session);
     }
     else {
-
+        callback(1, SessionPtr());
     }
 }
 
@@ -51,9 +57,10 @@ void RedisSessionDAO::update(const SessionPtr& session,
         session->toJson(&value);
 
         redis->set(key, value);
+        callback(0, session);
     }
     else {
-
+        callback(1, session);
     }
 }
 
@@ -64,9 +71,11 @@ void RedisSessionDAO::remove(const SessionPtr& session,
         key += session->getId();
 
         redis->del(key);
+
+        callback(0, session);
     }
     else {
-
+        callback(1, session);
     }
 }
 

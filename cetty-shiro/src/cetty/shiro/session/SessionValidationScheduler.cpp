@@ -11,6 +11,7 @@
 namespace cetty {
 namespace shiro {
 namespace session {
+
 SessionValidationScheduler::SessionValidationScheduler()
     :enabled(false),
      interval(SessionManager::DEFAULT_SESSION_VALIDATION_INTERVAL) {}

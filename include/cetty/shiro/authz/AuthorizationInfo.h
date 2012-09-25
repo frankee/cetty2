@@ -21,8 +21,11 @@
 
 #include <vector>
 #include <string>
+
 #include <cetty/shiro/authz/PermissionPtr.h>
+#include <cetty/shiro/authz/Permission.h>
 #include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
 
 namespace cetty {
 namespace shiro {
@@ -64,8 +67,8 @@ namespace authz {
  */
 class AuthorizationInfo {
 public:
-    AuthorizationInfo();
-    AuthorizationInfo(const std::vector<std::string>& roles);
+    AuthorizationInfo(){};
+    AuthorizationInfo(const std::vector<std::string>& roles):roles(roles){}
 
     /**
      * Returns the names of all roles assigned to a corresponding Subject.
@@ -130,6 +133,56 @@ private:
     std::vector<PermissionPtr> permissions;
     std::vector<std::string>   stringPermissions;
 };
+
+inline
+const std::vector<std::string>& AuthorizationInfo::getRoles() const{
+    return roles;
+}
+
+inline
+void AuthorizationInfo::setRoles(const std::vector<std::string>& roles){
+    this->roles = roles;
+}
+
+template<typename I>
+void AuthorizationInfo::setRoles(const I& begin, const I& end){
+    roles.clear();
+    for(; begin != end; ++begin)
+        roles.push_back(*begin);
+}
+
+inline
+void AuthorizationInfo::addRole(const std::string& role){
+    this->roles.push_back(role);
+}
+
+template<typename I>
+void AuthorizationInfo::addRoles(const I& begin, const I& end){
+    for(; begin != end; ++begin)
+        roles.push_back(*begin);
+}
+
+inline
+const std::vector<std::string>& AuthorizationInfo::getStringPermissions() const{
+    return stringPermissions;
+}
+
+inline
+void AuthorizationInfo::setStringPermissions(const std::vector<std::string>& permissions){
+    stringPermissions = permissions;
+}
+
+template<typename I>
+void AuthorizationInfo::setStringPermissions(const I& begin, const I& end){
+    stringPermissions.clear();
+    for(; begin != end; ++begin)
+        stringPermissions.push_back(*begin);
+}
+
+inline
+const std::vector<PermissionPtr>& AuthorizationInfo::getPermissions() const{
+    return permissions;
+}
 
 }
 }

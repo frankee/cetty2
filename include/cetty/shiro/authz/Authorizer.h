@@ -11,10 +11,15 @@
 #include <vector>
 #include <boost/function.hpp>
 
-#include <cetty/shiro/PrincipalCollection.h>
-#include <cetty/shiro/session/SessionPtr.h>
+#include <cetty/shiro/authz/Permission.h>
 #include <cetty/shiro/authz/PermissionPtr.h>
+#include <cetty/shiro/PrincipalCollection.h>
+#include <cetty/shiro/realm/AuthorizingRealm.h>
 #include <cetty/shiro/realm/AuthorizingRealmPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/realm/Realm.h>
+#include <cetty/shiro/realm/RealmPtr.h>
 
 namespace cetty {
 namespace shiro {
@@ -22,7 +27,7 @@ namespace authz {
 
 using namespace cetty::shiro;
 using namespace cetty::shiro::realm;
-using namespace cetty::shiro::session;
+using namespace cetty::shiro::authz;
 
 /**
  * An <tt>Authorizer</tt> performs authorization (access control) operations for any given Subject
@@ -48,7 +53,7 @@ using namespace cetty::shiro::session;
  */
 class Authorizer {
 public:
-    typedef boost::function1<PermissionPtr, const std::string&> PermissionResolver;
+    typedef boost::function1<PermissionPtr, const std::string&> ResolvePermissionFunctor;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
@@ -60,8 +65,9 @@ public:
      *
      * @param realms the realms to consult during an authorization check.
      */
-    Authorizer(const RealmPtr& realm);
-    Authorizer(const RealmPtr& realm, const PermissionResolver& resolver);
+    Authorizer(const AuthorizingRealmPtr& realm):realm(realm){}
+    Authorizer(const AuthorizingRealmPtr& realm, const ResolvePermissionFunctor& functor)
+        :realm(realm), permissionResolver(functor){}
 
     virtual ~Authorizer() {}
 
@@ -101,12 +107,17 @@ public:
                      const PermissionPtr& permission,
                      const AuthorizeCallback& callback) const;
 
+    void doPermite(const AuthorizationInfoPtr& info,
+                   const PrincipalCollection& principal,
+                   const PermissionPtr& permission,
+                   const AuthorizeCallback& callback) const;
     /**
      * Returns the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      *
      * @return the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      */
-    const RealmPtr& getRealm() const {
+    const AuthorizingRealmPtr& getRealm() const {
+        return realm;
     }
 
     /**
@@ -114,9 +125,7 @@ public:
      *
      * @param realms the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      */
-    void setRealm(const RealmPtr& realm) {
-
-    }
+    void setRealm(const AuthorizingRealmPtr& realm) {this->realm = realm; }
 
     /**
      * Sets the specified {@link PermissionResolver PermissionResolver} on <em>all</em> of the wrapped realms that
@@ -129,7 +138,7 @@ public:
      * @param permissionResolver the permissionResolver to set on all of the wrapped realms that implement the
      *                           {@link org.apache.shiro.authz.permission.PermissionResolverAware PermissionResolverAware} interface.
      */
-    void setPermissionResolver(const PermissionResolver& permissionResolver) {
+    void setPermissionResolver(const ResolvePermissionFunctor& permissionResolver) {
         this->permissionResolver = permissionResolver;
     }
 
@@ -152,7 +161,7 @@ protected:
      * A PermissionResolver to be used by <em>all</em> configured realms.  Leave <code>null</code> if you wish
      * to configure different resolvers for different realms.
      */
-    PermissionResolver permissionResolver;
+    ResolvePermissionFunctor permissionResolver;
 };
 
 }

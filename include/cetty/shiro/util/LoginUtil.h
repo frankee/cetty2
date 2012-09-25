@@ -30,6 +30,7 @@ public:
                              > getStoreInfo;
 
 public:
+    LoginUtil(){}
     LoginUtil(const saveInfo& save,
               const getStoreInfo& retrieveNonce,
               const getStoreInfo& retrieveServerTime,
@@ -61,18 +62,15 @@ public:
     void setGetHost(const getStoreInfo& retrieveHost);
 
 public:
-    static const int NO_SESSION_CODE;
-    static const int LOGIN_FAILED_CODE;
-    static const int LOGIN_REFUSED_CODE;
-
-    static const std::string NO_SESSION_MESSAGE;
-    static const std::string LOGIN_FAILED_MESSAGE;
-    static const std::string LOGIN_REFUSED_MESSAGE;
-
     saveInfo save;
     getStoreInfo retrieveNonce;
     getStoreInfo retrieveServerTime;
     getStoreInfo retrieveHost;
+
+    static const int NONCE_LENGTH;
+
+private:
+    static const int SERVER_TIME_EXPIRE;
 };
 
 inline

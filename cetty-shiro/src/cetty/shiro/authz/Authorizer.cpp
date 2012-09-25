@@ -6,14 +6,14 @@
  */
 
 #include <cetty/shiro/authz/Authorizer.h>
-#include <cetty/shiro/authz/Permission.h>
-#include <cetty/shiro/realm/AuthorizingRealm.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace shiro {
 namespace authz {
 
 using namespace cetty::shiro::realm;
+using namespace cetty::shiro::authz;
 
 void Authorizer::isPermitted(const std::string& principal,
                              const std::string& permission,
@@ -37,14 +37,52 @@ void Authorizer::isPermitted(const PrincipalCollection& principals,
 void Authorizer::isPermitted(const PrincipalCollection& principal,
                              const PermissionPtr& permission,
                              const AuthorizeCallback& callback) const {
-
+    realm->getAuthorizationInfo(principal, boost::bind(
+                                                      &Authorizer::doPermite,
+                                                      this,
+                                                      _1,
+                                                      principal,
+                                                      permission,
+                                                      callback));
 }
+
+void Authorizer::doPermite(const AuthorizationInfoPtr& info,
+                           const PrincipalCollection& principal,
+                           const PermissionPtr& permission,
+                           const AuthorizeCallback& callback) const{
+    std::vector<PermissionPtr> permissions = info->getPermissions();
+    std::vector<PermissionPtr>::iterator it;
+    for(it = permissions.begin(); it != permissions.end(); ++it)
+        if((*it)->implies(permission)){
+            LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
+                      <<"is permited for permission [" << permission->toString() << "].";
+            callback(true, principal.getPrimaryPrincipal(), permission->toString());
+            return;
+        }
+
+    std::vector<std::string> strPermissions = info->getStringPermissions();
+    std::vector<std::string>::iterator begin = strPermissions.begin();
+    for(; begin != strPermissions.end(); ++begin){
+        PermissionPtr pm = permissionResolver(*begin);
+        if(pm->implies(permission)){
+            LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
+                      <<"is permited for permission [" << permission->toString() << "].";
+            callback(true, principal.getPrimaryPrincipal(), permission->toString());
+            return;
+        }
+    }
+
+    LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
+              <<"is not permited for permission [" << permission->toString() << "].";
+    callback(false, principal.getPrimaryPrincipal(), permission->toString());
+}
+
+
 
 bool Authorizer::realmConfigured() const {
     if (!realm) {
-        //String msg = "Configuration error:  No realms have been configured!  One or more realms must be " +
-        //"present to execute an authorization operation.";
-        //throw new IllegalStateException(msg);
+        LOG_TRACE << "Configuration error:  No realms have been configured!  One or more realms must be "
+                  << "present to execute an authorization operation.";
         return false;
     }
 

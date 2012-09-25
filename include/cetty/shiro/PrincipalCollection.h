@@ -20,8 +20,8 @@
  */
 
 #include <map>
-#include <string>
 #include <vector>
+#include <string>
 
 namespace cetty {
 namespace shiro {
@@ -42,22 +42,54 @@ namespace shiro {
  */
 class PrincipalCollection {
 public:
-    typedef std::vector<std::string> Principals;
-    typedef std::map<std::string, Principals> RealmPrincipals;
-
-public:
     PrincipalCollection() {}
 
-    PrincipalCollection(const std::string& principal, const std::string& realmName) {
+    PrincipalCollection(const std::string &principal, const std::string &realmName){
         add(principal, realmName);
     }
 
-    PrincipalCollection(const std::vector<std::string>& principals, const std::string realmName) {
+    PrincipalCollection(const std::vector<std::string> &principals, const std::string &realmName){
         addAll(principals, realmName);
     }
 
-    PrincipalCollection(const PrincipalCollection& principals) {
+    PrincipalCollection(const PrincipalCollection &principals){
         addAll(principals);
+    }
+
+    PrincipalCollection& operator=(const PrincipalCollection &principals){
+        addAll(principals);
+        return *this;
+    }
+
+
+    /**
+     * Adds the given principal to this collection.
+     *
+     * @param principal the principal to be added.
+     * @param realmName the realm this principal came from.
+     */
+    void add(const std::string &principal, const std::string &realName);
+
+    /**
+     * Adds all of the principals in the given collection to this collection.
+     *
+     * @param principals the principals to be added.
+     * @param realmName  the realm these principals came from.
+     */
+    void addAll(const std::vector<std::string> &principals, const std::string &realmName);
+
+    /**
+     * Adds all of the principals from the given principal collection to this collection.
+     *
+     * @param principals the principals to add.
+     */
+    void addAll(const PrincipalCollection &principals);
+
+    template<typename I>
+    void addAll(const I& begin, const I& end, const std::string& realmName) {
+        for (I i = begin; i != end; ++i) {
+            add(*i, realmName);
+        }
     }
 
     /**
@@ -95,53 +127,17 @@ public:
      * @return the primary principal used to uniquely identify the owning account/Subject
      * @since 1.0
      */
-    const std::string& getPrimaryPrincipal() const;
+    std::string getPrimaryPrincipal() const;
 
     /**
-     * Adds the given principal to this collection.
-     *
-     * @param principal the principal to be added.
-     * @param realmName the realm this principal came from.
-     */
-    void add(const std::string& principal, const std::string& realmName);
-
-    /**
-     * Adds all of the principals in the given collection to this collection.
-     *
-     * @param principals the principals to be added.
-     * @param realmName  the realm these principals came from.
-     */
-    void addAll(const std::vector<std::string>& principals, const std::string& realmName);
-
-
-    template<typename I>
-    void addAll(const I& begin, const I& end, const std::string& realmName) {
-        for (I i = begin; i != end; ++i) {
-            add(*i, realmName);
-        }
-    }
-
-    /**
-     * Adds all of the principals from the given principal collection to this collection.
-     *
-     * @param principals the principals to add.
-     */
-    void addAll(const PrincipalCollection& principals);
-
-    /**
-     * Removes all Principals in this collection.
-     */
-    void clear();
-
-    /**
-     * Returns a single Subject's principals retrieved from all configured Realms as a List, or an empty List if
-     * there are not any principals.
+     * Returns a single Subject's principals retrieved from all configured Realms as a Set, or an empty Set if there
+     * are not any principals.
      * <p/>
-     * Note that this will return an empty List if the 'owning' subject has not yet logged in.
+     * Note that this will return an empty Set if the 'owning' subject has not yet logged in.
      *
-     * @return a single Subject's principals retrieved from all configured Realms as a List.
+     * @return a single Subject's principals retrieved from all configured Realms as a Set.
      */
-    //List asList();
+    void asVector(std::vector<std::string> *principals) const;
 
     /**
      * Returns a single Subject's principals retrieved from the specified Realm <em>only</em> as a Collection, or an empty
@@ -153,35 +149,37 @@ public:
      * @return the Subject's principals from the specified Realm only as a Collection or an empty Collection if there
      *         are not any principals from that realm.
      */
-    //Collection fromRealm(String realmName);
+    void fromRealm(const std::string &realmName, std::vector<std::string> *principals) const;
 
     /**
-     * Returns the realm names that this collection has principals for.
-     *
-     * @return the names of realms that this collection has one or more principals for.
-     */
-    //Set<String> getRealmNames();
+      * Returns the realm names that this collection has principals for.
+      *
+      * @return the names of realms that this collection has one or more principals for.
+      */
+    void getRealmNames(std::vector<std::string> *realNames) const;
 
     /**
      * Returns {@code true} if this collection is empty, {@code false} otherwise.
      *
      * @return {@code true} if this collection is empty, {@code false} otherwise.
      */
-    bool empty() const;
+    bool isEmpty() const;
 
-    std::string toString() const;
+    /**
+     * Removes all Principals in this collection.
+     */
+    void clear();
+
+    //bool equals(const std::string &o);
+
+    virtual ~PrincipalCollection(){}
 
 private:
-    RealmPrincipals realmPrincipals;
+    /** real<-->paincipals */
+    std::map<std::string, std::vector<std::string> > realmPrincipals;
+
 };
 
 }
 }
-
-#endif //#if !defined(CETTY_SHIRO_PRINCIPALCOLLECTION_H)
-
-// Local Variables:
-// mode: c++
-// End:
-
-
+#endif // #if !defined(CETTY_SHIRO_PRINCIPALCOLLECTION_H)

@@ -37,46 +37,34 @@ using namespace boost::posix_time;
 typedef boost::function2<void, const SessionPtr&, int> SessionChangeCallback;
 
 class SessionDAO;
-class SessionContext;
 class SessionValidationScheduler;
 
 /**
- * A SessionManager manages the creation, maintenance, and clean-up of all application
- * Sessions.
+ * A SessionManager manages the creation, maintenance,
+ *  and clean-up of all application sessions.
  */
 class SessionManager {
 public:
+
+    /// default expire timeout and validation interval
     static const int DEFAULT_GLOBAL_SESSION_TIMEOUT;
     static const int DEFAULT_SESSION_VALIDATION_INTERVAL;
 
+    /// Asynchronous call back after getting session
     typedef boost::function1<void, const SessionPtr&> SessionCallback;
+
+    /// Asynchronous call back after session is changed
     typedef std::vector<SessionChangeCallback> SessionChangeCallbacks;
 
 public:
     SessionManager();
     virtual ~SessionManager();
 
-    /**
-     * Starts a new session based on the specified contextual initialization data, which can be used by the underlying
-     * implementation to determine how exactly to create the internal Session instance.
-     * <p/>
-     * This method is mainly used in framework development, as the implementation will often relay the argument
-     * to an underlying {@link SessionFactory} which could use the context to construct the internal Session
-     * instance in a specific manner.  This allows pluggable {@link org.apache.shiro.session.Session Session} creation
-     * logic by simply injecting a {@code SessionFactory} into the {@code SessionManager} instance.
-     *
-     * @param context the contextual initialization data that can be used by the implementation or underlying
-     *                {@link SessionFactory} when instantiating the internal {@code Session} instance.
-     * @return the newly created session.
-     * @see SessionFactory#createSession(SessionContext)
-     * @since 1.0
-     */
+    /// @brief Start a new session with host #host.
+    /// @param callback Will be call after start a new session successfully
     void start(const std::string& host, const SessionCallback& callback);
 
     void getSession(const std::string& id, const SessionCallback& callback);
-
-    // from cache.
-    SessionPtr getSession(const std::string& id);
 
     /**
      * Returns {@code true} if sessions should be automatically deleted after they are discovered to be invalid,
@@ -96,24 +84,11 @@ public:
      *         {@code false} if invalid sessions will be manually deleted by some process external to Shiro's control.
      */
     bool isDeleteInvalidSessions() const;
-
-    /**
-     * Sets whether or not sessions should be automatically deleted after they are discovered to be invalid.  Default
-     * value is {@code true} to ensure no orphans will exist in the underlying data store.
-     * <h4>WARNING</h4>
-     * Only set this value to {@code false} if you are manually going to delete sessions yourself by some process
-     * (quartz, cron, etc) external to Shiro's control.  See the
-     * {@link #isDeleteInvalidSessions() isDeleteInvalidSessions()} JavaDoc for more.
-     *
-     * @param deleteInvalidSessions whether or not sessions should be automatically deleted after they are discovered
-     *                              to be invalid.
-     */
     void setDeleteInvalidSessions(bool deleteInvalidSessions);
 
-    void addSessionListeners(const SessionChangeCallback& callback);
 
     const std::vector<SessionChangeCallback>& getSessionListeners() const;
-
+    void addSessionListeners(const SessionChangeCallback& callback);
     void clearSessionListeners();
 
     /**
@@ -148,12 +123,11 @@ public:
      */
     void setGlobalSessionTimeout(int globalSessionTimeout);
 
-    bool isSessionValidationSchedulerEnabled() const;
 
+    bool isSessionValidationSchedulerEnabled() const;
     void setSessionValidationSchedulerEnabled(bool sessionValidationSchedulerEnabled);
 
     void setSessionValidationScheduler(SessionValidationScheduler* sessionValidationScheduler);
-
     SessionValidationScheduler* getSessionValidationScheduler() const;
 
     /**
@@ -171,69 +145,45 @@ public:
      * @param sessionValidationInterval the time in milliseconds between checking for valid sessions to reap orphans.
      */
     void setSessionValidationInterval(int sessionValidationInterval);
-
     int getSessionValidationInterval() const;
-
-    void setSessionDAO(SessionDAO* sessionDAO);
-    SessionDAO* getSessionDAO();
-
-    void validateSessions();
 
     void enableSessionValidation();
     void disableSessionValidation();
+
+    void validateSessions();
+
+    void setSessionDAO(SessionDAO* sessionDAO);
+    SessionDAO* getSessionDAO();
 
 protected:
     virtual void beforeSessionValidationDisabled() { /*NOOP*/ }
     virtual void afterSessionValidationEnabled() { /*NOOP*/ }
 
-    /**
-     * Template method that allows subclasses to react to a new session being created.
-     * <p/>
-     * This method is invoked <em>before</em> any session listeners are notified.
-     *
-     * @param session the session that was just {@link #createSession created}.
-     * @param context the {@link SessionContext SessionContext} that was used to start the session.
-     */
     virtual void onStart(const SessionPtr& session) { /*NOOP*/ }
-
+    virtual void onChange(const SessionPtr& session);
     virtual void onStop(const SessionPtr& session);
-
-    virtual void afterStopped(const SessionPtr& session);
-
     virtual void onExpiration(const SessionPtr& session);
 
+    virtual void afterStopped(const SessionPtr& session);
     virtual void afterExpired(const SessionPtr& session);
 
-    virtual void onChange(const SessionPtr& session);
-
-    virtual void onInvalidation(const SessionPtr& session, int state);
+    virtual void remove(const SessionPtr& session);
 
 private:
     void applyGlobalSessionTimeout(const SessionPtr& session);
 
-    void remove(const SessionPtr& session);
     void stop(const SessionPtr& session);
     void expire(const SessionPtr& session);
 
-    int validate(const SessionPtr& session);
-
-    void enableSessionValidationIfNecessary();
-
-    void getActiveSessions(std::vector<SessionPtr>* actives);
-
-    SessionValidationScheduler* createSessionValidationScheduler();
-
-    /**
-      * Notifies any interested {@link SessionListener}s that a Session has started.  This method is invoked
-      * <em>after</em> the {@link #onStart onStart} method is called.
-      *
-      * @param session the session that has just started that will be delivered to any
-      *                {@link #setSessionListeners(java.util.Collection) registered} session listeners.
-      * @see SessionListener#onStart(Session)
-      */
     void notifyStart(const SessionPtr& session);
     void notifyStop(const SessionPtr& session);
     void notifyExpiration(const SessionPtr& session);
+
+    SessionValidationScheduler* createSessionValidationScheduler();
+    void enableSessionValidationIfNecessary();
+    int validate(const SessionPtr& session);
+
+    void getActiveSessions(std::vector<SessionPtr>* actives);
 
     void createSessionCallback(int result,
                                const SessionPtr& session,

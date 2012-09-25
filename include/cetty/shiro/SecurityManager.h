@@ -68,22 +68,18 @@ using namespace cetty::shiro::session;
  */
 class SecurityManager {
 public:
-    typedef boost::function4<void, int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&> LoginCallback;
-    typedef boost::function1<void, const SessionPtr&> BeforeLogoutCallback;
-    typedef boost::function1<void, const AuthenticationInfoPtr&> AuthenticateCallback;
+    typedef boost::function<void (int, const AuthenticationToken&, const AuthenticationInfoPtr&, const SessionPtr&)> LoginCallback;
+    typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
+    typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
-    SecurityManager(): sessionManager() {}
-
-    virtual ~SecurityManager() {}
+    SecurityManager();
+    virtual ~SecurityManager();
 
     /// login by user name and password
     void login(const AuthenticationToken& token, const LoginCallback& callback);
     void logout(const std::string& sessionId);
-
-    void authenticate(const AuthenticationToken& token,
-        const AuthenticateCallback& callback);
 
     void isPermitted(const std::string& principal,
         const std::string& permission,
@@ -97,18 +93,19 @@ public:
         const PermissionPtr& permission,
         const AuthorizeCallback& callback) const;
 
-    SessionManager& getSessionManager();
+
+    SessionManager* getSessionManager();
     Authenticator& getAuthenticator();
     Authorizer& getAuthorizer();
 
-    void setRealm();
-    const RealmPtr& getRealm() const;
+    void setRealm(const RealmPtr &realm);
+    const RealmPtr& getRealms() const;
 
 private:
     /// login by session id
-    bool getSession(const std::string& id);
+    void getSession(const std::string& id, SessionManager::SessionCallback callback );
 
-    void bind(AuthenticationInfo& info, const SessionPtr& session);
+    void bind(const AuthenticationToken& token, const AuthenticationInfo& info, const SessionPtr& session);
 
     void fireFailedLoginEvent(const AuthenticationToken& token);
     void fireSuccessfulLoginEvent(const AuthenticationToken& token, const AuthenticationInfoPtr& info);
@@ -121,6 +118,8 @@ private:
                         const AuthenticationInfoPtr& info,
                         const AuthenticationToken& token,
                         const LoginCallback& callback);
+
+    void onLogout(const SessionPtr& session);
 
 private:
     Authenticator authenticator;

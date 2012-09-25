@@ -21,8 +21,8 @@
 
 #include <boost/function.hpp>
 #include <cetty/shiro/realm/Realm.h>
-#include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+#include <cetty/shiro/authc/AuthenticationInfo.h>
 
 namespace cetty {
 namespace shiro {
@@ -63,8 +63,9 @@ public:
 
 public:
     AuthenticatingRealm() {}
-    virtual ~AuthenticatingRealm() {
-    }
+    AuthenticatingRealm(const std::string &name): Realm(name){}
+
+    virtual ~AuthenticatingRealm() {}
 
     virtual void getAuthenticationInfo(const AuthenticationToken& token,
                                        const GetAuthenticationInfoCallback& callback) = 0;

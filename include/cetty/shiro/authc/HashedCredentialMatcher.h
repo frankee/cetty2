@@ -134,7 +134,13 @@ public:
     HashedCredentialsMatcher()
         :hashSalted(false),
          storedCredentialsHexEncoded(true),//false means Base64-encoded
-         hashIterations(1) {}
+         hashIterations(1){}
+
+    HashedCredentialsMatcher(const std::string &hashAlgorithm)
+        :hashSalted(false),
+         storedCredentialsHexEncoded(true),//false means Base64-encoded
+         hashIterations(1),
+         hashAlgorithm(hashAlgorithm){}
 
     /**
      * Returns {@code true} if the provided token credentials match the stored account credentials,
@@ -283,6 +289,8 @@ public:
         if (hashIterations < 1) { this->hashIterations = 1; }
         else { this->hashIterations = hashIterations; }
     }
+
+    ~HashedCredentialsMatcher(){  }
 
 private:
     /**

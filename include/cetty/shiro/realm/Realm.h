@@ -65,8 +65,8 @@ namespace realm {
  */
 class Realm : public cetty::util::ReferenceCounter<Realm, int> {
 public:
-    Realm(): isCached(false) { this->name = autoName(); }
-    Realm(bool isCached, std::string name);
+    Realm() { this->name = autoName(); }
+    Realm(std::string name): name(name){}
 
     const std::string &getName() const { return name; }
     void setName(const std::string &name) { this->name = name; }
@@ -79,7 +79,6 @@ private:
 
 private:
     std::string name;
-    bool isCached;
 };
 
 }

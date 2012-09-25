@@ -117,22 +117,6 @@ public:
           host(host) {
     }
 
-    AuthenticationToken(const AuthenticationToken& token) {
-        this->principal = token.principal;
-        this->credentials = token.credentials;
-        this->rememberMe = token.rememberMe;
-        this->host = token.host;
-    }
-
-    AuthenticationToken& operator=(const AuthenticationToken& token) {
-        this->principal = token.principal;
-        this->credentials = token.credentials;
-        this->rememberMe = token.rememberMe;
-        this->host = token.host;
-
-        return *this;
-    }
-
     /**
      * Returns the account identity submitted during the authentication process.
      * <p/>
@@ -263,6 +247,15 @@ private:
      */
     std::string host;
 };
+
+inline
+void AuthenticationToken::clear(){
+    rememberMe = false;
+    principal.clear();
+    credentials.clear();
+    salt.clear();
+    host.clear();
+}
 
 }
 }

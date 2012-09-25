@@ -3,27 +3,35 @@
 #include <boost/bind.hpp>
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionDAO.h>
+#include <cetty/shiro/session/RedisSessionDAO.h>
 #include <cetty/shiro/session/SessionValidationScheduler.h>
+#include <cetty/shiro/util/SecurityUtils.h>
 
 namespace cetty {
 namespace shiro {
 namespace session {
+
+using namespace cetty::shiro;
+using namespace cetty::shiro::util;
+using namespace cetty::shiro::session;
 
 const int MILLIS_PER_SECOND = 1000;
 const int MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
 const int MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
 const int SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT = 30 * MILLIS_PER_MINUTE;
 const int SessionManager::DEFAULT_SESSION_VALIDATION_INTERVAL = MILLIS_PER_HOUR;
+//const int SessionManager::REMEMBER_ME_SESSION_TIMEOUT = 7 * 24 * MILLIS_PER_HOUR;
 
-static const std::string EMTPY_STR;
+///static const std::string EMTPY_STR;
 
 SessionManager::SessionManager()
     :deleteInvalidSessions(true),
-     sessionValidationSchedulerEnabled(true),
+     sessionValidationSchedulerEnabled(false),
      globalSessionTimeout(DEFAULT_GLOBAL_SESSION_TIMEOUT),
      sessionValidationInterval(DEFAULT_SESSION_VALIDATION_INTERVAL),
      sessionDAO(NULL),
      validationScheduler(NULL) {
+    sessionDAO = new RedisSessionDAO();
 }
 
 SessionManager::~SessionManager() {
@@ -58,24 +66,13 @@ int SessionManager::validate(const SessionPtr& session) {
     Session::SessionState state = session->validate();
 
     if (state == Session::EXPIRED) {
-        onExpiration(session);
+        session->expire();
     }
     else if (state == Session::STOPPED) {
-        onInvalidation(session, state);
+        session->stop();
     }
 
     return (int)state;
-}
-
-void SessionManager::onInvalidation(const SessionPtr& s, int state) {
-    if (state == Session::EXPIRED) {
-        onExpiration(s);
-        return;
-    }
-
-    onStop(s);
-    notifyStop(s);
-    afterStopped(s);
 }
 
 void SessionManager::notifyStart(const SessionPtr& session) {
@@ -137,13 +134,17 @@ void SessionManager::start(const std::string& host,
                            const SessionCallback& callback) {
 
     enableSessionValidationIfNecessary();
-    SessionPtr session = new Session(host);
+    SessionPtr session = new Session(host,
+        boost::bind(&SessionManager::stop, this, _1),
+        boost::bind(&SessionManager::onChange, this, _1),
+        boost::bind(&SessionManager::expire, this, _1)
+                                     );
     sessionDAO->create(session,
                        boost::bind(&SessionManager::createSessionCallback,
-                                   this,
-                                   _1,
-                                   _2,
-                                   boost::cref(callback)));
+                       this,
+                       _1,
+                       _2,
+                       boost::cref(callback)));
 }
 
 void SessionManager::createSessionCallback(int result,
@@ -177,7 +178,13 @@ void SessionManager::readSessionCallback(int result,
         const SessionCallback& callback) {
     if (!result) {
         validate(session);
-        callback(session);
+        if(session->isStopped() || session->isExpired()){
+            callback(SessionPtr());
+        }
+        else{
+            session->touch();
+            callback(session);
+        }
     }
     else {
         callback(SessionPtr());
@@ -193,18 +200,15 @@ void SessionManager::addSessionListeners(const SessionChangeCallback& callback) 
 void SessionManager::onStop(const SessionPtr& session) {
     ptime stopTs = session->getStopTimestamp();
     session->setLastAccessTime(stopTs);
-    onChange(session);
+    session->setLogin(false);
 }
 
 void SessionManager::afterStopped(const SessionPtr& session) {
-    if (isDeleteInvalidSessions()) {
-        remove(session);
-    }
+    if (isDeleteInvalidSessions()) remove(session);
 }
 
 void SessionManager::onExpiration(const SessionPtr& session) {
-    //session->setExpired(true);
-    //onChange(session);
+    onChange(session);
 }
 
 void SessionManager::afterExpired(const SessionPtr& session) {
@@ -239,7 +243,7 @@ void SessionManager::enableSessionValidationIfNecessary() {
 
 void SessionManager::remove(const SessionPtr& session) {
     if (session) {
-        std::remove(sessions.begin(), sessions.end(), session->getId());
+        sessions.erase(session->getId());
         sessionDAO->remove(session, SessionDAO::SessionCallback());
     }
 }

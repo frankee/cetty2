@@ -8,7 +8,6 @@
 
 
 #include <cetty/shiro/realm/AuthorizingRealm.h>
-
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/shiro/PrincipalCollection.h>
 #include <cetty/shiro/authc/AuthenticationInfo.h>
@@ -20,22 +19,17 @@ namespace realm {
 using namespace cetty::shiro;
 using namespace cetty::shiro::authc;
 
-AuthorizingRealm::AuthorizingRealm(bool isCached,
-                                   std::string name) {
-
-}
-
 void AuthorizingRealm::getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback) {
     if (!callback) {
         return;
     }
 
-    if (principals.empty()) {
+    if (principals.isEmpty()) {
         callback(AuthorizationInfoPtr());
     }
 
     LOG_TRACE << "Retrieving AuthorizationInfo for principals ["
-              << principals.toString()
+              << principals.getPrimaryPrincipal()
               << "]";
 
     AuthorizationInfoPtr info = AuthorizationInfoPtr();
@@ -47,12 +41,12 @@ void AuthorizingRealm::getAuthorizationInfo(const PrincipalCollection& principal
     if (itr != authorizations.end()) {
         info = itr->second;
         LOG_TRACE << "AuthorizationInfo found in cache for principals ["
-                  << principals.toString()
+                  << principals.getPrimaryPrincipal()
                   << "]";
     }
     else {
         LOG_TRACE << "No AuthorizationInfo found in cache for principals ["
-                  << principals.toString()
+                  << principals.getPrimaryPrincipal()
                   << "]";
     }
 
@@ -76,11 +70,21 @@ void AuthorizingRealm::onGetAuthorizationInfo(const AuthorizationInfoPtr& info,
     // If the info is not null and the cache has been created, then cache the authorization info.
     if (info) {
         LOG_TRACE << "Caching authorization info for principals: ["
-                  << principals.toString()
+                  << principals.getPrimaryPrincipal()
                   << "].";
+
+        authorizations.insert(std::make_pair(principals.getPrimaryPrincipal(), info));
+        callback(info);
     }
 
-    authorizations.insert(std::make_pair(principals.getPrimaryPrincipal(), info));
+    else{
+        LOG_TRACE << "Can't find authorization info of principals: ["
+                  << principals.getPrimaryPrincipal()
+                  <<"].";
+        callback(AuthorizationInfoPtr());
+    }
+
+
 }
 
 }

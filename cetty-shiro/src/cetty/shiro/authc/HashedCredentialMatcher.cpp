@@ -35,6 +35,7 @@ bool HashedCredentialsMatcher::match(
 
 void HashedCredentialsMatcher::getCredentials(const AuthenticationInfo& info,
         std::string* credentials) {
+    assert(credentials != NULL);
 
     const std::string& infoCredentials = info.getCredentials();
 

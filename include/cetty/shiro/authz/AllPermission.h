@@ -20,6 +20,7 @@
  */
 
 #include <cetty/shiro/authz/Permission.h>
+#include <cetty/shiro/authz/PermissionPtr.h>
 
 namespace cetty {
 namespace shiro {

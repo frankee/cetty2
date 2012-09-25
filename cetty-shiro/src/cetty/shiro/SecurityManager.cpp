@@ -11,6 +11,7 @@
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/realm/AuthorizingRealm.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace shiro {
@@ -19,6 +20,17 @@ using namespace cetty::shiro::session;
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::realm;
 using namespace cetty::shiro::authz;
+
+SecurityManager::SecurityManager(){
+    sessionManager = new SessionManager();
+}
+
+SecurityManager::~SecurityManager(){
+    if(sessionManager != NULL){
+        delete sessionManager;
+        sessionManager = NULL;
+    }
+}
 
 void SecurityManager::login(const AuthenticationToken& token,
                             const LoginCallback& callback) {
@@ -52,31 +64,78 @@ void SecurityManager::onStartSession(const SessionPtr& session,
                                      const AuthenticationToken& token,
                                      const LoginCallback& callback) {
     if (session) {
-        //bind(info, session);
+        bind(token, *info, session);
         fireSuccessfulLoginEvent(token, info);
+        callback(0, token, info, session);
     }
     else {
         fireFailedLoginEvent(token);
+        callback(1, token, info, session);
     }
+}
+
+void SecurityManager::getSession(const std::string& id, SessionManager::SessionCallback callback ){
+    sessionManager->getSession(id, callback);
 }
 
 void SecurityManager::logout(const std::string& sessionId) {
-    //beforeLogout(sessionId);
+    AuthenticatingRealm *authRealm = (AuthenticatingRealm *)realms.get();
+    if(authRealm != NULL) authRealm->onLogout(sessionId);
 
-    SessionPtr session = sessionManager->getSession(sessionId);
-
-    if (session) {
-    //    std::string userId = session->getAttribute(AuthenticationInfo::USER_ID);
-    //    authenticator.onLogout(userId);
-    //    session->stop();
-    }
+    sessionManager->getSession(sessionId,
+                               boost::bind(&SecurityManager::onLogout,
+                                           this,
+                                           _1));
 }
 
-void SecurityManager::bind(AuthenticationInfo& info, const SessionPtr& session) {
-    //session->setAttribute(AuthenticationInfo::USER_ID, info.getUserId());
-    //session->setAttribute(AuthenticationInfo::CREDENTIALS, info.getCredentials());
-    //session->setAttribute(AuthenticationInfo::CREDENTIALS_SALT, info.getCredentialsSalt());
-    //session->setAttribute(AuthenticationInfo::CODE_TYPE, info.getCodeType());
+void SecurityManager::onLogout(const SessionPtr& session){
+    session->stop();
+}
+
+
+
+void SecurityManager::bind(const AuthenticationToken& token, const AuthenticationInfo& info, const SessionPtr& session) {
+    session->setHost(token.getHost());
+    session->setLogin(true);
+}
+
+
+SessionManager* SecurityManager::getSessionManager(){
+    return sessionManager;
+}
+
+void SecurityManager::fireFailedLoginEvent(const AuthenticationToken& token){
+    LOG_TRACE << token.getPrincipal()
+              << " is failed to login.";
+}
+void SecurityManager::fireSuccessfulLoginEvent(const AuthenticationToken& token, const AuthenticationInfoPtr& info){
+    LOG_TRACE << token.getPrincipal()
+              << " is successful to login.";
+}
+
+void SecurityManager::isPermitted(const std::string& principal,
+                                  const std::string& permission,
+                                  const AuthorizeCallback& callback) const{
+    authorizer.isPermitted(principal, permission, callback);
+}
+
+void SecurityManager::isPermitted(const PrincipalCollection& principals,
+                                  const std::string& permission,
+                                  const AuthorizeCallback& callback) const{
+    authorizer.isPermitted(principals, permission, callback);
+}
+
+void SecurityManager::isPermitted(const PrincipalCollection& principal,
+                                  const PermissionPtr& permission,
+                                  const AuthorizeCallback& callback) const{
+    authorizer.isPermitted(principal, permission, callback);
+}
+
+void SecurityManager::setRealm(const RealmPtr &realm){
+    this->realms = realm;
+}
+const RealmPtr& SecurityManager::getRealms() const{
+    return this->realms;
 }
 
 }

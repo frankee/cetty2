@@ -19,11 +19,19 @@
  * under the License.
  */
 
-#include <cstdlib>
+#include <string>
+#include <map>
 
-namespace cetty { namespace shiro {
+namespace cetty {
+namespace shiro {
     class SecurityManager;
 }}
+
+namespace cetty {
+namespace shiro {
+namespace crypt {
+    class DigestEngine;
+}}}
 
 namespace cetty {
 namespace shiro {
@@ -32,81 +40,52 @@ namespace util {
 class LoginUtil;
 
 using namespace cetty::shiro;
-/**
- * Accesses the currently accessible {@code Subject} for the calling code depending on runtime environment.
- *
- * @since 0.2
- */
+using namespace cetty::shiro::crypt;
+
 class SecurityUtils {
-private:
-    /**
-     * ONLY used as a 'backup' in VM Singleton environments (that is, standalone environments), since the
-     * ThreadContext should always be the primary source for Subject instances when possible.
-     */
-   static SecurityManager *securityManager;
-   static LoginUtil *loginUtil;
+public:
+    static SecurityUtils *getInstance();
+
+    SecurityManager *getSecurityManager();
+    LoginUtil *getLoginUtil();
+
+    DigestEngine *getDigestEngine();
+    DigestEngine *getDigestEngine(const std::string &engineName);
 
 public:
-    SecurityUtils():securityManager(NULL), loginUtil(NULL){}
+    static const std::string SECURITY_MANAGER;
+    static const std::string LOGIN_UTIL;
+    static const std::string MD5_ENGINE;
+    static const std::string SHA1_ENGINE;
 
-    /**
-     * Sets a VM (static) singleton SecurityManager, specifically for transparent use in the
-     * {@link #getSubject() getSubject()} implementation.
-     * <p/>
-     * <b>This method call exists mainly for framework development support.  Application developers should rarely,
-     * if ever, need to call this method.</b>
-     * <p/>
-     * The Shiro development team prefers that SecurityManager instances are non-static application singletons
-     * and <em>not</em> VM static singletons.  Application singletons that do not use static memory require some sort
-     * of application configuration framework to maintain the application-wide SecurityManager instance for you
-     * (for example, Spring or EJB3 environments) such that the object reference does not need to be static.
-     * <p/>
-     * In these environments, Shiro acquires Subject data based on the currently executing Thread via its own
-     * framework integration code, and this is the preferred way to use Shiro.
-     * <p/>
-     * However in some environments, such as a standalone desktop application or Applets that do not use Spring or
-     * EJB or similar config frameworks, a VM-singleton might make more sense (although the former is still preferred).
-     * In these environments, setting the SecurityManager via this method will automatically enable the
-     * {@link #getSubject() getSubject()} call to function with little configuration.
-     * <p/>
-     * For example, in these environments, this will work:
-     * <pre>
-     * DefaultSecurityManager securityManager = new {@link org.apache.shiro.mgt.DefaultSecurityManager DefaultSecurityManager}();
-     * securityManager.setRealms( ... ); //one or more Realms
-     * <b>SecurityUtils.setSecurityManager( securityManager );</b></pre>
-     * <p/>
-     * And then anywhere in the application code, the following call will return the application's Subject:
-     * <pre>
-     * Subject currentUser = SecurityUtils.getSubject();</pre>
-     *
-     * @param securityManager the securityManager instance to set as a VM static singleton.
-     */
-    static void setSecurityManager(SecurityManager *securityManager) {
-        SecurityUtils::securityManager = securityManager;
-    }
+private:
+    SecurityUtils();
 
-    /**
-     * Returns the SecurityManager accessible to the calling code.
-     * <p/>
-     * This implementation favors acquiring a thread-bound {@code SecurityManager} if it can find one.  If one is
-     * not available to the executing thread, it will attempt to use the static singleton if available (see the
-     * {@link #setSecurityManager setSecurityManager} method for more on the static singleton).
-     * <p/>
-     * If neither the thread-local or static singleton instances are available, this method throws an
-     * {@code UnavailableSecurityManagerException} to indicate an error - a SecurityManager should always be accessible
-     * to calling code in an application. If it is not, it is likely due to a Shiro configuration problem.
-     *
-     * @return the SecurityManager accessible to the calling code.
-     * @throws UnavailableSecurityManagerException
-     *          if there is no {@code SecurityManager} instance available to the
-     *          calling code, which typically indicates an invalid application configuration.
-     */
-    static SecurityManager *getSecurityManager(){ return securityManager; }
+    /// @brief read configuration file
+    /// @param path configuration file path which must be absolute.
+    void readConfigure();
 
-    static void setLoginUtil(LoginUtil *loginUtil){ this->loginUtil = loginUtil; }
-    static LoginUtil *getLoginUtil(){ return loginUtil; }
+    /// @brief configure object crossing configuration
+    void configure();
+
+    /// @brief Get configuration item which has name key
+    void getValue(const std::string &key, std::string *value);
+    /// @brief Get object which has name #name
+    void *getObject(const std::string &name);
+
+private:
+    /// map name to object
+    /// The objects in #objects are established crossing
+    /// configure file when system is launched.
+   std::map<std::string, void *> objects;
+
+   /// configuration item from file
+   std::map<std::string, std::string> configuration;
+
+   static SecurityUtils *instance;
 
 };
+
 }
 }
 }

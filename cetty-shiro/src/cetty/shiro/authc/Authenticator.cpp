@@ -35,7 +35,8 @@ void Authenticator::authenticate(const AuthenticationToken& token,
                                              callback));
     }
     else {
-
+        LOG_ERROR << "No realm configuration";
+        callback(AuthenticationInfoPtr());
     }
 }
 
@@ -46,6 +47,9 @@ void Authenticator::onGetAuthenticationInfo(const AuthenticationInfoPtr& info,
         callback(info);
     }
     else {
+        LOG_TRACE << "Authenticate failed for " << "["
+                  << token.getPrincipal()
+                  << "].";
         callback(AuthenticationInfoPtr());
     }
 }

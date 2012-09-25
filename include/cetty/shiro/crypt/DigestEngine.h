@@ -38,20 +38,21 @@
 //
 
 #include <vector>
+#include <string>
 
 namespace cetty {
 namespace shiro {
 namespace crypt {
 
+/// This class is an abstract base class
+/// for all classes implementing a message
+/// digest algorithm, like MD5Engine
+/// and SHA1Engine.
+/// Call update() repeatedly with data to
+/// compute the digest from. When done,
+/// call digest() to obtain the message
+/// digest.
 class DigestEngine
-    /// This class is an abstract base class
-    /// for all classes implementing a message
-    /// digest algorithm, like MD5Engine
-    /// and SHA1Engine.
-    /// Call update() repeatedly with data to
-    /// compute the digest from. When done,
-    /// call digest() to obtain the message
-    /// digest.
 {
 public:
     typedef std::vector<unsigned char> Digest;
@@ -59,27 +60,27 @@ public:
     DigestEngine();
     virtual ~DigestEngine();
 
+    /// Updates the digest with the given data.
     void update(const void* data, int length);
     void update(char data);
     void update(const std::string& data);
-    /// Updates the digest with the given data.
 
-    virtual int digestLength() const = 0;
     /// Returns the length of the digest in bytes.
+    virtual int digestLength() const = 0;
 
-    virtual void reset() = 0;
     /// Resets the engine so that a new
     /// digest can be computed.
+    virtual void reset() = 0;
 
-    virtual const Digest& digest() = 0;
     /// Finishes the computation of the digest and
     /// returns the message digest. Resets the engine
     /// and can thus only be called once for every digest.
     /// The returned reference is valid until the next
     /// time digest() is called, or the engine object is destroyed.
+    virtual const Digest& digest() = 0;
 
-    static std::string digestToHex(const Digest& bytes);
     /// Converts a message digest into a string of hexadecimal numbers.
+    static std::string digestToHex(const Digest& bytes);
 
     static void digestFromHex(const std::string& hex, std::string* out);
 
@@ -88,9 +89,9 @@ public:
     static void digestFromBase64(const std::string& base64, std::string* out);
 
 protected:
-    virtual void updateImpl(const void* data, unsigned int length) = 0;
     /// Updates the digest with the given data. Must be implemented
     /// by subclasses.
+    virtual void updateImpl(const void* data, unsigned int length) = 0;
 
 private:
     DigestEngine(const DigestEngine&);

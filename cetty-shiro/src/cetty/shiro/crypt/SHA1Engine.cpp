@@ -40,7 +40,7 @@
 #include <cetty/shiro/crypt/SHA1Engine.h>
 
 #include <cstring>
-#include <cetty/Platform.h>
+#include <cetty/util/Platform.h>
 
 #if CETTY_ARCH_LITTLE_ENDIAN
 #define SHA1_BYTE_REVERSE(x, y) byteReverse(x, y)
@@ -61,11 +61,11 @@ SHA1Engine::~SHA1Engine() {
     reset();
 }
 
-inline void SHA1Engine::byteReverse(uint32_t* buffer, int byteCount) {
-    byteCount /= sizeof(uint32_t);
+inline void SHA1Engine::byteReverse(boost::uint32_t* buffer, int byteCount) {
+    byteCount /= sizeof(boost::uint32_t);
 
     for (int count = 0; count < byteCount; count++) {
-        uint32_t value = (buffer[ count ] << 16) | (buffer[ count ] >> 16);
+        boost::uint32_t value = (buffer[ count ] << 16) | (buffer[ count ] >> 16);
         buffer[count] = ((value & 0xFF00FF00L) >> 8) | ((value & 0x00FF00FFL) << 8);
     }
 }
@@ -75,12 +75,12 @@ void SHA1Engine::updateImpl(const void* buffer_, unsigned int count) {
     BYTE* db = (BYTE*) &_context.data[0];
 
     /* Update bitcount */
-    if ((_context.countLo + ((uint32_t) count << 3)) < _context.countLo) {
+    if ((_context.countLo + ((boost::uint32_t) count << 3)) < _context.countLo) {
         _context.countHi++;    /* Carry from low to high bitCount */
     }
 
-    _context.countLo += ((uint32_t) count << 3);
-    _context.countHi += ((uint32_t) count >> 29);
+    _context.countLo += ((boost::uint32_t) count << 3);
+    _context.countHi += ((boost::uint32_t) count >> 29);
 
     /* Process data in BLOCK_SIZE chunks */
     while (count-- > 0) {
@@ -113,8 +113,9 @@ void SHA1Engine::reset() {
 
 const DigestEngine::Digest& SHA1Engine::digest() {
     int count;
-    uint32_t lowBitcount  = _context.countLo;
-    uint32_t highBitcount = _context.countHi;
+
+    boost::uint32_t lowBitcount  = _context.countLo;
+    boost::uint32_t highBitcount = _context.countHi;
 
     /* Compute number of bytes mod 64 */
     count = (int)((_context.countLo >> 3) & 0x3F);
@@ -175,7 +176,7 @@ const DigestEngine::Digest& SHA1Engine::digest() {
 
 
 /* 32-bit rotate - kludged with shifts */
-typedef uint32_t UL; /* to save space */
+typedef boost::uint32_t UL; /* to save space */
 
 
 #define S(n,X)  ( ( ((UL)X) << n ) | ( ((UL)X) >> ( 32 - n ) ) )
@@ -228,9 +229,9 @@ typedef uint32_t UL; /* to save space */
 
 
 void SHA1Engine::transform() {
-    uint32_t W[80];
-    uint32_t temp;
-    uint32_t A, B, C, D, E;
+    boost::uint32_t W[80];
+    boost::uint32_t temp;
+    boost::uint32_t A, B, C, D, E;
     int i;
 
     /* Step A.  Copy the data buffer into the local work buffer */

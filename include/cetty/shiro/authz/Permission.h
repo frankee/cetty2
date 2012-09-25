@@ -26,6 +26,8 @@ namespace cetty {
 namespace shiro {
 namespace authz {
 
+using namespace cetty::util;
+
 /**
  * A Permission represents the ability to perform an action or access a resource.  A Permission is the most
  * granular, or atomic, unit in a system's security policy and is the cornerstone upon which fine-grained security
@@ -71,7 +73,7 @@ namespace authz {
  * @see org.apache.shiro.authz.permission.WildcardPermission WildcardPermission
  * @since 0.2
  */
-class Permission : public cetty::util::ReferenceCounter<Permission, int> {
+class Permission : public ReferenceCounter<Permission, int> {
 public:
     virtual ~Permission() {}
 
@@ -91,7 +93,9 @@ public:
      * @return {@code true} if this current instance <em>implies</em> all the functionality and/or resource access
      *         described by the specified {@code Permission} argument, {@code false} otherwise.
      */
-    virtual bool implies(const PermissionPtr& p) = 0;
+    virtual bool implies(const PermissionPtr& p){ return true; }
+
+    virtual std::string toString(){ return std::string(); }
 };
 
 }

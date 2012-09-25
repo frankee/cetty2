@@ -128,7 +128,7 @@ public:
      *
      * @return all principals associated with the corresponding Subject.
      */
-    const PrincipalCollection& getPrincipals() const;
+    const PrincipalCollection& getPrincipals() const{ return principals; }
 
     /**
      * Returns the credentials associated with the corresponding Subject.  A credential verifies one or more of the

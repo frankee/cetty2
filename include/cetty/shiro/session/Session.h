@@ -122,6 +122,8 @@ public:
      */
     bool isExpired() const;
 
+    bool isStopped() const;
+
     /**
      * Returns the time in milliseconds that the session session may remain idle before expiring.
      * <ul>
@@ -169,6 +171,9 @@ public:
 
     bool isLogin() const;
     void setLogin(bool login);
+
+    bool isRememberMe();
+    void setRememberMe(bool rememberMe);
 
     const std::map<std::string, std::string>& getAttributes() const;
 
@@ -287,7 +292,6 @@ private:
      * @return true if the specified session has expired, false otherwise.
      */
     bool isTimedOut() const;
-    bool isStopped() const;
     bool isValid() const;
 
     void doStop();
@@ -296,6 +300,7 @@ private:
 private:
     bool expired;
     bool login;
+    bool rememberMe;
 
     int timeout;
 
@@ -356,6 +361,18 @@ inline
 const std::map<std::string, std::string>& Session::getAttributes() const {
     return attributes;
 }
+
+inline
+bool Session::isRememberMe(){
+    return rememberMe;
+}
+
+inline
+void Session::setRememberMe(bool rememberMe){
+    this->rememberMe = true;
+    if(updateCallback) updateCallback(shared_from_this());
+}
+
 
 }
 }

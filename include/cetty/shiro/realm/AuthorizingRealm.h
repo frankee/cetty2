@@ -3,21 +3,16 @@
 
 #include <map>
 #include <boost/function.hpp>
-#include <cetty/shiro/realm/AuthenticatingRealm.h>
-#include <cetty/shiro/realm/AuthorizingRealmPtr.h>
-#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
 
-namespace cetty {
-    namespace shiro {
-        class PrincipalCollection;
-    }
-}
+#include <cetty/shiro/realm/AuthenticatingRealm.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/PrincipalCollection.h>
 
 namespace cetty {
 namespace shiro {
 namespace realm {
 
-using namespace cetty::shiro;
 using namespace cetty::shiro::authz;
 
 /**
@@ -45,7 +40,7 @@ public:
 
 public:
     AuthorizingRealm() {}
-    AuthorizingRealm(bool isCached, std::string name);
+    AuthorizingRealm(std::string name): AuthenticatingRealm(name){}
 
     /**
      * Returns an account's authorization-specific information for the specified {@code principals},
@@ -92,8 +87,7 @@ public:
      * @return the authorization information for the account associated with the specified {@code principals},
      *         or {@code null} if no account could be found.
      */
-    void getAuthorizationInfo(const PrincipalCollection& principals,
-        const GetAuthorizationInfoCallback& callback);
+    void getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback);
 
 protected:
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,
