@@ -19,6 +19,7 @@
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/util/LoginUtil.h>
 #include <cetty/shiro/SecurityManager.h>
+#include <cetty/shiro/authc/WSSE.h>
 
 namespace cetty {
 namespace craft {
@@ -31,43 +32,31 @@ using namespace cetty::shiro;
 void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
                                         const PreLoginResponsePtr& response,
                                         const DoneCallback& done){
-    std::string host = request->host();
-    std::string userName = request->user_name();
 
-    LoginUtil *loginUtil = (SecurityUtils::getInstance())->getLoginUtil();
-    std::string nonce = loginUtil->getNonce();
-    std::string serverTime = loginUtil->getServerTime();
+    WSSE *wsse = SecurityUtils::getInstance()->getWSSE();
+    LoginSecret ls;
+    wsse->generatorSecret(request->host(), request->host(), &ls);
 
-    response->set_nonce(nonce);
-    response->set_server_time(serverTime);
-
-    loginUtil->saveNonceServerTime(userName, host, nonce, serverTime);
+    response->set_nonce(ls.nonce);
+    response->set_server_time(ls.created);
     done(response);
 }
 
 void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
                                      const LoginResponsePtr& response,
                                      const DoneCallback& done) {
-    const std::string& userName = request->user_name();
-    const std::string& nonce = request->nonce();
-    const std::string& serverTime = request->server_time();
     const std::string& encodeType = request->encode_type();
     const std::string& encodedPasswd = request->encoded_passwd();
 
-    LoginUtil *loginUtil = (SecurityUtils::getInstance())->getLoginUtil();
+    WSSE *wsse = SecurityUtils::getInstance()->getWSSE();
+    LoginSecret ls(std::string(), request->user_name(), request->nonce(), request->server_time());
 
-    std::string storeHost = loginUtil->getHost(userName, serverTime);
-    std::string storeNonce = loginUtil->getNonce(userName, serverTime);
-    std::string storeServerTime = loginUtil->getServerTime(userName, serverTime);
-
-    if (nonce == storeNonce &&
-        serverTime == storeServerTime &&
-        loginUtil->verifyServerTime(serverTime, loginUtil->getServerTime())) {
-
-        AuthenticationToken token(userName, encodedPasswd, storeHost);
+    if (wsse->verifySecret(ls)) {
+        AuthenticationToken token(request->user_name(), request->encodedPasswd, storeHost);
         token.setEncodeType(encodeType);
         token.setNonce(nonce);
         token.setServerTime(serverTime);
+        token.setSalt(nonce + server)
 
         SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
         sm->login(token, boost::bind(&AccessControlServiceImpl::onLogin,
