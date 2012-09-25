@@ -19,6 +19,9 @@
     <Filter Include="shiro\crypt">
       <UniqueIdentifier>{54d128ac-a1f2-40e1-99da-cd327307d0fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shiro\util">
+      <UniqueIdentifier>{d9961132-8957-44eb-b723-eadd1dd0af7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfo.h">
@@ -120,6 +123,15 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\SimpleCredentialsMatcher.h">
       <Filter>shiro\authc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\realm\SqlRealm.h">
+      <Filter>shiro\realm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\util\LoginUtil.h">
+      <Filter>shiro\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\shiro\util\SecurityUtils.h">
+      <Filter>shiro\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp">
@@ -175,6 +187,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialMatcher.cpp">
       <Filter>shiro\authc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\authz\WildcardPermission.cpp">
+      <Filter>shiro\authz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\realm\SqlRealm.cpp">
+      <Filter>shiro\realm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\util\LoginUtil.cpp">
+      <Filter>shiro\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\shiro\util\SecurityUtils.cpp">
+      <Filter>shiro\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

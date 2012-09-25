@@ -18,8 +18,13 @@
  */
 
 #include <deque>
+#include <boost/asio/buffer.hpp>
+#include <boost/static_assert.hpp>
+
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/buffer/GatheringBuffer.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/socket/asio/AsioGatheringBuffer.h>
+#include <cetty/util/TruncatableArray.h>
 
 namespace cetty {
 namespace channel {
@@ -28,9 +33,9 @@ class MessageEvent;
 }
 
 namespace cetty {
-    namespace util {
-        class Exception;
-    }
+namespace util {
+class Exception;
+}
 }
 
 namespace cetty {
@@ -45,24 +50,45 @@ class AsioSocketChannel;
 
 class AsioWriteOperation {
 public:
-    typedef AsioGatheringBuffer::AsioBuffer AsioBuffer;
-    typedef AsioGatheringBuffer::AsioBufferArray AsioBufferArray;
+    const static int  MAX_BUFFER_COUNT = 8;
+    typedef boost::asio::mutable_buffer AsioBuffer;
+    typedef cetty::util::TruncatableArray<AsioBuffer, MAX_BUFFER_COUNT> AsioBufferArray;
 
 public:
     AsioWriteOperation()  {}
 
     AsioWriteOperation(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f)
-        : future(f) {
-            gathering.mergeFrom(buffer);
+        : byteSize(0), channelBuffer(buffer), future(f) {
+        GatheringBuffer gathering;
+        buffer->slice(&gathering);
+
+        byteSize = gathering.bytesCount();
+
+        if (needCompactBuffers(gathering)) {
+            channelBuffer = buffer->readBytes();
+            char* bytes = (char*)channelBuffer->readableBytes((int*)NULL);
+            buffers[buffers.truncatedCnt++] = AsioBuffer(bytes, byteSize);
+        }
+        else {
+            for (int i = 0, j = gathering.blockCount(); i < j; ++i) {
+                const StringPiece& bytes = gathering.at(i);
+                buffers[buffers.truncatedCnt++] =
+                    AsioBuffer((char*)bytes.data(), bytes.size());
+            }
+        }
     }
 
     AsioWriteOperation(const AsioWriteOperation& op)
-        : gathering(op.gathering),
+        : byteSize(op.byteSize),
+          buffers(op.buffers),
+          channelBuffer(op.channelBuffer),
           future(op.future) {
     }
 
     AsioWriteOperation& operator=(const AsioWriteOperation& op) {
-        gathering = op.gathering;
+        byteSize = op.byteSize;
+        buffers = op.buffers;
+        channelBuffer = op.channelBuffer;
         future = op.future;
         return *this;
     }
@@ -70,19 +96,18 @@ public:
     ~AsioWriteOperation() {}
 
     int writeBufferSize() const {
-        return gathering.bytesCount();
+        return byteSize;
     }
 
     bool isMultiBuffers() const {
-        return gathering.isMultiBuffers();
+        return buffers.truncatedCnt > 1;
     }
 
     AsioBuffer& getAsioBuffer() {
-        return gathering.getAsioBuffer();
+        return buffers[0];
     }
-
     AsioBufferArray& getAsioBufferArray() {
-        return gathering.getAsioBufferArray();
+        return buffers;
     }
 
     bool setSuccess() {
@@ -93,7 +118,15 @@ public:
     }
 
 private:
-    AsioGatheringBuffer gathering;
+    bool needCompactBuffers(const GatheringBuffer& gathering) {
+        return gathering.blockCount() > 1;
+    }
+
+private:
+    int byteSize;
+    AsioBufferArray buffers;
+
+    ChannelBufferPtr channelBuffer;
     ChannelFuturePtr    future;
 };
 
@@ -120,7 +153,7 @@ public:
     AsioWriteOperation& offer(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f) {
         ops.push_back(AsioWriteOperation(buffer, f));
         plusWriteBufferSize(ops.back().writeBufferSize());
-		return ops.back();
+        return ops.back();
     }
 
     int  getWriteBufferSize() const {

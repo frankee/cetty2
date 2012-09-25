@@ -37,7 +37,7 @@ namespace buffer {
  *
  */
 
-class WrappedChannelBuffer {
+class WrappedChannelBuffer : public ChannelBuffer {
 public:
     virtual ~WrappedChannelBuffer() {}
 

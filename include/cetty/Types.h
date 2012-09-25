@@ -31,10 +31,8 @@ using boost::uint16_t;
 using boost::int32_t;
 using boost::uint32_t;
 
-# ifndef BOOST_NO_INT64_T
 using boost::int64_t;
 using boost::uint64_t;
-# endif
 
 using boost::intmax_t;
 using boost::uintmax_t;
@@ -59,11 +57,9 @@ static const int32_t MAX_INT32 = 0x7FFFFFFF;
 static const int32_t MIN_INT32 = -MAX_INT32 - 1;
 static const uint32_t MAX_UINT32 = 0xFFFFFFFFu;
 
-# ifndef BOOST_NO_INT64_T
 static const int64_t MAX_INT64 = GOOGLE_LONGLONG(0x7FFFFFFFFFFFFFFF);
 static const int64_t MIN_INT64 = -MAX_INT64 - 1;
 static const uint64_t MAX_UINT64 = GOOGLE_ULONGLONG(0xFFFFFFFFFFFFFFFF);
-#endif
 
 
 #define REFERENCED(x) void(x)

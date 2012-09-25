@@ -30,12 +30,43 @@ ServerBootstrap watchdog(factory);
 
 * 模块说明
 ** cetty-core
-*** buffer
+*** ChannelBuffer
+@startuml
+abstract ChannelBuffer {
+}
+
+abstract WrapChannelBuffer {
+}
+
+abstract CompositeChannelBuffer {
+}
+
+class HeapChannelBuffer;
+HeapChannelBuffer --|> ChannelBuffer
+
+SliceChannelBuffer --|> WrapChannelBuffer
+SwapChannelBuffer --|> WrapChannelBuffer
+
+DefaultCompositeChannelBuffer --|> CompositeChannelBuffer;
+
+@enduml
+
+ChannelBuffer有三种不同的实现：
+1，HeapChannelBuffer，这个最基本的，唯一的，实际去管理内存的buffer。
+2，WrappedChannelBuffer，这个是代理buffer，实现又可以分成两类：index独自管理，index与代理的buffer保持一致。
+3，CompositeChannelBuffer，这个也是代理buffer，这个与WrappedChannelBuffer不同的是，其内部有多个ChannelBuffer组成。
+
+
+
+TODO：
+1，remove GatheringBuffer
+
+
+
 *** channel
 *** pipeline/handler
 *** future
 *** bootstrap
-*** config
 *** logging
 *** timer
 *** SSL/TSL

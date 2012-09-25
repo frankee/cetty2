@@ -255,18 +255,6 @@ int ChannelBufferUtil::indexOf(const ConstChannelBufferPtr& buffer,
     }
 }
 
-int ChannelBufferUtil::indexOf(const ConstChannelBufferPtr& buffer,
-                               int fromIndex,
-                               int toIndex,
-                               const ChannelBufferIndexFinder::Functor& indexFinder) {
-    if (fromIndex <= toIndex) {
-        return firstIndexOf(buffer, fromIndex, toIndex, indexFinder);
-    }
-    else {
-        return lastIndexOf(buffer, fromIndex, toIndex, indexFinder);
-    }
-}
-
 int16_t ChannelBufferUtil::swapShort(int16_t value) {
     return ((value << 8) | ((value >> 8) & 0xff));
 }
@@ -283,32 +271,6 @@ int ChannelBufferUtil::swapInt(int value) {
 int64_t ChannelBufferUtil::swapLong(int64_t value) {
     return ((int64_t)(swapInt((int32_t)value)) << 32) |
            (swapInt((int32_t)(value >> 32)) & 0xffffffffL);
-}
-
-int ChannelBufferUtil::firstIndexOf(const ConstChannelBufferPtr& buffer,
-                                    int fromIndex,
-                                    int toIndex,
-                                    const ChannelBufferIndexFinder::Functor& indexFinder) {
-    if (!buffer || !indexFinder) {
-        return -1;
-        // log "the input buffer or the index finder is NULL."
-    }
-
-    int capacity = buffer->capacity();
-    fromIndex = std::max(fromIndex, 0);
-    toIndex = std::min(toIndex, capacity);
-
-    if (fromIndex >= toIndex || capacity == 0) {
-        return -1;
-    }
-
-    for (int i = fromIndex; i < toIndex; i ++) {
-        if (indexFinder(*buffer, i)) {
-            return i;
-        }
-    }
-
-    return -1;
 }
 
 int ChannelBufferUtil::firstIndexOf(const ConstChannelBufferPtr& buffer,
@@ -331,32 +293,6 @@ int ChannelBufferUtil::firstIndexOf(const ConstChannelBufferPtr& buffer,
 
     for (int i = fromIndex; i < toIndex; ++i) {
         if (buffer->getByte(i) == value) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-int ChannelBufferUtil::lastIndexOf(const ConstChannelBufferPtr& buffer,
-                                   int fromIndex,
-                                   int toIndex,
-                                   const ChannelBufferIndexFinder::Functor& indexFinder) {
-    if (!buffer || !indexFinder) {
-        //log "the input buffer or the index finder is NULL."
-        return -1;
-    }
-
-    int capacity = buffer->capacity();
-    fromIndex = std::min(fromIndex, capacity);
-    toIndex = std::max(toIndex, 0);
-
-    if (fromIndex < 0 || capacity == 0) {
-        return -1;
-    }
-
-    for (int i = fromIndex - 1; i >= toIndex; i --) {
-        if (indexFinder(*buffer, i)) {
             return i;
         }
     }

@@ -17,30 +17,62 @@
  * under the License.
  */
 
+#include <vector>
+#include <cetty/util/StringPiece.h>
+
 namespace cetty {
 namespace buffer {
 
+using namespace cetty::util;
+
 class GatheringBuffer {
 public:
-    virtual ~GatheringBuffer() {}
+    GatheringBuffer() : bytesCnt(0) {}
+    ~GatheringBuffer() {}
 
-    virtual bool empty() const = 0;
+    bool empty() const {
+        return buffers.empty();
+    }
 
     /**
      * underline memory block count.
      */
-    virtual int  blockCount() const = 0;
+    int blockCount() const {
+        return (int)buffers.size();
+    }
 
     /**
      * the total bytes of all the memory blocks.
      */
-    virtual int  bytesCount() const = 0;
+    int bytesCount() const {
+        return bytesCnt;
+    }
 
-    virtual void clear() = 0;
+    const StringPiece& at(int index) {
+        return buffers.at(index);
+    }
 
-    virtual void append(char* data, int size) = 0;
+    void append(const char* data, int size) {
+        if (data && size > 0) {
+            bytesCnt += size;
+            buffers.push_back(StringPiece(data, size));
+        }
+    }
 
-    virtual std::pair<char*, int> at(int index) = 0;
+    void addBlock(const StringPiece& bytes) {
+        if (!bytes.empty()) {
+            bytesCnt += bytes.size();
+            buffers.push_back(bytes);
+        }
+    }
+
+    void clear() {
+        buffers.clear();
+    }
+
+private:
+    int bytesCnt;
+    std::vector<StringPiece> buffers;
 };
 
 }

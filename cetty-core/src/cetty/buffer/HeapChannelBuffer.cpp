@@ -42,7 +42,7 @@ HeapChannelBuffer::HeapChannelBuffer(int initialCapacity, int aheadBytes, int ma
     if (initialCapacity < 0
             || initialCapacity > maximunCapacity
             || aheadBytes < 0) {
-        CETTY_NDC_SCOPE(HeapChannelBuffer);
+        CETTY_NDC_SCOPE();
         throw InvalidArgumentException("length must greater than 0.");
     }
 
@@ -134,28 +134,28 @@ void HeapChannelBuffer::capacity(int newCapacity) {
     }
 }
 
-void HeapChannelBuffer::readableBytes(StringPiece* bytes) {
-    if (bytes) {
-        bytes->set(buf + readerIdx, writerIdx - readerIdx);
+const char* HeapChannelBuffer::readableBytes(int* length) {
+    if (length) {
+        *length = writerIdx - readerIdx;
     }
+
+    return buf + readerIdx;
 }
 
 char* HeapChannelBuffer::writableBytes(int* length) {
     if (length) {
         *length = bufSize - writerIdx;
-        return buf + writerIdx;
     }
 
-    return NULL;
+    return buf + writerIdx;
 }
 
 char* HeapChannelBuffer::aheadWritableBytes(int* length) {
     if (length) {
         *length = readerIdx;
-        return buf;
     }
 
-    return NULL;
+    return buf;
 }
 
 int8_t HeapChannelBuffer::getByte(int index) const {
@@ -213,30 +213,34 @@ int HeapChannelBuffer::getBytes(int index, const ChannelBufferPtr& dst, int dstI
         boost::dynamic_pointer_cast<HeapChannelBuffer>(dst);
 
     if (dstBuffer) {
-        return getBytes(index, buf, dstIndex, length);
-    }
-    else {
-        return dst->setBytes(dstIndex, buf, index, length);
-    }
-}
-
-int HeapChannelBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
-    if (dst) {
-        if (dstIndex < 0
-            || index < 0
-            || length < 0
-            || index + length > bufSize) {
-                    CETTY_NDC_SCOPE();
-                    LOG_ERROR << "RangeException, getBytes("
-                        << index << ", char*, " << dstIndex << ", " << length << ")";
-                    throw RangeException("getBytes");
+        if (length < 0 || index < 0 || dstIndex < 0 || index + length > bufSize || dstIndex + length > dstBuffer->bufSize) {
+            return 0;
         }
-
-        memcpy(dst + dstIndex, buf + index, length);
-        return length;
+        else {
+            memmove(dstBuffer->buf + dstIndex, buf + index, length);
+            return length;
+        }
+    }
+    else if (dst) {
+        return dst->setBytes(dstIndex, buf + index, length);
     }
 
     return 0;
+}
+
+int HeapChannelBuffer::getBytes(int index, char* dst, int length) const {
+    if (NULL == dst
+        || index < 0
+        || length < 0
+        || index + length > bufSize) {
+                CETTY_NDC_SCOPE();
+                LOG_ERROR << "RangeException, getBytes("
+                    << index << ", char*, " << length << ")";
+                throw RangeException("getBytes");
+    }
+
+    memcpy(dst, buf + index, length);
+    return length;
 }
 
 int HeapChannelBuffer::getBytes(int index, OutputStream* out, int length) const {
@@ -288,9 +292,8 @@ int HeapChannelBuffer::setInt(int index, int value) {
 
 int HeapChannelBuffer::setLong(int index, int64_t value) {
     if (index < 0 || index + 7 >= bufSize) {
-        CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, setLong(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("setLong with %d", index));
+        return 0;
     }
 
     buf[index  ] = (int8_t)(value >> 56);
@@ -314,30 +317,33 @@ int HeapChannelBuffer::setBytes(int index, const ConstChannelBufferPtr& src, int
         boost::dynamic_pointer_cast<HeapChannelBuffer const>(src);
 
     if (heap) {
-        return setBytes(index, heap->buf, srcIndex, length);
+        if (length < 0 || index < 0 || srcIndex < 0 || index + length > bufSize || srcIndex + length > heap->bufSize) {
+            return 0;
+        }
+        else {
+            memmove(buf + index, heap->buf + srcIndex, length);
+            return length;
+        }
     }
     else {
-        src->getBytes(srcIndex, buf, index, length);
+        src->getBytes(srcIndex, buf + index, length);
         return length;
     }
 }
 
-int HeapChannelBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
-    if (src.empty() || length == 0) {
-        return 0;
-    }
-
-    if (srcIndex < 0
+int HeapChannelBuffer::setBytes(int index, const char* src, int length) {
+    if (NULL == src
+        || 0 == length
         || index < 0
         || length < 0
         || index + length > bufSize) {
             CETTY_NDC_SCOPE();
             LOG_ERROR << "RangeException, getBytes("
-                << index << ", char*, " << srcIndex << ", " << length << ")";
+                << index << ", char*, " << length << ")";
             throw RangeException("getBytes");
     }
 
-    memcpy(buf + index, src.data() + srcIndex, length);
+    memcpy(buf + index, src, length);
     return length;
 }
 
@@ -400,8 +406,14 @@ void HeapChannelBuffer::init(char* buf, int length, int maxCapacity, int readerI
 
     if (length <= 0 || length > maxCapacity) {
         CETTY_NDC_SCOPE();
-        LOG_ERROR << "RangeException";
-        throw InvalidArgumentException("length must greater than 0.");
+        std::string msg;
+        StringUtil::strprintf(&msg,
+            "length(%d) must greater than 0 and less then maxCapacity(%d).",
+            length,
+            maxCapacity);
+
+        LOG_ERROR << "RangeException: " << msg;
+        throw InvalidArgumentException(msg);
     }
 
     this->buf = buf;
@@ -410,7 +422,7 @@ void HeapChannelBuffer::init(char* buf, int length, int maxCapacity, int readerI
     setIndex(readerIndex, writerIndex);
 }
 
-cetty::buffer::ChannelBufferPtr HeapChannelBuffer::copy(int index, int length) const {
+ChannelBufferPtr HeapChannelBuffer::copy(int index, int length) const {
     if (index < 0 || length < 0 || index + length > bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, copy(" << index << ", " << length << ");";
@@ -421,12 +433,6 @@ cetty::buffer::ChannelBufferPtr HeapChannelBuffer::copy(int index, int length) c
     memcpy(copiedBytes, buf + index, length);
     return ChannelBufferPtr(
                new HeapChannelBuffer(copiedBytes, length, maximumCapacity, true));
-}
-
-cetty::buffer::ChannelBufferPtr HeapChannelBuffer::newBuffer(int initialCapacity) {
-    return new HeapChannelBuffer(initialCapacity,
-                                 0,
-                                 std::max(initialCapacity, maximumCapacity));
 }
 
 }

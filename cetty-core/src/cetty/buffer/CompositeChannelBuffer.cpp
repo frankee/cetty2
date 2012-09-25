@@ -51,14 +51,14 @@ std::vector<ChannelBufferPtr> CompositeChannelBuffer::decompose(int index, int l
     }
 
     if (index + length > capacity()) {
-        CETTY_NDC_SCOPE("decompose(int, int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer decompose out of range.");
     }
 
     int componentId = getComponentId(index);
 
     // The first component
-    ChannelBufferPtr first = components[componentId]->duplicate();
+    ChannelBufferPtr first = components[componentId]->slice();
     first->readerIndex(index - indices[componentId]);
 
     ChannelBufferPtr buf = first;
@@ -80,7 +80,7 @@ std::vector<ChannelBufferPtr> CompositeChannelBuffer::decompose(int index, int l
             componentId ++;
 
             // Fetch the next component.
-            buf = components[componentId]->duplicate();
+            buf = components[componentId]->slice();
         }
     }
     while (bytesToSlice > 0);
@@ -152,22 +152,23 @@ int64_t CompositeChannelBuffer::getLong(int index) const {
     }
 }
 
-int CompositeChannelBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
+int CompositeChannelBuffer::getBytes(int index, char* dst, int length) const {
     int componentId = getComponentId(index);
 
     if (index > (capacity() - length)) {
-        CETTY_NDC_SCOPE("getBytes(int, Array*, int, int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer getBytes out of range.");
     }
 
     int i = componentId;
     int transferredBytes = length;
+    int dstIndex = 0;
 
     while (length > 0) {
         const ChannelBufferPtr& s = components[i];
         int adjustment = indices[i];
         int localLength = std::min(length, s->capacity() - (index - adjustment));
-        s->getBytes(index - adjustment, dst, dstIndex, localLength);
+        s->getBytes(index - adjustment, dst + dstIndex, localLength);
 
         index += localLength;
         dstIndex += localLength;
@@ -182,7 +183,7 @@ int CompositeChannelBuffer::getBytes(int index, const ChannelBufferPtr& dst, int
     int componentId = getComponentId(index);
 
     if (index > (capacity() - length) || dstIndex > (dst->capacity() - length)) {
-        CETTY_NDC_SCOPE("getBytes(int, const ChannelBufferPtr&, int, int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer getBytes out of range.");
     }
 
@@ -209,7 +210,7 @@ int CompositeChannelBuffer::getBytes(int index, OutputStream* out, int length) c
     int componentId = getComponentId(index);
 
     if (index > capacity() - length) {
-        CETTY_NDC_SCOPE("getBytes(int, OutputStream*, int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer getBytes out of range.");
     }
 
@@ -288,23 +289,24 @@ int CompositeChannelBuffer::setLong(int index, int64_t value) {
     return 8;
 }
 
-int CompositeChannelBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
+int CompositeChannelBuffer::setBytes(int index, const char* src, int length) {
     int componentId = getComponentId(index);
 
-    if (index > capacity() - length || srcIndex > src.length() - length) {
-        CETTY_NDC_SCOPE("setBytes(int, const ConstArray&, int, int)");
+    if (NULL == src && index > capacity() - length) {
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer setBytes out of range.");
     }
 
     int i = componentId;
     int transferredBytes = length;
+    int srcIndex = 0;
 
     while (length > 0) {
         ChannelBufferPtr& s = components[i];
         int adjustment = indices[i];
         int localLength = std::min(length, s->capacity() - (index - adjustment));
 
-        s->setBytes(index - adjustment, src, srcIndex, localLength);
+        s->setBytes(index - adjustment, src + srcIndex, localLength);
 
         index += localLength;
         srcIndex += localLength;
@@ -319,7 +321,7 @@ int CompositeChannelBuffer::setBytes(int index, const ConstChannelBufferPtr& src
     int componentId = getComponentId(index);
 
     if (index > capacity() - length || srcIndex > src->capacity() - length) {
-        CETTY_NDC_SCOPE("setBytes(int, const ConstChannelBufferPtr&, int, int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer setBytes out of range.");
     }
 
@@ -388,8 +390,8 @@ ChannelBufferPtr CompositeChannelBuffer::copy(int index, int length) const {
     int componentId = getComponentId(index);
 
     if (index > (capacity() - length)) {
-        CETTY_NDC_SCOPE("copy(int, int)");
-        throw RangeException("CompositeChannelBuffer copy out of range.");
+        CETTY_NDC_SCOPE();
+        throw RangeException();
     }
 
     ChannelBufferPtr dst = Unpooled::buffer(length);
@@ -405,8 +407,8 @@ ChannelBufferPtr CompositeChannelBuffer::slice(int index, int length) {
     }
 
     if (index < 0 || index > (capacity() - length)) {
-        CETTY_NDC_SCOPE("slice(int, int)");
-        throw RangeException("CompositeChannelBuffer slice out of range.");
+        CETTY_NDC_SCOPE();
+        throw RangeException();
     }
 
     std::vector<ChannelBufferPtr> components = decompose(index, length);
@@ -430,7 +432,7 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
     }
 
     if (index < 0 || index + length > capacity()) {
-        CETTY_NDC_SCOPE("slice(int, int, GatheringBuffer*)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer slice out of range.");
     }
 
@@ -459,18 +461,18 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
     return length;
 }
 
-void CompositeChannelBuffer::readableBytes(StringPiece* bytes) {
-    CETTY_NDC_SCOPE("readableBytes(Array*)");
+const char* CompositeChannelBuffer::readableBytes(int* length) {
+    CETTY_NDC_SCOPE();
     throw UnsupportedOperationException();
 }
 
 char* CompositeChannelBuffer::writableBytes(int* length) {
-    CETTY_NDC_SCOPE("writableBytes(Array*)");
+    CETTY_NDC_SCOPE();
     throw UnsupportedOperationException();
 }
 
 char* CompositeChannelBuffer::aheadWritableBytes(int* length) {
-    CETTY_NDC_SCOPE("aheadWritableBytes(Array*)");
+    CETTY_NDC_SCOPE();
     throw UnsupportedOperationException();
 }
 
@@ -553,7 +555,7 @@ void CompositeChannelBuffer::setComponents(const std::vector<ChannelBufferPtr>& 
         const ChannelBufferPtr& c = newComponents.at(i);
 
         if (c->order() != order()) {
-            CETTY_NDC_SCOPE("setComponents");
+            CETTY_NDC_SCOPE();
             throw InvalidArgumentException("All buffers must have the same endianness.");
         }
 
@@ -603,7 +605,7 @@ int CompositeChannelBuffer::getComponentId(int index) const {
 
 int CompositeChannelBuffer::getComponentId(int index) {
     if (index < 0) {
-        CETTY_NDC_SCOPE("getComponentId(int)");
+        CETTY_NDC_SCOPE();
         throw RangeException("CompositeChannelBuffer getComponentId out of range.");
     }
 
@@ -632,12 +634,8 @@ int CompositeChannelBuffer::getComponentId(int index) {
         }
     }
 
-    CETTY_NDC_SCOPE("getComponentId(int)");
+    CETTY_NDC_SCOPE();
     throw RangeException("CompositeChannelBuffer getComponentId out of range.");
-}
-
-ChannelBufferPtr CompositeChannelBuffer::newBuffer(int initialCapacity) {
-    return Unpooled::EMPTY_BUFFER;
 }
 
 }

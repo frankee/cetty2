@@ -104,9 +104,6 @@
     <ClCompile Include="..\..\src\cetty\buffer\ByteOrder.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferIndexFinder.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\buffer\CompositeChannelBuffer.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
@@ -156,9 +153,6 @@
       <Filter>channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.cpp">
-      <Filter>channel\socket\asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioGatheringBuffer.cpp">
       <Filter>channel\socket\asio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
@@ -475,9 +469,6 @@
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferIndexFinder.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\CompositeChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
@@ -542,9 +533,6 @@
       <Filter>logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h">
-      <Filter>channel\socket\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioGatheringBuffer.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h">
@@ -652,9 +640,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPool.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -693,9 +678,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h">
       <Filter>handler\codec</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h">
       <Filter>channel</Filter>
@@ -1050,9 +1032,6 @@
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\Unpooled.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\buffer\SwappedChannelBuffer.h">
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\Common.h" />

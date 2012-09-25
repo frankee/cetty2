@@ -22,10 +22,11 @@
  */
 
 #include <string>
+#include <boost/function.hpp>
+
 #include <cetty/Types.h>
 #include <cetty/buffer/ByteOrder.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
-#include <cetty/buffer/ChannelBufferIndexFinder.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -39,10 +40,9 @@ class OutputStream;
 namespace cetty {
 namespace buffer {
 
-using namespace cetty::util;
-
 class GatheringBuffer;
-class ChannelBufferFactory;
+
+using namespace cetty::util;
 
 /**
  * A random and sequential accessible sequence of zero or more bytes (octets).
@@ -258,6 +258,9 @@ class ChannelBufferFactory;
 
 class ChannelBuffer : public cetty::util::ReferenceCounter<ChannelBuffer> {
 public:
+    typedef boost::function2<void, int, int> IndexChangedCallback;
+
+public:
     virtual ~ChannelBuffer() {}
 
     /**
@@ -295,7 +298,7 @@ public:
      * return {@code this}.  This method does not modify {@code readerIndex} or {@code writerIndex}
      * of this buffer.
      */
-    virtual ChannelBufferPtr order(const ByteOrder& endianness);
+    //virtual ChannelBufferPtr order(const ByteOrder& endianness);
 
     /**
      * Returns the <tt>readerIndex</tt> of this buffer.
@@ -410,8 +413,17 @@ public:
      */
     int readableBytes() const;
 
+    /**
+     * Returns the number of readable bytes which is equal to
+     * .
+     */
+    int readableBytes(StringPiece* bytes);
 
-    virtual void readableBytes(StringPiece* bytes) = 0;
+    /**
+     * Returns underlaying buffer pointer if is HeapChannelBuffer,
+     * otherwise return Null.
+     */
+    virtual const char* readableBytes(int* length) = 0;
 
     /**
      * Returns the number of writable bytes which is equal to
@@ -420,13 +432,21 @@ public:
     int writableBytes() const;
 
     /**
-     * Returns the number of writable bytes which is equal to
-     * <tt>(this.capacity - this.writerIndex)</tt>.
+     * Returns the number of ahead writable bytes which is equal to
+     * <tt>(readIndex())</tt>.
      */
     int aheadWritableBytes() const;
 
+    /**
+     * Returns underlaying buffer pointer if is HeapChannelBuffer,
+     * otherwise return Null.
+     */
     virtual char* writableBytes(int* length) = 0; 
 
+    /**
+     * Returns underlaying buffer pointer if is HeapChannelBuffer,
+     * otherwise return Null.
+     */
     virtual char* aheadWritableBytes(int* length) = 0;
 
     /**
@@ -557,6 +577,7 @@ public:
      */
     virtual int8_t getByte(int index) const = 0;
 
+
     /**
      * Gets an unsigned byte at the specified absolute <tt>index</tt> in this
      * buffer.  This method does not modify <tt>readerIndex</tt> or
@@ -567,7 +588,7 @@ public:
      *         <tt>index + 1</tt> is greater than <tt>this.capacity</tt>
      */
     uint8_t getUnsignedByte(int index) const;
-
+    
     /**
      * Gets a 16-bit short integer at the specified absolute <tt>index</tt> in
      * this buffer.  This method does not modify <tt>readerIndex</tt> or
@@ -645,6 +666,8 @@ public:
      */
     double getDouble(int index) const;
 
+    int getVarint(int index, uint64_t* value);
+
     /**
      * Transfers this buffer's data to the specified destination starting at
      * the specified absolute <tt>index</tt> until the destination becomes
@@ -708,39 +731,6 @@ public:
      * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
      * this buffer
      *
-     * @throws RangeException
-     *         if the specified <tt>index</tt> is less than <tt>0</tt> or
-     *         if <tt>index + dst.length()</tt> is greater than
-     *            <tt>this.capacity</tt>
-     */
-    int getBytes(int index, char* dst, int length) const;
-
-    /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute <tt>index</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt>
-     * of this buffer.
-     *
-     * @param dstIndex the first index of the destination
-     * @param length   the number of bytes to transfer
-     *
-     * @throws RangeException
-               如果dst的容量不足，必须抛出异常
-     *         if the specified <tt>index</tt> is less than <tt>0</tt>,
-     *         if the specified <tt>dstIndex</tt> is less than <tt>0</tt>,
-     *         if <tt>index + length</tt> is greater than
-     *            <tt>this.capacity</tt>, or
-     *         if <tt>dstIndex + length</tt> is greater than
-     *            <tt>dst.length()</tt>
-     */
-    virtual int getBytes(int index, char* dst, int dstIndex, int length) const = 0;
-
-    /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute <tt>index</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer
-     *
      * @param length   the number of bytes to transfer
      *
      * @throws RangeException
@@ -749,6 +739,19 @@ public:
      *            <tt>this->capacity</tt>
      */
     int getBytes(int index, std::string* dst, int length) const;
+
+    /**
+     * Transfers this buffer's data to the specified destination starting at
+     * the specified absolute <tt>index</tt>.
+     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
+     * this buffer
+     *
+     * @throws RangeException
+     *         if the specified <tt>index</tt> is less than <tt>0</tt> or
+     *         if <tt>index + dst.length()</tt> is greater than
+     *            <tt>this.capacity</tt>
+     */
+    virtual int getBytes(int index, char* dst, int length) const = 0;
 
     /**
      * Transfers this buffer's data to the specified stream starting at the
@@ -822,16 +825,6 @@ public:
     virtual int slice(int index, int length, GatheringBuffer* gatheringBuffer) = 0;
 
     /**
-     * Returns a buffer which shares the whole region of this buffer.
-     * Modifying the content of the returned buffer or this buffer affects
-     * each other's content while they maintain separate indexes and marks.
-     * This method is identical to <tt>buf.slice(0, buf.capacity())</tt>.
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     */
-    ChannelBufferPtr duplicate();
-
-    /**
      * Sets the specified byte at the specified absolute <tt>index</tt> in this
      * buffer.  The 24 high-order bits of the specified value are ignored.
      * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
@@ -903,6 +896,8 @@ public:
      *         <tt>index + 8</tt> is greater than <tt>this.capacity</tt>
      */
     int setDouble(int index, double value);
+
+    int setVarint(int index, uint64_t value);
 
     /**
      * Transfers the specified source buffer's data to this buffer starting at
@@ -987,25 +982,11 @@ public:
      *            <tt>this.capacity</tt>, or
      *         if <tt>srcIndex + length</tt> is greater than <tt>src.length()</tt>
      */
-    virtual int setBytes(int index, const StringPiece& src, int srcIndex, int length) = 0;
+    int setBytes(int index, const StringPiece& src, int srcIndex, int length);
 
-    int setBytes(int index, const char* src, int length);
 
-    /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
-     *
-     * @throws IndexOutOfBoundsException
-     *         if the specified {@code index} is less than {@code 0},
-     *         if the specified {@code srcIndex} is less than {@code 0},
-     *         if {@code index + length} is greater than
-     *            {@code this.capacity}, or
-     *         if {@code srcIndex + length} is greater than {@code src.length}
-     */
-    int setBytes(int index, const char* src, int srcIndex, int length);
-
+    virtual int setBytes(int index, const char* src, int length) = 0;
+    
     /**
      * Transfers the content of the specified source stream to this buffer
      * starting at the specified absolute <tt>index</tt>.
@@ -1120,6 +1101,8 @@ public:
      */
     double readDouble();
 
+    int readVarint(uint64_t* value);
+
     /**
      * Transfers this buffer's data to a newly created buffer starting at
      * the current <tt>readerIndex</tt> and increases the <tt>readerIndex</tt>
@@ -1222,7 +1205,7 @@ public:
      *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>, or
      *         if <tt>dstIndex + length</tt> is greater than <tt>dst.length()</tt>
      */
-    int readBytes(char* dst, int dstIndex, int length);
+    //int readBytes(char* dst, int dstIndex, int length);
 
     /**
      * Transfers this buffer's data to the specified destination starting at
@@ -1286,14 +1269,14 @@ public:
      * <tt>readerIndex</tt> and increases the <tt>readerIndex</tt> by the
      * {@link #readableBytes() readableBytes} to a GatheringBuffer.
      */
-    int readSlice(GatheringBuffer* gatheringBuffer);
+    int readSlice(GatheringBuffer* bytes);
 
     /**
      * Assign a new slice of this buffer's sub-region starting at the current
      * <tt>readerIndex</tt> and increases the <tt>readerIndex</tt> by the
      * {@link #readableBytes() readableBytes} to a GatheringBuffer.
      */
-    int readSlice(GatheringBuffer* gatheringBuffer, int length);
+    int readSlice(int length, GatheringBuffer* bytes);
 
     /**
      * Increases the current <tt>readerIndex</tt> by the specified
@@ -1375,6 +1358,9 @@ public:
 
     int writeDoubleAhead(double value);
 
+    int writeVarint(uint64_t value);
+    int writeVarintAhead(uint64_t value);
+
     /**
      * Transfers the specified source buffer's data to this buffer starting at
      * the current <tt>writerIndex</tt> until the source buffer becomes
@@ -1442,17 +1428,6 @@ public:
     int writeBytes(const StringPiece& src);
     int writeBytesAhead(const StringPiece& src);
 
-    int writeBytes(const char* src, int length) {
-        return writeBytes(src, 0, length);
-    }
-    int writeBytesAhead(const char* src, int length) {
-        return writeBytesAhead(src, 0, length);
-    }
-
-    int writeBytes(const char* src, int srcIndex, int length);
-
-    int writeBytesAhead(const char* src, int srcIndex, int length);
-
     /**
      * Transfers the specified source array's data to this buffer starting at
      * the current <tt>writerIndex</tt> and increases the <tt>writerIndex</tt>
@@ -1470,6 +1445,17 @@ public:
     int writeBytes(const StringPiece& src, int srcIndex, int length);
 
     int writeBytesAhead(const StringPiece& src, int srcIndex, int length);
+
+    /**
+     * Transfers the specified source array's data to this buffer starting at
+     * the current <tt>writerIndex</tt> and increases the <tt>writerIndex</tt>
+     * by the number of the transferred bytes (= <tt>src.length()</tt>).
+     *
+     * @throws RangeException
+     *         if <tt>src.length()</tt> is greater than <tt>this.writableBytes</tt>
+     */
+    int writeBytes(const char* src, int length);
+    int writeBytesAhead(const char* src, int length);
 
     /**
      * Transfers the content of the specified stream to this buffer
@@ -1516,26 +1502,10 @@ public:
      *         <tt>-1</tt> otherwise.
      */
     int indexOf(int fromIndex, int toIndex, int8_t value) const;
+    virtual int indexOf(int fromIndex, int toIndex, const StringPiece& value) const;
 
-    /**
-     * Locates the first place where the specified <tt>indexFinder</tt>
-     * returns <tt>true</tt>.  The search takes place from the specified
-     * <tt>fromIndex</tt> (inclusive) to the specified <tt>toIndex</tt>
-     * (exclusive).
-     * <p>
-     * If <tt>fromIndex</tt> is greater than <tt>toIndex</tt>, the search is
-     * performed in a reversed order.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the absolute index where the specified <tt>indexFinder</tt>
-     *         returned <tt>true</tt>.  <tt>-1</tt> if the <tt>indexFinder</tt>
-     *         did not return <tt>true</tt> at all.
-     */
-    int indexOf(int fromIndex,
-                int toIndex,
-                const ChannelBufferIndexFinder::Functor& indexFinder) const;
+    int indexNotOf(int fromIndex, int toIndex, int8_t value) const;
+    virtual int indexNotOf(int fromIndex, int toIndex, const StringPiece& value) const;
 
     /**
      * Locates the first occurrence of the specified <tt>value</tt> in this
@@ -1548,93 +1518,15 @@ public:
      * @return the number of bytes between the current <tt>readerIndex</tt>
      *         and the first occurrence if found. <tt>-1</tt> otherwise.
      */
-    int bytesBefore(int8_t value) const;
+    int bytesBefore(int8_t value, int offset = 0, int length = -1) const;
+    int bytesBefore(const StringPiece& value, int offset = 0, int length = -1) const;
 
-    /**
-     * Locates the first place where the specified <tt>indexFinder</tt> returns
-     * <tt>true</tt>.  The search takes place from the current <tt>readerIndex</tt>
-     * (inclusive) to the current <tt>writerIndex</tt>.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the number of bytes between the current <tt>readerIndex</tt>
-     *         and the first place where the <tt>indexFinder</tt> returned
-     *         <tt>true</tt>.  <tt>-1</tt> if the <tt>indexFinder</tt> did not
-     *         return <tt>true</tt> at all.
-     */
-    int bytesBefore(const ChannelBufferIndexFinder::Functor& indexFinder) const;
+    int bytesBeforeNot(int8_t value, int offset = 0, int length = -1) const;
+    int bytesBeforeNot(const StringPiece& value, int offset = 0, int length = -1) const;
 
-    /**
-     * Locates the first occurrence of the specified <tt>value</tt> in this
-     * buffer.  The search starts from the current <tt>readerIndex</tt>
-     * (inclusive) and lasts for the specified <tt>length</tt>.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the number of bytes between the current <tt>readerIndex</tt>
-     *         and the first occurrence if found. <tt>-1</tt> otherwise.
-     *
-     * @throws RangeException
-     *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>
-     */
-    int bytesBefore(int length, int8_t value) const;
-
-    /**
-     * Locates the first place where the specified <tt>indexFinder</tt> returns
-     * <tt>true</tt>.  The search starts the current <tt>readerIndex</tt>
-     * (inclusive) and lasts for the specified <tt>length</tt>.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the number of bytes between the current <tt>readerIndex</tt>
-     *         and the first place where the <tt>indexFinder</tt> returned
-     *         <tt>true</tt>.  <tt>-1</tt> if the <tt>indexFinder</tt> did not
-     *         return <tt>true</tt> at all.
-     *
-     * @throws RangeException
-     *         if <tt>length</tt> is greater than <tt>this.readableBytes</tt>
-     */
-    int bytesBefore(int length, const ChannelBufferIndexFinder::Functor& indexFinder) const;
-
-    /**
-     * Locates the first occurrence of the specified <tt>value</tt> in this
-     * buffer.  The search starts from the specified <tt>index</tt> (inclusive)
-     * and lasts for the specified <tt>length</tt>.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the number of bytes between the specified <tt>index</tt>
-     *         and the first occurrence if found. <tt>-1</tt> otherwise.
-     *
-     * @remark 
-     *         if <tt>index + length</tt> is greater than <tt>this.capacity</tt>,
-     *         will only search to this.capacity.
-     */
-    int bytesBefore(int index, int length, int8_t value) const;
-
-    /**
-     * Locates the first place where the specified <tt>indexFinder</tt> returns
-     * <tt>true</tt>.  The search starts the specified <tt>index</tt> (inclusive)
-     * and lasts for the specified <tt>length</tt>.
-     * <p>
-     * This method does not modify <tt>readerIndex</tt> or <tt>writerIndex</tt> of
-     * this buffer.
-     *
-     * @return the number of bytes between the specified <tt>index</tt>
-     *         and the first place where the <tt>indexFinder</tt> returned
-     *         <tt>true</tt>.  <tt>-1</tt> if the <tt>indexFinder</tt> did not
-     *         return <tt>true</tt> at all.
-     *
-     * @throws RangeException
-     *         if <tt>index + length</tt> is greater than <tt>this.capacity</tt>
-     */
-    int bytesBefore(int index,
-                    int length,
-                    const ChannelBufferIndexFinder::Functor& indexFinder) const;
+    void setIndexChangedCallback(const IndexChangedCallback& callback) {
+        this->callback = callback;
+    }
 
     /**
      * Compares the content of the specified buffer to the content of this
@@ -1643,13 +1535,6 @@ public:
      * <tt>memcmp</tt> and {@link std::string#compareTo(std::string)}.
      */
     int compare(const ChannelBufferPtr& buffer) const;
-
-    /**
-     * Returns a new buffer whose type is identical to the callee.
-     *
-     * @param initialCapacity the initial capacity of the new buffer
-     */
-    virtual ChannelBufferPtr newBuffer(int initialCapacity) = 0;
 
     /**
      * Returns the string representation of this buffer.  This method does not
@@ -1665,7 +1550,7 @@ protected:
      * {@link #readableBytes() readable bytes} of this buffer is less
      * than the specified value.
      */
-    virtual bool checkReadableBytes(int minReadableBytes) const;
+    virtual bool checkReadableBytes(int minReadableBytes, bool throwException = false) const;
 
     int calculateNewCapacity(int minNewCapacity);
 
@@ -1698,6 +1583,14 @@ protected:
           maximumCapacity(maximumCapacity),
           byteOrder(byteOrder) {}
 
+    
+
+    void fireIndexChanged() {
+        if (callback) {
+            callback(readerIdx, writerIdx);
+        }
+    }
+
 protected:
     int readerIdx;
     int writerIdx;
@@ -1706,6 +1599,8 @@ protected:
 
     int maximumCapacity;
     ByteOrder byteOrder;
+
+    IndexChangedCallback callback;
 };
 
 }

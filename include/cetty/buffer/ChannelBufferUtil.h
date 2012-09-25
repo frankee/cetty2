@@ -19,7 +19,6 @@
 
 #include <cetty/Types.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
-#include <cetty/buffer/ChannelBufferIndexFinder.h>
 
 namespace cetty {
 namespace buffer {
@@ -82,15 +81,6 @@ public:
                        int8_t value);
 
     /**
-     * The default implementation of {@link ChannelBuffer#indexOf(int, int, ChannelBufferIndexFinder)}.
-     * This method is useful when implementing a new buffer type.
-     */
-    static int indexOf(const ConstChannelBufferPtr& buffer,
-                       int fromIndex,
-                       int toIndex,
-                       const ChannelBufferIndexFinder::Functor& indexFinder);
-
-    /**
      * Toggles the endianness of the specified 16-bit short integer.
      */
     static int16_t swapShort(int16_t value);
@@ -120,16 +110,6 @@ private:
                            int fromIndex,
                            int toIndex,
                            int8_t value);
-
-    static int firstIndexOf(const ConstChannelBufferPtr& buffer,
-                            int fromIndex,
-                            int toIndex,
-                            const ChannelBufferIndexFinder::Functor& indexFinder);
-
-    static int lastIndexOf(const ConstChannelBufferPtr& buffer,
-                           int fromIndex,
-                           int toIndex,
-                           const ChannelBufferIndexFinder::Functor& indexFinder);
 
 private:
     ChannelBufferUtil();

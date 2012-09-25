@@ -55,7 +55,7 @@ public:
      */
     std::vector<ChannelBufferPtr> decompose(int index, int length);
 
-    virtual void readableBytes(StringPiece* bytes);
+    virtual const char* readableBytes(int* length);
     virtual char* writableBytes(int* length);
     virtual char* aheadWritableBytes(int* length);
 
@@ -67,7 +67,7 @@ public:
     virtual int32_t getInt(int index) const;
     virtual int64_t getLong(int index) const;
 
-    virtual int getBytes(int index, char* dst, int dstIndex, int length) const;
+    virtual int getBytes(int index, char* dst, int length) const;
     virtual int getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const;
     virtual int getBytes(int index, OutputStream* out, int length) const;
 
@@ -76,7 +76,7 @@ public:
     virtual int setInt(int index, int value);
     virtual int setLong(int index, int64_t value);
 
-    virtual int setBytes(int index, const StringPiece& src, int srcIndex, int length);
+    virtual int setBytes(int index, const char* src, int length);
     virtual int setBytes(int index, const ConstChannelBufferPtr& src, int srcIndex, int length);
     virtual int setBytes(int index, InputStream* in, int length);
 
@@ -86,8 +86,6 @@ public:
     virtual int slice(int index, int length, GatheringBuffer* arry);
 
     virtual void discardReadBytes();
-
-    virtual ChannelBufferPtr newBuffer(int initialCapacity);
 
     virtual std::string toString();
 

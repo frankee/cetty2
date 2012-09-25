@@ -99,7 +99,6 @@ public:
     virtual void setSoLinger(int soLinger);
     virtual void setTcpNoDelay(bool tcpNoDelay);
 
-
     virtual int  getWriteBufferHighWaterMark() const;
     virtual void setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
 

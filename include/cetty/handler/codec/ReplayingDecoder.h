@@ -467,7 +467,6 @@ protected:
                     else {
                         // Previous data has been discarded or caused state transition.
                         // Probably it is reading on.
-                        replayable->syncIndex();
                         continue;
                     }
                 }
@@ -479,8 +478,6 @@ protected:
                         typeid(*this).name() +
                         std::string(")"));
                 }
-
-                replayable->syncIndex();
 
                 // A successful decode
                 if (inboundTransfer.unfoldAndAdd(result)) {
@@ -558,15 +555,13 @@ private:
     void updateReplayable(const ChannelBufferPtr& input) {
         if (!cumulation) { // only first time will enter.
             cumulation = input;
-            replayable =
-                ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(cumulation));
+            replayable = new ReplayingDecoderBuffer(cumulation);
         }
 
-        // input buffer changes (may re allocate memory) which channel owns buffer
+        // input buffer, which channel owns, changes.
         if (cumulation.get() != input.get()) {
             cumulation = input;
-            replayable =
-                ReplayingDecoderBufferPtr(new ReplayingDecoderBuffer(input));
+            replayable = new ReplayingDecoderBuffer(input);
         }
     }
 

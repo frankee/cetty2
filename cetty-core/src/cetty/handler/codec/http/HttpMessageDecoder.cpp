@@ -690,13 +690,14 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
 
 StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buffer) {
     StringPiece str;
-    StringPiece bytes;
-    buffer->readableBytes(&bytes);
+
+    int bytesCnt;
+    const char* bytes = buffer->readableBytes(&bytesCnt);
 
     int headerSize = this->headerSize;
     int strSize = 0;
 
-    for (int i = 0, j = bytes.length() - 1; i < j; ++i, ++headerSize) {
+    for (int i = 0, j = bytesCnt - 1; i < j; ++i, ++headerSize) {
         // Abort decoding if the header part is too large.
         if (headerSize >= maxHeaderSize) {
             // TODO: Respond with Bad Request and discard the traffic
@@ -709,7 +710,7 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
 
         if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
             buffer->offsetReaderIndex(i+2);
-            return StringPiece(bytes.data(), i);
+            return StringPiece(bytes, i);
         }
     }
 
@@ -733,10 +734,10 @@ int HttpMessageDecoder::getChunkSize(const StringPiece& hex) const {
 
 StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer,
         int maxLineLength) {
-    StringPiece bytes;
-    buffer->readableBytes(&bytes);
+            int bytesCnt;
+    const char* bytes = buffer->readableBytes(&bytesCnt);
 
-    if (bytes.length() >= maxLineLength) {
+    if (bytesCnt >= maxLineLength) {
         // TODO: Respond with Bad Request and discard the traffic
         //    or close the connection.
         //       No need to notify the upstream handlers - just log.
@@ -745,10 +746,10 @@ StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer
             StringUtil::strprintf("An HTTP line is larger than %d bytes.", maxLineLength));
     }
 
-    for (int i = 0, j = bytes.length() - 1; i < j; ++i) {
+    for (int i = 0, j = bytesCnt - 1; i < j; ++i) {
         if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
             buffer->offsetReaderIndex(i+2);
-            return StringPiece(bytes.data(), i);
+            return StringPiece(bytes, i);
         }
     }
 

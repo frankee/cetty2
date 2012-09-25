@@ -24,8 +24,6 @@
 #include <cetty/buffer/SlicedChannelBuffer.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
 
-#include <cetty/buffer/ChannelBufferIndexFinder.h>
-
 #include <cetty/util/StlUtil.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringPiece.h>

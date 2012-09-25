@@ -32,26 +32,26 @@ public:
     typedef const T&       const_reference;
 
 public:
-    TruncatableArray() : truncatedIndex(1) {
+    TruncatableArray() : truncatedCnt(0) {
         BOOST_STATIC_ASSERT(N > 0);
     }
 
 public:
-    int truncatedIndex;
+    int truncatedCnt;
 
 public:
 
-    iterator        end()       { return boost::array<T, N>::elems+truncatedIndex; }
-    const_iterator  end() const { return boost::array<T, N>::elems+truncatedIndex; }
+    iterator        end()       { return boost::array<T, N>::elems+truncatedCnt; }
+    const_iterator  end() const { return boost::array<T, N>::elems+truncatedCnt; }
 
     reference back()  {
-        BOOST_ASSERT(truncatedIndex);
-        return boost::array<T, N>::elems[truncatedIndex-1];
+        BOOST_ASSERT(truncatedCnt);
+        return boost::array<T, N>::elems[truncatedCnt-1];
     }
 
     const_reference back() const {
-        BOOST_ASSERT(truncatedIndex);
-        return boost::array<T, N>::elems[truncatedIndex-1];
+        BOOST_ASSERT(truncatedCnt);
+        return boost::array<T, N>::elems[truncatedCnt-1];
     }
 };
 

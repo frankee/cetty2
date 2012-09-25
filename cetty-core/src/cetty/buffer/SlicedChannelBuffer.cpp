@@ -29,8 +29,10 @@ using namespace cetty::util;
 SlicedChannelBuffer::SlicedChannelBuffer(const ChannelBufferPtr& buffer,
         int index,
         int length)
-    : buffer(buffer), length(length), adjustment(index) {
-    BOOST_ASSERT(buffer);
+    : length(length),
+      adjustment(index),
+      channelBuffer(buffer) {
+    BOOST_ASSERT(channelBuffer);
 
     if (index < 0 || index > buffer->capacity()) {
         throw RangeException("index out range");
@@ -44,7 +46,7 @@ SlicedChannelBuffer::SlicedChannelBuffer(const ChannelBufferPtr& buffer,
 }
 
 const ChannelBufferPtr& SlicedChannelBuffer::unwrap() {
-    return buffer;
+    return channelBuffer;
 }
 
 int SlicedChannelBuffer::capacity() const {
@@ -55,13 +57,18 @@ void SlicedChannelBuffer::capacity(int newCapacity) {
     throw UnsupportedOperationException("sliced buffer");
 }
 
-void SlicedChannelBuffer::readableBytes(StringPiece* bytes) {
-    if (bytes) {
-        int count;
-        char* data = buffer->aheadWritableBytes(&count);
+const char* SlicedChannelBuffer::readableBytes(int* length) {
+    const char* data = channelBuffer->readableBytes(length);
 
-        bytes->set(data + readerIdx + adjustment, length - readerIdx);
+    if (data) {
+        if (length) {
+            *length = *length - readerIdx;
+        }
+
+        return data + adjustment;
     }
+
+    return NULL;
 }
 
 char* SlicedChannelBuffer::writableBytes(int* length) {
@@ -71,7 +78,7 @@ char* SlicedChannelBuffer::writableBytes(int* length) {
 char* SlicedChannelBuffer::aheadWritableBytes(int* length) {
     if (length) {
         int count;
-        char* bytes = buffer->aheadWritableBytes(&count);
+        char* bytes = channelBuffer->aheadWritableBytes(&count);
 
         *length = readerIdx;
         return bytes + adjustment;
@@ -82,27 +89,27 @@ char* SlicedChannelBuffer::aheadWritableBytes(int* length) {
 
 int8_t SlicedChannelBuffer::getByte(int index) const {
     checkIndex(index);
-    return buffer->getByte(index + adjustment);
+    return channelBuffer->getByte(index + adjustment);
 }
 
 int16_t SlicedChannelBuffer::getShort(int index) const {
     checkIndex(index, 2);
-    return buffer->getShort(index + adjustment);
+    return channelBuffer->getShort(index + adjustment);
 }
 
 int32_t SlicedChannelBuffer::getInt(int index) const {
     checkIndex(index, 4);
-    return buffer->getInt(index + adjustment);
+    return channelBuffer->getInt(index + adjustment);
 }
 
 int64_t SlicedChannelBuffer::getLong(int index) const {
     checkIndex(index, 8);
-    return buffer->getLong(index + adjustment);
+    return channelBuffer->getLong(index + adjustment);
 }
 
 ChannelBufferPtr SlicedChannelBuffer::copy(int index, int length) const {
     checkIndex(index, length);
-    return buffer->copy(index + adjustment, length);
+    return channelBuffer->copy(index + adjustment, length);
 }
 
 ChannelBufferPtr SlicedChannelBuffer::slice(int index, int length) {
@@ -113,7 +120,7 @@ ChannelBufferPtr SlicedChannelBuffer::slice(int index, int length) {
     }
 
     return ChannelBufferPtr(
-               new SlicedChannelBuffer(buffer, index + adjustment, length));
+               new SlicedChannelBuffer(channelBuffer, index + adjustment, length));
 }
 
 int SlicedChannelBuffer::slice(int index, int length, GatheringBuffer* gathering) {
@@ -122,57 +129,57 @@ int SlicedChannelBuffer::slice(int index, int length, GatheringBuffer* gathering
     }
 
     checkIndex(index, length);
-    return buffer->slice(index + adjustment, length, gathering);
+    return channelBuffer->slice(index + adjustment, length, gathering);
 }
 
 int SlicedChannelBuffer::getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const {
     checkIndex(index, length);
-    return buffer->getBytes(index + adjustment, dst, dstIndex, length);
+    return channelBuffer->getBytes(index + adjustment, dst, dstIndex, length);
 }
 
-int SlicedChannelBuffer::getBytes(int index, char* dst, int dstIndex, int length) const {
+int SlicedChannelBuffer::getBytes(int index, char* dst, int length) const {
     checkIndex(index, length);
-    return buffer->getBytes(index + adjustment, dst, dstIndex, length);
+    return channelBuffer->getBytes(index + adjustment, dst, length);
 }
 
 int SlicedChannelBuffer::getBytes(int index, OutputStream* out, int length) const {
     checkIndex(index, length);
-    return buffer->getBytes(index + adjustment, out, length);
+    return channelBuffer->getBytes(index + adjustment, out, length);
 }
 
 int SlicedChannelBuffer::setByte(int index, int value) {
     checkIndex(index);
-    return buffer->setByte(index + adjustment, value);
+    return channelBuffer->setByte(index + adjustment, value);
 }
 
 int SlicedChannelBuffer::setShort(int index, int value) {
     checkIndex(index, 2);
-    return buffer->setShort(index + adjustment, value);
+    return channelBuffer->setShort(index + adjustment, value);
 }
 
 int SlicedChannelBuffer::setInt(int index, int value) {
     checkIndex(index, 4);
-    return buffer->setInt(index + adjustment, value);
+    return channelBuffer->setInt(index + adjustment, value);
 }
 
 int SlicedChannelBuffer::setLong(int index, int64_t value) {
     checkIndex(index, 8);
-    return buffer->setLong(index + adjustment, value);
+    return channelBuffer->setLong(index + adjustment, value);
 }
 
-int SlicedChannelBuffer::setBytes(int index, const StringPiece& src, int srcIndex, int length) {
+int SlicedChannelBuffer::setBytes(int index, const char* src, int length) {
     checkIndex(index, length);
-    return buffer->setBytes(index + adjustment, src, srcIndex, length);
+    return channelBuffer->setBytes(index + adjustment, src, length);
 }
 
 int SlicedChannelBuffer::setBytes(int index, const ConstChannelBufferPtr& src, int srcIndex, int length) {
     checkIndex(index, length);
-    return buffer->setBytes(index + adjustment, src, srcIndex, length);
+    return channelBuffer->setBytes(index + adjustment, src, srcIndex, length);
 }
 
 int SlicedChannelBuffer::setBytes(int index, InputStream* in, int length) {
     checkIndex(index, length);
-    return buffer->setBytes(index + adjustment, in, length);
+    return channelBuffer->setBytes(index + adjustment, in, length);
 }
 
 void SlicedChannelBuffer::checkIndex(int index) const {
@@ -194,10 +201,6 @@ void SlicedChannelBuffer::checkIndex(int startIndex, int length) const {
     if (startIndex + length > capacity()) {
         throw RangeException("SlicedChannelBuffer length is out of range.");
     }
-}
-
-ChannelBufferPtr SlicedChannelBuffer::newBuffer(int initialCapacity) {
-    return buffer->newBuffer(initialCapacity);
 }
 
 }

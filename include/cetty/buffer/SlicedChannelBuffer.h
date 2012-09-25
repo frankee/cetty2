@@ -40,7 +40,7 @@ namespace buffer {
  *
  */
 
-class SlicedChannelBuffer : public ChannelBuffer, public WrappedChannelBuffer {
+class SlicedChannelBuffer : public WrappedChannelBuffer {
 public:
     SlicedChannelBuffer(const ChannelBufferPtr& buffer,
                         int index,
@@ -54,7 +54,7 @@ public:
 
     virtual void capacity(int newCapacity);
 
-    virtual void readableBytes(StringPiece* bytes);
+    virtual const char* readableBytes(int* length);
     virtual char* writableBytes(int* length);
     virtual char* aheadWritableBytes(int* length);
 
@@ -63,34 +63,33 @@ public:
     virtual int32_t getInt(int index) const;
     virtual int64_t getLong(int index) const;
 
-    virtual int getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const;
-    virtual int getBytes(int index, char* dst, int dstIndex, int length) const;
+    virtual int getBytes(int index, char* dst, int length) const;
     virtual int getBytes(int index, OutputStream* out, int length) const;
+    virtual int getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const;
 
     virtual int setByte(int index, int value);
     virtual int setShort(int index, int value);
     virtual int setInt(int index, int value);
     virtual int setLong(int index, int64_t value);
 
-    virtual int setBytes(int index, const StringPiece& src, int srcIndex, int length);
-    virtual int setBytes(int index, const ConstChannelBufferPtr& src, int srcIndex, int length);
+    virtual int setBytes(int index, const char* src, int length);
     virtual int setBytes(int index, InputStream* in, int length);
+    virtual int setBytes(int index, const ConstChannelBufferPtr& src, int srcIndex, int length);
 
     virtual ChannelBufferPtr slice(int index, int length);
     virtual int slice(int index, int length, GatheringBuffer* gathering);
 
     virtual ChannelBufferPtr copy(int index, int length) const;
 
-    virtual ChannelBufferPtr newBuffer(int initialCapacity);
-
 private:
     void checkIndex(int index) const;
     void checkIndex(int startIndex, int length) const;
 
 private:
-    ChannelBufferPtr buffer;
     int length;
     int adjustment;
+
+    ChannelBufferPtr channelBuffer;
 };
 
 }

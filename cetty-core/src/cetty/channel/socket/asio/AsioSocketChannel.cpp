@@ -311,9 +311,20 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 }
 
 void AsioSocketChannel::beginRead() {
+    const ChannelBufferPtr& buffer = pipeline->getReceiveBuffer();
     int size;
-    char* buf = pipeline->getReceiveBuffer()->writableBytes(&size);
+    char* buf = buffer->writableBytes(&size);
     LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : " << size;
+
+    // auto increment the capacity.
+    if (size < 128) {
+        if (!buffer->ensureWritableBytes(1024, true)) {
+            // error!
+        }
+
+        buf = buffer->writableBytes(&size);
+    }
+
     tcpSocket.async_read_some(
         boost::asio::buffer(buf, size),
         boost::bind(&AsioSocketChannel::handleRead,

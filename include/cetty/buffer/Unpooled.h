@@ -25,7 +25,6 @@
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cetty/Types.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBufferIndexFinder.h>
 
 namespace cetty {
 namespace buffer {
@@ -212,6 +211,9 @@ public:
                                          const ChannelBufferPtr& buffer2);
 
     static ChannelBufferPtr copiedBuffer(const std::vector<ChannelBufferPtr>& buffers);
+
+
+    static ChannelBufferPtr copiedBuffer(const std::vector<StringPiece>& bytes);
 
 private:
     static ChannelBufferPtr compositeBuffer(const std::vector<ChannelBufferPtr>& components);
