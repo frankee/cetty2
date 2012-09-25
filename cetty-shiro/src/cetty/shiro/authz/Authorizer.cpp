@@ -38,33 +38,42 @@ void Authorizer::isPermitted(const PrincipalCollection& principal,
                              const PermissionPtr& permission,
                              const AuthorizeCallback& callback) const {
     realm->getAuthorizationInfo(principal, boost::bind(
-                                                      &Authorizer::doPermite,
-                                                      this,
-                                                      _1,
-                                                      principal,
-                                                      permission,
-                                                      callback));
+                                    &Authorizer::doPermite,
+                                    this,
+                                    _1,
+                                    principal,
+                                    permission,
+                                    callback));
 }
 
 void Authorizer::doPermite(const AuthorizationInfoPtr& info,
                            const PrincipalCollection& principal,
                            const PermissionPtr& permission,
-                           const AuthorizeCallback& callback) const{
+                           const AuthorizeCallback& callback) const {
+    if (!callback) {
+        LOG_ERROR << "doPermite input callback can NOT be NULL";
+        return;
+    }
+
     std::vector<PermissionPtr> permissions = info->getPermissions();
     std::vector<PermissionPtr>::iterator it;
-    for(it = permissions.begin(); it != permissions.end(); ++it)
-        if((*it)->implies(permission)){
+
+    for (it = permissions.begin(); it != permissions.end(); ++it) {
+        if ((*it)->implies(permission)) {
             LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
-                      <<"is permited for permission [" << permission->toString() << "].";
+                <<"is permited for permission [" << permission->toString() << "].";
             callback(true, principal.getPrimaryPrincipal(), permission->toString());
             return;
         }
+    }
 
     std::vector<std::string> strPermissions = info->getStringPermissions();
     std::vector<std::string>::iterator begin = strPermissions.begin();
-    for(; begin != strPermissions.end(); ++begin){
+
+    for (; begin != strPermissions.end(); ++begin) {
         PermissionPtr pm = permissionResolver(*begin);
-        if(pm->implies(permission)){
+
+        if (pm->implies(permission)) {
             LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
                       <<"is permited for permission [" << permission->toString() << "].";
             callback(true, principal.getPrimaryPrincipal(), permission->toString());
@@ -74,10 +83,9 @@ void Authorizer::doPermite(const AuthorizationInfoPtr& info,
 
     LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
               <<"is not permited for permission [" << permission->toString() << "].";
+
     callback(false, principal.getPrimaryPrincipal(), permission->toString());
 }
-
-
 
 bool Authorizer::realmConfigured() const {
     if (!realm) {

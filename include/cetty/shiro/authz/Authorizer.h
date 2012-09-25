@@ -107,10 +107,6 @@ public:
                      const PermissionPtr& permission,
                      const AuthorizeCallback& callback) const;
 
-    void doPermite(const AuthorizationInfoPtr& info,
-                   const PrincipalCollection& principal,
-                   const PermissionPtr& permission,
-                   const AuthorizeCallback& callback) const;
     /**
      * Returns the realms wrapped by this <code>Authorizer</code> which are consulted during an authorization check.
      *
@@ -150,6 +146,11 @@ private:
      * @throws IllegalStateException if the <tt>realms</tt> property is configured incorrectly.
      */
     bool realmConfigured() const;
+
+    void doPermite(const AuthorizationInfoPtr& info,
+        const PrincipalCollection& principal,
+        const PermissionPtr& permission,
+        const AuthorizeCallback& callback) const;
 
 protected:
     /**

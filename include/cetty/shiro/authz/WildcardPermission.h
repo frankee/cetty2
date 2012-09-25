@@ -130,7 +130,6 @@ private:
     static const bool DEFAULT_CASE_SENSITIVE;
 
     std::vector<std::string> parts;
-
 };
 
 inline

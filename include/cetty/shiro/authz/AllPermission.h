@@ -51,6 +51,14 @@ public:
     virtual bool implies(const PermissionPtr& p) {
         return true;
     }
+
+    virtual const std:string& stringPermission() const {
+        return "*";
+    }
+
+    virtual std::string toString() const {
+        return "AllPermission";
+    }
 };
 
 }

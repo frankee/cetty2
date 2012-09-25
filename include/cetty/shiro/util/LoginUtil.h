@@ -15,6 +15,14 @@ namespace cetty {
 namespace shiro {
 namespace util {
 
+    class LoginSecret {
+        std::string host;
+        std::string principal;
+        std::string nonce;
+        std::string created;
+    };
+    //std::map<std::string, LoginSecret>
+
 class LoginUtil {
 public:
     typedef boost::function4<void,
@@ -36,6 +44,16 @@ public:
               const getStoreInfo& retrieveServerTime,
               const getStoreInfo& retrieveHost);
 
+    LoginSecret& generatorSecret(const std::string& principal, const std::string& host);
+
+    bool verifySecret(const std::string& host,
+                        const std::string& principal,
+                        const std::string& nonce,
+                        const std::string& created);
+
+    bool verifySecret(const LoginSecret& secret);
+
+private:
     /// produce random nonce and server time
     std::string getNonce();
     std::string getServerTime();

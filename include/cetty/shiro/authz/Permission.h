@@ -93,9 +93,11 @@ public:
      * @return {@code true} if this current instance <em>implies</em> all the functionality and/or resource access
      *         described by the specified {@code Permission} argument, {@code false} otherwise.
      */
-    virtual bool implies(const PermissionPtr& p){ return true; }
+    virtual bool implies(const PermissionPtr& p) = 0;
 
-    virtual std::string toString(){ return std::string(); }
+    virtual const std:string& stringPermission() const = 0;
+
+    virtual std::string toString() const = 0;
 };
 
 }
