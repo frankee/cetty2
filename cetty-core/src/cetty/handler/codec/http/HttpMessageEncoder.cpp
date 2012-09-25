@@ -201,7 +201,7 @@ void HttpMessageEncoder::encodeHeader(ChannelBuffer& buf,
 }
 
 static std::string lastStr("0\r\n\r\n");
-ChannelBufferPtr HttpMessageEncoder::LAST_CHUNK = Unpooled::wrappedBuffer(lastStr);
+ChannelBufferPtr HttpMessageEncoder::LAST_CHUNK = Unpooled::wrappedBuffer(&lastStr);
 
 }
 }

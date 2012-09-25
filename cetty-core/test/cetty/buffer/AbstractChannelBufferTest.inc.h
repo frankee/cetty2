@@ -70,10 +70,6 @@ TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteArrayBoundaryCheck2) {
     getByteArrayBoundaryCheck2();
 }
 
-TEST_F(CHANNEL_BUFFER_IMPL_TEST, getByteArrayBoundaryCheck3) {
-    getByteArrayBoundaryCheck3();
-}
-
 TEST_F(CHANNEL_BUFFER_IMPL_TEST, copyBoundaryCheck1) {
     copyBoundaryCheck1();
 }

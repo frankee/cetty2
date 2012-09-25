@@ -15,9 +15,6 @@
     <ClCompile Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\cetty\buffer\ChannelBufferIndexFinderTest.cpp">
-      <Filter>buffer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp">
       <Filter>buffer</Filter>
     </ClCompile>

@@ -55,9 +55,9 @@ cetty::buffer::ChannelBufferPtr Unpooled::buffer(int initialCapacity) {
     return buffer(initialCapacity, 0);
 }
 
-ChannelBufferPtr Unpooled::wrappedBuffer(std::string& str) {
-    char* bytes = string_as_array(&str);
-    return wrappedBuffer(bytes, 0, (int)str.size());
+ChannelBufferPtr Unpooled::wrappedBuffer(std::string* str) {
+    char* bytes = string_as_array(str);
+    return wrappedBuffer(bytes, 0, (int)str->size());
 }
 
 ChannelBufferPtr Unpooled::wrappedBuffer(char* bytes, int length) {

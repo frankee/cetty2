@@ -187,26 +187,7 @@ public:
 
     void getByteArrayBoundaryCheck2() {
         char bytes[1];
-        EXPECT_THROW(buffer->getBytes(-1, bytes, 0, 1), RangeException);
-    }
-
-    void getByteArrayBoundaryCheck3() {
-        char dst[4] = {0};
-        buffer->setInt(0, 0x01020304);
-        try {
-            buffer->getBytes(0, dst, -1, 4);
-            FAIL();
-        }
-        catch (const RangeException& e) {
-            printf(e.what());
-            // Success
-        }
-
-        // No partial copy is expected.
-        ASSERT_EQ(0, dst[0]);
-        ASSERT_EQ(0, dst[1]);
-        ASSERT_EQ(0, dst[2]);
-        ASSERT_EQ(0, dst[3]);
+        EXPECT_THROW(buffer->getBytes(-1, bytes, 1), RangeException);
     }
 
     void copyBoundaryCheck1() {
@@ -550,7 +531,7 @@ public:
         for (int i = 0; i < buffer->capacity() - BLOCK_SIZE + 1; i += BLOCK_SIZE) {
             random.nextBytes(expectedValue, BLOCK_SIZE * 2);
             int valueOffset = random.nextInt(BLOCK_SIZE);
-            buffer->getBytes(i, value, valueOffset, BLOCK_SIZE);
+            buffer->getBytes(i, value + valueOffset, BLOCK_SIZE);
             for (int j = valueOffset; j < valueOffset + BLOCK_SIZE; j ++) {
                 ASSERT_EQ(expectedValue[j], value[j]);
             }
@@ -591,7 +572,7 @@ public:
         for (int i = 0; i < buffer->capacity() - BLOCK_SIZE + 1; i += BLOCK_SIZE) {
             random.nextBytes(expectedValueContent, BLOCK_SIZE * 2);
             int valueOffset = random.nextInt(BLOCK_SIZE);
-            buffer->getBytes(i, value, valueOffset, BLOCK_SIZE);
+            buffer->getBytes(i, value + valueOffset, BLOCK_SIZE);
             for (int j = valueOffset; j < valueOffset + BLOCK_SIZE; j ++) {
                 ASSERT_EQ(expectedValue->getByte(j), value[j]);
             }
@@ -691,7 +672,7 @@ public:
 
             ASSERT_EQ(i, buffer->readerIndex());
             ASSERT_EQ(CAPACITY, buffer->writerIndex());
-            buffer->readBytes(value, valueOffset, BLOCK_SIZE);
+            buffer->readBytes(value + valueOffset, BLOCK_SIZE);
             for (int j = valueOffset; j < valueOffset + BLOCK_SIZE; j ++) {
                 ASSERT_EQ(expectedValue[j], value[j]);
             }
@@ -1019,7 +1000,7 @@ public:
         buffer->setIndex(readerIndex, writerIndex);
 
         // Make sure all properties are copied.
-        ChannelBufferPtr duplicate = buffer->duplicate();
+        ChannelBufferPtr duplicate = buffer->slice();
         ASSERT_EQ(buffer->readerIndex(), duplicate->readerIndex());
         ASSERT_EQ(buffer->writerIndex(), duplicate->writerIndex());
         ASSERT_EQ(buffer->capacity(), duplicate->capacity());
@@ -1065,6 +1046,7 @@ public:
         ASSERT_TRUE(ChannelBufferUtil::equals(buffer,
             Unpooled::wrappedBuffer(value, LENGTH)));
 
+#if 0
         ASSERT_TRUE(ChannelBufferUtil::equals(buffer,
             Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)));
 
@@ -1072,6 +1054,7 @@ public:
         ASSERT_FALSE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) == 0);
         ASSERT_FALSE(buffer->compare(
             Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) == 0);
+#endif
     }
     
     void testCompareTo() {
@@ -1093,28 +1076,28 @@ public:
         buffer->setBytes(0, value, LENGTH);
 
         ASSERT_EQ(0, buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)));
-        ASSERT_EQ(0, buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)));
+        //ASSERT_EQ(0, buffer->compare(
+        //    Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)));
 
         value[0] ++;
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) < 0);
-        ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
+        //ASSERT_TRUE(buffer->compare(
+        //    Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
 
         value[0] -= 2;
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, LENGTH)) > 0);
-        ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) > 0);
+        //ASSERT_TRUE(buffer->compare(
+        //    Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) > 0);
         value[0] ++;
 
         ASSERT_TRUE(buffer->compare(Unpooled::wrappedBuffer(value, 0, 31)) > 0);
-        ASSERT_TRUE(buffer->compare(
-            Unpooled::wrappedBuffer(value, 0, 31)->order(ByteOrder::LITTLE)) > 0);
+        //ASSERT_TRUE(buffer->compare(
+        //    Unpooled::wrappedBuffer(value, 0, 31)->order(ByteOrder::LITTLE)) > 0);
 
         ASSERT_TRUE(buffer->slice(0, 31)->compare(
             Unpooled::wrappedBuffer(value, LENGTH)) < 0);
-        ASSERT_TRUE(buffer->slice(0, 31)->compare(
-            Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
+        //ASSERT_TRUE(buffer->slice(0, 31)->compare(
+        //    Unpooled::wrappedBuffer(value, LENGTH)->order(ByteOrder::LITTLE)) < 0);
     }
 
     void testIndexOf() {

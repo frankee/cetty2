@@ -108,7 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.cpp" />
-    <ClCompile Include="..\..\test\cetty\buffer\ChannelBufferIndexFinderTest.cpp" />
     <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp" />
     <ClCompile Include="..\..\test\cetty\util\RandomTest.cpp" />
   </ItemGroup>

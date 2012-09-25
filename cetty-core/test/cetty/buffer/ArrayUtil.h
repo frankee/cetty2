@@ -27,10 +27,10 @@ using namespace cetty::util;
 
 class ArrayUtil {
 public:
-    static std::string create(int cnt, ...) {
-        if (cnt <= 0) { return std::string(); }
+    static std::string* create(int cnt, ...) {
+        if (cnt <= 0) { return NULL; }
 
-        char* buf = new char[cnt];
+        std::string* buf = new std::string();
         va_list argp;
         int argno = 0;
         int charect;
@@ -47,15 +47,13 @@ public:
                 charect = 0;
             }
 
-            buf[argno] = (char)charect;
+            buf->append(1, charect);
             ++argno;
         }
 
         va_end(argp);
 
-        std::string str(buf, cnt);
-        delete [] buf;
-        return str;
+        return buf;
     }
 };
 

@@ -127,7 +127,7 @@ public:
      * A modification on the specified array's content will be visible to the
      * returned buffer.
      */
-    static ChannelBufferPtr wrappedBuffer(std::string& str);
+    static ChannelBufferPtr wrappedBuffer(std::string* str);
 
     /**
      * Creates a new big-endian buffer which wraps the specified <tt>array</tt>.
