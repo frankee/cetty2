@@ -45,18 +45,19 @@ void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
 void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
                                      const LoginResponsePtr& response,
                                      const DoneCallback& done) {
-    const std::string& encodeType = request->encode_type();
-    const std::string& encodedPasswd = request->encoded_passwd();
+
+    const std::string &principal = request->user_name();
+    const std::string &digest = request->encoded_passwd();
+    const std::string &nonce = request->nonce();
+    const std::string &created = request->request->server_time();
+    const std::string &host = request->host();
 
     WSSE *wsse = SecurityUtils::getInstance()->getWSSE();
-    LoginSecret ls(std::string(), request->user_name(), request->nonce(), request->server_time());
+    LoginSecret ls(host, principal, nonce, created);
 
     if (wsse->verifySecret(ls)) {
-        AuthenticationToken token(request->user_name(), request->encodedPasswd, storeHost);
-        token.setEncodeType(encodeType);
-        token.setNonce(nonce);
-        token.setServerTime(serverTime);
-        token.setSalt(nonce + server)
+        AuthenticationToken token(principal, digest, host);
+        token.setSalt(nonce + created);
 
         SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
         sm->login(token, boost::bind(&AccessControlServiceImpl::onLogin,
@@ -69,13 +70,12 @@ void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
                                      done));
     }
     else {
-        cetty::protobuf::service::Status *status = response->mutable_status();
-
-        //todo modify code and message
-        status->set_code(0x00);
-        status->set_message(LoginUtil::LOGIN_REFUSED_MESSAGE);
+        // todo modify code and message
+        // cetty::protobuf::service::Status *status = response->mutable_status();
+        // status->set_code(0x00);
+        // status->set_message("");
         done(response);
-    } // end
+    }
 }
 
 void AccessControlServiceImpl::onLogin(int code,
@@ -89,22 +89,21 @@ void AccessControlServiceImpl::onLogin(int code,
             cetty::protobuf::service::Session *session = response->mutable_session();
             session->set_id(session->getId().c_str(););
             cetty::protobuf::service::KeyValue *item = session->add_items();
-            tem->set_key("username");
+            item->set_key("username");
             item->set_value(userName);
+
         }
         else{
-            cetty::protobuf::service::Status *status = response->mutable_status();
-            //status->set_status();
             // todo modify status code and status message
-            status->set_code(code);
-            status->set_message("");
+            // cetty::protobuf::service::Status *status = response->mutable_status();
+            // status->set_code(code);
+            // status->set_message("");
         }
     }else{
-        cetty::protobuf::service::Status *status = response->mutable_status();
-        //status->set_status();
         // todo modify status code and status message
-        status->set_code(code);
-        status->set_message("");
+        // cetty::protobuf::service::Status *status = response->mutable_status();
+        // status->set_code(code);
+        // status->set_message("");
     }
     done(response);
 }
