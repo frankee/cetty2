@@ -19,6 +19,8 @@
 #if defined(BOOST_POSIX_API)
 #  include <cerrno>
 #  include <signal.h>
+#  include <sys/time.h>
+#  include <sys/resource.h>
 #elif defined(BOOST_WINDOWS_API)
 #  include <windows.h>
 #else
@@ -102,7 +104,7 @@ void Process::terminate(PID pid, bool force /*= false*/) {
 
 #elif defined(BOOST_POSIX_API)
 
-    if (::kill(id_, force ? SIGKILL : SIGTERM) == -1) {
+    if (::kill(pid, force ? SIGKILL : SIGTERM) == -1) {
         switch (errno) {
         case ESRCH:
 

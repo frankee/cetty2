@@ -28,6 +28,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+#include <string>
 #include <vector>
 
 namespace cetty {

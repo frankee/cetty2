@@ -15,7 +15,7 @@
  * under the License.
  */
 
-#include <cetty/channel/channelBufferHandler.h>
+#include <cetty/channel/ChannelBufferHandler.h>
 #include <cetty/channel/ChannelBufferHandlerContext.h>
 
 namespace cetty {
