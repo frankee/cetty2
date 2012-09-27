@@ -7,7 +7,6 @@
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/buffer/ChannelBufferFactory.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -21,7 +20,7 @@ void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
         ChannelBufferPtr tmp = buffer->readBytes();
         ChannelPtr channel = ctx.getChannel();
 
-        outboundTransfer.write(ctx, tmp, ctx.getChannel()->newSucceededFuture());
+        outboundTransfer.write(tmp, ctx.getChannel()->newSucceededFuture());
         //channel->write(tmp);
         printf("received message from %d at %s with %dBytes.\n",
                channel->getId(),
@@ -34,7 +33,7 @@ void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
 
-    outboundTransfer.write(ctx, firstMessage, ctx.getChannel()->newSucceededFuture());
+    outboundTransfer.write(firstMessage, ctx.getChannel()->newSucceededFuture());
     //ctx.getChannel()->write(firstMessage);
     //ctx.getPipeline().write(firstMessage);
 }
