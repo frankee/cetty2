@@ -1,19 +1,19 @@
-#+TITLE: cetty��Ҫ
+#+TITLE: cetty概要
 
-* ����˵��
-  ����������Netty��C++��д�����socket��ʵ�ֲ���Boost asio�������ȶ��ԡ���Ч����ƽ̨���ԡ�
+* 整体说明
+  整体框架来自Netty的C++改写，框架socket的实现采用Boost asio，满足稳定性、高效及跨平台特性。
 
-  �������ˣ�
+  服务器端：
   ServerChannel  -----   ChannelSink
     +
     + -- Channel ChannelPipeline
 
-  ServerChannelFactory����ServerChannel��ͨ������¿���ʹ��ͬһ��ServerChannelFactory�������ServerChannel�����ж�����ChannelSink������ASIO��ʵ���£�ʹ��ͬһ��IO�̳߳أ����Խ���������в�ͬҵ�������̵�TCP Server���󶨲�ͬ�Ķ˿ڡ�
-ͨ����ʹ�������ǣ�ʹ��ͬһ��IO�̳߳أ�����һ��ҵ��TCP/HTTP����������ͬʱ��һ��HTTP�ļ�ط�����������ά��
+  ServerChannelFactory创建ServerChannel，通常情况下可以使用同一个ServerChannelFactory创建多个ServerChannel（含有独立的ChannelSink），在ASIO的实现下，使用同一个IO线程池，可以建立多个具有不同业务处理流程的TCP Server，绑定不同的端口。
+通常的使用例子是，使用同一份IO线程池，建立一个业务TCP/HTTP服务器，并同时开一个HTTP的监控服务，以面向运维。
     
-���߼���ʵ�ֿ����ò�ͬ��ServerChannelͨ����ͬ�Ĳ�����ʹ��IO�̳߳أ�ͬʱServerChannel��������Channelʱ��Ҳ����ָ��ĳ�ֲ��ԡ�
+更高级的实现可以让不同的ServerChannel通过不同的策略来使用IO线程池，同时ServerChannel创建连接Channel时，也可以指定某种策略。
 
-Bootstrapֻ�����ĳһ�ִ���ҵ��Channelpipeline���Ĺ����ࡣ
+Bootstrap只能针对某一种处理业务（Channelpipeline）的工具类。
 
 AsioServerSocketChannelFactoryPtr factory = new AsioServerSocketChannelFactory();
 ServerBootstrap httpBiz(factory);
@@ -24,11 +24,11 @@ ServerBootstrap tcpBiz(factory);
 
 ServerBootstrap watchdog(factory);
 
-* ����
+* 例子
 ** echo
 ** discard
 
-* ģ��˵��
+* 模块说明
 ** cetty-core
 *** ChannelBuffer
 @startuml
@@ -51,15 +51,15 @@ DefaultCompositeChannelBuffer --|> CompositeChannelBuffer;
 
 @enduml
 
-ChannelBuffer�����ֲ�ͬ��ʵ�֣�
-1��HeapChannelBuffer�����������ģ�Ψһ�ģ�ʵ��ȥ�����ڴ��buffer��
-2��WrappedChannelBuffer������Ǵ���buffer��ʵ���ֿ��Էֳ����ࣺindex���Թ�����index�������buffer����һ�¡�
-3��CompositeChannelBuffer�����Ҳ�Ǵ���buffer�������WrappedChannelBuffer��ͬ���ǣ����ڲ��ж��ChannelBuffer��ɡ�
+ChannelBuffer有三种不同的实现：
+1，HeapChannelBuffer，这个最基本的，唯一的，实际去管理内存的buffer。
+2，WrappedChannelBuffer，这个是代理buffer，实现又可以分成两类：index独自管理，index与代理的buffer保持一致。
+3，CompositeChannelBuffer，这个也是代理buffer，这个与WrappedChannelBuffer不同的是，其内部有多个ChannelBuffer组成。
 
 
 
-TODO��
-1��remove GatheringBuffer
+TODO：
+1，remove GatheringBuffer
 
 
 
@@ -72,11 +72,11 @@ TODO��
 *** SSL/TSL
 
 ** cetty-config
-*** configʹ��˵��
+*** config使用说明
 *** config internal
 
 ** cetty-service
-cetty-service��Ҫ�������ڷֲ�ʽ�����У�
+cetty-service主要侧重于在分布式环境中，
 
 ** cetty-shiro
 *** authc
@@ -88,28 +88,28 @@ cetty-service��Ҫ�������ڷֲ�ʽ�����У�
 ** cetty-thrift
 
 ** cetty-protobuf-service
-����protobuf��RPCϵͳ
+基于protobuf的RPC系统
 
 ** cetty-protobuf-serialization
 
 ** cetty-zookeeper
 
 ** cetty-craft
-craft��ҪӦ����webӦ�ÿ������棬��Ҫ��Ӧ�ó���������ͳ��WEBӦ�ã�RESTful��񣩣�Ҳ����API����ƽ̨WEBӦ�ã������͵�ϵͳTOP��ROP���Ĳ�ͬ���ڣ�craft���ⷢ����Э����Բ���HTTPЭ�飬ͬʱҲ�����ṩ����Google Protobuf��RPC���ã����ƶ���Ӧ�ö˿��Խ�һ������������
+craft主要应用在web应用开发方面，主要的应用场景包含传统的WEB应用（RESTful风格），也包含API开放平台WEB应用，与类型的系统TOP、ROP最大的不同在于，craft对外发布的协议可以采用HTTP协议，同时也可以提供基于Google Protobuf的RPC调用，在移动的应用端可以进一步减少流量。
 
-  HTTP��REST�� -- map validate signature -> RPC -- validate signature --> ����ʵ��
+  HTTP（REST） -- map validate signature -> RPC -- validate signature --> 服务实现
 
-*** ����
-**** ������ʶcraft
-**** ʹ��craft����һ������
-     1. ����craft��cetty������������boost��protobuf��yaml��
-     2. ����һ�����񷽷�
-        a. ��дproto�ļ������彻��Э��
-        b. ��proto�ļ��У���дuri template
-        c. ��proto�ļ��У���дfield��Լ����У�鷽ʽ
-        d. ʹ��generator���ɷ�������Ŀ�ܴ��롣
-        e. ��д����ʵ�ֵ�ҵ����롣
-     3. ����craft����
+*** 概述
+**** 快速认识craft
+**** 使用craft开发一个服务
+     1. 下载craft（cetty）及其依赖（boost、protobuf、yaml）
+     2. 开发一个服务方法
+        a. 编写proto文件，定义交互协议
+        b. 在proto文件中，编写uri template
+        c. 在proto文件中，编写field的约束及校验方式
+        d. 使用generator生成服务基本的框架代码。
+        e. 编写服务实现的业务代码。
+     3. 访问craft服务
         a. 
 
 class ServiceClient {
@@ -127,79 +127,79 @@ private:
 static const char* URI_TEMPLATE = "";
 };
 
-*** �������ģ��
+*** 请求服务模型
 
-*** Ӧ����Ȩ����֤
+*** 应用授权及验证
 
-*** ����Ự����
+*** 服务会话管理
 
-*** ����ģ��
-����HTTP�Ĵ���ģ�͡�
+*** 错误模型
+基于HTTP的错误模型。
 
-*** ��Ӧ���Ŀ���
+*** 响应报文控制
 
-*** ����ȫ����
+*** 服务安全控制
 
-*** filter���ģʽ
+*** filter插件模式
 
 ** cetty-gearman
-����gearman���������ϵͳ��cetty-gearman-protobuf��protobuf���ɣ��Ƿֲ�ʽ��RPCϵͳ��
+基于gearman的任务管理系统，cetty-gearman-protobuf与protobuf集成，是分布式的RPC系统。
 
 ** cetty-redis
-redis�ͻ��ˣ���cettyϵͳ���ɣ�����ʹ�á�
+redis客户端，与cetty系统集成，方便使用。
 
 ** cetty-beantalk
-beantalk�Ŀͻ��ˣ�
+beantalk的客户端，
 
 ** cetty-zurg
-��˷�����̹���ϵͳ��
+后端服务进程管理系统。
 
 ** cetty-tair
-����tair�ķֲ�ʽkv���ݿ⡣
+基于tair的分布式kv数据库。
 
 ** cetty-scribe
-����scribe����־ϵͳ��������־�ռ���������������ϵͳ��
+基于scribe的日志系统，包含日志收集、处理、分析子系统。
 
 
-* �����������˵��
-** ����������������
-** ���������˳�����
-** ���ݵĽ��մ���
-** ���ݵ��쳣����
-** ���ݵķ���
-** �ͻ�����������
-** �ͻ����˳�����
+* 框架运行流程说明
+** 服务器端启动流程
+** 服务器端退出流程
+** 数据的接收处理
+** 数据的异常处理
+** 数据的发送
+** 客户端连接流程
+** 客户端退出流程
 
-* ����ϵͳ
-** ˵��
-   cetty config�������ṩӦ�ÿ����߷��������ϵͳ��ͨ����ʹ�����̰�����
-   1. ����{ģ������}.conf.proto�ļ���
-   2. ʹ��ConfigGenerator���ɶ�Ӧ��{ģ������}Config.h/cpp, {ģ������}.yml, {ģ������}Cmdline.h/cpp
-      1) {ģ������}Config.h/cpp��ģ��������ࣨstruct�����û�����ֱ�Ӳ�����������г�������ã�ͬʱ����Ὣ���õ�Meta��Ϣ��Description��Reflection��ע�ᵽ��ȫ�ֵ�Meta��Ϣ���ģ��Թ������Զ���{ģ������}.yml�ļ��ж�ȡ������{ģ������}Config��
-      2) {ģ������}.yml�Ƕ�Ӧ�������ļ�ģ�壬����û��defaultֵ��field�ᴦ��ע��״̬�����е�option�У�
-         1. field��option��mark=true/false�������Ƿ�Ĭ��ע�͸�field��
-         2. field��option��comment�����������������˵�������ڵ�message��file��optionҲ��comment��
-         3. file��option��include��ָ��Ҫ������������yml�����ļ�����ʹ��server��ܵ�����£�ͨ������ServerBuilder.yml��ָ����
-      3) {ģ������}Cmdline.h/cpp���������������в����Ļ�ȡ��Ĭ���е�������--confָ�����ڵ�yml�����ļ������԰������yml�ļ������ڲ�ʹ��yml�������Ҳ����ʹ��cmdline��program option����ȡ��ص��������cmdline�����������ȼ�����yml�������
-   3. ��������{ģ������}Config.h/cpp�Լ�{ģ������}Cmdline.h/cpp��������̣����޸���Ӧ��{ģ������}.yml��
-   4. Ĭ����������е�{ģ������}.yml�������ļ��������project��Ӧ��confĿ¼��
+* 配置系统
+** 说明
+   cetty config是用来提供应用开发者方便的配置系统。通常的使用流程包含：
+   1. 定义{模块名称}.conf.proto文件；
+   2. 使用ConfigGenerator生成对应的{模块名称}Config.h/cpp, {模块名称}.yml, {模块名称}Cmdline.h/cpp
+      1) {模块名称}Config.h/cpp是模块的配置类（struct），用户可以直接操作配置类进行程序的配置，同时该类会将配置的Meta信息（Description、Reflection）注册到到全局的Meta信息中心，以供程序自动从{模块名称}.yml文件中读取并配置{模块名称}Config。
+      2) {模块名称}.yml是对应的配置文件模板，对于没有default值的field会处于注释状态，具有的option有：
+         1. field的option：mark=true/false来设置是否默认注释该field。
+         2. field的option：comment，用来设置配置项的说明，对于的message、file的option也有comment。
+         3. file的option：include，指定要包含的其他的yml配置文件，在使用server框架的情况下，通常是在ServerBuilder.yml中指定。
+      3) {模块名称}Cmdline.h/cpp是用来处理命令行参数的获取。默认有的配置有--conf指定对于的yml配置文件（可以包含多个yml文件），在不使用yml的情况下也可以使用cmdline的program option来获取相关的配置项。且cmdline的配置项优先级高于yml的配置项。
+   3. 接下来将{模块名称}Config.h/cpp以及{模块名称}Cmdline.h/cpp编译进工程，并修改相应的{模块名称}.yml。
+   4. 默认情况的所有的{模块名称}.yml的配置文件都存放于project相应的conf目录。
 
-   ��ʵ��ϵͳ����ֱ��ʹ��protoc��{ģ������}.conf.proto�ļ�����{ģ������}Config.h/cpp�����������ɵ��ļ�sizeʵ��̫����������ѡ��ʵ��һ������protoc��
-   ϵͳ��ʹ�õļ���������
+   其实本系统可以直接使用protoc将{模块名称}.conf.proto文件生成{模块名称}Config.h/cpp，但是所生成的文件size实在太大。所以最终选择实现一个简版的protoc。
+   系统所使用的技术包含：
    - google protobuf
-   - yaml ��yaml-cpp��
+   - yaml （yaml-cpp）
    - boost program_options
 
-   ϵͳ��ƵĻ���˼����ԭ��
-   1. ����ģ��������ļ�Ӧ�þ��ж����ԣ�
-   2. ����ϵͳ��������������ͨ��includeѡ���������Ҫ��ģ�������ļ���֧���﷨�У�
+   系统设计的基本思想与原则：
+   1. 各个模块的配置文件应该具有独立性；
+   2. 整个系统（服务器）可以通过include选项包含所需要的模块配置文件，支持语法有：
       - #include path/to/module.yml
       - #inlcude path/to/*.yml
-   3. �����ļ��������п���ͬʱʹ�ã�
-   4. ʹ���Ͼ�������д��������ظ��ı������ö���ֱ�ӱ����ϵͳ������Ҫͨ���ַ�����������ȡ��
-   5. ����ϵͳ�������ھ�����ļ���ʽ������ѡ��֧��yml��json��xml��ini���ڱ���˳��������ʱ��Ƚ�ugly����
+   3. 配置文件与命令行可以同时使用；
+   4. 使用上尽可能少写代码或是重复文本，配置对象直接编译进系统，不需要通过字符串名称来获取；
+   5. 配置系统不依赖于具体的文件格式，可以选择支持yml，json，xml，ini（在表达顺序容器的时候比较ugly）。
 
-** ʹ��
+** 使用
 #+BEGIN_EXAMPLE
 int main(int argc, char* argv[]) {
     ConfigureCenter::instance().load(argc, argv);
@@ -210,123 +210,128 @@ int main(int argc, char* argv[]) {
 }
 #+END_EXAMPLE
 
-* ����Google Protobuf��RPCϵͳ
-  ֧��Protobuf RPC��REST��SOAP1.1
-** ��Ҫ˵��
+* 基于Google Protobuf的RPC系统
+  支持Protobuf RPC，REST，SOAP1.1
+** 简要说明
 ** Protobuf RPC
-*** ��������
-*** �ͻ���
-    �������Ե�ʵ��Java��Ruby��Python
+*** 服务器端
+*** 客户端
+    其他语言的实现Java、Ruby、Python
 
-* ����Google Protobuf��Web������ܣ�craft��
+* 基于Google Protobuf的Web开发框架（craft）
 
 ** REST
-*** request���뷽ʽ
-    1. ͨ��Uriģ���ȡ��ȡservice��mothod�Լ���Ӧ�Ĳ�����
-    2. ͨ��POST��content��ȡ��Ӧ�Ĳ�����
-    3. ͨ��http header��cookie��ȡ��Ӧ�Ĳ�������Ҫ��֤����Ȩ��ز�����
+*** request输入方式
+    1. 通过Uri模板获取获取service、mothod以及相应的参数；
+    2. 通过POST的content获取相应的参数；
+    3. 通过http header的cookie获取相应的参数，主要认证及鉴权相关参数。
 
 ** SOAP1.1
 
-** Service��ܴ�����Զ�����
-   1. proto�ļ��Զ����� {����}.pb.h/cc {����}ServiceImpl.h/cpp {����}Server.cpp {����}.yml {����}.md {����}Server.conf
+** Service框架代码的自动生成
+   1. proto文件自动生成 {服务}.pb.h/cc {服务}ServiceImpl.h/cpp {服务}Server.cpp {服务}.yml {服务}.md {服务}Server.conf
 
-** Service�Ŀ���ʾ��
+** Service的开发步骤（无框架代码生成器的情况下）
+   1. 基于protobuf编写业务的网络交换协议（API）
+   2. 根据protobuf编写相应的HTTP请求的URI模板文件
+   3. 使用ProtobufServiceGenerator生成相应的pb文件
+   4. 编写服务的实现
+   5. C-c/C-v服务的Server.cpp
+   6. 编译运行
+
+* 框架运维
+** 单个服务实例的监控
+** 日志
+
+* 框架安全
+** 连接数的限制
+** 空闲连接的处理
+** DDOS的防范
+
+* 服务群集管理
+** 服务的查找 NameService （Zookeeper）
+
+* 框架高级使用模式
+** 多种服务器（TCP、HTTP）共用asio线程池
+** 异步handler的使用
+*** 异步handler使用方式
+*** 异步handler在数据库方面的使用方式
+
+** 数据库连接池模式
+** 内部服务器RPC依赖的处理
+** cetty client如何与channel共用同一线程
 
 
-* �����ά
-** ��������ʵ���ļ��
-** ��־
+* NoSql数据库的使用
+** cetty与redis
+** cetty与mongodb
 
-* ��ܰ�ȫ
-** ������������
-** �������ӵĴ���
-** DDOS�ķ���
-
-* ����Ⱥ������
-** ����Ĳ��� NameService ��Zookeeper��
-
-* ��ܸ߼�ʹ��ģʽ
-** ���ַ�������TCP��HTTP������asio�̳߳�
-** �첽handler��ʹ��
-*** �첽handlerʹ�÷�ʽ
-*** �첽handler�����ݿⷽ���ʹ�÷�ʽ
-
-** ���ݿ����ӳ�ģʽ
-** �ڲ�������RPC�����Ĵ���
-** cetty client�����channel����ͬһ�߳�
-
-
-* NoSql���ݿ��ʹ��
-** cetty��redis
-** cetty��mongodb
-
-* ����Google Protobuf��Sql���ݿ��ORӳ��
-** SOCI˵��
+* 基于Google Protobuf的Sql数据库的OR映射
+** SOCI说明
 *** sqlite
 *** mysql
 *** oracle
 
-** cetty��SOCI
-** ���������Ĳ���
-** ��������Ĳ���
-** �洢���̵�ʹ��
-** ���ݿ����ӳص�ʹ��
-** redis/memcached���ݿ��ȡ�����ʹ��
+** cetty与SOCI
+** 单个表单的操作
+** 多个表单的操作
+** 存储过程的使用
+** 数据库连接池的使用
+** redis/memcached数据库读取缓存的使用
 
-* ����cetty��Ӧ��
-** ����cetty����Ϣ����
-** ����cetty��gearman�ķֲ�ʽRPCϵͳ
-   - Tile Map��̬��Ⱦ����
-   - Tile Mapѭ����Ⱦ����
-   - Tile Map��̬ʵʱ��Ⱦ����
-     1. �ͻ��˷���task���� --> gearman�������
-   - Tile Map�����Ⱦ���������־�̬�����ֶ�̬��
+* 基于cetty的应用
+** 基于cetty的消息队列
+** 基于cetty及gearman的分布式RPC系统
+   - Tile Map静态渲染处理
+   - Tile Map循环渲染处理
+   - Tile Map动态实时渲染处理
+     1. 客户端发送task请求 --> gearman存入队列
+   - Tile Map混合渲染处理（部分静态、部分动态）
 
-** ����cetty��levelDB��noSql�ֲ�ʽ���ݿ�
+** 基于cetty及levelDB的noSql分布式数据库
 
-* ��ȫ
-** ��֤
-*** HTTP��֤
+* 安全
+** 认证
+*** HTTP认证
 *** OAuth
-** ��Ȩ
+** 鉴权
 
-** session����
+** session管理
 
-* �����ܹ�
-** ���ؾ��⣨ȫ�ָ�����⣬DNS��
-** �����
-*** �������
+* 基础架构
+** 负载均衡（全局负责均衡，DNS）
+** 接入层
+*** 反向代理
 *** web cache
-*** ��ȫ����
-** Ӧ�ò�
+*** 安全控制
+** 应用层
 
-** ���ݲ�
+** 数据层
 *** nosql
-*** mysql��oracle
-*** ���ݻ���
-*** �ֲ�ʽ�ļ�ϵͳ
+*** mysql、oracle
+*** 数据缓存
+*** 分布式文件系统
 
-** ������
-*** nodejsǰ��
+** 基础层
+*** nodejs前端
 *** c++ full service stack
 *** message queue
-*** �ֲ�ʽ����ַ�ϵͳ��gearman��
+*** 分布式任务分发系统（gearman）
 
-*** ��Ϣ����
+*** 消息总线
 
-** ��ά��
-*** ��־
-**** �ֲ�ʽ��־����ϵͳ
-*** ���
-**** ϵͳ���
-**** ͨ��Ӧ�ý��̼��
-**** cetty�ļ��
-**** ���̵Ŀ���
-**** ������־�ļ��
-**** ��ر�������
-*** ����
-**** �Զ�����װϵͳ
-**** �Զ�������ϵͳ
-**** ϵͳ����
-**** ���������ԡ����߰汾�Ĺ���
+** 运维层
+*** 日志
+**** 分布式日志处理系统
+*** 监控
+**** 系统监控
+**** 通用应用进程监控
+**** cetty的监控
+**** 进程的控制
+**** 根据日志的监控
+**** 相关报警处理
+*** 配置
+**** 自动化安装系统
+**** 自动化配置系统
+**** 系统更新
+**** 开发、测试、上线版本的管理
