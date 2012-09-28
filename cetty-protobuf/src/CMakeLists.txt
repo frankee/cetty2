@@ -16,7 +16,6 @@ SET(GENERATOR_DIR cetty/protobuf/service/generator)
 
 cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR})
 target_link_libraries(ProtobufServiceGenerator protoc protobuf ${Boost_LIBRARIES})
-#ADD_DEPENDENCIES(ProtobufServiceGenerator protoc protobuf)
 
 PROTOBUF_GENERATE_RPC(PROTO_SRCS cetty/protobuf/service/service.proto)
 

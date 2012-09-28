@@ -17,14 +17,13 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelConfig.h"
+
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
-#include "cetty/buffer/ChannelBuffer.h"
-#include "cetty/buffer/ChannelBuffers.h"
-#include "cetty/buffer/ChannelBufferFactory.h"
+#include <cetty/buffer/ChannelBuffer.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -49,15 +48,12 @@ public:
 
     virtual void channelActive(ChannelHandlerContext& ctx) {
         voidFuture = ctx.getChannel()->newSucceededFuture();
-        //out = ChannelBuffers::buffer(1024*512);
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         const ChannelBufferPtr& buffer = getInboundChannelBuffer();
         if (buffer) {
-            //out->clear();
-            //buffer->readBytes(out, buffer->readableBytes());
-            outboundTransfer.write(ctx, buffer->readBytes(), voidFuture);
+            outboundTransfer.write(buffer->readBytes(), voidFuture);
         }
     }
 
@@ -70,7 +66,6 @@ public:
     }
 
 private:
-    //ChannelBufferPtr out;
     ChannelFuturePtr voidFuture;
     int transferredBytes;
 };
