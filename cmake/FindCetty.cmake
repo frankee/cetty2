@@ -1,7 +1,10 @@
 #find cetty
 #SET(CETTY_HEADER_FILE cetty/bootstrap/Bootstrap.h)
 
-FIND_PATH(CETTY_INCLUDE_DIR cetty.h
+set(CETTY_HEADER_FILES cetty/bootstrap/Bootstrap.h)
+
+FIND_PATH(CETTY_INCLUDE_DIR ${CETTY_HEADER_FILES}
+	/mnt/hgfs/alp_new/cetty/include/
 	/mnt/hgfs/alp/Cetty/include
 	/mnt/hgfs/alp-2/Cetty/include
 	/usr/local/include
@@ -11,7 +14,8 @@ mark_as_advanced(CETTY_INCLUDE_DIR)
 
 FIND_LIBRARY(CETTY_LIBRARY_DIR 
 	NAMES cetty
-	PATHS /mnt/hgfs/alp/Cetty/buildcmake/lib/
+	PATHS /mnt/hgfs/alp_new/cetty/mybuild/lib
+		  /mnt/hgfs/alp/Cetty/buildcmake/lib/
 		  /mnt/hgfs/alp-2/Cetty/buildcmake/lib/
 	#PATHS /mnt/hgfs/alp/Cetty/buildfpic/lib/
 		  /usr/local/lib
@@ -20,7 +24,7 @@ FIND_LIBRARY(CETTY_LIBRARY_DIR
   )
 mark_as_advanced(CETTY_LIBRARY_DIR)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CETTY DEFAULT_MSG
     CETTY_LIBRARY_DIR CETTY_INCLUDE_DIR)
   
