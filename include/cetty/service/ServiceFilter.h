@@ -77,6 +77,7 @@ protected:
                 LOG_WARN << "serviceFilter filterRequest has an empty result, "
                          "skip it, user handler should reply an error message if needed.";
 
+                inboundQueue.pop_front();
                 continue;
             }
 

@@ -83,6 +83,7 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 // deprecated
                 if (request->getQueryParameters().has("req")) {
                     ProtobufParser* jsonParser = ProtobufParser::getParser("json");
+
                     if (jsonParser) {
                         Message* req = prototype->New();
                         const std::string& reqStr = request->getQueryParameters().get("req");
@@ -90,8 +91,8 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                         if (req && !jsonParser->parse(reqStr, req)) {
                             ProtobufServiceMessagePtr message(
                                 new ProtobufServiceMessage(ProtobufServiceMessage::T_REQUEST,
-                                tmpl->getService(),
-                                tmpl->getMethod()));
+                                                           tmpl->getService(),
+                                                           tmpl->getMethod()));
                             message->setPayload(req);
                             return message;
                         }
@@ -99,17 +100,17 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 }
 
                 LOG_ERROR << "can not parse the message: "
-                    << prototype->GetDescriptor()->full_name();
+                          << prototype->GetDescriptor()->full_name();
             }
         }
         else {
             LOG_ERROR << "has no such service register: "
-                << tmpl->getService() << ":" << tmpl->getMethod();
+                      << tmpl->getService() << ":" << tmpl->getMethod();
         }
     }
     else {
         LOG_ERROR << "wrong uri format, can not match any template."
-            << request->getUri();
+                  << request->getUri();
     }
 
     return ProtobufServiceMessagePtr();
@@ -119,7 +120,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
         const HttpRequestPtr& request,
         Message* message) {
     BOOST_ASSERT(message && "Message should not be NULL.");
-    
+
     const google::protobuf::Reflection* reflection = message->GetReflection();
     const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
     BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
@@ -131,6 +132,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
         const std::string& fieldFullName = field->full_name();
         fieldName = fieldNameScope + field->name();
+
         if (tmpl.hasField(fieldName)) {
             if (!parseField(tmpl, request, field, fieldName, message)) {
                 LOG_ERROR << "parse filed: " << fieldName << " error.";
@@ -142,8 +144,10 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
     // remove this message name in field name scope.
     if (!fieldNameScope.empty()) {
         std::string::size_type size = fieldNameScope.size();
+
         if (fieldNameScope[size - 1] == '.' && size > 1) {
             std::string::size_type pos = fieldNameScope.rfind('.', size - 2);
+
             if (pos == fieldNameScope.npos) {
                 fieldNameScope.clear();
             }
@@ -153,8 +157,8 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
         }
         else {
             LOG_ERROR << "the fieldNameScope ("
-                << fieldNameScope
-                << ") not end with '.', should NOT happened";
+                      << fieldNameScope
+                      << ") not end with '.', should NOT happened";
             return false;
         }
     }
@@ -281,7 +285,7 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
         else {
             // a.b1, a.b2, a.c, a.d
             // if has tow 'b'(b1&b2), but the field of b is not repeated,
-            // so, when a is repeated, then will create a twice, or a.b2 will be skip. 
+            // so, when a is repeated, then will create a twice, or a.b2 will be skip.
 
         }
     }
