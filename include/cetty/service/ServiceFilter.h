@@ -19,6 +19,7 @@
 
 #include <deque>
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace service {
@@ -53,7 +54,7 @@ template<typename RequestInT,
          typename ResponseOutT>
 class ServiceFilter
         : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
-
+public:
     using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
     using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
 
@@ -71,6 +72,13 @@ protected:
             RequestInT& req = inboundQueue.front();
             reqs.push_back(req);
             RequestOutT oreq = filterRequest(ctx, req);
+
+            if (!oreq) {
+                LOG_WARN << "serviceFilter filterRequest has an empty result, "
+                         "skip it, user handler should reply an error message if needed.";
+
+                continue;
+            }
 
             if (inboundTransfer.unfoldAndAdd(oreq)) {
                 notify = true;
@@ -90,6 +98,15 @@ protected:
             ResponseInT& rep = outboundQueue.front();
             ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
             reqs.pop_front();
+
+            if (!orep) {
+                LOG_ERROR << "serviceFilter filterResponse has an empty result, "
+                          "skip it, user handler should replace an error message if needed.";
+
+                outboundQueue.pop_front();
+                continue;
+            }
+
             outboundTransfer.unfoldAndAdd(orep);
             outboundQueue.pop_front();
         }

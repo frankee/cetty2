@@ -94,6 +94,10 @@ public:
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
+    // if has an exception, reply an error message.
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause);
+
 protected:
     virtual HttpMessagePtr createMessage(const StringPiece& str1,
                                          const StringPiece& str2,

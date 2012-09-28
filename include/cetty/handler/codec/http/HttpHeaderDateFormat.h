@@ -1,3 +1,5 @@
+#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPHEADERDATEFORMAT_H)
+#define CETTY_HANDLER_CODEC_HTTP_HTTPHEADERDATEFORMAT_H
 /*
  * Copyright 2012 The Netty Project
  *
@@ -13,13 +15,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty.handler.codec.http;
 
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+#include <string>
+#include <sstream>
+#include <locale>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+
+namespace cetty {
+namespace handler {
+namespace codec {
+namespace http {
+
+using boost::posix_time::ptime;
+using boost::posix_time::time_facet;
+using boost::posix_time::time_input_facet;
 
 /**
  * This DateFormat decodes 3 formats of {@link Date}, but only encodes the one,
@@ -32,56 +42,56 @@ import java.util.TimeZone;
  * </ul>
  */
 class HttpHeaderDateFormat {
-    private static final long serialVersionUID = -925286159755905325L;
-
-    private final SimpleDateFormat format1 = new HttpHeaderDateFormatObsolete1();
-    private final SimpleDateFormat format2 = new HttpHeaderDateFormatObsolete2();
-
+public:
     /**
      * Standard date format<p>
      * Sun, 06 Nov 1994 08:49:37 GMT -> E, d MMM yyyy HH:mm:ss z
      */
-    HttpHeaderDateFormat() {
-        super("E, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        setTimeZone(TimeZone.getTimeZone("GMT"));
+    HttpHeaderDateFormat()
+        : formatStr("%A, %d %b %Y %H:%M:%S GMT"),
+          timeOutput(formatStr.c_str()),
+          timeInput(formatStr.c_str()) {
     }
 
-    @Override
-    public Date parse(String text, ParsePosition pos) {
-        Date date = super.parse(text, pos);
-        if (date == null) {
-            date = format1.parse(text, pos);
-        }
-        if (date == null) {
-            date = format2.parse(text, pos);
-        }
-        return date;
+    HttpHeaderDateFormat(const std::string& format)
+        : formatStr(format),
+          timeOutput(format.c_str()),
+          timeInput(format.c_str()) {
     }
+
+    ptime parse(const std::string& str);
+    bool parse(const std::string& str, ptime* time);
+
+    std::string format(const ptime& time);
+    bool format(const ptime& time, std::string* str);
 
     /**
-     * First obsolete format<p>
-     * Sunday, 06-Nov-94 08:49:37 GMT -> E, d-MMM-y HH:mm:ss z
+     * Cookie date format<p>
+     * Sun, 06-Nov-1994 08:49:37 GMT -> E, DD-MMM-YYYY HH:mm:ss z
      */
-    private static final class HttpHeaderDateFormatObsolete1 extends SimpleDateFormat {
-        private static final long serialVersionUID = -3178072504225114298L;
-
-        HttpHeaderDateFormatObsolete1() {
-            super("E, dd-MMM-y HH:mm:ss z", Locale.ENGLISH);
-            setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-    }
+    static HttpHeaderDateFormat defaultFormat;
 
     /**
-     * Second obsolete format
+     * Head date format HTTP1.1
      * <p>
-     * Sun Nov 6 08:49:37 1994 -> EEE, MMM d HH:mm:ss yyyy
+     * Sun, 06 Nov 1994 08:49:37 GMT
      */
-    private static final class HttpHeaderDateFormatObsolete2 extends SimpleDateFormat {
-        private static final long serialVersionUID = 3010674519968303714L;
+    static HttpHeaderDateFormat cookieFormat;
 
-        HttpHeaderDateFormatObsolete2() {
-            super("E MMM d HH:mm:ss yyyy", Locale.ENGLISH);
-            setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-    }
+private:
+    std::string formatStr;
+
+    time_facet timeOutput;
+    time_input_facet timeInput;
 };
+
+}
+}
+}
+}
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPHEADERDATEFORMAT_H)
+
+// Local Variables:
+// mode: c++
+// End:

@@ -552,14 +552,21 @@ public:
                 context->outboundHandler->flush(*context, future);
             }
             catch (const Exception& e) {
-                //logger.warn(
-                //    "An exception was thrown by a user handler's " +
-                //    "exceptionCaught() method while handling the following exception:", cause);
+                LOG_WARN << "An exception was thrown by a user handler's "
+                        "exceptionCaught() method while handling the following exception:"
+                        << e.getDisplayText();
             }
             catch (const std::exception& e) {
+                LOG_WARN << "An exception was thrown by a user handler's "
+                    "exceptionCaught() method while handling the following exception:"
+                    << e.what();
+
                 //notifyHandlerException(e);
             }
             catch (...) {
+                LOG_WARN << "An unknown exception was thrown by a user handler's "
+                    "exceptionCaught() method while handling the exception";
+
                 // clear the outbound ChannelBuffer
                 //if (ctx.outByteBuf != null) {
                 //    ByteBuf buf = ctx.outByteBuf;
@@ -580,9 +587,6 @@ public:
 
         return future;
     }
-
-    //const ChannelFuturePtr& write(const ChannelBufferPtr& message,
-    //                              const ChannelFuturePtr& future);
 
     /**
      * Retrieves a boost::any which is
@@ -655,8 +659,8 @@ private:
     ChannelHandlerContext* head;
     ChannelHandlerContext* tail;
 
-    ChannelHandlerContext* inboundHead; //< upstream single list.
-    ChannelHandlerContext* outboundHead; //< downstream single list.
+    ChannelHandlerContext* inboundHead; //< inbound single list.
+    ChannelHandlerContext* outboundHead; //< outbound single list.
 
     ChannelBufferPtr receiveBuffer;
     ChannelHandlerPtr sinkHandler;

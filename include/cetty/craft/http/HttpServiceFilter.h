@@ -43,7 +43,10 @@ public:
     HttpServiceFilter();
 
     HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
-                              const ServiceResponseMapperPtr& responseMap);
+                      const ServiceResponseMapperPtr& responseMap);
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+                                 const ChannelException& cause);
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;

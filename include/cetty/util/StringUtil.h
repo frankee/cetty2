@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <stdarg.h>
+#include <boost/assert.hpp>
 #include <cetty/Types.h>
 #include <cetty/util/Character.h>
 
@@ -92,7 +93,7 @@ public:
      * @return the number of result elements.
      */
     static size_t strsplit(const std::string& str, const std::string& delims,
-                    std::vector<std::string>* elems);
+                           std::vector<std::string>* elems);
 
     /**
      * Check whether a string begins with a key.
@@ -155,6 +156,46 @@ public:
      * @return the real number.  If the string does not contain numeric expression, 0.0 is returned.
      */
     static double atof(const char* str);
+
+    static bool striequals(const char* astr, const char* bstr) {
+        BOOST_ASSERT(astr && bstr);
+
+        while (*astr != '\0') {
+            if (*astr != *bstr
+                    && *astr + 0x20 != *bstr
+                    && *astr != *bstr + 0x20) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Compare two strings by case insensitive evaluation.
+     */
+    inline int stricmp(const char* astr, const char* bstr) {
+        BOOST_ASSERT(astr && bstr);
+
+        while (*astr != '\0') {
+            if (*bstr == '\0') { return 1; }
+
+            int ac = *(unsigned char*)astr;
+
+            if (ac >= 'A' && ac <= 'Z') { ac += 'a' - 'A'; }
+
+            int bc = *(unsigned char*)bstr;
+
+            if (bc >= 'A' && bc <= 'Z') { bc += 'a' - 'A'; }
+
+            if (ac != bc) { return ac - bc; }
+
+            astr++;
+            bstr++;
+        }
+
+        return (*bstr == '\0') ? 0 : -1;
+    }
 
 private:
     StringUtil() {}

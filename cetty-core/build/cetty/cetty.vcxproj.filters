@@ -368,6 +368,21 @@
     <ClCompile Include="..\..\src\cetty\buffer\Unpooled.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaderDateFormat.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\ClientCookieEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieEncoderUtil.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\ServerCookieEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -688,9 +703,6 @@
     <ClInclude Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannelSink.h">
       <Filter>channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPtr.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -766,13 +778,7 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\Cookie.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieDateFormat.h">
-      <Filter>handler\codec\http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieDecoder.h">
-      <Filter>handler\codec\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieEncoder.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieHeaderNames.h">
@@ -1035,5 +1041,14 @@
       <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\Common.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\ClientCookieEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieEncoderUtil.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\ServerCookieEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

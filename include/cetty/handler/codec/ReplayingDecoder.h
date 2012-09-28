@@ -569,7 +569,6 @@ protected:
     ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
 
 private:
-    bool channelOwnBuffer;
     bool unfold;
     int  state;
     int  checkedPoint;

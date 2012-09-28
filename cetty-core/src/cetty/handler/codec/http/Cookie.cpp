@@ -23,8 +23,63 @@ using namespace cetty::util;
 Cookie::Cookie(const std::string& name, const std::string& value)
     : secure(false), httpOnly(false), discard(false), maxAge(-1), version(0) {
     std::string nameStr = boost::trim_copy(name);
+    
+    if (validateName(nameStr)) {
+        this->name = name;
+        setValue(value);
+    }
+}
 
-    if (nameStr.empty()) {
+Cookie::Cookie(const std::string& name) {
+}
+
+Cookie::Cookie(const NameValueCollection& nvc) {
+}
+
+Cookie::Cookie(const Cookie& cookie)
+    : secure(cookie.secure),
+      httpOnly(cookie.httpOnly),
+      discard(cookie.discard),
+      maxAge(cookie.maxAge),
+      version(cookie.version),
+      name(cookie.name),
+      value(cookie.value),
+      domain(cookie.domain),
+      path(cookie.path),
+      comment(cookie.comment),
+      commentUrl(cookie.commentUrl),
+      ports(cookie.ports),
+      unmodifiablePorts(cookie.unmodifiablePorts) {
+}
+
+Cookie& Cookie::operator=(const Cookie& cookie) {
+    secure = cookie.secure;
+    httpOnly = cookie.httpOnly;
+    discard = cookie.discard;
+    maxAge = cookie.maxAge;
+    version = cookie.version;
+    name = cookie.name;
+    value = cookie.value;
+    domain = cookie.domain;
+    path = cookie.path;
+    comment = cookie.comment;
+    commentUrl = cookie.commentUrl;
+    ports = cookie.ports;
+    unmodifiablePorts = cookie.unmodifiablePorts;
+
+    return *this;
+}
+
+bool Cookie::operator==(const Cookie& cookie) {
+    return compare(cookie) == 0;
+}
+
+bool Cookie::operator<(const Cookie& cookie) {
+    return compare(cookie) < 0;
+}
+
+bool Cookie::validateName(const std::string& name) {
+    if (name.empty()) {
         throw InvalidArgumentException("empty name");
     }
 
@@ -50,17 +105,6 @@ Cookie::Cookie(const std::string& name, const std::string& value)
     if (CookieHeaderNames::isReserved(name)) {
         throw InvalidArgumentException("reserved name", name);
     }
-
-    this->name = name;
-    setValue(value);
-}
-
-Cookie::Cookie(const std::string& name) {
-
-}
-
-Cookie::Cookie(const NameValueCollection& nvc) {
-
 }
 
 void Cookie::validateValue(const std::string& name, const std::string& value, std::string* output) const {
@@ -100,10 +144,6 @@ void Cookie::setCommentUrl(const std::string& commentUrl) {
     validateValue("commentUrl", commentUrl, &this->commentUrl);
 }
 
-void Cookie::setDiscard(bool discard) {
-    this->discard = discard;
-}
-
 void Cookie::setPorts(const std::vector<int>& ports) {
     /*
     Set<Integer> newPorts = new TreeSet<Integer>();
@@ -130,6 +170,10 @@ void Cookie::setMaxAge(int maxAge) {
     }
 
     this->maxAge = maxAge;
+}
+
+void Cookie::setDiscard(bool discard) {
+    this->discard = discard;
 }
 
 void Cookie::setVersion(int version) {
@@ -173,7 +217,7 @@ bool Cookie::equals(const Cookie& that) const {
 }
 #endif
 
-int Cookie::compareTo(const Cookie& c) const {
+int Cookie::compare(const Cookie& c) const {
     int v;
     /*
     v = getName().compareToIgnoreCase(c.getName());

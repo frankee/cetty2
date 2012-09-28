@@ -37,12 +37,12 @@ HttpRequest::HttpRequest(const HttpVersion& httpVersion,
 }
 
 HttpRequest::HttpRequest(const HttpVersion& httpVersion,
-    const HttpMethod& method,
-    const StringPiece& uri)
-: HttpMessage(httpVersion),
-method(method),
-uriStr(uri.data(), uri.size()),
-uri(uri) {
+                         const HttpMethod& method,
+                         const StringPiece& uri)
+    : HttpMessage(httpVersion),
+      method(method),
+      uriStr(uri.data(), uri.size()),
+      uri(uri) {
 
 }
 
@@ -65,6 +65,7 @@ const std::vector<std::string>& HttpRequest::getPathSegments() const {
 
         std::string& lastSegment = pathSegments.back();
         std::string::size_type pos = lastSegment.find('.');
+
         if (pos != lastSegment.npos) {
             label = lastSegment.substr(pos + 1);
             lastSegment = lastSegment.substr(0, pos);

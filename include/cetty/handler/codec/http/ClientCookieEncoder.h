@@ -13,9 +13,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty.handler.codec.http;
 
-import static io.netty.handler.codec.http.CookieEncoderUtil.*;
+#include <string>
+#include <cetty/handler/codec/http/Cookie.h>
+
+namespace cetty {
+namespace handler {
+namespace codec {
+namespace http {
 
 /**
  * Encodes client-side {@link Cookie}s into an HTTP header value.  This encoder can encode
@@ -31,90 +36,30 @@ import static io.netty.handler.codec.http.CookieEncoderUtil.*;
  * @apiviz.stereotype utility
  * @apiviz.has        io.netty.handler.codec.http.Cookie oneway - - encodes
  */
-public final class ClientCookieEncoder {
-
+class ClientCookieEncoder {
+public:
     /**
      * Encodes the specified cookie into an HTTP header value.
      */
-    public static String encode(String name, String value) {
-        return encode(new DefaultCookie(name, value));
-    }
+    static void encode(const std::string& name,
+                       const std::string& value,
+                       std::string* out);
 
-    public static String encode(Cookie cookie) {
-        if (cookie == null) {
-            throw new NullPointerException("cookie");
-        }
+    static void encode(const Cookie& cookie, std::string* out);
 
-        StringBuilder buf = new StringBuilder();
-        encode(buf, cookie);
-        return stripTrailingSeparator(buf);
-    }
+private:
+    ClientCookieEncoder() {}
+};
 
-    public static String encode(Cookie... cookies) {
-        if (cookies == null) {
-            throw new NullPointerException("cookies");
-        }
+inline
+void ClientCookieEncoder::encode(const std::string& name,
+                                 const std::string& value,
+                                 std::string* out) {
+    Cookie cookie(name, value);
+    encode(cookie, out);
+}
 
-        StringBuilder buf = new StringBuilder();
-        for (Cookie c: cookies) {
-            if (c == null) {
-                break;
-            }
-
-            encode(buf, c);
-        }
-        return stripTrailingSeparator(buf);
-    }
-
-    public static String encode(Iterable<Cookie> cookies) {
-        if (cookies == null) {
-            throw new NullPointerException("cookies");
-        }
-
-        StringBuilder buf = new StringBuilder();
-        for (Cookie c: cookies) {
-            if (c == null) {
-                break;
-            }
-
-            encode(buf, c);
-        }
-        return stripTrailingSeparator(buf);
-    }
-
-    private static void encode(StringBuilder buf, Cookie c) {
-        if (c.getVersion() >= 1) {
-            add(buf, '$' + CookieHeaderNames.VERSION, 1);
-        }
-
-        add(buf, c.getName(), c.getValue());
-
-        if (c.getPath() != null) {
-            add(buf, '$' + CookieHeaderNames.PATH, c.getPath());
-        }
-
-        if (c.getDomain() != null) {
-            add(buf, '$' + CookieHeaderNames.DOMAIN, c.getDomain());
-        }
-
-        if (c.getVersion() >= 1) {
-            if (!c.getPorts().isEmpty()) {
-                buf.append('$');
-                buf.append(CookieHeaderNames.PORT);
-                buf.append((char) HttpConstants.EQUALS);
-                buf.append((char) HttpConstants.DOUBLE_QUOTE);
-                for (int port: c.getPorts()) {
-                    buf.append(port);
-                    buf.append((char) HttpConstants.COMMA);
-                }
-                buf.setCharAt(buf.length() - 1, (char) HttpConstants.DOUBLE_QUOTE);
-                buf.append((char) HttpConstants.SEMICOLON);
-                buf.append((char) HttpConstants.SP);
-            }
-        }
-    }
-
-    private ClientCookieEncoder() {
-        // Unused
-    }
+}
+}
+}
 }

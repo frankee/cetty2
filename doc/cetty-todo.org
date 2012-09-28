@@ -1,5 +1,13 @@
 * cetty-doto
 
+** cetty-core
+
+*** channelpipeline
+	1. 异常、错误处理机制，fireexception应该从 inboundinvoker独立出来，
+	   异常的处理可以三种方式，inbound、outbound、handler的序列
+	   哪个handler抛出的异常是否需要先给他处理？
+	   
+
 ** cetty-protobuf
    1. HTTP与protobuf之间转换时，field的验证（参数的绑定与校验）
       具体做法，在定义protobuf时，增加field相关的验证option

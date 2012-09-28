@@ -62,7 +62,6 @@ public:
 
     virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
 
-protected:
     const ChannelBufferPtr& getInboundChannelBuffer() const;
 
 private:

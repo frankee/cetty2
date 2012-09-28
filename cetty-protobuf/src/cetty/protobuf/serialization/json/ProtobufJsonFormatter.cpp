@@ -313,7 +313,9 @@ public:
         return *this;
     }
     JsonPrinter& endObject(bool empty = false) {
-        stream.backward(1);
+        if (!empty) {
+            stream.backward(1);
+        }
 
         --objectLevel;
 
@@ -351,7 +353,10 @@ public:
 
     JsonPrinter& endArray(bool empty = false) {
         inArray = false;
-        stream.backward(1);
+
+        if (!empty) {
+            stream.backward(1);
+        }
 
         if (Style) {
             --indentLevel;

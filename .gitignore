@@ -13,7 +13,6 @@
 *.orig
 *.lib
 *.exe
-*.cmake
 *#
 *.pb.cc
 *.pb.h

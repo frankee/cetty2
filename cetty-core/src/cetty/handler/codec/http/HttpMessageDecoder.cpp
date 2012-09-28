@@ -86,7 +86,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
         if (skipControlCharacters(buffer)) {
             checkpoint(READ_INITIAL);
         }
-        else {
+        else { 
             checkpoint(); //do not care skipped control chars.
         }
 
@@ -572,27 +572,34 @@ int HttpMessageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
         message->clearHeaders();
 
         std::vector<StringPiece> header;
-        std::string multiValueStr;
+        std::string valueStr;
+        std::string nameStr;
 
         do {
             char firstChar = line[0];
 
             if (!name.empty() && (firstChar == ' ' || firstChar == '\t')) {
-                multiValueStr.clear();
-                StringPiece trimedLine = line;//line.trim();
+                valueStr.clear();
+                StringPiece trimedLine = line.trim();
 
-                multiValueStr.append(value.c_str());
-                multiValueStr.append(1, ' ');
-                multiValueStr.append(trimedLine.data(), trimedLine.size());
+                valueStr.append(value.data(), value.size());
+                valueStr.append(1, ' ');
+                valueStr.append(trimedLine.data(), trimedLine.size());
             }
             else {
                 if (!name.empty()) {
-                    if (!multiValueStr.empty()) {
-                        message->addHeader(name.c_str(), multiValueStr);
+                    nameStr.assign(name.data(), name.size());
+
+                    if (!valueStr.empty()) {
+                        message->addHeader(nameStr, valueStr);
                     }
                     else {
-                        message->addHeader(name.c_str(), value.c_str());
+                        valueStr.assign(value.data(), value.size());
+                        message->addHeader(nameStr, valueStr);
                     }
+
+                    nameStr.clear();
+                    valueStr.clear();
                 }
 
                 header.clear();
@@ -611,13 +618,17 @@ int HttpMessageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
 
         // Add the last header.
         if (!name.empty()) {
-            if (!multiValueStr.empty()) {
-                message->addHeader(name.c_str(), multiValueStr);
+            nameStr.assign(name.data(), name.size());
+
+            if (!valueStr.empty()) {
+                message->addHeader(nameStr, valueStr);
             }
             else {
-                message->addHeader(name.c_str(), value.c_str());
+                valueStr.assign(value.data(), value.size());
+                message->addHeader(nameStr, valueStr);
             }
         }
+
     }
 
     if (isContentAlwaysEmpty(*message)) {
@@ -714,6 +725,7 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
         }
     }
 
+    buffer->needMoreBytes(true);
     return StringPiece();
 }
 
@@ -734,7 +746,7 @@ int HttpMessageDecoder::getChunkSize(const StringPiece& hex) const {
 
 StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer,
         int maxLineLength) {
-            int bytesCnt;
+    int bytesCnt;
     const char* bytes = buffer->readableBytes(&bytesCnt);
 
     if (bytesCnt >= maxLineLength) {

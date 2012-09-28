@@ -534,7 +534,7 @@ int HttpHeaders::getContentLength(const HttpMessage& message) {
 }
 
 int HttpHeaders::getContentLength(const HttpMessage& message, int defaultValue) {
-    std::string contentLength = message.getHeader(Names::CONTENT_LENGTH);
+    const std::string& contentLength = message.getHeader(Names::CONTENT_LENGTH);
 
     if (!contentLength.empty()) {
         return Integer::parse(contentLength);

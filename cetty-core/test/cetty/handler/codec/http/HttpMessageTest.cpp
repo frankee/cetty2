@@ -13,12 +13,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include "gtest/gtest.h"
-#include "cetty/handler/codec/http/HttpMethod.h"
-#include "cetty/handler/codec/http/HttpVersion.h"
-#include "cetty/handler/codec/http/DefaultHttpMessage.h"
-#include "cetty/handler/codec/http/DefaultHttpRequest.h"
-#include "cetty/util/Integer.h"
+#include <gtest/gtest.h>
+#include <cetty/handler/codec/http/HttpMethod.h>
+#include <cetty/handler/codec/http/HttpVersion.h>
+#include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
 
 using namespace cetty::util;
 using namespace cetty::handler::codec::http;
@@ -28,22 +27,22 @@ using namespace cetty::handler::codec::http;
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
  * @version $Rev: 2260 $, $Date: 2010-05-04 10:48:52 +0900 (Tue, 04 May 2010) $
  */
-TEST(DefaultHttpRequestTest, testHeaderRemoval) {
-    DefaultHttpRequest m(HttpVersion::HTTP_1_1, HttpMethod::HM_GET, "/");
+TEST(HttpRequestTest, testHeaderRemoval) {
+    HttpRequest m(HttpVersion::HTTP_1_1, HttpMethod::GET, "/");
 
     // Insert sample keys.
     for (int i = 0; i < 1000; ++i) {
-        m.setHeader(Integer::toString(i), "");
+        m.setHeader(StringUtil::strprintf("%d", i), "");
     }
 
     // Remove in reversed order.
     for (int i = 999; i >= 0; --i) {
-        m.removeHeader(Integer::toString(i));
+        m.removeHeader(StringUtil::strprintf("%d", i));
     }
 
     // Check if random access returns nothing.
     for (int i = 0; i < 1000; ++i) {
-        ASSERT_TRUE(m.getHeader(Integer::toString(i)).empty());
+        ASSERT_TRUE(m.getHeader(StringUtil::strprintf("%d", i)).empty());
     }
 
     // Check if sequential access returns nothing.

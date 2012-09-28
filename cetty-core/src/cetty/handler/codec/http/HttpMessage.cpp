@@ -21,6 +21,7 @@
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/Cookie.h>
 
 namespace cetty {
 namespace handler {
@@ -105,6 +106,38 @@ void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
         removeHeader(HttpHeaders::Names::CONTENT_LENGTH);
         setContent(Unpooled::EMPTY_BUFFER);
     }
+}
+
+void HttpMessage::addCookie(const Cookie& cookie) {
+    cookies.push_back(cookie);
+}
+
+void HttpMessage::addCookie(const std::string& name, const std::string& value) {
+    Cookie cookie(name, value);
+    cookies.push_back(cookie);
+}
+
+const std::vector<Cookie>& HttpMessage::getCookies() const {
+    if (cookies.empty()) {
+        const std::string& header = getHeader(HttpHeaders::Names::COOKIE);
+        if (!header.empty()) {
+
+
+            return cookies;
+        }
+        
+        NameValueCollection::ConstIterator lower = httpHeader.lowerBound(HttpHeaders::Names::SET_COOKIE);
+        if (lower != httpHeader.end()) {
+            NameValueCollection::ConstIterator up =
+                httpHeader.upperBound(HttpHeaders::Names::SET_COOKIE);
+
+            for (NameValueCollection::ConstIterator itr = lower; itr != up; ++itr) {
+
+            }
+        }
+    }
+
+    return cookies;
 }
 
 }

@@ -21,12 +21,14 @@
 * Distributed under under the Apache License, version 2.0 (the "License").
 */
 
+#include <vector>
+#include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/util/NameValueCollection.h>
+#include <cetty/handler/codec/http/Cookie.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/handler/codec/http/HttpTransferEncoding.h>
-#include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/util/NameValueCollection.h>
 
 namespace cetty {
 namespace handler {
@@ -163,6 +165,11 @@ public:
         httpHeader.clear();
     }
 
+    void addCookie(const Cookie& cookie);
+    void addCookie(const std::string& name, const std::string& value);
+
+    const std::vector<Cookie>& getCookies() const;
+
     /**
     * Returns the protocol version of this message.
     */
@@ -229,6 +236,8 @@ private:
 
     ChannelBufferPtr content;
     HttpTransferEncoding transferEncoding;
+
+    mutable std::vector<Cookie> cookies;
 };
 
 }

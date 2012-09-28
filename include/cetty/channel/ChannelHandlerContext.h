@@ -40,6 +40,7 @@ namespace channel {
 using namespace cetty::buffer;
 
 class ChannelPipeline;
+class ChannelPipelineException;
 class ChannelInboundBufferHandlerContext;
 class ChannelOutboundBufferHandlerContext;
 
@@ -173,34 +174,33 @@ public:
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
      * This method is a shortcut to <tt>getPipeline().getChannel()</tt>.
-     * @return ChannelPtr which will not be NULL.
+     * @return ChannelPtr which is NULL, when pipeline has detach the channel.
      */
     const ChannelPtr& getChannel() const;
 
     /**
      * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
      * belongs to.
-     * @return ChannelPipelinePtr which will not be NULL.
      */
-    const ChannelPipeline& getPipeline() const {
-        return pipeline;
-    }
+    const ChannelPipeline& getPipeline() const;
 
-    ChannelPipeline& getPipeline() {
-        return pipeline;
-    }
+    /**
+     * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
+     * belongs to.
+     */
+    ChannelPipeline& getPipeline();
 
-    const EventLoopPtr& getEventLoop() const {
-        return eventloop;
-    }
+    /**
+     * Returns the {@link EventLoop} that the {@link ChannelHandler}
+     * belongs to.
+     */
+    const EventLoopPtr& getEventLoop() const;
 
     /**
      * Returns the name of the {@link ChannelHandler} in the
      * {@link ChannelPipeline}.
      */
-    const std::string& getName() const {
-        return this->name;
-    }
+    const std::string& getName() const;
 
     /**
      * Returns the {@link ChannelHandler} that this context object is
@@ -209,146 +209,80 @@ public:
     const ChannelHandlerPtr& getHandler() const;
 
     /**
-     * Returns the {@link ChannelUpstreamHandler} that this context object is
-     * actually serving. If the context object serving is not ChannelUpstreamHandler,
-     * then return an empty ChannelUpstreamHandlerPtr.
+     * Returns the {@link ChannelInboundHandler} that this context object is
+     * actually serving. If the context object serving is not ChannelInboundHandler,
+     * then return an empty ChannelInboundHandlerPtr.
      */
     const ChannelInboundHandlerPtr& getInboundHandler() const;
 
     /**
-     * Returns the {@link ChannelDownstreamHandler} that this context object is
-     * actually serving. If the context object serving is not ChannelDownstreamHandler,
-     * then return an empty ChannelDownstreamHandlerPtr.
+     * Returns the {@link ChannelOutboundHandler} that this context object is
+     * actually serving. If the context object serving is not ChannelOutboundHandler,
+     * then return an empty ChannelOutboundHandlerPtr.
      */
     const ChannelOutboundHandlerPtr& getOutboundHandler() const;
 
-    ChannelHandlerContext* getNextOutboundContext() {
-        if (canHandleOutbound) {
-            return nextOutboundContext;
-        }
-        else {
-            ChannelHandlerContext* preCtx = prev;
-            while (preCtx) {
-                if (preCtx->canHandleOutbound) {
-                    return preCtx;
-                }
-                preCtx = preCtx->prev;
-            }
-            return NULL;
-        }
-    }
+    /**
+     * Returns the next outbound context of this context object, excluding this context.
+     */
+    ChannelHandlerContext* getNextOutboundContext();
 
-    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext() {
-        return nextInboundBufferHandlerContext(nextInboundContext);
-    }
-    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext() {
-        if (!canHandleOutbound) {
-            ChannelHandlerContext* preCtx = prev;
-            while (preCtx) {
-                if (preCtx->canHandleOutbound) {
-                    return nextOutboundBufferHandlerContext(preCtx);
-                }
-                preCtx = preCtx->prev;
-            }
-            return NULL;
-        }
+    /**
+     * Returns the next inbound context of this context object, excluding this context.
+     */
+    ChannelHandlerContext* getNextInboundContext();
 
-        return nextOutboundBufferHandlerContext(nextOutboundContext);
-    }
+    /**
+     * Returns the next inbound context, which actually serve {@link ChannelInboundBufferHandler},
+     * of this context object, excluding this context.
+     */
+    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext();
 
+    /**
+     * Returns the next inbound context from ctx, which actually serve {@link ChannelInboundBufferHandler},
+     * of this context object, including the input ctx.
+     *
+     * @param ctx
+     */
     ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext(ChannelHandlerContext* ctx);
+
+    /**
+     * Returns the next outbound context, which actually serve {@link ChannelOutboundBufferHandler},
+     * of this context object, excluding this context.
+     */
+    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext();
+
+    /**
+     * Returns the next outbound context from ctx, which actually serve {@link ChannelOutboundBufferHandler},
+     * of this context object, including the input ctx.
+     *
+     * @param ctx
+     */
     ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext(ChannelHandlerContext* ctx);
 
     template<typename T>
-    T* nextInboundMessageHandlerContext() {
-        return nextInboundMessageHandlerContext<T>(nextInboundContext);
-    }
+    T* nextInboundMessageHandlerContext();
 
     template<typename T>
-    T* nextInboundMessageHandlerContext(ChannelHandlerContext* ctx) {
-        ChannelHandlerContext* next = ctx;
-
-        if (!next) {
-            return (T*)NULL;
-        }
-
-        if (next->hasInboundMessageHandler) {
-            T* context = dynamic_cast<T*>(next);
-
-            if (context) { return context; }
-        }
-
-        next = next->nextInboundContext;
-
-        while (true) {
-            if (!next) {
-                return (T*)NULL;
-            }
-
-            if (next->hasInboundMessageHandler) {
-                T* context = dynamic_cast<T*>(next);
-
-                if (context) { return context; }
-            }
-
-            next = next->nextInboundContext;
-        }
-    }
+    T* nextInboundMessageHandlerContext(ChannelHandlerContext* ctx);
 
     template<typename T>
-    T* nextOutboundMessageHandlerContext() {
-        if (!canHandleOutbound) {
-            ChannelHandlerContext* preCtx = prev;
-            while (preCtx) {
-                if (preCtx->canHandleOutbound) {
-                    return nextOutboundMessageHandlerContext<T>(preCtx);
-                }
-                preCtx = preCtx->prev;
-            }
-            return NULL;
-        }
-
-        return nextOutboundMessageHandlerContext<T>(nextOutboundContext);
-    }
+    T* nextOutboundMessageHandlerContext();
 
     template<typename T>
-    T* nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx) {
-        ChannelHandlerContext* next = ctx;
-
-        if (!next) {
-            return (T*)NULL;
-        }
-
-        if (next->hasOutboundMessageHandler) {
-            return dynamic_cast<T*>(next);
-        }
-
-        next = next->nextInboundContext;
-
-        while (true) {
-            if (!next) {
-                return (T*)NULL;
-            }
-
-            if (next->hasOutboundMessageHandler) {
-                return dynamic_cast<T*>(next);
-            }
-
-            next = next->nextInboundContext;
-        }
-    }
+    T* nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx);
 
     /**
      * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
-     * instance of {@link ChannelUpstreamHandler}.
+     * instance of {@link ChannelInboundHandler}.
      */
-    bool canHandleInboundMessage() const { return canHandleInbound; }
+    bool canHandleInboundMessage() const;
 
     /**
      * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
-     * instance of {@link ChannelDownstreamHandler}.
+     * instance of {@link ChannelOutboundHandler}.
      */
-    bool canHandleOutboundMessage() const { return canHandleOutbound; }
+    bool canHandleOutboundMessage() const;
 
     virtual void fireChannelCreated();
     virtual void fireChannelActive();
@@ -387,16 +321,6 @@ public:
 
     virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
-    void fireChannelCreated(ChannelHandlerContext& ctx);
-    void fireChannelActive(ChannelHandlerContext& ctx);
-    void fireChannelInactive(ChannelHandlerContext& ctx);
-    void fireMessageUpdated(ChannelHandlerContext& ctx);
-    void fireWriteCompleted(ChannelHandlerContext& ctx);
-    void fireExceptionCaught(ChannelHandlerContext& ctx,
-                             const ChannelException& cause);
-    void fireUserEventTriggered(ChannelHandlerContext& ctx,
-                                const UserEvent& event);
-
 
     const ChannelFuturePtr& bind(ChannelHandlerContext& ctx,
                                  const SocketAddress& localAddress,
@@ -416,6 +340,16 @@ public:
     const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
                                   const ChannelFuturePtr& future);
 
+    virtual void fireChannelCreated(ChannelHandlerContext& ctx);
+    virtual void fireChannelActive(ChannelHandlerContext& ctx);
+    virtual void fireChannelInactive(ChannelHandlerContext& ctx);
+    virtual void fireMessageUpdated(ChannelHandlerContext& ctx);
+    virtual void fireWriteCompleted(ChannelHandlerContext& ctx);
+    virtual void fireExceptionCaught(ChannelHandlerContext& ctx,
+                                     const ChannelException& cause);
+    virtual void fireUserEventTriggered(ChannelHandlerContext& ctx,
+                                        const UserEvent& event);
+
 private:
     void init(const ChannelHandlerPtr& handler);
 
@@ -426,9 +360,10 @@ private:
     ChannelFuturePtr newSucceededFuture();
     ChannelFuturePtr newFailedFuture(const ChannelException& cause);
 
-    void notifyHandlerException();
-    void notifyHandlerException(const std::exception& e);
-    void notifyHandlerException(const Exception& e);
+    void notifyHandlerException(const ChannelPipelineException& e);
+
+    void clearOutboundChannelBuffer(ChannelHandlerContext& ctx);
+    void clearInboundChannelBuffer(ChannelHandlerContext& ctx);
 
 protected:
     bool canHandleInbound;
@@ -454,6 +389,133 @@ protected:
     ChannelPipeline& pipeline;
     EventLoopPtr eventloop;
 };
+
+inline
+const ChannelPipeline& ChannelHandlerContext::getPipeline() const {
+    return pipeline;
+}
+
+inline
+ChannelPipeline& ChannelHandlerContext::getPipeline() {
+    return pipeline;
+}
+
+inline
+const EventLoopPtr& ChannelHandlerContext::getEventLoop() const {
+    return eventloop;
+}
+
+inline
+const std::string& ChannelHandlerContext::getName() const {
+    return name;
+}
+
+inline
+const ChannelHandlerPtr& ChannelHandlerContext::getHandler() const {
+    return handler;
+}
+
+inline
+const ChannelInboundHandlerPtr& ChannelHandlerContext::getInboundHandler() const {
+    return inboundHandler;
+}
+
+inline
+const ChannelOutboundHandlerPtr& ChannelHandlerContext::getOutboundHandler() const {
+    return outboundHandler;
+}
+
+inline
+bool ChannelHandlerContext::canHandleInboundMessage() const {
+    return canHandleInbound;
+}
+
+inline
+bool ChannelHandlerContext::canHandleOutboundMessage() const {
+    return canHandleOutbound;
+}
+
+template<typename T> inline
+T* ChannelHandlerContext::nextInboundMessageHandlerContext() {
+    return nextInboundMessageHandlerContext<T>(nextInboundContext);
+}
+
+template<typename T> inline
+T* ChannelHandlerContext::nextInboundMessageHandlerContext(ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* next = ctx;
+
+    if (!next) {
+        return (T*)NULL;
+    }
+
+    if (next->hasInboundMessageHandler) {
+        T* context = dynamic_cast<T*>(next);
+
+        if (context) { return context; }
+    }
+
+    next = next->nextInboundContext;
+
+    while (true) {
+        if (!next) {
+            return (T*)NULL;
+        }
+
+        if (next->hasInboundMessageHandler) {
+            T* context = dynamic_cast<T*>(next);
+
+            if (context) { return context; }
+        }
+
+        next = next->nextInboundContext;
+    }
+}
+
+template<typename T> inline
+T* ChannelHandlerContext::nextOutboundMessageHandlerContext() {
+    if (!canHandleOutbound) {
+        ChannelHandlerContext* preCtx = prev;
+
+        while (preCtx) {
+            if (preCtx->canHandleOutbound) {
+                return nextOutboundMessageHandlerContext<T>(preCtx);
+            }
+
+            preCtx = preCtx->prev;
+        }
+
+        return NULL;
+    }
+
+    return nextOutboundMessageHandlerContext<T>(nextOutboundContext);
+}
+
+template<typename T> inline
+T* ChannelHandlerContext::nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* next = ctx;
+
+    if (!next) {
+        return (T*)NULL;
+    }
+
+    if (next->hasOutboundMessageHandler) {
+        return dynamic_cast<T*>(next);
+    }
+
+    next = next->nextInboundContext;
+
+    while (true) {
+        if (!next) {
+            return (T*)NULL;
+        }
+
+        if (next->hasOutboundMessageHandler) {
+            return dynamic_cast<T*>(next);
+        }
+
+        next = next->nextInboundContext;
+    }
+}
 
 }
 }

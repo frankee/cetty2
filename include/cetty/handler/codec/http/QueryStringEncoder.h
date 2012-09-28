@@ -93,7 +93,6 @@ private:
 private:
     std::string uri;
     NameValueCollection params;
-    //std::vector<std::pair<std::string, std::string> > params;
 };
 
 }

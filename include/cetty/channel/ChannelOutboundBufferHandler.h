@@ -77,7 +77,6 @@ public:
 
     virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
 
-protected:
     const ChannelBufferPtr& getOutboundChannelBuffer() const {
         return outboundBuffer;
     }

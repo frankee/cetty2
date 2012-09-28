@@ -58,6 +58,10 @@ public:
         return needMore;
     }
 
+    void needMoreBytes(bool needMore) {
+        this->needMore = needMore;
+    }
+
     virtual int capacity() const;
     virtual void capacity(int newCapacity) {
         buffer->capacity(newCapacity);

@@ -31,7 +31,7 @@ using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
 HttpServiceFilter::HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
-        const ServiceResponseMapperPtr& responseMapper)
+                                     const ServiceResponseMapperPtr& responseMapper)
     : requestMapper(requestMapper),
       responseMapper(responseMapper),
       http2proto(requestMapper),
@@ -56,16 +56,42 @@ std::string HttpServiceFilter::toString() const {
 
 ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
         const HttpMessagePtr& req) {
-    return http2proto.getProtobufMessage(boost::static_pointer_cast<HttpRequest>(req));
+    HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);
+    ProtobufServiceMessagePtr msg = http2proto.getProtobufMessage(request);
+
+    if (!msg) {
+        HttpResponsePtr response = new HttpResponse(
+            request->getProtocolVersion(),
+            HttpResponseStatus::BAD_REQUEST);
+
+        outboundTransfer.unfoldAndAdd(
+            boost::static_pointer_cast<HttpMessage>(response));
+        ctx.flush();
+    }
+
+    return msg;
 }
 
 HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const HttpMessagePtr& req,
         const ProtobufServiceMessagePtr& rep) {
-      HttpResponsePtr response =
-            proto2http.getHttpResponse(boost::static_pointer_cast<HttpRequest>(req), rep);
+    HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);
 
-      return boost::static_pointer_cast<HttpMessage>(response);
+    HttpResponsePtr response = proto2http.getHttpResponse(request, rep);
+
+    if (!response) {
+        LOG_WARN << "HttpServiceFilter filterResponse has an error.";
+        response = HttpResponsePtr(new HttpResponse(
+                                       request->getProtocolVersion(),
+                                       HttpResponseStatus::BAD_REQUEST));
+    }
+
+    return boost::static_pointer_cast<HttpMessage>(response);
+}
+
+void HttpServiceFilter::exceptionCaught(ChannelHandlerContext& ctx,
+                                        const ChannelException& cause) {
+    ctx.fireExceptionCaught(ctx, cause);
 }
 
 }

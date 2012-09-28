@@ -67,13 +67,13 @@ public:
     * @param method      the HTTP method of the request
     * @param uri         the URI or path of the request
     */
-    HttpRequest(const HttpVersion& httpVersion,
-                const HttpMethod& method,
-                const std::string& uri);
+    explicit HttpRequest(const HttpVersion& httpVersion,
+                         const HttpMethod& method,
+                         const std::string& uri);
 
-    HttpRequest(const HttpVersion& httpVersion,
-        const HttpMethod& method,
-        const StringPiece& uri);
+    explicit HttpRequest(const HttpVersion& httpVersion,
+                         const HttpMethod& method,
+                         const StringPiece& uri);
 
     virtual ~HttpRequest();
 

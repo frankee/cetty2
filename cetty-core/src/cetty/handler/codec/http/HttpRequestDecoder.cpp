@@ -47,8 +47,8 @@ std::string HttpRequestDecoder::toString() const {
 }
 
 HttpMessagePtr HttpRequestDecoder::createMessage(const StringPiece& str1,
-    const StringPiece& str2,
-    const StringPiece& str3) {
+        const StringPiece& str2,
+        const StringPiece& str3) {
 
     BOOST_ASSERT(!str1.empty() && !str2.empty() && !str3.empty()
                  && "createMessage parameters should not be NULL");
@@ -70,6 +70,11 @@ HttpMessagePtr HttpRequestDecoder::createMessage(const StringPiece& str1,
 
 bool HttpRequestDecoder::isDecodingRequest() const {
     return true;
+}
+
+void HttpRequestDecoder::exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause) {
+    
 }
 
 }

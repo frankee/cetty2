@@ -20,14 +20,14 @@
  * @version $Rev: 2302 $, $Date: 2010-06-14 20:07:44 +0900 (Mon, 14 Jun 2010) $
  */
 
-#include "gtest/gtest.h"
-#include "cetty/handler/codec/http/QueryStringDecoder.h"
+#include <gtest/gtest.h>
+#include <cetty/handler/codec/http/QueryStringDecoder.h>
 
 using namespace cetty::handler::codec::http;
 
 TEST(QueryStringDecoderTest, testBasic) {
     QueryStringDecoder* d;
-    const QueryStringDecoder::ParametersType* params;
+    const NameValueCollection* params;
 
     d = new QueryStringDecoder("/foo?a=b=c");
     ASSERT_STREQ("/foo", d->getPath().c_str());

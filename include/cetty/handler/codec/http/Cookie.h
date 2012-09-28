@@ -65,12 +65,12 @@ public:
 
     Cookie(const Cookie& cookie);
 
-    ~Cookie() {}
-
     Cookie& operator=(const Cookie& cookie);
 
     bool operator==(const Cookie& cookie);
     bool operator<(const Cookie& cookie);
+
+    ~Cookie() {}
 
     /**
      * Returns the name of this cookie.
@@ -194,11 +194,12 @@ public:
      */
     void setPorts(const std::vector<int>& ports);
 
-    int compareTo(const Cookie& c) const;
+    int compare(const Cookie& c) const;
 
     std::string toString() const;
 
 private:
+    bool validateName(const std::string& name);
     void validateValue(const std::string& name, const std::string& value, std::string* output) const;
 
 private:
@@ -224,6 +225,7 @@ inline const std::string& Cookie::getName() const { return name; }
 inline const std::string& Cookie::getValue() const { return value; }
 inline const std::string& Cookie::getDomain() const { return domain; }
 inline const std::string& Cookie::getPath() const { return path; }
+inline const std::string& Cookie::getComment() const { return comment; }
 inline const std::string& Cookie::getCommentUrl() const { return commentUrl; }
 inline const std::vector<int>& Cookie::getPorts() const { return ports; }
 inline int  Cookie::getMaxAge() const { return maxAge; }

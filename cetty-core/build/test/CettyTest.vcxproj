@@ -109,6 +109,16 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\cetty\buffer\BigEndianHeapChannelBufferTest.cpp" />
     <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\CookieDecoderTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\CookieEncoderTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpMessageTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpChunkAggregatorTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpClientCodecTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpContentCompressorTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpHeaderDateFormatTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpServerCodecTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\QueryStringDecoderTest.cpp" />
+    <ClCompile Include="..\..\test\cetty\handler\codec\http\QueryStringEncoderTest.cpp" />
     <ClCompile Include="..\..\test\cetty\util\RandomTest.cpp" />
   </ItemGroup>
   <ItemGroup>

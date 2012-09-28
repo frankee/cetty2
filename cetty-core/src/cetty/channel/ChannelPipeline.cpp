@@ -902,14 +902,14 @@ void ChannelPipeline::fireChannelInactive() {
 }
 
 void ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
-    if (inboundHead) {
-        inboundHead->fireExceptionCaught(cause);
+    if (head) {
+        head->fireExceptionCaught(cause);
     }
 }
 
 void ChannelPipeline::fireUserEventTriggered(const UserEvent& event) {
-    if (inboundHead) {
-        inboundHead->fireUserEventTriggered(event);
+    if (head) {
+        head->fireUserEventTriggered(event);
     }
 }
 
@@ -934,9 +934,15 @@ ChannelFuturePtr ChannelPipeline::bind(const SocketAddress& localAddress) {
     return bind(localAddress, channel->newFuture());
 }
 
-const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
+    const ChannelFuturePtr& future) {
     if (outboundHead) {
         return outboundHead->bind(*outboundHead, localAddress, future);
+    }
+    else {
+        LOG_ERROR << "has no handler to handle to bind";
+        future->setFailure(ChannelPipelineException("has no handler to handle to bind"));
+        return future;
     }
 }
 
@@ -960,6 +966,11 @@ const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddr
     if (outboundHead) {
         return outboundHead->connect(*outboundHead, remoteAddress, localAddress, future);
     }
+    else {
+        LOG_ERROR << "has no handler to handle to connect";
+        future->setFailure(ChannelPipelineException("has no handler to handle to connect"));
+        return future;
+    }
 }
 
 ChannelFuturePtr ChannelPipeline::disconnect() {
@@ -969,6 +980,11 @@ ChannelFuturePtr ChannelPipeline::disconnect() {
 const ChannelFuturePtr& ChannelPipeline::disconnect(const ChannelFuturePtr& future) {
     if (outboundHead) {
         return outboundHead->disconnect(*outboundHead, future);
+    }
+    else {
+        LOG_ERROR << "has no handler to handle to disconnect";
+        future->setFailure(ChannelPipelineException("has no handler to handle to disconnect"));
+        return future;
     }
 }
 
@@ -980,6 +996,11 @@ const ChannelFuturePtr& ChannelPipeline::close(const ChannelFuturePtr& future) {
     if (outboundHead) {
         return outboundHead->close(*outboundHead, future);
     }
+    else {
+        LOG_ERROR << "has no handler to handle to close";
+        future->setFailure(ChannelPipelineException("has no handler to handle to close"));
+        return future;
+    }
 }
 
 ChannelFuturePtr ChannelPipeline::flush() {
@@ -989,6 +1010,11 @@ ChannelFuturePtr ChannelPipeline::flush() {
 const ChannelFuturePtr& ChannelPipeline::flush(const ChannelFuturePtr& future) {
     if (outboundHead) {
         return outboundHead->flush(*outboundHead, future);
+    }
+    else {
+        LOG_ERROR << "has no handler to handle to close";
+        future->setFailure(ChannelPipelineException("has no handler to handle to close"));
+        return future;
     }
 }
 
