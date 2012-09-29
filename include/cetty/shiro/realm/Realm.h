@@ -68,8 +68,12 @@ public:
     Realm() { this->name = autoName(); }
     Realm(std::string name): name(name){}
 
+    virtual ~Realm(){}
+
     const std::string &getName() const { return name; }
     void setName(const std::string &name) { this->name = name; }
+
+    virtual void onLogout(const std::string &principal){/*NOOP*/}
 
 private:
     /**

@@ -20,21 +20,19 @@ namespace authc {
 
 using namespace cetty::shiro::crypt;
 
-bool HashedCredentialsMatcher::match(
-    const AuthenticationToken& token,
-    const AuthenticationInfo& info) {
-
+bool HashedCredentialsMatcher::match(const AuthenticationToken& token,
+                                     const AuthenticationInfo& info) {
     std::string tokenCredentials;
     std::string accountCredentials;
 
-    getCredentials(info, &accountCredentials);
-    hashProvidedCredentials(token, info, &tokenCredentials);
+    getCredentials(token, &tokenCredentials);
+    hashProvidedCredentials(token, info, &accountCredentials);
 
     return tokenCredentials == accountCredentials;
 }
 
 void HashedCredentialsMatcher::getCredentials(const AuthenticationInfo& info,
-        std::string* credentials) {
+                                              std::string* credentials) {
     assert(credentials != NULL);
 
     const std::string& infoCredentials = info.getCredentials();
@@ -47,27 +45,27 @@ void HashedCredentialsMatcher::getCredentials(const AuthenticationInfo& info,
     }
 }
 
-void HashedCredentialsMatcher::getCredentials(const AuthenticationToken &token, std::string* credentials) {
+void HashedCredentialsMatcher::getCredentials(const AuthenticationToken &token,
+                                              std::string* credentials) {
     if (credentials) {
-        *credentials = token.getCredentials();
+        DigestEngine* digestEngine = getDigestEngine();
+        digestEngine->digestFromBase64(token.getCredentials(), credentials);
     }
 }
 
-void HashedCredentialsMatcher::hashProvidedCredentials(
-    const AuthenticationToken& token,
-    const AuthenticationInfo& info,
-    std::string* credentials) {
+void HashedCredentialsMatcher::hashProvidedCredentials(const AuthenticationToken& token,
+                                                       const AuthenticationInfo& info,
+                                                       std::string* credentials) {
     if (!credentials) {
         return;
     }
 
     std::string salt = info.getCredentialsSalt();
-    
     if (salt.empty() && isHashSalted()) {
         salt = token.getSalt();
     }
 
-    std::string c = token.getCredentials();
+    std::string c = info.getCredentials();
     c.append(salt);
 
     DigestEngine* digestEngine = getDigestEngine();

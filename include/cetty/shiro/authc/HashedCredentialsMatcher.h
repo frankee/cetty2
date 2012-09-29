@@ -23,7 +23,9 @@
 namespace cetty {
 namespace shiro {
 namespace crypt {
+
 class DigestEngine;
+
 }
 }
 }
@@ -124,7 +126,7 @@ class AuthenticationToken;
  * @see org.apache.shiro.crypto.hash.Sha256Hash
  * @since 0.9
  */
-class HashedCredentialsMatcher {
+class HashedCredentialsMatcher : public CredentialsMatcher{
 public:
     /**
      * JavaBeans-compatibile no-arg constructor intended for use in IoC/Dependency Injection environments.  If you
@@ -132,12 +134,12 @@ public:
      * {@link #setHashAlgorithmName(String) hashAlgorithmName} property.
      */
     HashedCredentialsMatcher()
-        :hashSalted(false),
+        :hashSalted(true),
          storedCredentialsHexEncoded(true),//false means Base64-encoded
          hashIterations(1){}
 
     HashedCredentialsMatcher(const std::string &hashAlgorithm)
-        :hashSalted(false),
+        :hashSalted(true),
          storedCredentialsHexEncoded(true),//false means Base64-encoded
          hashIterations(1),
          hashAlgorithm(hashAlgorithm){}
@@ -151,7 +153,8 @@ public:
      * @return {@code true} if the provided token credentials match the stored account credentials,
      *         {@code false} otherwise.
      */
-    bool match(const AuthenticationToken& token, const AuthenticationInfo& info);
+    virtual bool match(const AuthenticationToken& token,
+                       const AuthenticationInfo& info);
 
     /**
      * Returns the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
@@ -161,7 +164,7 @@ public:
      *         when performing hashes for credentials matching.
      * @since 1.1
      */
-    std::string getHashAlgorithmName() const {
+    const std::string getHashAlgorithmName() const {
         return hashAlgorithm;
     }
 

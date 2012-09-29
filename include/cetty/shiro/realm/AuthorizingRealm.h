@@ -89,6 +89,10 @@ public:
      */
     void getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback);
 
+    virtual void onLogout(const std::string &principal){
+        authorizations.erase(principal);
+    }
+
 protected:
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,
                                         const GetAuthorizationInfoCallback& callback) = 0;

@@ -74,17 +74,15 @@ void AuthorizingRealm::onGetAuthorizationInfo(const AuthorizationInfoPtr& info,
                   << "].";
 
         authorizations.insert(std::make_pair(principals.getPrimaryPrincipal(), info));
-        callback(info);
     }
 
     else{
         LOG_TRACE << "Can't find authorization info of principals: ["
                   << principals.getPrimaryPrincipal()
                   <<"].";
-        callback(AuthorizationInfoPtr());
     }
 
-
+    callback(info);
 }
 
 }

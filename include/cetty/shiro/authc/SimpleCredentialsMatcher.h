@@ -38,7 +38,7 @@ namespace authc {
  * @see org.apache.shiro.authc.credential.HashedCredentialsMatcher
  * @since 0.9
  */
-class SimpleCredentialsMatcher {
+class SimpleCredentialsMatcher: public CredentialsMatcher{
 public:
     /**
      * This implementation acquires the {@code token}'s credentials
@@ -53,7 +53,7 @@ public:
      * @return {@code true} if the provided token credentials are equal to the stored account credentials,
      *         {@code false} otherwise
      */
-    static bool match(const AuthenticationToken& token, const AuthenticationInfo& info) {
+    virtual bool match(const AuthenticationToken& token, const AuthenticationInfo& info) {
         return token.getCredentials() == info.getCredentials();
     }
 };

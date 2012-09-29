@@ -8,6 +8,8 @@
 #include <cetty/shiro/authz/WildcardPermission.h>
 #include <cetty/logging/LoggerHelper.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace cetty {
 namespace shiro {
 namespace authz {
@@ -50,38 +52,15 @@ void WildcardPermission::setParts(std::string& wildcardString, bool caseSensitiv
         return;
     }
 
-    while (wildcardString.at(wildcardString.size() - 1) == ' ') {
-        wildcardString.erase(wildcardString.size() - 1, 1);
-    }
+    boost::trim(wildcardString);
+    if(!caseSensitive) boost::to_lower(wildcardString);
 
     size_t pre = 0, pos = 0;
-
     while ((pos = wildcardString.find(':', pre)) != std::string::npos) {
         parts.push_back(wildcardString.substr(pre, pos - pre));
         pre = pos + 1;
     }
-
     parts.push_back(wildcardString.substr(pre, wildcardString.size() - pre));
-
-    if (!caseSensitive) {
-        std::vector<std::string>::iterator iter = parts.begin();
-
-        for (; iter != parts.end(); iter ++) {
-            lowercase(&(*iter));
-        }
-    }
-}
-
-void WildcardPermission::lowercase(std::string* part) {
-    if (part == NULL || part->empty()) { return; }
-
-    int diff = 'a' - 'A';
-    unsigned int i = 0;
-
-    for (; i < part->size(); ++i)
-        if (part->at(i) >= 'A' && part->at(i) <= 'Z') {
-            part->at(i) += diff;
-        }
 }
 
 std::string WildcardPermission::toString() const {

@@ -15,6 +15,10 @@ namespace authc {
 
 using namespace cetty::util;
 
+const std::string& AuthenticationToken::getCredentials() const {
+    return credentials;
+}
+
 
 std::string AuthenticationToken::toString() {
     return StringUtil::strprintf("principal: %s host: %s rememberMe: %s",

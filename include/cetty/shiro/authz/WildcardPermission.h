@@ -108,7 +108,8 @@ public:
 
 public:
     WildcardPermission(){}
-    WildcardPermission(std::string& wildcardString) {
+    WildcardPermission(std::string& wildcardString)
+        :Permission(wildcardString){
         setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
     }
     WildcardPermission(std::string& wildcardString, bool caseSensitive) {
@@ -121,7 +122,6 @@ public:
 
 private:
     void setParts(std::string &wildcardString, bool caseSensitive);
-    void lowercase(std::string *part);
     const std::vector<std::string>& getParts() const;
 
 private:

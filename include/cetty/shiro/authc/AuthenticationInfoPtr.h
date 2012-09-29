@@ -22,7 +22,7 @@ namespace shiro {
 namespace authc {
 
 class AuthenticationInfo;
-typedef AuthenticationInfo* AuthenticationInfoPtr;
+typedef boost::intrusive_ptr<AuthenticationInfo> AuthenticationInfoPtr;
 
 }
 }

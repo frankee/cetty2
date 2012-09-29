@@ -68,30 +68,26 @@ public:
     virtual ~AuthenticatingRealm() {}
 
     virtual void getAuthenticationInfo(const AuthenticationToken& token,
-                                       const GetAuthenticationInfoCallback& callback) = 0;
+                                       const GetAuthenticationInfoCallback& callback);
 
-    /**
-     * Default implementation that does nothing (no-op) and exists as a convenience mechanism in case subclasses
-     * wish to override it to implement realm-specific logout logic for the given user account logging out.</p>
-     * <p/>
-     * In a single-realm Shiro configuration (most applications), the <code>principals</code> method
-     * argument will be the same as that which is contained in the <code>AuthenticationInfo</code> object returned by the
-     * {@link #doGetAuthenticationInfo} method (that is, {@link AuthenticationInfo#getPrincipals info.getPrincipals()}).
-     * <p/>
-     * In a multi-realm Shiro configuration, the given <code>principals</code> method
-     * argument could contain principals returned by many realms.  Therefore the subclass implementation would need
-     * to know how to extract the principal(s) relevant to only itself and ignore other realms' principals.  This is
-     * usually done by calling {@link org.apache.shiro.subject.PrincipalCollection#fromRealm(String) principals.fromRealm(name)},
-     * using the realm's own {@link Realm#getName() name}.
-     *
-     * @param principals the application-specific Subject/user identifier that is logging out.
-     */
-    void onLogout(const std::string& sessionId) {
-        //no-op, here for subclass override if desired.
+    /// @brief cleaning cache when logout
+    virtual void onLogout(const std::string& principal) {
+        infos.erase(principal);
     }
 
-private:
+protected:
+    virtual void doGetAuthenticationInfo(const AuthenticationToken& token,
+                                         const GetAuthenticationInfoCallback& callback) = 0;
 
+
+private:
+    void onGetAuthenticationInfo(const AuthenticationToken& token,
+                                const AuthenticationInfoPtr& info,
+                                const GetAuthenticationInfoCallback& callback);
+
+private:
+    /// key: principal
+    std::map<std::string, AuthenticationInfoPtr> infos;
 };
 
 }

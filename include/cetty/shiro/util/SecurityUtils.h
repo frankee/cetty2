@@ -37,8 +37,6 @@ namespace cetty {
 namespace shiro {
 namespace util {
 
-class LoginUtil;
-
 using namespace cetty::shiro;
 using namespace cetty::shiro::crypt;
 
@@ -47,7 +45,6 @@ public:
     static SecurityUtils *getInstance();
 
     SecurityManager *getSecurityManager();
-    LoginUtil *getLoginUtil();
 
     DigestEngine *getDigestEngine();
     DigestEngine *getDigestEngine(const std::string &engineName);

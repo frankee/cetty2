@@ -61,8 +61,8 @@ void Authorizer::doPermite(const AuthorizationInfoPtr& info,
     for (it = permissions.begin(); it != permissions.end(); ++it) {
         if ((*it)->implies(permission)) {
             LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
-                <<"is permited for permission [" << permission->toString() << "].";
-            callback(true, principal.getPrimaryPrincipal(), permission->toString());
+                <<"is permited for permission [" << permission->stringPermission() << "].";
+            callback(true, principal.getPrimaryPrincipal(), permission->stringPermission());
             return;
         }
     }
@@ -75,16 +75,16 @@ void Authorizer::doPermite(const AuthorizationInfoPtr& info,
 
         if (pm->implies(permission)) {
             LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
-                      <<"is permited for permission [" << permission->toString() << "].";
-            callback(true, principal.getPrimaryPrincipal(), permission->toString());
+                      <<"is permited for permission [" << permission->stringPermission() << "].";
+            callback(true, principal.getPrimaryPrincipal(), permission->stringPermission());
             return;
         }
     }
 
     LOG_TRACE << "[" << principal.getPrimaryPrincipal() << "]"
-              <<"is not permited for permission [" << permission->toString() << "].";
+              <<"is not permited for permission [" << permission->stringPermission() << "].";
 
-    callback(false, principal.getPrimaryPrincipal(), permission->toString());
+    callback(false, principal.getPrimaryPrincipal(), permission->stringPermission());
 }
 
 bool Authorizer::realmConfigured() const {

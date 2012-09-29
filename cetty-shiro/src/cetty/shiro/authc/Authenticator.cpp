@@ -23,6 +23,8 @@ using namespace cetty::shiro::realm;
 void Authenticator::authenticate(const AuthenticationToken& token,
                                  const AuthenticateCallback& callback) {
     if (token.getPrincipal().empty()) {
+        LOG_TRACE << "Principal of token is empty.";
+        callback(AuthenticationInfoPtr());
         return;
     }
 
@@ -43,7 +45,7 @@ void Authenticator::authenticate(const AuthenticationToken& token,
 void Authenticator::onGetAuthenticationInfo(const AuthenticationInfoPtr& info,
         const AuthenticationToken& token,
         const AuthenticateCallback& callback) {
-    if (info && credentialsMatcher(token, *info)) {
+    if (info && credentialsMatcher.match(token, *info)) {
         callback(info);
     }
     else {

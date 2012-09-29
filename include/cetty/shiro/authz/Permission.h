@@ -19,7 +19,6 @@
  * under the License.
  */
 
-#include <string>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/shiro/authz/PermissionPtr.h>
 
@@ -76,6 +75,9 @@ using namespace cetty::util;
  */
 class Permission : public ReferenceCounter<Permission, int> {
 public:
+    Permission(){}
+    Permission(const std::string &strPermission): strPermission(strPermission){}
+
     virtual ~Permission() {}
 
     /**
@@ -96,9 +98,14 @@ public:
      */
     virtual bool implies(const PermissionPtr& p) = 0;
 
-    virtual const std::string& stringPermission() const = 0;
+    virtual const std::string& stringPermission() const{
+        return strPermission;
+    }
 
     virtual std::string toString() const = 0;
+
+protected:
+    std::string strPermission;
 };
 
 }

@@ -154,7 +154,7 @@ public:
      *
      * @return the credential submitted by the user during the authentication process.
      */
-    const std::string& getCredentials() const { return credentials; }
+    const std::string& getCredentials() const;
 
     /**
      * Sets the credentials for submission during an authentication attempt.

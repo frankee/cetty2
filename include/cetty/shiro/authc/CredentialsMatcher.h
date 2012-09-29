@@ -45,6 +45,13 @@ class AuthenticationToken;
  * @since 0.1
  */
 
+class CredentialsMatcher{
+public:
+    virtual bool match(const AuthenticationToken& token, const AuthenticationInfo& info);
+
+    virtual ~CredentialsMatcher(){}
+};
+
 
 /**
  * Returns {@code true} if the provided token credentials match the stored account credentials,
@@ -55,7 +62,9 @@ class AuthenticationToken;
  * @return {@code true} if the provided token credentials match the stored account credentials,
  *         {@code false} otherwise.
  */
-typedef boost::function2<bool, const AuthenticationToken&, const AuthenticationInfo&> CredentialsMatcher;
+/*
+ * typedef boost::function2<bool, const AuthenticationToken&, const AuthenticationInfo&> CredentialsMatcher;
+*/
 
 }
 }

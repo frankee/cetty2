@@ -18,12 +18,79 @@
  */
 
 #include <cetty/config/ConfigObject.h>
+#include <cetty/shiro/realm/SqlRealm.h>
 
 namespace cetty {
 namespace shiro {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+using namespace cetty::config;
+using namespace cetty::shiro::realm;
+
+class SecurityManagerConfig: public ConfigObject {
 public:
+    class AuthenticatorConfig: ConfigObject {
+    public:
+        class HashedCredentialsMatcherConfig: public ConfigObject{
+            bool hashSalted;
+            bool storedCredentialsHexEncoded;
+
+            int hashIterations;
+
+            std::string hashAlgorithm;
+
+            HashedCredentialsMatcherConfig();
+            virtual ConfigObject* create() const { return new HashedCredentialsMatcherConfig; }
+        };
+
+        HashedCredentialsMatcherConfig config;
+        
+        AuthenticatorConfig();
+        virtual ConfigObject* create() const { return new AuthenticatorConfig; }
+    };
+
+    class AuthorizerConfig: ConfigObject {
+        AuthorizerConfig();
+        virtual ConfigObject* create() const { return new AuthorizerConfig; }
+    };
+
+    class SessionManagerConfig: ConfigObject {
+    public:
+        bool deleteInvalidSessions;
+        bool sessionValidationSchedulerEnabled;
+
+        int globalSessionTimeout;
+        int sessionValidationInterval;
+        
+        SessionManagerConfig();
+        virtual ConfigObject* create() const { return new SessionManagerConfig; }
+    };
+
+    class RealmConfig: ConfigObject {
+    public:
+        std::string name;
+
+        std::string backend;
+        std::string connectionString;
+
+        std::string authenticationQuery;
+        std::string userRolesQuery;
+        std::string permissionsQuery;
+
+        SqlRealm::SaltStyle saltStyle;
+        bool permissionsLookupEnabled;
+
+        RealmConfig();
+
+        virtual ConfigObject* create() const { return new RealmConfig; }
+    };
+    
+    AuthenticatorConfig authenticatorConfig;
+    AuthorizerConfig authorizerConfig;
+    SessionManagerConfig sessionManagerConfig;
+    RealmConfig realmConfig;
+    
+    SecurityManagerConfig();
+    virtual ConfigObject* create() const { return new SecurityManagerConfig; }
 };
 
 }

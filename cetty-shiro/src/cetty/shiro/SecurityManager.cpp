@@ -74,14 +74,12 @@ void SecurityManager::onStartSession(const SessionPtr& session,
     }
 }
 
-void SecurityManager::getSession(const std::string& id, SessionManager::SessionCallback callback ){
+void SecurityManager::getSession(const std::string& id,
+                                 SessionManager::SessionCallback callback ){
     sessionManager->getSession(id, callback);
 }
 
 void SecurityManager::logout(const std::string& sessionId) {
-    AuthenticatingRealm *authRealm = (AuthenticatingRealm *)realms.get();
-    if(authRealm != NULL) authRealm->onLogout(sessionId);
-
     sessionManager->getSession(sessionId,
                                boost::bind(&SecurityManager::onLogout,
                                            this,
@@ -89,12 +87,15 @@ void SecurityManager::logout(const std::string& sessionId) {
 }
 
 void SecurityManager::onLogout(const SessionPtr& session){
+    AuthenticatingRealm *authRealm = (AuthenticatingRealm *)realms.get();
+    if(authRealm != NULL) authRealm->onLogout(session->getAttribute("username"));
     session->stop();
 }
 
 
-
-void SecurityManager::bind(const AuthenticationToken& token, const AuthenticationInfo& info, const SessionPtr& session) {
+void SecurityManager::bind(const AuthenticationToken& token,
+                           const AuthenticationInfo& info,
+                           const SessionPtr& session) {
     session->setHost(token.getHost());
     session->setLogin(true);
 }
@@ -108,7 +109,8 @@ void SecurityManager::fireFailedLoginEvent(const AuthenticationToken& token){
     LOG_TRACE << token.getPrincipal()
               << " is failed to login.";
 }
-void SecurityManager::fireSuccessfulLoginEvent(const AuthenticationToken& token, const AuthenticationInfoPtr& info){
+void SecurityManager::fireSuccessfulLoginEvent(const AuthenticationToken& token,
+                                               const AuthenticationInfoPtr& info){
     LOG_TRACE << token.getPrincipal()
               << " is successful to login.";
 }
@@ -134,6 +136,7 @@ void SecurityManager::isPermitted(const PrincipalCollection& principal,
 void SecurityManager::setRealm(const RealmPtr &realm){
     this->realms = realm;
 }
+
 const RealmPtr& SecurityManager::getRealms() const{
     return this->realms;
 }

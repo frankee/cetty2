@@ -24,7 +24,7 @@
 #include <boost/function.hpp>
 #include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
-#include <cetty/shiro/authc/CredentialsMatcher.h>
+#include <cetty/shiro/authc/HashedCredentialsMatcher.h>
 
 namespace cetty {
 namespace shiro {
@@ -66,8 +66,8 @@ public:
      * {@link AuthenticationListener AuthenticationListener} collection is a non-null {@code ArrayList}.
      */
     Authenticator() {}
-    Authenticator(const RealmPtr& realm);
-    Authenticator(const RealmPtr& realm, const CredentialsMatcher& matcher);
+    Authenticator(const RealmPtr& realm, const HashedCredentialsMatcher &matcher)
+        :realm(realm), credentialsMatcher(matcher){}
 
     virtual ~Authenticator() {}
 
@@ -83,6 +83,10 @@ public:
      */
     void setCredentialsMatcher(const CredentialsMatcher& matcher) {
         this->credentialsMatcher = matcher;
+    }
+
+    const HashedCredentialsMatcher &getCredentialsMatcher() const{
+        return this->credentialsMatcher;
     }
 
     /**
@@ -144,7 +148,7 @@ private:
      * Password matcher used to determine if the provided password matches
      * the password stored in the data store.
      */
-    CredentialsMatcher credentialsMatcher;
+    HashedCredentialsMatcher credentialsMatcher;
 };
 
 }
