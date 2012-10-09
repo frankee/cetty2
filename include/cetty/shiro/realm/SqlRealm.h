@@ -2,6 +2,7 @@
 #define CETTY_SHIRO_REALM_SQLREALM_H
 
 #include <cetty/shiro/realm/AuthorizingRealm.h>
+#include <cetty/shiro/realm/SqlRealmConfig.h>
 
 namespace cetty {
 namespace shiro {
@@ -55,7 +56,6 @@ protected:
     static const std::string DEFAULT_USER_ROLES_QUERY;
     static const std::string DEFAULT_PERMISSIONS_QUERY;
 
-
     std::string authenticationQuery;
     std::string userRolesQuery;
     std::string permissionsQuery;
@@ -67,6 +67,8 @@ protected:
     std::string connectionString;
     bool permissionsLookupEnabled;
     SaltStyle saltStyle;
+
+    SqlRealmConfig config;
 
 private:
     void getPasswordForUser(const std::string &username, std::vector<std::string> *passwd);

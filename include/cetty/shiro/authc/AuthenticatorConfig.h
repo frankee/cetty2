@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
-#define CETTY_SHIRO_SECURITYMANAGERCONFIG_H
+#if !defined(CETTY_SHIRO_AUTHC_AUTHENTICATORCONFIG_H)
+#define CETTY_SHIRO_AUTHC_AUTHENTICATORCONFIG_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,19 +21,21 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+class AuthenticatorConfig : cetty::config::ConfigObject {
 public:
-    std::string realm;
+    std::string credentialsMatcher;
 
-    SecurityManagerConfig();
-    virtual ConfigObject* create() const { return new SecurityManagerConfig; }
+    AuthenticatorConfig();
+    virtual ConfigObject* create() const { return new AuthenticatorConfig; }
 };
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
+#endif //#if !defined(CETTY_SHIRO_AUTHC_AUTHENTICATORCONFIG_H)
 
 // Local Variables:
 // mode: c++

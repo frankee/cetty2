@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
-#define CETTY_SHIRO_SECURITYMANAGERCONFIG_H
+#if !defined(CETTY_SHIRO_REALM_SQLREALMCONFIG_H)
+#define CETTY_SHIRO_REALM_SQLREALMCONFIG_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,19 +21,32 @@
 
 namespace cetty {
 namespace shiro {
+namespace realm {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+class SqlRealmConfig : cetty::config::ConfigObject {
 public:
-    std::string realm;
+    bool permissionsLookupEnabled;
+    int saltStyle;
 
-    SecurityManagerConfig();
-    virtual ConfigObject* create() const { return new SecurityManagerConfig; }
+    std::string name;
+
+    std::string backend;
+    std::string connectionString;
+
+    std::string authenticationQuery;
+    std::string userRolesQuery;
+    std::string permissionsQuery;
+
+    SqlRealmConfig();
+
+    virtual ConfigObject* create() const { return new SqlRealmConfig; }
 };
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
+#endif //#if !defined(CETTY_SHIRO_REALM_SQLREALMCONFIG_H)
 
 // Local Variables:
 // mode: c++
