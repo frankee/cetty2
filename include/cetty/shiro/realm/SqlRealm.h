@@ -43,7 +43,7 @@ public:
         this->connectionString = connectionString;
     }
 
-    virtual void getAuthenticationInfo(const AuthenticationToken& token,
+    virtual void doGetAuthenticationInfo(const AuthenticationToken& token,
                                        const GetAuthenticationInfoCallback& callback);
 
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,

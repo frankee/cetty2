@@ -23,6 +23,33 @@ using namespace cetty::shiro::authz;
 
 SecurityManager::SecurityManager(){
     sessionManager = new SessionManager();
+    //realms = new SqlRealm();
+
+    ConfigCenter::instance().configure(&config);
+    init();
+}
+
+void SecurityManager::init(){
+    SecurityManagerConfig::AuthenticatorConfig *authcConfig = config.authenticatorConfig;
+    SecurityManagerConfig::AuthenticatorConfig::HashedCredentialsMatcherConfig *hcmConfig = authcConfig->config;
+    HashedCredentialsMatcher &hcm = const_cast<HashedCredentialsMatcher &> (authenticator.getCredentialsMatcher());
+    hcm.setHashAlgorithmName(hcmConfig->hashAlgorithm);
+    hcm.setHashIterations(hcmConfig->hashIterations);
+    hcm.setHashSalted(hcmConfig->hashSalted);
+    hcm.setStoredCredentialsHexEncoded(hcmConfig->storedCredentialsHexEncoded);
+
+
+    SecurityManagerConfig::SessionManagerConfig *smConfig = config.sessionManagerConfig;
+    sessionManager->setGlobalSessionTimeout(smConfig->globalSessionTimeout);
+    sessionManager->setSessionValidationInterval(smConfig->sessionValidationInterval);
+    sessionManager->setDeleteInvalidSessions(smConfig->deleteInvalidSessions);
+    sessionManager->setSessionValidationSchedulerEnabled(smConfig->sessionValidationSchedulerEnabled);
+
+    SecurityManagerConfig::RealmConfig *realmConfig = config.realmConfig;
+
+    //SqlRealm authzRealm = dynamic_cast<AuthorizingRealm *>(realms.get());
+    //authzRealm->setName(realmConfig->name);
+    //authzRea
 }
 
 SecurityManager::~SecurityManager(){

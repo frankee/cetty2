@@ -26,17 +26,20 @@
 #include <cetty/shiro/session/SessionManager.h>
 #include <cetty/shiro/authc/Authenticator.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+#include <cetty/shiro/SecurityManagerConfig.h>
+#include <cetty/config/ConfigCenter.h>
+
+namespace authc {
+    class AuthenticationToken;
+}
 
 namespace cetty {
 namespace shiro {
 
-namespace authc {
-class AuthenticationToken;
-}
-
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::authz;
 using namespace cetty::shiro::session;
+using namespace cetty::shiro;
 
 
 /**
@@ -102,6 +105,8 @@ public:
     const RealmPtr& getRealms() const;
 
 private:
+    void init();
+
     /// login by session id
     void getSession(const std::string& id, SessionManager::SessionCallback callback );
 
@@ -122,6 +127,8 @@ private:
     void onLogout(const SessionPtr& session);
 
 private:
+    SecurityManagerConfig config;
+
     Authenticator authenticator;
     Authorizer    authorizer;
 

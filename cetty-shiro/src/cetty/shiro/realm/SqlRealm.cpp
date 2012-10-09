@@ -60,7 +60,7 @@ void SqlRealm::setSaltStyle(SqlRealm::SaltStyle saltStyle) {
     }
 }
 
-void SqlRealm::getAuthenticationInfo(const AuthenticationToken& token,
+void SqlRealm::doGetAuthenticationInfo(const AuthenticationToken& token,
                                      const GetAuthenticationInfoCallback& callback){
     AuthenticationInfoPtr info;
 
@@ -89,8 +89,8 @@ void SqlRealm::getAuthenticationInfo(const AuthenticationToken& token,
 void SqlRealm::getPasswordForUser(const std::string &username,
                                   std::vector<std::string> *passwd){
     if(backend.empty() || connectionString.empty()){
-               LOG_ERROR << "DB connection info does not be set.";
-               return;
+        LOG_ERROR << "DB connection info does not be set.";
+        return;
     }
 
     std::string credentials;

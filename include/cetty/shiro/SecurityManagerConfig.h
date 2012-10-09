@@ -31,6 +31,7 @@ public:
     class AuthenticatorConfig: ConfigObject {
     public:
         class HashedCredentialsMatcherConfig: public ConfigObject{
+        public:
             bool hashSalted;
             bool storedCredentialsHexEncoded;
 
@@ -42,16 +43,18 @@ public:
             virtual ConfigObject* create() const { return new HashedCredentialsMatcherConfig; }
         };
 
-        HashedCredentialsMatcherConfig config;
-        
+        HashedCredentialsMatcherConfig *config;
+
         AuthenticatorConfig();
         virtual ConfigObject* create() const { return new AuthenticatorConfig; }
     };
 
+    /*
     class AuthorizerConfig: ConfigObject {
         AuthorizerConfig();
         virtual ConfigObject* create() const { return new AuthorizerConfig; }
     };
+    */
 
     class SessionManagerConfig: ConfigObject {
     public:
@@ -60,7 +63,7 @@ public:
 
         int globalSessionTimeout;
         int sessionValidationInterval;
-        
+
         SessionManagerConfig();
         virtual ConfigObject* create() const { return new SessionManagerConfig; }
     };
@@ -84,11 +87,11 @@ public:
         virtual ConfigObject* create() const { return new RealmConfig; }
     };
     
-    AuthenticatorConfig authenticatorConfig;
-    AuthorizerConfig authorizerConfig;
-    SessionManagerConfig sessionManagerConfig;
-    RealmConfig realmConfig;
-    
+    AuthenticatorConfig *authenticatorConfig;
+    //AuthorizerConfig *authorizerConfig;
+    SessionManagerConfig *sessionManagerConfig;
+    RealmConfig *realmConfig;
+
     SecurityManagerConfig();
     virtual ConfigObject* create() const { return new SecurityManagerConfig; }
 };
