@@ -15,9 +15,12 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticatorConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialMatcher.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialsMatcherConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\SimpleCredentialsMatcher.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\authc\WSSEConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfoPtr.h" />
@@ -36,6 +39,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealmPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\Realm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\SqlRealm.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\realm\SqlRealmConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManagerConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManager.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h" />
@@ -43,6 +47,7 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionDAO.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionIdGenerator.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionManager.h" />
+    <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionManagerConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\SessionValidationScheduler.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\util\LoginUtil.h" />
@@ -53,6 +58,7 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationToken.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialMatcher.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\authc\WSSEConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\WildcardPermission.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\crypt\DigestEngine.cpp" />
@@ -63,6 +69,7 @@
     <ClCompile Include="..\..\src\cetty\shiro\realm\Realm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\realm\SqlRealm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\SecurityManager.cpp" />
+    <ClCompile Include="..\..\src\cetty\shiro\SecurityManagerConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\RedisSessionDAO.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionDAO.cpp" />

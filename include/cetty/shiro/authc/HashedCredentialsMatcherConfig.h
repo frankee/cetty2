@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
-#define CETTY_SHIRO_SECURITYMANAGERCONFIG_H
+#if !defined(CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHERCONFIG_H)
+#define CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHERCONFIG_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,19 +21,26 @@
 
 namespace cetty {
 namespace shiro {
+namespace authc {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+class HashedCredentialsMatcherConfig : public cetty::config::ConfigObject {
 public:
-    std::string realm;
+    bool hashSalted;
+    bool storedCredentialsHexEncoded;
 
-    SecurityManagerConfig();
-    virtual ConfigObject* create() const { return new SecurityManagerConfig; }
+    int hashIterations;
+
+    std::string hashAlgorithm;
+
+    HashedCredentialsMatcherConfig();
+    virtual ConfigObject* create() const { return new HashedCredentialsMatcherConfig; }
 };
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
+#endif //#if !defined(CETTY_SHIRO_AUTHC_HASHEDCREDENTIALSMATCHERCONFIG_H)
 
 // Local Variables:
 // mode: c++

@@ -1,5 +1,5 @@
-#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
-#define CETTY_SHIRO_SECURITYMANAGERCONFIG_H
+#if !defined(CETTY_SHIRO_SESSION_SESSIONMANAGERCONFIG_H)
+#define CETTY_SHIRO_SESSION_SESSIONMANAGERCONFIG_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,19 +21,25 @@
 
 namespace cetty {
 namespace shiro {
+namespace session {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+class SessionManagerConfig : cetty::config::ConfigObject {
 public:
-    std::string realm;
+    bool deleteInvalidSessions;
+    bool sessionValidationSchedulerEnabled;
 
-    SecurityManagerConfig();
-    virtual ConfigObject* create() const { return new SecurityManagerConfig; }
+    int globalSessionTimeout;
+    int sessionValidationInterval;
+
+    SessionManagerConfig();
+    virtual ConfigObject* create() const { return new SessionManagerConfig; }
 };
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_SHIRO_SECURITYMANAGERCONFIG_H)
+#endif //#if !defined(CETTY_SHIRO_SESSION_SESSIONMANAGERCONFIG_H)
 
 // Local Variables:
 // mode: c++
