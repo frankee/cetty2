@@ -34,16 +34,9 @@ int ProtobufJsonParser::parse(const char* buffer,
         return -1;
     }
 
-    YAML::Node root;
-    
-    if (buffer + bufferSize == '\0') {
-        root = YAML::Load(buffer);
-    }
-    else { //FIXME: add YAML::Load(const char*, int)?
-        std::string str(buffer, bufferSize);
-        root = YAML::Load(str);
-    }
-    
+    std::string str(buffer, bufferSize);
+    YAML::Node root = YAML::Load(str);
+
     if (root) {
         return parseMessage(root, message);
     }
@@ -63,7 +56,7 @@ int ProtobufJsonParser::parseMessage(const YAML::Node& node,
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
         YAML::Node fieldNode = node[field->camelcase_name()];
 
-        if (!fieldNode) {
+        if (fieldNode) {
             if (parseField(fieldNode, field, message) < 0) {
                 return -3;
             }
