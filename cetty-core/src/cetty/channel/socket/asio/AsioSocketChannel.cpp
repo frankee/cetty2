@@ -54,11 +54,11 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
                                      const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline)
     : SocketChannel(eventLoop, parent, factory, pipeline),
+      isWriting(false),
+      highWaterMarkCounter(0),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       sink(),
-      isWriting(false),
-      highWaterMarkCounter(0),
       config(tcpSocket) {
       init(pipeline);
 }
@@ -67,11 +67,11 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
                                      const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline)
     : SocketChannel(eventLoop, ChannelPtr(), factory, pipeline),
+      isWriting(false),
+      highWaterMarkCounter(0),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       sink(),
-      isWriting(false),
-      highWaterMarkCounter(0),
       config(tcpSocket) {
     init(pipeline);
 }

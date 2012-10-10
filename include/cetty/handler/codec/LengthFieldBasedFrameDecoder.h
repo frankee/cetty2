@@ -220,8 +220,9 @@ public:
         int lengthFieldOffset,
         int lengthFieldLength)
         : discardingTooLongFrame(false),
-          bytesToDiscard(0),
           maxFrameLength(maxFrameLength),
+          tooLongFrameLength(0),
+          bytesToDiscard(0),
           lengthFieldOffset(lengthFieldOffset),
           lengthFieldLength(lengthFieldLength),
           lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
@@ -262,8 +263,9 @@ public:
                                  int lengthAdjustment,
                                  int initialBytesToStrip)
         : discardingTooLongFrame(false),
-          bytesToDiscard(0),
           maxFrameLength(maxFrameLength),
+          tooLongFrameLength(0),
+          bytesToDiscard(0),
           lengthFieldOffset(lengthFieldOffset),
           lengthFieldLength(lengthFieldLength),
           lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
@@ -290,8 +292,9 @@ public:
                                  int checksumFieldLength,
                                  const ChecksumFunction& checksumFunction)
         : discardingTooLongFrame(false),
-          bytesToDiscard(0),
           maxFrameLength(maxFrameLength),
+          tooLongFrameLength(0),
+          bytesToDiscard(0),
           lengthFieldOffset(lengthFieldOffset),
           lengthFieldLength(lengthFieldLength),
           lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
@@ -312,8 +315,9 @@ public:
                                  int checksumCalcOffset,
                                  const ChecksumFunction& checksumFunction)
         : discardingTooLongFrame(false),
-          bytesToDiscard(0),
           maxFrameLength(maxFrameLength),
+          tooLongFrameLength(0),
+          bytesToDiscard(0),
           lengthFieldOffset(lengthFieldOffset),
           lengthFieldLength(lengthFieldLength),
           lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
@@ -328,15 +332,18 @@ public:
     LengthFieldBasedFrameDecoder(const LengthFieldBasedFrameDecoder& decoder)
         : discardingTooLongFrame(decoder.discardingTooLongFrame),
           maxFrameLength(decoder.maxFrameLength),
+          tooLongFrameLength(0),
+          bytesToDiscard(0),
           lengthFieldOffset(decoder.lengthFieldOffset),
           lengthFieldLength(decoder.lengthFieldLength),
           lengthFieldEndOffset(decoder.lengthFieldEndOffset),
           lengthAdjustment(decoder.lengthAdjustment),
+          header1(decoder.header1),
+          header2(decoder.header2),
           initialBytesToStrip(decoder.initialBytesToStrip),
           checksumFieldLength(decoder.checksumFieldLength),
           checksumCalcOffset(decoder.checksumCalcOffset),
-          checksumFunction(decoder.checksumFunction),
-          header1(decoder.header1) {
+          checksumFunction(decoder.checksumFunction) {
     }
 
     virtual ~LengthFieldBasedFrameDecoder() {}
@@ -372,6 +379,8 @@ private:
 private:
     bool discardingTooLongFrame;
     int  maxFrameLength;
+    int  tooLongFrameLength;
+    int  bytesToDiscard;
 
     int  lengthFieldOffset;
     int  lengthFieldLength;
@@ -382,10 +391,7 @@ private:
     std::string header2;
 
     int  initialBytesToStrip;
-
-    int  tooLongFrameLength;
-    int  bytesToDiscard;
-
+    
     int  checksumFieldLength;
     int  checksumCalcOffset;
     ChecksumFunction checksumFunction;

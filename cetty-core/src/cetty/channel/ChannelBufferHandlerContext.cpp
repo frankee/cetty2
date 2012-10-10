@@ -26,9 +26,9 @@ ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name
         const ChannelHandlerPtr& handler,
         ChannelHandlerContext* prev,
         ChannelHandlerContext* next)
-    : ChannelInboundBufferHandlerContext(name, pipeline, handler, prev, next),
-      ChannelOutboundBufferHandlerContext(name, pipeline, handler, prev, next),
-      ChannelHandlerContext(name, pipeline, handler, prev, next) {
+    : ChannelHandlerContext(name, pipeline, handler, prev, next),
+      ChannelInboundBufferHandlerContext(name, pipeline, handler, prev, next),
+      ChannelOutboundBufferHandlerContext(name, pipeline, handler, prev, next) {
           hasInboundBufferHandler = true;
           hasOutboundBufferHandler = true;
 }
@@ -39,9 +39,9 @@ ChannelBufferHandlerContext::ChannelBufferHandlerContext(const std::string& name
         const ChannelHandlerPtr& handler,
         ChannelHandlerContext* prev,
         ChannelHandlerContext* next)
-    : ChannelInboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-      ChannelOutboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-      ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+    : ChannelHandlerContext(name, pipeline, handler, prev, next),
+      ChannelInboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
+      ChannelOutboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
           hasInboundBufferHandler = true;
           hasOutboundBufferHandler = true;
 }

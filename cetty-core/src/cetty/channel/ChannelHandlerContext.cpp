@@ -37,20 +37,20 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
         const ChannelHandlerPtr& handler,
         ChannelHandlerContext* prev,
         ChannelHandlerContext* next)
-    : pipeline(pipeline),
-      eventloop(),
-      next(next),
-      prev(prev),
-      nextInboundContext(NULL),
-      nextOutboundContext(NULL),
-      canHandleInbound(false),
+    : canHandleInbound(false),
       canHandleOutbound(false),
       hasInboundBufferHandler(false),
       hasInboundMessageHandler(false),
       hasOutboundBufferHandler(false),
       hasOutboundMessageHandler(false),
+      handler(handler),
+      next(next),
+      prev(prev),
+      nextInboundContext(NULL),
+      nextOutboundContext(NULL),
       name(name),
-      handler(handler) {
+      pipeline(pipeline),
+      eventloop() {
     init(handler);
 }
 
@@ -60,20 +60,20 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
         const ChannelHandlerPtr& handler,
         ChannelHandlerContext* prev,
         ChannelHandlerContext* next)
-    : pipeline(pipeline),
-      eventloop(eventloop),
-      next(next),
-      prev(prev),
-      nextInboundContext(NULL),
-      nextOutboundContext(NULL),
-      canHandleInbound(false),
+    : canHandleInbound(false),
       canHandleOutbound(false),
       hasInboundBufferHandler(false),
       hasInboundMessageHandler(false),
       hasOutboundBufferHandler(false),
       hasOutboundMessageHandler(false),
+      handler(handler),
+      next(next),
+      prev(prev),
+      nextInboundContext(NULL),
+      nextOutboundContext(NULL),
       name(name),
-      handler(handler) {
+      pipeline(pipeline),
+      eventloop(eventloop) {
     init(handler);
 }
 

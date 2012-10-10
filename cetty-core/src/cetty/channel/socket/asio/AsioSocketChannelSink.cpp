@@ -26,7 +26,7 @@ namespace socket {
 namespace asio {
 
 AsioSocketChannelSink::AsioSocketChannelSink(AsioSocketChannel& channel)
-    : channel(channel), AbstractChannelSink(channel) {
+    :  AbstractChannelSink(channel), channel(channel) {
 }
 
 void AsioSocketChannelSink::connect(const SocketAddress& remoteAddress,

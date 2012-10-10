@@ -108,9 +108,9 @@ private:
 };
 
 ChannelPipeline::ChannelPipeline()
-    : channel(),
-      firedChannelActive(false),
+    : firedChannelActive(false),
       fireInboundBufferUpdatedOnActivation(false),
+      channel(),
       head(NULL),
       tail(NULL),
       inboundHead(NULL),

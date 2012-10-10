@@ -49,7 +49,7 @@ public:
     typedef boost::shared_ptr<boost::asio::io_service::work> WorkPtr;
 
 public:
-    AsioServiceHolder() : priority(0), state(INITIALIZED) {}
+    AsioServiceHolder() : state(INITIALIZED), priority(0) {}
     virtual ~AsioServiceHolder() {}
 
     virtual const EventLoopPtr& getEventLoop() const {

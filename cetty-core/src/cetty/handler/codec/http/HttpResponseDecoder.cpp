@@ -27,17 +27,19 @@ namespace http {
 using namespace cetty::util;
 
 HttpResponseDecoder::HttpResponseDecoder()
-    : response(new HttpResponse),
-      HttpMessageDecoder(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE) {
+    : HttpMessageDecoder(MAX_INITIAL_LINE_LENGTH,
+        MAX_HEADER_SIZE,
+        MAX_CHUNK_SIZE),
+      response(new HttpResponse) {
 }
 
 HttpResponseDecoder::HttpResponseDecoder(int maxInitialLineLength,
         int maxHeaderSize,
         int maxChunkSize)
-    : response(new HttpResponse),
-      HttpMessageDecoder(maxInitialLineLength,
-                         maxHeaderSize,
-                         maxChunkSize) {
+    : HttpMessageDecoder(maxInitialLineLength,
+        maxHeaderSize,
+        maxChunkSize),
+      response(new HttpResponse) {
 }
 
 HttpResponseDecoder::~HttpResponseDecoder() {

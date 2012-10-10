@@ -41,16 +41,18 @@ AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
     const EventLoopPoolPtr& pool)
     : parentPool(pool),
       childPool(pool),
-      socketAddressFactory(NULL),
-      ipAddressFactory(NULL) {
+      socketAddressFactory(),
+      ipAddressFactory() {
     BOOST_ASSERT(pool && "ioServicePool SHOULD NOT BE NULL.");
     init();
 }
 
-AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(int parentThreadCnt,
-        int childThreadCnt /*= 0*/)
-    : ipAddressFactory(),
-      socketAddressFactory() {
+AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
+    int parentThreadCnt,
+    int childThreadCnt /*= 0*/)
+    : socketAddressFactory(),
+      ipAddressFactory() {
+
     parentPool = new AsioServicePool(parentThreadCnt);
 
     if (0 == childThreadCnt) {
@@ -69,8 +71,8 @@ AsioServerSocketChannelFactory::AsioServerSocketChannelFactory(
         const EventLoopPoolPtr& childPool)
     : parentPool(parentPool),
       childPool(childPool),
-      ipAddressFactory(),
-      socketAddressFactory() {
+      socketAddressFactory(),
+      ipAddressFactory() {
 
     BOOST_ASSERT(parentPool && childPool && "ioServicePool SHOULD NOT BE NULL.");
     init();

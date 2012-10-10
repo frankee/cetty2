@@ -40,7 +40,7 @@ void CookieDecoder::decode(const std::string& header, std::vector<Cookie>* cooki
         return;
     }
 
-    int i;
+    std::size_t i;
     int version = 0;
 
     // $Version is the only attribute that can appear before the actual

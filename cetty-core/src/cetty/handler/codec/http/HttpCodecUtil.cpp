@@ -34,7 +34,7 @@ const char HttpCodecUtil::CRLF[2] = { (char)HttpCodecUtil::CR, (char)HttpCodecUt
 
 bool HttpCodecUtil::validateHeaderName(const std::string& name) {
     for (size_t i = 0; i < name.size(); ++i) {
-        char c = name.at(i);
+        unsigned char c = (unsigned char)name.at(i);
 
         if (c > 127) {
             throw InvalidArgumentException(
@@ -114,9 +114,12 @@ bool HttpCodecUtil::validateHeaderValue(const std::string& value) {
     }
 
     if (state != 0) {
+        return false;
         throw InvalidArgumentException(
             std::string("value must not end with '\\r' or '\\n':") + value);
     }
+
+    return true;
 }
 
 bool HttpCodecUtil::isTransferEncodingChunked(const HttpMessage& m) {

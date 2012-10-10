@@ -43,10 +43,10 @@ AsioServerSocketChannel::AsioServerSocketChannel(
     const EventLoopPoolPtr& childEventLoopPool)
     : ServerSocketChannel(eventLoop, factory, pipeline),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       sink(),
       childPipeline(childPipeline),
       childServicePool(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
-      acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       config(acceptor) {
 
     sink = new AbstractChannelSink(*this);

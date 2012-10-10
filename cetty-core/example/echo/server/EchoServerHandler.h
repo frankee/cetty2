@@ -60,7 +60,7 @@ public:
     virtual ChannelHandlerPtr clone() {
         return ChannelHandlerPtr(new EchoServerHandler);
     }
-    
+
     virtual std::string toString() const {
         return "EchoServerHandler";
     }

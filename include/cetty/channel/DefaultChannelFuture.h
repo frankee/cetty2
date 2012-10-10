@@ -125,9 +125,9 @@ private:
 
         PriorityCallback() : priority(0) {}
         PriorityCallback(const CompletedCallback& callback)
-            : callback(callback), priority(0) {}
+            : priority(0), callback(callback) {}
         PriorityCallback(const CompletedCallback& callback, int priority)
-            : callback(callback), priority(priority) {}
+            : priority(priority), callback(callback) {}
 
         bool empty() const {
             return callback.empty();

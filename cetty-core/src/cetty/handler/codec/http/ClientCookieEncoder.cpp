@@ -25,7 +25,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-static const char const* COOKIE_NAME_PREFIX = "$";
+static const char* const COOKIE_NAME_PREFIX = "$";
 
 void ClientCookieEncoder::encode(const Cookie& cookie, std::string* out) {
     if (!out) {
