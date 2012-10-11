@@ -20,12 +20,14 @@
  */
 #include <string>
 
+#include <cetty/shiro/authc/CredentialsMatcher.h>
+#include <cetty/shiro/authc/HashedCredentialsMatcherConfig.h>
+
+
 namespace cetty {
 namespace shiro {
 namespace crypt {
-
-class DigestEngine;
-
+    class DigestEngine;
 }
 }
 }
@@ -36,6 +38,8 @@ namespace authc {
 
 class AuthenticationInfo;
 class AuthenticationToken;
+
+using namespace cetty::shiro::crypt;
 
 /**
  * A {@code HashedCredentialMatcher} provides support for hashing of supplied {@code AuthenticationToken} credentials
@@ -126,23 +130,14 @@ class AuthenticationToken;
  * @see org.apache.shiro.crypto.hash.Sha256Hash
  * @since 0.9
  */
-class HashedCredentialsMatcher : public CredentialsMatcher{
+class HashedCredentialsMatcher : public CredentialsMatcher {
 public:
     /**
      * JavaBeans-compatibile no-arg constructor intended for use in IoC/Dependency Injection environments.  If you
      * use this constructor, you <em>MUST</em> also additionally set the
      * {@link #setHashAlgorithmName(String) hashAlgorithmName} property.
      */
-    HashedCredentialsMatcher()
-        :hashSalted(true),
-         storedCredentialsHexEncoded(true),//false means Base64-encoded
-         hashIterations(1){}
-
-    HashedCredentialsMatcher(const std::string &hashAlgorithm)
-        :hashSalted(true),
-         storedCredentialsHexEncoded(true),//false means Base64-encoded
-         hashIterations(1),
-         hashAlgorithm(hashAlgorithm){}
+    HashedCredentialsMatcher();
 
     /**
      * Returns {@code true} if the provided token credentials match the stored account credentials,
@@ -165,19 +160,7 @@ public:
      * @since 1.1
      */
     const std::string getHashAlgorithmName() const {
-        return hashAlgorithm;
-    }
-
-    /**
-     * Sets the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName} to use
-     * when performing hashes for credentials matching.
-     *
-     * @param hashAlgorithmName the {@code Hash} {@link org.apache.shiro.crypto.hash.Hash#getAlgorithmName() algorithmName}
-     *                          to use when performing hashes for credentials matching.
-     * @since 1.1
-     */
-    void setHashAlgorithmName(const std::string& hashAlgorithmName) {
-        this->hashAlgorithm = hashAlgorithmName;
+        return config.hashAlgorithm;
     }
 
     /**
@@ -192,24 +175,7 @@ public:
      *         is Base64 encoded.  Default is {@code true}
      */
     bool isStoredCredentialsHexEncoded() const {
-        return storedCredentialsHexEncoded;
-    }
-
-    /**
-     * Sets the indicator if this system's stored credential hash is Hex encoded or not.
-     * <p/>
-     * A value of {@code true} will cause this class to decode the system credential from Hex, a
-     * value of {@code false} will cause this class to decode the system credential from Base64.
-     * <p/>
-     * Unless overridden via this method, the default value is {@code true} for convenience - all of Shiro's
-     * {@link Hash Hash#toString()} implementations return Hex encoded values by default, making this class's use with
-     * those implementations easier.
-     *
-     * @param storedCredentialsHexEncoded the indicator if this system's stored credential hash is Hex
-     *                                    encoded or not ('not' automatically implying it is Base64 encoded).
-     */
-    void setStoredCredentialsHexEncoded(bool storedCredentialsHexEncoded) {
-        this->storedCredentialsHexEncoded = storedCredentialsHexEncoded;
+        return config.storedCredentialsHexEncoded;
     }
 
     /**
@@ -236,32 +202,7 @@ public:
      *             are almost impossible to break.  This method will be removed in Shiro 2.0.
      */
     bool isHashSalted() const {
-        return hashSalted;
-    }
-
-    /**
-     * Sets whether or not to salt a submitted {@code AuthenticationToken}'s credentials when hashing.
-     * <p/>
-     * If enabled, the salt used will be obtained via the {@link #getSalt(org.apache.shiro.authc.AuthenticationToken) getCredentialsSalt} method.
-     * </p>
-     * The default value is {@code false}.
-     *
-     * @param hashSalted whether or not to salt a submitted {@code AuthenticationToken}'s credentials when hashing.
-     * @deprecated since Shiro 1.1.  Hash salting is now expected to be based on if the {@link AuthenticationInfo}
-     *             returned from the {@code Realm} is a {@link SaltedAuthenticationInfo} instance and its
-     *             {@link org.apache.shiro.authc.SaltedAuthenticationInfo#getCredentialsSalt() getCredentialsSalt()} method returns a non-null value.
-     *             This method and the 1.0 behavior still exists for backwards compatibility if the {@code Realm} does not return
-     *             {@code SaltedAuthenticationInfo} instances, but <b>it is highly recommended that {@code Realm} implementations
-     *             that support hashed credentials start returning {@link SaltedAuthenticationInfo SaltedAuthenticationInfo}
-     *             instances as soon as possible</b>.
-     *             <p/>
-     *             This is because salts should always be obtained from the stored account information and
-     *             never be interpreted based on user/Subject-entered data.  User-entered data is easier to compromise for
-     *             attackers, whereas account-unique (and secure randomly-generated) salts never disseminated to the end-user
-     *             are almost impossible to break.  This method will be removed in Shiro 2.0.
-     */
-    void setHashSalted(bool hashSalted) {
-        this->hashSalted = hashSalted;
+        return config.hashSalted;
     }
 
     /**
@@ -274,28 +215,18 @@ public:
      *         comparing to the credentials stored in the system.
      */
     int getHashIterations() const {
-        return hashIterations;
+        return config.hashIterations;
     }
 
-    /**
-     * Sets the number of times a submitted {@code AuthenticationToken}'s credentials will be hashed before comparing
-     * to the credentials stored in the system.
-     * <p/>
-     * Unless overridden, the default value is {@code 1}, meaning a normal single hash execution will occur.
-     * <p/>
-     * If this argument is less than 1 (i.e. 0 or negative), the default value of 1 is applied.  There must always be
-     * at least 1 hash iteration (otherwise there would be no hash).
-     *
-     * @param hashIterations the number of times to hash a submitted {@code AuthenticationToken}'s credentials.
-     */
-    void setHashIterations(int hashIterations) {
-        if (hashIterations < 1) { this->hashIterations = 1; }
-        else { this->hashIterations = hashIterations; }
-    }
+    ~HashedCredentialsMatcher();
 
-    ~HashedCredentialsMatcher(){  }
+public:
+    static const std::string MD5ENGINE;
+    static const std::string SHA1ENGINE;
 
 private:
+    void init();
+
     /**
      * Returns the {@code account}'s credentials.
      * <p/>
@@ -345,15 +276,12 @@ private:
                                  const AuthenticationInfo& info,
                                  std::string* credentials);
 
-    cetty::shiro::crypt::DigestEngine* getDigestEngine();
+    DigestEngine* getDigestEngine();
 
 private:
-    bool hashSalted;
-    bool storedCredentialsHexEncoded;
+    HashedCredentialsMatcherConfig config;
 
-    int hashIterations;
-
-    std::string hashAlgorithm;
+    DigestEngine* digestEngine;
 };
 
 }

@@ -23,7 +23,9 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-class HashedCredentialsMatcherConfig : public cetty::config::ConfigObject {
+using namespace cetty::config;
+
+class HashedCredentialsMatcherConfig : public ConfigObject {
 public:
     bool hashSalted;
     bool storedCredentialsHexEncoded;

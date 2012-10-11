@@ -22,66 +22,40 @@
 #include <string>
 #include <map>
 
-namespace cetty {
-namespace shiro {
-    class SecurityManager;
-}}
-
-namespace cetty {
-namespace shiro {
-namespace crypt {
-    class DigestEngine;
-}}}
+#include <cetty/shiro/SecurityManager.h>
+#include <cetty/shiro/authc/WSSE.h>
 
 namespace cetty {
 namespace shiro {
 namespace util {
 
 using namespace cetty::shiro;
-using namespace cetty::shiro::crypt;
+using namespace cetty::shiro::authc;
 
 class SecurityUtils {
 public:
-    static SecurityUtils *getInstance();
-
-    SecurityManager *getSecurityManager();
-
-    DigestEngine *getDigestEngine();
-    DigestEngine *getDigestEngine(const std::string &engineName);
-
-public:
-    static const std::string SECURITY_MANAGER;
-    static const std::string LOGIN_UTIL;
-    static const std::string MD5_ENGINE;
-    static const std::string SHA1_ENGINE;
+    static SecurityManager *getSecurityManager();
+    static WSSE *getWsse();
 
 private:
     SecurityUtils();
-
-    /// @brief read configuration file
-    /// @param path configuration file path which must be absolute.
-    void readConfigure();
-
-    /// @brief configure object crossing configuration
-    void configure();
-
-    /// @brief Get configuration item which has name key
-    void getValue(const std::string &key, std::string *value);
-    /// @brief Get object which has name #name
-    void *getObject(const std::string &name);
+    SecurityUtils(SecurityUtils &);
+    SecurityUtils &operator =(SecurityUtils &);
 
 private:
-    /// map name to object
-    /// The objects in #objects are established crossing
-    /// configure file when system is launched.
-   std::map<std::string, void *> objects;
-
-   /// configuration item from file
-   std::map<std::string, std::string> configuration;
-
-   static SecurityUtils *instance;
-
+    static SecurityManager securityManager;
+    static WSSE wsse;
 };
+
+inline
+SecurityManager *SecurityUtils::getSecurityManager(){
+    return &securityManager;
+}
+
+inline
+WSSE *SecurityUtils::getWsse(){
+    return &wsse;
+}
 
 }
 }

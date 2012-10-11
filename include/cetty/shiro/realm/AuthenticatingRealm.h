@@ -20,14 +20,17 @@
  */
 
 #include <boost/function.hpp>
+
+#include <cetty/util/ReferenceCounter.h>
+
 #include <cetty/shiro/realm/Realm.h>
-#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
 #include <cetty/shiro/authc/AuthenticationInfo.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace authc {
-class AuthenticationToken;
+    class AuthenticationToken;
 }
 }
 }
@@ -57,7 +60,7 @@ using namespace cetty::shiro::authc;
  *
  * @since 0.2
  */
-class AuthenticatingRealm : public Realm {
+class AuthenticatingRealm : public Realm{
 public:
     typedef boost::function1<void, const AuthenticationInfoPtr&> GetAuthenticationInfoCallback;
 
@@ -82,8 +85,8 @@ protected:
 
 private:
     void onGetAuthenticationInfo(const AuthenticationToken& token,
-                                const AuthenticationInfoPtr& info,
-                                const GetAuthenticationInfoCallback& callback);
+                                 const AuthenticationInfoPtr& info,
+                                 const GetAuthenticationInfoCallback& callback);
 
 private:
     /// key: principal

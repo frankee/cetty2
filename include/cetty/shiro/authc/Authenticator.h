@@ -22,9 +22,13 @@
 
 #include <vector>
 #include <boost/function.hpp>
+
+#include <cetty/shiro/realm/AuthenticatingRealm.h>
 #include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
+#include <cetty/shiro/authc/AuthenticationInfo.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
-#include <cetty/shiro/authc/HashedCredentialsMatcher.h>
+#include <cetty/shiro/authc/AuthenticatorConfig.h>
+#include <cetty/shiro/authc/CredentialsMatcher.h>
 
 namespace cetty {
 namespace shiro {
@@ -65,29 +69,9 @@ public:
      * Default no-argument constructor. Ensures the internal
      * {@link AuthenticationListener AuthenticationListener} collection is a non-null {@code ArrayList}.
      */
-    Authenticator() {}
-    Authenticator(const RealmPtr& realm, const HashedCredentialsMatcher &matcher)
-        :realm(realm), credentialsMatcher(matcher){}
+    Authenticator();
 
-    virtual ~Authenticator() {}
-
-    /**
-     * Sets the CrendialsMatcher used during an authentication attempt to verify submitted credentials with those
-     * stored in the system.  The implementation of this matcher can be switched via configuration to
-     * support any number of schemes, including plain text comparisons, hashing comparisons, and others.
-     *
-     * <p>Unless overridden by this method, the default value is a
-     * {@link org.apache.shiro.authc.credential.SimpleCredentialsMatcher} instance.
-     *
-     * @param credentialsMatcher the matcher to use.
-     */
-    void setCredentialsMatcher(const CredentialsMatcher& matcher) {
-        this->credentialsMatcher = matcher;
-    }
-
-    const HashedCredentialsMatcher &getCredentialsMatcher() const{
-        return this->credentialsMatcher;
-    }
+    virtual ~Authenticator();
 
     /**
      * Implementation of the {@link Authenticator} interface that functions in the following manner:
@@ -132,12 +116,20 @@ public:
         return this->realm;
     }
 
+public:
+    static const std::string HASHEDCREDENTIALSMATCHER;
+    static const std::string SIMPLECREDENTIALSMATCHER;
+
 private:
+    void init();
+
     void onGetAuthenticationInfo(const AuthenticationInfoPtr& info,
                                  const AuthenticationToken& token,
                                  const AuthenticateCallback& callback);
 
 private:
+    AuthenticatorConfig config;
+
     /**
     * List of realms that will be iterated through when a user authenticates
     * notice the lifecycle of AuthenticationRealm.
@@ -148,7 +140,7 @@ private:
      * Password matcher used to determine if the provided password matches
      * the password stored in the data store.
      */
-    HashedCredentialsMatcher credentialsMatcher;
+    CredentialsMatcher *credentialsMatcher;
 };
 
 }

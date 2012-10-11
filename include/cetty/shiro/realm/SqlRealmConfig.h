@@ -23,7 +23,9 @@ namespace cetty {
 namespace shiro {
 namespace realm {
 
-class SqlRealmConfig : cetty::config::ConfigObject {
+using namespace cetty::config;
+
+class SqlRealmConfig : public ConfigObject {
 public:
     bool permissionsLookupEnabled;
     int saltStyle;

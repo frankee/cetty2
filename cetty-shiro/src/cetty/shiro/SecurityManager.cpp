@@ -7,11 +7,16 @@
 
 #include <cetty/shiro/SecurityManager.h>
 
-#include <boost/bind.hpp>
+
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/shiro/realm/AuthorizingRealm.h>
+#include <cetty/shiro/realm/SqlRealm.h>
+
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/config/ConfigCenter.h>
+
+#include <boost/bind.hpp>
 
 namespace cetty {
 namespace shiro {
@@ -21,35 +26,25 @@ using namespace cetty::shiro::authc;
 using namespace cetty::shiro::realm;
 using namespace cetty::shiro::authz;
 
+const std::string SecurityManager::SQL_REALM = "sql_realm";
+
 SecurityManager::SecurityManager(){
     sessionManager = new SessionManager();
-    //realms = new SqlRealm();
 
     ConfigCenter::instance().configure(&config);
     init();
 }
 
 void SecurityManager::init(){
-    SecurityManagerConfig::AuthenticatorConfig *authcConfig = config.authenticatorConfig;
-    SecurityManagerConfig::AuthenticatorConfig::HashedCredentialsMatcherConfig *hcmConfig = authcConfig->config;
-    HashedCredentialsMatcher &hcm = const_cast<HashedCredentialsMatcher &> (authenticator.getCredentialsMatcher());
-    hcm.setHashAlgorithmName(hcmConfig->hashAlgorithm);
-    hcm.setHashIterations(hcmConfig->hashIterations);
-    hcm.setHashSalted(hcmConfig->hashSalted);
-    hcm.setStoredCredentialsHexEncoded(hcmConfig->storedCredentialsHexEncoded);
+    std::string realm = config.realm;
+    if(realm == SQL_REALM){
+        realms = new SqlRealm();
+    } else {
+        LOG_ERROR << "No realm is named [" << realm << "]";
+    }
 
-
-    SecurityManagerConfig::SessionManagerConfig *smConfig = config.sessionManagerConfig;
-    sessionManager->setGlobalSessionTimeout(smConfig->globalSessionTimeout);
-    sessionManager->setSessionValidationInterval(smConfig->sessionValidationInterval);
-    sessionManager->setDeleteInvalidSessions(smConfig->deleteInvalidSessions);
-    sessionManager->setSessionValidationSchedulerEnabled(smConfig->sessionValidationSchedulerEnabled);
-
-    SecurityManagerConfig::RealmConfig *realmConfig = config.realmConfig;
-
-    //SqlRealm authzRealm = dynamic_cast<AuthorizingRealm *>(realms.get());
-    //authzRealm->setName(realmConfig->name);
-    //authzRea
+    authenticator.setRealm(boost::dynamic_pointer_cast<AuthenticatingRealm>(realms));
+    authorizer.setRealm(boost::dynamic_pointer_cast<AuthorizingRealm>(realms));
 }
 
 SecurityManager::~SecurityManager(){

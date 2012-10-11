@@ -6,12 +6,18 @@
  */
 
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
+#include <cetty/shiro/realm/AuthenticatingRealmPtr.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/logging/LoggerHelper.h>
+
+#include <cetty/shiro/authc/AuthenticationInfo.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace realm {
+
+using namespace cetty::shiro::authc;
 
 void AuthenticatingRealm::getAuthenticationInfo(const AuthenticationToken& token,
                                                 const GetAuthenticationInfoCallback& callback){
@@ -22,13 +28,14 @@ void AuthenticatingRealm::getAuthenticationInfo(const AuthenticationToken& token
 
     if (token.getPrincipal().empty()) {
         callback(AuthenticationInfoPtr());
+        return;
     }
 
     LOG_TRACE << "Retrieving AuthenticationInfo for principal ["
               << token.getPrincipal()
               << "]";
 
-    AuthenticationInfoPtr info = AuthenticationInfoPtr();
+    AuthenticationInfoPtr info;
 
     LOG_TRACE << "Attempting to retrieve the AuthenticationInfo from cache.";
     std::map<std::string, AuthenticationInfoPtr>::iterator itr =
@@ -67,7 +74,6 @@ void AuthenticatingRealm::onGetAuthenticationInfo(const AuthenticationToken& tok
 
         infos.insert(std::make_pair(token.getPrincipal(), info));
     }
-
     else{
         LOG_TRACE << "Can't find authorization info of principals: ["
                   << token.getPrincipal() <<"].";

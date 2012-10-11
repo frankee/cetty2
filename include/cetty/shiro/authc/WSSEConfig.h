@@ -25,6 +25,9 @@ public:
     std::string userTokenUpdate;
     std::string userTokenSave;
 
+    int nonceLength;
+    int serverTimeExpire;
+
     WSSEConfig();
     virtual ConfigObject* create() const { return new WSSEConfig; }
 };

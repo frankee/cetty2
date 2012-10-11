@@ -14,35 +14,8 @@ public:
 
 public:
     SqlRealm();
-    SqlRealm(const std::string &backend, const std::string &connStr);
 
     virtual ~SqlRealm(){}
-
-    void setAuthenticationQuery(const std::string &authenticationQuery) {
-         this->authenticationQuery = authenticationQuery;
-    }
-
-    void setUserRolesQuery(const std::string &userRolesQuery) {
-        this->userRolesQuery = userRolesQuery;
-    }
-
-    void setPermissionsQuery(const std::string &permissionsQuery) {
-       this->permissionsQuery = permissionsQuery;
-    }
-
-    void setPermissionsLookupEnabled(bool permissionsLookupEnabled) {
-        this->permissionsLookupEnabled = permissionsLookupEnabled;
-    }
-
-    void setSaltStyle(SqlRealm::SaltStyle saltStyle);
-
-    void setBackend(const std::string &backend){
-        this->backend = backend;
-    }
-
-    void setConnectionString(const std::string &connectionString){
-        this->connectionString = connectionString;
-    }
 
     virtual void doGetAuthenticationInfo(const AuthenticationToken& token,
                                        const GetAuthenticationInfoCallback& callback);
@@ -50,27 +23,21 @@ public:
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,
                                         const GetAuthorizationInfoCallback& callback);
 
-protected:
+public:
+    static const std::string BACKEND;
+    static const std::string CONNECTION_STRING;
+
     static const std::string DEFAULT_AUTHENTICATION_QUERY;
     static const std::string DEFAULT_SALTED_AUTHENTICATION_QUERY;
     static const std::string DEFAULT_USER_ROLES_QUERY;
     static const std::string DEFAULT_PERMISSIONS_QUERY;
 
-    std::string authenticationQuery;
-    std::string userRolesQuery;
-    std::string permissionsQuery;
-
-    static const std::string BACKEND;
-    static const std::string CONNECTION_STRING;
-
-    std::string backend;
-    std::string connectionString;
-    bool permissionsLookupEnabled;
-    SaltStyle saltStyle;
-
+protected:
     SqlRealmConfig config;
 
 private:
+    void init();
+
     void getPasswordForUser(const std::string &username, std::vector<std::string> *passwd);
     void getRoleNamesForUser(const std::string &username, std::vector<std::string> *roles);
     void getPermissions(const std::string &userName,

@@ -23,7 +23,9 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-class AuthenticatorConfig : cetty::config::ConfigObject {
+using namespace cetty::config;
+
+class AuthenticatorConfig : public ConfigObject {
 public:
     std::string credentialsMatcher;
 

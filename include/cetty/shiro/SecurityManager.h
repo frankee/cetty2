@@ -27,7 +27,6 @@
 #include <cetty/shiro/authc/Authenticator.h>
 #include <cetty/shiro/authc/AuthenticationInfoPtr.h>
 #include <cetty/shiro/SecurityManagerConfig.h>
-#include <cetty/config/ConfigCenter.h>
 
 namespace authc {
     class AuthenticationToken;
@@ -75,6 +74,8 @@ public:
     typedef boost::function<void (const SessionPtr&)> BeforeLogoutCallback;
     typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
+
+    static const std::string SQL_REALM;
 
 public:
     SecurityManager();

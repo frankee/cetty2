@@ -7,6 +7,7 @@
 #include <cetty/shiro/session/Session.h>
 
 #include <cstring>
+#include <yaml-cpp/yaml.h>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -22,18 +23,6 @@ const int MILLIS_PER_SECOND = 1000;
 const int MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
 const int MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
 static const std::string EMPTY_STR;
-
-static void splitStr(std::string src, std::string *key, std::string *value){
-    size_t pos = src.find(':');
-    if(pos == std::string::npos){
-        // todo add log
-        return;
-
-    }
-
-    key->assign(src, 0, pos);
-    value->assign(src, pos + 1, src.size() - pos -1);
-}
 
 Session::Session()
     : expired(false),
@@ -228,60 +217,60 @@ void Session::setLogin(bool login) {
 
 void Session::toJson(std::string* json) const {
     std::stringstream ss;
-    ss << "expired:" << (expired ? "true" : "false")
-       << ",login:" << (login ? "true" : "false")
-       << ",remember:" << (rememberMe ? "true" : "false");
+    ss << "{$session_self:[";
+
+    ss << (expired ? "true" : "false")
+       << "," << (login ? "true" : "false")
+       << "," << (rememberMe ? "true" : "false");
 
     char timeout[20];
     memset(timeout, 0x00, sizeof(timeout));
     sprintf(timeout, "%d", this->timeout);
 
-    ss << ",timeout:" << timeout
-       << ",id:" << id
-       << ",host:" << host
-       << ",startTime:" << to_simple_string(startTime)
-       << ",stopTime:" << to_simple_string(stopTime)
-       << ",lastAccessTime:" << to_simple_string(lastAccessTime);
+    ss << "," << timeout
+       << "," << id
+       << "," << host
+       << "," << to_simple_string(startTime)
+       << "," << to_simple_string(stopTime)
+       << "," << to_simple_string(lastAccessTime);
 
+    ss << "]";
     std::map<std::string, std::string>::const_iterator it;
     for(it = attributes.begin(); it != attributes.end(); ++ it){
         std::string key = it->first;
         std::string value = it->second;
         ss << "," << key << ":" << value;
     }
+    ss << "}";
 
     json->assign(ss.str());
 }
 
 void Session::fromJson(const char* json) {
-    /*
-    std::string token;
-    std::string key, value;
-    const char *pre = json;
 
-    const char *pos = strchr(pre, ',');
-    if(pos == NULL){
-        // todo add log
-        return;
+    YAML::Node node = YAML::Load(json);
+    YAML::const_iterator it = node.begin();
+    for(; it != node.end(); ++it){
+        if("$session_self" == it->first.as<std::string>()){
+            YAML::Node temp = node["$session_self"];
+            assert(temp.IsSequence());
+            expired = temp[0].as<bool>();
+            login = temp[1].as<bool>();
+            rememberMe = temp[2].as<bool>();
+            timeout = temp[3].as<int>();
+            id = temp[4].as<std::string>();
+            host = temp[5].as<std::string>();
+            startTime = time_from_string(temp[6].as<std::string>());
+            stopTime = time_from_string(temp[7].as<std::string>());
+            lastAccessTime = time_from_string(temp[8].as<std::string>());
+        }else{
+            attributes.insert(std::pair<std::string, std::string>(
+                it->first.as<std::string>(),
+                it->second.as<std::string>())
+                );
+        }
     }
-    token.assign(pre, pos - pre);
-    splitStr(token, &key, &value);
-    expired = ("true" == value ? true : false);
-
-    pre = pos + 1;
-    pos = strchr(pre, ',');
-    if(pos == NULL){
-        // todo add log
-        return;
-    }
-    token.assign(pre, pos - pre);
-    splitStr(token, &key, &value);
-
-    // todo find third lib to parse json
-     * */
 }
-
-
 
 }
 }

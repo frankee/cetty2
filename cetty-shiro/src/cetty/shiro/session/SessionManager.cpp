@@ -5,7 +5,10 @@
 #include <cetty/shiro/session/SessionDAO.h>
 #include <cetty/shiro/session/RedisSessionDAO.h>
 #include <cetty/shiro/session/SessionValidationScheduler.h>
+
 #include <cetty/shiro/util/SecurityUtils.h>
+
+#include <cetty/config/ConfigCenter.h>
 
 namespace cetty {
 namespace shiro {
@@ -14,6 +17,7 @@ namespace session {
 using namespace cetty::shiro;
 using namespace cetty::shiro::util;
 using namespace cetty::shiro::session;
+using namespace cetty::config;
 
 const int MILLIS_PER_SECOND = 1000;
 const int MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
@@ -22,16 +26,19 @@ const int SessionManager::DEFAULT_GLOBAL_SESSION_TIMEOUT = 30 * MILLIS_PER_MINUT
 const int SessionManager::DEFAULT_SESSION_VALIDATION_INTERVAL = MILLIS_PER_HOUR;
 //const int SessionManager::REMEMBER_ME_SESSION_TIMEOUT = 7 * 24 * MILLIS_PER_HOUR;
 
-///static const std::string EMTPY_STR;
-
 SessionManager::SessionManager()
-    :deleteInvalidSessions(true),
-     sessionValidationSchedulerEnabled(false),
-     globalSessionTimeout(DEFAULT_GLOBAL_SESSION_TIMEOUT),
-     sessionValidationInterval(DEFAULT_SESSION_VALIDATION_INTERVAL),
-     sessionDAO(NULL),
+    :sessionDAO(NULL),
      validationScheduler(NULL) {
     sessionDAO = new RedisSessionDAO();
+    ConfigCenter::instance().configure(&config);
+    init();
+}
+
+void SessionManager::init(){
+    deleteInvalidSessions = config.deleteInvalidSessions;
+    sessionValidationSchedulerEnabled = config.sessionValidationSchedulerEnabled;
+    globalSessionTimeout = config.globalSessionTimeout;
+    sessionValidationInterval = config.sessionValidationInterval;
 }
 
 SessionManager::~SessionManager() {

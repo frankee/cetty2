@@ -22,7 +22,9 @@
 namespace cetty {
 namespace shiro {
 
-class SecurityManagerConfig : public cetty::config::ConfigObject {
+using namespace cetty::config;
+
+class SecurityManagerConfig : public ConfigObject {
 public:
     std::string realm;
 

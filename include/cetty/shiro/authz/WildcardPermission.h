@@ -27,6 +27,9 @@ namespace cetty {
 namespace shiro {
 namespace authz {
 
+class WildcardPermission;
+typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
+
 /**
  * A <code>WildcardPermission</code> is a very flexible permission construct supporting multiple levels of
  * permission matching. However, most people will probably follow some standard conventions as explained below.
@@ -103,9 +106,6 @@ namespace authz {
  * @since 0.9
  */
 class WildcardPermission : public Permission {
-public:
-    typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
-
 public:
     WildcardPermission(){}
     WildcardPermission(std::string& wildcardString)

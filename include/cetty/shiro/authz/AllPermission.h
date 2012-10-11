@@ -52,7 +52,7 @@ public:
         return true;
     }
 
-    virtual const std:string& stringPermission() const {
+    virtual const std::string stringPermission() const {
         return "*";
     }
 

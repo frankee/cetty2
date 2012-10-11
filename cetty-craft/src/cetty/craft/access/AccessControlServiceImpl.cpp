@@ -17,7 +17,6 @@
 
 #include <cetty/craft/access/AccessControlServiceImpl.h>
 #include <cetty/shiro/authc/AuthenticationToken.h>
-#include <cetty/shiro/util/LoginUtil.h>
 #include <cetty/shiro/SecurityManager.h>
 #include <cetty/shiro/authc/WSSE.h>
 
@@ -33,7 +32,7 @@ void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
                                         const PreLoginResponsePtr& response,
                                         const DoneCallback& done){
 
-    WSSE *wsse = SecurityUtils::getInstance()->getWSSE();
+    WSSE *wsse = SecurityUtils::getWsse();
     LoginSecret ls;
     wsse->generatorSecret(request->host(), request->host(), &ls);
 
@@ -52,14 +51,14 @@ void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
     const std::string &created = request->request->server_time();
     const std::string &host = request->host();
 
-    WSSE *wsse = SecurityUtils::getInstance()->getWSSE();
+    WSSE *wsse = SecurityUtils::getWsse();
     LoginSecret ls(host, principal, nonce, created);
 
     if (wsse->verifySecret(ls)) {
         AuthenticationToken token(principal, digest, host);
         token.setSalt(nonce + created);
 
-        SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
+        SecurityManager *sm = SecurityUtils::getSecurityManager();
         sm->login(token, boost::bind(&AccessControlServiceImpl::onLogin,
                                      this,
                                      _1,
@@ -113,7 +112,7 @@ void AccessControlServiceImpl::logout(const ConstLogoutRequestPtr& request,
                                       const DoneCallback& done) {
     cetty::protobuf::service::Session session = request->session();
     std::string sessionId = session.id();
-    SecurityManager *sm = (SecurityUtils::getInstance())->getSecurityManager();
+    SecurityManager *sm = SecurityUtils::getSecurityManager();
     sm->logout(sessionId);
 }
 

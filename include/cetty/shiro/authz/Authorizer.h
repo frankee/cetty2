@@ -1,13 +1,6 @@
 #if !defined(CETTY_SHIRO_AUTHZ_AUTHORIZER_H)
 #define CETTY_SHIRO_AUTHZ_AUTHORIZER_H
 
-/*
- * Authorizer.h
- *
- *  Created on: 2012-9-4
- *      Author: chenhl
- */
-
 #include <vector>
 #include <boost/function.hpp>
 
@@ -16,10 +9,6 @@
 #include <cetty/shiro/PrincipalCollection.h>
 #include <cetty/shiro/realm/AuthorizingRealm.h>
 #include <cetty/shiro/realm/AuthorizingRealmPtr.h>
-#include <cetty/shiro/authz/AuthorizationInfo.h>
-#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
-#include <cetty/shiro/realm/Realm.h>
-#include <cetty/shiro/realm/RealmPtr.h>
 
 namespace cetty {
 namespace shiro {
@@ -139,12 +128,6 @@ public:
     }
 
 private:
-    /**
-     * Used by the {@link Authorizer Authorizer} implementation methods to ensure that the {@link #setRealms realms}
-     * has been set.  The default implementation ensures the property is not null and not empty.
-     *
-     * @throws IllegalStateException if the <tt>realms</tt> property is configured incorrectly.
-     */
     bool realmConfigured() const;
 
     void doPermite(const AuthorizationInfoPtr& info,
@@ -153,9 +136,6 @@ private:
         const AuthorizeCallback& callback) const;
 
 protected:
-    /**
-     * The realms to consult during any authorization check.
-     */
     AuthorizingRealmPtr realm;
 
     /**

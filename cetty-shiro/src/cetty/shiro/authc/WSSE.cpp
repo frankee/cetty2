@@ -5,12 +5,13 @@
  *      Author: chenhl
  */
 
-#include <WSSE.h>
+#include <cetty/shiro/authc/WSSE.h>
 
 #include <soci.h>
 #include <sqlite3/soci-sqlite3.h>
 
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/config/ConfigCenter.h>
 
 namespace cetty {
 namespace shiro {
@@ -37,12 +38,8 @@ const std::string WSSE::USER_TOKEN_SAVE =
     "VALUES (?, ?, ?, ?, 0)";
 
 
-WSSE::WSSE(const std::string &backend,
-           const std::string &connectionString)
-    :backend(backend), connectionString(connectionString){
-    userTokenQuery = USER_TOKEN_QUERY;
-    userTokenUpdate = USER_TOKEN_UPDATE;
-    userTokenSave = USER_TOKEN_SAVE;
+WSSE::WSSE(){
+    ConfigCenter::instance().configure(&config);
 }
 
 void WSSE::generatorSecret(const std::string &principal,
@@ -78,8 +75,8 @@ bool WSSE::verifySecret(const LoginSecret& secret){
     retrive(secret, &ls);
 
     bool ret = (secret.host == ls.host &&
-                secret.principal = ls.principal &&
-                secret.nonce = ls.nonce &&
+                secret.principal == ls.principal &&
+                secret.nonce == ls.nonce &&
                 !isExpried(ls.created));
 
     return ret;
@@ -93,7 +90,7 @@ bool WSSE::isExpried(const std::string &created){
     long int secs2 = std::atoi(now.c_str());
 
     long int interval = secs2 - secs1;
-    if(interval > WSSE::SERVER_TIME_EXPIRE)
+    if(interval > config.serverTimeExpire)
         return true;
 
     return false;
@@ -106,7 +103,7 @@ void WSSE::generatorNonce(std::string *nonce){
 
     char ch = '\0';
     int i = 0;
-    for(; i < WSSE::NONCE_LENGTH; ++i){
+    for(; i < config.nonceLength; ++i){
         int t = (rand() % 61);
         if(t >= 0 && t <= 9) ch = '0' + t;
         else if(t >= 10 && t <= 35) ch = t + 55;
@@ -133,15 +130,15 @@ void WSSE::retrive(const LoginSecret &secret, LoginSecret *ls){
         return;
     }
 
-    if(backend.empty() || connectionString.empty()){
+    if((config.backend).empty() || (config.connectionString).empty()){
         LOG_ERROR << "DB connection info does not be set.";
         return;
     }
 
     soci::session sql;
     try{
-        sql.open(backend, connectionString);
-        sql << userTokenQuery,
+        sql.open(config.backend, config.connectionString);
+        sql << config.userTokenQuery,
                soci::into(ls->principal),
                soci::into(ls->host),
                soci::into(ls->nonce),
@@ -154,7 +151,7 @@ void WSSE::retrive(const LoginSecret &secret, LoginSecret *ls){
     }
 
     try{
-         sql << userTokenUpdate,
+         sql << config.userTokenUpdate,
                 soci::use(secret.principal),
                 soci::use(secret.created);
          sql.commit();
@@ -166,15 +163,15 @@ void WSSE::retrive(const LoginSecret &secret, LoginSecret *ls){
 }
 
 void WSSE::save(const LoginSecret &ls){
-    if(backend.empty() || connectionString.empty()){
+    if((config.backend).empty() || (config.connectionString).empty()){
         LOG_ERROR << "DB connection info does not be set.";
         return;
     }
 
     soci::session sql;
     try{
-        sql.open(backend, connectionString);
-        sql << userTokenSave,
+        sql.open(config.backend, config.connectionString);
+        sql << config.userTokenSave,
                soci::use(ls.principal),
                soci::use(ls.host),
                soci::use(ls.nonce),

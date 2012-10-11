@@ -23,8 +23,8 @@ namespace cetty {
 namespace shiro {
 namespace authz {
 
-class Permission;
-typedef boost::intrusive_ptr<Permission> PermissionPtr;
+/*class Permission;
+typedef boost::intrusive_ptr<Permission> PermissionPtr;*/
 
 }
 }

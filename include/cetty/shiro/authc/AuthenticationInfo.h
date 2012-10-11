@@ -4,7 +4,7 @@
 
 #include <string>
 #include <cetty/shiro/PrincipalCollection.h>
-#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace shiro {
@@ -42,7 +42,7 @@ namespace authc {
  * @see Account
  * @since 0.9
  */
-class AuthenticationInfo {
+class AuthenticationInfo : public cetty::util::ReferenceCounter<AuthenticationInfo, int>{
 public:
     AuthenticationInfo() {}
 

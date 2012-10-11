@@ -18,7 +18,6 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
-#include <cetty/shiro/realm/RealmPtr.h>
 
 namespace cetty {
 namespace shiro {

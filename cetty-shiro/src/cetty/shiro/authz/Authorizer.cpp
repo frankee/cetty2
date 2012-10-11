@@ -37,13 +37,15 @@ void Authorizer::isPermitted(const PrincipalCollection& principals,
 void Authorizer::isPermitted(const PrincipalCollection& principal,
                              const PermissionPtr& permission,
                              const AuthorizeCallback& callback) const {
-    realm->getAuthorizationInfo(principal, boost::bind(
+    realm->getAuthorizationInfo(principal,
+                                boost::bind(
                                     &Authorizer::doPermite,
                                     this,
                                     _1,
                                     principal,
                                     permission,
-                                    callback));
+                                    callback)
+                               );
 }
 
 void Authorizer::doPermite(const AuthorizationInfoPtr& info,
@@ -53,6 +55,12 @@ void Authorizer::doPermite(const AuthorizationInfoPtr& info,
     if (!callback) {
         LOG_ERROR << "doPermite input callback can NOT be NULL";
         return;
+    }
+
+    if(!info){
+        LOG_TRACE<< "Can't find account info for principal ["
+                 << principal.getPrimaryPrincipal() << "]";
+        callback(false, principal.getPrimaryPrincipal(), permission->stringPermission());
     }
 
     std::vector<PermissionPtr> permissions = info->getPermissions();

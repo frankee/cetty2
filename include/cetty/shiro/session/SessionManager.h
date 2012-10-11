@@ -23,7 +23,10 @@
 #include <vector>
 #include <boost/function.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+
+#include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionPtr.h>
+#include <cetty/shiro/session/SessionManagerConfig.h>
 
 namespace cetty {
 namespace shiro {
@@ -170,6 +173,8 @@ protected:
     virtual void remove(const SessionPtr& session);
 
 private:
+    void init();
+
     void applyGlobalSessionTimeout(const SessionPtr& session);
 
     void stop(const SessionPtr& session);
@@ -194,6 +199,8 @@ private:
                              const SessionCallback& callback);
 
 private:
+    SessionManagerConfig config;
+
     bool deleteInvalidSessions;
     bool sessionValidationSchedulerEnabled;
 
@@ -206,6 +213,7 @@ private:
     std::map<std::string, SessionPtr> sessions;
     std::vector<SessionChangeCallback> listeners;
 };
+
 
 inline
 bool SessionManager::isDeleteInvalidSessions() const {

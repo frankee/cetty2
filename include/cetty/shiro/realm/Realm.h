@@ -26,6 +26,8 @@ namespace cetty {
 namespace shiro {
 namespace realm {
 
+using namespace cetty::util;
+
 /**
  * A <tt>Realm</tt> is a security component that can access application-specific security entities
  * such as users, roles, and permissions to determine authentication and authorization operations.
@@ -63,7 +65,7 @@ namespace realm {
  * @see org.apache.shiro.authc.pam.ModularRealmAuthenticator ModularRealmAuthenticator
  * @since 0.1
  */
-class Realm : public cetty::util::ReferenceCounter<Realm, int> {
+class Realm : public ReferenceCounter<Realm, int> {
 public:
     Realm() { this->name = autoName(); }
     Realm(std::string name): name(name){}

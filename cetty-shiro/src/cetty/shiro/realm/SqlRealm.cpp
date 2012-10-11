@@ -12,8 +12,7 @@
 
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/logging/LoggerHelper.h>
-
-
+#include <cetty/config/ConfigCenter.h>
 
 namespace cetty {
 namespace shiro {
@@ -36,32 +35,19 @@ const std::string SqlRealm::CONNECTION_STRING = "/home/chenhl/dev/db/data/sqlite
 
 
 
-SqlRealm::SqlRealm(): permissionsLookupEnabled(true),
-                      saltStyle(SqlRealm::NO_SALT){
-    authenticationQuery = DEFAULT_AUTHENTICATION_QUERY;
-    userRolesQuery = DEFAULT_USER_ROLES_QUERY;
-    permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
+SqlRealm::SqlRealm() {
+    ConfigCenter::instance().configure(&config);
+    init();
 }
 
-SqlRealm::SqlRealm(const std::string &backend, const std::string &connStr)
-    :backend(backend),
-     connectionString(connStr),
-     permissionsLookupEnabled(true),
-     saltStyle(SqlRealm::NO_SALT){
-    authenticationQuery = DEFAULT_AUTHENTICATION_QUERY;
-    userRolesQuery = DEFAULT_USER_ROLES_QUERY;
-    permissionsQuery = DEFAULT_PERMISSIONS_QUERY;
-}
-
-void SqlRealm::setSaltStyle(SqlRealm::SaltStyle saltStyle) {
-    this->saltStyle = saltStyle;
-    if (saltStyle == SqlRealm::COLUMN && authenticationQuery == DEFAULT_AUTHENTICATION_QUERY) {
-        authenticationQuery = DEFAULT_SALTED_AUTHENTICATION_QUERY;
+void SqlRealm::init(){
+    if (config.saltStyle == SqlRealm::COLUMN && config.authenticationQuery == DEFAULT_AUTHENTICATION_QUERY) {
+        config.authenticationQuery = DEFAULT_SALTED_AUTHENTICATION_QUERY;
     }
 }
 
 void SqlRealm::doGetAuthenticationInfo(const AuthenticationToken& token,
-                                     const GetAuthenticationInfoCallback& callback){
+                                       const GetAuthenticationInfoCallback& callback){
     AuthenticationInfoPtr info;
 
     std::string principal = token.getPrincipal();
@@ -88,7 +74,7 @@ void SqlRealm::doGetAuthenticationInfo(const AuthenticationToken& token,
 
 void SqlRealm::getPasswordForUser(const std::string &username,
                                   std::vector<std::string> *passwd){
-    if(backend.empty() || connectionString.empty()){
+    if((config.backend).empty() || (config.connectionString).empty()){
         LOG_ERROR << "DB connection info does not be set.";
         return;
     }
@@ -97,7 +83,7 @@ void SqlRealm::getPasswordForUser(const std::string &username,
     std::string salt;
 
     bool returningSeparatedSalt = false;
-    switch (saltStyle) {
+    switch (config.saltStyle) {
     case NO_SALT:
     case CRYPT:
     case EXTERNAL:
@@ -108,8 +94,8 @@ void SqlRealm::getPasswordForUser(const std::string &username,
     }
 
     try {
-        soci::session sql(backend, connectionString);
-        soci::rowset<soci::row> rows = (sql.prepare << authenticationQuery, soci::use(username));
+        soci::session sql(config.backend, config.connectionString);
+        soci::rowset<soci::row> rows = (sql.prepare << config.authenticationQuery, soci::use(username));
         soci::rowset_iterator<soci::row> it = rows.begin();
         bool foundResult = false;
 
@@ -157,8 +143,8 @@ void SqlRealm::doGetAuthorizationInfo(const PrincipalCollection& principals,
     std::vector<std::string> permissions;
     try {         
         getRoleNamesForUser(principal, &roles);
-        if (permissionsLookupEnabled) {
-            permissions = getPermissions(principal, roles, &permissions);
+        if (config.permissionsLookupEnabled) {
+            getPermissions(principal, roles, &permissions);
        }
     } catch (const soci::soci_error &e) {
         LOG_ERROR << e.what();
@@ -172,7 +158,7 @@ void SqlRealm::doGetAuthorizationInfo(const PrincipalCollection& principals,
 
 void SqlRealm::getRoleNamesForUser(const std::string &username,
                                    std::vector<std::string> *roles){
-    if(backend.empty() || connectionString.empty()){
+    if((config.backend).empty() || (config.connectionString).empty()){
         LOG_ERROR << "DB connection info does not be set.";
         return;
     }
@@ -183,8 +169,8 @@ void SqlRealm::getRoleNamesForUser(const std::string &username,
     }
     
     try { 
-        soci::session sql(backend, connectionString);
-        soci::rowset<soci::row> rows = (sql.prepare << userRolesQuery, soci::use(username));
+        soci::session sql(config.backend, config.connectionString);
+        soci::rowset<soci::row> rows = (sql.prepare << config.userRolesQuery, soci::use(username));
         soci::rowset_iterator<soci::row> it = rows.begin();
 
         std::string userRole;
@@ -197,7 +183,7 @@ void SqlRealm::getRoleNamesForUser(const std::string &username,
         LOG_ERROR << e.what();
     }
     
-    if(roles->empty){
+    if(roles->empty()){
         LOG_TRACE << "No roles are found for user ["
                   << username
                   << "]";
@@ -207,7 +193,7 @@ void SqlRealm::getRoleNamesForUser(const std::string &username,
 void SqlRealm::getPermissions(const std::string &userName,
                               const std::vector<std::string> &roles,
                               std::vector<std::string> *permissions){
-    if(backend.empty() || connectionString.empty()){
+    if((config.backend).empty() || (config.connectionString).empty()){
         LOG_ERROR << "DB connection info does not be set.";
         return;
     }
@@ -220,13 +206,13 @@ void SqlRealm::getPermissions(const std::string &userName,
     }
     
     try {
-        soci::session sql(backend, connectionString);
+        soci::session sql(config.backend, config.connectionString);
     
         std::string permission;
         std::vector<std::string>::const_iterator it = roles.begin();
         for(; it != roles.end(); ++it){
             if(it->empty()) continue;
-            soci::rowset<soci::row> rows = (sql.prepare << permissionsQuery, soci::use(*it));
+            soci::rowset<soci::row> rows = (sql.prepare << config.permissionsQuery, soci::use(*it));
             soci::rowset_iterator<soci::row> rowIt = rows.begin();
             
             for(; rowIt != rows.end(); ++rowIt){

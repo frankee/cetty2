@@ -23,7 +23,9 @@ namespace cetty {
 namespace shiro {
 namespace session {
 
-class SessionManagerConfig : cetty::config::ConfigObject {
+using namespace cetty::config;
+
+class SessionManagerConfig : public ConfigObject {
 public:
     bool deleteInvalidSessions;
     bool sessionValidationSchedulerEnabled;
