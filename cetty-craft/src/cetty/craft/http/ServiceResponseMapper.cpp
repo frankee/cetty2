@@ -71,8 +71,8 @@ void ServiceResponseMapper::setHttpHeaders(const ResponseTemplate& templ,
     std::size_t j = templ.headers.size();
 
     for (std::size_t i = 0; i < j; ++i) {
-        const ResponseTemplate::Header* header = templ.headers[i];
-        response->setHeader(header->name, header->value);
+        const KeyValuePair* header = templ.headers[i];
+        response->setHeader(header->key, header->value);
     }
 }
 

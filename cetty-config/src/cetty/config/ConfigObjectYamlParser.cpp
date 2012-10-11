@@ -16,8 +16,11 @@
 
 #include <yaml-cpp/yaml.h>
 #include <cetty/config/ConfigObject.h>
+#include <cetty/config/KeyValuePair.h>
 #include <cetty/config/ConfigDescriptor.h>
 #include <cetty/config/ConfigReflection.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace config {
@@ -28,6 +31,7 @@ int parseField(const ConfigFieldDescriptor* field,
 
 bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
     if (!object) {
+        LOG_ERROR << "parsed object is NULL.";
         return false;
     }
 
@@ -40,17 +44,48 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         const ConfigFieldDescriptor* field = *itr;
         const YAML::Node fieldNode = node[field->name];
 
-        YAML::NodeType::value type = fieldNode.Type();
+        if (fieldNode.Type() == YAML::NodeType::Null) {
+            LOG_INFO << "field " << field->name << " has none value, skip it.";
+            continue;
+        }
 
         if (!fieldNode) {
-            //if (fieldNode.Type() == YAML::NodeType::Null) {
+            // in the following situation:
+            //
+            // // in config header file:
+            //
+            // class SingleFiledConfig : public cetty::config::ConfigObject {
+            //     std::vector<int> numbers;
+            // }
+            // 
+            // // in YAML config file:
+            //
+            // SingleFiledConfig :
+            //   - 5
+            //
+            // will set the '5' to numbers filed in the SingleFiledConfig object.
             if (descriptor->fieldCnt() == 1 && field->repeated) {
                 if (!parseField(field, node, object)) {
                     return false;
                 }
             }
+            else if (object->getName() == KeyValuePair::NAME) {
+                KeyValuePair* kv = dynamic_cast<KeyValuePair*>(object);
+                if (kv) {
+                    kv->key = node.begin()->first.Scalar();
+                    kv->value = node.begin()->second.Scalar();
+                }
+                else {
+                    LOG_ERROR << "the config object name is "
+                        << KeyValuePair::NAME
+                        << " , but the instance is not KeyValuePair";
+
+                    return false;
+                }
+            }
             else {
-                return false;
+                LOG_INFO << "has no such field " << field->name << " , skip it.";
+                continue;
             }
         }
         else {
@@ -70,11 +105,6 @@ int parseField(const ConfigFieldDescriptor* field,
     const ConfigReflection* reflection = object->getreflection();
 
     if (field->repeated) {
-        //if (!value.isArray()) {
-        //    printf("protobuf field is repeated, but json not.\n");
-        //    return false;
-        //}
-
         YAML::Node::const_iterator itr = node.begin();
 
         for (; itr != node.end(); ++itr) {

@@ -21,20 +21,13 @@ namespace cetty {
 namespace craft {
 namespace http {
 
-CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig_Template_Header,
-                            new ConfigDescriptor(
-                                2,
-                                CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template::Header, name, STRING),
-                                CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template::Header, value, STRING)),
-                            new ServiceResponseMapperConfig::Template::Header);
-
 CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig_Template,
                             new ConfigDescriptor(
                                 4,
                                 CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template, service, STRING),
                                 CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template, method, STRING),
                                 CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template, content, STRING),
-                                CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServiceResponseMapperConfig::Template, headers, Header)),
+                                CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServiceResponseMapperConfig::Template, headers, KeyValuePair)),
                             new ServiceResponseMapperConfig::Template);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig,
@@ -44,19 +37,12 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig,
                             new ServiceResponseMapperConfig);
 
 
-ServiceResponseMapperConfig::Template::Header::Header()
-    : ConfigObject("ServiceResponseMapperConfig_Template_Header") {
-
-}
-
 ServiceResponseMapperConfig::Template::Template()
     : ConfigObject("ServiceResponseMapperConfig_Template") {
-
 }
 
 ServiceResponseMapperConfig::ServiceResponseMapperConfig()
     : ConfigObject("ServiceResponseMapperConfig") {
-
 }
 
 }

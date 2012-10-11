@@ -16,6 +16,7 @@
 
 #include <cetty/config/ConfigReflection.h>
 #include <cetty/config/ConfigObject.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace config {
@@ -23,7 +24,8 @@ namespace config {
 ConfigReflection::ConfigReflection() {
 }
 
-ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object, const ConfigFieldDescriptor* field) const {
+ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object,
+        const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
@@ -31,8 +33,22 @@ ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object, const Conf
     std::string className(object->getName());
     className += "_";
     className += field->className;
-    
+
     const ConfigObject* prototype = ConfigObject::getDefaultObject(className);
+
+    if (NULL == prototype) {
+        prototype = ConfigObject::getDefaultObject(field->className);
+    }
+
+    if (NULL == prototype) {
+        LOG_ERROR << "can not find such object "
+                  << className
+                  << " or "
+                  << field->className;
+
+        return NULL;
+    }
+
     ConfigObject* newObject = prototype->create();
     repeated->push_back(newObject);
 

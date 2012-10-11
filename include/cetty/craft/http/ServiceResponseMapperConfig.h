@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <cetty/config/ConfigObject.h>
+#include <cetty/config/KeyValuePair.h>
 #include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
@@ -31,29 +32,20 @@ class ServiceResponseMapperConfig : public cetty::config::ConfigObject {
 public:
     class Template : public cetty::config::ConfigObject {
     public:
-        class Header : public cetty::config::ConfigObject {
-        public:
-            std::string name;
-            std::string value;
-
-            Header();
-
-            virtual ConfigObject* create() const { return new Header; }
-        };
-
         std::string service;
         std::string method;
         std::string content;
-        std::vector<Header*> headers;
+        std::vector<KeyValuePair*> headers;
 
         Template();
 
         virtual ConfigObject* create() const { return new Template; }
     };
 
-    std::vector<Template*> templates;
-
     typedef std::vector<Template*> Templates;
+
+public:
+    Templates templates;
 
     ServiceResponseMapperConfig();
     virtual ConfigObject* create() const { return new ServiceResponseMapperConfig; }

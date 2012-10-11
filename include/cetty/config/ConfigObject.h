@@ -37,7 +37,7 @@ public:
 
     virtual ConfigObject* create() const = 0;
 
-    std::string getName() const { return name; }
+    const std::string& getName() const { return name; }
 
     virtual void clear();
     virtual void copyFrom(const ConfigObject& from);

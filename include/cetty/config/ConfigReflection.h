@@ -41,7 +41,7 @@ public:
     }
 
     int64_t getInt64(const ConfigObject& object,
-                            const ConfigFieldDescriptor* field) const {
+                     const ConfigFieldDescriptor* field) const {
         return getField<int64_t>(object, field);
     }
 
@@ -117,7 +117,8 @@ public:
         addField<std::string>(object, field, value);
     }
 
-    ConfigObject* addConfigObject(ConfigObject* object, const ConfigFieldDescriptor* field) const;
+    ConfigObject* addConfigObject(ConfigObject* object,
+                                  const ConfigFieldDescriptor* field) const;
 
 private:
     template <typename Type>

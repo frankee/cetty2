@@ -98,12 +98,14 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigIncludeFileFinder.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectYamlParser.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\KeyValuePair.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h" />
+    <ClInclude Include="..\..\..\include\cetty\config\KeyValuePair.h" />
     <ClInclude Include="..\..\src\cetty\config\ConfigIncludeFileFinder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
