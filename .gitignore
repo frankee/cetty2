@@ -16,15 +16,17 @@
 *#
 *.pb.cc
 *.pb.h
-*-
+*.h-
+*.cpp-
+*.cc-
+.project
+.cproject
 
 CMakeCache.txt
 bin/
 lib/
 Debug/
 Release/
-build/
 ipch/
 CMakeFiles/
-.project
-.cproject
+builder/
