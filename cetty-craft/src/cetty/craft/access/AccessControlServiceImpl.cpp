@@ -34,7 +34,7 @@ void AccessControlServiceImpl::preLogin(const ConstPreLoginRequestPtr& request,
 
     WSSE *wsse = SecurityUtils::getWsse();
     LoginSecret ls;
-    wsse->generatorSecret(request->host(), request->host(), &ls);
+    wsse->generatorSecret(request->user_name(), request->host(), &ls);
 
     response->set_nonce(ls.nonce);
     response->set_server_time(ls.created);
@@ -48,7 +48,7 @@ void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
     const std::string &principal = request->user_name();
     const std::string &digest = request->encoded_passwd();
     const std::string &nonce = request->nonce();
-    const std::string &created = request->request->server_time();
+    const std::string &created = request->server_time();
     const std::string &host = request->host();
 
     WSSE *wsse = SecurityUtils::getWsse();
@@ -67,14 +67,11 @@ void AccessControlServiceImpl::login(const ConstLoginRequestPtr& request,
                                      _4,
                                      response,
                                      done));
-    }
-    else {
-        // todo modify code and message
-        // cetty::protobuf::service::Status *status = response->mutable_status();
-        // status->set_code(0x00);
-        // status->set_message("");
+    }else {
+        // refuse login
+        // todo add error code
         done(response);
-    }
+    } // if (wsse->verifySecret(ls))
 }
 
 void AccessControlServiceImpl::onLogin(int code,
@@ -91,19 +88,14 @@ void AccessControlServiceImpl::onLogin(int code,
             item->set_key("username");
             item->set_value(userName);
 
-        }
-        else{
-            // todo modify status code and status message
-            // cetty::protobuf::service::Status *status = response->mutable_status();
-            // status->set_code(code);
-            // status->set_message("");
-        }
-    }else{
-        // todo modify status code and status message
-        // cetty::protobuf::service::Status *status = response->mutable_status();
-        // status->set_code(code);
-        // status->set_message("");
-    }
+        }else{
+            // Login success but no session
+            // todo add dealing code
+        } // if(sessionPtr)
+    } else {
+        // Login failed
+        // todo add dealing code
+    } // if(!code)
     done(response);
 }
 
