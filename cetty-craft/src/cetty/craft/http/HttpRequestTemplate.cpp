@@ -31,7 +31,7 @@ HttpRequestTemplate::HttpRequestTemplate(const std::string& method,
    for (std::size_t i= 0; i < j; ++i) {
        const UriTemplate::PathSegment& segment = pathSegments[i];
        if (segment.type == UriTemplate::PATH_SEG_PARAM) {
-           trie.addKey(segment.alias,
+           trie.addKey(segment.name,
                Parameter::createFromPath(segment.name, segment.alias, i));
        }
        else if (segment.type == UriTemplate::PATH_SEG_ALIAS) {

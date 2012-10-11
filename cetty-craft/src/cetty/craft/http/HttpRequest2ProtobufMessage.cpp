@@ -81,6 +81,12 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
             }
             else {
                 // deprecated
+                const HttpRequestTemplate::Parameter* p = tmpl->getParameter("format");
+                if (p) {
+                    const std::vector<std::string>& segments = request->getPathSegments();
+                    request->setLabel(segments[p->index]);
+                }
+
                 if (request->getQueryParameters().has("req")) {
                     ProtobufParser* jsonParser = ProtobufParser::getParser("json");
 

@@ -116,6 +116,10 @@ void HttpRequest::setUri(const StringPiece& uri) {
     }
 }
 
+void HttpRequest::setLabel(const std::string& label) {
+    this->label = label;
+}
+
 }
 }
 }
