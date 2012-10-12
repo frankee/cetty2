@@ -149,8 +149,8 @@ private:
                                          uint32_t cs);
 
 private:
-    int  lengthFieldOffset;
     int  lengthFieldLength;
+    int  lengthFieldOffset;
     int  lengthAdjustment;
 
     std::string header;

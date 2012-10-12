@@ -85,7 +85,8 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
         //}
 
         YAML::Node::const_iterator itr = node.begin();
-
+        google::protobuf::Message* msg = NULL;
+        
         for (; itr != node.end(); ++itr) {
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
@@ -96,7 +97,7 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
                 reflection->AddInt64(message, field, itr->as<google::protobuf::int64>());
                 break;
 
-            case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+            case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
                 reflection->AddDouble(message, field, itr->as<double>());
                 break;
 
@@ -105,17 +106,22 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
-                google::protobuf::Message* msg = reflection->AddMessage(message, field);
+                msg = reflection->AddMessage(message, field);
 
                 if (parseMessage(*itr, msg) < 0) {
                     return -3;
                 }
+                
+                break;
 
+            default:
                 break;
             }
         }
     }
     else {
+        google::protobuf::Message* msg = NULL;
+        
         switch (field->cpp_type()) {
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
             reflection->SetInt32(message, field, node.as<google::protobuf::int32>());
@@ -125,7 +131,7 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
             reflection->SetInt64(message, field, node.as<google::protobuf::int64>());
             break;
 
-        case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+        case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
             reflection->SetDouble(message, field, node.as<double>());
             break;
 
@@ -134,8 +140,10 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
-            google::protobuf::Message* msg = reflection->MutableMessage(message, field);
+            msg = reflection->MutableMessage(message, field);
             return parseMessage(node, msg);
+
+        default:
             break;
         }
     }

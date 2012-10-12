@@ -71,7 +71,7 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
                     break;
 
                 case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-                    return &(reflection->GetString(message, field));
+                    return &(reflection->GetStringReference(message, field, NULL));
                     break;
 
                 case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
@@ -117,7 +117,7 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
 
                 case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
                     for (i = 0; i < fieldCnt; ++i) {
-                        strings.push_back(&reflection->GetRepeatedString(message, field, i));
+                        strings.push_back(&reflection->GetRepeatedStringReference(message, field, i, NULL));
                     }
 
                     return strings;

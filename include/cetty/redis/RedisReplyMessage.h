@@ -74,22 +74,25 @@ public:
 
     int64_t getInteger() const;
 
-    const StringPiece& getString() const {
+    StringPiece getString() const {
         if (type == RedisReplyMessageType::STRING) {
             return boost::get<StringPiece>(value);
         }
+        return StringPiece();
     }
 
-    const StringPiece& getStatus() const {
+    StringPiece getStatus() const {
         if (type == RedisReplyMessageType::STATUS) {
             return boost::get<StringPiece>(value);
         }
+        return StringPiece();
     }
 
-    const StringPiece& getError() const {
+    StringPiece getError() const {
         if (type == RedisReplyMessageType::ERROR) {
             return boost::get<StringPiece>(value);
         }
+        return StringPiece();
     }
 
     bool isNil() const {
@@ -100,6 +103,7 @@ public:
         if (type == RedisReplyMessageType::ARRAY) {
             return boost::get<std::vector<StringPiece> >(value);
         }
+        return EMPTY_STRING_PIECES;
     }
 
     std::vector<StringPiece>* getMutableArray();
@@ -112,6 +116,9 @@ private:
 private:
     RedisReplyMessageType  type;
     Value value;
+
+private:
+    static const std::vector<StringPiece> EMPTY_STRING_PIECES;
 };
 
 }

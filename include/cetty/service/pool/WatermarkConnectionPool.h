@@ -59,9 +59,12 @@ private:
 
 inline int WatermarkConnectionPool::setLowWatermark(int lowWatermark) {
     this->lowWatermark = lowWatermark;
+    return 0;
 }
+    
 inline int WatermarkConnectionPool::setHighWatermark(int hightWatermark) {
     this->highWatermark = highWatermark;
+    return 0;
 }
 
 }

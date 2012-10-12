@@ -35,9 +35,9 @@ using namespace cetty::util;
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 
-static const char* REDIS_LBR                       = "\r\n";
-static const char* REDIS_STATUS_REPLY_OK           = "OK";
-static const char* REDIS_PREFIX_STATUS_REPLY_ERROR = "-ERR ";
+    //static const char* REDIS_LBR                       = "\r\n";
+    //static const char* REDIS_STATUS_REPLY_OK           = "OK";
+    //static const char* REDIS_PREFIX_STATUS_REPLY_ERROR = "-ERR ";
 
 static const char REDIS_PREFIX_ERROR_REPLY       = '-';
 static const char REDIS_PREFIX_STATUS_REPLY      = '+';
@@ -268,10 +268,13 @@ RedisReplyMessagePtr RedisReplyMessageDecoder::readMultiBukls(
         }
 
         if (frameLength == 0 || subBytes[0] != REDIS_PREFIX_SINGLE_BULK_REPLY) {
-            LOG_ERROR << frameLength ?
-                      "parsing multi-bulk, but the first line not begin with the '$'"
-                      : "parsing multi-bulk, but is empty line";
-            
+            if (frameLength) {
+                LOG_ERROR << "parsing multi-bulk, but the first line not begin with the '$'";
+            }
+            else {
+                LOG_ERROR << "parsing multi-bulk, but is empty line";
+            }
+
             //TODO fire an error?
             buffer->skipBytes(frameLength + 2);
             reply->setType(RedisReplyMessageType::NIL);

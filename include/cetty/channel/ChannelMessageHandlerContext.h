@@ -33,9 +33,9 @@ public:
                                  const ChannelHandlerPtr& handler,
                                  ChannelHandlerContext* prev,
                                  ChannelHandlerContext* next)
-        : ChannelInboundMessageHandlerContext<InboundInT>(name, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, pipeline, handler, prev, next),
-          ChannelHandlerContext(name, pipeline, handler, prev, next) {
+        : ChannelHandlerContext(name, pipeline, handler, prev, next),
+          ChannelInboundMessageHandlerContext<InboundInT>(name, pipeline, handler, prev, next),
+          ChannelOutboundMessageHandlerContext<OutboundInT>(name, pipeline, handler, prev, next) {
         ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
         ChannelInboundMessageHandlerContext<InboundInT>::hasOutboundMessageHandler = true;
     }
@@ -46,9 +46,9 @@ public:
                                  const ChannelHandlerPtr& handler,
                                  ChannelHandlerContext* prev,
                                  ChannelHandlerContext* next)
-        : ChannelInboundMessageHandlerContext<InboundInT>(name, eventLoop, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, eventLoop, pipeline, handler, prev, next),
-          ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next) {
+        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next),
+         ChannelInboundMessageHandlerContext<InboundInT>(name, eventLoop, pipeline, handler, prev, next),
+        ChannelOutboundMessageHandlerContext<OutboundInT>(name, eventLoop, pipeline, handler, prev, next) {
         ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
         ChannelInboundMessageHandlerContext<InboundInT>::hasOutboundMessageHandler = true;
     }

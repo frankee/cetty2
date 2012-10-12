@@ -322,7 +322,6 @@ bool Base64::encode(const char* bytes, int size, int flags, std::string* str) {
     // total.
 
     if (p == size-1) {
-        int t = 0;
         v = (bytes[p++] & 0xff) << 4;
         output[op++] = alphabet[(v >> 6) & 0x3f];
         output[op++] = alphabet[v & 0x3f];
@@ -339,9 +338,8 @@ bool Base64::encode(const char* bytes, int size, int flags, std::string* str) {
         }
     }
     else if (p == size-2) {
-        int t = 0;
-        v = ((bytes[p++] & 0xff) << 10) |
-            ((bytes[p++] & 0xff) << 2);
+        v |= ((bytes[p++] & 0xff) << 10);
+        v |= ((bytes[p++] & 0xff) << 2);
 
         output[op++] = alphabet[(v >> 12) & 0x3f];
         output[op++] = alphabet[(v >> 6) & 0x3f];

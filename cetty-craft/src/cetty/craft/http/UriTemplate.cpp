@@ -93,7 +93,6 @@ void UriTemplate::parse(const std::string& str) {
     int state = ST_NORMAL;
     std::string::size_type stateBegin = 0;
     std::string::size_type stateEnd = 0;
-    std::string::size_type speratorPos = 0;
 
     std::string query;
     std::string queryAlias;

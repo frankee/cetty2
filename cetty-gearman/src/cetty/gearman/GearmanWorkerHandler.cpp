@@ -35,19 +35,21 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 
 GearmanWorkerHandler::GearmanWorkerHandler()
-    : isSleep(false), channel(0), grabIdleCount(0),maxGrabIdleCount(3) {
+    : isSleep(false), grabIdleCount(0),maxGrabIdleCount(3) {
 }
 
-GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount):isSleep(false),
-    channel(0),grabIdleCount(0) {
-    maxGrabIdleCount = maxGrabIdleCount;
+GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount)
+    :isSleep(false),
+     grabIdleCount(0),
+     maxGrabIdleCount(maxGrabIdleCount) {
 }
 
 GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount,
-        const std::map<std::string, GrabJobCallback> workerFunctorMap)
-    :isSleep(false), channel(0), grabIdleCount(0) {
-    maxGrabIdleCount = maxGrabIdleCount;
-    workerFunctors = workerFunctorMap;
+        const std::map<std::string, GrabJobCallback> workerFunctors)
+    :isSleep(false),
+     grabIdleCount(0),
+     maxGrabIdleCount(maxGrabIdleCount),
+     workerFunctors(workerFunctors) {
 }
 
 GearmanWorkerHandler::~GearmanWorkerHandler() {

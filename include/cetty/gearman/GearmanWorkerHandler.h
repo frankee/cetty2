@@ -45,7 +45,7 @@ public:
     GearmanWorkerHandler();
     GearmanWorkerHandler(int maxGrabIdleCount);
     GearmanWorkerHandler(int maxGrabIdleCount,
-                         const std::map<std::string, GrabJobCallback> workerFunctorMap);
+                         const std::map<std::string, GrabJobCallback> workerFunctors);
 
     virtual ~GearmanWorkerHandler();
 
@@ -80,8 +80,8 @@ private:
 
 private:
     bool isSleep;
-    int maxGrabIdleCount;
     int grabIdleCount;
+    int maxGrabIdleCount;
     ChannelPtr channel;
     CallbackMap workerFunctors;
 };

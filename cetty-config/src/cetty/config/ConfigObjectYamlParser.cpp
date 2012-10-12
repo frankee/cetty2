@@ -34,8 +34,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         LOG_ERROR << "parsed object is NULL.";
         return false;
     }
-
-    const ConfigReflection* reflection = object->getreflection();
+    
     const ConfigDescriptor* descriptor = object->getdescriptor();
 
     ConfigDescriptor::ConstIterator itr = descriptor->begin();

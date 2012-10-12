@@ -655,10 +655,9 @@ std::string ChannelPipeline::toString() const {
 }
 
 void ChannelPipeline::notifyHandlerException(const Exception& e) {
-    if (false/*exceptionEvt*/) {
-        //logger->warn(
-        //    "An exception was thrown by a user handler \
-        //         while handling an exception event ( ... )", e);
+    if (e.getNested()) {
+        LOG_WARN << "exception was thrown by a user handler"
+            "while handling an exception ( ... )";
         return;
     }
 

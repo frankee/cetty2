@@ -28,6 +28,7 @@ const RedisReplyMessageType RedisReplyMessageType::NIL     = 3;
 const RedisReplyMessageType RedisReplyMessageType::STATUS  = 4;
 const RedisReplyMessageType RedisReplyMessageType::ERROR   = 5;
 
+const std::vector<StringPiece> RedisReplyMessage::EMPTY_STRING_PIECES;
 
 int64_t RedisReplyMessage::getInteger() const {
     if (type == RedisReplyMessageType::INTEGER) {
@@ -35,6 +36,7 @@ int64_t RedisReplyMessage::getInteger() const {
     }
     else {
         LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";
+        return 0;
     }
 }
 

@@ -49,15 +49,15 @@ public:
 
         int type;
         int index;
-        std::string cookie;
         std::string name;
         std::string alias;
+        std::string cookie;
 
         Parameter(int type, const std::string& name, const std::string& alias)
-            : type(type), name(name), alias(alias), index(0) {
+            : type(type), index(0), name(name), alias(alias) {
         }
         Parameter(int type, const std::string& name, const std::string& alias, int index)
-            : type(type), name(name), alias(alias), index(index) {
+            : type(type), index(index), name(name), alias(alias) {
         }
 
         static Parameter* createFromPath(const std::string& name, const std::string& alias, int index) {

@@ -29,6 +29,8 @@
 #include <cetty/gearman/GearmanWorkerHandler.h>
 #include <cetty/gearman/protobuf/GearmanProtobufWorkerFilter.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace gearman {
 namespace protobuf {
@@ -69,7 +71,7 @@ GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
     const ProtobufServicePtr& service) {
 
     if (!service) {
-        printf("");
+        LOG_WARN << "registered service is NULL";
         return *this;
     }
 
@@ -92,6 +94,8 @@ GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
         //register the worker function
         registerWorker(functionName, nullWorker);
     }
+
+    return *this;
 }
 
 }

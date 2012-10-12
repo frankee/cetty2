@@ -36,9 +36,8 @@ struct ProtobufParserRegister {
 #endif
     }
     ~ProtobufParserRegister() {
-        ProtobufParser* parser = NULL;
 #if JSON_PARSER_PLUGIN
-       unregister("png");
+       unregister("json");
 #endif
     }
 

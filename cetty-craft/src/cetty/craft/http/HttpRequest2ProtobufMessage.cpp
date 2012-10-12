@@ -136,7 +136,6 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
 
     for (int i = 0; i < fieldCnt; ++i) {
         const google::protobuf::FieldDescriptor* field = descriptor->field(i);
-        const std::string& fieldFullName = field->full_name();
         fieldName = fieldNameScope + field->name();
 
         if (tmpl.hasField(fieldName)) {

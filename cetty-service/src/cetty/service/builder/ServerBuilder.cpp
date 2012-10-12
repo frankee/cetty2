@@ -21,6 +21,7 @@
 #include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/logging/LoggerHelper.h>
 
 #if (defined(linux) || defined(__linux) || defined(__linux__))
 
@@ -219,13 +220,6 @@ int ServerBuilder::init() {
         daemonize();
     }
 
-    if (config.logger == "log4cplus") {
-        //if (confCenter) {
-        //InternalLoggerFactory::setDefaultFactory(
-        //    new Log4cplusLoggerFactory(*confCenter));
-        //}
-    }
-
     return 0;
 }
 
@@ -280,7 +274,7 @@ void ServerBuilder::buildAll() {
             }
         }
         else {
-            printf("");
+            LOG_ERROR << "has no pipeline config, will not start the server.";
         }
     }
 }

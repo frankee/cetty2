@@ -23,8 +23,8 @@ namespace logging {
 
 LogMessage::LogMessage(const LogLevel& level, const char* source, int line)
     : level(level),
-      source(source),
       line(line),
+      source(source),
       func(""),
       stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
 
@@ -38,8 +38,8 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line)
 
 LogMessage::LogMessage(const LogLevel& level, const char* source, int line, const char* func)
     : level(level),
-      source(source),
       line(line),
+      source(source),
       func(func),
       stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
 

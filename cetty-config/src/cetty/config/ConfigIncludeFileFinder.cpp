@@ -87,7 +87,7 @@ int ConfigIncludeFileFinder::find(const std::string& file,
         return 0;
     }
 
-    for (std::size_t i = 0; i < filesCnt; ++i) {
+    for (int i = 0; i < filesCnt; ++i) {
         const IncludeLine& include = includes[i];
         findFile(include.filePath, include.pattern, files);
     }
@@ -96,9 +96,9 @@ int ConfigIncludeFileFinder::find(const std::string& file,
 }
 
 bool filterIncludeLine(const std::string line) {
-    std::string::size_type pos;
+    std::string::size_type pos = line.find("#include");
 
-    if (pos = line.find("#include") != std::string::npos) {
+    if (pos != std::string::npos) {
         return true;
     }
 
@@ -106,13 +106,10 @@ bool filterIncludeLine(const std::string line) {
 }
 
 bool FileNameMatchPattern::parse(const std::string& str, boost::filesystem::path* filePath) {
-    std::string::size_type pos;
-
     //处理相对路径
     boost::filesystem::path p(str);
     *filePath = p.parent_path();
     std::string pathStr = p.parent_path().string();
-    bool result = p.is_complete();
 
     if (!p.is_complete() && fatherPath.string().compare(p.parent_path().string()) != 0) {
         *filePath = (fatherPath /= pathStr);
