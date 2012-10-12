@@ -14,6 +14,8 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
+using namespace cetty::config;
+
 CETTY_CONFIG_ADD_DESCRIPTOR(WSSEConfig,
                             new ConfigDescriptor(
                                 7,
