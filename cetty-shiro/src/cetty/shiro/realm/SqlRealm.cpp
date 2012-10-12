@@ -30,11 +30,6 @@ const std::string SqlRealm::DEFAULT_USER_ROLES_QUERY =
 const std::string SqlRealm::DEFAULT_PERMISSIONS_QUERY =
     "SELECT permission FROM roles_permissions WHERE role_name = ?";
 
-const std::string SqlRealm::BACKEND = "sqlite3";
-const std::string SqlRealm::CONNECTION_STRING = "/home/chenhl/dev/db/data/sqlite/test";
-
-
-
 SqlRealm::SqlRealm() {
     ConfigCenter::instance().configure(&config);
     init();

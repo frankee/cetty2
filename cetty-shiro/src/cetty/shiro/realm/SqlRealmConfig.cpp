@@ -30,8 +30,6 @@ CETTY_CONFIG_ADD_DESCRIPTOR(SqlRealmConfig,
 
 SqlRealmConfig::SqlRealmConfig()
     : ConfigObject("SqlRealmConfig"),
-      backend(SqlRealm::BACKEND),
-      connectionString(SqlRealm::CONNECTION_STRING),
       authenticationQuery(SqlRealm::DEFAULT_AUTHENTICATION_QUERY),
       userRolesQuery(SqlRealm::DEFAULT_USER_ROLES_QUERY),
       permissionsQuery(SqlRealm::DEFAULT_PERMISSIONS_QUERY),

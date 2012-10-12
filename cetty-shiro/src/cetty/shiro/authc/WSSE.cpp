@@ -20,9 +20,6 @@ namespace authc {
 const int WSSE::NONCE_LENGTH = 6;
 const int WSSE::SERVER_TIME_EXPIRE = 10 * 60;
 
-const std::string WSSE::BACKEND = "sqlite";
-const std::string WSSE::CONNECTION_STRING = "/home/chenhl/dev/db/data/sqlite/test";
-
 const std::string WSSE::USER_TOKEN_QUERY =
     "SELECT username, host, nonce, created "
     "FROM user_token "

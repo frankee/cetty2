@@ -29,8 +29,6 @@ CETTY_CONFIG_ADD_DESCRIPTOR(WSSEConfig,
 
 WSSEConfig::WSSEConfig()
     : ConfigObject("WSSEConfig"),
-      backend(WSSE::BACKEND),
-      connectionString(WSSE::CONNECTION_STRING),
       userTokenQuery(WSSE::USER_TOKEN_QUERY),
       userTokenUpdate(WSSE::USER_TOKEN_UPDATE),
       userTokenSave(WSSE::USER_TOKEN_SAVE),

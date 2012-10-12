@@ -24,9 +24,6 @@ public:
                                         const GetAuthorizationInfoCallback& callback);
 
 public:
-    static const std::string BACKEND;
-    static const std::string CONNECTION_STRING;
-
     static const std::string DEFAULT_AUTHENTICATION_QUERY;
     static const std::string DEFAULT_SALTED_AUTHENTICATION_QUERY;
     static const std::string DEFAULT_USER_ROLES_QUERY;
