@@ -94,7 +94,7 @@ public:
     const char* className;
 
     ConfigFieldDescriptor(int offset, int type, const char* name, const char* className, bool repeated = false)
-        : offset(offset), type(type), name(name), className(className), repeated(repeated) {}
+        : repeated(repeated), offset(offset), type(type), name(name), className(className) {}
 };
 
 class ConfigDescriptor {

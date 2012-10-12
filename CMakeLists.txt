@@ -64,6 +64,10 @@ find_package(YamlCpp REQUIRED)
 include_directories(${YAMLCPP_INCLUDE_DIRS})
 LINK_DIRECTORIES(${YAMLCPP_LIBRARY_DIRS})
 
+find_package(Soci)
+include_directories(${SOCI_INCLUDE_DIRS})
+LINK_DIRECTORIES($(SOCI_LIBRARY))
+
 # Defines the compiler/linker flags used to build cetty.  You can
 # tweak these definitions to suit your need.  A variable's value is
 # empty before it's explicitly assigned to.
@@ -233,5 +237,5 @@ ADD_SUBDIRECTORY(cetty-service)
 ADD_SUBDIRECTORY(cetty-protobuf)
 ADD_SUBDIRECTORY(cetty-gearman)
 ADD_SUBDIRECTORY(cetty-redis)
-#ADD_SUBDIRECTORY(cetty-shiro)
+ADD_SUBDIRECTORY(cetty-shiro)
 ADD_SUBDIRECTORY(cetty-craft)
