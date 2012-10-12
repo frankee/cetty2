@@ -48,9 +48,6 @@ public:
     bool verifySecret(const LoginSecret& secret);
 
 public:
-    static const std::string BACKEND;
-    static const std::string CONNECTION_STRING;
-
     static const std::string USER_TOKEN_QUERY;
     static const std::string USER_TOKEN_UPDATE;
     static const std::string USER_TOKEN_SAVE;
