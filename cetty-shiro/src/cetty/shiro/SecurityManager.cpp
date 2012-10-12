@@ -26,20 +26,20 @@ using namespace cetty::shiro::authc;
 using namespace cetty::shiro::realm;
 using namespace cetty::shiro::authz;
 
-const std::string SecurityManager::SQL_REALM = "sql_realm";
-
-SecurityManager::SecurityManager(){
+SecurityManager::SecurityManager() {
     sessionManager = new SessionManager();
 
     ConfigCenter::instance().configure(&config);
     init();
 }
 
-void SecurityManager::init(){
+void SecurityManager::init() {
     std::string realm = config.realm;
-    if(realm == SQL_REALM){
+
+    if (realm == SqlRealm::NAME) {
         realms = new SqlRealm();
-    } else {
+    }
+    else {
         LOG_ERROR << "No realm is named [" << realm << "]";
     }
 
@@ -47,8 +47,8 @@ void SecurityManager::init(){
     authorizer.setRealm(boost::dynamic_pointer_cast<AuthorizingRealm>(realms));
 }
 
-SecurityManager::~SecurityManager(){
-    if(sessionManager != NULL){
+SecurityManager::~SecurityManager() {
+    if (sessionManager != NULL) {
         delete sessionManager;
         sessionManager = NULL;
     }
@@ -97,7 +97,7 @@ void SecurityManager::onStartSession(const SessionPtr& session,
 }
 
 void SecurityManager::getSession(const std::string& id,
-                                 SessionManager::SessionCallback callback ){
+                                 SessionManager::SessionCallback callback) {
     sessionManager->getSession(id, callback);
 }
 
@@ -108,9 +108,11 @@ void SecurityManager::logout(const std::string& sessionId) {
                                            _1));
 }
 
-void SecurityManager::onLogout(const SessionPtr& session){
-    AuthenticatingRealm *authRealm = (AuthenticatingRealm *)realms.get();
-    if(authRealm != NULL) authRealm->onLogout(session->getAttribute("username"));
+void SecurityManager::onLogout(const SessionPtr& session) {
+    AuthenticatingRealm* authRealm = (AuthenticatingRealm*)realms.get();
+
+    if (authRealm != NULL) { authRealm->onLogout(session->getAttribute("username")); }
+
     session->stop();
 }
 
@@ -123,44 +125,49 @@ void SecurityManager::bind(const AuthenticationToken& token,
 }
 
 
-SessionManager* SecurityManager::getSessionManager(){
+SessionManager* SecurityManager::getSessionManager() {
     return sessionManager;
 }
 
-void SecurityManager::fireFailedLoginEvent(const AuthenticationToken& token){
+void SecurityManager::fireFailedLoginEvent(const AuthenticationToken& token) {
     LOG_TRACE << token.getPrincipal()
               << " is failed to login.";
 }
 void SecurityManager::fireSuccessfulLoginEvent(const AuthenticationToken& token,
-                                               const AuthenticationInfoPtr& info){
+        const AuthenticationInfoPtr& info) {
     LOG_TRACE << token.getPrincipal()
               << " is successful to login.";
 }
 
 void SecurityManager::isPermitted(const std::string& principal,
                                   const std::string& permission,
-                                  const AuthorizeCallback& callback) const{
+                                  const AuthorizeCallback& callback) const {
     authorizer.isPermitted(principal, permission, callback);
 }
 
 void SecurityManager::isPermitted(const PrincipalCollection& principals,
                                   const std::string& permission,
-                                  const AuthorizeCallback& callback) const{
+                                  const AuthorizeCallback& callback) const {
     authorizer.isPermitted(principals, permission, callback);
 }
 
 void SecurityManager::isPermitted(const PrincipalCollection& principal,
                                   const PermissionPtr& permission,
-                                  const AuthorizeCallback& callback) const{
+                                  const AuthorizeCallback& callback) const {
     authorizer.isPermitted(principal, permission, callback);
 }
 
-void SecurityManager::setRealm(const RealmPtr &realm){
+void SecurityManager::setRealm(const RealmPtr& realm) {
     this->realms = realm;
 }
 
-const RealmPtr& SecurityManager::getRealms() const{
+const RealmPtr& SecurityManager::getRealms() const {
     return this->realms;
+}
+
+SecurityManager& SecurityManager::instance() {
+    static SecurityManager securityManager;
+    return securityManager;
 }
 
 }

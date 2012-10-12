@@ -12,6 +12,8 @@ class SqlRealm : public AuthorizingRealm {
 public:
     enum SaltStyle {NO_SALT, CRYPT, COLUMN, EXTERNAL};
 
+    static const std::string NAME;
+
 public:
     SqlRealm();
 

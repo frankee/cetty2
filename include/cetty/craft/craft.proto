@@ -28,13 +28,13 @@ message Error {
 	repeated SubError sub_errors = 9;
 }
 
-message Cookie {
-	optional string session_id = 1;
-	optional string    user_id = 2;
+message Session {
+	optional string   id = 1;
+	optional string user = 2;
 }
 
 message Authority {
-	optional Cookie      cookie = 1;
+	optional Session    session = 1;
 	
     optional string         key = 2;
     optional string   signature = 3;

@@ -262,6 +262,24 @@ int main(int argc, char* argv[]) {
 ** cetty client如何与channel共用同一线程
 
 
+* craft
+** 参数映射方式
+   参数映射是指将HTTP的请求映射成对应的Protobuf的Rpc请求，当然，同样也可以将Protobuf的Rpc请求映射成HTTP的请求。对于响应亦然。
+   参数映射可以通过模板来实现。
+   参数的映射可以分为以下几种：
+   1. HTTP方法
+   2. URI（path、label、query）
+   3. Headers
+   4. cookie
+
+*** path映射方式
+    path的映射包含参数映射和method的映射
+
+
+*** query
+
+*** cookie
+
 * NoSql数据库的使用
 ** cetty与redis
 ** cetty与mongodb

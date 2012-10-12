@@ -75,7 +75,8 @@ public:
     typedef boost::function<void (const AuthenticationInfoPtr&)> AuthenticateCallback;
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
-    static const std::string SQL_REALM;
+public:
+    static SecurityManager& instance();
 
 public:
     SecurityManager();
