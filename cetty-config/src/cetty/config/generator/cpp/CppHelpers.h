@@ -150,5 +150,3 @@ inline bool HasFastArraySerialization(const FileDescriptor* file) {
 
 }}}}
 #endif  // GOOGLE_PROTOBUF_COMPILER_CPP_HELPERS_H__
-
-

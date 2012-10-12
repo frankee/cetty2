@@ -349,4 +349,3 @@ ChannelBufferPtr UserEvent::intrusivePointer<ChannelBuffer>() const {
 // Local Variables:
 // mode: c++
 // End:
-

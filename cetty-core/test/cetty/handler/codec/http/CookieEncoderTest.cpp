@@ -128,5 +128,3 @@ TEST(CookieEncoderTest, testEncodingSingleCookieV2) {
     std::string encodedCookie = ClientCookieEncoder::encode(cookie, cookie2, cookie3);
     ASSERT_STREQ(c.c_str(), encodedCookie.c_str());
 }
-
-

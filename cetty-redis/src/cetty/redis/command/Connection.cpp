@@ -29,4 +29,3 @@ static const std::string QUIT   = "QUIT";
 }
 }
 }
-

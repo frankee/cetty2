@@ -162,5 +162,3 @@ RedisCommandPtr stringsCommandStrlen(const std::string& key) {
 }
 }
 }
-
-

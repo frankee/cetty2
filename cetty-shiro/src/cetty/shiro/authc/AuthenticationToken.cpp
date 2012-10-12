@@ -30,5 +30,3 @@ std::string AuthenticationToken::toString() {
 }
 }
 }
-
-

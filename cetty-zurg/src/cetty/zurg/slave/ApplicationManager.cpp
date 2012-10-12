@@ -158,4 +158,3 @@ void ApplicationManager::remove(const ConstRemoveApplicationsRequestPtr& request
 
 }
 }
-

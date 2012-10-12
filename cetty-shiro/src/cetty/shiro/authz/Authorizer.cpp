@@ -108,5 +108,3 @@ bool Authorizer::realmConfigured() const {
 }
 }
 }
-
-

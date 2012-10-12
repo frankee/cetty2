@@ -457,4 +457,3 @@ TEST(CookieDecoderTest, testDecodingLongValue) {
     ASSERT_STREQ("bh", c.getName().c_str());
     ASSERT_STREQ(longValue.c_str(), c.getValue().c_str());
 }
-

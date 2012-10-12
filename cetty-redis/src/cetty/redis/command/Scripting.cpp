@@ -31,4 +31,3 @@ static const std::string SCRIPT_LOAD   = "SCRIPT LOAD";
 }
 }
 }
-

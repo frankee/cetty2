@@ -186,5 +186,3 @@ void WSSE::save(const LoginSecret &ls){
 }
 }
 }
-
-

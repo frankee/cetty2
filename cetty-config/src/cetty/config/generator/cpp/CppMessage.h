@@ -137,5 +137,3 @@ private:
 }
 
 #endif  // GOOGLE_PROTOBUF_COMPILER_CPP_MESSAGE_H__
-
-

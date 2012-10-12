@@ -63,5 +63,3 @@ TEST(HttpServerCodecTest, testUnfinishedChunkedHttpRequestIsLastFlag) {
     Assert.assertFalse(empty);
     Assert.assertEquals(offeredContentLength, totalBytesPolled);
 }
-
-

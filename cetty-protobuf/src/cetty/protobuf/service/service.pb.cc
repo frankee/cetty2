@@ -858,5 +858,3 @@ void Empty::Swap(Empty* other) {
 }  // namespace cetty
 
 // @@protoc_insertion_point(global_scope)
-
-

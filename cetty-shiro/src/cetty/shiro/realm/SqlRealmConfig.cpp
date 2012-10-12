@@ -40,5 +40,3 @@ SqlRealmConfig::SqlRealmConfig()
 }
 }
 }
-
-

@@ -91,4 +91,3 @@ TEST(ProtobufServiceMessageCodecTest, decode)
 	ASSERT_TRUE(decodedMsg->getService().compare("hello") == 0);
 	ASSERT_TRUE(decodedMsg->getMethod().compare("world") == 0);
 }
-

@@ -165,4 +165,3 @@ const RealmPtr& SecurityManager::getRealms() const{
 
 }
 }
-

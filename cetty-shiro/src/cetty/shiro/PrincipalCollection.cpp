@@ -97,7 +97,3 @@ void PrincipalCollection::clear(){
 
 }
 }
-
-
-
-

@@ -36,6 +36,3 @@ std::string SessionIdGenerator::generateId(const SessionPtr& session){
 }
 }
 }
-
-
-

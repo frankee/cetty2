@@ -33,6 +33,3 @@ SessionManagerConfig::SessionManagerConfig()
 }
 }
 }
-
-
-

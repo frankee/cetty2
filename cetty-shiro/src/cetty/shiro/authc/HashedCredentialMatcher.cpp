@@ -129,5 +129,3 @@ HashedCredentialsMatcher::~HashedCredentialsMatcher(){
 }
 }
 }
-
-

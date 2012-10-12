@@ -85,5 +85,3 @@ void AuthenticatingRealm::onGetAuthenticationInfo(const AuthenticationToken& tok
 }
 }
 }
-
-

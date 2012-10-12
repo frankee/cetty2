@@ -21,5 +21,3 @@ WSSE SecurityUtils::wsse;
 }
 }
 }
-
-

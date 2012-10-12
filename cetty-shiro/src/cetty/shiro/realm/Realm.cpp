@@ -34,5 +34,3 @@ std::string Realm::autoName(){
 }
 }
 }
-
-

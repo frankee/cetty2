@@ -662,5 +662,3 @@ void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
 }  // namespace echo
 
 // @@protoc_insertion_point(global_scope)
-
-

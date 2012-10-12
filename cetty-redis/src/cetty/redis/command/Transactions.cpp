@@ -60,4 +60,3 @@ RedisCommandPtr transactionsCommandWatch(const std::string& key) {
 }
 }
 }
-
