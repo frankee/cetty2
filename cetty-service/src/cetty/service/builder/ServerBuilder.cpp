@@ -274,7 +274,7 @@ void ServerBuilder::buildAll() {
             }
         }
         else {
-            LOG_ERROR << "has no pipeline config, will not start the server.";
+            LOG_WARN << "has no pipeline config, will not start the server.";
         }
     }
 }
