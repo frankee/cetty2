@@ -7,10 +7,13 @@
 
 #include <cetty/shiro/SecurityManagerConfig.h>
 #include <cetty/shiro/SecurityManager.h>
+#include <cetty/shiro/realm/SqlRealm.h>
 #include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
 namespace shiro {
+
+using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(SecurityManagerConfig,
                             new ConfigDescriptor(
@@ -21,6 +24,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(SecurityManagerConfig,
 
 SecurityManagerConfig::SecurityManagerConfig()
     : ConfigObject("SecurityManagerConfig"),
-      realm(SecurityManager::SQL_REALM){}
+      realm(cetty::shiro::realm::SqlRealm::NAME) {}
+
 }
 }
