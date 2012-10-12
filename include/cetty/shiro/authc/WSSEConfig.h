@@ -14,9 +14,7 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-using namespace cetty::config;
-
-class WSSEConfig : public ConfigObject {
+class WSSEConfig : public cetty::config::ConfigObject {
 public:
     std::string backend;
     std::string connectionString;
@@ -32,10 +30,8 @@ public:
     virtual ConfigObject* create() const { return new WSSEConfig; }
 };
 
-
 }
 }
 }
-
 
 #endif // #if !defined(CETTY_SHIRO_AUTHC_WSSECONFIG_H)

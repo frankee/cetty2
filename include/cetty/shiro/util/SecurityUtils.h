@@ -60,4 +60,5 @@ WSSE *SecurityUtils::getWsse(){
 }
 }
 }
+
 #endif //#if !defined(CETTY_SHIRO_SECURITYUTILS_H)

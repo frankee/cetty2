@@ -27,7 +27,7 @@ message LoginRequest {
 	optional string          nonce = 2;
 	optional string    server_time = 3;
 	
-	optional string    host = 8;
+	optional string           host = 8;
 	optional string encoded_passwd = 9;
 }
 

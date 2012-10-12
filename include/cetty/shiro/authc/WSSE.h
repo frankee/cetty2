@@ -14,38 +14,23 @@ namespace cetty {
 namespace shiro {
 namespace authc {
 
-struct LoginSecret {
-    LoginSecret(){}
-    LoginSecret(const std::string &host,
-                const std::string &principal,
-                const std::string &nonce,
-                const std::string &created)
-        :host(host),
-         principal(principal),
-         nonce(nonce),
-         created(created){}
-
-    std::string host;
-    std::string principal;
-    std::string nonce;
-    std::string created;
-};
-
 class WSSE {
 public:
+    static WSSE& instance();
+
+public:
     WSSE();
-    virtual ~WSSE(){}
+    virtual ~WSSE() {}
 
     void generatorSecret(const std::string& principal,
                          const std::string& host,
-                         LoginSecret* ls);
+                         std::string* nonce,
+                         std::string* created);
 
     bool verifySecret(const std::string& host,
                       const std::string& principal,
                       const std::string& nonce,
                       const std::string& created);
-
-    bool verifySecret(const LoginSecret& secret);
 
 public:
     static const std::string USER_TOKEN_QUERY;
@@ -56,21 +41,25 @@ public:
     static const int SERVER_TIME_EXPIRE;
 
 protected:
-    virtual void generatorNonce(std::string *nonce);
-    virtual void generatorCreated(std::string *created);
+    virtual void generatorNonce(std::string* nonce);
+    virtual void generatorCreated(std::string* created);
 
     /// @brief retrive login secret from data source
-    virtual void retrive(const LoginSecret &secret, LoginSecret *ls);
+    virtual void retrive(const std::string& principal,
+                         const std::string& created,
+                         std::string* nonce);
 
     /// @brief save login secret to data source
-    virtual void save(const LoginSecret &ls);
+    virtual void save(const std::string& host,
+                      const std::string& principal,
+                      const std::string& nonce,
+                      const std::string& created);
 
 private:
-    bool isExpried(const std::string &created);
+    bool isExpried(const std::string& created);
 
 private:
     WSSEConfig config;
-
 };
 
 }

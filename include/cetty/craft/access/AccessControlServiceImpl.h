@@ -19,9 +19,23 @@
 
 #include <cetty/craft/access/AccessControl.pb.h>
 
+#include <cetty/shiro/session/SessionPtr.h>
+#include <cetty/shiro/authc/AuthenticationInfoPtr.h>
+
+namespace cetty {
+namespace shiro {
+namespace authc {
+class AuthenticationToken;
+}
+}
+}
+
 namespace cetty {
 namespace craft {
 namespace access {
+
+using namespace cetty::shiro::authc;
+using namespace cetty::shiro::session;
 
 class AccessControlServiceImpl : public AccessControlService {
 public:
@@ -36,16 +50,17 @@ public:
                        const LoginResponsePtr& response,
                        const DoneCallback& done);
 
-    virtual void onLogin(int code,
-                         const AuthenticationToken&,
-                         const AuthenticationInfoPtr&,
-                         const SessionPtr&,
-                         const LoginResponsePtr& response,
-                         const DoneCallback& done);
-
     virtual void logout(const ConstLogoutRequestPtr& request,
                         const LogoutResponsePtr& response,
                         const DoneCallback& done);
+
+private:
+    void onLogin(int code,
+                 const AuthenticationToken& token,
+                 const AuthenticationInfoPtr& info,
+                 const SessionPtr& session,
+                 const LoginResponsePtr& response,
+                 const DoneCallback& done);
 };
 
 }
