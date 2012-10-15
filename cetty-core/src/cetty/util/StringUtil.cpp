@@ -18,6 +18,8 @@
 
 #include <limits>
 #include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
 #include <cetty/util/StringPiece.h>

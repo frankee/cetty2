@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <cstring>
 #include <boost/assert.hpp>
 #include <cetty/util/StringUtil.h>
 
