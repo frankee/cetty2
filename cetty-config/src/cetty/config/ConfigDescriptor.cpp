@@ -17,6 +17,7 @@
 #include <cetty/config/ConfigDescriptor.h>
 
 #include <cstdarg>
+#include <cstdlib>
 
 namespace cetty {
 namespace config {

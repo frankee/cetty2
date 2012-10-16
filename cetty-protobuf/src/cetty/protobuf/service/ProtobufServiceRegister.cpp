@@ -1,5 +1,6 @@
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 
+#include <cstdio>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
 #include <cetty/protobuf/service/ProtobufService.h>
