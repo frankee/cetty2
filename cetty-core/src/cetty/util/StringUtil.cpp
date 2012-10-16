@@ -16,6 +16,7 @@
 
 #include <cetty/util/StringUtil.h>
 
+#include <stdarg.h>
 #include <limits>
 #include <cmath>
 #include <boost/crc.hpp>
@@ -85,7 +86,14 @@ std::string StringUtil::stripControlCharacters(const std::string& value) {
     return buf;
 }
 
-void StringUtil::vstrprintf(std::string* dest, const char* format, va_list ap) {
+/**
+ * Append a formatted string at the end of a string.
+ * @param dest the destination string.
+ * @param format the printf-like format string.  The conversion character `%' can be used with
+ * such flag characters as `s', `d', `o', `u', `x', `X', `c', `e', `E', `f', `g', `G', and `%'.
+ * @param ap used according to the format string.
+*/
+static void vstrprintf(std::string* dest, const char* format, va_list ap) {
     BOOST_ASSERT(dest && format);
     static const size_t NUMBUFSIZ = 32;
 

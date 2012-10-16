@@ -35,7 +35,7 @@ TEST(HttpServerCodecTest, testUnfinishedChunkedHttpRequestIsLastFlag) {
     int totalContentLength = maxChunkSize * 5;
 
     std::string input;
-    StringUtil::vstrprintf(&input, "PUT /test HTTP/1.1\r\nContent-Length: %d\r\n\r\n", totalContentLength);
+    StringUtil::strprintf(&input, "PUT /test HTTP/1.1\r\nContent-Length: %d\r\n\r\n", totalContentLength);
     decoderEmbedder.writeInbound(Unpooled::wrappedBuffer(&input));
 
     int offeredContentLength = (int)(maxChunkSize * 2.5);

@@ -19,7 +19,6 @@
 
 #include <string>
 #include <vector>
-#include <stdarg.h>
 #include <boost/assert.hpp>
 #include <cetty/Types.h>
 #include <cetty/util/Character.h>
@@ -52,19 +51,9 @@ public:
      * @param dest the destination string.
      * @param format the printf-like format string.  The conversion character `%' can be used with
      * such flag characters as `s', `d', `o', `u', `x', `X', `c', `e', `E', `f', `g', `G', and `%'.
-     * @param ap used according to the format string.
-     */
-    static void vstrprintf(std::string* dest, const char* format, va_list ap);
-
-    /**
-     * Append a formatted string at the end of a string.
-     * @param dest the destination string.
-     * @param format the printf-like format string.  The conversion character `%' can be used with
-     * such flag characters as `s', `d', `o', `u', `x', `X', `c', `e', `E', `f', `g', `G', and `%'.
      * @param ... used according to the format string.
      */
     static void strprintf(std::string* dest, const char* format, ...);
-
 
     /**
      * Generate a formatted string.
