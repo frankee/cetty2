@@ -21,11 +21,11 @@ namespace redis {
 namespace command {
 
 // Miscellaneous
-static const std::string DISCARD  = "DISCARD";
-static const std::string EXEC     = "EXEC";
-static const std::string MULTI    = "MULTI";
-static const std::string UNWATCH  = "UNWATCH";
-static const std::string WATCH    = "WATCH";
+const std::string DISCARD  = "DISCARD";
+const std::string EXEC     = "EXEC";
+const std::string MULTI    = "MULTI";
+const std::string UNWATCH  = "UNWATCH";
+const std::string WATCH    = "WATCH";
 
 RedisCommandPtr transactionsCommandDiscard() {
     RedisCommandPtr command(new RedisCommand(DISCARD));

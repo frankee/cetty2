@@ -24,28 +24,28 @@ namespace command {
 using namespace cetty::redis;
 
 // String Commands
-static const std::string APPEND    = "APPEND";
-static const std::string BITCOUNT  = "BITCOUNT";
-static const std::string DECR      = "DECR";
-static const std::string DECRBY    = "DECRBY";
-static const std::string DECRBYFLOAT = "DECRBYFLOAT";
-static const std::string GET       = "GET";
-static const std::string GETBIT    = "GETBIT";
-static const std::string GETRANGE  = "GETRANGE";
-static const std::string GETSET    = "GETSET";
-static const std::string INCR      = "INCR";
-static const std::string INCRBY    = "INCRBY";
-static const std::string INCRBYFLOAT = "INCRBYFLOAT";
-static const std::string MGET      = "MGET";
-static const std::string MSET      = "MSET";
-static const std::string MSETNX    = "MSETNX";
-static const std::string SET       = "SET";
-static const std::string SETBIT    = "SETBIT";
-static const std::string PSETEX    = "PSETEX";
-static const std::string SETEX     = "SETEX";
-static const std::string SETNX     = "SETNX";
-static const std::string SETRANGE  = "SETRANGE";
-static const std::string STRLEN    = "STRLEN";
+const std::string APPEND    = "APPEND";
+const std::string BITCOUNT  = "BITCOUNT";
+const std::string DECR      = "DECR";
+const std::string DECRBY    = "DECRBY";
+const std::string DECRBYFLOAT = "DECRBYFLOAT";
+const std::string GET       = "GET";
+const std::string GETBIT    = "GETBIT";
+const std::string GETRANGE  = "GETRANGE";
+const std::string GETSET    = "GETSET";
+const std::string INCR      = "INCR";
+const std::string INCRBY    = "INCRBY";
+const std::string INCRBYFLOAT = "INCRBYFLOAT";
+const std::string MGET      = "MGET";
+const std::string MSET      = "MSET";
+const std::string MSETNX    = "MSETNX";
+const std::string SET       = "SET";
+const std::string SETBIT    = "SETBIT";
+const std::string PSETEX    = "PSETEX";
+const std::string SETEX     = "SETEX";
+const std::string SETNX     = "SETNX";
+const std::string SETRANGE  = "SETRANGE";
+const std::string STRLEN    = "STRLEN";
 
 RedisCommandPtr stringsCommandAppend(const std::string& key, const StringPiece& value) {
     RedisCommandPtr command(new RedisCommand(APPEND));
