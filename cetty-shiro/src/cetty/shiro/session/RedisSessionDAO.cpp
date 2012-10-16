@@ -1,13 +1,32 @@
 
 #include <cetty/shiro/session/RedisSessionDAO.h>
 #include <cetty/shiro/session/Session.h>
+#include <cetty/config/ConfigCenter.h>
+#include <cetty/redis/builder/RedisClientBuilder.h>
 #include <boost/ref.hpp>
 
 namespace cetty {
 namespace shiro {
 namespace session {
 
+using namespace cetty::redis::builder;
+
 static const std::string KEY_PREFIX = "sess:";
+
+RedisSessionDAO::RedisSessionDAO():redis(NULL){
+    ConfigCenter::instance().configure(&config);
+
+    RedisClientBuilder builder;
+    builder.addConnection(config.ip, config.port);
+    redis = new RedisClient(builder.build());
+}
+
+RedisSessionDAO::~RedisSessionDAO(){
+    if(redis){
+        delete redis;
+        redis = NULL;
+    }
+}
 
 void RedisSessionDAO::readSession(const std::string& sessionId,
                                   const SessionCallback& callback) {

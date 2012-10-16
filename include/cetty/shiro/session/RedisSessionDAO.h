@@ -3,6 +3,7 @@
 
 #include <cetty/redis/RedisClient.h>
 #include <cetty/shiro/session/SessionDAO.h>
+#include <cetty/shiro/session/RedisConfig.h>
 
 namespace cetty {
 namespace shiro {
@@ -27,6 +28,7 @@ private:
                             const SessionCallback& callback);
 
 private:
+    RedisConfig config;
     RedisClient* redis;
 };
 
