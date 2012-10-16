@@ -7,8 +7,8 @@
 
 #include <cetty/shiro/authc/WSSE.h>
 
-#include <soci.h>
-#include <sqlite3/soci-sqlite3.h>
+#include <soci/soci.h>
+#include <soci/sqlite3/soci-sqlite3.h>
 
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/config/ConfigCenter.h>
