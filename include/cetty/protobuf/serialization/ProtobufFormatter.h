@@ -111,8 +111,10 @@ public:
                                   ProtobufFormatter* formatter);
     static void unregisterFormatter(const std::string& name);
 
+    static void clear();
+
 private:
-    static std::map<std::string, ProtobufFormatter*> formatters;
+    static std::map<std::string, ProtobufFormatter*>* formatters;
 };
 
 }

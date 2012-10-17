@@ -26,7 +26,7 @@ namespace serialization {
 
 using namespace cetty::util;
 
-std::map<std::string, ProtobufFormatter*> ProtobufFormatter::formatters;
+std::map<std::string, ProtobufFormatter*>* ProtobufFormatter::formatters = NULL;
 
 struct ProtobufFormatterRegister {
     ProtobufFormatterRegister() {
@@ -46,6 +46,8 @@ struct ProtobufFormatterRegister {
 #if (PNG_FORMATTER_PLUGIN)
         unregister("png");
 #endif
+
+        ProtobufFormatter::clear();
     }
 
     void unregister(const std::string& name) {
@@ -176,11 +178,13 @@ void ProtobufFormatter::format(const std::string& key,
 }
 
 ProtobufFormatter* ProtobufFormatter::getFormatter(const std::string& name) {
-    std::map<std::string, ProtobufFormatter*>::const_iterator itr
-        = formatters.find(name);
+    if (formatters) {
+        std::map<std::string, ProtobufFormatter*>::const_iterator itr
+            = formatters->find(name);
 
-    if (itr != formatters.end()) {
-        return itr->second;
+        if (itr != formatters->end()) {
+            return itr->second;
+        }
     }
 
     return NULL;
@@ -189,16 +193,28 @@ ProtobufFormatter* ProtobufFormatter::getFormatter(const std::string& name) {
 void ProtobufFormatter::registerFormatter(const std::string& name,
         ProtobufFormatter* formatter) {
     if (!name.empty() && NULL != formatter) {
-        formatters.insert(std::make_pair(name, formatter));
+        if (NULL == formatters) {
+            formatters = new std::map<std::string, ProtobufFormatter*>;
+        }
+
+        formatters->insert(std::make_pair(name, formatter));
     }
 }
 
 void ProtobufFormatter::unregisterFormatter(const std::string& name) {
-    std::map<std::string, ProtobufFormatter*>::iterator itr
-        = formatters.find(name);
+    if (formatters) {
+        std::map<std::string, ProtobufFormatter*>::iterator itr
+            = formatters->find(name);
 
-    if (itr != formatters.end()) {
-        formatters.erase(itr);
+        if (itr != formatters->end()) {
+            formatters->erase(itr);
+        }
+    }
+}
+
+void ProtobufFormatter::clear() {
+    if (formatters) {
+        delete formatters;
     }
 }
 
