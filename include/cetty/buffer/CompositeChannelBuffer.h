@@ -87,7 +87,7 @@ public:
 
     virtual void discardReadBytes();
 
-    virtual std::string toString();
+    virtual std::string toString() const;
 
 private:
     /**

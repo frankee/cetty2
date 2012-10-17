@@ -115,6 +115,9 @@ public:
 
     virtual void discardReadBytes();
     virtual void ensureWritableBytes(int writableBytes);
+    virtual int ensureWritableBytes(int minWritableBytes, bool force) {
+        ChannelBuffer::ensureWritableBytes(minWritableBytes, force);
+    }
 
     virtual int8_t   getByte(int index) const;
     virtual int16_t  getShort(int index) const;
@@ -126,6 +129,9 @@ public:
     virtual int getBytes(int index, OutputStream* out, int length) const;
 
     virtual int indexOf(int fromIndex, int toIndex, int8_t value) const;
+    virtual int indexOf(int fromIndex, int toIndex, const StringPiece& value) const {
+        return ChannelBuffer::indexOf(fromIndex, toIndex, value);
+    }
 
     virtual int setByte(int index, int value);
     virtual int setShort(int index, int value);
