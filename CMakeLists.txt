@@ -13,6 +13,7 @@ SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/cmake)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+SET(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
@@ -47,7 +48,7 @@ LINK_DIRECTORIES(
 set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package( Boost 1.48.0 COMPONENTS date_time system thread filesystem regex REQUIRED )
+find_package( Boost 1.48.0 COMPONENTS date_time system thread filesystem regex program_options REQUIRED )
 
 INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIRS})
 LINK_DIRECTORIES(${BOOST_LIB_DIRS})
@@ -122,6 +123,37 @@ set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
 # For building the cetty libraries.
 set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set(CXX_FLAGS
+    -g
+    # -DVALGRIND
+    # -DMUDUO_STD_STRING
+    -D_FILE_OFFSET_BITS=64
+    -Wall
+    #-Wextra
+    #-Werror
+    -Wconversion
+    -Wno-unused-parameter
+    #-Wold-style-cast
+    -Woverloaded-virtual
+    -Wpointer-arith
+    #-Wshadow
+    -Wwrite-strings
+    #-march=native
+    # -MMD
+    # -std=c++0x
+    -rdynamic
+    )
+  if(CMAKE_BUILD_BITS EQUAL 32)
+    list(APPEND CXX_FLAGS "-m32")
+  endif()
+  string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
+
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
+endif()
+
 ########################################################################
 #
 # Defines the cetty libraries.
@@ -129,22 +161,26 @@ function(cxx_library_with_type name type cxx_flags)
   # type can be either STATIC or SHARED to denote a static or shared library.
   # ARGN refers to additional arguments after 'cxx_flags'.
   add_library(${name} ${type} ${ARGN})
-  set_target_properties(${name}
-    PROPERTIES
-    COMPILE_FLAGS "${cxx_flags}")
-    if (CMAKE_USE_PTHREADS_INIT)
-      target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
-	elseif (CMAKE_USE_PTHREADS_INIT)
-	  target_link_libraries(${name} ${Boost_LIBRARIES})
-    endif()
+  if(cxx_flags)
+    message(STATUS "cxx_library_with_type setting the cxx_flags ${cxx_flags}")
+    set_target_properties(${name}
+      PROPERTIES
+      COMPILE_FLAGS "${cxx_flags}")
+  endif()
+
+  if (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+  elseif (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${Boost_LIBRARIES})
+  endif()
 endfunction()
 
-function(cxx_static_library name cxx_flags)
-  cxx_library_with_type(${name} STATIC "${cxx_flags}" ${ARGN})
+function(cxx_static_library name)
+  cxx_library_with_type(${name} STATIC 0 ${ARGN})
 endfunction()
 
-function(cxx_shared_library name cxx_flags)
-  cxx_library_with_type(${name} SHARED "${cxx_flags}" ${ARGN})
+function(cxx_shared_library name)
+  cxx_library_with_type(${name} SHARED 0 ${ARGN})
 endfunction()
 
 
@@ -164,6 +200,7 @@ endfunction()
 function(cxx_executable_with_flags name cxx_flags lib)
   add_executable(${name} ${ARGN})
   if (cxx_flags)
+    message(STATUS "cxx_executable_with_flags setting the cxx_flags ${cxx_flags}")
     set_target_properties(${name}
       PROPERTIES
       COMPILE_FLAGS "${cxx_flags}")
@@ -174,6 +211,7 @@ endfunction()
 function(cxx_executable_with_flags_no_link name cxx_flags)
   add_executable(${name} ${ARGN})
   if (cxx_flags)
+    message(STATUS "cxx_executable_with_flags_no_link setting the cxx_flags ${cxx_flags}")
     set_target_properties(${name}
       PROPERTIES
       COMPILE_FLAGS "${cxx_flags}")
@@ -186,45 +224,66 @@ endfunction()
 # from the given source files.  dir/name.cc is implicitly included in
 # the source file list.
 function(cxx_executable name dir lib)
-  cxx_executable_with_flags(
-    ${name} "${cxx_default}" ${lib} "${dir}/${name}.cpp" ${ARGN})
+  cxx_executable_with_flags(${name} 0 ${lib} "${dir}/${name}.cpp" ${ARGN})
 endfunction()
 
 function(cxx_executable_no_link name dir)
-  cxx_executable_with_flags_no_link(
-    ${name} "${cxx_default}" "${dir}/${name}.cpp" ${ARGN})
+  cxx_executable_with_flags_no_link(${name} 0 "${dir}/${name}.cpp" ${ARGN})
 endfunction()
 
 function(cxx_executable_current_path name lib)
-  cxx_executable_with_flags(
-    ${name} "${cxx_default}" ${lib} "${name}.cpp" ${ARGN})
+  cxx_executable_with_flags(${name} 0 ${lib} "${name}.cpp" ${ARGN})
 endfunction()
 
 function(cxx_executable_current_path_no_link name)
-  cxx_executable_with_flags_no_link(
-    ${name} "${cxx_default}" "${name}.cpp" ${ARGN})
+  cxx_executable_with_flags_no_link(${name} 0 "${name}.cpp" ${ARGN})
 endfunction()
 
-function(PROTOBUF_GENERATE_RPC SRCS)
+function(cxx_link name)
+  if (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${ARGN})
+  elseif (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${Boost_LIBRARIES} ${ARGN})
+  endif()
+endfunction()
+
+function(cxx_link_with_pb name)
+  if (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${ARGN} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES})
+  elseif (CMAKE_USE_PTHREADS_INIT)
+    target_link_libraries(${name} ${ARGN} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
+  endif()
+endfunction()
+
+function(protobuf_generate_rpc srcs)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: PROTOBUF_GENERATE_RPC() called without any proto files")
+    message(SEND_ERROR "Error: protobuf_generate_rpc() called without any proto files")
     return()
   endif(NOT ARGN)
 
-  set(${SRCS})
+  set(${srcs})
   foreach(FIL ${ARGN})
     get_filename_component(FIL_WE ${FIL} NAME_WE)
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+    list(APPEND ${srcs} "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc")
 
     add_custom_command(
       OUTPUT "${FIL_WE}.pb.cc" "${FIL_WE}.pb.h"
-      COMMAND ${PROJECT_BINARY_DIR}/bin/proto-generator
-      ARGS --rpc_out . ${CMAKE_CURRENT_SOURCE_DIR}/${FIL} -I${CMAKE_CURRENT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR} -I${PROTOBUF_INCLUDE_DIR}
-      MAIN_DEPENDENCY ${FIL}
+      COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
+      ARGS ./${FIL} --cpp_out=. -I. -I${CMAKE_CURRENT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR} -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       VERBATIM )
   endforeach()
-  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(${srcs} ${${srcs}} PARENT_SCOPE)
 endfunction()
+
+#function(protobuf_generate_rpc srcs)
+#  protobuf_generate_rpc_dir($CMAKE_CURRENT_SOURCE_DIR ${srcs} ${ARGN})
+#endfunction()
+
+#function(protobuf_generate_i srcs)
+#  protobuf_generate_rpc_dir($PROJECT_INCLUDE_DIR ${srcs} ${ARGN})
+#endfunction()
+
 
 #if (BUILD_EXAMPLES)
 #	MESSAGE(STATUS "BUILDING SAMPLES...")
@@ -239,3 +298,12 @@ ADD_SUBDIRECTORY(cetty-gearman)
 ADD_SUBDIRECTORY(cetty-redis)
 ADD_SUBDIRECTORY(cetty-shiro)
 ADD_SUBDIRECTORY(cetty-craft)
+
+#cetty cettyconfig cettyservice ProtobufServiceGenerator protobufserialization protobufservice cettygearman cettyredis cettyshiro craft
+
+#INSTALL(TARGETS cetty
+#  RUNTIME DESTINATION bin
+#  LIBRARY DESTINATION lib
+#  ARCHIVE DESTINATION lib)
+
+#INSTALL(DIRECTORY include/cetty DESTINATION cetty)
