@@ -1501,10 +1501,10 @@ public:
      * @return the absolute index of the first occurrence if found.
      *         <tt>-1</tt> otherwise.
      */
-    int indexOf(int fromIndex, int toIndex, int8_t value) const;
+    virtual int indexOf(int fromIndex, int toIndex, int8_t value) const;
     virtual int indexOf(int fromIndex, int toIndex, const StringPiece& value) const;
 
-    int indexNotOf(int fromIndex, int toIndex, int8_t value) const;
+    virtual int indexNotOf(int fromIndex, int toIndex, int8_t value) const;
     virtual int indexNotOf(int fromIndex, int toIndex, const StringPiece& value) const;
 
     /**

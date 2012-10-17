@@ -6,7 +6,8 @@ AUX_SOURCE_DIRECTORY(cetty/gearman GEARMAN_DIR)
 AUX_SOURCE_DIRECTORY(cetty/gearman/builder GEARMAN_BUILDER_DIR)
 AUX_SOURCE_DIRECTORY(cetty/gearman/protobuf GEARMAN_PROTOBUF_DIR)
 AUX_SOURCE_DIRECTORY(cetty/gearman/protobuf/builder GEARMAN_PROTOBUF_BUILDER_DIR)
-SET(libgearmansources ${GEARMAN_DIR} ${GEARMAN_BUILDER_DIR} ${GEARMAN_PROTOBUF_DIR}
+
+SET(gearman_sources ${GEARMAN_DIR} ${GEARMAN_BUILDER_DIR} ${GEARMAN_PROTOBUF_DIR}
 ${GEARMAN_PROTOBUF_BUILDER_DIR})
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-cxx_static_library(cettygearman "${cxx_default}" ${libgearmansources})
+
+cxx_static_library(cettygearman ${gearman_sources})

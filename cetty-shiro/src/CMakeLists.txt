@@ -10,6 +10,6 @@ AUX_SOURCE_DIRECTORY(cetty/shiro/realm SHIRO_REALM_DIR)
 AUX_SOURCE_DIRECTORY(cetty/shiro/session SHIRO_SESSION_DIR)
 AUX_SOURCE_DIRECTORY(cetty/shiro/util SHIRO_UTIL_DIR)
 
-SET(libshirosources ${SHIRO_DIR} ${SHIRO_AUTHC_DIR} ${SHIRO_AUTHZ_DIR} ${SHIRO_REALM_DIR} ${SHIRO_SESSION_DIR} ${SHIRO_UTIL_DIR})
+SET(shiro_sources ${SHIRO_DIR} ${SHIRO_AUTHC_DIR} ${SHIRO_AUTHZ_DIR} ${SHIRO_REALM_DIR} ${SHIRO_SESSION_DIR} ${SHIRO_UTIL_DIR})
 
-cxx_static_library(cettyshiro "${cxx_default}" ${libshirosources})
+cxx_static_library(cettyshiro ${shiro_sources})

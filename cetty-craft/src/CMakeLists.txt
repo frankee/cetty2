@@ -10,11 +10,11 @@ AUX_SOURCE_DIRECTORY(cetty/craft/http CRAFT_HTTP_DIR)
 AUX_SOURCE_DIRECTORY(cetty/craft/startup CRAFT_STARTUP_DIR)
 AUX_SOURCE_DIRECTORY(cetty/craft/access CRAFT_ACCESS_DIR)
 
-SET(libcraftsources ${CRAFT_DIR} ${CRAFT_BUILDER_DIR} ${CRAFT_HTTP_DIR})
+SET(craftsources ${CRAFT_DIR} ${CRAFT_BUILDER_DIR} ${CRAFT_HTTP_DIR})
 
-PROTOBUF_GENERATE_RPC(PROTO_SRCS cetty/craft/craft.proto cetty/craft/access/AccessControl.proto)
+protobuf_generate_rpc(PROTO_SRCS cetty/craft/craft.proto cetty/craft/access/AccessControl.proto)
 
-cxx_static_library(craft "${cxx_default}" ${libcraftsources})
+cxx_static_library(craft ${craftsources})
 
 SET(CRAFT_APP_DEPENDENCIES craft protobufservice protobufserialization cettyservice cettyconfig
 cetty protobuf yaml-cpp)

@@ -15,12 +15,16 @@ AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/png PNG_DIR)
 SET(GENERATOR_DIR cetty/protobuf/service/generator)
 
 cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR})
-target_link_libraries(ProtobufServiceGenerator protoc protobuf ${Boost_LIBRARIES})
+cxx_link_with_pb(ProtobufServiceGenerator protoc)
 
-PROTOBUF_GENERATE_RPC(PROTO_SRCS cetty/protobuf/service/service.proto)
+protobuf_generate_rpc(PROTO_SRCS cetty/protobuf/service/service.proto)
 
-SET(libpbservicesources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR})
-SET(libpbserializationsources ${SERIALIZATION_DIR} ${JSON_DIR} ${XML_DIR} ${PNG_DIR})
+SET(pbservicesources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR})
+SET(pbserializationsources ${SERIALIZATION_DIR} ${JSON_DIR} ${XML_DIR} ${PNG_DIR})
 
-cxx_static_library(protobufservice "${cxx_default}" ${libpbservicesources})
-cxx_static_library(protobufserialization "${cxx_default}" ${libpbserializationsources})
+cxx_static_library(protobufservice ${pbservicesources})
+cxx_static_library(protobufserialization ${pbserializationsources})
+
+install(TARGETS protobufservice DESTINATION lib)
+install(TARGETS protobufserialization DESTINATION lib)
+install(TARGETS ProtobufServiceGenerator DESTINATION bin)

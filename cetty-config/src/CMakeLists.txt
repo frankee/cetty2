@@ -4,7 +4,6 @@
 
 AUX_SOURCE_DIRECTORY(cetty/config CONFIG_DIR)
 
-SET(libsources ${CONFIG_DIR})
+SET(configure_sources ${CONFIG_DIR})
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-cxx_static_library(cettyconfig "${cxx_default}" ${libsources})
+cxx_static_library(cettyconfig ${configure_sources})
