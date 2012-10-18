@@ -24,8 +24,8 @@ namespace authc {
 
 using namespace cetty::shiro::realm;
 
-const std::string HASHEDCREDENTIALSMATCHER = "hashed_credentials_matcher";
-const std::string SIMPLECREDENTIALSMATCHER = "simple_credentials_matcher";
+const std::string Authenticator::HASHEDCREDENTIALSMATCHER = "hashed_credentials_matcher";
+const std::string Authenticator::SIMPLECREDENTIALSMATCHER = "simple_credentials_matcher";
 
 Authenticator::Authenticator(): credentialsMatcher(NULL) {
     ConfigCenter::instance().configure(&config);

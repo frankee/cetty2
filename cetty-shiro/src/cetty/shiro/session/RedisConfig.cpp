@@ -23,7 +23,8 @@ CETTY_CONFIG_ADD_DESCRIPTOR(RedisConfig,
 
 
 RedisConfig::RedisConfig()
-    :ip("127.0.0.1"),
+    :ConfigObject("RedisConfig"),
+     ip("127.0.0.1"),
      port(6379){}
 
 }

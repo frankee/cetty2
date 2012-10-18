@@ -29,7 +29,7 @@ const std::string WSSE::USER_TOKEN_QUERY =
     "FROM user_token "
     "WHERE username = ? AND created = ? AND is_used = 0";
 
-const std::string USER_TOKEN_UPDATE =
+const std::string WSSE::USER_TOKEN_UPDATE =
     "UPDATE user_token "
     "SET is_used = 1 "
     "WHERE username = ? AND created = ?";
