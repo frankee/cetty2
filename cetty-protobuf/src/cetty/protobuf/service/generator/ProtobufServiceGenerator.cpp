@@ -527,7 +527,7 @@ void changeGeneratedFiles(int argc, char* argv[], bool moveSource) {
     findCmdParam(argc, argv, "--cpp_out=", &path);
 
     if (moveSource) {
-        findCmdParam(argc, argv, "--src=", &sourcePath);
+        findCmdParam(argc, argv, "--src_out=", &sourcePath);
     }
 
     if (path[path.size() - 1] == '\\' || path[path.size() - 1] == '/') {
@@ -559,6 +559,20 @@ void changeGeneratedFiles(int argc, char* argv[], bool moveSource) {
         if (moveSource) {
             std::string hfile(files[i]);
             hfile.replace(hfile.end() - 6, hfile.end(), ".pb.cc");
+
+            std::string::size_type pos = hfile.find_last_of('/');
+            if (pos == hfile.npos) {
+                pos = hfile.find_last_of('\\');
+            }
+            if (pos != hfile.npos) {
+                std::string hfilePath = hfile.substr(pos);
+                hfilePath = sourcePath + hfilePath;
+                boost::filesystem::path p(hfilePath);
+                if (!boost::filesystem::exists(p)) {
+                    boost::filesystem::create_directory(p);
+                }
+            }
+
             hfile = sourcePath + hfile;
             boost::filesystem::rename(boost::filesystem::path(source),
                 boost::filesystem::path(hfile));
@@ -590,15 +604,15 @@ int main(int argc, char* argv[]) {
 
     if (findCmd(argc, argv, "-h", "--help")) {
         cli.Run(argc, argv);
-        printf("  --src=SOURCE_DIR            move the *.pb.cc to SOURCE_DIR\n");
+        printf("  --src_out=SOURCE_DIR            move the *.pb.cc to SOURCE_DIR\n");
         return 0;
     }
 
-    if (findCmd(argc, argv, NULL, "--src")) {
+    if (findCmd(argc, argv, NULL, "--src_out")) {
         int newArgc = argc - 1;
         const char* newArgv[128];
         for (int i = 0, j = 0; i < argc; ++i) {
-            if (strstr(argv[i], "--src")) {
+            if (strstr(argv[i], "--src_out")) {
                 continue;
             }
 
