@@ -23,6 +23,8 @@ const int MILLIS_PER_SECOND = 1000;
 const int MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
 const int MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
 static const std::string EMPTY_STR;
+const std::string Session::SESSION_SELF = "$self";
+const std::string Session::NULL_TIME = "null";
 
 Session::Session()
     : expired(false),
@@ -122,7 +124,7 @@ void Session::setAttribute(const std::string& key, const std::string& value) {
     }
 
     if (value.empty()) {
-        DLOG_DEBUG << "without value, will remove the attribute";
+        LOG_WARN << "without value, will remove the attribute";
         removeAttribute(key);
     }
 
@@ -217,7 +219,7 @@ void Session::setLogin(bool login) {
 
 void Session::toJson(std::string* json) const {
     std::stringstream ss;
-    ss << "{$session_self:[";
+    ss << "{" << SESSION_SELF << ": [";
 
     ss << (expired ? "true" : "false")
        << "," << (login ? "true" : "false")
@@ -229,17 +231,36 @@ void Session::toJson(std::string* json) const {
 
     ss << "," << timeout
        << "," << id
-       << "," << host
-       << "," << to_simple_string(startTime)
-       << "," << to_simple_string(stopTime)
-       << "," << to_simple_string(lastAccessTime);
+       << "," << host;
 
+    ss << ",";
+    if(!startTime.is_not_a_date_time()){
+        ss << to_simple_string(startTime);
+    } else {
+        LOG_ERROR << "Session start time[" << to_simple_string(startTime) << "]is invalid";
+        ss << NULL_TIME;
+    }
+
+    ss << ",";
+    if(!stopTime.is_not_a_date_time()){
+        ss << to_simple_string(stopTime);
+    } else {
+        ss << NULL_TIME;
+    }
+
+    ss << ",";
+    if(!lastAccessTime.is_not_a_date_time()){
+        ss << to_simple_string(lastAccessTime);
+    } else {
+        LOG_ERROR << "Session last access time[" << to_simple_string(lastAccessTime) << "]is invalid";
+        ss << NULL_TIME;
+    }
     ss << "]";
     std::map<std::string, std::string>::const_iterator it;
     for(it = attributes.begin(); it != attributes.end(); ++ it){
         std::string key = it->first;
         std::string value = it->second;
-        ss << "," << key << ":" << value;
+        ss << "," << key << ": " << value;
     }
     ss << "}";
 
@@ -251,8 +272,8 @@ void Session::fromJson(const char* json) {
     YAML::Node node = YAML::Load(json);
     YAML::const_iterator it = node.begin();
     for(; it != node.end(); ++it){
-        if("$session_self" == it->first.as<std::string>()){
-            YAML::Node temp = node["$session_self"];
+        if(SESSION_SELF == it->first.as<std::string>()){
+            YAML::Node temp = node[SESSION_SELF];
             assert(temp.IsSequence());
             expired = temp[0].as<bool>();
             login = temp[1].as<bool>();
@@ -260,9 +281,13 @@ void Session::fromJson(const char* json) {
             timeout = temp[3].as<int>();
             id = temp[4].as<std::string>();
             host = temp[5].as<std::string>();
-            startTime = time_from_string(temp[6].as<std::string>());
-            stopTime = time_from_string(temp[7].as<std::string>());
-            lastAccessTime = time_from_string(temp[8].as<std::string>());
+
+            if(NULL_TIME != temp[6].as<std::string>())
+                startTime = time_from_string(temp[6].as<std::string>());
+            if(NULL_TIME != temp[7].as<std::string>())
+                stopTime = time_from_string(temp[7].as<std::string>());
+            if(NULL_TIME != temp[8].as<std::string>())
+                lastAccessTime = time_from_string(temp[8].as<std::string>());
         }else{
             attributes.insert(std::pair<std::string, std::string>(
                 it->first.as<std::string>(),

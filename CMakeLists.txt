@@ -128,7 +128,6 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   set(CXX_FLAGS
     -g
     # -DVALGRIND
-    # -DMUDUO_STD_STRING
     -D_FILE_OFFSET_BITS=64
     -Wall
     #-Wextra
@@ -267,28 +266,15 @@ function(protobuf_generate_rpc srcs)
     list(APPEND ${srcs} "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc")
 
     add_custom_command(
-      OUTPUT "${FIL_WE}.pb.cc" "${FIL_WE}.pb.h"
+      OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc" "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.h"
       COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
       ARGS ./${FIL} --cpp_out=. -I. -I${CMAKE_CURRENT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR} -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      MAIN_DEPENDENCY ${FIL}
       VERBATIM )
   endforeach()
   set(${srcs} ${${srcs}} PARENT_SCOPE)
 endfunction()
-
-#function(protobuf_generate_rpc srcs)
-#  protobuf_generate_rpc_dir($CMAKE_CURRENT_SOURCE_DIR ${srcs} ${ARGN})
-#endfunction()
-
-#function(protobuf_generate_i srcs)
-#  protobuf_generate_rpc_dir($PROJECT_INCLUDE_DIR ${srcs} ${ARGN})
-#endfunction()
-
-
-#if (BUILD_EXAMPLES)
-#	MESSAGE(STATUS "BUILDING SAMPLES...")
-#	ADD_SUBDIRECTORY(example)
-#endif()
 
 ADD_SUBDIRECTORY(cetty-core)
 ADD_SUBDIRECTORY(cetty-config)
@@ -299,11 +285,3 @@ ADD_SUBDIRECTORY(cetty-redis)
 ADD_SUBDIRECTORY(cetty-shiro)
 ADD_SUBDIRECTORY(cetty-craft)
 
-#cetty cettyconfig cettyservice ProtobufServiceGenerator protobufserialization protobufservice cettygearman cettyredis cettyshiro craft
-
-#INSTALL(TARGETS cetty
-#  RUNTIME DESTINATION bin
-#  LIBRARY DESTINATION lib
-#  ARCHIVE DESTINATION lib)
-
-#INSTALL(DIRECTORY include/cetty DESTINATION cetty)

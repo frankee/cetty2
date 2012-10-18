@@ -279,6 +279,15 @@ public:
      */
     void removeAttribute(const std::string& key);
 
+    void setStopCallback(StopCallback callback) {
+        this->stopCallback = callback;
+    }
+    void setUpdateCallback(UpdateCallback callback){
+        this->updateCallback = callback;
+    }
+    void setExpireCallback(ExpireCallback callback){
+        this->expireCallback = callback;
+    }
 
     SessionState validate();
 
@@ -298,6 +307,9 @@ private:
     void doExpire();
 
 private:
+    const static std::string SESSION_SELF;
+    const static std::string NULL_TIME;
+
     bool expired;
     bool login;
     bool rememberMe;

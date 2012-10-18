@@ -3,6 +3,8 @@
 #include <cetty/shiro/session/Session.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/redis/builder/RedisClientBuilder.h>
+#include <cetty/shiro/util/SecurityUtils.h>
+
 #include <boost/ref.hpp>
 
 namespace cetty {
@@ -10,6 +12,7 @@ namespace shiro {
 namespace session {
 
 using namespace cetty::redis::builder;
+using namespace cetty::shiro::util;
 
 static const std::string KEY_PREFIX = "sess:";
 
@@ -62,7 +65,7 @@ void RedisSessionDAO::create(const SessionPtr& session,
         callback(0, session);
     }
     else {
-        callback(1, SessionPtr());
+        callback(-1, SessionPtr());
     }
 }
 
@@ -102,7 +105,15 @@ void RedisSessionDAO::getSessionCallback(int result,
         const StringPiece& data,
         const SessionCallback& callback) {
     if (result == 0) {
-        SessionPtr session = new Session;
+        SessionPtr session = new Session();
+
+        session->setStopCallback(boost::bind(&SessionManager::stop,
+            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
+        session->setUpdateCallback(boost::bind(&SessionManager::onChange,
+            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
+        session->setExpireCallback(boost::bind(&SessionManager::expire,
+            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
+
         session->fromJson(data.c_str());
         callback(0, session);
     }

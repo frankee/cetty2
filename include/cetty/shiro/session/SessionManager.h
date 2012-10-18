@@ -158,12 +158,15 @@ public:
     void setSessionDAO(SessionDAO* sessionDAO);
     SessionDAO* getSessionDAO();
 
+    void stop(const SessionPtr& session);
+    void expire(const SessionPtr& session);
+    virtual void onChange(const SessionPtr& session);
+
 protected:
     virtual void beforeSessionValidationDisabled() { /*NOOP*/ }
     virtual void afterSessionValidationEnabled() { /*NOOP*/ }
 
     virtual void onStart(const SessionPtr& session) { /*NOOP*/ }
-    virtual void onChange(const SessionPtr& session);
     virtual void onStop(const SessionPtr& session);
     virtual void onExpiration(const SessionPtr& session);
 
@@ -177,8 +180,7 @@ private:
 
     void applyGlobalSessionTimeout(const SessionPtr& session);
 
-    void stop(const SessionPtr& session);
-    void expire(const SessionPtr& session);
+
 
     void notifyStart(const SessionPtr& session);
     void notifyStop(const SessionPtr& session);
