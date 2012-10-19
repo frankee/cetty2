@@ -33,10 +33,24 @@ Authenticator::Authenticator(): credentialsMatcher(NULL) {
 }
 
 void Authenticator::init(){
+    if(config.credentialsMatcher.empty()){
+        LOG_TRACE << "Credentials matcher is not configured, use"
+                  << " default hash credentials matcher";
+        credentialsMatcher = new HashedCredentialsMatcher();
+        return;
+    }
+
     if(config.credentialsMatcher == HASHEDCREDENTIALSMATCHER){
+        LOG_TRACE << "Use hash credentials matcher";
         credentialsMatcher = new HashedCredentialsMatcher();
     } else if (config.credentialsMatcher == SIMPLECREDENTIALSMATCHER){
+        LOG_TRACE << "Use simple credentials matcher";
         credentialsMatcher = new SimpleCredentialsMatcher();
+    } else {
+        LOG_TRACE << "No credentials matcher is found for ["
+                  << config.credentialsMatcher << "],use "
+                     "default hash credentials matcher";
+        credentialsMatcher = new HashedCredentialsMatcher();
     }
 }
 

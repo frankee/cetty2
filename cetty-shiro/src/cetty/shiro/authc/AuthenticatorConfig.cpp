@@ -22,8 +22,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(AuthenticatorConfig,
                             new AuthenticatorConfig);
 
 AuthenticatorConfig::AuthenticatorConfig()
-    : ConfigObject("AuthenticatorConfig"),
-      credentialsMatcher(Authenticator::HASHEDCREDENTIALSMATCHER){
+    : ConfigObject("AuthenticatorConfig"){
 
 }
 

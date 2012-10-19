@@ -42,6 +42,8 @@ void HashedCredentialsMatcher::init(){
         digestEngine = new MD5Engine();
    } else if(config.hashAlgorithm == SHA1ENGINE){
        digestEngine = new SHA1Engine();
+   } else {
+       digestEngine = new SHA1Engine();
    }
 }
 

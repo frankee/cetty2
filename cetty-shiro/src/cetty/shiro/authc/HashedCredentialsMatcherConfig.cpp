@@ -27,8 +27,7 @@ HashedCredentialsMatcherConfig::HashedCredentialsMatcherConfig()
     : ConfigObject("HashedCredentialsMatcherConfig"),
       hashSalted(true),
       storedCredentialsHexEncoded(true),
-      hashIterations(1),
-      hashAlgorithm(HashedCredentialsMatcher::SHA1ENGINE){};
+      hashIterations(1){};
 
 }
 }

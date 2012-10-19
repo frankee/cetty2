@@ -36,7 +36,8 @@ SecurityManager::SecurityManager() {
 void SecurityManager::init() {
     std::string realm = config.realm;
 
-    if (realm == SqlRealm::NAME) {
+    if (realm.empty() || realm == SqlRealm::NAME) {
+        LOG_TRACE << "Use sql realm";
         realms = new SqlRealm();
     }
     else {

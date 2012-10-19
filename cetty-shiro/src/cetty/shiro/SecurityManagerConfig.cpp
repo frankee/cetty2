@@ -16,15 +16,14 @@ namespace shiro {
 using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(SecurityManagerConfig,
-                            new ConfigDescriptor(
-                                1,
+                            (new ConfigDescriptor(
+                                1, // param count
                                 CETTY_CONFIG_FIELD(SecurityManagerConfig, realm, STRING)
-                            ),
+                            )),
                             new SecurityManagerConfig);
 
 SecurityManagerConfig::SecurityManagerConfig()
-    : ConfigObject("SecurityManagerConfig"),
-      realm(cetty::shiro::realm::SqlRealm::NAME) {}
+   : ConfigObject("SecurityManagerConfig"){}
 
 }
 }
