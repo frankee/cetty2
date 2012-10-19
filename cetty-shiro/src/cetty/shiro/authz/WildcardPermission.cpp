@@ -63,7 +63,7 @@ void WildcardPermission::setParts(std::string& wildcardString, bool caseSensitiv
     parts.push_back(wildcardString.substr(pre, wildcardString.size() - pre));
 }
 
-std::string WildcardPermission::toString() const {
+std::string WildcardPermission::toString() const{
     std::string permission;
     bool flag = false;
 

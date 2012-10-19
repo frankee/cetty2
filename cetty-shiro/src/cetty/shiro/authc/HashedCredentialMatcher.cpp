@@ -24,8 +24,8 @@ namespace authc {
 
 using namespace cetty::shiro::crypt;
 
-const std::string MD5ENGINE = "md5_engine";
-const std::string SHA1ENGINE = "sha1_engine";
+const std::string HashedCredentialsMatcher::MD5ENGINE = "md5_engine";
+const std::string HashedCredentialsMatcher::SHA1ENGINE = "sha1_engine";
 
 HashedCredentialsMatcher::HashedCredentialsMatcher()
     : digestEngine(NULL){
