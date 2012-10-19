@@ -16,9 +16,25 @@ AUX_SOURCE_DIRECTORY(cetty/util/internal UTIL_INTERNAL_DIR)
 AUX_SOURCE_DIRECTORY(cetty/util/internal/asio UTIL_INTERNAL_ASIO_DIR)
 
 
-SET(cetty_sources ${BOOTSTRAP_DIR} ${BUFFER_DIR} ${CHANNEL_ASIO_DIR} ${CHANNEL_DIR} ${HANDLER_CODEC_DIR} ${HANDLER_HTTP_DIR} 
-${HANDLER_ONEONE_DIR} ${HANDLER_REPLAY_DIR} ${STRING_DIR} ${LOGGING_DIR} ${UTIL_INTERNAL_ASIO_DIR} ${UTIL_INTERNAL_DIR} ${UTIL_DIR})
+SET(cetty_sources ${BOOTSTRAP_DIR} ${BUFFER_DIR} ${CHANNEL_ASIO_DIR}
+  ${CHANNEL_DIR} ${HANDLER_CODEC_DIR} ${HANDLER_HTTP_DIR}
+  ${HANDLER_ONEONE_DIR} ${HANDLER_REPLAY_DIR} ${STRING_DIR}
+  ${LOGGING_DIR} ${UTIL_INTERNAL_ASIO_DIR} ${UTIL_INTERNAL_DIR} ${UTIL_DIR})
+SET(cetty_lib cetty)
 
-cxx_static_library(cetty ${cetty_sources})
+cxx_static_library(${cetty_lib} ${cetty_sources})
 
-install(TARGETS cetty DESTINATION lib)
+install(TARGETS ${cetty_lib} DESTINATION lib)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/bootstrap/ DESTINATION include/cetty/bootstrap)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/buffer/ DESTINATION include/cetty/buffer)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/channel/ DESTINATION include/cetty/channel)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/handler/ DESTINATION include/cetty/handler)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/logging/ DESTINATION include/cetty/logging)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/util/ DESTINATION include/cetty/util)
+install(FILES
+   ${PROJECT_INCLUDE_DIR}/cetty/Common.h
+   ${PROJECT_INCLUDE_DIR}/cetty/Platform.h
+   ${PROJECT_INCLUDE_DIR}/cetty/PlatformWin32.h
+   ${PROJECT_INCLUDE_DIR}/cetty/Types.h
+   ${PROJECT_INCLUDE_DIR}/cetty/Version.h
+   DESTINATION include/cetty)

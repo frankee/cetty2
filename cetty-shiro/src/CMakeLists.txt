@@ -11,6 +11,11 @@ AUX_SOURCE_DIRECTORY(cetty/shiro/session SHIRO_SESSION_DIR)
 AUX_SOURCE_DIRECTORY(cetty/shiro/util SHIRO_UTIL_DIR)
 AUX_SOURCE_DIRECTORY(cetty/shiro/crypt SHIRO_CRYPT_DIR)
 
-SET(shiro_sources ${SHIRO_DIR} ${SHIRO_AUTHC_DIR} ${SHIRO_AUTHZ_DIR} ${SHIRO_REALM_DIR} ${SHIRO_SESSION_DIR} ${SHIRO_UTIL_DIR} ${SHIRO_CRYPT_DIR})
+SET(shiro_sources ${SHIRO_DIR} ${SHIRO_AUTHC_DIR} ${SHIRO_AUTHZ_DIR}
+	${SHIRO_REALM_DIR} ${SHIRO_SESSION_DIR} ${SHIRO_UTIL_DIR} ${SHIRO_CRYPT_DIR})
+SET(shiro_lib cetty-shiro)
 
-cxx_static_library(cettyshiro ${shiro_sources})
+cxx_static_library(${shiro_lib} ${shiro_sources})
+
+install(TARGETS ${shiro_lib} DESTINATION lib)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/shiro/ DESTINATION include/cetty/shiro)

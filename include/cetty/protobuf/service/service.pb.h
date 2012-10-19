@@ -662,3 +662,4 @@ inline const EnumDescriptor* GetEnumDescriptor< cetty::protobuf::service::ErrorC
 // Local Variables:
 // mode: c++
 // End:
+

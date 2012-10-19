@@ -88,14 +88,14 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   set(cxx_exception_flags "-fexceptions")
   set(cxx_no_exception_flags "-fno-exceptions")
   # Until version 4.3.2, GCC doesn't define a macro to indicate
-  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+  # whether RTTI is enabled.  Therefore we define CETTY _HAS_RTTI
   # explicitly.
   set(cxx_no_rtti_flags "-fno-rtti -DCETTY_HAS_RTTI=0")
   set(cxx_strict_flags "-Wextra")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
   set(cxx_exception_flags "-features=except")
   # Sun Pro doesn't provide macros to indicate whether exceptions and
-  # RTTI are enabled, so we define GTEST_HAS_* explicitly.
+  # RTTI are enabled, so we define CETTY_HAS_* explicitly.
   set(cxx_no_exception_flags "-features=no%except -DCETTY_HAS_EXCEPTIONS=0")
   set(cxx_no_rtti_flags "-features=no%rtti -DCETTY_HAS_RTTI=0")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
@@ -104,7 +104,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
   set(cxx_exception_flags "-qeh")
   set(cxx_no_exception_flags "-qnoeh")
   # Until version 9.0, Visual Age doesn't define a macro to indicate
-  # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+  # whether RTTI is enabled.  Therefore we define CETTY_HAS_RTTI
   # explicitly.
   set(cxx_no_rtti_flags "-qnortti -DCETTY_HAS_RTTI=0")
 endif()
@@ -254,34 +254,80 @@ function(cxx_link_with_pb name)
   endif()
 endfunction()
 
-function(protobuf_generate_rpc srcs)
+function(PROTOBUF_GENERATE_SERVICE SRCS)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: protobuf_generate_rpc() called without any proto files")
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE() called without any proto files")
     return()
   endif(NOT ARGN)
 
-  set(${srcs})
+  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+  set(${SRCS})
   foreach(FIL ${ARGN})
     get_filename_component(FIL_WE ${FIL} NAME_WE)
-    list(APPEND ${srcs} "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc")
+    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
 
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc" "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.h"
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
       COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-      ARGS ./${FIL} --cpp_out=. -I. -I${CMAKE_CURRENT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR} -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+      ARGS ./${FIL} --cpp_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       MAIN_DEPENDENCY ${FIL}
       VERBATIM )
   endforeach()
-  set(${srcs} ${${srcs}} PARENT_SCOPE)
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
 endfunction()
 
+function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
+  if(NOT ARGN)
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE_SEPARATE() called without any proto files")
+    return()
+  endif(NOT ARGN)
+
+  set(${SRCS})
+  set(${HDRS})
+  foreach(FIL ${ARGN})
+    get_filename_component(FIL_PATH ${FIL} PATH)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(ABS_FILE ${FIL} ABSOLUTE)
+
+    set(OUT_HEADER "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.h")
+    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
+
+    list(APPEND ${HDRS} ${OUT_HEADER})
+    list(APPEND ${SRCS} ${OUT_SOURCE})
+
+    add_custom_command(
+      OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
+      COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
+      ARGS ${FIL} --cpp_out=. --src_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROTOBUF_INCLUDE_DIR}
+      WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
+      MAIN_DEPENDENCY ${ABS_FIL}
+      VERBATIM)
+  endforeach()
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+endfunction()
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "debug")
+  message(STATUS "you do not set the CMAKE_BUILD_TYPE, using debug type.")
+endif()
+
 ADD_SUBDIRECTORY(cetty-core)
-ADD_SUBDIRECTORY(cetty-config)
+
+if (YAMLCPP_INCLUDE_DIRS)
+  ADD_SUBDIRECTORY(cetty-config)  #auto generator depends on protobuf
+  SET(HAS_CETTY_CONFIG 1)
+else ()
+  message(STATUS "has not found yaml-cpp, skip cetty-config module")
+endif()
+
 ADD_SUBDIRECTORY(cetty-service)
-ADD_SUBDIRECTORY(cetty-protobuf)
-ADD_SUBDIRECTORY(cetty-gearman)
 ADD_SUBDIRECTORY(cetty-redis)
 ADD_SUBDIRECTORY(cetty-shiro)
-ADD_SUBDIRECTORY(cetty-craft)
 
+ADD_SUBDIRECTORY(cetty-protobuf)
+ADD_SUBDIRECTORY(cetty-gearman)
+
+ADD_SUBDIRECTORY(cetty-craft)

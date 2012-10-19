@@ -3,24 +3,22 @@
 # cetty can be compiled by a user aggressive about warnings.
 
 AUX_SOURCE_DIRECTORY(cetty/craft CRAFT_DIR)
-
 AUX_SOURCE_DIRECTORY(cetty/craft/builder CRAFT_BUILDER_DIR)
 AUX_SOURCE_DIRECTORY(cetty/craft/http CRAFT_HTTP_DIR)
 
-AUX_SOURCE_DIRECTORY(cetty/craft/startup CRAFT_STARTUP_DIR)
 AUX_SOURCE_DIRECTORY(cetty/craft/access CRAFT_ACCESS_DIR)
 
-SET(craftsources ${CRAFT_DIR} ${CRAFT_BUILDER_DIR} ${CRAFT_HTTP_DIR})
+SET(craft_sources ${CRAFT_DIR} ${CRAFT_BUILDER_DIR} ${CRAFT_HTTP_DIR})
+SET(craft_lib cetty-craft)
 
-protobuf_generate_rpc(PROTO_SRCS cetty/craft/craft.proto cetty/craft/access/AccessControl.proto)
+protobuf_generate_service_separate(PROTO_SRCS PROTO_HDRS cetty/craft/craft.proto)
+message(STATUS "generate source files ${PROTO_SRCS}")
+message(STATUS "generate header files ${PROTO_HDRS}")
 
-cxx_static_library(craft ${craftsources})
+protobuf_generate_service_separate(PROTO_ACCESS_SRCS PROTO_ACCESS_HDRS cetty/craft/access/AccessControl.proto)
+message(STATUS "generate source files ${PROTO_ACCESS_SRCS}")
 
-SET(CRAFT_APP_DEPENDENCIES craft protobufservice protobufserialization cettyservice cettyconfig
-cetty protobuf yaml-cpp)
+cxx_static_library(${craft_lib} ${craft_sources} ${PROTO_SRCS})
 
-#cxx_executable_no_link(startup ${CRAFT_STARTUP_DIR})
-#target_link_libraries(startup ${CRAFT_APP_DEPENDENCIES})
-
-#cxx_executable_no_link(AccessControlServer ${CRAFT_ACCESS_DIR})
-#target_link_libraries(AccessControlServer ${CRAFT_APP_DEPENDENCIES})
+install(TARGETS ${craft_lib} DESTINATION lib)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/craft/ DESTINATION include/cetty/craft)

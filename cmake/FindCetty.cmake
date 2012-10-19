@@ -4,9 +4,12 @@
 set(CETTY_HEADER_FILES cetty/bootstrap/Bootstrap.h)
 
 FIND_PATH(CETTY_INCLUDE_DIR ${CETTY_HEADER_FILES}
-	/mnt/hgfs/alp_new/cetty/include/
-	/mnt/hgfs/alp/Cetty/include
-	/mnt/hgfs/alp-2/Cetty/include
+	/usr/include
+        /usr/local/include
+        /opt/include
+        /opt/cetty/include
+	/mnt/s/tt
+	/mnt/hgfs/alp-2/
 	/usr/local/include
     /usr/include
   )

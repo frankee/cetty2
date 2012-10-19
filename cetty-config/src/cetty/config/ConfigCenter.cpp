@@ -72,7 +72,24 @@ bool ConfigCenter::load(int argc, char* argv[]) {
     const variable_value& option = vm["conf"];
 
     if (option.empty()) {
-        return false;
+        std::string program = argv[0];
+        std::string::size_type slashPos = program.find_last_of('/');
+        if (slashPos == program.npos) {
+            slashPos = program.find_last_of('\\');
+        }
+
+        std::string::size_type dotPos = program.find_last_of('.');
+        if (dotPos != program.npos) {
+            // dot is not in the path, make sure dot is file name suffix.
+            if (!(slashPos != program.npos && dotPos < slashPos)) {
+                program = program.substr(0, dotPos);
+            }
+        }
+
+        program += ".conf";
+        LOG_INFO << "no command line parameter, using default " << program;
+
+        return loadFromFile(program);
     }
 
     return loadFromFile(option.as<std::string>());
