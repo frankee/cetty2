@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_SUBDIRECTORY(src)
 
-SET(CRAFT_PROJECT_DEPENDENCIES craft protobufserialization protobufservice cettyservice cettyconfig cetty yaml-cpp)
+SET(CRAFT_PROJECT_DEPENDENCIES cetty-craft cetty-protobuf-serialization cetty-protobuf cetty-service cetty-config cetty yaml-cpp)
 
 ########################################################################
 #
@@ -20,3 +20,4 @@ SET(CRAFT_PROJECT_DEPENDENCIES craft protobufserialization protobufservice cetty
 	MESSAGE(STATUS "BUILDING CRAFT SAMPLES...")
 	ADD_SUBDIRECTORY(example)
 #endif()
+

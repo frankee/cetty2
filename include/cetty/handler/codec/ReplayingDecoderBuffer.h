@@ -116,7 +116,7 @@ public:
     virtual void discardReadBytes();
     virtual void ensureWritableBytes(int writableBytes);
     virtual int ensureWritableBytes(int minWritableBytes, bool force) {
-        ChannelBuffer::ensureWritableBytes(minWritableBytes, force);
+        return ChannelBuffer::ensureWritableBytes(minWritableBytes, force);
     }
 
     virtual int8_t   getByte(int index) const;

@@ -565,12 +565,21 @@ void changeGeneratedFiles(int argc, char* argv[], bool moveSource) {
                 pos = hfile.find_last_of('\\');
             }
             if (pos != hfile.npos) {
-                std::string hfilePath = hfile.substr(pos);
+                std::string hfilePath = hfile.substr(0, pos+1);
                 hfilePath = sourcePath + hfilePath;
+
                 boost::filesystem::path p(hfilePath);
-                if (!boost::filesystem::exists(p)) {
-                    boost::filesystem::create_directory(p);
+                while(!boost::filesystem::exists(p)) {
+                    boost::filesystem::path parent = p;
+                    while(!boost::filesystem::exists(parent.parent_path())) {
+                        parent = parent.parent_path();
+                    }
+                    printf("path(%s) does not exist, create it\n", parent.c_str());
+                    boost::filesystem::create_directory(parent);
                 }
+            }
+            else {
+                printf("file(%s) does not contain any path\n", hfile.c_str());
             }
 
             hfile = sourcePath + hfile;

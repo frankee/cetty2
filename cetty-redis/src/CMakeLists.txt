@@ -7,5 +7,9 @@ AUX_SOURCE_DIRECTORY(cetty/redis/builder REDIS_BUILDER_DIR)
 AUX_SOURCE_DIRECTORY(cetty/redis/command REDIS_COMMAND_DIR)
 
 SET(redis_sources ${REDIS_DIR} ${REDIS_BUILDER_DIR} ${REDIS_COMMAND_DIR})
+SET(redis_lib cetty-redis)
 
-cxx_static_library(cettyredis ${redis_sources})
+cxx_static_library(${redis_lib} ${redis_sources})
+
+install(TARGETS ${redis_lib} DESTINATION lib)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/redis/ DESTINATION include/cetty/redis)
