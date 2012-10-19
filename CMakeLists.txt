@@ -260,6 +260,8 @@ function(PROTOBUF_GENERATE_SERVICE SRCS)
     return()
   endif(NOT ARGN)
 
+  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
   set(${SRCS})
   foreach(FIL ${ARGN})
     get_filename_component(FIL_WE ${FIL} NAME_WE)
