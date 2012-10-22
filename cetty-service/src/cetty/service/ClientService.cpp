@@ -50,15 +50,15 @@ bool ClientService::isActive() const {
 }
 
 void ClientService::doBind(const SocketAddress& localAddress) {
-
+    //TODO
 }
 
 void ClientService::doDisconnect() {
-
+    //TODO
 }
 
 void ClientService::doClose() {
-
+    //TODO
 }
 
 ClientService::ClientService(const EventLoopPtr& eventLoop,
@@ -66,10 +66,16 @@ ClientService::ClientService(const EventLoopPtr& eventLoop,
                              const ChannelPipelinePtr& pipeline)
     : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {
 
-    AbstractChannel::setPipeline(pipeline);
+    pipeline->attach(shared_from_this());
 
     LOG_INFO << "ClientService firing the Channel Create Event.";
     pipeline->fireChannelCreated();
+}
+
+void ClientService::setPipeline(const ChannelPipelinePtr& pipeline) {
+    if (pipeline) {
+        pipeline->attach(shared_from_this());
+    }
 }
 
 }

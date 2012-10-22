@@ -26,7 +26,9 @@ namespace socket {
 namespace asio {
 
 AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler(
-    const AsioSocketChannelPtr& channel) : channel(channel) {
+    const AsioSocketChannelPtr& channel)
+    : ChannelSinkHandler(boost::static_pointer_cast<AbstractChannel>(channel)),
+      channel(channel) {
 }
 
 void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,

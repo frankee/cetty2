@@ -48,6 +48,8 @@ public:
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
+    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
+
 protected:
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();

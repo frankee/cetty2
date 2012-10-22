@@ -22,12 +22,16 @@
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipelineException.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace channel {
 
 void ChannelSinkHandler::bind(ChannelHandlerContext& ctx,
-    const SocketAddress& localAddress,
-    const ChannelFuturePtr& future) {
+                              const SocketAddress& localAddress,
+                              const ChannelFuturePtr& future) {
+    ensureChannelSet(ctx);
+
     if (!ensureOpen(future)) {
         return;
     }
@@ -49,14 +53,16 @@ void ChannelSinkHandler::bind(ChannelHandlerContext& ctx,
 }
 
 void ChannelSinkHandler::connect(ChannelHandlerContext& ctx,
-    const SocketAddress& remoteAddress,
-    const SocketAddress& localAddress,
-    const ChannelFuturePtr& future) {
+                                 const SocketAddress& remoteAddress,
+                                 const SocketAddress& localAddress,
+                                 const ChannelFuturePtr& future) {
     throw ChannelException("has not implement this method.");
 }
 
 void ChannelSinkHandler::disconnect(ChannelHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
+                                    const ChannelFuturePtr& future) {
+    ensureChannelSet(ctx);
+
     try {
         bool wasActive = channel->isActive();
         channel->doDisconnect();
@@ -73,7 +79,8 @@ void ChannelSinkHandler::disconnect(ChannelHandlerContext& ctx,
 }
 
 void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
+                               const ChannelFuturePtr& future) {
+    ensureChannelSet(ctx);
     bool wasActive = channel->isActive();
 
     if (channel->setClosed()) {
@@ -103,18 +110,18 @@ void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
 }
 
 void ChannelSinkHandler::flush(ChannelHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
+                               const ChannelFuturePtr& future) {
     throw ChannelException("has not implement this method.");
 }
 
 void ChannelSinkHandler::exceptionCaught(ChannelHandlerContext& ctx,
-    const ChannelException& cause) {
-
+        const ChannelException& cause) {
+    LOG_WARN << "no handler process the outbound exception";
 }
 
 void ChannelSinkHandler::userEventTriggered(ChannelHandlerContext& ctx,
-    const UserEvent& evt) {
-
+        const UserEvent& evt) {
+    LOG_WARN << "no handler process the outbound user event";
 }
 
 cetty::channel::ChannelHandlerPtr ChannelSinkHandler::clone() {
@@ -142,6 +149,14 @@ void ChannelSinkHandler::closeIfClosed() {
     }
 
     //close(voidFuture());
+}
+
+void ChannelSinkHandler::ensureChannelSet(ChannelHandlerContext& ctx) {
+    if (!channel) {
+        channel = boost::dynamic_pointer_cast<AbstractChannel>(ctx.getChannel());
+    }
+
+    BOOST_ASSERT(channel);
 }
 
 }

@@ -26,10 +26,12 @@ class AbstractChannel;
 
 class ChannelSinkHandler : public ChannelOutboundBufferHandler {
 public:
-    ChannelSinkHandler(const boost::intrusive_ptr<AbstractChannel>& channel)
-        : channel(channel) {}
+    typedef boost::intrusive_ptr<AbstractChannel> AbstractChannelPtr;
 
+public:
     ChannelSinkHandler() : channel() {}
+    ChannelSinkHandler(AbstractChannelPtr& channel) : channel(channel) {}
+
     virtual ~ChannelSinkHandler() {}
 
     virtual void bind(ChannelHandlerContext& ctx,
@@ -65,7 +67,10 @@ protected:
     void closeIfClosed();
 
 private:
-    boost::intrusive_ptr<AbstractChannel> channel;
+    void ensureChannelSet(ChannelHandlerContext& ctx);
+
+private:
+    AbstractChannelPtr channel;
 };
 
 }
