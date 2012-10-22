@@ -41,20 +41,16 @@ private:
     SecurityUtils();
     SecurityUtils(SecurityUtils &);
     SecurityUtils &operator =(SecurityUtils &);
-
-private:
-    static SecurityManager securityManager;
-    static WSSE wsse;
 };
 
 inline
 SecurityManager *SecurityUtils::getSecurityManager(){
-    return &securityManager;
+    return &SecurityManager::instance();
 }
 
 inline
 WSSE *SecurityUtils::getWsse(){
-    return &wsse;
+    return &WSSE::instance();
 }
 
 }
