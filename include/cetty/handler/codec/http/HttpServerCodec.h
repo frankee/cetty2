@@ -21,6 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/channel/CombinedChannelBufferMessageHandler.h>
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 
@@ -43,36 +44,33 @@ namespace http {
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpResponseEncoder
  */
 
-class HttpServerCodec : public cetty::channel::ChannelUpstreamHandler,
-    public cetty::channel::ChannelDownstreamHandler {
+class HttpServerCodec
+        : public cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> {
 public:
     /**
      * Creates a new instance with the default decoder options
      * (<tt>maxInitialLineLength (4096}</tt>, <tt>maxHeaderSize (8192)</tt>, and
      * <tt>maxChunkSize (8192)</tt>).
      */
-    HttpServerCodec() : decoder(4096, 8192, 8192) {}
+    HttpServerCodec()
+        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
+            new HttpRequestDecoder(4096, 8192, 8192),
+            new HttpResponseEncoder) {
+    }
 
     /**
      * Creates a new instance with the specified decoder options.
      */
     HttpServerCodec(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-        : decoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
+        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
+            new HttpRequestDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize),
+            new HttpResponseEncoder) {
     }
 
-    void handleUpstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-        decoder.handleUpstream(ctx, e);
+    virtual std::string toString() const {
+        return "HttpServerCodec";
     }
-
-    void handleDownstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-        encoder.handleDownstream(ctx, e);
-    }
-
-private:
-    HttpRequestDecoder decoder;
-    HttpResponseEncoder encoder;
 };
-
 
 }
 }

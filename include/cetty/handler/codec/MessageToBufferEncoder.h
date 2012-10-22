@@ -45,6 +45,7 @@ using namespace cetty::channel;
 template<typename OutboundInT>
 class MessageToBufferEncoder
     : public ChannelOutboundMessageHandler<OutboundInT> {
+protected:
     using ChannelOutboundMessageHandler<OutboundInT>::outboundQueue;
 
 public:

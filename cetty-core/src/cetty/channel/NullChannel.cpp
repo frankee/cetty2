@@ -35,40 +35,10 @@ public:
     virtual ~NullChannelFactory() {}
 
     virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline) {
-        return NullChannel::getInstance();
+        return NullChannel::instance();
     }
 
     virtual void shutdown() {
-    }
-};
-
-class NullChannelSink : public ChannelSink {
-public:
-    NullChannelSink() {}
-    virtual ~NullChannelSink() {}
-
-    virtual void bind(const SocketAddress& localAddress,
-                      const ChannelFuturePtr& future) {
-        // NOOP
-    }
-
-    virtual void connect(const SocketAddress& remoteAddress,
-                         const SocketAddress& localAddress,
-                         const ChannelFuturePtr& future) {
-        // NOOP
-    }
-
-    virtual void disconnect(const ChannelFuturePtr& future) {
-        // NOOP
-    }
-
-    virtual void close(const ChannelFuturePtr& future) {
-        // NOOP
-    }
-
-    virtual void flush(const ChannelBufferPtr& buffer,
-                       const ChannelFuturePtr& future) {
-        // NOOP
     }
 };
 
@@ -78,15 +48,13 @@ static DefaultChannelConfig channelConfig;
 static ChannelPipelinePtr channelPipeline = new ChannelPipeline;
 static ChannelFactoryPtr nullChannelFactory = new NullChannelFactory;
 
-ChannelPtr NullChannel::nullChannel = new NullChannel;
 ChannelFuturePtr NullChannel::failedFuture;
+ChannelPtr NullChannel::nullChannel = new NullChannel;
 
 NullChannel::NullChannel() {
     if (!failedFuture) {
         failedFuture = new FailedChannelFuture(this, exception);
     }
-
-    sink = new NullChannelSink;
 }
 
 int NullChannel::getId() const {
@@ -125,7 +93,7 @@ std::string NullChannel::toString() const {
     return "NullChannle";
 }
 
-const ChannelPtr& NullChannel::getInstance() {
+const ChannelPtr& NullChannel::instance() {
     return nullChannel;
 }
 
@@ -143,10 +111,6 @@ int NullChannel::compareTo(const ChannelPtr& c) const {
     }
 
     return 1;
-}
-
-ChannelSink& NullChannel::getSink() {
-    return *sink;
 }
 
 const EventLoopPtr& NullChannel::getEventLoop() const {

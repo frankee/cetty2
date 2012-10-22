@@ -28,11 +28,14 @@ HttpRequestDecoder::HttpRequestDecoder(int maxInitialLineLength,
                                        int maxHeaderSize,
                                        int maxChunkSize)
     : HttpMessageDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
-
 }
 
-HttpRequestDecoder::~HttpRequestDecoder() {
+HttpRequestDecoder::HttpRequestDecoder()
+    : HttpMessageDecoder(4096, 8192, 8192) {
+}
 
+
+HttpRequestDecoder::~HttpRequestDecoder() {
 }
 
 ChannelHandlerPtr HttpRequestDecoder::clone() {

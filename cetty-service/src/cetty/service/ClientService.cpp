@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -18,7 +17,6 @@
 #include <cetty/service/ClientService.h>
 
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/AbstractChannelSink.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -26,7 +24,6 @@ namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
-
 
 ChannelConfig& ClientService::getConfig() {
     return this->config;
@@ -64,20 +61,14 @@ void ClientService::doClose() {
 
 }
 
-ChannelSink& ClientService::getSink() {
-    return *sink;
-}
-
 ClientService::ClientService(const EventLoopPtr& eventLoop,
                              const ChannelFactoryPtr& factory,
                              const ChannelPipelinePtr& pipeline)
-    : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline),
-      sink() {
+    : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {
 
-    sink = new AbstractChannelSink(*this);
     AbstractChannel::setPipeline(pipeline);
 
-    //LOG_INFO(logger, "AsioSocketChannel firing the Channel Create Event.");
+    LOG_INFO << "ClientService firing the Channel Create Event.";
     pipeline->fireChannelCreated();
 }
 

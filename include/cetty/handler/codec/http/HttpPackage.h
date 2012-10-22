@@ -17,11 +17,10 @@
  * under the License.
  */
 
-#include <boost/blank.hpp>
 #include <boost/variant.hpp>
 
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
+#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 
 namespace cetty {
@@ -29,24 +28,21 @@ namespace handler {
 namespace codec {
 namespace http {
 
-typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> HttpPackage;
-
-class HttpPackageEmptyVisitor : public boost::static_visitor<bool> {
+class HttpPackage {
 public:
-    bool operator()(const HttpMessagePtr& value) const { return !value; }
-    bool operator()(const HttpChunkPtr& value) const { return !value; }
-    bool operator()(const HttpChunkTrailerPtr& value) const { return !value; }
+    typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> Variant;
 
-    template <typename T>
-    bool operator()(const T& t) const { return false; }
+public:
+    Variant variant;
 
-    static HttpPackageEmptyVisitor visitor;
+public:
+    HttpPackage() {}
+    HttpPackage(const HttpChunkPtr& chunk) : variant(chunk) {}
+    HttpPackage(const HttpMessagePtr& message) : variant(message) {}
+    HttpPackage(const HttpChunkTrailerPtr& chunkTailer) : variant(chunkTailer) {}
+
+    operator bool() const;
 };
-
-inline
-bool operator !(const HttpPackage& pacakge) {
-    return pacakge.apply_visitor(HttpPackageEmptyVisitor::visitor);
-}
 
 }
 }

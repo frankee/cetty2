@@ -21,7 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/embedded/AbstractEmbeddedChannel.h>
+#include <cetty/channel/ChannelOutboundBufferHandler.h>
 
 namespace cetty {
 namespace channel {
@@ -35,25 +37,48 @@ template<typename InboundOutT>
 class EmbeddedBufferChannel
         : public AbstractEmbeddedChannel<InboundOutT, ChannelBufferPtr> {
 public:
+    EmbeddedBufferChannel(const ChannelHandlerPtr& handler)
+        : AbstractEmbeddedChannel(handler) {
+    }
+
+    EmbeddedBufferChannel(const ChannelHandlerPtr& handler1,
+                          const ChannelHandlerPtr& handler2)
+        : AbstractEmbeddedChannel(handler1, handler2) {
+    }
+
+    EmbeddedBufferChannel(const ChannelHandlerPtr& handler1,
+                          const ChannelHandlerPtr& handler2,
+                          const ChannelHandlerPtr& handler3)
+        : AbstractEmbeddedChannel(handler1, handler2, handler3) {
+    }
+
+    EmbeddedBufferChannel(const ChannelPipelinePtr& pipeline)
+        : AbstractEmbeddedChannel(pipeline) {
+    }
+
     virtual ~EmbeddedBufferChannel() {}
 
-    const ChannelBufferPtr& getLastOutboundBuffer() {
-        return lastOutboundBuffer;
+    ChannelBufferPtr getLastOutboundBuffer() {
+        boost::intrusive_ptr<ChannelOutboundBufferHandler> handler
+            = boost::dynamic_pointer_cast<ChannelOutboundBufferHandler>(
+            pipeline->getSinkHandler());
+        
+        BOOST_ASSERT(handler);
+        return handler->getOutboundChannelBuffer();
     }
 
     ChannelBufferPtr readOutbound() {
-        if (!lastOutboundBuffer->readable()) {
+        ChannelBufferPtr lastOutboundBuffer = getLastOutboundBuffer();
+        if (!lastOutboundBuffer || !lastOutboundBuffer->readable()) {
             return ChannelBufferPtr();
         }
 
-        ChannelBufferPtr buffer
-            = lastOutboundBuffer->readBytes(lastOutboundBuffer->readableBytes());
-
+        ChannelBufferPtr buffer = lastOutboundBuffer->readBytes();
         lastOutboundBuffer->clear();
         return buffer;
     }
 
-    template<T>
+    template<typename T>
     bool writeOutbound(const T& msg) {
         write(msg);
         checkException();
@@ -70,13 +95,9 @@ public:
     bool finish() {
         close();
         checkException();
-        return getLastInboundChannelBuffer()->readable()
-               || !getLastInboundMessageQueue().empty()
-               || lastOutboundBuffer->readable();
+        return hasInboundOut()
+               || (getLastOutboundBuffer()->readable());
     }
-
-private:
-    ChannelBufferPtr lastOutboundBuffer;
 };
 
 }

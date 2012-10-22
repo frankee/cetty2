@@ -56,7 +56,7 @@ public:
 
     virtual ~ChannelInboundMessageHandlerContext() {}
 
-    void addInboundMessage(const InboundInT& message) {
+    virtual void addInboundMessage(const InboundInT& message) {
         if (eventloop->inLoopThread()) {
             inboundMsgHandler->addInboundMessage(message);
         }

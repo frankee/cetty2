@@ -29,7 +29,6 @@
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelSink.h>
 #include <cetty/channel/ChannelHandlerPtr.h>
 #include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/channel/ChannelInboundMessageHandlerContext.h>

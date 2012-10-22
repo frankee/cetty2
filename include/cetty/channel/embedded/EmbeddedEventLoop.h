@@ -20,7 +20,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
 
 namespace cetty {
 namespace channel {
@@ -32,17 +34,27 @@ class EmbeddedEventLoop : public EventLoop {
 public:
     EmbeddedEventLoop()
         : EventLoop(EventLoopPoolPtr()) {
+        setThreadId(boost::this_thread::get_id());
     }
 
     virtual ~EmbeddedEventLoop() {}
 
-
-    virtual void post(const Functor& handler) {}
+    virtual void post(const Functor& handler) {
+        if (handler) {
+            handler();
+        }
+    }
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-        const Functor& timerCallback) {}
+                             const Functor& timerCallback) {
+        return TimeoutPtr();
+    }
 
-    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) {}
-    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) {}
+    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) {
+        return TimeoutPtr();
+    }
+    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) {
+        return TimeoutPtr();
+    }
 };
 
 }

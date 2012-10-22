@@ -21,6 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/UnreplayableOperationException.h>
 
@@ -46,8 +47,8 @@ class ReplayingDecoderBuffer : public cetty::buffer::ChannelBuffer {
 public:
     ReplayingDecoderBuffer(const ChannelBufferPtr& buffer)
         : needMore(false), terminated(false), buffer(buffer) {
-            readerIdx = buffer->readerIndex();
-            writerIdx = buffer->writerIndex();
+        readerIdx = buffer->readerIndex();
+        writerIdx = buffer->writerIndex();
     }
 
     void terminate() {
@@ -144,21 +145,70 @@ public:
 
     virtual ChannelBufferPtr slice(int index, int length);
     virtual int slice(int index, int length, GatheringBuffer* gatheringBuffer);
-    
-    int8_t  readByte() { return buffer->readByte(); }
-    uint8_t readUnsignedByte() { return buffer->readUnsignedByte(); }
-    int16_t readShort() { return buffer->readShort(); }
-    uint16_t readUnsignedShort() { return buffer->readUnsignedShort(); }
-    int32_t readInt() { return buffer->readInt(); }
-    uint32_t readUnsignedInt() { return buffer->readUnsignedInt(); }
-    int64_t readLong() { return buffer->readLong(); }
+
+    int8_t  readByte() {
+        if (checkReadable(1)) {
+            return buffer->readByte();
+        }
+
+        return 0;
+    }
+    uint8_t readUnsignedByte() {
+        if (checkReadable(1)) {
+            return buffer->readUnsignedByte();
+        }
+
+        return 0;
+    }
+    int16_t readShort() {
+        if (checkReadable(2)) {
+            return buffer->readShort();
+        }
+
+        return 0;
+    }
+    uint16_t readUnsignedShort() {
+        if (checkReadable(2)) {
+            return buffer->readUnsignedShort();
+        }
+
+        return 0;
+    }
+    int32_t readInt() {
+        if (checkReadable(4)) {
+            return buffer->readInt();
+        }
+
+        return 4;
+    }
+    uint32_t readUnsignedInt() {
+        if (checkReadable(4)) {
+            return buffer->readUnsignedInt();
+        }
+
+        return 0;
+    }
+    int64_t readLong() {
+        if (checkReadable(8)) {
+            return buffer->readLong();
+        }
+
+        return 0;
+    }
 
     int readVarint(uint64_t* value) { return buffer->readVarint(value); }
 
     ChannelBufferPtr readBytes() {
-        return readBytes();
+        return buffer->readBytes();
     }
-    ChannelBufferPtr readBytes(int length);
+    ChannelBufferPtr readBytes(int length) {
+        if (checkReadable(length)) {
+            return buffer->readBytes(length);
+        }
+
+        return Unpooled::EMPTY_BUFFER;
+    }
+
     int readBytes(const ChannelBufferPtr& dst) {
         throw UnreplayableOperationException();
     }
@@ -166,16 +216,28 @@ public:
         throw UnreplayableOperationException();
     }
     int readBytes(const ChannelBufferPtr& dst, int dstIndex, int length) {
-        return buffer->readBytes(dst, dstIndex, length);
+        if (checkReadable(length)) {
+            return buffer->readBytes(dst, dstIndex, length);
+        }
+
+        return 0;
     }
     int readBytes(char* dst, int length) {
-        return buffer->readBytes(dst, length);
+        if (checkReadable(length)) {
+            return buffer->readBytes(dst, length);
+        }
+
+        return 0;
     }
     int readBytes(std::string* dst) {
         return buffer->readBytes(dst);
     }
     int readBytes(std::string* dst, int length) {
-        return buffer->readBytes(dst, length);
+        if (checkReadable(length)) {
+            return buffer->readBytes(dst, length);
+        }
+
+        return 0;
     }
     int readBytes(OutputStream* out, int length) {
         throw UnreplayableOperationException();
@@ -184,16 +246,28 @@ public:
         return buffer->readSlice();
     }
     ChannelBufferPtr readSlice(int length) {
-        return buffer->readSlice(length);
+        if (checkReadable(length)) {
+            return buffer->readSlice(length);
+        }
+
+        return Unpooled::EMPTY_BUFFER;
     }
     int readSlice(GatheringBuffer* bytes) {
         return buffer->readSlice(bytes);
     }
     int readSlice(int length, GatheringBuffer* bytes) {
-        return buffer->readSlice(length, bytes);
+        if (checkReadable(length)) {
+            return buffer->readSlice(length, bytes);
+        }
+
+        return 0;
     }
     int skipBytes(int length) {
-        return buffer->skipBytes(length);
+        if (checkReadable(length)) {
+            return buffer->skipBytes(length);
+        }
+
+        return 0;
     }
 
     void clear();
@@ -202,8 +276,7 @@ public:
 
 private:
     bool checkIndex(int index, int length) const;
-
-    virtual bool checkReadableBytes(int readableBytes, bool throwException) const;
+    bool checkReadable(int minReadableBytes) const;
 
 private:
     mutable bool needMore;

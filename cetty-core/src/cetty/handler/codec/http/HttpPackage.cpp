@@ -22,7 +22,20 @@ namespace handler {
 namespace codec {
 namespace http {
 
-HttpPackageEmptyVisitor HttpPackageEmptyVisitor::visitor;
+class HttpPackageEmptyVisitor : public boost::static_visitor<bool> {
+public:
+    bool operator()(const HttpMessagePtr& value) const { return !!value; }
+    bool operator()(const HttpChunkPtr& value) const { return !!value; }
+    bool operator()(const HttpChunkTrailerPtr& value) const { return !!value; }
+
+    template <typename T>
+    bool operator()(const T& t) const { return false; }
+};
+
+HttpPackage::operator bool() const {
+    static HttpPackageEmptyVisitor visitor;
+    return variant.apply_visitor(visitor);
+}
 
 }
 }

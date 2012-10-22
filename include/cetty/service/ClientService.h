@@ -18,9 +18,9 @@
  */
 
 #include <vector>
+#include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/AbstractChannel.h>
 #include <cetty/channel/DefaultChannelConfig.h>
-#include <cetty/util/ReferenceCounter.h>
 
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ClientServicePtr.h>
@@ -45,8 +45,6 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
-    virtual ChannelSink& getSink();
-
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
@@ -57,8 +55,6 @@ protected:
 
 protected:
     EventLoopPtr  eventLoop;
-    ChannelSink* sink;
-
     DefaultChannelConfig config;
 };
 

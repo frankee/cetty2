@@ -24,8 +24,8 @@
 namespace cetty {
 namespace channel {
 
-    template<typename OutboundInT>
-    class ChannelOutboundMessageHandler;
+template<typename OutboundInT>
+class ChannelOutboundMessageHandler;
 
 template<typename OutboundInT>
 class ChannelOutboundMessageHandlerContext : public virtual ChannelHandlerContext {

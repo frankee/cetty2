@@ -15,7 +15,7 @@
  * under the License.
  */
 
-#include <cetty/channel/socket/asio/AsioSocketChannelSink.h>
+#include <cetty/channel/socket/asio/AsioSocketChannelSinkHandler.h>
 
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
@@ -25,13 +25,14 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-AsioSocketChannelSink::AsioSocketChannelSink(AsioSocketChannel& channel)
-    :  AbstractChannelSink(channel), channel(channel) {
+AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler(const boost::intrusive_ptr<AsioSocketChannel>& channel) {
+
 }
 
-void AsioSocketChannelSink::connect(const SocketAddress& remoteAddress,
-                                    const SocketAddress& localAddress,
-                                    const ChannelFuturePtr& future) {
+void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
+        const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
     if (!ensureOpen(future)) {
         return;
     }
@@ -43,7 +44,7 @@ void AsioSocketChannelSink::connect(const SocketAddress& remoteAddress,
 
         //connectFuture = future;
 
-        channel.doConnect(remoteAddress, localAddress, future);
+        channel->doConnect(remoteAddress, localAddress, future);
 #if 0
         // Schedule connect timeout.
         int connectTimeoutMillis = channel->config.getConnectTimeoutMillis();
@@ -78,6 +79,12 @@ void AsioSocketChannelSink::connect(const SocketAddress& remoteAddress,
     }
 }
 
+void AsioSocketChannelSinkHandler::flush(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& buffer,
+        const ChannelFuturePtr& future) {
+    channel->doFlush(buffer, future);
+}
+
 #if 0
 void connectFailed(Throwable t) {
     connectFuture.setFailure(t);
@@ -107,14 +114,9 @@ void connectSuccess() {
         connectFuture = null;
     }
 }
+
 }
 #endif
-
-void AsioSocketChannelSink::flush(const ChannelBufferPtr& buffer,
-                                  const ChannelFuturePtr& future) {
-    channel.doFlush(buffer, future);
-}
-
 /*
   void flush(final ChannelFuture future) {
       if (eventLoop().inEventLoop()) {

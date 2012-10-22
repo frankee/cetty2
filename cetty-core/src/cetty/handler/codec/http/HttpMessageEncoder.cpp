@@ -177,7 +177,7 @@ ChannelBufferPtr HttpMessageEncoder::encode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& out) {
 
     HttpPackageEncodeVisitor visitor(*this, ctx, out);
-    return msg.apply_visitor(visitor);
+    return msg.variant.apply_visitor(visitor);
 }
 
 void HttpMessageEncoder::encodeHeaders(ChannelBuffer& buf,

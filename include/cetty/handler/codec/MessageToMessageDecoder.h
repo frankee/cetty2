@@ -44,6 +44,7 @@ using namespace cetty::channel;
 
 template<typename InboundInT, typename InboundOutT>
 class MessageToMessageDecoder : public ChannelInboundMessageHandler<InboundInT> {
+protected:
     using ChannelInboundMessageHandler<InboundInT>::inboundQueue;
 
 public:

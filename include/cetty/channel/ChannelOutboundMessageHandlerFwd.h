@@ -90,8 +90,16 @@ public:
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next);
 
-    void addOutboundMessage(const OutboundInT& message) {
+    virtual void addOutboundMessage(const OutboundInT& message) {
         outboundQueue.push_back(message);
+    }
+
+    MessageQueue& getOutboundMessageQueue() {
+        return outboundQueue;
+    }
+
+    const MessageQueue& getOutboundMessageQueue() const {
+        return outboundQueue;
     }
 
 protected:

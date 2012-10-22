@@ -22,6 +22,7 @@
  */
 
 #include <cetty/channel/embedded/AbstractEmbeddedChannel.h>
+#include <cetty/channel/ChannelOutboundMessageHandler.h>
 
 namespace cetty {
 namespace channel {
@@ -30,45 +31,74 @@ namespace embedded {
 template<typename InboundOutT,
          typename OutboundOutT>
 class EmbeddedMessageChannel
-    : public AbstractEmbeddedChannel<InboundOutT, OutboundOutT> {
+        : public AbstractEmbeddedChannel<InboundOutT, OutboundOutT> {
 public:
+    typedef ChannelOutboundMessageHandler<OutboundOutT> SinkHandler;
+
+public:
+    EmbeddedMessageChannel(const ChannelHandlerPtr& handler)
+        : AbstractEmbeddedChannel(handler) {
+    }
+
+    EmbeddedMessageChannel(const ChannelHandlerPtr& handler1,
+                           const ChannelHandlerPtr& handler2)
+        : AbstractEmbeddedChannel(handler1, handler2) {
+    }
+
+    EmbeddedMessageChannel(const ChannelHandlerPtr& handler1,
+                           const ChannelHandlerPtr& handler2,
+                           const ChannelHandlerPtr& handler3)
+        : AbstractEmbeddedChannel(handler1, handler2, handler3) {
+    }
+
+    EmbeddedMessageChannel(const ChannelPipelinePtr& pipeline)
+        : AbstractEmbeddedChannel(pipeline) {
+    }
+
     virtual ~EmbeddedMessageChannel() {}
 
-    std::deque<OutboundOutT>& getLastOutboundBuffer() {
-        return lastOutboundQueue;
+    SinkHandler::MessageQueue& getLastOutboundMessageQueue() {
+        boost::intrusive<SinkHandler> handler
+            = boost::dynamic_pointer_cast<SinkHandler>(
+                  pipeline->getSinkHandler());
+
+        BOOST_ASSERT(handler);
+        return handler->getOutboundMessageQueue();
     }
 
     OutboundOutT readOutbound() {
-        OutboundOutT out = lastOutboundQueue.front();
-        lastOutboundQueue.pop_front();
-        return out;
+        SinkHandler::MessageQueue& lastOutboundQueue
+            = getLastOutboundMessageQueue();
+
+        if (!lastOutboundQueue.empty()) {
+            OutboundOutT out = lastOutboundQueue.front();
+            lastOutboundQueue.pop_front();
+            return out;
+        }
+
+        return OutboundOutT();
     }
 
     template<T>
     bool writeOutbound(const T& msg) {
         write(msg);
         checkException();
-        return !lastOutboundBuffer.empty();
+        return !getLastOutboundMessageQueue().empty();
     }
 
     template<>
     bool writeOutbound(const ChannelBufferPtr& msg) {
         write(msg);
         checkException();
-        return lastOutboundBuffer.empty();
+        return !lastInboundMessageQueue.empty();
     }
 
     bool finish() {
         close();
         checkException();
-        return getLastInboundChannelBuffer()->readable()
-            || !getLastInboundMessageQueue().empty()
-            || !lastOutboundQueue.empty();
+        return hasInboundOut()
+               || !getLastOutboundMessageQueue().empty();
     }
-
-private:
-    std::deque<OutboundOutT> lastOutboundQueue;
-
 };
 
 }

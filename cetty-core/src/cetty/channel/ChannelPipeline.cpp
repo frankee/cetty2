@@ -17,18 +17,15 @@
 #include <cetty/channel/ChannelPipeline.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelSink.h>
-
 #include <cetty/channel/UserEvent.h>
 #include <cetty/channel/SocketAddress.h>
-
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelInboundHandler.h>
 #include <cetty/channel/ChannelOutboundHandler.h>
 #include <cetty/channel/ChannelOutboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
@@ -46,66 +43,7 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class SinkHandler : public ChannelOutboundBufferHandler {
-public:
-    SinkHandler(ChannelSink* sink) : sink(sink) {}
-    virtual ~SinkHandler() {}
-
-    void bind(ChannelHandlerContext& ctx,
-              const SocketAddress& localAddress,
-              const ChannelFuturePtr& future) {
-        if (sink) {
-            sink->bind(localAddress, future);
-        }
-    }
-
-    void connect(ChannelHandlerContext& ctx,
-                 const SocketAddress& remoteAddress,
-                 const SocketAddress& localAddress,
-                 const ChannelFuturePtr& future) {
-        if (sink) {
-            sink->connect(remoteAddress, localAddress, future);
-        }
-    }
-
-    void disconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        if (sink) {
-            sink->disconnect(future);
-        }
-    }
-
-    void close(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        if (sink) {
-            sink->close(future);
-        }
-    }
-
-    void flush(ChannelHandlerContext& ctx,
-        const ChannelFuturePtr& future) {
-            if (sink) {
-                sink->flush(getOutboundChannelBuffer(), future);
-            }
-    }
-
-    void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause) {
-        ctx.fireExceptionCaught(cause);
-    }
-
-    void userEventTriggered(ChannelHandlerContext& ctx, const UserEvent& evt) {
-        ctx.fireUserEventTriggered(evt);
-    }
-
-    ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new SinkHandler(sink));
-    }
-
-    std::string toString() const {
-        return "HeadHandler";
-    }
-
-private:
-    ChannelSink* sink;
-};
+static const char* SINK_HANDLER_NAME = "_sink";
 
 ChannelPipeline::ChannelPipeline()
     : firedChannelActive(false),
@@ -123,6 +61,10 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
         throw NullPointerException("channel");
     }
 
+    if (!sinkHandler) {
+        throw NullPointerException("should setSinkHandler first.");
+    }
+
     if (this->channel) {
         throw IllegalStateException("attached already");
     }
@@ -130,12 +72,10 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
     this->channel = channel;
     this->eventLoop = channel->getEventLoop();
 
-    if (!sinkHandler) {
-        sinkHandler = ChannelHandlerPtr(new SinkHandler(&channel->getSink()));
-    }
-    addFirst("_sink", sinkHandler);
+    addFirst(SINK_HANDLER_NAME, sinkHandler);
 
     ChannelHandlerContext* ctx = head;
+
     while (true) {
         if (ctx == tail) {
             ctx->attach();
@@ -149,6 +89,7 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
 
 void ChannelPipeline::detach() {
     ChannelHandlerContext* ctx = head;
+
     while (true) {
         if (ctx == tail) {
             ctx->detach();
@@ -162,7 +103,7 @@ void ChannelPipeline::detach() {
     this->channel.reset();
     this->eventLoop.reset();
 
-    remove("_sink");
+    remove(SINK_HANDLER_NAME);
 }
 
 bool ChannelPipeline::isAttached() const {
@@ -657,7 +598,7 @@ std::string ChannelPipeline::toString() const {
 void ChannelPipeline::notifyHandlerException(const Exception& e) {
     if (e.getNested()) {
         LOG_WARN << "exception was thrown by a user handler"
-            "while handling an exception ( ... )";
+                 "while handling an exception ( ... )";
         return;
     }
 
@@ -896,7 +837,7 @@ void ChannelPipeline::fireChannelInactive() {
     // Also, all known transports never get re-activated.
     //firedChannelActive = false;
     if (inboundHead) {
-        inboundHead->fireChannelInactive(*outboundHead);
+        inboundHead->fireChannelInactive(*inboundHead);
     }
 }
 
@@ -934,7 +875,7 @@ ChannelFuturePtr ChannelPipeline::bind(const SocketAddress& localAddress) {
 }
 
 const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
-    const ChannelFuturePtr& future) {
+        const ChannelFuturePtr& future) {
     if (outboundHead) {
         return outboundHead->bind(*outboundHead, localAddress, future);
     }
@@ -1046,6 +987,9 @@ const ChannelHandlerPtr& ChannelPipeline::getSinkHandler() const {
 void ChannelPipeline::setSinkHandler(const ChannelHandlerPtr& handler) {
     if (handler) {
         this->sinkHandler = handler;
+    }
+    else {
+        LOG_WARN << "set an empty sink handler";
     }
 }
 

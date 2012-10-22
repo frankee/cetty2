@@ -27,34 +27,7 @@
     <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\CookieDecoderTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\CookieEncoderTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpChunkAggregatorTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpClientCodecTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpContentCompressorTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpHeaderDateFormatTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpServerCodecTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\QueryStringDecoderTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\QueryStringEncoderTest.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpMessageTest.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
   </ItemGroup>

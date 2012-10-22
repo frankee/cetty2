@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELMESSAGEHANDLERCONTEXT_H)
-#define CETTY_CHANNEL_CHANNELMESSAGEHANDLERCONTEXT_H
+#if !defined(CETTY_CHANNEL_COMBINEDCHANNELBUFFERMESSAGEHANDLERCONTEXT_H)
+#define CETTY_CHANNEL_COMBINEDCHANNELBUFFERMESSAGEHANDLERCONTEXT_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -23,44 +23,42 @@
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT, typename OutboundInT>
-class ChannelMessageHandlerContext
-    : public ChannelInboundMessageHandlerContext<InboundInT>,
+template<typename OutboundInT>
+class CombinedChannelBufferMessageHandlerContext
+    : public ChannelInboundBufferHandlerContext,
       public ChannelOutboundMessageHandlerContext<OutboundInT> {
 public:
-    ChannelMessageHandlerContext(const std::string& name,
+    CombinedChannelBufferMessageHandlerContext(const std::string& name,
                                  ChannelPipeline& pipeline,
                                  const ChannelHandlerPtr& handler,
                                  ChannelHandlerContext* prev,
                                  ChannelHandlerContext* next)
         : ChannelHandlerContext(name, pipeline, handler, prev, next),
-          ChannelInboundMessageHandlerContext<InboundInT>(name, pipeline, handler, prev, next),
+          ChannelInboundBufferHandlerContext(name, pipeline, handler, prev, next),
           ChannelOutboundMessageHandlerContext<OutboundInT>(name, pipeline, handler, prev, next) {
-        ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
         ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
     }
 
-    ChannelMessageHandlerContext(const std::string& name,
+    CombinedChannelBufferMessageHandlerContext(const std::string& name,
                                  const EventLoopPtr& eventLoop,
                                  ChannelPipeline& pipeline,
                                  const ChannelHandlerPtr& handler,
                                  ChannelHandlerContext* prev,
                                  ChannelHandlerContext* next)
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-          ChannelInboundMessageHandlerContext<InboundInT>(name, eventLoop, pipeline, handler, prev, next),
+          ChannelInboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
           ChannelOutboundMessageHandlerContext<OutboundInT>(name, eventLoop, pipeline, handler, prev, next) {
-        ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
         ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
     }
 
-    virtual ~ChannelMessageHandlerContext() {}
+    virtual ~CombinedChannelBufferMessageHandlerContext() {}
 
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELMESSAGEHANDLERCONTEXT_H)
+#endif //#if !defined(CETTY_CHANNEL_COMBINEDCHANNELBUFFERMESSAGEHANDLERCONTEXT_H)
 
 // Local Variables:
 // mode: c++

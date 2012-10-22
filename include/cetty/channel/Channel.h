@@ -174,9 +174,6 @@ public:
      */
     virtual const ChannelPipelinePtr& getPipeline() const  = 0;
 
-
-    virtual ChannelSink& getSink() = 0;
-
     /**
      * Returns <tt>true</tt> if and only if this channel is open.
      */

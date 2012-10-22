@@ -21,14 +21,19 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/ChannelHandler.h>
 #include <cetty/handler/codec/BufferToMessageDecoder.h>
+#include <cetty/util/StringUtil.h>
+#include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
 using namespace cetty::channel;
+using namespace cetty::buffer;
+using namespace cetty::util;
 
 /**
  * A decoder that splits the received {@link ChannelBuffer}s by the fixed number
@@ -62,8 +67,9 @@ public:
     FixedLengthFrameDecoder(int frameLength) : frameLength(frameLength) {
         if (frameLength <= 0) {
             throw InvalidArgumentException(
-                std::string("frameLength must be a positive integer: ") +
-                Integer::toString(frameLength));
+                StringUtil::strprintf(
+                    "frameLength must be a positive integer: %d",
+                    frameLength));
         }
     }
 
@@ -76,15 +82,12 @@ public:
 
 protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in) {
-        if (in->readableBytes() < frameLength) {
-            return UserEvent::EMPTY_EVENT;
+                                    const ChannelBufferPtr& in) {
+        if (!in && in->readableBytes() < frameLength) {
+            return Unpooled::EMPTY_BUFFER;
         }
         else {
-            ChannelBufferPtr sub = buffer->slice(buffer->readerIndex(), frameLength);
-            buffer->readerIndex(buffer->readerIndex() + frameLength);
-
-            return UserEvent(sub);
+            return in->readSlice(frameLength);
         }
     }
 

@@ -16,7 +16,6 @@
 
 #include <cetty/service/asio/AsioClientServiceFactory.h>
 
-#include <cetty/channel/ChannelSink.h>
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
