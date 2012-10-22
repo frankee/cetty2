@@ -31,8 +31,6 @@ public:
 
     virtual const ChannelPtr& getParent() const;
 
-    virtual ChannelSink& getSink();
-
     virtual const EventLoopPtr& getEventLoop() const;
 
     virtual const ChannelFactoryPtr&  getFactory() const;
@@ -49,21 +47,21 @@ public:
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
 
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress);
+                                     const SocketAddress& localAddress);
 
     virtual ChannelFuturePtr disconnect();
     virtual ChannelFuturePtr close();
     virtual ChannelFuturePtr flush();
 
     virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
-        const ChannelFuturePtr& future);
+                                         const ChannelFuturePtr& future);
 
     virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-        const ChannelFuturePtr& future);
+                                            const ChannelFuturePtr& future);
 
     virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
-        const ChannelFuturePtr& future);
+                                            const SocketAddress& localAddress,
+                                            const ChannelFuturePtr& future);
     virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
     virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
 
@@ -82,15 +80,14 @@ public:
     virtual int compareTo(const ChannelPtr& c) const;
 
 public:
-    static const ChannelPtr& getInstance();
+    static const ChannelPtr& instance();
 
 private:
-    static ChannelFuturePtr failedFuture;
     static ChannelPtr nullChannel;
+    static ChannelFuturePtr failedFuture;
 
 private:
     EventLoopPtr eventLoop;
-    ChannelSink* sink;
 
     ChannelPtr fatherChannel;
 };

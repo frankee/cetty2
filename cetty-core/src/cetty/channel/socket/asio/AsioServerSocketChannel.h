@@ -34,12 +34,6 @@
 
 namespace cetty {
 namespace channel {
-class AbstractChannelSink;
-}
-}
-
-namespace cetty {
-namespace channel {
 namespace socket {
 namespace asio {
 
@@ -66,8 +60,6 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
-    virtual ChannelSink& getSink();
-
     virtual bool isActive() const;
 
 protected:
@@ -90,8 +82,6 @@ private:
 
     AsioHandlerAllocator<int> acceptAllocator;
     boost::asio::ip::tcp::acceptor acceptor;
-
-    AbstractChannelSink* sink;
 
     ChannelPipelinePtr childPipeline;
     AsioServicePoolPtr childServicePool;

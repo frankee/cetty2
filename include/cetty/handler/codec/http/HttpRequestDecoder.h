@@ -79,8 +79,7 @@ public:
      * <tt>maxInitialLineLength (4096)</tt>, <tt>maxHeaderSize (8192)</tt>, and
      * <tt>maxChunkSize (8192)</tt>.
      */
-    HttpRequestDecoder() {
-    }
+    HttpRequestDecoder();
 
     /**
      * Creates a new instance with the specified parameters.

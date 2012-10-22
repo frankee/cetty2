@@ -63,7 +63,7 @@ HeapChannelBuffer::HeapChannelBuffer(char* buf, int length)
       ownBuffer(false),
       buf(NULL),
       bufSize(0)  {
-    init(buf, length, length, 0, 0);
+    init(buf, length, length, 0, length);
 }
 
 HeapChannelBuffer::HeapChannelBuffer(char* buf, int length, int maximunCapacity, bool takeCare)
@@ -71,7 +71,7 @@ HeapChannelBuffer::HeapChannelBuffer(char* buf, int length, int maximunCapacity,
       ownBuffer(takeCare),
       buf(NULL),
       bufSize(0)  {
-    init(buf, length, maximunCapacity, 0, 0);
+    init(buf, length, maximunCapacity, 0, length);
 }
 
 HeapChannelBuffer::HeapChannelBuffer(char* buf,

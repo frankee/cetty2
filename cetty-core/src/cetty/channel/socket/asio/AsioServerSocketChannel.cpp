@@ -22,7 +22,6 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/AbstractChannelSink.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
 #include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
@@ -44,19 +43,14 @@ AsioServerSocketChannel::AsioServerSocketChannel(
     : ServerSocketChannel(eventLoop, factory, pipeline),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      sink(),
       childPipeline(childPipeline),
       childServicePool(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
       config(acceptor) {
 
-    sink = new AbstractChannelSink(*this);
     AbstractChannel::setPipeline(pipeline);
 }
 
 AsioServerSocketChannel::~AsioServerSocketChannel() {
-    if (sink) {
-        delete sink;
-    }
 }
 
 ChannelConfig& AsioServerSocketChannel::getConfig() {
@@ -259,11 +253,6 @@ void AsioServerSocketChannel::doClose() {
 
 void AsioServerSocketChannel::doDisconnect() {
 
-}
-
-ChannelSink& AsioServerSocketChannel::getSink() {
-    BOOST_ASSERT(sink);
-    return *sink;
 }
 
 bool AsioServerSocketChannel::isActive() const {

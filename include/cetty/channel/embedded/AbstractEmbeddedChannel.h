@@ -18,13 +18,21 @@
  */
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
- *
  * Distributed under under the Apache License, version 2.0 (the "License").
- *
  */
 
+#include <cetty/channel/NullChannel.h>
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/AbstractChannel.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/DefaultChannelConfig.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
+
+#include <cetty/channel/embedded/EmbeddedEventLoop.h>
 #include <cetty/channel/embedded/EmbeddedSocketAddressImpl.h>
+
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -37,15 +45,23 @@ template<typename InboundOutT,
          typename OutboundOutT>
 class AbstractEmbeddedChannel : public AbstractChannel {
 public:
+    friend class LastInboundMessageHandler;
+    friend class LastInboundBufferHandler;
+
     class LastInboundMessageHandler : public ChannelInboundMessageHandler<InboundOutT> {
+    public:
         LastInboundMessageHandler(AbstractEmbeddedChannel& channel)
-        : channel(channel) {
+            : channel(channel) {
             channel.lastInboundMessageQueue = &inboundQueue;
         }
 
-        virtual void ChannelHandlerPtr clone();
+        virtual ChannelHandlerPtr clone() {
+            return new LastInboundMessageHandler(channel);
+        }
 
-        virtual std::string toString() const;
+        virtual std::string toString() const {
+            return "LastInboundMessageHandler";
+        }
 
         virtual void messageUpdated(ChannelHandlerContext& ctx) {
             // Do nothing.
@@ -53,7 +69,7 @@ public:
 
         virtual void exceptionCaught(ChannelHandlerContext& ctx,
                                      const ChannelException& cause) {
-            if (channel.lastException == null) {
+            if (channel.lastException == NULL) {
                 channel.lastException = new Exception(cause);
             }
             else {
@@ -71,11 +87,17 @@ public:
         LastInboundBufferHandler(AbstractEmbeddedChannel& channel)
             : channel(channel) {}
 
-        virtual void ChannelHandlerPtr clone();
+        virtual ChannelHandlerPtr clone() {
+            return new LastInboundBufferHandler(channel);
+        }
 
-        virtual std::string toString() const;
+        virtual std::string toString() const {
+            return "LastInboundBufferHandler";
+        }
 
-        virtual void messageUpdated(ChannelHandlerContext& ctx) {}
+        virtual void messageUpdated(ChannelHandlerContext& ctx) {
+            // Do nothing.
+        }
 
     protected:
         virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
@@ -86,44 +108,83 @@ public:
         AbstractEmbeddedChannel& channel;
     };
 
-    typedef LastInboundMessageHandler::MessageQueue InboundMessageQueue;
-
-    friend class LastInboundMessageHandler;
-    friend class LastInboundBufferHandler;
+    typedef typename LastInboundMessageHandler::MessageQueue InboundMessageQueue;
 
 public:
     AbstractEmbeddedChannel(const ChannelHandlerPtr& handler)
-        : localAddress() {
-
+        : AbstractChannel(new EmbeddedEventLoop,
+                          ChannelPtr(),
+                          NullChannel::instance()->getFactory(),
+                          ChannelPipelines::pipeline(handler)),
+        localAddress(new EmbeddedSocketAddressImpl),
+        remoteAddress(new EmbeddedSocketAddressImpl),
+        lastInboundMessageQueue(),
+        lastException(),
+        state() {
+        init();
     }
+
     AbstractEmbeddedChannel(const ChannelHandlerPtr& handler1,
-                            const ChannelHandlerPtr& handler2);
+                            const ChannelHandlerPtr& handler2)
+        : AbstractChannel(new EmbeddedEventLoop,
+                          ChannelPtr(),
+                          NullChannel::instance()->getFactory(),
+                          ChannelPipelines::pipeline(handler1, handler2)),
+        localAddress(new EmbeddedSocketAddressImpl),
+        remoteAddress(new EmbeddedSocketAddressImpl),
+        lastInboundMessageQueue(),
+        lastException(),
+        state() {
+        init();
+    }
 
     AbstractEmbeddedChannel(const ChannelHandlerPtr& handler1,
                             const ChannelHandlerPtr& handler2,
-                            const ChannelHandlerPtr& handler3);
+                            const ChannelHandlerPtr& handler3)
+        : AbstractChannel(new EmbeddedEventLoop,
+                          ChannelPtr(),
+                          NullChannel::instance()->getFactory(),
+                          ChannelPipelines::pipeline(handler1, handler2, handler3)),
+        localAddress(new EmbeddedSocketAddressImpl),
+        remoteAddress(new EmbeddedSocketAddressImpl),
+        lastInboundMessageQueue(),
+        lastException(),
+        state() {
+        init();
+    }
 
-    AbstractEmbeddedChannel(const ChannelPipelinePtr& pipeline);
+    AbstractEmbeddedChannel(const ChannelPipelinePtr& pipeline)
+        : AbstractChannel(new EmbeddedEventLoop,
+                          ChannelPtr(),
+                          NullChannel::instance()->getFactory(),
+                          pipeline),
+        localAddress(new EmbeddedSocketAddressImpl),
+        remoteAddress(new EmbeddedSocketAddressImpl),
+        lastInboundMessageQueue(),
+        lastException(),
+        state() {
+        init();
+    }
 
-    AbstractEmbeddedChannel(const EventLoopPtr& eventLoop,
-                            const ChannelPtr& parent,
-                            const ChannelFactoryPtr& factory,
-                            const ChannelPipelinePtr& pipeline)
-        : AbstractChannel(eventLoop, parent, factory, pipeline) {
-
-        pipeline->addLast("lastMesssage", new LastInboundMessageHandler(*this));
-        pipeline->addLast("lastBuffer", new LastInboundBufferHandler(*this));
+    virtual ~AbstractEmbeddedChannel() {
     }
 
     virtual ChannelConfig& getConfig() { return config; }
     virtual const ChannelConfig& getConfig() const { return config; }
 
-    bool isOpen() {
+    virtual bool isActive(void) const {
+        return state == 1;
+    }
+
+    virtual bool isOpen() const {
         return state < 2;
     }
 
-    bool isActive() {
-        return state == 1;
+    virtual const SocketAddress& getLocalAddress(void) const {
+        return localAddress;
+    }
+    virtual const SocketAddress& getRemoteAddress(void) const {
+        return remoteAddress;
     }
 
     InboundMessageQueue& getLastInboundMessageQueue() {
@@ -137,41 +198,45 @@ public:
 
     template<typename T>
     bool writeInbound(const T& data) {
-        inboundBuffer().add(msg);
-        pipeline()->fireMessageUpdated();
+        ChannelPipelinePtr pipeline = getPipeline();
+        pipeline->addInboundMessage(data);
+        pipeline->fireMessageUpdated();
 
         checkException();
-        return getLastInboundChannelBuffer()->readable()
-            || !getLastInboundMessageQueue().empty();
+        return hasInboundOut();
     }
 
     template<>
     bool writeInbound<ChannelBufferPtr>(const ChannelBufferPtr& data) {
-        inboundBuffer().writeBytes(data);
-        pipeline()->fireMessageUpdated();
+        ChannelPipelinePtr pipeline = getPipeline();
+        pipeline->setInboundChannelBuffer(data);
+        pipeline->fireMessageUpdated();
 
         checkException();
-        return getLastInboundChannelBuffer()->readable()
-            || !getLastInboundMessageQueue().empty();
+        return hasInboundOut();
     }
 
-    InboundOutT readInbound() {
+    bool readInbound(InboundOutT* inboundOut) {
+        if (lastInboundMessageQueue && !lastInboundMessageQueue->empty()) {
+            *inboundOut = lastInboundMessageQueue->front();
+            lastInboundMessageQueue->pop_front();
+            return true;
+        }
+
+        return false;
+    }
+
+    bool readInbound(ChannelBufferPtr* inboundOut) {
         if (lastInboundChannelBuffer->readable()) {
-            buffer = lastInboundChannelBuffer->readBytes(
-                         lastInboundChannelBuffer->readableBytes());
+            *inboundOut = lastInboundChannelBuffer->readBytes(
+                              lastInboundChannelBuffer->readableBytes());
 
             lastInboundChannelBuffer->clear();
 
-            return buffer;
+            return true;
         }
 
-        if (lastInboundMessageQueue && !lastInboundMessageQueue->empty()) {
-            InboundOutT = lastInboundMessageQueue->front();
-            lastInboundMessageQueue->pop_front();
-            return InboundOutT;
-        }
-
-        return InboundOutT();
+        return false;
     }
 
     void checkException() {
@@ -182,10 +247,15 @@ public:
         }
 
         lastException = NULL;
-        throw ChannelException(*t);
+        throw ChannelException(t->what(), t->getCode());
     }
 
 protected:
+    bool hasInboundOut() {
+        return (lastInboundChannelBuffer && lastInboundChannelBuffer->readable())
+               || (lastInboundMessageQueue && !lastInboundMessageQueue->empty());
+    }
+
     void doBind(const SocketAddress& localAddress) {
         // NOOP
     }
@@ -199,11 +269,24 @@ protected:
     }
 
 private:
+    void init() {
+        
+        ChannelPipelinePtr pipeline = AbstractChannel::getPipeline();
+        pipeline->addLast("lastMesssage", new LastInboundMessageHandler(*this));
+        pipeline->addLast("lastBuffer", new LastInboundBufferHandler(*this));
+        AbstractChannel::setPipeline(pipeline);
+        pipeline->fireChannelCreated();
+        pipeline->fireChannelActive();
+        state = 1;
+    }
+
+private:
     DefaultChannelConfig config;
+
     SocketAddress localAddress;
     SocketAddress remoteAddress;
 
-    LastInboundMessageHandler::MessageQueue* lastInboundMessageQueue;
+    InboundMessageQueue* lastInboundMessageQueue;
     ChannelBufferPtr lastInboundChannelBuffer;
 
     Exception* lastException;

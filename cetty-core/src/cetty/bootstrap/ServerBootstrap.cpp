@@ -119,14 +119,14 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
 
     if (!factory) {
         LOG_ERROR << "has not set the factory.";
-        return NullChannel::getInstance()->getCloseFuture();
+        return NullChannel::instance()->getCloseFuture();
     }
 
     ChannelPtr channel = factory->newChannel(serverPipeline);
 
     if (!channel) {
         LOG_ERROR << "Server channel factory failed to create a new channel.";
-        return NullChannel::getInstance()->getCloseFuture();
+        return NullChannel::instance()->getCloseFuture();
     }
 
     ChannelFuturePtr future = channel->newFuture();

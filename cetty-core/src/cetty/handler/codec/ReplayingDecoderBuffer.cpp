@@ -19,7 +19,7 @@
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBufferUtil.h>
 
-#include <cetty/util/Integer.h>
+#include <cetty/Types.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 
@@ -35,7 +35,7 @@ int ReplayingDecoderBuffer::capacity() const {
         return buffer->capacity();
     }
     else {
-        return Integer::MAX_VALUE;
+        return MAX_INT32;
     }
 }
 
@@ -123,7 +123,7 @@ int ReplayingDecoderBuffer::readableBytes() const {
         return ChannelBuffer::readableBytes();
     }
     else {
-        return Integer::MAX_VALUE - readerIndex();
+        return MAX_INT32 - readerIndex();
     }
 }
 
@@ -206,8 +206,8 @@ bool ReplayingDecoderBuffer::checkIndex(int index, int length) const {
     return false;
 }
 
-bool ReplayingDecoderBuffer::checkReadableBytes(int readableBytes, bool throwException) const {
-    if (buffer->readableBytes() >= readableBytes) {
+bool ReplayingDecoderBuffer::checkReadable(int minReadableBytes) const {
+    if (buffer->readableBytes() >= minReadableBytes) {
         needMore = false;
         return true;
     }

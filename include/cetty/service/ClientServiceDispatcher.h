@@ -48,7 +48,7 @@ class ClientServiceDispatcher
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
-
+protected:
     using ChannelMessageHandlerAdapter<
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
           boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,

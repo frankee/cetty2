@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINK_H)
-#define CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINK_H
+#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINKHANDLER_H)
+#define CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINKHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,7 +17,8 @@
  * under the License.
  */
 
-#include <cetty/channel/AbstractChannelSink.h>
+#include <boost/intrusive_ptr.hpp>
+#include <cetty/channel/ChannelSinkHandler.h>
 
 namespace cetty {
 namespace channel {
@@ -26,21 +27,28 @@ namespace asio {
 
 class AsioSocketChannel;
 
-class AsioSocketChannelSink : public cetty::channel::AbstractChannelSink {
+class AsioSocketChannelSinkHandler : public cetty::channel::ChannelSinkHandler {
 public:
-    AsioSocketChannelSink(AsioSocketChannel& channel);
-    virtual ~AsioSocketChannelSink() {}
+    typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
+    
+public:
+    AsioSocketChannelSinkHandler(const AsioSocketChannelPtr& channel);
+    virtual ~AsioSocketChannelSinkHandler() {}
 
 public:
-    virtual void connect(const SocketAddress& remoteAddress,
+    virtual void connect(ChannelHandlerContext& ctx,
+                         const SocketAddress& remoteAddress,
                          const SocketAddress& localAddress,
                          const ChannelFuturePtr& future);
 
-    virtual void flush(const ChannelBufferPtr& buffer,
+    virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future);
 
+    // TODO: seperated with flush.
+    //virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
+
 private:
-    AsioSocketChannel& channel;
+    AsioSocketChannelPtr channel;
 };
 
 }
@@ -48,7 +56,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINK_H)
+#endif //#if !defined(CETTY_CHANNEL_SOCKET_ASIO_ASIOSOCKETCHANNELSINKHANDLER_H)
 
 // Local Variables:
 // mode: c++

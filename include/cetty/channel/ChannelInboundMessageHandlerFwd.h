@@ -98,8 +98,16 @@ public:
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next);
 
-    void addInboundMessage(const InboundInT& message) {
+    virtual void addInboundMessage(const InboundInT& message) {
         inboundQueue.push_back(message);
+    }
+
+    MessageQueue& getInboundMessageQueue() {
+        return inboundQueue;
+    }
+
+    const MessageQueue& getInboundMessageQueue() const {
+        return inboundQueue;
     }
 
 protected:

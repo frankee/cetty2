@@ -29,7 +29,7 @@
 namespace cetty {
 namespace channel {
 
-class AbstractChannelSink;
+class ChannelSinkHandler;
 
 /**
  * A skeletal {@link Channel} implementation.
@@ -172,14 +172,14 @@ protected:
      */
     virtual ChannelFuturePtr getUnsupportedOperationFuture();
 
-    void setPipeline(const ChannelPipelinePtr& pipeline);
+    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
 
 private:
     void idDeallocatorCallback(ChannelFuture& future);
     int  allocateId(const ChannelPtr& channel);
 
 private:
-    friend class AbstractChannelSink;
+    friend class ChannelSinkHandler;
 
     static ChannelMap allChannels;
 

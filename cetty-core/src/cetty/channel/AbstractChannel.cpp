@@ -19,16 +19,15 @@
 #include <boost/bind.hpp>
 
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelSink.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/ChannelFutureListener.h>
-
-#include <cetty/channel/SucceededChannelFuture.h>
-#include <cetty/channel/DefaultChannelFuture.h>
+#include <cetty/channel/ChannelSinkHandler.h>
 #include <cetty/channel/FailedChannelFuture.h>
+#include <cetty/channel/DefaultChannelFuture.h>
+#include <cetty/channel/ChannelFutureListener.h>
+#include <cetty/channel/SucceededChannelFuture.h>
 
 #include <cetty/util/Exception.h>
 
@@ -76,6 +75,16 @@ AbstractChannel::AbstractChannel(const EventLoopPtr& eventLoop,
       factory(factory),
       pipeline(pipeline) {
     BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
+
+    succeededFuture = new SucceededChannelFuture(shared_from_this());
+    closeFuture = new ChannelCloseFuture(shared_from_this());
+
+    if (!id) {
+        id = allocateId(this);
+    }
+
+    closeFuture->addListener(
+        boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
 }
 
 AbstractChannel::AbstractChannel(int id,
@@ -89,13 +98,7 @@ AbstractChannel::AbstractChannel(int id,
       factory(factory),
       pipeline(pipeline) {
     BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
-}
 
-AbstractChannel::~AbstractChannel() {
-}
-
-void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->attach(shared_from_this());
     succeededFuture = new SucceededChannelFuture(shared_from_this());
     closeFuture = new ChannelCloseFuture(shared_from_this());
 
@@ -105,6 +108,17 @@ void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
 
     closeFuture->addListener(
         boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
+}
+
+AbstractChannel::~AbstractChannel() {
+}
+
+void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
+    pipeline->setSinkHandler(
+        new ChannelSinkHandler(
+            boost::static_pointer_cast<AbstractChannel>(shared_from_this())));
+
+    pipeline->attach(shared_from_this());
 }
 
 int AbstractChannel::getId() const {

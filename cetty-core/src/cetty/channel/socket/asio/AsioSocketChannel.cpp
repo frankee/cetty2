@@ -29,9 +29,9 @@
 
 #include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioSocketChannelSink.h>
 #include <cetty/channel/socket/asio/AsioSocketAddressImpl.h>
 #include <cetty/channel/socket/asio/AsioWriteOperationQueue.h>
+#include <cetty/channel/socket/asio/AsioSocketChannelSinkHandler.h>
 #include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
@@ -58,9 +58,8 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
       highWaterMarkCounter(0),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      sink(),
       config(tcpSocket) {
-      init(pipeline);
+    init(pipeline);
 }
 
 AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
@@ -71,15 +70,11 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
       highWaterMarkCounter(0),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      sink(),
       config(tcpSocket) {
     init(pipeline);
 }
 
 AsioSocketChannel::~AsioSocketChannel() {
-    if (sink) {
-        delete sink;
-    }
 }
 
 ChannelConfig& AsioSocketChannel::getConfig() {
@@ -88,10 +83,6 @@ ChannelConfig& AsioSocketChannel::getConfig() {
 
 const ChannelConfig& AsioSocketChannel::getConfig() const {
     return this->config;
-}
-
-ChannelSink& AsioSocketChannel::getSink() {
-    return *sink;
 }
 
 const SocketAddress& AsioSocketChannel::getLocalAddress() const {
@@ -104,7 +95,7 @@ const SocketAddress& AsioSocketChannel::getLocalAddress() const {
 
     if (!ec) {
         localAddress = SocketAddress(SocketAddressImplPtr(
-            new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+                                         new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the local address of the channel from asio.";
@@ -123,7 +114,7 @@ const SocketAddress& AsioSocketChannel::getRemoteAddress() const {
 
     if (!ec) {
         remoteAddress = SocketAddress(SocketAddressImplPtr(
-            new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+                                          new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the remote address of the channel from asio.";
@@ -177,10 +168,10 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         if (!writeQueue->empty()) {
             writeQueue->peek().setFailure(
                 RuntimeException(std::string("write buffer failed, code=") +
-                Integer::toString(error.value())));
+                                 Integer::toString(error.value())));
             writeQueue->popup();
         }
-        
+
         close();
     }
 }
@@ -190,7 +181,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
                                       const ChannelFuturePtr& cf) {
     if (!error) {
         LOG_INFO << "channel connected to the remote server %s, firing connected event."
-            << remoteAddress.toString();
+                 << remoteAddress.toString();
         pipeline->fireChannelActive();
         cf->setSuccess();
 
@@ -203,10 +194,10 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
 
         if (error) {
             LOG_ERROR << "failed to close tcp socket before connect, "
-                << error.value()
-                << ":"
-                << error.message()
-                << ", but skip it.";
+                      << error.value()
+                      << ":"
+                      << error.message()
+                      << ", but skip it.";
         }
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
@@ -268,9 +259,9 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 
     if (error) {
         LOG_ERROR << "boost asio can NOT resolve "
-            << hostname << ":" << port
-            << " , code=" << error.value() << ", msg=" << error.message()
-            << ", then firing this exception.";
+                  << hostname << ":" << port
+                  << " , code=" << error.value() << ", msg=" << error.message()
+                  << ", then firing this exception.";
 
         ChannelException exception(error.message(), error.value());
         connectFuture->setFailure(exception);
@@ -290,23 +281,25 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
                     connectFuture));
 
     const EventLoopPoolPtr& pool = eventLoop->getEventLoopPool();
-    if (pool && pool->isMainThread()) {
-            LOG_INFO << "the asio service pool starting to run in main thread.";
-            if (pool->start()) {
-                LOG_INFO << "the asio service pool started to running.";
-            }
-            else {
-                //TODO: may duplicated with the callback of AsioSocketChannel::handleConnect
-                LOG_ERROR << "start the boost asio service error,"
-                    << " and firing an exception, then terminate self.";
-                ChannelException e("the boost asio service can not be started.");
-                connectFuture->setFailure(e);
-                pipeline->fireExceptionCaught(e);
-                doClose();
 
-                //TODO: should terminate the program
-                std::terminate();
-            }
+    if (pool && pool->isMainThread()) {
+        LOG_INFO << "the asio service pool starting to run in main thread.";
+
+        if (pool->start()) {
+            LOG_INFO << "the asio service pool started to running.";
+        }
+        else {
+            //TODO: may duplicated with the callback of AsioSocketChannel::handleConnect
+            LOG_ERROR << "start the boost asio service error,"
+                      << " and firing an exception, then terminate self.";
+            ChannelException e("the boost asio service can not be started.");
+            connectFuture->setFailure(e);
+            pipeline->fireExceptionCaught(e);
+            doClose();
+
+            //TODO: should terminate the program
+            std::terminate();
+        }
     }
 }
 
@@ -355,7 +348,7 @@ void AsioSocketChannel::doClose() {
 
         if (error) {
             LOG_ERROR << "failed to shutdown the tcp socket"
-                << error.value() << ":" << error.message();
+                      << error.value() << ":" << error.message();
         }
     }
 
@@ -363,7 +356,7 @@ void AsioSocketChannel::doClose() {
 
     if (error) {
         LOG_ERROR << "failed to close the tcp socket."
-            << error.value() << ":" << error.message();
+                  << error.value() << ":" << error.message();
 
         IOException e("failed to close the tcp socket.", error.value());
         //future->setFailure(e);
@@ -429,11 +422,19 @@ void AsioSocketChannel::doFlush(const ChannelBufferPtr& buffer,
 
 void AsioSocketChannel::init(const ChannelPipelinePtr& pipeline) {
     writeQueue.reset(new AsioWriteOperationQueue(*this));
-    this->sink = new AsioSocketChannelSink(*this);
 
-    AbstractChannel::setPipeline(pipeline);
+    setPipeline(pipeline);
+
     LOG_INFO << "AsioSocketChannel firing the Channel Create Event.";
     pipeline->fireChannelCreated();
+}
+
+void AsioSocketChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
+    pipeline->setSinkHandler(
+        new AsioSocketChannelSinkHandler(
+            boost::static_pointer_cast<AsioSocketChannel>(shared_from_this())));
+
+    pipeline->attach(shared_from_this());
 }
 
 }

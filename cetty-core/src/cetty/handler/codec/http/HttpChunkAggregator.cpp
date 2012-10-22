@@ -166,7 +166,7 @@ HttpChunkAggregator::HttpChunkAggregator(int maxContentLength)
 HttpMessagePtr HttpChunkAggregator::decode(ChannelHandlerContext& ctx,
         const HttpPackage& msg) {
     HttpPackageVisitor visitor(*this, ctx);
-    return msg.apply_visitor(visitor);
+    return msg.variant.apply_visitor(visitor);
 }
 
 void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {

@@ -18,19 +18,48 @@
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
+#include <cetty/channel/embedded/EmbeddedBufferChannel.h>
+#include <cetty/handler/codec/http/HttpServerCodec.h>
+#include <cetty/handler/codec/http/HttpChunkAggregator.h>
+
 #include <cetty/util/StringUtil.h>
 
 using namespace cetty::buffer;
+using namespace cetty::channel::embedded;
+using namespace cetty::handler::codec::http;
 
 static ChannelBufferPtr prepareDataChunk(int size) {
     std::string str(size, 'a');
     return Unpooled::copiedBuffer(str);
 }
 
+TEST(HttpServerCodecTest, testMultiChannelBufferInput) {
+    EmbeddedBufferChannel<HttpMessagePtr> decoderEmbedder(
+        new HttpRequestDecoder(),
+        new HttpChunkAggregator(1048576));
+
+    std::string inputPart1 = "GET /api/echo.json?p=ssss HTTP/1.1\r\n"
+                        "Host: 127.0.0.1:8080\r\n"
+                        "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20100101 Firefox/15.0.1\r\n";
+
+    std::string inputPart2 = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+                        "Accept-Language: en-us,en;q=0.5\r\n"
+                        "Accept-Encoding: gzip, deflate\r\n"
+                        "Connection: keep-alive\r\n\r\n";
+
+    decoderEmbedder.writeInbound(Unpooled::wrappedBuffer(&inputPart1));
+    decoderEmbedder.writeInbound(Unpooled::wrappedBuffer(&inputPart2));
+    decoderEmbedder.finish();
+
+    HttpMessagePtr message;
+    decoderEmbedder.readInbound(&message);
+}
+
 TEST(HttpServerCodecTest, testUnfinishedChunkedHttpRequestIsLastFlag) {
     int maxChunkSize = 2000;
-    HttpServerCodec httpServerCodec = new HttpServerCodec(1000, 1000, maxChunkSize);
-    EmbeddedByteChannel decoderEmbedder = new EmbeddedByteChannel(httpServerCodec);
+
+    EmbeddedBufferChannel<HttpPackage> decoderEmbedder(
+        new HttpServerCodec(1000, 1000, maxChunkSize));
 
     int totalContentLength = maxChunkSize * 5;
 
@@ -42,24 +71,26 @@ TEST(HttpServerCodecTest, testUnfinishedChunkedHttpRequestIsLastFlag) {
     decoderEmbedder.writeInbound(prepareDataChunk(offeredContentLength));
     decoderEmbedder.finish();
 
-    HttpMessage httpMessage = (HttpMessage) decoderEmbedder.readInbound();
-    Assert.assertSame(HttpTransferEncoding.STREAMED, httpMessage.getTransferEncoding());
+    HttpPackage message;
+    decoderEmbedder.readInbound(&message);
+    //Assert.assertSame(HttpTransferEncoding.STREAMED, httpMessage.getTransferEncoding());
 
-    boolean empty = true;
+    bool empty = true;
     int totalBytesPolled = 0;
 
     for (;;) {
-        HttpChunk httpChunk = (HttpChunk) decoderEmbedder.readInbound();
+        HttpPackage httpChunk;
+        decoderEmbedder.readInbound(&httpChunk);
 
-        if (httpChunk == null) {
+        if (!httpChunk) {
             break;
         }
 
         empty = false;
-        totalBytesPolled += httpChunk.getContent().readableBytes();
-        Assert.assertFalse(httpChunk.isLast());
+        //totalBytesPolled += httpChunk.getContent().readableBytes();
+        //Assert.assertFalse(httpChunk.isLast());
     }
 
-    Assert.assertFalse(empty);
-    Assert.assertEquals(offeredContentLength, totalBytesPolled);
-}
+    ASSERT_FALSE(empty);
+    ASSERT_EQ(offeredContentLength, totalBytesPolled);
+};

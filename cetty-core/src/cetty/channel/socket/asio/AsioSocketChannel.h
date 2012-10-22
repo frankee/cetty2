@@ -46,9 +46,9 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::logging;
 
-class AsioSocketChannelSink;
 class AsioWriteOperationQueue;
 class AsioServerSocketChannel;
+class AsioSocketChannelSinkHandler;
 
 class AsioSocketChannel;
 typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
@@ -69,8 +69,6 @@ public:
     virtual ChannelConfig& getConfig();
     virtual const ChannelConfig& getConfig() const;
 
-    virtual ChannelSink& getSink();
-
     boost::asio::ip::tcp::socket& getSocket() {
         return this->tcpSocket;
     }
@@ -83,6 +81,8 @@ public:
     virtual const SocketAddress& getRemoteAddress() const;
 
     virtual bool isActive() const;
+
+    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
 
 protected:
     virtual bool setClosed();
@@ -112,9 +112,9 @@ private:
     void init(const ChannelPipelinePtr& pipeline);
 
 private:
-    friend class AsioSocketChannelSink;
     friend class AsioWriteOperationQueue;
     friend class AsioServerSocketChannel;
+    friend class AsioSocketChannelSinkHandler;
 
 protected:
     bool isWriting;
@@ -122,8 +122,6 @@ protected:
 
     AsioServicePtr  ioService;
     boost::asio::ip::tcp::socket tcpSocket;
-
-    AsioSocketChannelSink* sink;
 
     boost::scoped_ptr<AsioWriteOperationQueue> writeQueue;
 

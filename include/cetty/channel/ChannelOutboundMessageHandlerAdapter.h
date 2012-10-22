@@ -26,6 +26,8 @@ namespace channel {
 
 template<typename OutboundInT,
          typename OutboundOutT,
+         // may be the ChannelOutboundMessageHandlerContext<OutboundOutT>
+         // or be the ChannelOutboundBufferHandlerContext
          typename OutboundContext = ChannelOutboundMessageHandlerContext<OutboundOutT> >
 class ChannelOutboundMessageHandlerAdapter
         : public ChannelOutboundMessageHandler<OutboundInT> {
