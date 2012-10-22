@@ -25,8 +25,8 @@ namespace channel {
 namespace socket {
 namespace asio {
 
-AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler(const boost::intrusive_ptr<AsioSocketChannel>& channel) {
-
+AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler(
+    const AsioSocketChannelPtr& channel) : channel(channel) {
 }
 
 void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
@@ -80,9 +80,8 @@ void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
 }
 
 void AsioSocketChannelSinkHandler::flush(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& buffer,
         const ChannelFuturePtr& future) {
-    channel->doFlush(buffer, future);
+    channel->doFlush(getOutboundChannelBuffer(), future);
 }
 
 #if 0

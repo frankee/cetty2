@@ -26,7 +26,7 @@ class AbstractChannel;
 
 class ChannelSinkHandler : public ChannelOutboundBufferHandler {
 public:
-    ChannelSinkHandler(boost::intrusive_ptr<AbstractChannel>& channel)
+    ChannelSinkHandler(const boost::intrusive_ptr<AbstractChannel>& channel)
         : channel(channel) {}
 
     ChannelSinkHandler() : channel() {}

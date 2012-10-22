@@ -29,8 +29,10 @@ class AsioSocketChannel;
 
 class AsioSocketChannelSinkHandler : public cetty::channel::ChannelSinkHandler {
 public:
-    AsioSocketChannelSinkHandler();
-    AsioSocketChannelSinkHandler(const boost::intrusive_ptr<AsioSocketChannel>& channel);
+    typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
+    
+public:
+    AsioSocketChannelSinkHandler(const AsioSocketChannelPtr& channel);
     virtual ~AsioSocketChannelSinkHandler() {}
 
 public:
@@ -40,11 +42,13 @@ public:
                          const ChannelFuturePtr& future);
 
     virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelBufferPtr& buffer,
                        const ChannelFuturePtr& future);
 
+    // TODO: seperated with flush.
+    //virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
+
 private:
-    boost::intrusive_ptr<AsioSocketChannel> channel;
+    AsioSocketChannelPtr channel;
 };
 
 }

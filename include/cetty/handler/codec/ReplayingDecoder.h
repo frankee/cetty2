@@ -563,6 +563,9 @@ private:
             cumulation = input;
             replayable = new ReplayingDecoderBuffer(input);
         }
+        else {
+            replayable->needMoreBytes(false);
+        }
     }
 
 protected:
