@@ -161,10 +161,10 @@ void SessionManager::createSessionCallback(int result,
         applyGlobalSessionTimeout(session);
         onStart(session);
         notifyStart(session);
+        sessions.insert(std::pair<std::string, SessionPtr>(session->getId(), session));
 
         callback(session);
-    }
-    else {
+    } else {
         callback(SessionPtr());
     }
 }
@@ -172,11 +172,17 @@ void SessionManager::createSessionCallback(int result,
 void SessionManager::getSession(const std::string& id,
                                 const SessionCallback& callback) {
     enableSessionValidationIfNecessary();
+    std::map<std::string, SessionPtr>::iterator it = sessions.find(id);
+    if(it != sessions.end()){
+        readSessionCallback(0, (*it).second, callback);
+        return;
+    }
+
     sessionDAO->readSession(id,
                             boost::bind(&SessionManager::readSessionCallback,
                                         this,
-                                        _1,
-                                        _2,
+                                        _1, // return code
+                                        _2, // session
                                         boost::cref(callback)));
 }
 
@@ -187,15 +193,16 @@ void SessionManager::readSessionCallback(int result,
         validate(session);
         if(session->isStopped() || session->isExpired()){
             callback(SessionPtr());
-        }
-        else{
+        } else{
             session->touch();
+
+            // There will not cover the old session which has the same key in #sessions
+            sessions.insert(std::pair<std::string, SessionPtr>(session->getId(), session));
             callback(session);
-        }
-    }
-    else {
+        } // if(session->isStopped() || session->isExpired())
+    } else {
         callback(SessionPtr());
-    }
+    } // if (!result)
 }
 
 void SessionManager::addSessionListeners(const SessionChangeCallback& callback) {

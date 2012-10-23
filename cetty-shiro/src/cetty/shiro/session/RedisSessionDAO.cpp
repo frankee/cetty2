@@ -33,6 +33,10 @@ RedisSessionDAO::~RedisSessionDAO(){
 
 void RedisSessionDAO::readSession(const std::string& sessionId,
                                   const SessionCallback& callback) {
+    if(callback.empty()) {
+        LOG_TRACE << "Session reading callback is not set.";
+        return;
+    }
     if (redis) {
         std::string key(KEY_PREFIX);
         key += sessionId;
@@ -50,6 +54,10 @@ void RedisSessionDAO::readSession(const std::string& sessionId,
 
 void RedisSessionDAO::create(const SessionPtr& session,
                              const SessionCallback& callback) {
+    if(callback.empty()) {
+        LOG_TRACE << "Session create callback is not set.";
+        return;
+    }
     if (redis && session) {
         std::string sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
@@ -71,6 +79,11 @@ void RedisSessionDAO::create(const SessionPtr& session,
 
 void RedisSessionDAO::update(const SessionPtr& session,
                              const SessionCallback& callback) {
+    if(callback.empty()) {
+        LOG_TRACE << "Session updating callback is not set.";
+        return;
+    }
+
     if (redis && session) {
         std::string key(KEY_PREFIX);
         std::string value;
@@ -88,6 +101,10 @@ void RedisSessionDAO::update(const SessionPtr& session,
 
 void RedisSessionDAO::remove(const SessionPtr& session,
                              const SessionCallback& callback) {
+    if(callback.empty()) {
+        LOG_TRACE << "Session removing callback is not set.";
+        return;
+    }
     if (redis && session) {
         std::string key(KEY_PREFIX);
         key += session->getId();

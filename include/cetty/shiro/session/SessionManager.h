@@ -130,7 +130,7 @@ public:
     bool isSessionValidationSchedulerEnabled() const;
     void setSessionValidationSchedulerEnabled(bool sessionValidationSchedulerEnabled);
 
-    void setSessionValidationScheduler(SessionValidationScheduler* sessionValidationScheduler);
+    void setSessionValidationScheduler(SessionValidationScheduler* scheduler);
     SessionValidationScheduler* getSessionValidationScheduler() const;
 
     /**
@@ -155,7 +155,6 @@ public:
 
     void validateSessions();
 
-    void setSessionDAO(SessionDAO* sessionDAO);
     SessionDAO* getSessionDAO();
 
     void stop(const SessionPtr& session);
@@ -258,8 +257,12 @@ void SessionManager::setSessionValidationSchedulerEnabled(bool sessionValidation
 }
 
 inline
-void SessionManager::setSessionValidationScheduler(SessionValidationScheduler* sessionValidationScheduler) {
-    this->validationScheduler = sessionValidationScheduler;
+void SessionManager::setSessionValidationScheduler(SessionValidationScheduler* scheduler){
+    if(validationScheduler){
+        delete validationScheduler;
+        validationScheduler = NULL;
+    }
+    validationScheduler = scheduler;
 }
 
 inline
@@ -275,11 +278,6 @@ void SessionManager::setSessionValidationInterval(int sessionValidationInterval)
 inline
 int SessionManager::getSessionValidationInterval() const {
     return sessionValidationInterval;
-}
-
-inline
-void SessionManager::setSessionDAO(SessionDAO* sessionDAO) {
-    this->sessionDAO = sessionDAO;
 }
 
 inline
