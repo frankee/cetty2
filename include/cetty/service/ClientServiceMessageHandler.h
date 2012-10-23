@@ -60,12 +60,10 @@ public:
     virtual ~ClientServiceMessageHandler() {}
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        bool notify = false;
-
         while (!inboundQueue.empty()) {
-            OutstandingCallPtr& response = inboundQueue.front();
+            //OutstandingCallPtr& response = inboundQueue.front();
+            //int64_t id = response->getId();
 
-            int64_t id = response->getId();
             const OutstandingCallPtr& out = outMessages.front();
 
             if (out->future) {

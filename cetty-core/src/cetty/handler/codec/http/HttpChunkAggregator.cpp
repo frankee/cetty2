@@ -78,6 +78,7 @@ public:
         }
         else {
             // Error.
+            return HttpMessagePtr();
         }
     }
 

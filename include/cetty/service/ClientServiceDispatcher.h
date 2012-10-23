@@ -75,10 +75,10 @@ public:
     ClientServiceDispatcher(const Connections& connections,
                             const ChannelPipelinePtr& pipeline,
                             const EventLoopPtr& eventLoop)
-        : connections(connections),
-          pool(connections),
+        : eventLoop(eventLoop),
           defaultPipeline(pipeline),
-          eventLoop(eventLoop) {
+          connections(connections),
+          pool(connections) {
     }
 
 public:

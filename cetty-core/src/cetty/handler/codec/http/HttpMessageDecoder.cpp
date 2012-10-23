@@ -721,8 +721,6 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
     const char* bytes = buffer->readableBytes(&bytesCnt);
 
     int headerSize = this->headerSize;
-    int strSize = 0;
-
     for (int i = 0, j = bytesCnt - 1; i < j; ++i, ++headerSize) {
         // Abort decoding if the header part is too large.
         if (headerSize >= maxHeaderSize) {

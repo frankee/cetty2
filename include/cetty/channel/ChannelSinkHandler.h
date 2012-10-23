@@ -30,7 +30,7 @@ public:
 
 public:
     ChannelSinkHandler() : channel() {}
-    ChannelSinkHandler(AbstractChannelPtr& channel) : channel(channel) {}
+    ChannelSinkHandler(const AbstractChannelPtr& channel) : channel(channel) {}
 
     virtual ~ChannelSinkHandler() {}
 

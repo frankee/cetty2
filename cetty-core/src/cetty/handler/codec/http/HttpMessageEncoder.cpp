@@ -135,6 +135,9 @@ public:
         else {
             // error.
         }
+
+        //FIXME
+        return Unpooled::EMPTY_BUFFER;
     }
 
     ChannelBufferPtr operator()(const HttpChunkTrailerPtr& value) const {
