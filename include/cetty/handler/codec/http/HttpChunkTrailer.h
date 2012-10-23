@@ -52,6 +52,10 @@ public:
         return httpHeader.get(name);
     }
 
+    const std::string& getLastHeader(const std::string& name) const {
+        return httpHeader.getLast(name);
+    }
+
     /**
     * Get the header values with the specified header name.
     *

@@ -655,25 +655,36 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
     StringPiece line = readHeader(buffer);
     StringPiece lastHeader;
 
+    if (buffer->needMoreBytes()) { // need more data
+        return HttpChunkTrailerPtr();
+    }
+
     if (!line.empty()) {
         std::vector<StringPiece> header;
         HttpChunkTrailerPtr trailer = new HttpChunkTrailer;
 
+        std::string valueStr;
+        std::string nameStr;
+
         do {
             char firstChar = line[0];
 
+            //FIXME
+            //  HeaderName:HeaderValue
+            //   Header Continued Value
             if (!lastHeader.empty() && (firstChar == ' ' || firstChar == '\t')) {
-                //std::string headers;
-                //trailer->getHeaders(lastHeader, &headers);
+#if 0
+                const std::string& lastHeader = trailer->getLastHeader(
+                    lastHeader.c_str());
 
-                //if (!headers.empty()) {
-                //    int lastPos = current.size() - 1;
-                //    String newString = current.get(lastPos) + line.trim();
-                //    current.set(lastPos, newString);
-                //}
-                //else {
-                // Content-Length, Transfer-Encoding, or Trailer
-                //}
+                if (!lastHeader.empty()) {
+                    std::string newString(lastHeader);
+                    newString += line.trim().c_str();
+                }
+                else {
+                    // Content-Length, Transfer-Encoding, or Trailer
+                }
+#endif
             }
             else {
                 header.clear();
@@ -690,6 +701,10 @@ HttpMessageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
             }
 
             line = readHeader(buffer);
+
+            if (buffer->needMoreBytes()) { // need more data
+                return HttpChunkTrailerPtr();
+            }
         }
         while (!line.empty());
 
@@ -722,6 +737,14 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
         if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
             buffer->offsetReaderIndex(i+2);
             return StringPiece(bytes, i);
+        }
+        else if (bytes[i] == HttpCodecUtil::LF) {
+            buffer->offsetReaderIndex(i + 1);
+            return StringPiece(bytes, i);
+        }
+        else if (bytes[i] != HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
+            buffer->offsetReaderIndex(i + 2);
+            return StringPiece(bytes, i + 1);
         }
     }
 
@@ -765,6 +788,7 @@ StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer
         }
     }
 
+    buffer->needMoreBytes(true);
     return StringPiece();
 }
 

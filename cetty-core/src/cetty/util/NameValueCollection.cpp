@@ -117,6 +117,27 @@ const std::string& NameValueCollection::get(const std::string& name, const std::
     }
 }
 
+const std::string& NameValueCollection::getLast(const std::string& name) const {
+    ConstIterator it = findLast(name);
+    if (it != _map.end()) {
+        return it->second;
+    }
+    else {
+        return EMPTY_STR;
+    }
+}
+
+const std::string& NameValueCollection::getLast(const std::string& name, const std::string& defaultValue) const {
+    ConstIterator it = findLast(name);
+
+    if (it != _map.end()) {
+        return it->second;
+    }
+    else {
+        return defaultValue;
+    }
+}
+
 const int NameValueCollection::get(const std::string& name, std::vector<std::string>* values) const {
     int count = 0;
 
@@ -174,6 +195,14 @@ bool NameValueCollection::has(const std::string& name, const std::string& value)
 
 NameValueCollection::ConstIterator NameValueCollection::find(const std::string& name) const {
     return _map.find(name);
+}
+
+NameValueCollection::ConstIterator NameValueCollection::findLast(const std::string& name) const {
+    std::pair<ConstIterator,ConstIterator> range = _map.equal_range(name);
+    if (range.first != _map.end()) {
+        return --range.second;
+    }
+    return range.first;
 }
 
 NameValueCollection::ConstIterator NameValueCollection::lowerBound(const std::string& name) const {

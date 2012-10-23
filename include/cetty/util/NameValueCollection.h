@@ -108,7 +108,15 @@ public:
     /// Returns the value of the first name-value pair with the given name.
     /// If no value with the given name has been found, the defaultValue is returned.
 
+    const std::string& getLast(const std::string& name) const;
+    /// Returns the value of the last name-value pair with the given name.
+
+    const std::string& getLast(const std::string& name, const std::string& defaultValue) const;
+    /// Returns the value of the last name-value pair with the given name.
+    /// If no value with the given name has been found, the defaultValue is returned.
+
     const int get(const std::string& name, std::vector<std::string>* values) const;
+    /// Returns all of the values of the name-value pair with the given name.
 
     const int getNames(std::vector<std::string>* names) const;
 
@@ -120,6 +128,10 @@ public:
 
     ConstIterator find(const std::string& name) const;
     /// Returns an iterator pointing to the first name-value pair
+    /// with the given name.
+
+    ConstIterator findLast(const std::string& name) const;
+    /// Returns an iterator pointing to the last name-value pair
     /// with the given name.
 
     ConstIterator lowerBound(const std::string& name) const;
