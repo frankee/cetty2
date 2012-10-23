@@ -39,9 +39,15 @@ public:
 
 public:
     RedisReplyMessageDecoder()
-    : maxBulkSize(1024*1024), bulkSize(0), multiBulkSize(0) {}
+        : ReplayingDecoder<RedisReplyMessagePtr>(READ_INITIAL, true),
+          maxBulkSize(1024*1024),
+          bulkSize(0),
+          multiBulkSize(0) {}
     RedisReplyMessageDecoder(int maxBulkSize)
-    : maxBulkSize(maxBulkSize), bulkSize(0), multiBulkSize(0) {}
+        : ReplayingDecoder<RedisReplyMessagePtr>(READ_INITIAL, true),
+          maxBulkSize(maxBulkSize),
+          bulkSize(0),
+          multiBulkSize(0) {}
 
     virtual ~RedisReplyMessageDecoder() {}
 
@@ -59,8 +65,8 @@ private:
                                         std::vector<StringPiece>* bulks);
 
     bool readMultiBulkElement(const ReplayingDecoderBufferPtr& buffer,
-            const StringPiece& bytes,
-            std::vector<StringPiece>* bulks);
+                              const StringPiece& bytes,
+                              std::vector<StringPiece>* bulks);
 
     void fail(ChannelHandlerContext& ctx, long frameLength);
 

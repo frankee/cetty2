@@ -28,7 +28,9 @@ void myCallback(int code, const StringPiece& reply) {
         printf("the value not exist.\n");
     }
     else {
-        printf("the value is %s.\n", reply.c_str());
+        std::string str(reply.c_str(), reply.size());
+        str.append(1, '\0');
+        printf("the value is %s.\n", str.c_str());
     }
 }
 
@@ -37,8 +39,11 @@ void myArrayCallback(int code, const std::vector<StringPiece>& replies) {
         printf("the array value not exist.\n");
     }
     else {
+        std::string str;
         for (std::size_t i = 0; i < replies.size(); ++i) {
-            printf("the array value of %d is %s.\n", i, replies[i].c_str());
+            str.assign(replies[i].c_str(), replies[i].size());
+            str.append(1, '\0');
+            printf("the array value of %d is %s.\n", i, str.c_str());
         }
     }
 }
@@ -50,18 +55,15 @@ int main(int argc, char** argv) {
 
     RedisClient client(builder.build());
 
-    /*
-    std::string buffer(1024* 100, 0xff);
+    std::string buffer(1024, '5');
 
     client.set("test1", buffer);
     client.get("test1", boost::bind(myCallback, _1, _2));
 
-
-    buffer.clear();
-    buffer.append(1024*16, '2');
-    client.set("test1", buffer);
-    client.get("test1", boost::bind(myCallback, _1, _2));
-    */
+    //buffer.clear();
+    //buffer.append(1024, '2');
+    //client.set("test1", buffer);
+    //client.get("test1", boost::bind(myCallback, _1, _2));
 
     /*
     std::vector<std::pair<std::string, std::string> > values;
@@ -76,7 +78,7 @@ int main(int argc, char** argv) {
     client.hmget("ht", keys, boost::bind(myArrayCallback, _1, _2));
     */
 
-    client.set("mset1", "1---");
+    //client.set("mset1", "1---");
     //client.set("mset2", "sdksalsdj888788**&&^^2");
 
 #if 0
