@@ -71,14 +71,6 @@ void SessionManager::validateSessions() {
 
 int SessionManager::validate(const SessionPtr& session) {
     Session::SessionState state = session->validate();
-
-    if (state == Session::EXPIRED) {
-        session->expire();
-    }
-    else if (state == Session::STOPPED) {
-        session->stop();
-    }
-
     return (int)state;
 }
 
@@ -183,7 +175,7 @@ void SessionManager::getSession(const std::string& id,
                                         this,
                                         _1, // return code
                                         _2, // session
-                                        boost::cref(callback)));
+                                        callback));
 }
 
 void SessionManager::readSessionCallback(int result,
@@ -192,7 +184,7 @@ void SessionManager::readSessionCallback(int result,
     if (!result) {
         validate(session);
         if(session->isStopped() || session->isExpired()){
-            callback(SessionPtr());
+            callback(session);
         } else{
             session->touch();
 

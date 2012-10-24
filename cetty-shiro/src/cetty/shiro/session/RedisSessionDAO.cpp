@@ -37,27 +37,23 @@ void RedisSessionDAO::readSession(const std::string& sessionId,
         LOG_TRACE << "Session reading callback is not set.";
         return;
     }
+
     if (redis) {
         std::string key(KEY_PREFIX);
         key += sessionId;
         redis->get(key, boost::bind(
                        &RedisSessionDAO::getSessionCallback,
                        this,
-                       _1,
-                       _2,
-                       boost::cref(callback)));
-    }
-    else {
+                       _1, // return code
+                       _2, // session string
+                       callback));
+    } else {
 
     }
 }
 
 void RedisSessionDAO::create(const SessionPtr& session,
                              const SessionCallback& callback) {
-    if(callback.empty()) {
-        LOG_TRACE << "Session create callback is not set.";
-        return;
-    }
     if (redis && session) {
         std::string sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
@@ -69,59 +65,51 @@ void RedisSessionDAO::create(const SessionPtr& session,
         session->toJson(&value);
 
         redis->set(key, value);
-
-        callback(0, session);
-    }
-    else {
-        callback(-1, SessionPtr());
-    }
+        if(!callback.empty())
+            callback(0, session);
+    } else {
+        if(!callback.empty())
+            callback(-1, SessionPtr());
+    } // if(redis && session)
 }
 
 void RedisSessionDAO::update(const SessionPtr& session,
                              const SessionCallback& callback) {
-    if(callback.empty()) {
-        LOG_TRACE << "Session updating callback is not set.";
-        return;
-    }
-
     if (redis && session) {
         std::string key(KEY_PREFIX);
         std::string value;
 
         key += session->getId();
         session->toJson(&value);
-
         redis->set(key, value);
-        callback(0, session);
-    }
-    else {
-        callback(1, session);
-    }
+
+        if(!callback.empty())
+            callback(0, session);
+    } else {
+        if(!callback.empty())
+            callback(1, session);
+    } //  if (redis && session)
 }
 
 void RedisSessionDAO::remove(const SessionPtr& session,
                              const SessionCallback& callback) {
-    if(callback.empty()) {
-        LOG_TRACE << "Session removing callback is not set.";
-        return;
-    }
     if (redis && session) {
         std::string key(KEY_PREFIX);
         key += session->getId();
 
         redis->del(key);
-
-        callback(0, session);
-    }
-    else {
-        callback(1, session);
-    }
+        if(!callback.empty())
+            callback(0, session);
+    } else {
+        if(!callback.empty())
+            callback(1, session);
+    } // if (redis && session)
 }
 
 void RedisSessionDAO::getSessionCallback(int result,
         const StringPiece& data,
         const SessionCallback& callback) {
-    if (result == 0) {
+    if (!result) {
         SessionPtr session = new Session();
 
         session->setStopCallback(boost::bind(&SessionManager::stop,
@@ -132,11 +120,12 @@ void RedisSessionDAO::getSessionCallback(int result,
             SecurityUtils::getSecurityManager()->getSessionManager(), _1));
 
         session->fromJson(data.c_str());
-        callback(0, session);
-    }
-    else {
-        callback(result, SessionPtr());
-    }
+        if(!callback.empty())
+            callback(result, session);
+    } else {
+        if(!callback.empty())
+            callback(result, SessionPtr());
+    } // if (!result)
 }
 
 }

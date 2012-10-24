@@ -110,11 +110,9 @@ void SecurityManager::logout(const std::string& sessionId) {
 }
 
 void SecurityManager::onLogout(const SessionPtr& session) {
-    AuthenticatingRealm* authRealm = (AuthenticatingRealm*)realms.get();
-
-    if (authRealm != NULL) { authRealm->onLogout(session->getAttribute("username")); }
-
-    session->stop();
+    if(!session) return;
+    if(realms) realms->onLogout(session->getAttribute("username"));
+    if(!session->isStopped()) session->stop();
 }
 
 

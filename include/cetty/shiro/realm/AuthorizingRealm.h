@@ -51,6 +51,7 @@ public:
     void getAuthorizationInfo(const PrincipalCollection& principals, const GetAuthorizationInfoCallback& callback);
 
     virtual void onLogout(const std::string &principal){
+        AuthenticatingRealm::onLogout(principal);
         authorizations.erase(principal);
     }
 

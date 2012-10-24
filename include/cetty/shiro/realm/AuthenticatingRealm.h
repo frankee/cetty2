@@ -75,6 +75,7 @@ public:
 
     /// @brief cleaning cache when logout
     virtual void onLogout(const std::string& principal) {
+        Realm::onLogout(principal);
         infos.erase(principal);
     }
 

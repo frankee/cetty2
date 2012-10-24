@@ -106,9 +106,9 @@ void WSSE::generatorNonce(std::string* nonce) {
     for (; i < config.nonceLength; ++i) {
         int t = (rand() % 61);
 
-        if (t >= 0 && t <= 9) { ch = '0' + t; }
-        else if (t >= 10 && t <= 35) { ch = t + 55; }
-        else { ch = t + 61; }
+        if (t >= 0 && t <= 9) { ch = '0' + (char)t; }
+        else if (t >= 10 && t <= 35) { ch = (char)t + 55; }
+        else { ch = (char)t + 61; }
 
         nonce->append(1, ch);
     }
@@ -157,11 +157,11 @@ void WSSE::retrive(const std::string& principal,
         sql << config.userTokenUpdate,
             soci::use(principal),
             soci::use(created);
-        sql.commit();
+        //sql.commit();
     }
     catch (soci::soci_error const& e) {
         LOG_ERROR << e.what();
-        sql.rollback();
+        //sql.rollback();
     }
 
     sql.close();
@@ -185,11 +185,11 @@ void WSSE::save(const std::string& host,
             soci::use(host),
             soci::use(nonce),
             soci::use(created);
-        sql.commit();
+        //sql.commit();
     }
     catch (soci::soci_error const& e) {
         LOG_ERROR << e.what();
-        sql.rollback();
+        //sql.rollback();
     }
 
     sql.close();
