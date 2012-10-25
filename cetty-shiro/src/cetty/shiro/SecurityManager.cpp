@@ -78,6 +78,7 @@ void SecurityManager::onAuthenticate(const AuthenticationInfoPtr& info,
                                           callback));
     }
     else {
+        callback(1, token, info, SessionPtr());
         fireFailedLoginEvent(token);
     }
 }

@@ -95,11 +95,13 @@ bool Session::isValid() const {
 
 Session::SessionState Session::validate() {
     if (isStopped()) {
+        LOG_INFO << "session [" << getId() << "] has stoped.";
         stop();
         return Session::STOPPED;
     }
 
     if (isTimedOut()) {
+        LOG_INFO << "session [" << getId() << "] has expired.";
         expire();
         return Session::EXPIRED;
     }
@@ -128,11 +130,11 @@ void Session::setAttribute(const std::string& key, const std::string& value) {
         removeAttribute(key);
     }
 
-   if(key.empty() || value.empty()) return;
-        attributes.insert(std::pair<std::string, std::string>(key, value));
+    if(key.empty() || value.empty()) return;
+    attributes.insert(std::pair<std::string, std::string>(key, value));
 
-        if (updateCallback) {
-            updateCallback(shared_from_this());
+    if (updateCallback) {
+        updateCallback(shared_from_this());
     }
 }
 

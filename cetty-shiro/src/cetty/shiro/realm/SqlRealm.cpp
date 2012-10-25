@@ -42,6 +42,13 @@ void SqlRealm::init() {
             && config.authenticationQuery == DEFAULT_AUTHENTICATION_QUERY) {
         config.authenticationQuery = DEFAULT_SALTED_AUTHENTICATION_QUERY;
     }
+
+    if(config.authenticationQuery.empty())
+        config.authenticationQuery = SqlRealm::DEFAULT_AUTHENTICATION_QUERY;
+    if(config.userRolesQuery.empty())
+        config.userRolesQuery = SqlRealm::DEFAULT_USER_ROLES_QUERY;
+    if(config.permissionsQuery.empty())
+        config.permissionsQuery = SqlRealm::DEFAULT_PERMISSIONS_QUERY;
 }
 
 void SqlRealm::doGetAuthenticationInfo(const AuthenticationToken& token,

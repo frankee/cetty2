@@ -31,10 +31,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(SqlRealmConfig,
 SqlRealmConfig::SqlRealmConfig()
     : ConfigObject("SqlRealmConfig"),
       permissionsLookupEnabled(true),
-      saltStyle(SqlRealm::NO_SALT),
-      authenticationQuery(SqlRealm::DEFAULT_AUTHENTICATION_QUERY),
-      userRolesQuery(SqlRealm::DEFAULT_USER_ROLES_QUERY),
-      permissionsQuery(SqlRealm::DEFAULT_PERMISSIONS_QUERY) {}
+      saltStyle(SqlRealm::NO_SALT){}
 }
 }
 }

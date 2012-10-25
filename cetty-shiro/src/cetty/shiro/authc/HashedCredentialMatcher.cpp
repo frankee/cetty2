@@ -66,17 +66,19 @@ void HashedCredentialsMatcher::getCredentials(const AuthenticationInfo& info,
 
     if (isStoredCredentialsHexEncoded()) {
         DigestEngine::digestFromHex(infoCredentials, credentials);
-    }
-    else {
+    } else {
         DigestEngine::digestFromBase64(infoCredentials, credentials);
     }
 }
 
 void HashedCredentialsMatcher::getCredentials(const AuthenticationToken &token,
                                               std::string* credentials) {
-    if (credentials) {
-        DigestEngine* digestEngine = getDigestEngine();
-        digestEngine->digestFromBase64(token.getCredentials(), credentials);
+    if (credentials != NULL) {
+        if (isStoredCredentialsHexEncoded()){
+            DigestEngine::digestFromHex(token.getCredentials(), credentials);
+        } else {
+            DigestEngine::digestFromBase64(token.getCredentials(), credentials);
+        }
     }
 }
 
@@ -92,7 +94,8 @@ void HashedCredentialsMatcher::hashProvidedCredentials(const AuthenticationToken
         salt = token.getSalt();
     }
 
-    std::string c = info.getCredentials();
+    std::string c;
+    getCredentials(info, &c);
     c.append(salt);
 
     DigestEngine* digestEngine = getDigestEngine();
