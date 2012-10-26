@@ -27,6 +27,7 @@
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionPtr.h>
 #include <cetty/shiro/session/SessionManagerConfig.h>
+#include <cetty/shiro/session/SessionValidationScheduler.h>
 
 namespace cetty {
 namespace shiro {
@@ -40,7 +41,6 @@ using namespace boost::posix_time;
 typedef boost::function2<void, const SessionPtr&, int> SessionChangeCallback;
 
 class SessionDAO;
-class SessionValidationScheduler;
 
 /**
  * A SessionManager manages the creation, maintenance,
@@ -54,7 +54,7 @@ public:
     static const int DEFAULT_SESSION_VALIDATION_INTERVAL;
 
     /// Asynchronous call back after getting session
-    typedef boost::function1<void, const SessionPtr&> SessionCallback;
+    typedef boost::function1<void, SessionPtr> SessionCallback;
 
     /// Asynchronous call back after session is changed
     typedef std::vector<SessionChangeCallback> SessionChangeCallbacks;
@@ -161,6 +161,10 @@ public:
     void expire(const SessionPtr& session);
     virtual void onChange(const SessionPtr& session);
 
+    void setClearCallback(const SessionCallback &callback){
+        this->clearCallback = callback;
+    }
+
 protected:
     virtual void beforeSessionValidationDisabled() { /*NOOP*/ }
     virtual void afterSessionValidationEnabled() { /*NOOP*/ }
@@ -187,7 +191,7 @@ private:
 
     SessionValidationScheduler* createSessionValidationScheduler();
     void enableSessionValidationIfNecessary();
-    int validate(const SessionPtr& session);
+    Session::SessionState validate(SessionPtr session);
 
     void getActiveSessions(std::vector<SessionPtr>* actives);
 
@@ -213,6 +217,8 @@ private:
 
     std::map<std::string, SessionPtr> sessions;
     std::vector<SessionChangeCallback> listeners;
+
+    SessionCallback clearCallback;
 };
 
 

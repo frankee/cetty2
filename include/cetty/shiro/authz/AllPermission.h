@@ -39,7 +39,8 @@ namespace authz {
  */
 class AllPermission : public Permission {
 public:
-    AllPermission() {}
+    AllPermission(const std::string &permission)
+        : Permission(permission){}
     virtual ~AllPermission() {}
 
     /**
@@ -50,10 +51,6 @@ public:
      */
     virtual bool implies(const PermissionPtr& p) {
         return true;
-    }
-
-    virtual const std::string stringPermission() const {
-        return "*";
     }
 
     virtual std::string toString() const {

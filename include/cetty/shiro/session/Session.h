@@ -169,6 +169,9 @@ public:
     const std::string& getHost() const;
     void setHost(const std::string& host);
 
+    const std::string& getPrincipal() const;
+    void setPrincipal(const std::string &principal);
+
     bool isLogin() const;
     void setLogin(bool login);
 
@@ -318,6 +321,8 @@ private:
 
     std::string id;
     std::string host;
+    std::string principal;
+
     ptime startTime;
     ptime stopTime;
     ptime lastAccessTime;
@@ -362,6 +367,16 @@ int Session::getTimeout() const {
 inline
 const std::string& Session::getHost() const {
     return host;
+}
+
+inline
+void Session::setPrincipal(const std::string& principal){
+    this->principal = principal;
+}
+
+inline
+const std::string& Session::getPrincipal() const{
+    return principal;
 }
 
 inline
