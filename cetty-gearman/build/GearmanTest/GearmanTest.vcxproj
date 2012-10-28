@@ -15,7 +15,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}</ProjectGuid>
-    <RootNamespace>GearmanClientTest</RootNamespace>
+    <RootNamespace>GearmanTest</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
