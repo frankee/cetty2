@@ -16,17 +16,13 @@
 
 #include <cetty/handler/timeout/WriteTimeoutHandler.h>
 
-#include <boost/thread/thread_time.hpp>
 #include <boost/bind.hpp>
+#include <boost/thread/thread_time.hpp>
 
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/util/TimeUnit.h>
-#include <cetty/util/Timeout.h>
-#include <cetty/util/TimerFactory.h>
 
 namespace cetty {
 namespace handler {
@@ -34,72 +30,52 @@ namespace timeout {
 
 const WriteTimeoutException WriteTimeoutHandler::EXCEPTION("WriteTimeout");
 
-WriteTimeoutHandler::WriteTimeoutHandler(int timeoutSeconds) {
+WriteTimeoutHandler::WriteTimeoutHandler(int timeoutSeconds)
+    : timeoutMillis(timeoutSeconds * 1000) {
     if (timeoutSeconds <= 0) {
         timeoutMillis = 0;
     }
-    else {
-        timeoutMillis = TimeUnit::SECONDS.toMillis(timeoutSeconds);
-    }
 }
 
-WriteTimeoutHandler::WriteTimeoutHandler(boost::int64_t timeout,
-        const TimeUnit& unit) {
-    if (timeout <= 0) {
+WriteTimeoutHandler::WriteTimeoutHandler(const Duration& timeout)
+    : timeoutMillis(timeout.total_milliseconds()) {
+    if (timeoutMillis <= 0) {
         timeoutMillis = 0;
     }
-    else {
-        timeoutMillis = unit.toMillis(timeout);
-
-        if (0 == timeoutMillis) { timeoutMillis = 1; }
-    }
 }
 
-void WriteTimeoutHandler::releaseExternalResources() {
-    if (timer) {
-        timer->stop();
-    }
-}
-
-void WriteTimeoutHandler::writeRequested(ChannelHandlerContext& ctx,
-        const MessageEvent& e) {
-    boost::int64_t timeoutMillis = getTimeoutMillis(e);
-
+void WriteTimeoutHandler::flush(ChannelHandlerContext& ctx,
+    const ChannelFuturePtr& future) {
     if (timeoutMillis > 0) {
-        if (!timer) {
-            timer = TimerFactory::getFactory().getTimer(e.getChannel());
-        }
+        // Schedule a timeout.
+        ctx.getEventLoop()->runAfter(timeoutMillis, boost::bind(
+            &WriteTimeoutHandler::handleWriteTimeout,
+            this,
+            boost::ref(ctx),
+            boost::cref(future)));
 
-        // Set timeout only when getTimeoutMillis() returns a positive value.
-        const ChannelFuturePtr& future = e.getFuture();
-
-        if (future) {
-            const TimeoutPtr& timeout =
-                timer->newTimeout(boost::bind(&WriteTimeoutHandler::handleWriteTimeout,
-                                              this,
-                                              _1,
-                                              boost::ref(ctx),
-                                              boost::cref(future)),
-                                  timeoutMillis);
-
-            future->addListener(boost::bind(&WriteTimeoutHandler::cancelTimeout,
-                                            this,
-                                            _1,
-                                            timeout));
-        }
+        // Cancel the scheduled timeout if the flush future is complete.
+        future->addListener(boost::bind(
+            &WriteTimeoutHandler::cancelTimeout,
+            this,
+            _1));
     }
 
-    ctx.sendDownstream(e);
+    AbstractChannelOutboundHandler::flush(ctx, future);
 }
 
-void WriteTimeoutHandler::writeTimedOut(ChannelHandlerContext& ctx) {
-    Channels::fireExceptionCaught(ctx, EXCEPTION);
+ChannelHandlerPtr WriteTimeoutHandler::clone() {
+    return new WriteTimeoutHandler(
+        boost::posix_time::milliseconds(timeoutMillis));
 }
 
-void WriteTimeoutHandler::handleWriteTimeout(Timeout& timeout,
-        ChannelHandlerContext& ctx,
-        const ChannelFuturePtr& future) {
-    if (timeout.isCancelled()) {
+std::string WriteTimeoutHandler::toString() const {
+    return "WriterTimeoutHandler";
+}
+
+void WriteTimeoutHandler::handleWriteTimeout(ChannelHandlerContext& ctx,
+    const ChannelFuturePtr& future) {
+    if (timeout && timeout->isCancelled()) {
         return;
     }
 
@@ -113,7 +89,7 @@ void WriteTimeoutHandler::handleWriteTimeout(Timeout& timeout,
         try {
             writeTimedOut(ctx);
         }
-        catch (const Exception& t) {
+        catch (const std::exception& t) {
             // TODO
             // here may have problems:
             // if the timer is in the different thread (not the default AsioDeadlineTimer)
@@ -124,20 +100,26 @@ void WriteTimeoutHandler::handleWriteTimeout(Timeout& timeout,
             //
             // So at present, make sure handleWriteTimeout will be invoked in the
             // same thread with the channel's pipeline.
-            Channels::fireExceptionCaught(ctx, t);
-        }
-        catch (const std::exception& t) {
-            Channels::fireExceptionCaught(ctx, Exception(t.what()));
+            ctx.fireExceptionCaught(ChannelException(t.what()));
         }
         catch (...) {
-            Channels::fireExceptionCaught(ctx, Exception("Unknow exception"));
+            ctx.fireExceptionCaught(ChannelException("Unknown exception"));
         }
     }
 }
 
-void WriteTimeoutHandler::cancelTimeout(ChannelFuture& future,
-                                        TimeoutPtr timeout) {
-    timeout->cancel();
+void WriteTimeoutHandler::cancelTimeout(ChannelFuture& future) {
+    if (timeout) {
+        timeout->cancel();
+    }
+}
+
+void WriteTimeoutHandler::writeTimedOut(ChannelHandlerContext& ctx) {
+    if (!closed) {
+        ctx.fireExceptionCaught(EXCEPTION);
+        ctx.close();
+        closed = true;
+    }
 }
 
 }

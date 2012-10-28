@@ -71,7 +71,7 @@ void AbstractChannelOutboundHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void AbstractChannelOutboundHandler::userEventTriggered(ChannelHandlerContext& ctx,
-    const UserEvent& evt) {
+    const boost::any& evt) {
 
 }
 

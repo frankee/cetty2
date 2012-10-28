@@ -111,7 +111,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\proxy\HexDumpProxyInboundHandler.h" />
-    <ClInclude Include="..\..\example\proxy\HexDumpProxyPipelineFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

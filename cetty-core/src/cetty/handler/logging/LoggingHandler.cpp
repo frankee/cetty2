@@ -16,12 +16,11 @@
 
 #include <cetty/handler/logging/LoggingHandler.h>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/ChannelBuffers.h>
-#include <cetty/channel/ExceptionEvent.h>
-#include <cetty/channel/ChannelEvent.h>
-#include <cetty/channel/MessageEvent.h>
-#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+
+#include <cetty/logging/Logger.h>
 
 namespace cetty {
 namespace handler {
@@ -31,46 +30,119 @@ using namespace cetty::logging;
 using namespace cetty::buffer;
 using namespace cetty::channel;
 
-InternalLogLevel LoggingHandler::DEFAULT_LEVEL(InternalLogLevel::DEBUG);
 
-void LoggingHandler::log(const ChannelEvent& e) {
-    if (getLogger().isEnabled(level)) {
-        std::string msg = e.toString();
-
-        // Append hex dump if necessary.
-        if (hexDump) {
-            const MessageEvent* me =
-                dynamic_cast<const MessageEvent*>(&e);
-
-            if (me) {
-                ChannelBufferPtr buf = me->getMessage().smartPointer<ChannelBuffer>();
-                msg += " - (HEXDUMP: ";
-                msg += ChannelBuffers::hexDump(buf);
-                msg += ")";
-            }
-        }
-
-        // Log the message (and exception if available.)
-        const ExceptionEvent* ee =
-            dynamic_cast<const ExceptionEvent*>(&e);
-
-        if (ee) {
-            getLogger().log(level, msg, ee->getCause());
-        }
-        else {
-            getLogger().log(level, msg);
-        }
+void LoggingHandler::channelCreated(ChannelHandlerContext& ctx) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " CREATED";
     }
+
+    AbstractChannelHandler::channelCreated(ctx);
 }
 
-void LoggingHandler::handleUpstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-    log(e);
-    ctx.sendUpstream(e);
+void LoggingHandler::channelActive(ChannelHandlerContext& ctx) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " ACTIVE";
+    }
+
+    AbstractChannelHandler::channelActive(ctx);
 }
 
-void LoggingHandler::handleDownstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-    log(e);
-    ctx.sendDownstream(e);
+void LoggingHandler::channelInactive(ChannelHandlerContext& ctx) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " INACTIVE";
+    }
+
+    AbstractChannelHandler::channelInactive(ctx);
+}
+
+void LoggingHandler::exceptionCaught(ChannelHandlerContext& ctx,
+                                     const ChannelException& cause) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " EXCEPTION: "
+                << cause.getMessage();
+    }
+
+    AbstractChannelHandler::exceptionCaught(ctx, cause);
+}
+
+void LoggingHandler::userEventTriggered(ChannelHandlerContext& ctx,
+                                        const boost::any& evt) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " USER_EVENT: ";
+    }
+
+    AbstractChannelHandler::userEventTriggered(ctx, evt);
+}
+
+void LoggingHandler::bind(ChannelHandlerContext& ctx,
+                          const SocketAddress& localAddress,
+                          const ChannelFuturePtr& future) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " BIND("
+                << localAddress.toString()
+                << ")";
+    }
+
+    AbstractChannelHandler::bind(ctx, localAddress, future);
+}
+
+void LoggingHandler::connect(ChannelHandlerContext& ctx,
+                             const SocketAddress& remoteAddress,
+                             const SocketAddress& localAddress,
+                             const ChannelFuturePtr& future) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " CONNECT("
+                << remoteAddress.toString()
+                << ", "
+                << localAddress.toString()
+                << ")";
+    }
+
+    AbstractChannelHandler::connect(ctx, remoteAddress, localAddress, future);
+}
+
+void LoggingHandler::disconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " DISCONNECT()";
+    }
+
+    AbstractChannelHandler::disconnect(ctx, future);
+}
+
+void LoggingHandler::close(ChannelHandlerContext& ctx,
+                           const ChannelFuturePtr& future) {
+    if (Logger::isEnabled(level)) {
+        Logger("loggerHander", 0, level).stream()
+                << ctx.getChannel()->toString()
+                << " CLOSE()";
+    }
+
+    AbstractChannelHandler::close(ctx, future);
+}
+
+void LoggingHandler::flush(ChannelHandlerContext& ctx,
+                           const ChannelFuturePtr& future) {
+    ctx.flush(future);
+}
+
+void LoggingHandler::messageUpdated(ChannelHandlerContext& ctx) {
+    ctx.fireMessageUpdated();
 }
 
 }

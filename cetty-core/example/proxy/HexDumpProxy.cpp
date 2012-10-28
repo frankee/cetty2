@@ -18,16 +18,18 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "cetty/channel/socket/asio/AsioServerSocketChannelFactory.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
-#include "cetty/bootstrap/ServerBootstrap.h"
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/bootstrap/ServerBootstrap.h>
 
-#include "cetty/util/Integer.h"
-
-#include "HexDumpProxyPipelineFactory.h"
+#include <cetty/util/StringUtil.h>
+#include <cetty/handler/logging/LoggingHandler.h>
+#include "HexDumpProxyFrontendHandler.h"
 
 using namespace cetty::bootstrap;
 using namespace cetty::util;
+using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 
 /**
@@ -46,9 +48,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Parse command line options.
-    int localPort = Integer::parse(argv[1]);
+    int localPort = (int)StringUtil::atoi(argv[1]);
     std::string remoteHost = argv[2];
-    int remotePort = Integer::parse(argv[3]);
+    int remotePort = (int)StringUtil::atoi(argv[3]);
 
     printf("Proxying *:%d to %s:%d ...\n", localPort, remoteHost.c_str(), remotePort);
 
@@ -61,31 +63,28 @@ int main(int argc, char* argv[]) {
     ChannelFactoryPtr cf =
         ChannelFactoryPtr(new AsioClientSocketChannelFactory());
 
-    sb.setPipelineFactory(
-        ChannelPipelineFactoryPtr(
-            new HexDumpProxyPipelineFactory(cf, remoteHost, remotePort)));
+    sb.setPipeline(
+        ChannelPipelines::pipeline(
+        new LoggingHandler(LogLevel::INFO),
+        new HexDumpProxyFrontendHandler(remoteHost, remotePort)));
 
     // Start up the server.
-    Channel* c = sb.bind(SocketAddress(IpAddress::IPv4, localPort));
+    ChannelFuturePtr f = sb.bind(localPort)->await();
 
-    if (c->isBound()) {
-        printf("Server is running...\n");
-        printf("To quit server, press 'q'.\n");
+    printf("Server is running...\n");
+    printf("To quit server, press 'q'.\n");
 
-        char input;
+    char input;
 
-        do {
-            input = getchar();
+    do {
+        input = getchar();
 
-            if (input == 'q') {
-                c->close()->awaitUninterruptibly();
-                sb.releaseExternalResources();
-                return 0;
-            }
+        if (input == 'q') {
+            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            return 0;
         }
-        while (true);
     }
+    while (true);
 
-    sb.releaseExternalResources();
     return -1;
 }

@@ -175,7 +175,7 @@ protected:
         const ReplayingDecoderBufferPtr& buffer,
         int state);
 
-    bool isContentAlwaysEmpty(const HttpMessage& msg) const;
+    virtual bool isContentAlwaysEmpty(const HttpMessagePtr& msg) const;
 
 protected:
     virtual bool isDecodingRequest() const = 0;

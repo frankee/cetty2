@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/VoidChannelMessage.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
 
 namespace cetty {

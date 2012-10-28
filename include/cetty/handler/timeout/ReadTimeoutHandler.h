@@ -21,20 +21,13 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <boost/function.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
-#include <cetty/channel/LifeCycleAwareChannelHandler.h>
-#include <cetty/util/ExternalResourceReleasable.h>
-#include <cetty/util/Timer.h>
-
+#include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/AbstractChannelInboundHandler.h>
 #include <cetty/handler/timeout/ReadTimeoutException.h>
 
-namespace cetty {
-namespace util {
-class TimeUnit;
-}
-}
 
 namespace cetty {
 namespace handler {
@@ -86,12 +79,13 @@ using namespace cetty::util;
  * @apiviz.uses org.jboss.netty.util.HashedWheelTimer
  * @apiviz.has org.jboss.netty.handler.timeout.TimeoutException oneway - - raises
  */
-class ReadTimeoutHandler : public cetty::channel::SimpleChannelUpstreamHandler,
-    public cetty::channel::LifeCycleAwareChannelHandler,
-    public cetty::util::ExternalResourceReleasable {
+class ReadTimeoutHandler : public AbstractChannelInboundHandler {
 public:
-    typedef boost::posix_time::ptime time_type;
-    typedef boost::posix_time::time_duration time_duration_type;
+    typedef boost::posix_time::ptime Time;
+    typedef boost::posix_time::time_duration Duration;
+
+private:
+    typedef boost::function0<void> TimeoutCallback;
 
 public:
     /**
@@ -113,59 +107,51 @@ public:
      *        The recommended {@link Timer} implementation is {@link HashedWheelTimer}.
      * @param timeout
      *        read timeout
-     * @param unit
-     *        the {@link TimeUnit} of <tt>timeout</tt>
+     *
      */
-    ReadTimeoutHandler(boost::int64_t timeout, const TimeUnit& unit);
-
-    /**
-     * Stops the {@link Timer} which was specified in the constructor of this
-     * handler.  You should not call this method if the {@link Timer} is in use
-     * by other objects.
-     */
-    virtual void releaseExternalResources();
+    ReadTimeoutHandler(const Duration& timeout);
 
     virtual void beforeAdd(ChannelHandlerContext& ctx);
 
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        // NOOP
-    }
+    virtual void afterAdd(ChannelHandlerContext& ctx);
 
     virtual void beforeRemove(ChannelHandlerContext& ctx);
 
-    virtual void afterRemove(ChannelHandlerContext& ctx) {
-        // NOOP
-    }
+    virtual void afterRemove(ChannelHandlerContext& ctx);
 
-    virtual void channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+    virtual void channelCreated(ChannelHandlerContext& ctx);
 
-    virtual void channelClosed(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+    virtual void channelActive(ChannelHandlerContext& ctx);
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
+    virtual void channelInactive(ChannelHandlerContext& ctx);
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx);
 
     virtual ChannelHandlerPtr clone();
 
-    virtual std::string toString() const { return "ReadTimeoutHandler"; }
-
-    void handleReadTimeout(Timeout& timeout, ChannelHandlerContext& ctx);
+    virtual std::string toString() const;
 
 protected:
-    virtual void readTimedOut(ChannelHandlerContext& ctx);
+    void readTimedOut(ChannelHandlerContext& ctx);
 
 private:
     void initialize(ChannelHandlerContext& ctx);
     void destroy();
 
-    void updateLastReadTime();
+    void handleReadTimeout(ChannelHandlerContext& ctx);
 
 private:
     static const ReadTimeoutException EXCEPTION;
 
-    TimerPtr timer;
-    TimeoutPtr timeout;
+private:
+    int state; // 0 - none, 1 - Initialized, 2 - Destroyed;
+    bool closed;
 
-    boost::int64_t timeoutMillis;
-    time_type lastReadTime;
+    int64_t timeoutMillis;
+    Time lastReadTime;
+
+    TimeoutPtr timeout;
+    TimeoutCallback timeoutCallback;
 };
 
 }

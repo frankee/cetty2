@@ -36,19 +36,29 @@ void AbstractChannelHandler::afterRemove(ChannelHandlerContext& ctx) {
 
 }
 
-void AbstractChannelHandler::exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause) {
+void AbstractChannelHandler::exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause) {
 
 }
 
-void AbstractChannelHandler::userEventTriggered(ChannelHandlerContext& ctx, const UserEvent& evt) {
-
+void AbstractChannelHandler::userEventTriggered(ChannelHandlerContext& ctx,
+        const boost::any& evt) {
 }
 
-ChannelHandlerContext* AbstractChannelHandler::createContext(const std::string& name, ChannelPipeline& pipeline, ChannelHandlerContext* prev, ChannelHandlerContext* next) {
+ChannelHandlerContext* AbstractChannelHandler::createContext(
+    const std::string& name,
+    ChannelPipeline& pipeline,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next) {
     return new ChannelHandlerContext(name, pipeline, shared_from_this(), prev, next);
 }
 
-ChannelHandlerContext* AbstractChannelHandler::createContext(const std::string& name, const EventLoopPtr& eventLoop, ChannelPipeline& pipeline, ChannelHandlerContext* prev, ChannelHandlerContext* next) {
+ChannelHandlerContext* AbstractChannelHandler::createContext(
+    const std::string& name,
+    const EventLoopPtr& eventLoop,
+    ChannelPipeline& pipeline,
+    ChannelHandlerContext* prev,
+    ChannelHandlerContext* next) {
     return new ChannelHandlerContext(name, eventLoop, pipeline, shared_from_this(), prev, next);
 }
 

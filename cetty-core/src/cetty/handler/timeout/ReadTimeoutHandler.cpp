@@ -19,13 +19,10 @@
 #include <boost/thread/thread_time.hpp>
 #include <boost/bind.hpp>
 
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/util/TimeUnit.h>
-#include <cetty/util/Timeout.h>
-#include <cetty/util/TimerFactory.h>
 
 namespace cetty {
 namespace handler {
@@ -36,78 +33,56 @@ using namespace cetty::util;
 
 const ReadTimeoutException ReadTimeoutHandler::EXCEPTION("ReadTimeout");
 
-ReadTimeoutHandler::ReadTimeoutHandler(int timeoutSeconds) {
+ReadTimeoutHandler::ReadTimeoutHandler(int timeoutSeconds)
+    : state(0), closed(true), timeoutMillis(timeoutSeconds * 1000) {
     if (timeoutSeconds <= 0) {
         timeoutMillis = 0;
     }
-    else {
-        timeoutMillis = TimeUnit::SECONDS.toMillis(timeoutSeconds);
-    }
 }
 
-ReadTimeoutHandler::ReadTimeoutHandler(boost::int64_t timeout,
-                                       const TimeUnit& unit) {
-    if (timeout <= 0) {
+ReadTimeoutHandler::ReadTimeoutHandler(const Duration& timeout)
+    : state(0), closed(true), timeoutMillis(timeout.total_milliseconds()) {
+    if (timeoutMillis <= 0) {
         timeoutMillis = 0;
     }
-    else {
-        timeoutMillis = unit.toMillis(timeout);
+}
 
-        if (0 == timeoutMillis) { timeoutMillis = 1; }
+void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
+    // Avoid the case where destroy() is called before scheduling timeouts.
+    switch (state) {
+    case 1:
+    case 2:
+        return;
+    }
+
+    state = 1;
+
+    if (!timeoutCallback) {
+        timeoutCallback = boost::bind(
+                              &ReadTimeoutHandler::handleReadTimeout,
+                              this,
+                              boost::ref(ctx));
+    }
+
+    lastReadTime = boost::get_system_time();
+
+    if (timeoutMillis > 0) {
+        timeout =
+            ctx.getEventLoop()->runAfter(timeoutMillis, timeoutCallback);
     }
 }
 
-void ReadTimeoutHandler::releaseExternalResources() {
-    if (timer) {
-        timer->stop();
+void ReadTimeoutHandler::destroy() {
+    state = 2;
+
+    if (timeout) {
+        timeout->cancel();
+        timeout.reset();
     }
 }
 
-void ReadTimeoutHandler::beforeAdd(ChannelHandlerContext& ctx) {
-    if (ctx.getPipeline()->isAttached()) {
-        // channelOpen event has been fired already, which means
-        // this.channelOpen() will not be invoked.
-        // We have to initialize here instead.
-        initialize(ctx);
-    }
-    else {
-        // channelOpen event has not been fired yet.
-        // this.channelOpen() will be invoked and initialization will occur there.
-    }
-}
-
-void ReadTimeoutHandler::beforeRemove(ChannelHandlerContext& ctx) {
-    destroy();
-}
-
-void ReadTimeoutHandler::channelOpen(ChannelHandlerContext& ctx,
-                                     const ChannelStateEvent& e) {
-    // This method will be invoked only if this handler was added
-    // before channelOpen event is fired.  If a user adds this handler
-    // after the channelOpen event, initialize() will be called by beforeAdd().
-    initialize(ctx);
-    ctx.sendUpstream(e);
-}
-
-void ReadTimeoutHandler::channelClosed(ChannelHandlerContext& ctx,
-                                       const ChannelStateEvent& e) {
-    destroy();
-    ctx.sendUpstream(e);
-}
-
-void ReadTimeoutHandler::messageReceived(ChannelHandlerContext& ctx,
-        const MessageEvent& e) {
-    updateLastReadTime();
-    ctx.sendUpstream(e);
-}
-
-cetty::channel::ChannelHandlerPtr ReadTimeoutHandler::clone() {
-    return ChannelHandlerPtr(
-               new ReadTimeoutHandler(timeoutMillis, TimeUnit::MILLISECONDS));
-}
-
-void ReadTimeoutHandler::handleReadTimeout(Timeout& timeout, ChannelHandlerContext& ctx) {
-    if (timeout.isCancelled()) {
+void ReadTimeoutHandler::handleReadTimeout(ChannelHandlerContext& ctx) {
+    if (timeout->isCancelled()) {
         return;
     }
 
@@ -115,71 +90,99 @@ void ReadTimeoutHandler::handleReadTimeout(Timeout& timeout, ChannelHandlerConte
         return;
     }
 
-    time_type currentTime = boost::get_system_time();
-    time_duration_type duration = currentTime - lastReadTime;
+    Time currentTime = boost::get_system_time();
+    Duration duration = currentTime - lastReadTime;
     boost::int64_t nextDelay = timeoutMillis - duration.total_milliseconds();
 
     if (nextDelay <= 0) {
         // Read timed out - set a new timeout and notify the callback.
         this->timeout =
-            timer->newTimeout(boost::bind(&ReadTimeoutHandler::handleReadTimeout,
-                                          this,
-                                          _1,
-                                          boost::ref(ctx)),
-                              timeoutMillis);
+            ctx.getEventLoop()->runAfter(timeoutMillis, timeoutCallback);
 
         try {
             readTimedOut(ctx);
         }
-        catch (const Exception& t) {
-            Channels::fireExceptionCaught(ctx, t);
-        }
         catch (const std::exception& t) {
-            Channels::fireExceptionCaught(ctx, Exception(t.what()));
+            ctx.fireExceptionCaught(ChannelException(t.what()));
         }
         catch (...) {
-            Channels::fireExceptionCaught(ctx, Exception("Unknow exception."));
+            ctx.fireExceptionCaught(ChannelException("Unknow exception."));
         }
     }
     else {
         // Read occurred before the timeout - set a new timeout with shorter delay.
         this->timeout =
-            timer->newTimeout(boost::bind(&ReadTimeoutHandler::handleReadTimeout,
-                                          this,
-                                          _1,
-                                          boost::ref(ctx)), nextDelay);
+            ctx.getEventLoop()->runAfter(nextDelay, timeoutCallback);
     }
 }
 
 void ReadTimeoutHandler::readTimedOut(ChannelHandlerContext& ctx) {
-    Channels::fireExceptionCaught(ctx, EXCEPTION);
+    if (!closed) {
+        ctx.fireExceptionCaught(EXCEPTION);
+        ctx.close();
+        closed = true;
+    }
 }
 
-void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
-    if (timeoutMillis == 0) { return; }
+void ReadTimeoutHandler::beforeAdd(ChannelHandlerContext& ctx) {
+    if (ctx.getChannel()->isActive()) {
+        // channelActvie() event has been fired already, which means this.channelActive() will
+        // not be invoked. We have to initialize here instead.
+        initialize(ctx);
+    }
+    else {
+        // channelActive() event has not been fired yet.  this.channelActive() will be invoked
+        // and initialization will occur there.
+    }
+}
 
-    updateLastReadTime();
+ChannelHandlerPtr ReadTimeoutHandler::clone() {
+    return ChannelHandlerPtr(
+               new ReadTimeoutHandler(
+                   boost::posix_time::milliseconds(timeoutMillis)));
+}
 
-    if (!timer) {
-        timer = TimerFactory::getFactory().getTimer(ctx.getChannel());
+void ReadTimeoutHandler::afterAdd(ChannelHandlerContext& ctx) {
+    // NOOP
+}
+
+void ReadTimeoutHandler::beforeRemove(ChannelHandlerContext& ctx) {
+    destroy();
+}
+
+void ReadTimeoutHandler::afterRemove(ChannelHandlerContext& ctx) {
+    // NOOP
+}
+
+void ReadTimeoutHandler::channelCreated(ChannelHandlerContext& ctx) {
+    // Initialize early if channel is active already.
+    if (ctx.getChannel()->isActive()) {
+        initialize(ctx);
     }
 
-    timeout = timer->newTimeout(boost::bind(&ReadTimeoutHandler::handleReadTimeout,
-                                            this,
-                                            _1,
-                                            boost::ref(ctx)),
-                                timeoutMillis);
+    AbstractChannelInboundHandler::channelCreated(ctx);
 }
 
-void ReadTimeoutHandler::updateLastReadTime() {
+void ReadTimeoutHandler::channelActive(ChannelHandlerContext& ctx) {
+    // This method will be invoked only if this handler was added
+    // before channelActive() event is fired.  If a user adds this handler
+    // after the channelActive() event, initialize() will be called by beforeAdd().
+    initialize(ctx);
+    AbstractChannelInboundHandler::channelActive(ctx);
+}
+
+void ReadTimeoutHandler::channelInactive(ChannelHandlerContext& ctx) {
+    destroy();
+    AbstractChannelInboundHandler::channelInactive(ctx);
+}
+
+void ReadTimeoutHandler::messageUpdated(ChannelHandlerContext& ctx) {
     lastReadTime = boost::get_system_time();
+    ctx.fireMessageUpdated();
 }
 
-void ReadTimeoutHandler::destroy() {
-    if (this->timeout) {
-        this->timeout->cancel();
-        this->timeout.reset();
-    }
+std::string ReadTimeoutHandler::toString() const {
+    return "ReadTimeoutHandler";
 }
 
 }

@@ -14,10 +14,13 @@
  * under the License.
  */
 
-#include "cetty/bootstrap/ClientBootstrap.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
-#include "cetty/handler/timeout/ReadTimeoutHandler.h"
-#include "cetty/util/Integer.h"
+#include <cetty/bootstrap/ClientBootstrap.h>
+
+#include <cetty/channel/Timeout.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+
+#include <cetty/handler/timeout/ReadTimeoutHandler.h>
 
 #include "UptimeClientHandler.h"
 
@@ -31,11 +34,6 @@ using namespace cetty::util;
  * Connects to a server periodically to measure and print the uptime of the
  * server.  This example demonstrates how to implement reliable reconnection
  * mechanism in Cetty.
- *
- * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
- * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- *
- * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
  */
 
 // Sleep 5 seconds before a reconnection attempt.
@@ -46,14 +44,13 @@ public:
     UptimeClient(int argc, char* argv[]) {
         // Print usage if no argument is specified.
         if (argc != 3) {
-            printf(
-                "Usage: UptimeClient <host> <port>");
+            printf("Usage: UptimeClient <host> <port>");
             return;
         }
 
         // Parse options.
         std::string host = argv[1];
-        int port = Integer::parse(argv[2]);
+        int port = (int)StringUtil::atoi(argv[2]);
 
         // Initialize the timer that schedules subsequent reconnection attempts.
         //final Timer timer = new HashedWheelTimer();
@@ -63,12 +60,12 @@ public:
                                       new AsioClientSocketChannelFactory(0)));
 
         // Configure the pipeline factory.
-        bootstrap.getPipeline()->addLast(
-            "ReadTimeoutHandler", ChannelHandlerPtr(new ReadTimeoutHandler(READ_TIMEOUT)));
-        bootstrap.getPipeline()->addLast(
-            "UptimeClientHandler", ChannelHandlerPtr(new UptimeClientHandler(bootstrap)));
+        bootstrap.setPipeline(
+            ChannelPipelines::pipeline(
+                new ReadTimeoutHandler(READ_TIMEOUT),
+                new UptimeClientHandler(bootstrap)));
 
-        bootstrap.setOption("remoteAddress", SocketAddress(host, port));
+        bootstrap.remoteAddress(host, port);
 
         // Initiate the first connection attempt - the rest is handled by
         // UptimeClientHandler.
@@ -78,9 +75,7 @@ public:
 private:
     // Reconnect when the server sends nothing for 10 seconds.
     static const int READ_TIMEOUT = 10;
-
 };
-
 
 void main(int argc, char* argv[]) {
     UptimeClient(argc, argv);

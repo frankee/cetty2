@@ -120,7 +120,7 @@ void ChannelSinkHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelSinkHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
     LOG_WARN << "no handler process the outbound user event";
 }
 

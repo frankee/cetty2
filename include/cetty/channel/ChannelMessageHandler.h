@@ -50,7 +50,7 @@ public:
     }
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const UserEvent& evt) {
+                                    const boost::any& evt) {
 
     }
 

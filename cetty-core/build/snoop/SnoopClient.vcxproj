@@ -14,7 +14,6 @@
     <ClCompile Include="..\..\example\http\snoop\client\HttpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\example\http\snoop\client\HttpClientPipelineFactory.h" />
     <ClInclude Include="..\..\example\http\snoop\client\HttpResponseHandler.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

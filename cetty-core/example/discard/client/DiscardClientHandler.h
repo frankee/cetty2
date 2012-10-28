@@ -21,20 +21,20 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
-#include "cetty/buffer/ChannelBuffer.h"
+#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBuffer.h>
 
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelHandler.h"
-#include "cetty/channel/ChannelHandlerContext.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 
-#include "cetty/util/Exception.h"
-#include "cetty/util/Integer.h"
+#include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 
+#include <cetty/logging/LoggerHelper.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
-using namespace cetty::logging;
 
 /**
  * Handles a client-side channel.
@@ -44,82 +44,62 @@ using namespace cetty::logging;
  *
  * @version $Rev: 2121 $, $Date: 2010-02-02 09:38:07 +0900 (Tue, 02 Feb 2010) $
  */
-class DiscardClientHandler : public cetty::channel::SimpleChannelUpstreamHandler {
+class DiscardClientHandler
+        : public ChannelInboundBufferHandlerAdapter<> {
 public:
-    DiscardClientHandler(int messageSize) : transferredBytes(0) {
+    DiscardClientHandler(int messageSize)
+        : context() {
         if (messageSize <= 0) {
-            throw InvalidArgumentException(std::string("messageSize: ") +
-                                           Integer::toString(messageSize));
+            throw InvalidArgumentException(
+                StringUtil::strprintf("messageSize: %d", messageSize));
         }
+
         content = Unpooled::buffer(messageSize);
     }
     virtual ~DiscardClientHandler() {}
 
-    int getTransferredBytes() const {
-        return transferredBytes;
+    virtual void channelActive(ChannelHandlerContext& ctx) {
+        this->context = &ctx;
+        generateTraffic();
     }
 
-    virtual void channelStateChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        logger->info(e.toString());
-        SimpleChannelUpstreamHandler::channelStateChanged(ctx, e);
-    }
-
-    virtual void channelConnected(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        // Send the initial messages.
-        generateTraffic(e);
-    }
-
-    virtual void channelInterestChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        // Keep sending messages whenever the current socket buffer has room.
-        generateTraffic(e);
-    }
-
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         // Server is supposed to send nothing.  Therefore, do nothing.
     }
 
-    virtual void writeCompleted(ChannelHandlerContext& ctx, const WriteCompletionEvent& e) {
-        //boost::lock_guard<boost::mutex> guard(mutex);
-        transferredBytes += e.getWrittenAmount();
-    }
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
+    virtual void exceptionCaught(ChannelHandlerContext ctx,
+                                 const ChannelException& cause) {
         // Close the connection when an exception is raised.
-        logger->warn(
-                "Unexpected exception from downstream.",
-                e.getCause());
-        e.getChannel().close();
+        LOG_WARN << "Unexpected exception (" << cause.what() << ") from downstream.",
+                 ctx.close();
     }
 
-    virtual ChannelHandlerPtr clone() { return shared_from_this(); }
+    virtual void writeCompleted(ChannelHandlerContext& ctx) {
+        generateTraffic();
+    }
+
+    virtual ChannelHandlerPtr clone() {
+        return new DiscardClientHandler(content->readableBytes());
+    }
+
     virtual std::string toString() const { return "DiscardClientHandler"; }
 
 private:
-    void generateTraffic(const ChannelStateEvent& e) {
-        // Keep generating traffic until the channel is unwritable.
-        // A channel becomes unwritable when its internal buffer is full.
-        // If you keep writing messages ignoring this property,
-        // you will end up with an OutOfMemoryError.
-        Channel& channel = e.getChannel();
-        while (channel.isWritable()) {
-            ChannelBufferPtr m = nextMessage();
-            if (m) {
-                channel.write(m, false);
-            }
-            else {
-                break;
-            }
-        }
-    }
+    void generateTraffic() {
+        // Fill the outbound buffer up to 64KiB
+        ChannelBufferPtr out = Unpooled::buffer(65536);
 
-    ChannelBufferPtr nextMessage() {
-        content->setIndex(0, content->capacity());
-        return content;
+        while (out->readableBytes() < 65536) {
+            out->writeBytes(content);
+        }
+
+        // Flush the outbound buffer to the socket.
+        // Once flushed, generate the same amount of traffic again.
+        context->flush();
     }
 
 private:
-    static InternalLogger* logger;
-
     int transferredBytes;
     ChannelBufferPtr content;
+    ChannelHandlerContext* context;
 };

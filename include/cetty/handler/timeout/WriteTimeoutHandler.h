@@ -23,24 +23,16 @@
 
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/channel/SimpleChannelDownstreamHandler.h>
+#include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/ChannelFutureListener.h>
-#include <cetty/util/ExternalResourceReleasable.h>
-#include <cetty/util/Timer.h>
+#include <cetty/channel/AbstractChannelOutboundHandler.h>
 
 #include <cetty/handler/timeout/WriteTimeoutException.h>
-
-namespace cetty {
-namespace util {
-class TimeUnit;
-}
-}
 
 namespace cetty {
 namespace handler {
 namespace timeout {
 
-using namespace cetty::util;
 using namespace cetty::channel;
 
 /**
@@ -86,8 +78,11 @@ using namespace cetty::channel;
  * @apiviz.has org.jboss.netty.handler.timeout.TimeoutException oneway - - raises
  */
 
-class WriteTimeoutHandler : public cetty::channel::SimpleChannelDownstreamHandler,
-    public cetty::util::ExternalResourceReleasable {
+class WriteTimeoutHandler : public AbstractChannelOutboundHandler {
+public:
+    typedef boost::posix_time::ptime Time;
+    typedef boost::posix_time::time_duration Duration;
+
 public:
     /**
      * Creates a new instance.
@@ -111,37 +106,31 @@ public:
      * @param unit
      *        the {@link TimeUnit} of <tt>timeout</tt>
      */
-    WriteTimeoutHandler(boost::int64_t timeout, const TimeUnit& unit);
+    WriteTimeoutHandler(const Duration& timeout);
 
-    /**
-     * Stops the {@link Timer} which was specified in the constructor of this
-     * handler.  You should not call this method if the {@link Timer} is in use
-     * by other objects.
-     */
-    virtual void releaseExternalResources();
+    virtual void flush(ChannelHandlerContext& ctx,
+                       const ChannelFuturePtr& future);
 
-    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e);
+    virtual ChannelHandlerPtr clone();
 
-    void handleWriteTimeout(Timeout& timeout, ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
-
-    void cancelTimeout(ChannelFuture& future, TimeoutPtr timeout);
-
-protected:
-    /**
-     * the timeoutMillis can be different according to the MessageEvent,
-     * if you want, by overriding this function.
-     */
-    virtual boost::int64_t getTimeoutMillis(const MessageEvent& e) const {
-        return timeoutMillis;
-    }
-
-    virtual void writeTimedOut(ChannelHandlerContext& ctx);
+    virtual std::string toString() const;
 
 private:
-    TimerPtr timer;
+    void handleWriteTimeout(ChannelHandlerContext& ctx,
+                            const ChannelFuturePtr& future);
+
+    void cancelTimeout(ChannelFuture& future);
+
+    void writeTimedOut(ChannelHandlerContext& ctx);
+
+private:
+    static const WriteTimeoutException EXCEPTION;
+
+private:
+    bool closed;
     boost::int64_t timeoutMillis;
 
-    static const WriteTimeoutException EXCEPTION;
+    TimeoutPtr timeout;
 };
 
 }

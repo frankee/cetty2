@@ -18,14 +18,18 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "cetty/bootstrap/ServerBootstrap.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/socket/asio/AsioServerSocketChannelFactory.h"
-#include "HttpServerPipelineFactory.h"
+#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+
+#include <cetty/handler/codec/http/HttpServerCodec.h>
+#include <cetty/handler/codec/http/HttpChunkAggregator.h>
+#include "HttpRequestHandler.h"
 
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
+using namespace cetty::handler::codec::http;
 
 /**
  * An HTTP server that sends back the content of the received HTTP request
@@ -43,14 +47,10 @@ int main(int argc, const char* argv[]) {
     ServerBootstrap bootstrap(
         ChannelFactoryPtr(new AsioServerSocketChannelFactory(0)));
 
-    bootstrap.setOption("child.tcpNoDelay", boost::any(true));
-    bootstrap.setOption("reuseAddress", boost::any(true));
-    bootstrap.setOption("backlog", boost::any(4096));
-
-    // Set up the event pipeline factory.
-    bootstrap.setPipelineFactory(
-        ChannelPipelineFactoryPtr(new HttpServerPipelineFactory()));
-
-    // Bind and start to accept incoming connections.
-    bootstrap.bind(SocketAddress(IpAddress::IPv4, 8080));
+    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
+    .setOption(ChannelOption::CO_SO_REUSEADDR, true)
+    .setOption(ChannelOption::CO_SO_BACKLOG, 4096)
+    .setPipeline(ChannelPipelines::pipeline(new HttpServerCodec,
+                                            new HttpRequestHandler));
+    bootstrap.bind(8080);
 };

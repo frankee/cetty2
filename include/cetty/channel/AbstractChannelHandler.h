@@ -38,7 +38,7 @@ public:
                                  const ChannelException& cause);
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                const UserEvent& evt);
+                                const boost::any& evt);
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
             ChannelPipeline& pipeline,

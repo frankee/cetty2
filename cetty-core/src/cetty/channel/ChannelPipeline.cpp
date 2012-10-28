@@ -17,7 +17,6 @@
 #include <cetty/channel/ChannelPipeline.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/UserEvent.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelHandler.h>
@@ -847,9 +846,9 @@ void ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
     }
 }
 
-void ChannelPipeline::fireUserEventTriggered(const UserEvent& event) {
+void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
     if (head) {
-        head->fireUserEventTriggered(event);
+        head->fireUserEventTriggered(evt);
     }
 }
 

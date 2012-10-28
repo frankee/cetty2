@@ -22,6 +22,7 @@
  */
 
 #include <boost/bind.hpp>
+#include <boost/any.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
@@ -288,7 +289,7 @@ public:
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
     virtual void fireExceptionCaught(const ChannelException& cause);
-    virtual void fireUserEventTriggered(const UserEvent& event);
+    virtual void fireUserEventTriggered(const boost::any& evt);
     virtual void fireMessageUpdated();
     virtual void fireWriteCompleted();
 
@@ -348,7 +349,7 @@ public:
     virtual void fireExceptionCaught(ChannelHandlerContext& ctx,
                                      const ChannelException& cause);
     virtual void fireUserEventTriggered(ChannelHandlerContext& ctx,
-                                        const UserEvent& event);
+                                        const boost::any& evt);
 
 private:
     void init(const ChannelHandlerPtr& handler);

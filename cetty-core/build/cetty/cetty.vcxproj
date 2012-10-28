@@ -111,7 +111,6 @@
     <ClCompile Include="..\..\src\cetty\channel\EventLoopPool.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\UserEvent.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelOption.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelOutboundBufferHandler.cpp" />
@@ -153,6 +152,7 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\CorruptedFrameException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\DecoderException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\DelimiterBasedFrameDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\codec\Delimiters.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\EncoderException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\ClientCookieEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\Cookie.cpp" />
@@ -188,6 +188,15 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\TooLongFrameException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\UnreplayableOperationException.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\logging\LoggingHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleState.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleStateEvent.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleStateHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\ReadTimeoutException.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\ReadTimeoutHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\TimeoutException.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutException.cpp" />
+    <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
@@ -239,7 +248,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioService.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePoolPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h" />
@@ -259,7 +267,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEventHolder.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOption.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerContext.h" />
@@ -321,10 +328,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunkTrailer.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpClientCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpCodecUtil.h" />
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpContentCompressor.h" />
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpContentDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpContentDecompressor.h" />
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpContentEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaderDateFormat.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaders.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessage.h" />
@@ -356,6 +359,15 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\ReplayingDecoderBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\TooLongFrameException.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\logging\LoggingHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleState.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleStateEvent.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleStateHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\ReadTimeoutException.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\ReadTimeoutHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\TimeoutException.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutException.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogFileSink.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\Logger.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />

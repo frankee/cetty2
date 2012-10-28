@@ -48,7 +48,7 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
         if (*it == '%') {
             if (++it != end) {
                 switch (*it) {
-                case 'l': msg.getStream() << msg.getLevel(); break;
+                case 'l': msg.getStream() << msg.getLevel().toInt(); break;
 
                 case 'L': msg.getStream() << msg.getLevel().toString(); break;
 

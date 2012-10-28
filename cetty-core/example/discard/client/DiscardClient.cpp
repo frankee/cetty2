@@ -18,14 +18,17 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/bootstrap/ClientBootstrap.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/IpAddress.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelFuture.h>
+
 #include "DiscardClientHandler.h"
 
-#include "cetty/bootstrap/ClientBootstrap.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
-#include "cetty/channel/IpAddress.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/ChannelFuture.h"
 
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
@@ -54,11 +57,11 @@ int main(int argc, const char* argv[]) {
 
     // Parse options.
     std::string host = argv[1];
-    int port = Integer::parse(argv[2]);
+    int port = (int)StringUtil::atoi(argv[2]);
     int firstMessageSize;
 
     if (argc == 4) {
-        firstMessageSize = Integer::parse(argv[3]);
+        firstMessageSize = (int)StringUtil::atoi(argv[3]);
     }
     else {
         firstMessageSize = 256;
@@ -69,17 +72,21 @@ int main(int argc, const char* argv[]) {
         ChannelFactoryPtr(new AsioClientSocketChannelFactory(1)));
 
     // Set up the pipeline factory.
-    bootstrap.getPipeline()->addLast(
-        "Discard", ChannelHandlerPtr(new DiscardClientHandler(firstMessageSize)));
+    bootstrap.setPipeline(
+        ChannelPipelines::pipeline(
+            new DiscardClientHandler(firstMessageSize)));
 
     // Start the connection attempt.
-    ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
+    ChannelFuturePtr future = bootstrap.connect(host, port);
+    future->awaitUninterruptibly();
+
+    ChannelPtr channel = future->getChannel();
 
     // Wait until the connection is closed or the connection attempt fails.
-    future->getChannel().getCloseFuture()->awaitUninterruptibly();
+    channel->getCloseFuture()->awaitUninterruptibly();
 
     // Shut down thread pools to exit.
-    bootstrap.releaseExternalResources();
+    bootstrap.shutdown();
 
     return 0;
 }

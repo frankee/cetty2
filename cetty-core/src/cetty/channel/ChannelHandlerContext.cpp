@@ -259,18 +259,18 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
     }
 }
 
-void ChannelHandlerContext::fireUserEventTriggered(const UserEvent& event) {
+void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
     ChannelHandlerContext* next = this->next;
 
     if (next) {
-        fireUserEventTriggered(*next, event);
+        fireUserEventTriggered(*next, evt);
     }
 }
 
-void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, const UserEvent& event) {
+void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, const boost::any& evt) {
     if (ctx.eventloop->inLoopThread()) {
         try {
-            ctx.handler->userEventTriggered(ctx, event);
+            ctx.handler->userEventTriggered(ctx, evt);
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -299,7 +299,7 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, c
             boost::bind(&ChannelHandlerContext::fireUserEventTriggered,
                         this,
                         boost::ref(ctx),
-                        boost::cref(event)));
+                        boost::cref(evt)));
     }
 }
 

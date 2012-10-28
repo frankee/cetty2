@@ -93,7 +93,7 @@ std::string HttpRequest::toString() const {
                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
                           getTransferEncoding().toString().c_str(),
                           getMethod().toString().c_str(),
-                          getUri().c_str(),
+                          getUriString().c_str(),
                           getProtocolVersion().getText().c_str());
 
     ConstHeaderIterator end = getLastHeader();

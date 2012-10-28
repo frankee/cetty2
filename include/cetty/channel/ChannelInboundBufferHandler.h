@@ -47,7 +47,7 @@ public:
                                  const ChannelException& cause);
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const UserEvent& evt);
+                                    const boost::any& evt);
 
     virtual ChannelHandlerContext* createContext(const std::string& name,
             ChannelPipeline& pipeline,
@@ -63,6 +63,12 @@ public:
     virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
 
     const ChannelBufferPtr& getInboundChannelBuffer() const;
+
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg) {
+            throw ChannelException("you must implement the messageReceived method.");
+    }
 
 private:
     ChannelBufferPtr inboundBuffer;

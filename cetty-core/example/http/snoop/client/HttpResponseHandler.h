@@ -20,18 +20,15 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
-#include "cetty/buffer/ChannelBuffer.h"
+#include <cetty/buffer/ChannelBuffer.h>
 
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/ChannelHandlerContext.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 
-#include "cetty/channel/MessageEvent.h"
-
-#include "cetty/handler/codec/http/HttpChunk.h"
-#include "cetty/handler/codec/http/HttpResponse.h"
-
-#include "cetty/util/CharsetUtil.h"
+#include <cetty/handler/codec/http/HttpChunk.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
+#include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -45,33 +42,47 @@ using namespace cetty::handler::codec::http;
  *
  * @version $Rev: 2189 $, $Date: 2010-02-19 18:02:57 +0900 (Fri, 19 Feb 2010) $
  */
-class HttpResponseHandler : public ChannelInboundMessageHandler {
+class HttpResponseHandler : public ChannelInboundMessageHandler<HttpPackage> {
 public:
     HttpResponseHandler() : readingChunks(false) {}
     virtual ~HttpResponseHandler() {}
 
-    void messageReceived(ChannelHandlerContext& ctx) {
+    virtual ChannelHandlerPtr clone() {
+        return new HttpResponseHandler;
+    }
+    virtual std::string toString() const {
+        return "HttpResponseHandler";
+    }
+
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const HttpPackage& msg) {
         if (!readingChunks) {
+            if (!msg.isHttpMessage()) {
+
+            }
+
             HttpResponsePtr response =
-                e.getMessage().smartPointer<HttpResponse, HttpMessage>();
+                boost::dynamic_pointer_cast<HttpResponse>(msg.httpMessage());
 
             printf("STATUS: %s\n", response->getStatus().toString().c_str());
             printf("VERSION: %s\n", response->getProtocolVersion().toString().c_str());
             printf("\n");
 
-            HttpResponse::StringList names;
-            HttpResponse::StringList values;
-            response->getHeaderNames(names);
+            std::vector<std::string> names;
+            std::vector<std::string> values;
+            response->getHeaderNames(&names);
             for (size_t i = 0; i < names.size(); ++i) {
                 values.clear();
-                response->getHeaders(names[i], values);
+                response->getHeaders(names[i], &values);
                 for (size_t j = 0; j < values.size(); ++j) {
                     printf("HEADER: %s = %s\n", names[i].c_str(), values[j].c_str());
                 }
                 printf("\n");
             }
 
-            if (response->getStatus().getCode() == 200 && response->isChunked()) {
+            if (response->getStatus().getCode() == 200
+                && response->getTransferEncoding().isMultiple()) {
                 readingChunks = true;
                 printf("CHUNKED CONTENT {\n");
             }
@@ -85,13 +96,13 @@ public:
             }
         }
         else {
-            HttpChunkPtr chunk = e.getMessage().smartPointer<HttpChunk>();
+            HttpChunkPtr chunk = msg.httpChunk();
             if (chunk->isLast()) {
                 readingChunks = false;
                 printf("} END OF CHUNKED CONTENT\n");
             }
             else {
-                printf(chunk->getContent()->toString(CharsetUtil::UTF_8).c_str());
+                printf(chunk->getContent()->toString().c_str());
             }
         }
     }

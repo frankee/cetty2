@@ -68,7 +68,8 @@ static void decodeParams(const std::string& s, NameValueCollection& params) {
     }
 }
 
-QueryStringDecoder::QueryStringDecoder(const URI& uri) : uri(uri) {
+QueryStringDecoder::QueryStringDecoder(const URI& uri)
+    : uri(uri) {
 
 }
 

@@ -94,7 +94,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\example\discard\client\DiscardClient.cpp" />
-    <ClCompile Include="..\..\example\discard\client\DiscardClientHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\discard\client\DiscardClientHandler.h" />

@@ -17,10 +17,11 @@
  * under the License.
  */
 
+#include <boost/any.hpp>
+
 namespace cetty {
 namespace channel {
 
-class UserEvent;
 class ChannelException;
 
 class ChannelInboundInvoker {
@@ -50,7 +51,7 @@ public:
     /**
      *
      */
-    virtual void fireUserEventTriggered(const UserEvent& event) = 0;
+    virtual void fireUserEventTriggered(const boost::any& event) = 0;
 
     /**
      *

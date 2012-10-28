@@ -21,23 +21,15 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "boost/thread/mutex.hpp"
-#include "cetty/buffer/ChannelBuffer.h"
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelEvent.h"
-#include "cetty/channel/ChannelState.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/ChannelHandler.h"
-#include "cetty/channel/ChannelHandlerContext.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
-#include "cetty/logging/InternalLogger.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelConfig.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
+#include <cetty/buffer/ChannelBuffer.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
-using namespace cetty::logging;
 
 /**
  * Handles a server-side channel.
@@ -47,56 +39,29 @@ using namespace cetty::logging;
  *
  * @version $Rev: 2121 $, $Date: 2010-02-02 09:38:07 +0900 (Tue, 02 Feb 2010) $
  */
-class DiscardServerHandler : public SimpleChannelUpstreamHandler {
+class DiscardServerHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
-    DiscardServerHandler() : transferredBytes(0) {}
+    DiscardServerHandler() {}
     virtual ~DiscardServerHandler() {}
-
-
-    int getTransferredBytes() const {
-        //boost::lock_guard<boost::mutex> guard(mutex);
-        return transferredBytes;
-    }
 
     virtual ChannelHandlerPtr clone() {
         return shared_from_this();
     }
 
-    virtual void channelStateChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        logger->info(e.toString());
-        SimpleChannelUpstreamHandler::channelStateChanged(ctx, e);
-    }
-
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+    virtual void messageReceived(ChannelHandlerContext& ctx) {
         // Discard received data silently by doing nothing.
-        const ChannelBufferPtr& buffer = e.getMessage().value<ChannelBufferPtr>();
-        int readableBytes = buffer->readableBytes();
-
-        {
-            boost::lock_guard<boost::mutex> guard(mutex);
-            transferredBytes += readableBytes;
-        }
-        
-        buffer->clear();
+        getInboundChannelBuffer()->clear();
     }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
+    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
         // Close the connection when an exception is raised.
-        logger->warn(
-                "Unexpected exception from downstream.",
-                e.getCause());
-        e.getChannel().close();
+        LOG_WARN << "Unexpected exception (" << e.what() << ") from downstream.";
+        ctx.close();
     }
 
     virtual std::string toString() const {
         return "DiscardServerHandler";
     }
-
-private:
-    static InternalLogger* logger;
-    
-    boost::mutex mutex;
-    int transferredBytes;
 };
 
 

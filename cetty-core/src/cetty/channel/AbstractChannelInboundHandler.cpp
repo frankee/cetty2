@@ -64,7 +64,7 @@ void AbstractChannelInboundHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void AbstractChannelInboundHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
     ctx.fireUserEventTriggered(evt);
 }
 

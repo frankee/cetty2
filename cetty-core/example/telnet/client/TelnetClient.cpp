@@ -18,19 +18,27 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <iostream>
-#include "cetty/bootstrap/ClientBootstrap.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
+#include <cetty/bootstrap/ClientBootstrap.h>
 
-#include "cetty/util/Integer.h"
-#include "cetty/util/Exception.h"
+#include <cetty/buffer/Unpooled.h>
 
-#include "TelnetClientPipelineFactory.h"
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+
+#include <cetty/handler/codec/Delimiters.h>
+#include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
+
+#include <cetty/util/StringUtil.h>
+#include <cetty/util/Exception.h>
+
+#include "TelnetClientHandler.h"
 
 using namespace cetty::bootstrap;
-using namespace cetty::util;
+using namespace cetty::buffer;
+using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
+using namespace cetty::handler::codec;
+using namespace cetty::util;
 
 /**
  * Simplistic telnet client.
@@ -49,25 +57,23 @@ int main(int argc, char* argv[]) {
 
     // Parse options.
     std::string host = argv[1];
-    int port = Integer::parse(argv[2]);
+    int port = (int)StringUtil::atoi(argv[2]);
 
     // Configure the client.
     ClientBootstrap bootstrap(
-        ChannelFactoryPtr(new AsioClientSocketChannelFactory()));
-
+        ChannelFactoryPtr(new AsioClientSocketChannelFactory(1)));
+    
     // Configure the pipeline factory.
-    bootstrap.setPipelineFactory(
-        ChannelPipelineFactoryPtr(new TelnetClientPipelineFactory()));
+    bootstrap.setPipeline(
+        ChannelPipelines::pipeline(
+            new DelimiterBasedFrameDecoder(8192, Delimiters::lineDelimiter()),
+            new TelnetClientHandler()));
 
     // Start the connection attempt.
-    ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
+    ChannelPtr channel = bootstrap.connect(host, port)->awaitUninterruptibly()->getChannel();
 
-    // Wait until the connection attempt succeeds or fails.
-    Channel& channel = future->awaitUninterruptibly().getChannel();
-
-    if (!future->isSuccess()) {
-        printf("Exception happened, %s.", future->getCause()->what());
-        bootstrap.releaseExternalResources();
+    if (!channel->isActive()) {
+        bootstrap.shutdown();
         return -1;
     }
 
@@ -86,7 +92,7 @@ int main(int argc, char* argv[]) {
         line.append("\r\n");
 
         // Sends the received line to the server.
-        lastWriteFuture = channel.write(Unpooled::copiedBuffer(line));
+        lastWriteFuture = channel->write(Unpooled::copiedBuffer(line));
 
         // this method will happend two content copies.
         //lastWriteFuture = channel.write(line);
@@ -94,7 +100,7 @@ int main(int argc, char* argv[]) {
         // If user typed the 'bye' command, wait until the server closes
         // the connection.
         if (line.compare("bye\r\n") == 0) {
-            channel.getCloseFuture()->awaitUninterruptibly();
+            channel->getCloseFuture()->awaitUninterruptibly();
             break;
         }
     }
@@ -106,8 +112,8 @@ int main(int argc, char* argv[]) {
 
     // Close the connection.  Make sure the close operation ends because
     // all I/O operations are asynchronous in Netty.
-    channel.close()->awaitUninterruptibly();
+    channel->close()->awaitUninterruptibly();
 
     // Shut down all thread pools to exit.
-    bootstrap.releaseExternalResources();
+    bootstrap.shutdown();
 }

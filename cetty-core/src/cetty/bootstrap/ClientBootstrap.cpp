@@ -48,7 +48,11 @@ ClientBootstrap::ClientBootstrap(const ChannelFactoryPtr& channelFactory)
     : Bootstrap(channelFactory) {
 }
 
-cetty::channel::ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
+ChannelFuturePtr ClientBootstrap::connect() {
+    return connect(this->remote);
+}
+
+ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
     SocketAddress remote(host, port);
     return connect(remote);
 }
@@ -63,6 +67,12 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
 
     SocketAddress remote = remoteAddress;
     SocketAddress local  = localAddress;
+
+    if (!remote.validated()) {
+        LOG_ERROR << "the remote address is invalidated, then return a failed future.";
+        return NullChannel::instance()->newFailedFuture(
+            ChannelPipelineException("Failed to initialize a pipeline."));
+    }
 
     try {
         pipeline = ChannelPipelines::pipeline(getPipeline());

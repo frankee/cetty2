@@ -14,19 +14,15 @@
  * under the License.
  */
 
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/ChannelFactory.h"
-#include "cetty/channel/ChannelFuture.h"
-#include "cetty/channel/ChannelFutureListener.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelMessage.h>
+#include <cetty/channel/ChannelFactory.h>
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/ChannelFutureListener.h>
 
-#include "cetty/buffer/ChannelBuffers.h"
+#include <cetty/buffer/Unpooled.h>
 
-#include "cetty/bootstrap/ClientBootstrap.h"
+#include <cetty/bootstrap/ClientBootstrap.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
@@ -54,7 +50,7 @@ public:
         // Start the connection attempt.
         cb.getPipeline()->addLast(
             "handler", ChannelHandlerPtr(new OutboundHandler(e.getChannel())));
-        ChannelFuturePtr f = cb.connect(SocketAddress(remoteHost, remotePort));
+        ChannelFuturePtr f = cb.connect(remoteHost, remotePort);
 
         outboundChannel = &(f->getChannel());
         f->setListener(boost::bind(
@@ -82,7 +78,7 @@ public:
         
         outboundChannel->write(msg->readBytes());
     }
-
+    b
     virtual void channelClosed(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
         if (outboundChannel != NULL) {
             closeOnFlush(*outboundChannel);
@@ -154,6 +150,5 @@ private:
     int remotePort;
 
     ClientBootstrap cb;
-
-    Channel* outboundChannel;
+    ChannelPtr outboundChannel;
 };

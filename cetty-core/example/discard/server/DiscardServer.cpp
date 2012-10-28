@@ -18,10 +18,10 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "cetty/bootstrap/ServerBootstrap.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/Channels.h"
-#include "cetty/channel/socket/asio/AsioServerSocketChannelFactory.h"
+#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
 
 #include "DiscardServerHandler.h"
 
@@ -39,19 +39,26 @@ using namespace cetty::channel::socket::asio;
  */
 
 int main(int argc, char* argv[]) {
-    // Configure the server.
-    ServerBootstrap bootstrap(
-        ChannelFactoryPtr(new AsioServerSocketChannelFactory(-1)));
+    int threadCount = 1;
 
-    // Set up the pipeline factory.
-    bootstrap.getPipeline()->addLast(
-        "discard", new DiscardServerHandler);
+    if (argc == 2) {
+        threadCount = atoi(argv[1]);
+    }
+
+    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
+
+    ServerBootstrap bootstrap(factory);
+
+    bootstrap.setPipeline(ChannelPipelines::pipeline(new DiscardServerHandler))
+        .setOption(ChannelOption::CO_TCP_NODELAY, true)
+        .setOption(ChannelOption::CO_SO_REUSEADDR, true)
+        .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
 
     // Bind and start to accept incoming connections.
-    ChannelFuturePtr f = bootstrap.bind(1980);
+    ChannelFuturePtr f = bootstrap.bind(1980)->await();
 
     printf("Server is running...\n");
-    printf("To quit server, please enter 'q'.\n");
+    printf("To quit server, press 'q'.\n");
 
     char input;
 

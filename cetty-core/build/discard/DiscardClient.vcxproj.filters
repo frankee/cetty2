@@ -14,9 +14,6 @@
     <ClCompile Include="..\..\example\discard\client\DiscardClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\example\discard\client\DiscardClientHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\discard\client\DiscardClientHandler.h">

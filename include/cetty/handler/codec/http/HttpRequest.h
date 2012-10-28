@@ -95,7 +95,11 @@ public:
     /**
     * Returns the URI (or path) of this request.
     */
-    const std::string& getUri() const {
+    const URI& getUri() const {
+        return uri;
+    }
+
+    const std::string& getUriString() const {
         return uriStr;
     }
 

@@ -494,7 +494,7 @@ public:
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
     virtual void fireExceptionCaught(const ChannelException& cause);
-    virtual void fireUserEventTriggered(const UserEvent& event);
+    virtual void fireUserEventTriggered(const boost::any& evt);
     virtual void fireMessageUpdated();
     virtual void fireWriteCompleted();
 

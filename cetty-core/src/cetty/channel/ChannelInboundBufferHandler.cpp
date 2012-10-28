@@ -44,6 +44,16 @@ void ChannelInboundBufferHandler::channelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelInboundBufferHandler::messageUpdated(ChannelHandlerContext& ctx) {
+    try {
+        messageReceived(ctx, inboundBuffer);
+    }
+    catch (const ChannelException& e) {
+        ctx.fireExceptionCaught(e);
+    }
+    catch (const std::exception& e) {
+        ctx.fireExceptionCaught(ChannelException(e.what()));
+    }
+
     ctx.fireMessageUpdated();
 }
 
@@ -73,7 +83,7 @@ void ChannelInboundBufferHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelInboundBufferHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
     ctx.fireUserEventTriggered(evt);
 }
 

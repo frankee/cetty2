@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <string>
+#include <cetty/util/Enum.h>
 
 #if defined(WIN32)
 
@@ -39,7 +40,7 @@
 namespace cetty {
 namespace logging {
 
-class LogLevel {
+class LogLevel : public cetty::util::Enum<LogLevel> {
 public:
     static const LogLevel FATAL;
     static const LogLevel ERROR;
@@ -49,14 +50,14 @@ public:
     static const LogLevel TRACE;
 
 public:
-    LogLevel(int level) : level(level) {}
-
-    operator int() const { return level; }
-
     const std::string& toString() const;
 
+    int toInt() const {
+        return v;
+    }
+
 private:
-    int level;
+    LogLevel(int value) : cetty::util::Enum<LogLevel>(value) {}
 };
 
 //static const std::string LOG_LEVEL_STR[];

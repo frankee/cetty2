@@ -42,7 +42,6 @@ class ChannelPipeline;
 class ChannelHandler;
 class ChannelHandlerContext;
 class ChannelFuture;
-class UserEvent;
 
 class SocketAddress;
 

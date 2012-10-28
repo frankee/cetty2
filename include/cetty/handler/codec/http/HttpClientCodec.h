@@ -23,15 +23,20 @@
 
 #include <deque>
 
-#include <cetty/channel/ChannelUpstreamHandler.h>
-#include <cetty/channel/ChannelDownstreamHandler.h>
+#include <cetty/channel/CombinedChannelBufferMessageHandler.h>
 #include <cetty/handler/codec/http/HttpRequestEncoder.h>
 #include <cetty/handler/codec/http/HttpResponseDecoder.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
+
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
+
+using namespace cetty::util;
 
 /**
  * A combination of {@link HttpRequestEncoder} and {@link HttpResponseDecoder}
@@ -52,8 +57,8 @@ namespace http {
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpRequestEncoder
  */
 
-class HttpClientCodec : public cetty::channel::ChannelUpstreamHandler,
-    public cetty::channel::ChannelDownstreamHandler {
+class HttpClientCodec
+        : public cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> {
 public:
     /**
      * Creates a new instance with the default decoder options
@@ -61,89 +66,96 @@ public:
      * <tt>maxChunkSize (8192)</tt>).
      */
     HttpClientCodec()
-        : decoder(4096, 8192, 8192) {
-        decoder.setHttpClientCodec(this);
-        encoder.setHttpClientCodec(this);
+        : done(false),
+          failOnMissingResponse(false),
+          maxInitialLineLength(4096),
+          maxHeaderSize(8192),
+          maxChunkSize(8192) {
+        init(new Decoder(maxInitialLineLength, maxHeaderSize, maxChunkSize, this),
+             new Encoder(this));
     }
 
     /**
      * Creates a new instance with the specified decoder options.
      */
-    HttpClientCodec(
-        int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-        : decoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
-        decoder.setHttpClientCodec(this);
-        encoder.setHttpClientCodec(this);
+    HttpClientCodec(int maxInitialLineLength,
+                    int maxHeaderSize,
+                    int maxChunkSize)
+        : done(false),
+          failOnMissingResponse(false),
+          maxInitialLineLength(maxInitialLineLength),
+          maxHeaderSize(maxHeaderSize),
+          maxChunkSize(maxChunkSize) {
+        init(new Decoder(maxInitialLineLength, maxHeaderSize, maxChunkSize, this),
+             new Encoder(this));
     }
 
-    virtual void handleUpstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-        decoder.handleUpstream(ctx, e);
-    }
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        decoder.messageReceived(ctx, e);
-    }
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        decoder.exceptionCaught(ctx, e);
-    }
-    virtual void writeCompleted(ChannelHandlerContext& ctx, const WriteCompletionEvent& e) {
-        decoder.writeCompleted(ctx, e);
-    }
-    virtual void channelStateChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        decoder.channelStateChanged(ctx, e);
-    }
-    virtual void childChannelStateChanged(ChannelHandlerContext& ctx, const ChildChannelStateEvent& e) {
-        decoder.childChannelStateChanged(ctx, e);
-    }
-
-    virtual void handleDownstream(ChannelHandlerContext& ctx, const ChannelEvent& e) {
-        encoder.handleDownstream(ctx, e);
-    }
-    virtual void writeRequested(ChannelHandlerContext& ctx, const MessageEvent& e) {
-        encoder.writeRequested(ctx, e);
-    }
-    virtual void stateChangeRequested(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        encoder.stateChangeRequested(ctx, e);
+    HttpClientCodec(int maxInitialLineLength,
+                    int maxHeaderSize,
+                    int maxChunkSize,
+                    bool failOnMissingResponse)
+        : done(false),
+          failOnMissingResponse(failOnMissingResponse),
+          maxInitialLineLength(maxInitialLineLength),
+          maxHeaderSize(maxHeaderSize),
+          maxChunkSize(maxChunkSize) {
+        init(new Decoder(maxInitialLineLength, maxHeaderSize, maxChunkSize, this),
+             new Encoder(this));
     }
 
     virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(
-                   dynamic_cast<ChannelHandler*>(
-                       new HttpClientCodec(decoder.getMaxInitialLineLength(),
-                                           decoder.getMaxHeaderSize(),
-                                           decoder.getMaxChunkSize())));
+        return new HttpClientCodec(maxInitialLineLength,
+                                   maxHeaderSize,
+                                   maxChunkSize);
     }
-    virtual std::string toString() const { return "HttpClientCodec"; }
 
-    bool isDone() const { return done; }
+    virtual std::string toString() const { return "HttpClientCodec"; }
 
 private:
     class Encoder : public HttpRequestEncoder {
     public:
-        Encoder() {}
+        Encoder(HttpClientCodec* clientCodec) : codec(clientCodec) {}
         virtual ~Encoder() {}
 
-        void setHttpClientCodec(HttpClientCodec* clientCodec) {
-            BOOST_ASSERT(clientCodec);
-            codec = clientCodec;
-        }
-
         virtual ChannelHandlerPtr clone() {
-            return ChannelHandlerPtr(new Encoder);
+            return ChannelHandlerPtr(new Encoder(codec));
         }
         virtual std::string toString() const {
             return "HttpClientCodec::Encoder";
         }
 
     protected:
-        virtual ChannelMessage encode(
-            ChannelHandlerContext& ctx, const ChannelPtr& channel, ChannelMessage& msg) {
-            HttpRequestPtr request = msg.smartPointer<HttpRequest, HttpMessage>();
+        virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                                        const HttpPackage& msg,
+                                        const ChannelBufferPtr& out) {
+            if (msg.isHttpMessage() && !codec->done) {
+                HttpRequestPtr request
+                    = boost::dynamic_pointer_cast<HttpRequest>(msg.httpMessage());
 
-            if (request && !codec->isDone()) {
-                codec->queue.push_front(request->getMethod());
+                if (request) {
+                    codec->queue.push_back(request->getMethod());
+                }
+                else {
+
+                }
             }
 
-            return HttpRequestEncoder::encode(ctx, channel, msg);
+            ChannelBufferPtr buffer =
+                HttpRequestEncoder::encode(ctx, msg, out);
+
+            if (codec->failOnMissingResponse) {
+                // check if the request is chunked if so do not increment
+                if (msg.isHttpMessage() /*HttpRequest*/
+                        && msg.httpMessage()->getTransferEncoding().isSingle()) {
+                    ++ codec->requestResponseCounter;
+                }
+                else if (msg.isHttpChunk() && msg.httpChunk()->isLast()) {
+                    // increment as its the last chunk
+                    ++ codec->requestResponseCounter;
+                }
+            }
+
+            return buffer;
         }
 
     private:
@@ -152,45 +164,62 @@ private:
 
     class Decoder : public HttpResponseDecoder {
     public:
-        Decoder(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-            : HttpResponseDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
+        Decoder(int maxInitialLineLength,
+                int maxHeaderSize,
+                int maxChunkSize,
+                HttpClientCodec* clientCodec)
+            : HttpResponseDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize),
+              codec(clientCodec) {
         }
         virtual ~Decoder() {}
-
-        void setHttpClientCodec(HttpClientCodec* clientCodec) {
-            BOOST_ASSERT(clientCodec);
-            codec = clientCodec;
-        }
 
         virtual ChannelHandlerPtr clone() {
             return ChannelHandlerPtr(new Decoder(maxInitialLineLength,
                                                  maxHeaderSize,
-                                                 maxChunkSize));
+                                                 maxChunkSize,
+                                                 codec));
         }
+
         virtual std::string toString() const {
             return "HttpClientCodec::Decoder";
         }
 
-        int getMaxInitialLineLength() const { return maxInitialLineLength; }
-        int getMaxHeaderSize() const { return maxHeaderSize; }
-        int getMaxChunkSize() const { return maxChunkSize; }
+        virtual void channelInactive(ChannelHandlerContext& ctx) {
+            HttpResponseDecoder::channelInactive(ctx);
 
-    protected:
-        virtual ChannelMessage decode(ChannelHandlerContext& ctx,
-                                      const ChannelPtr& channel,
-                                      const ReplayingDecoderBufferPtr& buffer,
-                                      const int& state) {
-            if (codec->isDone()) {
-                return buffer->readBytes(actualReadableBytes());
-            }
-            else {
-                return HttpResponseDecoder::decode(ctx, channel, buffer, state);
+            if (codec->failOnMissingResponse) {
+                int missingResponses = codec->requestResponseCounter;
+
+                if (missingResponses > 0) {
+                    ctx.fireExceptionCaught(
+                        ChannelException(StringUtil::strprintf(
+                                             "channel gone inactive with %d missing response(s)",
+                                             missingResponses)));
+                }
             }
         }
 
-        virtual bool isContentAlwaysEmpty(const HttpMessage& msg) const {
-            const HttpResponse* response =
-                dynamic_cast<const HttpResponse*>(&msg);
+    protected:
+        virtual HttpPackage decode(ChannelHandlerContext& ctx,
+                                   const ReplayingDecoderBufferPtr& buffer,
+                                   int state) {
+            if (codec->done) {
+                return HttpPackage()/*buffer->readBytes(actualReadableBytes())*/;
+            }
+            else {
+                HttpPackage msg = HttpResponseDecoder::decode(ctx, buffer, state);
+
+                if (codec->failOnMissingResponse) {
+                    decrement(msg);
+                }
+
+                return msg;
+            }
+        }
+
+        virtual bool isContentAlwaysEmpty(const HttpMessagePtr& msg) {
+            HttpResponsePtr response =
+                boost::dynamic_pointer_cast<HttpResponse>(msg);
             BOOST_ASSERT(response);
 
             int statusCode = response->getStatus().getCode();
@@ -214,12 +243,21 @@ private:
                 // All responses to the HEAD request method MUST NOT include a
                 // message-body, even though the presence of entity-header fields
                 // might lead one to believe they do.
-                if (HttpMethod::HEAD.equals(method)) {
-                    // Interesting edge case:
-                    // Zero-byte chunk will appear if Transfer-Encoding of the
-                    // response is 'chunked'.  This is probably because of the
-                    // trailing headers.
-                    return !msg.isChunked();
+                if (HttpMethod::HEAD == method) {
+                    return true;
+
+                    // The following code was inserted to work around the servers
+                    // that behave incorrectly.  It has been commented out
+                    // because it does not work with well behaving servers.
+                    // Please note, even if the 'Transfer-Encoding: chunked'
+                    // header exists in the HEAD response, the response should
+                    // have absolutely no content.
+                    //
+                    //// Interesting edge case:
+                    //// Some poorly implemented servers will send a zero-byte
+                    //// chunk if Transfer-Encoding of the response is 'chunked'.
+                    ////
+                    //// return !msg.isChunked();
                 }
 
                 break;
@@ -228,7 +266,7 @@ private:
 
                 // Successful CONNECT request results in a response with empty body.
                 if (statusCode == 200) {
-                    if (HttpMethod::CONNECT.equals(method)) {
+                    if (HttpMethod::CONNECT == method) {
                         // Proxy connection established - Not HTTP anymore.
                         codec->done = true;
                         codec->queue.clear();
@@ -243,18 +281,47 @@ private:
         }
 
     private:
+        void decrement(const HttpPackage& msg) {
+            if (!msg) {
+                return;
+            }
+
+            // check if it's an HttpMessage and its transfer encoding is SINGLE.
+            if (msg.isHttpMessage() && msg.httpMessage()->getTransferEncoding().isSingle()) {
+                -- codec->requestResponseCounter;
+            }
+            else if (msg.isHttpChunk() && msg.httpChunk()->isLast()) {
+                -- codec->requestResponseCounter;
+            }
+
+            //else if (msg instanceof Object[]) {
+            // we just decrement it here as we only use this if the end of the chunk is reached
+            // It would be more safe to check all the objects in the array but would also be slower
+            //    requestResponseCounter.decrementAndGet();
+            //}
+        }
+
+    private:
         HttpClientCodec* codec;
     };
 
-private:
-    /** A queue that is used for correlating a request and a response. */
-    std::deque<HttpMethod> queue;
+    friend class Encoder;
+    friend class Decoder;
 
+private:
     /** If true, decoding stops (i.e. pass-through) */
     bool done;
 
-    Encoder encoder;
-    Decoder decoder;
+    bool failOnMissingResponse;
+
+    int requestResponseCounter;
+
+    int maxInitialLineLength;
+    int maxHeaderSize;
+    int maxChunkSize;
+
+    /** A queue that is used for correlating a request and a response. */
+    std::deque<HttpMethod> queue;
 };
 
 

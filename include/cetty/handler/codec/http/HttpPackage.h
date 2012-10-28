@@ -21,6 +21,8 @@
 
 #include <cetty/handler/codec/http/HttpChunk.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 
 namespace cetty {
@@ -39,9 +41,23 @@ public:
     HttpPackage() {}
     HttpPackage(const HttpChunkPtr& chunk) : variant(chunk) {}
     HttpPackage(const HttpMessagePtr& message) : variant(message) {}
+    HttpPackage(const HttpRequestPtr& request)
+        : variant(boost::static_pointer_cast<HttpMessage>(request)) {
+    }
+    HttpPackage(const HttpResponsePtr& response)
+        : variant(boost::static_pointer_cast<HttpMessage>(response)) {
+    }
     HttpPackage(const HttpChunkTrailerPtr& chunkTailer) : variant(chunkTailer) {}
 
     operator bool() const;
+
+    bool isHttpMessage() const { return variant.which() == 0; }
+    bool isHttpChunk() const { return variant.which() == 1; }
+    bool isHttpChunkTrailer() const { return variant.which() == 2; }
+
+    HttpMessagePtr httpMessage() const;
+    HttpChunkPtr httpChunk() const;
+    HttpChunkTrailerPtr httpChunkTrailer() const;
 };
 
 }
