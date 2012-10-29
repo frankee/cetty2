@@ -372,6 +372,9 @@ const std::string& Session::getHost() const {
 inline
 void Session::setPrincipal(const std::string& principal){
     this->principal = principal;
+    if(updateCallback) {
+        updateCallback(shared_from_this());
+    }
 }
 
 inline
