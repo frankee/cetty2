@@ -257,6 +257,8 @@ void Session::toJson(std::string* json) const {
         LOG_ERROR << "Session last access time[" << to_simple_string(lastAccessTime) << "]is invalid";
         ss << NULL_TIME;
     }
+
+    ss << "," << principal;
     ss << "]";
     std::map<std::string, std::string>::const_iterator it;
     for(it = attributes.begin(); it != attributes.end(); ++ it){
@@ -290,6 +292,7 @@ void Session::fromJson(const char* json) {
                 stopTime = time_from_string(temp[7].as<std::string>());
             if(NULL_TIME != temp[8].as<std::string>())
                 lastAccessTime = time_from_string(temp[8].as<std::string>());
+            principal = temp[9].as<std::string>();
         }else{
             attributes.insert(std::pair<std::string, std::string>(
                 it->first.as<std::string>(),

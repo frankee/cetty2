@@ -7,6 +7,10 @@
 
 #include <cetty/shiro/authz/Authorizer.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/config/ConfigCenter.h>
+#include <cetty/shiro/authz/PermissionResolver.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
 
 namespace cetty {
 namespace shiro {
@@ -15,23 +19,36 @@ namespace authz {
 using namespace cetty::shiro::realm;
 using namespace cetty::shiro::authz;
 
+const std::string Authorizer::ALL_PERMISSION = "all_permission";
+const std::string Authorizer::WILDCARD_PERMISSION = "wildcard_permission";
+
+Authorizer::Authorizer(){
+    ConfigCenter::instance().configure(&config);
+
+    if(config.permissionType == WILDCARD_PERMISSION){
+        permissionResolver = &wildcardPermissionResolver;
+    } else {
+        permissionResolver = &allPermissionResolver;
+    }
+}
+
 void Authorizer::isPermitted(const std::string& principal,
                              const std::string& permission,
                              const AuthorizeCallback& callback) const {
-    if (realmConfigured()) {
-        PrincipalCollection principals(principal, realm->getName());
-        PermissionPtr p = permissionResolver(permission);
-        isPermitted(principals, p, callback);
-    }
+    assert(realmConfigured());
+
+    PrincipalCollection principals(principal, realm->getName());
+    PermissionPtr p = permissionResolver(permission);
+    isPermitted(principals, p, callback);
 }
 
 void Authorizer::isPermitted(const PrincipalCollection& principals,
                              const std::string& permission,
                              const AuthorizeCallback& callback) const {
-    if (realmConfigured()) {
-        PermissionPtr p = permissionResolver(permission);
-        isPermitted(principals, p, callback);
-    }
+    assert(realmConfigured());
+
+    PermissionPtr p = permissionResolver(permission);
+    isPermitted(principals, p, callback);
 }
 
 void Authorizer::isPermitted(const PrincipalCollection& principal,
@@ -41,17 +58,16 @@ void Authorizer::isPermitted(const PrincipalCollection& principal,
                                 boost::bind(
                                     &Authorizer::doPermite,
                                     this,
-                                    _1,
+                                    _1, // AuthorizationInfoPtr
                                     principal,
                                     permission,
-                                    callback)
-                               );
+                                    callback));
 }
 
-void Authorizer::doPermite(const AuthorizationInfoPtr& info,
-                           const PrincipalCollection& principal,
-                           const PermissionPtr& permission,
-                           const AuthorizeCallback& callback) const {
+void Authorizer::doPermite(AuthorizationInfoPtr info,
+                           PrincipalCollection principal,
+                           PermissionPtr permission,
+                           AuthorizeCallback callback) const {
     if (!callback) {
         LOG_ERROR << "doPermite input callback can NOT be NULL";
         return;
@@ -62,6 +78,9 @@ void Authorizer::doPermite(const AuthorizationInfoPtr& info,
                  << principal.getPrimaryPrincipal() << "]";
         callback(false, principal.getPrimaryPrincipal(), permission->stringPermission());
     }
+
+    if(config.permissionType == ALL_PERMISSION)
+        callback(true, principal.getPrimaryPrincipal(), permission->stringPermission());
 
     std::vector<PermissionPtr> permissions = info->getPermissions();
     std::vector<PermissionPtr>::iterator it;

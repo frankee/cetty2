@@ -67,7 +67,7 @@ using namespace cetty::util;
  */
 class Realm : public ReferenceCounter<Realm, int> {
 public:
-    Realm() { this->name = autoName(); }
+    Realm() { name = autoName(); }
     Realm(std::string name): name(name){}
 
     virtual ~Realm(){}

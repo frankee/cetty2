@@ -5,8 +5,8 @@
 #include <boost/function.hpp>
 
 #include <cetty/shiro/realm/AuthenticatingRealm.h>
-#include <cetty/shiro/authz/AuthorizationInfo.h>
 #include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
 #include <cetty/shiro/PrincipalCollection.h>
 
 namespace cetty {
@@ -36,7 +36,7 @@ using namespace cetty::shiro::authz;
  */
 class AuthorizingRealm : public AuthenticatingRealm{
 public:
-    typedef boost::function1<void, const AuthorizationInfoPtr&> GetAuthorizationInfoCallback;
+    typedef boost::function1<void, const AuthorizationInfoPtr &> GetAuthorizationInfoCallback;
 
 public:
     AuthorizingRealm() {}

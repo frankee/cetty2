@@ -9,6 +9,7 @@
 #include <cetty/shiro/PrincipalCollection.h>
 #include <cetty/shiro/realm/AuthorizingRealm.h>
 #include <cetty/shiro/realm/AuthorizingRealmPtr.h>
+#include <cetty/shiro/authz/AuthorizerConfig.h>
 
 namespace cetty {
 namespace shiro {
@@ -46,7 +47,7 @@ public:
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
-    Authorizer() {}
+    Authorizer();
 
     /**
      * Constructor that accepts the <code>Realm</code>s to consult during an authorization check.  Immediately calls
@@ -130,10 +131,16 @@ public:
 private:
     bool realmConfigured() const;
 
-    void doPermite(const AuthorizationInfoPtr& info,
-        const PrincipalCollection& principal,
-        const PermissionPtr& permission,
-        const AuthorizeCallback& callback) const;
+    void doPermite(AuthorizationInfoPtr info,
+        PrincipalCollection principal,
+        PermissionPtr permission,
+        AuthorizeCallback callback) const;
+
+private:
+    static const std::string ALL_PERMISSION;
+    static const std::string WILDCARD_PERMISSION;
+
+    AuthorizerConfig config;
 
 protected:
     AuthorizingRealmPtr realm;

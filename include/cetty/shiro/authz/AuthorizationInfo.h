@@ -65,7 +65,7 @@ namespace authz {
  * @see org.apache.shiro.authc.Account
  * @since 0.9
  */
-class AuthorizationInfo {
+class AuthorizationInfo: public ReferenceCounter<AuthorizationInfo, int>{
 public:
     AuthorizationInfo(){};
     AuthorizationInfo(const std::vector<std::string>& roles):roles(roles){}

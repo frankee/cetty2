@@ -13,6 +13,8 @@
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
 
 namespace cetty {
 namespace shiro {
@@ -255,8 +257,7 @@ void SqlRealm::getPermissions(const std::string& userName,
 
     if (permissions->empty()) {
         LOG_ERROR << "No permissions are found for user ["
-                  << userName
-                  <<"]";
+                  << userName <<"]";
     }
 }
 

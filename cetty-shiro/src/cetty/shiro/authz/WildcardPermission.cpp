@@ -16,7 +16,7 @@ namespace authz {
 
 const std::string WildcardPermission::WILDCARD_TOKEN = "*";
 const std::string WildcardPermission::PART_DIVIDER_TOKEN = ":";
-const bool DEFAULT_CASE_SENSITIVE = false;
+const bool WildcardPermission::DEFAULT_CASE_SENSITIVE = false;
 
 bool WildcardPermission::implies(const PermissionPtr& p) {
     WildcardPermissionPtr permission = boost::dynamic_pointer_cast<WildcardPermission>(p);
@@ -45,7 +45,8 @@ bool WildcardPermission::implies(const PermissionPtr& p) {
     return true;
 }
 
-void WildcardPermission::setParts(std::string& wildcardString, bool caseSensitive) {
+void WildcardPermission::setParts(const std::string& strPermission, bool caseSensitive) {
+    std::string wildcardString = strPermission;
     if (wildcardString.empty()) {
         LOG_TRACE << "Wildcard string cannot be null or empty. "
                   "Make sure permission strings are properly formatted.";
