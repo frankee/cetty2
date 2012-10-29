@@ -11,6 +11,9 @@
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/shiro/PrincipalCollection.h>
 #include <cetty/shiro/authc/AuthenticationInfo.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
+
 
 namespace cetty {
 namespace shiro {

@@ -16,13 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
 namespace shiro {
 namespace authz {
 
 class AuthorizationInfo;
-typedef AuthorizationInfo* AuthorizationInfoPtr;
+typedef boost::intrusive_ptr<AuthorizationInfo> AuthorizationInfoPtr;
 
 }
 }

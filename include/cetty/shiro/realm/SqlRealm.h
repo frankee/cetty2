@@ -14,6 +14,11 @@ public:
 
     static const std::string NAME;
 
+    static const std::string DEFAULT_AUTHENTICATION_QUERY;
+    static const std::string DEFAULT_SALTED_AUTHENTICATION_QUERY;
+    static const std::string DEFAULT_USER_ROLES_QUERY;
+    static const std::string DEFAULT_PERMISSIONS_QUERY;
+
 public:
     SqlRealm();
 
@@ -25,11 +30,9 @@ public:
     virtual void doGetAuthorizationInfo(const PrincipalCollection& principals,
                                         const GetAuthorizationInfoCallback& callback);
 
-public:
-    static const std::string DEFAULT_AUTHENTICATION_QUERY;
-    static const std::string DEFAULT_SALTED_AUTHENTICATION_QUERY;
-    static const std::string DEFAULT_USER_ROLES_QUERY;
-    static const std::string DEFAULT_PERMISSIONS_QUERY;
+    virtual void onLogout(const std::string &principal){
+        AuthorizingRealm::onLogout(principal);
+    }
 
 protected:
     SqlRealmConfig config;

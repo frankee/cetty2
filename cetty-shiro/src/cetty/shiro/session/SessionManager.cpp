@@ -4,7 +4,6 @@
 #include <cetty/shiro/session/Session.h>
 #include <cetty/shiro/session/SessionDAO.h>
 #include <cetty/shiro/session/RedisSessionDAO.h>
-#include <cetty/shiro/session/SessionValidationScheduler.h>
 
 #include <cetty/shiro/util/SecurityUtils.h>
 
@@ -61,7 +60,7 @@ void SessionManager::validateSessions() {
     std::vector<SessionPtr>::iterator it = v.begin();
 
     for (; it != v.end(); ++it) {
-        int state = validate(*it);
+        Session::SessionState state = validate(*it);
 
         if (state == Session::STOPPED || state == Session::EXPIRED) {
             invalidCount ++;
@@ -69,22 +68,14 @@ void SessionManager::validateSessions() {
     }
 }
 
-int SessionManager::validate(const SessionPtr& session) {
+Session::SessionState SessionManager::validate(SessionPtr session) {
+    assert(session);
     Session::SessionState state = session->validate();
-
-    if (state == Session::EXPIRED) {
-        session->expire();
-    }
-    else if (state == Session::STOPPED) {
-        session->stop();
-    }
-
-    return (int)state;
+    return state;
 }
 
 void SessionManager::notifyStart(const SessionPtr& session) {
     std::vector<SessionChangeCallback>::iterator it = listeners.begin();
-
     for (; it != listeners.end(); ++it) {
         (*it)(session, Session::START);
     }
@@ -183,15 +174,15 @@ void SessionManager::getSession(const std::string& id,
                                         this,
                                         _1, // return code
                                         _2, // session
-                                        boost::cref(callback)));
+                                        callback));
 }
 
 void SessionManager::readSessionCallback(int result,
         const SessionPtr& session,
         const SessionCallback& callback) {
     if (!result) {
-        validate(session);
-        if(session->isStopped() || session->isExpired()){
+        Session::SessionState state = validate(session);
+        if(state == Session::STOPPED|| state == Session::EXPIRED){
             callback(SessionPtr());
         } else{
             session->touch();
@@ -218,6 +209,7 @@ void SessionManager::onStop(const SessionPtr& session) {
 }
 
 void SessionManager::afterStopped(const SessionPtr& session) {
+    if(clearCallback) clearCallback(session);
     if (isDeleteInvalidSessions()) remove(session);
 }
 
@@ -226,6 +218,7 @@ void SessionManager::onExpiration(const SessionPtr& session) {
 }
 
 void SessionManager::afterExpired(const SessionPtr& session) {
+    if(clearCallback) clearCallback(session);
     if (isDeleteInvalidSessions()) {
         remove(session);
     }

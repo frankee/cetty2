@@ -105,12 +105,11 @@ public:
 
     void setRealm(const RealmPtr &realm);
     const RealmPtr& getRealms() const;
+    void getSession(const std::string& id, SessionManager::SessionCallback callback );
+    void clear(SessionPtr session);
 
 private:
     void init();
-
-    /// login by session id
-    void getSession(const std::string& id, SessionManager::SessionCallback callback );
 
     void bind(const AuthenticationToken& token, const AuthenticationInfo& info, const SessionPtr& session);
 

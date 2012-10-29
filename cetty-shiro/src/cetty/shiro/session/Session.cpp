@@ -95,11 +95,13 @@ bool Session::isValid() const {
 
 Session::SessionState Session::validate() {
     if (isStopped()) {
+        LOG_INFO << "session [" << getId() << "] has stoped.";
         stop();
         return Session::STOPPED;
     }
 
     if (isTimedOut()) {
+        LOG_INFO << "session [" << getId() << "] has expired.";
         expire();
         return Session::EXPIRED;
     }
@@ -128,11 +130,11 @@ void Session::setAttribute(const std::string& key, const std::string& value) {
         removeAttribute(key);
     }
 
-   if(key.empty() || value.empty()) return;
-        attributes.insert(std::pair<std::string, std::string>(key, value));
+    if(key.empty() || value.empty()) return;
+    attributes.insert(std::pair<std::string, std::string>(key, value));
 
-        if (updateCallback) {
-            updateCallback(shared_from_this());
+    if (updateCallback) {
+        updateCallback(shared_from_this());
     }
 }
 
@@ -255,6 +257,8 @@ void Session::toJson(std::string* json) const {
         LOG_ERROR << "Session last access time[" << to_simple_string(lastAccessTime) << "]is invalid";
         ss << NULL_TIME;
     }
+
+    ss << "," << principal;
     ss << "]";
     std::map<std::string, std::string>::const_iterator it;
     for(it = attributes.begin(); it != attributes.end(); ++ it){
@@ -288,6 +292,7 @@ void Session::fromJson(const char* json) {
                 stopTime = time_from_string(temp[7].as<std::string>());
             if(NULL_TIME != temp[8].as<std::string>())
                 lastAccessTime = time_from_string(temp[8].as<std::string>());
+            principal = temp[9].as<std::string>();
         }else{
             attributes.insert(std::pair<std::string, std::string>(
                 it->first.as<std::string>(),

@@ -13,6 +13,8 @@
 #include <cetty/shiro/authc/AuthenticationToken.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/shiro/authz/AuthorizationInfoPtr.h>
+#include <cetty/shiro/authz/AuthorizationInfo.h>
 
 namespace cetty {
 namespace shiro {
@@ -42,6 +44,13 @@ void SqlRealm::init() {
             && config.authenticationQuery == DEFAULT_AUTHENTICATION_QUERY) {
         config.authenticationQuery = DEFAULT_SALTED_AUTHENTICATION_QUERY;
     }
+
+    if(config.authenticationQuery.empty())
+        config.authenticationQuery = SqlRealm::DEFAULT_AUTHENTICATION_QUERY;
+    if(config.userRolesQuery.empty())
+        config.userRolesQuery = SqlRealm::DEFAULT_USER_ROLES_QUERY;
+    if(config.permissionsQuery.empty())
+        config.permissionsQuery = SqlRealm::DEFAULT_PERMISSIONS_QUERY;
 }
 
 void SqlRealm::doGetAuthenticationInfo(const AuthenticationToken& token,
@@ -248,8 +257,7 @@ void SqlRealm::getPermissions(const std::string& userName,
 
     if (permissions->empty()) {
         LOG_ERROR << "No permissions are found for user ["
-                  << userName
-                  <<"]";
+                  << userName <<"]";
     }
 }
 

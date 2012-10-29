@@ -28,6 +28,9 @@ using namespace cetty::shiro::authz;
 
 SecurityManager::SecurityManager() {
     sessionManager = new SessionManager();
+    sessionManager->setClearCallback(boost::bind(&SecurityManager::clear,
+                                                 this,
+                                                 _1/*SessionPtr*/));
 
     ConfigCenter::instance().configure(&config);
     init();
@@ -78,6 +81,7 @@ void SecurityManager::onAuthenticate(const AuthenticationInfoPtr& info,
                                           callback));
     }
     else {
+        callback(1, token, info, SessionPtr());
         fireFailedLoginEvent(token);
     }
 }
@@ -110,17 +114,19 @@ void SecurityManager::logout(const std::string& sessionId) {
 }
 
 void SecurityManager::onLogout(const SessionPtr& session) {
-    AuthenticatingRealm* authRealm = (AuthenticatingRealm*)realms.get();
-
-    if (authRealm != NULL) { authRealm->onLogout(session->getAttribute("username")); }
-
+    if(!session) return;
+    if(realms) realms->onLogout(session->getPrincipal());
     session->stop();
+
+    LOG_INFO << "User [" << session->getPrincipal() << "] logs out system.";
+    LOG_INFO << "Session [" << session->getId() << "] has stopped.";
 }
 
 
 void SecurityManager::bind(const AuthenticationToken& token,
                            const AuthenticationInfo& info,
                            const SessionPtr& session) {
+    session->setPrincipal(token.getPrincipal());
     session->setHost(token.getHost());
     session->setLogin(true);
 }
@@ -169,6 +175,14 @@ const RealmPtr& SecurityManager::getRealms() const {
 SecurityManager& SecurityManager::instance() {
     static SecurityManager securityManager;
     return securityManager;
+}
+
+void SecurityManager::clear(SessionPtr session){
+    if(!session) return;
+    std::string principal = session->getPrincipal();
+    if(!principal.empty()){
+        realms->onLogout(principal);
+    }
 }
 
 }

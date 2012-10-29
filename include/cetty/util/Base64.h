@@ -98,6 +98,7 @@ public:
     }
     static bool decode(const char* str, int size, int flags, std::string* bytes);
 
+    // todo Encoded result looks like error
     static bool encode(const std::string& bytes, std::string* str) {
         return encode(bytes, DEFAULT, str);
     }

@@ -107,12 +107,12 @@ typedef boost::intrusive_ptr<WildcardPermission> WildcardPermissionPtr;
  */
 class WildcardPermission : public Permission {
 public:
-    WildcardPermission(){}
-    WildcardPermission(std::string& wildcardString)
+    WildcardPermission(const std::string& wildcardString)
         :Permission(wildcardString){
         setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
     }
-    WildcardPermission(std::string& wildcardString, bool caseSensitive) {
+    WildcardPermission(const std::string& wildcardString, bool caseSensitive)
+        : Permission(wildcardString){
         setParts(wildcardString, caseSensitive);
     }
 
@@ -121,7 +121,7 @@ public:
     virtual std::string toString() const;
 
 private:
-    void setParts(std::string &wildcardString, bool caseSensitive);
+    void setParts(const std::string &wildcardString, bool caseSensitive);
     const std::vector<std::string>& getParts() const;
 
 private:

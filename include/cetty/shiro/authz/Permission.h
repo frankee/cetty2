@@ -42,7 +42,6 @@ typedef boost::intrusive_ptr<Permission> PermissionPtr;
  */
 class Permission : public ReferenceCounter<Permission, int> {
 public:
-    Permission(){}
     Permission(const std::string &strPermission): strPermission(strPermission){}
 
     virtual ~Permission() {}
