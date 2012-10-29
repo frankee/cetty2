@@ -66,9 +66,7 @@ public:
 
 protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& msg) {
-            throw ChannelException("you must implement the messageReceived method.");
-    }
+                                 const ChannelBufferPtr& msg);
 
 private:
     ChannelBufferPtr inboundBuffer;

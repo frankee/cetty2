@@ -17,6 +17,7 @@
 
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 
+#include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 
@@ -113,6 +114,10 @@ ChannelHandlerContext* ChannelInboundBufferHandler::createContext(const std::str
 
 void ChannelInboundBufferHandler::setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
     inboundBuffer = buffer;
+}
+
+void ChannelInboundBufferHandler::messageReceived(ChannelHandlerContext& ctx, const ChannelBufferPtr& msg) {
+    throw ChannelException("you must implement the messageReceived method.");
 }
 
 }

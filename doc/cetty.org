@@ -272,6 +272,11 @@ int main(int argc, char* argv[]) {
    3. Headers
    4. cookie
 
+      message Request {
+      option method = ;
+      option path = ;
+   }
+
 *** path映射方式
     path的映射包含参数映射和method的映射
 

@@ -4,6 +4,7 @@
     <ClCompile Include="..\..\example\proxy\HexDumpProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\example\proxy\HexDumpProxyInboundHandler.h" />
+    <ClInclude Include="..\..\example\proxy\HexDumpProxyBackendHandler.h" />
+    <ClInclude Include="..\..\example\proxy\HexDumpProxyFrontendHandler.h" />
   </ItemGroup>
 </Project>

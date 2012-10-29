@@ -10,6 +10,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\sample\echo\protobuf\GearmanProtobufEchoWorker.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F25952F1-9ED5-4D5B-A644-97A4CF9EB495}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -76,13 +79,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\sample\protobufEcho\echo.pb.cc" />
-    <ClCompile Include="..\..\sample\protobufEcho\GearmanProtobufEchoWorker.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

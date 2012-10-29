@@ -116,7 +116,7 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     }
     else {
         LOG_ERROR << "wrong uri format, can not match any template."
-                  << request->getUri();
+                  << request->getUriString();
     }
 
     return ProtobufServiceMessagePtr();

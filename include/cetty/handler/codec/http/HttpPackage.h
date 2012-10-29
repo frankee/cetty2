@@ -47,18 +47,58 @@ public:
     HttpPackage(const HttpResponsePtr& response)
         : variant(boost::static_pointer_cast<HttpMessage>(response)) {
     }
-    HttpPackage(const HttpChunkTrailerPtr& chunkTailer) : variant(chunkTailer) {}
+    HttpPackage(const HttpChunkTrailerPtr& chunkTailer)
+        : variant(chunkTailer) {}
 
     operator bool() const;
 
-    bool isHttpMessage() const { return variant.which() == 0; }
-    bool isHttpChunk() const { return variant.which() == 1; }
-    bool isHttpChunkTrailer() const { return variant.which() == 2; }
+    bool isHttpMessage() const;
+    bool isHttpChunk() const;
+    bool isHttpChunkTrailer() const;
 
     HttpMessagePtr httpMessage() const;
     HttpChunkPtr httpChunk() const;
     HttpChunkTrailerPtr httpChunkTrailer() const;
 };
+
+inline
+bool HttpPackage::isHttpMessage() const {
+    return variant.which() == 0;
+}
+
+inline
+bool HttpPackage::isHttpChunk() const {
+    return variant.which() == 1;
+}
+
+inline
+bool HttpPackage::isHttpChunkTrailer() const {
+    return variant.which() == 2;
+}
+
+inline
+HttpMessagePtr HttpPackage::httpMessage() const {
+    if (isHttpMessage()) {
+        return boost::get<HttpMessagePtr>(variant);
+    }
+    return HttpMessagePtr();
+}
+
+inline
+HttpChunkPtr HttpPackage::httpChunk() const {
+    if (isHttpChunk()) {
+        return boost::get<HttpChunkPtr>(variant);
+    }
+    return HttpChunkPtr();
+}
+
+inline
+HttpChunkTrailerPtr HttpPackage::httpChunkTrailer() const {
+    if (isHttpChunkTrailer()) {
+        return boost::get<HttpChunkTrailerPtr>(variant);
+    }
+    return HttpChunkTrailerPtr();
+}
 
 }
 }
