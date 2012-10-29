@@ -15,7 +15,7 @@ message PreLoginRequest {
 }
 
 message PreLoginResponse {
-	optional cetty.craft.Error   error = 1;
+	optional cetty.craft.Status   status = 1;
 	optional cetty.craft.Session session = 2;
 	
 	optional string       nonce = 3;
@@ -32,7 +32,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
-	optional cetty.craft.Error     error = 1;
+	optional cetty.craft.Status   status = 1;
 	optional cetty.craft.Session session = 2;
 }
 
@@ -41,7 +41,7 @@ message LogoutRequest {
 }
 
 message LogoutResponse {
-	optional cetty.craft.Error error = 1;
+	optional cetty.craft.Status status = 1;
 }
 
 service AccessControlService {

@@ -34,8 +34,8 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         LOG_ERROR << "parsed object is NULL.";
         return false;
     }
-    
-    const ConfigDescriptor* descriptor = object->getdescriptor();
+
+    const ConfigDescriptor* descriptor = object->getDescriptor();
 
     ConfigDescriptor::ConstIterator itr = descriptor->begin();
 
@@ -101,7 +101,7 @@ int parseField(const ConfigFieldDescriptor* field,
                const YAML::Node& node,
                ConfigObject* object) {
 
-    const ConfigReflection* reflection = object->getreflection();
+    const ConfigReflection* reflection = object->getReflection();
 
     if (field->repeated) {
         YAML::Node::const_iterator itr = node.begin();
@@ -126,6 +126,16 @@ int parseField(const ConfigFieldDescriptor* field,
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
                 ConfigObject* obj = reflection->addConfigObject(object, field);
+
+                // items:
+                //   - objectName :
+                //       field1 : value
+                //       field2 : value
+
+                const std::string& objectName = itr->first.Scalar();
+                if (!objectName.empty()) {
+                    obj->setName(objectName);
+                } 
 
                 if (!parseConfigObject(*itr, obj)) {
                     return false;

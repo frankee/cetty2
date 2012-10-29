@@ -24,7 +24,7 @@ namespace config {
 ConfigObject::ObjectDescriptorMap* ConfigObject::objects = NULL;
 ConfigReflection* ConfigObject::reflection = NULL;
 
-const ConfigReflection* ConfigObject::getreflection() const {
+const ConfigReflection* ConfigObject::getReflection() const {
     ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
 
     ObjectDescriptorMap::const_iterator itr = objects.find(name);
@@ -40,7 +40,7 @@ const ConfigReflection* ConfigObject::getreflection() const {
     return NULL;
 }
 
-const ConfigDescriptor* ConfigObject::getdescriptor() const {
+const ConfigDescriptor* ConfigObject::getDescriptor() const {
     ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
 
     ObjectDescriptorMap::const_iterator itr = objects.find(name);

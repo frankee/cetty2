@@ -32,11 +32,12 @@ public:
     ConfigObject(const std::string& name) : name(name) {}
     virtual ~ConfigObject() {}
 
-    virtual const ConfigReflection* getreflection() const;
-    virtual const ConfigDescriptor* getdescriptor() const;
+    virtual const ConfigReflection* getReflection() const;
+    virtual const ConfigDescriptor* getDescriptor() const;
 
     virtual ConfigObject* create() const = 0;
 
+    void setName(const std::string& name) { this->name = name; }
     const std::string& getName() const { return name; }
 
     virtual void clear();
