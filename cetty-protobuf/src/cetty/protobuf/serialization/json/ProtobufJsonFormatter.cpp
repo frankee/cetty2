@@ -267,7 +267,7 @@ public:
     }
 
     OutputStream& appendValue(double value) {
-        output->writeBytes(StringUtil::strprintf("%lf", value));
+        output->writeBytes(StringUtil::strprintf("%f", value));
         return *this;
     }
 
