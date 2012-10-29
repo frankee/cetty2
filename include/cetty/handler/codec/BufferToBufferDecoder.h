@@ -56,8 +56,6 @@ public:
     BufferToBufferDecoder();
     virtual ~BufferToBufferDecoder();
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx, const ChannelBufferPtr& in);
-
     virtual void channelInactive(ChannelHandlerContext& ctx);
 
     ChannelBufferPtr decodeLast(ChannelHandlerContext& ctx,
@@ -67,6 +65,9 @@ public:
 
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
                                     const ChannelBufferPtr& in) = 0;
+
+protected:
+    virtual void messageReceived(ChannelHandlerContext& ctx, const ChannelBufferPtr& in);
 
 private:
     ChannelBufferPtr callDecode(ChannelHandlerContext& ctx,
