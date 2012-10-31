@@ -64,6 +64,11 @@ public:
             const ExpireCallback& expireCallback);
 
     /**
+     * This method will be called after session is changed
+     */
+    void update(const SessionPtr&);
+
+    /**
      * Returns the unique identifier assigned by the system upon session creation.
      * <p/>
      * All return values from this method are expected to have proper {@code toString()},
@@ -175,7 +180,7 @@ public:
     bool isLogin() const;
     void setLogin(bool login);
 
-    bool isRememberMe();
+    bool isRememberMe() const;
     void setRememberMe(bool rememberMe);
 
     const std::map<std::string, std::string>& getAttributes() const;
@@ -282,13 +287,13 @@ public:
      */
     void removeAttribute(const std::string& key);
 
-    void setStopCallback(StopCallback callback) {
+    void setStopCallback(const StopCallback &callback) {
         this->stopCallback = callback;
     }
-    void setUpdateCallback(UpdateCallback callback){
+    void setUpdateCallback(const UpdateCallback &callback){
         this->updateCallback = callback;
     }
-    void setExpireCallback(ExpireCallback callback){
+    void setExpireCallback(const ExpireCallback &callback){
         this->expireCallback = callback;
     }
 
@@ -335,8 +340,15 @@ private:
 };
 
 inline
+void Session::update(const SessionPtr&){
+	if (updateCallback) {
+	    updateCallback(shared_from_this());
+	}
+}
+
+inline
 const std::string& Session::getId() const {
-    return this->id;
+    return id;
 }
 
 inline
@@ -372,6 +384,7 @@ const std::string& Session::getHost() const {
 inline
 void Session::setPrincipal(const std::string& principal){
     this->principal = principal;
+    update(shared_from_this());
 }
 
 inline
@@ -390,16 +403,16 @@ const std::map<std::string, std::string>& Session::getAttributes() const {
 }
 
 inline
-bool Session::isRememberMe(){
+bool Session::isRememberMe() const{
     return rememberMe;
 }
 
 inline
-void Session::setRememberMe(bool rememberMe){
-    this->rememberMe = true;
-    if(updateCallback) updateCallback(shared_from_this());
+void Session::setRememberMe(bool rm){
+	if(rememberMe == rm) return;
+    rememberMe = true;
+    update(shared_from_this());
 }
-
 
 }
 }
