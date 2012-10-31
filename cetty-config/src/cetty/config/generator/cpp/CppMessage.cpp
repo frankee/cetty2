@@ -31,22 +31,31 @@
 // Author: kenton@google.com (Kenton Varda)
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
+#include <cetty/config/generator/cpp/CppMessage.h>
 
 #include <algorithm>
 #include <map>
 #include <utility>
 #include <vector>
-#include <cetty/config/generator/cpp/CppMessage.h>
-#include <cetty/config/generator/cpp/CppHelpers.h>
+
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/wire_format.h>
+#include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
+
+#include <cetty/config/generator/cpp/CppHelpers.h>
 
 namespace cetty {
 namespace config {
 namespace generator {
 namespace cpp {
+
+    std::string simpleI2A(int i) {
+        char buf[64] = {0};
+        sprintf(buf, "%d", i);
+        return std::string(buf);
+    }
 
 namespace {
 
@@ -106,7 +115,6 @@ MessageGenerator::MessageGenerator(const Descriptor* descriptor,
     : descriptor_(descriptor),
       classname_(ClassName(descriptor, false)),
       dllexport_decl_(dllexport_decl),
-      field_generators_(descriptor),
       nested_generators_(new scoped_ptr<MessageGenerator>[
                              descriptor->nested_type_count()]) {
 
@@ -135,7 +143,7 @@ GenerateClassDefinition(io::Printer* printer) {
 
     map<string, string> vars;
     vars["classname"] = classname_;
-    vars["field_count"] = SimpleItoa(descriptor_->field_count());
+    vars["field_count"] = simpleI2A(descriptor_->field_count());
 
     if (dllexport_decl_.empty()) {
         vars["dllexport"] = "";
@@ -198,11 +206,59 @@ GenerateClassDefinition(io::Printer* printer) {
     vector<const FieldDescriptor*> fields;
 
     for (int i = 0; i < descriptor_->field_count(); i++) {
-        fields.push_back(descriptor_->field(i));
-    }
-
-    for (int i = 0; i < fields.size(); ++i) {
-        field_generators_.get(fields[i]).GeneratePrivateMembers(printer);
+        const FieldDescriptor* field = descriptor_->field(i);
+        if (field->is_repeated()) {
+            switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_INT32:
+                printer->Print("std::vector<int> $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_INT64:
+                printer->Print("std::vector<int64_t> $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_BOOL:
+                printer->Print("std::vector<bool> $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_DOUBLE:
+                printer->Print("std::vector<double> $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_STRING:
+                printer->Print("std::vector<std::string> $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                printer->Print("std::vector<$class_name$*> $field_name$;\n",
+                    "class_name", ClassName(field->containing_type(), true),
+                    "field_name", field->camelcase_name());
+                break;
+            default:
+                break;
+            }
+        }
+        else {
+            switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_INT32:
+                printer->Print("int $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_INT64:
+                printer->Print("int64_t $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_BOOL:
+                printer->Print("bool $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_DOUBLE:
+                printer->Print("double $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_STRING:
+                printer->Print("std::string $field_name$;\n", "field_name", field->camelcase_name());
+                break;
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                printer->Print("$class_name$* $field_name$;\n",
+                    "class_name", ClassName(field->containing_type(), true),
+                    "field_name", field->camelcase_name());
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     printer->Outdent();
@@ -215,7 +271,7 @@ GenerateDescriptorInitializer(io::Printer* printer, int index) {
     //   descriptor_->index() instead.
     map<string, string> vars;
     vars["classname"] = classname_;
-    vars["index"] = SimpleItoa(index);
+    vars["index"] = simpleI2A(index);
 
     // Obtain the descriptor from the parent's descriptor.
     if (descriptor_->containing_type() == NULL) {
@@ -298,11 +354,6 @@ GenerateDefaultInstanceInitializer(io::Printer* printer) {
         "$classname$::default_instance_->InitAsDefaultInstance();\n",
         "classname", classname_);
 
-    // Register extensions.
-    for (int i = 0; i < descriptor_->extension_count(); i++) {
-        extension_generators_[i]->GenerateRegistration(printer);
-    }
-
     // Handle nested types.
     for (int i = 0; i < descriptor_->nested_type_count(); i++) {
         nested_generators_[i]->GenerateDefaultInstanceInitializer(printer);
@@ -330,16 +381,13 @@ GenerateShutdownCode(io::Printer* printer) {
 
 void MessageGenerator::
 GenerateStructors(io::Printer* printer) {
-    string superclass = SuperClassName(descriptor_);
-
     // Generate the default constructor.
     printer->Print(
         "$classname$::$classname$()\n"
-        "  : $superclass$() {\n"
+        "  : ::cetty::config::ConfigObject() {\n"
         "  SharedCtor();\n"
         "}\n",
-        "classname", classname_,
-        "superclass", superclass);
+        "classname", classname_);
 
     printer->Print(
         "\n"
@@ -377,10 +425,7 @@ GenerateStructors(io::Printer* printer) {
         "}\n"
         "\n",
         "classname", classname_,
-        "superclass", superclass);
-
-    // Generate the shared constructor code.
-    GenerateSharedConstructorCode(printer);
+        "superclass", "cetty::config::ConfigObject");
 
     // Generate the destructor.
     printer->Print(
@@ -388,18 +433,6 @@ GenerateStructors(io::Printer* printer) {
         "  SharedDtor();\n"
         "}\n"
         "\n",
-        "classname", classname_);
-
-    // Generate the shared destructor code.
-    GenerateSharedDestructorCode(printer);
-
-    // Generate SetCachedSize.
-    printer->Print(
-        "void $classname$::SetCachedSize(int size) const {\n"
-        "  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();\n"
-        "  _cached_size_ = size;\n"
-        "  GOOGLE_SAFE_CONCURRENT_WRITES_END();\n"
-        "}\n",
         "classname", classname_);
 
     // Only generate this member if it's not disabled.

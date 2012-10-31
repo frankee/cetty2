@@ -17,25 +17,25 @@
  */
 
 #include <vector>
+#include <boost/function.hpp>
+
 #include <cetty/channel/ChannelPipelinePtr.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>
-#include <cetty/gearman/GearmanWorkerHandler.h>
+#include <cetty/gearman/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
 namespace builder {
 
-using namespace cetty::channel::socket::asio;
 using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman;
 
 class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
 public:
-    typedef GearmanWorkerHandler::GrabJobCallback WorkerFunctor;
+    typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> WorkerFunctor;
 
 public:
     GearmanWorkerBuilder();

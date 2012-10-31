@@ -21,6 +21,8 @@
 
 #include <cetty/config/generator/cpp/CppGenerator.h>
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 

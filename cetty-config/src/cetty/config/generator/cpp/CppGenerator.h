@@ -29,12 +29,12 @@ using namespace google::protobuf::compiler;
 
 class CppGenerator : public google::protobuf::compiler::CodeGenerator {
 public:
-    CppGenerator();
-    virtual ~CppGenerator();
+    CppGenerator() {}
+    virtual ~CppGenerator() {}
 
     virtual bool Generate(const FileDescriptor* file,
                           const string& parameter,
-                          GeneratorContext* generator_context,
+                          GeneratorContext* generatorContext,
                           string* error) const;
 };
 

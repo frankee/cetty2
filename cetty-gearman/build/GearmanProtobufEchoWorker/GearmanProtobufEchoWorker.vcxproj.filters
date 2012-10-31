@@ -2,5 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\..\sample\echo\protobuf\GearmanProtobufEchoWorker.cpp" />
+    <ClCompile Include="..\..\sample\echo\protobuf\echo.pb.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\sample\echo\protobuf\echo.pb.h" />
   </ItemGroup>
 </Project>

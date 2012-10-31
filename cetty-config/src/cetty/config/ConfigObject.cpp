@@ -25,19 +25,11 @@ ConfigObject::ObjectDescriptorMap* ConfigObject::objects = NULL;
 ConfigReflection* ConfigObject::reflection = NULL;
 
 const ConfigReflection* ConfigObject::getReflection() const {
-    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
-
-    ObjectDescriptorMap::const_iterator itr = objects.find(name);
-
-    if (itr != objects.end()) {
-        if (!reflection) {
-            reflection = new ConfigReflection;
-        }
-
-        return reflection;
+    if (!reflection) {
+        reflection = new ConfigReflection;
     }
 
-    return NULL;
+    return reflection;
 }
 
 const ConfigDescriptor* ConfigObject::getDescriptor() const {

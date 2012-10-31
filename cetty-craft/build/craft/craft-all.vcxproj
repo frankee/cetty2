@@ -100,7 +100,7 @@
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketAddressImpl.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannel.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelConfig.h" />
-    <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSink.h" />
+    <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h" />
@@ -142,7 +142,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandler.h" />
@@ -160,7 +159,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioService.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePoolPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFactoryPtr.h" />
@@ -180,7 +178,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEventHolder.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOption.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerContext.h" />
@@ -366,7 +363,6 @@
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelInboundHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelOutboundHandler.cpp" />
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelSink.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractServerChannel.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelBufferHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelBufferHandlerContext.cpp" />
@@ -382,6 +378,7 @@
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelPipeline.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelPipelineException.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelPipelines.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelSinkHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\CompleteChannelFuture.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\DefaultChannelConfig.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\DefaultChannelFuture.cpp" />
@@ -402,10 +399,9 @@
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketAddressImplFactory.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannel.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelConfig.cpp" />
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSink.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioWriteOperationQueue.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\SucceededChannelFuture.cpp" />
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\UserEvent.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\handler\codec\BufferToBufferCodec.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\handler\codec\BufferToBufferDecoder.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\handler\codec\BufferToBufferEncoder.cpp" />
@@ -480,6 +476,18 @@
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\service.pb.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\builder\RedisClientBuilder.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Connection.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Hashes.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Keys.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Scripting.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Server.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\SortedSets.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Strings.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Transactions.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisClient.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessage.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessageDecoder.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />

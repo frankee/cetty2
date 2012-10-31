@@ -33,6 +33,7 @@
 
 #include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/channel/ChannelOutboundBufferHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 
 namespace cetty {
 namespace channel {
@@ -61,6 +62,9 @@ public:
 protected:
     virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
                                     const ChannelBufferPtr& in) = 0;
+
+protected:
+    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> outboundTransfer;
 };
 
 }

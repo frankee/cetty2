@@ -20,12 +20,15 @@
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 
+#include <cetty/handler/codec/CodecException.h>
+#include <cetty/handler/codec/DecoderException.h>
+
 namespace cetty {
 namespace handler {
 namespace codec {
 
-    using namespace cetty::buffer;
-    using namespace cetty::channel;
+using namespace cetty::buffer;
+using namespace cetty::channel;
 
 BufferToBufferDecoder::BufferToBufferDecoder() {
 
@@ -35,26 +38,22 @@ BufferToBufferDecoder::~BufferToBufferDecoder() {
 
 }
 
-#if 0
-void BufferToBufferDecoder::messageUpdated(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& in) {
-    NextContext* nextCtx = ctx.nextInboundBufferHandlerContext();
-    if (nextCtx) {
-        ChannelBufferPtr out = callDecode(ctx, in);
-        nextCtx->setInboundChannelBuffer(out);
-    }
+void BufferToBufferDecoder::messageReceived(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& in) {
+    ChannelBufferPtr out = callDecode(ctx, in);
+    inboundTransfer.unfoldAndAdd(out);
 }
 
 void BufferToBufferDecoder::channelInactive(ChannelHandlerContext& ctx) {
-    Context* context = ctx.downcast()<Context>();
-    NextContext* nextContxt = ctx.nextInboundBufferHandlerContext();
 
-    const ChannelBuffer& in = context->getInboundChannelBuffer();
+    const ChannelBufferPtr& in = getInboundChannelBuffer();
+    ChannelBufferPtr out;
 
-    if (!in.readable()) {
-        callDecode(ctx, in, out);
+    if (!in->readable()) {
+        out = callDecode(ctx, in);
     }
 
+#if 0 //FIXME
     int oldOutSize = out.readableBytes();
 
     try {
@@ -64,48 +63,49 @@ void BufferToBufferDecoder::channelInactive(ChannelHandlerContext& ctx) {
         ctx.fireExceptionCaught(e);
     }
     catch (const std::exception& e) {
-        ctx.fireExceptionCaught(DecoderException(e));
+        ctx.fireExceptionCaught(DecoderException(e.what()));
     }
 
     if (out.readableBytes() > oldOutSize) {
         in->discardReadBytes();
         ctx.fireMessageUpdated();
     }
+#endif
 
     ctx.fireChannelInactive();
 }
 
 ChannelBufferPtr BufferToBufferDecoder::callDecode(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& in) {
-    int oldOutSize = out.readableBytes();
+        const ChannelBufferPtr& in) {
+    //int oldOutSize = out.readableBytes();
+    ChannelBufferPtr out;
 
-    while (in.readable()) {
-        int oldInSize = in.readableBytes();
+    while (in->readable()) {
+        int oldInSize = in->readableBytes();
 
         try {
-            decode(ctx, in, out);
+            out = decode(ctx, in);
         }
-        catch (Throwable t) {
-            if (t instanceof CodecException) {
-                ctx.fireExceptionCaught(t);
-            }
-            else {
-                ctx.fireExceptionCaught(new DecoderException(t));
-            }
+        catch (const CodecException& e) {
+            ctx.fireExceptionCaught(e);
+        }
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(DecoderException(e.what()));
         }
 
-        if (oldInSize == in.readableBytes()) {
+        if (oldInSize == in->readableBytes()) {
             break;
         }
     }
 
-    if (out.readableBytes() > oldOutSize) {
-        in.discardReadBytes();
-        ctx.fireMessageUpdated();
-    }
+    //if (out.readableBytes() > oldOutSize) {
+    //    in->discardReadBytes();
+    //    ctx.fireMessageUpdated();
+    //}
+
+    return out;
 }
 
-#endif
 }
 }
 }

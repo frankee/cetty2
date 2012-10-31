@@ -28,7 +28,7 @@ public:
 
         //to call the callback
         if (done) {
-            done(static_pointer_cast<google::protobuf::Message>(rep));
+            done(rep);
         }
     }
 };
@@ -36,16 +36,14 @@ public:
 }
 
 int main(int argc, char* argv[]) {
-    //ConfigCenter::instance().load(argc, argv);
+    ConfigCenter::instance().load(argc, argv);
 
     GearmanProtobufWorkerBuilder builder(1);
     builder.registerService(new echo::EchoServiceImpl);
     builder.addConnection("192.168.1.162",4730);
     builder.buildWorkers();
 
-    getchar();
     //builder.buildAll();
-    //builder.waitingForExit();
-
+    builder.waitingForExit();
     return 0;
 }

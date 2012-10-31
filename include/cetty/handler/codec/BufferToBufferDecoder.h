@@ -32,6 +32,7 @@
  */
 
 #include <cetty/channel/ChannelInboundBufferHandler.h>
+#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
@@ -59,7 +60,7 @@ public:
     virtual void channelInactive(ChannelHandlerContext& ctx);
 
     ChannelBufferPtr decodeLast(ChannelHandlerContext& ctx,
-                                      const ChannelBufferPtr& in) {
+                                const ChannelBufferPtr& in) {
         return decode(ctx, in);
     }
 
@@ -67,11 +68,15 @@ public:
                                     const ChannelBufferPtr& in) = 0;
 
 protected:
-    virtual void messageReceived(ChannelHandlerContext& ctx, const ChannelBufferPtr& in);
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+                                 const ChannelBufferPtr& in);
 
 private:
     ChannelBufferPtr callDecode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& in);
+                                const ChannelBufferPtr& in);
+
+protected:
+    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> inboundTransfer;
 };
 
 }

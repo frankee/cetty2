@@ -39,10 +39,13 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 
-namespace cetty { namespace config { namespace generator { namespace cpp { 
+namespace cetty {
+namespace config {
+namespace generator {
+namespace cpp {
 
-    using namespace std;
-    using namespace google::protobuf;
+using namespace std;
+using namespace google::protobuf;
 
 // Commonly-used separator comments.  Thick is a line of '=', thin is a line
 // of '-'.
@@ -68,13 +71,13 @@ string FieldName(const FieldDescriptor* field);
 
 // Get the unqualified name that should be used for a field's field
 // number constant.
-string FieldConstantName(const FieldDescriptor *field);
+string FieldConstantName(const FieldDescriptor* field);
 
 // Returns the scope where the field was defined (for extensions, this is
 // different from the message type to which the field applies).
 inline const Descriptor* FieldScope(const FieldDescriptor* field) {
-  return field->is_extension() ?
-    field->extension_scope() : field->containing_type();
+    return field->is_extension() ?
+           field->extension_scope() : field->containing_type();
 }
 
 // Returns the fully-qualified type name field->message_type().  Usually this
@@ -114,39 +117,42 @@ string GlobalShutdownFileName(const string& filename);
 string EscapeTrigraphs(const string& to_escape);
 
 // Do message classes in this file keep track of unknown fields?
-inline bool HasUnknownFields(const FileDescriptor *file) {
-  return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
+inline bool HasUnknownFields(const FileDescriptor* file) {
+    return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
 }
 
 // Does this file have generated parsing, serialization, and other
 // standard methods for which reflection-based fallback implementations exist?
-inline bool HasGeneratedMethods(const FileDescriptor *file) {
-  return file->options().optimize_for() != FileOptions::CODE_SIZE;
+inline bool HasGeneratedMethods(const FileDescriptor* file) {
+    return file->options().optimize_for() != FileOptions::CODE_SIZE;
 }
 
 // Do message classes in this file have descriptor and refelction methods?
-inline bool HasDescriptorMethods(const FileDescriptor *file) {
-  return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
+inline bool HasDescriptorMethods(const FileDescriptor* file) {
+    return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
 }
 
 // Should we generate generic services for this file?
-inline bool HasGenericServices(const FileDescriptor *file) {
-  return file->service_count() > 0 &&
-         file->options().optimize_for() != FileOptions::LITE_RUNTIME &&
-         file->options().cc_generic_services();
+inline bool HasGenericServices(const FileDescriptor* file) {
+    return file->service_count() > 0 &&
+           file->options().optimize_for() != FileOptions::LITE_RUNTIME &&
+           file->options().cc_generic_services();
 }
 
 // Should string fields in this file verify that their contents are UTF-8?
 inline bool HasUtf8Verification(const FileDescriptor* file) {
-  return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
+    return file->options().optimize_for() != FileOptions::LITE_RUNTIME;
 }
 
 // Should we generate a separate, super-optimized code path for serializing to
 // flat arrays?  We don't do this in Lite mode because we'd rather reduce code
 // size.
 inline bool HasFastArraySerialization(const FileDescriptor* file) {
-  return file->options().optimize_for() == FileOptions::SPEED;
+    return file->options().optimize_for() == FileOptions::SPEED;
 }
 
-}}}}
+}
+}
+}
+}
 #endif  // GOOGLE_PROTOBUF_COMPILER_CPP_HELPERS_H__

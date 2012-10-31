@@ -33,7 +33,7 @@ using namespace google::protobuf::compiler;
 
 bool CppGenerator::Generate(const FileDescriptor* file,
                             const string& parameter,
-                            GeneratorContext* generator_context,
+                            GeneratorContext* generatorContext,
                             string* error) const {
 
     std::vector<std::pair<std::string, std::string> > options;
@@ -70,26 +70,26 @@ bool CppGenerator::Generate(const FileDescriptor* file,
             return false;
         }
     }
-
+    +
     string basename = StripProto(file->name());
-    basename.append("Config");
+    basename.append(".conf");
 
-    FileGenerator file_generator(file, dllexport_decl);
+    FileGenerator fileGenerator(file, dllexport_decl);
 
     // Generate header.
     {
         scoped_ptr<io::ZeroCopyOutputStream> output(
-            generator_context->Open(basename + ".h"));
+            generatorContext->Open(basename + ".h"));
         io::Printer printer(output.get(), '$');
-        file_generator.GenerateHeader(&printer);
+        fileGenerator.GenerateHeader(&printer);
     }
 
     // Generate cc file.
     {
         scoped_ptr<io::ZeroCopyOutputStream> output(
-            generator_context->Open(basename + ".cc"));
+            generatorContext->Open(basename + ".cc"));
         io::Printer printer(output.get(), '$');
-        file_generator.GenerateSource(&printer);
+        fileGenerator.GenerateSource(&printer);
     }
 
     return true;
