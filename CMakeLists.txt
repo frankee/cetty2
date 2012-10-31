@@ -300,7 +300,7 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
       COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-      ARGS ${FIL} --cpp_out=. --src_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROTOBUF_INCLUDE_DIR}
+      ARGS ${FIL} --cpp_out=. --src_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
       MAIN_DEPENDENCY ${ABS_FIL}
       VERBATIM)
@@ -331,3 +331,4 @@ ADD_SUBDIRECTORY(cetty-protobuf)
 ADD_SUBDIRECTORY(cetty-gearman)
 
 ADD_SUBDIRECTORY(cetty-craft)
+
