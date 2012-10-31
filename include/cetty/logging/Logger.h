@@ -63,8 +63,21 @@ public:
         return formatter;
     }
 
+    static bool isEnabled(const LogLevel& level) {
+        return level >= Logger::level;
+    }
+
+    static LogLevel logLevel() {
+        return level;
+    }
+    static void logLevel(LogLevel level) {
+        Logger::level = level;
+    }
+
 private:
     LogMessage message;
+
+    static LogLevel level;
     static LogPatternFormatter formatter;
 };
 

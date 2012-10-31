@@ -82,7 +82,7 @@ DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
 }
 
 ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
-    const ChannelBufferPtr& in) {
+        const ChannelBufferPtr& in) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
     int minFrameLength = Integer::MAX_VALUE;
     ChannelBufferPtr minDelim;

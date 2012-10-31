@@ -1,0 +1,109 @@
+package cetty.zurg.master;
+
+option cc_generic_services = true;
+option java_generic_services = true;
+option py_generic_services = true;
+option java_package = "cetty.zurg.master";
+option java_outer_classname = "MasterProto";
+
+import "cetty/protobuf/service/service.proto";
+import "cetty/zurg/slave/slave.proto";
+
+message DiskUsage {
+  required string device = 1;
+  required string  mount = 2;
+
+  // statvfs
+  required int32   block_size = 3;
+  required int64   blocks_all = 4;
+  required int64  blocks_free = 5;
+  required int64 blocks_avail = 6;
+
+  required int64   inodes_all = 7;
+  required int64  inodes_free = 8;
+  required int64 inodes_avail = 9;
+
+  required uint64    fsid = 10;
+  required uint64    flag = 11;
+  required uint64 namemax = 12;
+}
+
+enum ApplicationState {
+  kUnknown = 0;
+  kNewApp  = 1;
+  kRunning = 2;
+  kExited  = 3;
+  kError   = 4;
+}
+
+message ApplicationStatus {
+  required ApplicationState state = 1 [default = kUnknown];
+  required string            name = 2;
+  optional int32              pid = 3;
+  optional string executable_file = 4;
+  optional string             cwd = 5;
+  optional string         message = 6;
+  optional string      slave_name = 8;
+
+  optional int64     start_time_us = 10;
+  optional int64 last_stop_time_us = 11;
+  optional string        proc_stat = 12;
+  optional string      proc_status = 13;
+
+  optional int32  last_exit_status = 30;
+  optional int32     last_signaled = 31;
+  optional bool      last_coredump = 32;
+}
+
+message SlaveHeartbeat {
+  message Uname {
+    required string    sys_name = 1;
+    required string   node_name = 2;
+    required string     release = 3;
+    required string     version = 4;
+    required string     machine = 5;
+    required string domain_name = 6;
+  }
+  
+  required string    slave_name = 1;
+  required int64   send_time_us = 2;
+
+  // static data
+  optional string     host_name = 20;
+  optional int32    listen_port = 21;
+  optional int32      slave_pid = 22;
+  optional int64  start_time_us = 23;
+  optional string slave_version = 24;
+  repeated string      env_vars = 25;
+
+  // static proc files per hour
+  optional string       cpuinfo = 30;
+  optional string       version = 31;
+  optional string      etc_mtab = 32;
+  optional string        sysctl = 33;
+  optional Uname          uname = 34;
+
+  // dynamic proc files 10s
+  optional string   meminfo = 40;
+  optional string proc_stat = 41;
+  optional string   loadavg = 42;
+  optional string diskstats = 43;
+  optional string   net_dev = 44;
+  optional string   net_tcp = 45;
+
+  // not so dynamic per minute
+  repeated DiskUsage disk_usage = 50;
+}
+
+
+
+service MasterService {
+  rpc slaveHeartbeat (SlaveHeartbeat) returns (cetty.protobuf.service.Empty) {
+    option (cetty.protobuf.service.no_return) = true;
+  }
+  
+  rpc appStatusChange (ApplicationStatus) returns (cetty.protobuf.service.Empty) {
+    option (cetty.protobuf.service.no_return) = true;
+  }
+}
+

@@ -47,7 +47,7 @@ void ChannelBufferHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelBufferHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
 
 }
 

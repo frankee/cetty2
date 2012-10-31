@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sample\GearmanEchoServer.cpp" />
+    <ClCompile Include="..\..\sample\echo\GearmanEchoWorker.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A0D7D3E7-386B-440E-AB0C-A3D7EA99CA93}</ProjectGuid>

@@ -17,18 +17,13 @@
  * under the License.
  */
 
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/ChannelHandlerContext.h"
-#include "cetty/channel/ChannelMessage.h"
-#include "cetty/channel/ChannelEvent.h"
-#include "cetty/channel/MessageEvent.h"
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/ChannelStateEvent.h"
-#include "cetty/logging/InternalLogger.h"
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
+
+#include <cetty/logging/LoggerHelper.h>
 
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 /**
  * Handles a client-side channel.
@@ -39,7 +34,7 @@ using namespace cetty::logging;
  * @version $Rev: 2121 $, $Date: 2010-02-02 09:38:07 +0900 (Tue, 02 Feb 2010) $
  */
 
-class TelnetClientHandler : public SimpleChannelUpstreamHandler {
+class TelnetClientHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
     TelnetClientHandler() {}
     virtual ~TelnetClientHandler() {}
@@ -52,29 +47,18 @@ public:
         return "TelnetClientHandler";
     }
 
-    virtual void channelStateChanged(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-        logger->info(e.toString());
-        SimpleChannelUpstreamHandler::channelStateChanged(ctx, e);
-    }
-
-    virtual void messageReceived(
-            ChannelHandlerContext& ctx, const MessageEvent& e) {
+    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         // Print out the line received from the server.
-        std::string str = e.getMessage().value<std::string>();
+        std::string str;
+        getInboundChannelBuffer()->readBytes(&str);
         printf("%s\n->", str.c_str());
     }
 
-    virtual void exceptionCaught(
-            ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        logger->warn(
-                "Unexpected exception from downstream.",
-                e.getCause());
-        e.getChannel().close();
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& e) {
+        LOG_WARN << "Unexpected exception (" << e.getMessage() << ") from inbound.";
+        ctx.close();
     }
-
-private:
-    static InternalLogger* logger;
 };
-
 
 #endif //#if !defined(TELNET_TELNETCLIENTHANDLER_H)

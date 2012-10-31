@@ -21,7 +21,7 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-    using namespace cetty::buffer;
+using namespace cetty::buffer;
 
 }
 }

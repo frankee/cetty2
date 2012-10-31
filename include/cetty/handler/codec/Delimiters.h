@@ -18,11 +18,13 @@
  */
 
 #include <vector>
-#include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
+
+using namespace cetty::buffer;
 
 /**
  * A set of commonly used delimiters for {@link DelimiterBasedFrameDecoder}.
@@ -39,39 +41,13 @@ public:
      * Returns a <tt>NUL (0x00)</tt> delimiter, which could be used for
      * Flash XML socket or any similar protocols.
      */
-    static const std::vector<ChannelBufferPtr>& nulDelimiter() {
-        static std::vector<ChannelBufferPtr> buffers;
-
-        if (buffers.size() == 0) {
-            ChannelBufferPtr tmp = Unpooled::buffer(1);
-            tmp->writeByte(0);
-            buffers.push_back(tmp);
-        }
-
-        return buffers;
-    }
+    static const std::vector<ChannelBufferPtr>& nulDelimiter();
 
     /**
      * Returns <tt>CR ('\r')</tt> and <tt>LF ('\n')</tt> delimiters, which could
      * be used for text-based line protocols.
      */
-    static const std::vector<ChannelBufferPtr>& lineDelimiter() {
-        static std::vector<ChannelBufferPtr> buffers;
-
-        if (buffers.size() == 0) {
-            ChannelBufferPtr cr = Unpooled::buffer(2);
-            cr->writeByte('\r');
-            cr->writeByte('\n');
-
-            ChannelBufferPtr lf = Unpooled::buffer(1);
-            lf->writeByte('\n');
-
-            buffers.push_back(cr);
-            buffers.push_back(lf);
-        }
-
-        return buffers;
-    }
+    static const std::vector<ChannelBufferPtr>& lineDelimiter();
 
 private:
     Delimiters() {

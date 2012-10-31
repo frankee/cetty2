@@ -21,24 +21,28 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "cetty/buffer/ChannelBuffers.h"
+#include <cetty/buffer/Unpooled.h>
 
-#include "cetty/channel/ChannelFutureListener.h"
-#include "cetty/channel/SimpleChannelUpstreamHandler.h"
+#include <cetty/channel/ChannelFutureListener.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundMessageHandlerAdapter.h>
 
-#include "cetty/channel/ExceptionEvent.h"
-#include "cetty/channel/MessageEvent.h"
+#include <cetty/handler/codec/http/HttpPackage.h>
+#include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
+#include <cetty/handler/codec/http/HttpChunk.h>
+#include <cetty/handler/codec/http/HttpChunkTrailer.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/HttpResponseStatus.h>
+#include <cetty/handler/codec/http/QueryStringDecoder.h>
 
-#include "cetty/handler/codec/http/HttpChunk.h"
-#include "cetty/handler/codec/http/HttpChunkTrailer.h"
-#include "cetty/handler/codec/http/HttpHeaders.h"
-#include "cetty/handler/codec/http/HttpRequest.h"
-#include "cetty/handler/codec/http/HttpResponseStatus.h"
-#include "cetty/handler/codec/http/DefaultHttpResponse.h"
-#include "cetty/handler/codec/http/QueryStringDecoder.h"
+#include <cetty/util/URI.h>
+#include <cetty/util/NameValueCollection.h>
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
+using namespace cetty::util;
 using namespace cetty::handler::codec::http;
 
 /**
@@ -48,7 +52,8 @@ using namespace cetty::handler::codec::http;
  *
  * @version $Rev: 2288 $, $Date: 2010-05-27 21:40:50 +0900 (Thu, 27 May 2010) $
  */
-class HttpRequestHandler : public cetty::channel::SimpleChannelUpstreamHandler {
+class HttpRequestHandler
+    : public ChannelInboundMessageHandlerAdapter<HttpPackage, VoidChannelMessage, HttpPackage> {
 public:
     HttpRequestHandler() : readingChunks(false) {}
     virtual ~HttpRequestHandler() {}
@@ -59,10 +64,16 @@ public:
         return ChannelHandlerPtr(new HttpRequestHandler());
     }
     
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
+    virtual void messageReceived(ChannelHandlerContext& ctx,
+        const HttpPackage& msg) {
         if (!readingChunks) {
+            if (!msg.isHttpMessage()) {
+
+            }
+
             request.reset();
-            request = e.getMessage().smartPointer<HttpRequest, HttpMessage>();
+            request =
+                boost::dynamic_pointer_cast<HttpRequest>(msg.httpMessage());
 
             if (!request) {
                 // TODO
@@ -82,14 +93,12 @@ public:
             buf.append("\r\n");
             
             buf.append("REQUEST_URI: ");
-            buf.append(request->getUri());
+            buf.append(request->getUriString());
             buf.append("\r\n\r\n");
 
-            HttpHeader::NameValueList headers;
-            request->getHeaders(headers);
-
-            HttpHeader::NameValueListConstItr itr;
-            for (itr = headers.begin(); itr != headers.end(); ++itr) {
+            HttpRequest::ConstHeaderIterator itr = request->getFirstHeader();
+            HttpRequest::ConstHeaderIterator end = request->getLastHeader();
+            for (; itr != end; ++itr) {
                 buf.append("HEADER: ");
                 buf.append(itr->first);
                 buf.append(" = ");
@@ -99,25 +108,22 @@ public:
             buf.append("\r\n");
 
             QueryStringDecoder queryStringDecoder(request->getUri());
-            const QueryStringDecoder::ParametersType& params =
-                                        queryStringDecoder.getParameters();
+            NameValueCollection params;
+            queryStringDecoder.getParameters(&params);
+
             if (!params.empty()) {
-                QueryStringDecoder::ParametersType::const_iterator itr;
+                NameValueCollection::ConstIterator itr;
                 for (itr = params.begin(); itr != params.end(); ++itr) {
-                    const std::string& key = itr->first;
-                    const std::vector<std::string>& vals = itr->second;
-                    for (size_t i = 0; i < vals.size(); ++i) {
                         buf.append("PARAM: ");
-                        buf.append(key);
+                        buf.append(itr->first);
                         buf.append(" = ");
-                        buf.append(vals[i]);
+                        buf.append(itr->second);
                         buf.append("\r\n");
-                    }
                 }
                 buf.append("\r\n");
             }
 
-            if (request->isChunked()) {
+            if (request->getTransferEncoding().isMultiple()) {
                 readingChunks = true;
             }
             else {
@@ -127,25 +133,30 @@ public:
                     buf.append(content->toString());
                     buf.append("\r\n");
                 }
-                writeResponse(e);
+                writeResponse(ctx);
             }
         }
-        else {
-            HttpChunkPtr chunk = e.getMessage().smartPointer<HttpChunk, HttpMessage>();
-            if (chunk->isLast()) {
+        else if (msg.isHttpChunk()) {
+            HttpChunkPtr chunk = msg.httpChunk();
+
+            buf.append("CHUNK: ");
+            buf.append(chunk->getContent()->toString());
+            buf.append("\r\n");
+        }
+        else if (msg.isHttpChunkTrailer()) {
+            HttpChunkTrailerPtr trailer = msg.httpChunkTrailer();
+
+            //if (chunk->isLast()) {
                 readingChunks = false;
                 buf.append("END OF CONTENT\r\n");
 
-                HttpChunkTrailerPtr trailer =
-                    boost::dynamic_pointer_cast<HttpChunkTrailer>(chunk);
-
-                HttpChunkTrailer::StringList names;
-                trailer->getHeaderNames(names);
+                std::vector<std::string> names;
+                trailer->getHeaderNames(&names);
                 if (!names.empty()) {
                     buf.append("\r\n");
-                    HttpChunkTrailer::StringList values;
+                    std::vector<std::string> values;
                     for (size_t i = 0; i < names.size(); ++i) {
-                        trailer->getHeaders(names[i], values);
+                        trailer->getHeaders(names[i], &values);
                         for (size_t j = 0; j < values.size(); ++j) {
                             buf.append("TRAILING HEADER: ");
                             buf.append(names[i]);
@@ -156,29 +167,25 @@ public:
                     }
                     buf.append("\r\n");
                 }
-                writeResponse(e);
-            }
-            else {
-                buf.append("CHUNK: ");
-                buf.append(chunk->getContent()->toString());
-                buf.append("\r\n");
-            }
+
+                writeResponse(ctx);
+            //}
         }
     }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ExceptionEvent& e) {
-        //e.getCause().printStackTrace();
-        e.getChannel().close();
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& e) {
+        ctx.close();
     }
 
 private:
-    void writeResponse(const MessageEvent& e) {
+    void writeResponse(ChannelHandlerContext& ctx) {
         // Decide whether to close the connection or not.
         bool keepAlive = HttpHeaders::isKeepAlive(*request);
 
         // Build the response object.
         HttpResponsePtr response = 
-            HttpResponsePtr(new DefaultHttpResponse(HttpVersion::HTTP_1_1,
+            HttpResponsePtr(new HttpResponse(HttpVersion::HTTP_1_1,
                                                     HttpResponseStatus::OK));
         response->setContent(Unpooled::copiedBuffer(buf));
         response->setHeader(HttpHeaders::Names::CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -205,16 +212,19 @@ private:
 //         }
 
         // Write the response.
-        ChannelFuturePtr future = e.getChannel().write(ChannelMessage(response));
+        ChannelFuturePtr future = ctx.getChannel()->newFuture();
 
         // Close the non-keep-alive connection after the write operation is done.
         if (!keepAlive) {
             future->addListener(ChannelFutureListener::CLOSE);
         }
+
+        outboundTransfer.write(response, future);
     }
 
 private:
     HttpRequestPtr request;
+
     bool readingChunks;
     
     /** Buffer that stores the response content */

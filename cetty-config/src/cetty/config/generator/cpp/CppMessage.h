@@ -40,9 +40,13 @@
 
 namespace google {
 namespace protobuf {
+
+class Descriptor;
+
 namespace io {
 class Printer;             // printer.h
 }
+
 }
 }
 
@@ -58,7 +62,8 @@ using namespace std;
 class MessageGenerator {
 public:
     // See generator.cc for the meaning of dllexport_decl.
-    explicit MessageGenerator(const Descriptor* descriptor);
+    explicit MessageGenerator(const Descriptor* descriptor,
+                              const string& dllexport_decl);
     ~MessageGenerator();
 
     // Header stuff.
@@ -99,28 +104,12 @@ public:
     // to delete all dynamically-allocated objects.
     void GenerateShutdownCode(io::Printer* printer);
 
-    // Generate all non-inline methods for this class.
-    void GenerateClassMethods(io::Printer* printer);
-
 private:
-    // Generate declarations and definitions of accessors for fields.
-    void GenerateFieldAccessorDeclarations(io::Printer* printer);
-    void GenerateFieldAccessorDefinitions(io::Printer* printer);
-
     // Generate the field offsets array.
     void GenerateOffsets(io::Printer* printer);
 
     // Generate constructors and destructor.
     void GenerateStructors(io::Printer* printer);
-
-    // The compiler typically generates multiple copies of each constructor and
-    // destructor: http://gcc.gnu.org/bugs.html#nonbugs_cxx
-    // Placing common code in a separate method reduces the generated code size.
-    //
-    // Generate the shared constructor code.
-    void GenerateSharedConstructorCode(io::Printer* printer);
-    // Generate the shared destructor code.
-    void GenerateSharedDestructorCode(io::Printer* printer);
 
 
     const Descriptor* descriptor_;

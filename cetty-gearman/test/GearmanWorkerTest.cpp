@@ -75,8 +75,6 @@ void testForGrabJobUniq(ChannelPtr&  c)
 	c->write(UserEvent(task));
 }
 
-
-
 void testForWorkStauts(ChannelPtr&  c)
 {
 	const std::string jobHandle = "hd:112";
@@ -119,7 +117,6 @@ void testForWorkWarning(ChannelPtr&  c)
 	c->write(UserEvent(task));
 }
 
-
 void testForWorkException(ChannelPtr&  c)
 {
 	const std::string jobHandle = "hd:112";
@@ -131,7 +128,6 @@ void testForWorkException(ChannelPtr&  c)
 	c->write(UserEvent(task));
 }
 
-
 void testForWorkData(ChannelPtr&  c)
 {
 	const std::string jobHandle = "H:localhost.localdomain:8";
@@ -142,7 +138,6 @@ void testForWorkData(ChannelPtr&  c)
 	task->request = GearmanMessage::createWorkDataMessage(jobHandle,payload);
 	c->write(UserEvent(task));
 }
-
 
 void testForSetClientId(ChannelPtr&  c)
 {

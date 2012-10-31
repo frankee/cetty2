@@ -18,18 +18,15 @@
 
 #include <boost/thread/thread_time.hpp>
 
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/Channels.h>
-#include <cetty/channel/WriteCompletionEvent.h>
+#include <cetty/channel/Timeout.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelHandlerContext.h>
 
-#include <cetty/handler/timeout/DefaultIdleStateEvent.h>
+#include <cetty/handler/timeout/IdleStateEvent.h>
 
-#include <cetty/util/TimeUnit.h>
-#include <cetty/util/Timeout.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/TimerFactory.h>
 
 namespace cetty {
 namespace handler {
@@ -41,59 +38,37 @@ using namespace cetty::util;
 IdleStateHandler::IdleStateHandler(int readerIdleTimeSeconds,
                                    int writerIdleTimeSeconds,
                                    int allIdleTimeSeconds)
-    : readerIdleTimeMillis(TimeUnit::SECONDS.toMillis(readerIdleTimeSeconds)),
-      writerIdleTimeMillis(TimeUnit::SECONDS.toMillis(writerIdleTimeSeconds)),
-      allIdleTimeMillis(TimeUnit::SECONDS.toMillis(allIdleTimeSeconds)) {
+    : readerIdleTimeMillis(readerIdleTimeSeconds * 1000),
+      readerIdleCount(),
+      writerIdleTimeMillis(writerIdleTimeSeconds * 1000),
+      writerIdleCount(),
+      allIdleTimeMillis(allIdleTimeSeconds * 1000),
+      allIdleCount(),
+      state(0) {
 }
 
-IdleStateHandler::IdleStateHandler(boost::int64_t readerIdleTime,
-                                   boost::int64_t writerIdleTime,
-                                   boost::int64_t allIdleTime,
-                                   const TimeUnit& unit) {
-    if (readerIdleTime <= 0) {
-        readerIdleTimeMillis = 0;
-    }
-    else {
-        readerIdleTimeMillis = unit.toMillis(readerIdleTime);
-
-        if (!readerIdleTimeMillis) { readerIdleTimeMillis = 1; }
-    }
-
-    if (writerIdleTime <= 0) {
-        writerIdleTimeMillis = 0;
-    }
-    else {
-        writerIdleTimeMillis = unit.toMillis(writerIdleTime);
-
-        if (!writerIdleTimeMillis) { writerIdleTimeMillis = 1; }
-    }
-
-    if (allIdleTime <= 0) {
-        allIdleTimeMillis = 0;
-    }
-    else {
-        allIdleTimeMillis = unit.toMillis(allIdleTime);
-
-        if (!allIdleTime) { allIdleTime = 1; }
-    }
-}
-
-void IdleStateHandler::releaseExternalResources() {
-    if (timer) {
-        timer->stop();
-    }
+IdleStateHandler::IdleStateHandler(
+    const IdleStateHandler::Duration& readerIdleTime,
+    const IdleStateHandler::Duration& writerIdleTime,
+    const IdleStateHandler::Duration& allIdleTime)
+    : readerIdleTimeMillis(readerIdleTime.total_milliseconds()),
+      readerIdleCount(),
+      writerIdleTimeMillis(writerIdleTime.total_milliseconds()),
+      writerIdleCount(),
+      allIdleTimeMillis(allIdleTime.total_milliseconds()),
+      allIdleCount(),
+      state(0) {
 }
 
 void IdleStateHandler::beforeAdd(ChannelHandlerContext& ctx) {
-    if (ctx.getPipeline()->isAttached()) {
-        // channelOpen event has been fired already, which means
-        // this.channelOpen() will not be invoked.
-        // We have to initialize here instead.
+    if (ctx.getPipeline().isAttached() && ctx.getChannel()->isActive()) {
+        // channelActvie() event has been fired already, which means this.channelActive() will
+        // not be invoked. We have to initialize here instead.
         initialize(ctx);
     }
     else {
-        // channelOpen event has not been fired yet.
-        // this.channelOpen() will be invoked and initialization will occur there.
+        // channelActive() event has not been fired yet.  this.channelActive() will be invoked
+        // and initialization will occur there.
     }
 }
 
@@ -101,87 +76,75 @@ void IdleStateHandler::beforeRemove(ChannelHandlerContext& ctx) {
     destroy();
 }
 
-void IdleStateHandler::channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-    // This method will be invoked only if this handler was added
-    // before channelOpen event is fired.  If a user adds this handler
-    // after the channelOpen event, initialize() will be called by beforeAdd().
-    initialize(ctx);
-    ctx.sendUpstream(e);
-}
-
-void IdleStateHandler::channelClosed(ChannelHandlerContext& ctx, const ChannelStateEvent& e) {
-    destroy();
-    ctx.sendUpstream(e);
-}
-
-void IdleStateHandler::messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e) {
-    lastReadTime = boost::get_system_time();
-    ctx.sendUpstream(e);
-}
-
-void IdleStateHandler::writeCompleted(ChannelHandlerContext& ctx, const WriteCompletionEvent& e) {
-    if (e.getWrittenAmount() > 0) {
-        lastWriteTime = boost::get_system_time();
-    }
-
-    ctx.sendUpstream(e);
-}
-
 ChannelHandlerPtr IdleStateHandler::clone() {
     return ChannelHandlerPtr(
-               new IdleStateHandler(readerIdleTimeMillis,
-                                    writerIdleTimeMillis,
-                                    allIdleTimeMillis,
-                                    TimeUnit::MILLISECONDS));
+               new IdleStateHandler(
+                   boost::posix_time::milliseconds(readerIdleTimeMillis),
+                   boost::posix_time::milliseconds(writerIdleTimeMillis),
+                   boost::posix_time::milliseconds(allIdleTimeMillis)));
 }
 
-void IdleStateHandler::channelIdle(ChannelHandlerContext& ctx,
-                                   const IdleState& state,
-                                   const time_type& lastActivityTime) {
-    ctx.sendUpstream(
-        DefaultIdleStateEvent(ctx.getChannel(), state, lastActivityTime));
+void IdleStateHandler::handleIdle(ChannelHandlerContext& ctx,
+                                  const IdleStateEvent& evt) {
+    if (idleEventCallback) {
+        idleEventCallback(ctx, evt);
+    }
+
+    ctx.fireUserEventTriggered(evt);
 }
 
 void IdleStateHandler::initialize(ChannelHandlerContext& ctx) {
+    // Avoid the case where destroy() is called before scheduling timeouts.
+    switch (state) {
+    case 1:
+    case 2:
+        return;
+    }
+
+    state = 1;
+
     lastReadTime = lastWriteTime = boost::get_system_time();
 
-    if (!timer) {
-        timer = TimerFactory::getFactory().getTimer(ctx.getChannel());
+    if (!readerIdleTimeCallback) {
+        readerIdleTimeCallback = boost::bind(
+                                     &IdleStateHandler::handleReaderIdleTimeout,
+                                     this,
+                                     boost::ref(ctx));
     }
 
-    if (!readerTimeoutTask) {
-        readerTimeoutTask = new ReaderIdleTimeoutTask(ctx, *this);
+    if (!writerIdleTimeCallback) {
+        writerIdleTimeCallback = boost::bind(
+                                     &IdleStateHandler::handleWriterIdleTimeout,
+                                     this,
+                                     boost::ref(ctx));
     }
 
-    if (!writerTimeoutTask) {
-        writerTimeoutTask = new WriterIdleTimeoutTask(ctx, *this);
+    if (!allIdleTimeCallback) {
+        allIdleTimeCallback = boost::bind(
+                                  &IdleStateHandler::handleAllIdleTimeout,
+                                  this,
+                                  boost::ref(ctx));
     }
 
-    if (!allTimeoutTask) {
-        allTimeoutTask = new AllIdleTimeoutTask(ctx, *this);
-    }
+    const EventLoopPtr& eventLoop = ctx.getEventLoop();
 
     if (readerIdleTimeMillis > 0) {
         readerIdleTimeout =
-            timer->newTimeout(*readerTimeoutTask, readerIdleTimeMillis);
+            eventLoop->runAfter(readerIdleTimeMillis, readerIdleTimeCallback);
     }
 
     if (writerIdleTimeMillis > 0) {
         writerIdleTimeout =
-            timer->newTimeout(*writerTimeoutTask, writerIdleTimeMillis);
+            eventLoop->runAfter(writerIdleTimeMillis, writerIdleTimeCallback);
     }
 
     if (allIdleTimeMillis > 0) {
         allIdleTimeout =
-            timer->newTimeout(*allTimeoutTask, allIdleTimeMillis);
+            eventLoop->runAfter(allIdleTimeMillis, allIdleTimeCallback);
     }
 }
 
 void IdleStateHandler::destroy() {
-    if (timer) {
-        timer = NULL;
-    }
-
     if (readerIdleTimeout) {
         readerIdleTimeout->cancel();
         readerIdleTimeout.reset();
@@ -196,129 +159,150 @@ void IdleStateHandler::destroy() {
         allIdleTimeout->cancel();
         allIdleTimeout.reset();
     }
-
-    if (readerTimeoutTask) {
-        delete readerTimeoutTask;
-        readerTimeoutTask = NULL;
-    }
-
-    if (writerTimeoutTask) {
-        delete writerTimeoutTask;
-        writerTimeoutTask = NULL;
-    }
-
-    if (allTimeoutTask) {
-        delete allTimeoutTask;
-        allTimeoutTask = NULL;
-    }
 }
 
-void IdleStateHandler::ReaderIdleTimeoutTask::run(Timeout& timeout) {
-    if (timeout.isCancelled() || !ctx.getChannel()->isOpen()) {
+void IdleStateHandler::handleReaderIdleTimeout(ChannelHandlerContext& ctx) {
+    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
         return;
     }
 
-    time_type currentTime = boost::get_system_time();
-    time_type lastReadTime = handler.lastReadTime;
+    Time currentTime = boost::get_system_time();
 
-    time_duration_type duration = currentTime - lastReadTime;
-    boost::int64_t nextDelay = handler.readerIdleTimeMillis - duration.total_milliseconds();
+    Duration duration = currentTime - lastReadTime;
+    boost::int64_t nextDelay = readerIdleTimeMillis - duration.total_milliseconds();
 
     if (nextDelay <= 0) {
         // Reader is idle - set a new timeout and notify the callback.
-        handler.readerIdleTimeout =
-            handler.timer->newTimeout(*this, handler.readerIdleTimeMillis);
+        readerIdleTimeout = ctx.getEventLoop()->runAfter(readerIdleTimeMillis,
+                            readerIdleTimeCallback);
 
         try {
-            handler.channelIdle(ctx, IdleState::READER_IDLE, lastReadTime);
+            handleIdle(ctx,
+                       IdleStateEvent(IdleState::READER_IDLE,
+                                      readerIdleCount++,
+                                      (currentTime - lastReadTime).total_milliseconds()));
         }
-        catch (const Exception& t) {
-            Channels::fireExceptionCaught(ctx, t);
-        }
-        catch (const std::exception& t) {
-            Channels::fireExceptionCaught(ctx, Exception(t.what()));
-        }
-        catch (...) {
-            Channels::fireExceptionCaught(ctx, Exception("Unknow Exception"));
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(ChannelException(e.what()));
         }
     }
     else {
         // Read occurred before the timeout - set a new timeout with shorter delay.
-        handler.readerIdleTimeout = handler.timer->newTimeout(*this, nextDelay);
+        readerIdleTimeout = ctx.getEventLoop()->runAfter(nextDelay,
+                            readerIdleTimeCallback);
     }
 }
 
-
-void IdleStateHandler::WriterIdleTimeoutTask::run(Timeout& timeout) {
-    if (timeout.isCancelled() || !ctx.getChannel()->isOpen()) {
+void IdleStateHandler::handleWriterIdleTimeout(ChannelHandlerContext& ctx) {
+    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
         return;
     }
 
-    time_type currentTime = boost::get_system_time();
-    time_type lastWriteTime = handler.lastWriteTime;
-
-    time_duration_type duration = currentTime - lastWriteTime;
-    boost::int64_t nextDelay = handler.writerIdleTimeMillis - duration.total_milliseconds();
+    Time currentTime = boost::get_system_time();
+    Duration duration = currentTime - lastWriteTime;
+    boost::int64_t nextDelay = writerIdleTimeMillis - duration.total_milliseconds();
 
     if (nextDelay <= 0) {
         // Writer is idle - set a new timeout and notify the callback.
-        handler.writerIdleTimeout =
-            handler.timer->newTimeout(*this, handler.writerIdleTimeMillis);
+        writerIdleTimeout = ctx.getEventLoop()->runAfter(writerIdleTimeMillis,
+                            writerIdleTimeCallback);
 
         try {
-            handler.channelIdle(ctx, IdleState::WRITER_IDLE, lastWriteTime);
+            handleIdle(ctx,
+                       IdleStateEvent(IdleState::WRITER_IDLE,
+                                      writerIdleCount ++,
+                                      (currentTime - lastWriteTime).total_milliseconds()));
         }
-        catch (const Exception& t) {
-            Channels::fireExceptionCaught(ctx, t);
-        }
-        catch (const std::exception& t) {
-            Channels::fireExceptionCaught(ctx, Exception(t.what()));
-        }
-        catch (...) {
-            Channels::fireExceptionCaught(ctx, Exception("Unknow Exception"));
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(ChannelException(e.what()));
         }
     }
     else {
         // Write occurred before the timeout - set a new timeout with shorter delay.
-        handler.writerIdleTimeout = handler.timer->newTimeout(*this, nextDelay);
+        writerIdleTimeout = ctx.getEventLoop()->runAfter(nextDelay,
+                            writerIdleTimeCallback);
     }
 }
 
-void IdleStateHandler::AllIdleTimeoutTask::run(Timeout& timeout) {
-    if (timeout.isCancelled() || !ctx.getChannel()->isOpen()) {
+void IdleStateHandler::handleAllIdleTimeout(ChannelHandlerContext& ctx) {
+    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
         return;
     }
 
-    time_type currentTime = boost::get_system_time();
-    time_type lastIoTime = std::max(handler.lastWriteTime, handler.lastReadTime);
+    Time currentTime = boost::get_system_time();
+    Time lastIoTime = std::max(lastWriteTime, lastReadTime);
 
-    time_duration_type duration = currentTime - lastIoTime;
-    boost::int64_t nextDelay = handler.allIdleTimeMillis - duration.total_milliseconds();
+    Duration duration = currentTime - lastIoTime;
+    boost::int64_t nextDelay = allIdleTimeMillis - duration.total_milliseconds();
 
     if (nextDelay <= 0) {
         // Both reader and writer are idle - set a new timeout and
         // notify the callback.
-        handler.allIdleTimeout =
-            handler.timer->newTimeout(*this, handler.allIdleTimeMillis);
+        allIdleTimeout =  ctx.getEventLoop()->runAfter(allIdleTimeMillis,
+                          allIdleTimeCallback);
 
         try {
-            handler.channelIdle(ctx, IdleState::ALL_IDLE, lastIoTime);
+            handleIdle(ctx,
+                       IdleStateEvent(IdleState::ALL_IDLE,
+                                      allIdleCount ++,
+                                      (currentTime - lastIoTime).total_milliseconds()));
         }
-        catch (const Exception& t) {
-            Channels::fireExceptionCaught(ctx, t);
-        }
-        catch (const std::exception& t) {
-            Channels::fireExceptionCaught(ctx, Exception(t.what()));
-        }
-        catch (...) {
-            Channels::fireExceptionCaught(ctx, Exception("Unknow Exception"));
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(ChannelException(e.what()));
         }
     }
     else {
         // Either read or write occurred before the timeout - set a new
         // timeout with shorter delay.
-        handler.allIdleTimeout = handler.timer->newTimeout(*this, nextDelay);
+        allIdleTimeout =  ctx.getEventLoop()->runAfter(nextDelay,
+                          allIdleTimeCallback);
     }
+}
+
+void IdleStateHandler::handleWriteCompleted(const ChannelFuturePtr& future) {
+    lastWriteTime = boost::get_system_time();
+    writerIdleCount = allIdleCount = 0;
+}
+
+std::string IdleStateHandler::toString() const {
+    return "IdleStateHandler";
+}
+
+void IdleStateHandler::afterAdd(ChannelHandlerContext& ctx) {
+
+}
+
+void IdleStateHandler::afterRemove(ChannelHandlerContext& ctx) {
+
+}
+
+void IdleStateHandler::channelActive(ChannelHandlerContext& ctx) {
+    // This method will be invoked only if this handler was added
+    // before channelActive() event is fired.  If a user adds this handler
+    // after the channelActive() event, initialize() will be called by beforeAdd().
+    initialize(ctx);
+    AbstractChannelHandler::channelActive(ctx);
+}
+
+void IdleStateHandler::channelInactive(ChannelHandlerContext& ctx) {
+    destroy();
+    AbstractChannelHandler::channelInactive(ctx);
+}
+
+void IdleStateHandler::messageUpdated(ChannelHandlerContext& ctx) {
+    lastReadTime = boost::get_system_time();
+    readerIdleCount = allIdleCount = 0;
+    ctx.fireMessageUpdated();
+}
+
+void IdleStateHandler::flush(ChannelHandlerContext& ctx,
+                             const ChannelFuturePtr& future) {
+    future->addListener(
+        boost::bind(&IdleStateHandler::handleWriteCompleted,
+                    this,
+                    boost::cref(future)));
+
+    AbstractChannelHandler::flush(ctx, future);
 }
 
 }

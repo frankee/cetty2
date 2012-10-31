@@ -384,7 +384,13 @@ const std::string& Session::getHost() const {
 inline
 void Session::setPrincipal(const std::string& principal){
     this->principal = principal;
+<<<<<<< HEAD
     update(shared_from_this());
+=======
+    if(updateCallback) {
+        updateCallback(shared_from_this());
+    }
+>>>>>>> cd48b08f8653c0434346669d7c2ad399dca5187c
 }
 
 inline

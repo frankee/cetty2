@@ -41,7 +41,7 @@ void HttpRequestEncoder::encodeInitialLine(ChannelBuffer& buf, const HttpMessage
 
     buf.writeBytes(request->getMethod().toString());
     buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(request->getUri());
+    buf.writeBytes(request->getUriString());
     buf.writeByte(HttpCodecUtil::SP);
     buf.writeBytes(request->getProtocolVersion().toString());
     buf.writeByte(HttpCodecUtil::CR);

@@ -22,14 +22,16 @@
  */
 
 #include <string>
-#include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/ChannelHandlerPtr.h>
+#include <boost/any.hpp>
+
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/ChannelHandlerPtr.h>
+
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
 
-class UserEvent;
 class ChannelException;
 class ChannelPipeline;
 class ChannelHandlerContext;
@@ -250,7 +252,7 @@ public:
      *
      */
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                const UserEvent& evt) = 0;
+                                const boost::any& evt) = 0;
 
     /**
      *

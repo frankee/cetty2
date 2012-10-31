@@ -1,22 +1,20 @@
 
 #include <cetty/zurg/slave/SlaveServiceImpl.h>
-
 #include <cetty/zurg/slave/Process.h>
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
-
-#include <boost/weak_ptr.hpp>
-
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
+
+#include <boost/weak_ptr.hpp>
 
 namespace cetty {
 namespace zurg {
 namespace slave {
 
 using namespace cetty::util;
-using namespace cetty::zurg::proto;
+using namespace cetty::zurg::slave;
 
 int g_tempFileCount = 0;
 
@@ -53,7 +51,7 @@ void parseMd5sum(const std::string& lines, std::map<StringPiece, StringPiece>* m
     }
 }
 
-SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
+SlaveServiceImpl::SlaveServiceImpl(EventLoopPtr& loop, int zombieInterval)
     : loop(loop),
       children(new ProcessManager(loop, zombieInterval)),
       apps(new ApplicationManager(loop, children.get())) {

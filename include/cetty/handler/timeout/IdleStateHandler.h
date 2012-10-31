@@ -21,21 +21,12 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/cstdint.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/function.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/channel/SimpleChannelUpstreamHandler.h>
-#include <cetty/channel/LifeCycleAwareChannelHandler.h>
-#include <cetty/util/ExternalResourceReleasable.h>
-#include <cetty/util/Timer.h>
-#include <cetty/util/TimerTask.h>
-
-namespace cetty {
-namespace util {
-class TimeUnit;
-}
-}
+#include <cetty/Types.h>
+#include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/AbstractChannelHandler.h>
 
 namespace cetty {
 namespace handler {
@@ -45,6 +36,7 @@ using namespace cetty::channel;
 using namespace cetty::util;
 
 class IdleState;
+class IdleStateEvent;
 
 /**
  * Triggers an {@link IdleStateEvent} when a {@link Channel} has not performed
@@ -131,13 +123,15 @@ class IdleState;
  * @apiviz.has org.jboss.netty.handler.timeout.IdleStateEvent oneway - - triggers
  */
 
-class IdleStateHandler : public cetty::channel::SimpleChannelUpstreamHandler,
-    public cetty::channel::LifeCycleAwareChannelHandler,
-    public cetty::util::ExternalResourceReleasable {
-
+class IdleStateHandler : public cetty::channel::AbstractChannelHandler {
 public:
-    typedef boost::posix_time::ptime time_type;
-    typedef boost::posix_time::time_duration time_duration_type;
+    typedef boost::posix_time::ptime Time;
+    typedef boost::posix_time::time_duration Duration;
+
+    typedef boost::function2<void, ChannelHandlerContext&, const IdleStateEvent&> IdleEventCallback;
+
+private:
+    typedef boost::function0<void> TimeoutCallback;
 
 public:
     /**
@@ -185,119 +179,95 @@ public:
      *        the {@link TimeUnit} of <tt>readerIdleTime</tt>,
      *        <tt>writeIdleTime</tt>, and <tt>allIdleTime</tt>
      */
-    IdleStateHandler(boost::int64_t readerIdleTime,
-                     boost::int64_t writerIdleTime,
-                     boost::int64_t allIdleTime,
-                     const TimeUnit& unit);
+    IdleStateHandler(const Duration& readerIdleTime,
+                     const Duration& writerIdleTime,
+                     const Duration& allIdleTime);
 
     /**
-     * Stops the {@link Timer} which was specified in the constructor of this
-     * handler.  You should not call this method if the {@link Timer} is in use
-     * by other objects.
+     * Return the readerIdleTime that was given when instance this class in milliseconds.
+     *
      */
-    virtual void releaseExternalResources();
+    int64_t getReaderIdleTimeInMillis() const {
+        return readerIdleTimeMillis;
+    }
+
+    /**
+     * Return the writerIdleTime that was given when instance this class in milliseconds.
+     *
+     */
+    int64_t getWriterIdleTimeInMillis() const {
+        return writerIdleTimeMillis;
+    }
+
+    /**
+     * Return the allIdleTime that was given when instance this class in milliseconds.
+     *
+     */
+    int64_t getAllIdleTimeInMillis() const {
+        return allIdleTimeMillis;
+    }
 
     virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx) {} // NOOP
+    virtual void afterAdd(ChannelHandlerContext& ctx); // NOOP
 
     virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx) {} // NOOP
+    virtual void afterRemove(ChannelHandlerContext& ctx); // NOOP
 
-    virtual void channelOpen(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
-    virtual void channelClosed(ChannelHandlerContext& ctx, const ChannelStateEvent& e);
+    virtual void channelActive(ChannelHandlerContext& ctx);
 
-    virtual void messageReceived(ChannelHandlerContext& ctx, const MessageEvent& e);
-    virtual void writeCompleted(ChannelHandlerContext& ctx, const WriteCompletionEvent& e);
+    virtual void channelInactive(ChannelHandlerContext& ctx);
+
+    virtual void messageUpdated(ChannelHandlerContext& ctx);
+
+    virtual void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
 
     virtual ChannelHandlerPtr clone();
 
-    virtual std::string toString() const { return "IdleStateHandler"; }
+    virtual std::string toString() const;
 
-protected:
-    void channelIdle(ChannelHandlerContext& ctx, const IdleState& state, const time_type& lastActivityTime);
+    void setIdleEventCallback(const IdleEventCallback& idleEventCallback) {
+        if (idleEventCallback) {
+            this->idleEventCallback = idleEventCallback;
+        }
+    }
 
 private:
     void initialize(ChannelHandlerContext& ctx);
     void destroy();
 
 private:
+    void handleWriteCompleted(const ChannelFuturePtr& future);
 
-    class ReaderIdleTimeoutTask : public cetty::util::TimerTask {
-    public:
-        typedef IdleStateHandler::time_type time_type;
-        typedef IdleStateHandler::time_duration_type time_duration_type;
+    void handleIdle(ChannelHandlerContext& ctx, const IdleStateEvent& state);
 
-    public:
-        ReaderIdleTimeoutTask(ChannelHandlerContext& ctx, IdleStateHandler& handler)
-            : ctx(ctx), handler(handler) {
-        }
-
-        virtual ~ReaderIdleTimeoutTask() {}
-
-        virtual void run(Timeout& timeout);
-
-    private:
-        ChannelHandlerContext& ctx;
-        IdleStateHandler& handler;
-    };
-
-    friend class WriterIdleTimeoutTask;
-    class WriterIdleTimeoutTask : public cetty::util::TimerTask {
-    public:
-        typedef IdleStateHandler::time_type time_type;
-        typedef IdleStateHandler::time_duration_type time_duration_type;
-
-    public:
-        WriterIdleTimeoutTask(ChannelHandlerContext& ctx, IdleStateHandler& handler)
-            : ctx(ctx), handler(handler) {
-        }
-
-        virtual ~WriterIdleTimeoutTask() {}
-
-        virtual void run(Timeout& timeout);
-
-    private:
-        ChannelHandlerContext& ctx;
-        IdleStateHandler& handler;
-    };
-
-    friend class AllIdleTimeoutTask;
-    class AllIdleTimeoutTask : public cetty::util::TimerTask {
-    public:
-        typedef IdleStateHandler::time_type time_type;
-        typedef IdleStateHandler::time_duration_type time_duration_type;
-
-    public:
-        AllIdleTimeoutTask(ChannelHandlerContext& ctx, IdleStateHandler& handler)
-            : ctx(ctx), handler(handler) {
-        }
-
-        virtual ~AllIdleTimeoutTask() {}
-
-        virtual void run(Timeout& timeout);
-
-    private:
-        ChannelHandlerContext& ctx;
-        IdleStateHandler& handler;
-    };
+    void handleReaderIdleTimeout(ChannelHandlerContext& ctx);
+    void handleWriterIdleTimeout(ChannelHandlerContext& ctx);
+    void handleAllIdleTimeout(ChannelHandlerContext& ctx);
 
 private:
-    TimerPtr timer;
-
-    boost::int64_t readerIdleTimeMillis;
+    int64_t readerIdleTimeMillis;
     TimeoutPtr readerIdleTimeout;
-    time_type lastReadTime;
-    ReaderIdleTimeoutTask* readerTimeoutTask;
+    Time lastReadTime;
+    int readerIdleCount;
 
+    TimeoutCallback readerIdleTimeCallback;
 
-    boost::int64_t writerIdleTimeMillis;
+    int64_t writerIdleTimeMillis;
     TimeoutPtr writerIdleTimeout;
-    time_type lastWriteTime;
-    WriterIdleTimeoutTask* writerTimeoutTask;
+    Time lastWriteTime;
+    int writerIdleCount;
 
-    boost::int64_t allIdleTimeMillis;
+    TimeoutCallback writerIdleTimeCallback;
+
+    int64_t allIdleTimeMillis;
     TimeoutPtr allIdleTimeout;
-    AllIdleTimeoutTask* allTimeoutTask;
+    int allIdleCount;
+
+    TimeoutCallback allIdleTimeCallback;
+
+    int state; // 0 - none, 1 - initialized, 2 - destroyed
+
+    IdleEventCallback idleEventCallback;
 };
 
 }

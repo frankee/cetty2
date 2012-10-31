@@ -21,14 +21,12 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <cetty/channel/ChannelEvent.h>
+#include <cetty/Types.h>
+#include <cetty/handler/timeout/IdleState.h>
 
 namespace cetty {
 namespace handler {
 namespace timeout {
-
-class IdleState;
 
 /**
  * A {@link ChannelEvent} that is triggered when a {@link Channel} has been idle
@@ -41,22 +39,31 @@ class IdleState;
  * @apiviz.landmark
  * @apiviz.has org.jboss.netty.handler.timeout.IdleState oneway - -
  */
-class IdleStateEvent : public cetty::channel::ChannelEvent {
+class IdleStateEvent {
 public:
-    typedef boost::posix_time::ptime time_type;
-
-public:
-    virtual ~IdleStateEvent() {}
+    IdleStateEvent(IdleState state, int count, int64_t durationMillis);
 
     /**
      * Returns the detailed idle state.
      */
-    virtual const IdleState& getState() const = 0;
+    const IdleState& getState() const {
+        return state;
+    }
 
-    /**
-     * Returns the last time when I/O occurred.
-     */
-    virtual const time_type& getLastActivityTime() const = 0;
+    int getCount() const {
+        return count;
+    }
+
+    int64_t getDurationMillis() const {
+        return durationMillis;
+    }
+
+    std::string toString() const;
+
+private:
+    IdleState state;
+    int count;
+    int64_t durationMillis;
 };
 
 }

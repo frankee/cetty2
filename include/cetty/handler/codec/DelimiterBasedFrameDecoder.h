@@ -136,10 +136,6 @@ protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
                                     const ChannelBufferPtr& in);
 
-    virtual UserEvent decode(ChannelHandlerContext& ctx,
-                             const ChannelPtr& channel,
-                             const ChannelBufferPtr& buffer);
-
 private:
     void fail(ChannelHandlerContext& ctx, long frameLength);
     void initdelimiters(const std::vector<ChannelBufferPtr>& delimiters);

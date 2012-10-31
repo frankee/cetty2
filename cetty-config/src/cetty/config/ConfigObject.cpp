@@ -24,23 +24,15 @@ namespace config {
 ConfigObject::ObjectDescriptorMap* ConfigObject::objects = NULL;
 ConfigReflection* ConfigObject::reflection = NULL;
 
-const ConfigReflection* ConfigObject::getreflection() const {
-    ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
-
-    ObjectDescriptorMap::const_iterator itr = objects.find(name);
-
-    if (itr != objects.end()) {
-        if (!reflection) {
-            reflection = new ConfigReflection;
-        }
-
-        return reflection;
+const ConfigReflection* ConfigObject::getReflection() const {
+    if (!reflection) {
+        reflection = new ConfigReflection;
     }
 
-    return NULL;
+    return reflection;
 }
 
-const ConfigDescriptor* ConfigObject::getdescriptor() const {
+const ConfigDescriptor* ConfigObject::getDescriptor() const {
     ConfigObject::ObjectDescriptorMap& objects = getObjectDescriptorMap();
 
     ObjectDescriptorMap::const_iterator itr = objects.find(name);

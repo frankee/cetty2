@@ -56,7 +56,7 @@ public:
                                  const ChannelException& cause);
 
     virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const UserEvent& evt);
+                                    const boost::any& evt);
 
     virtual ChannelHandlerPtr clone();
 

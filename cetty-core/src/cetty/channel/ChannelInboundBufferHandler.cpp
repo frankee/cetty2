@@ -17,6 +17,7 @@
 
 #include <cetty/channel/ChannelInboundBufferHandler.h>
 
+#include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 
@@ -44,6 +45,16 @@ void ChannelInboundBufferHandler::channelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelInboundBufferHandler::messageUpdated(ChannelHandlerContext& ctx) {
+    try {
+        messageReceived(ctx, inboundBuffer);
+    }
+    catch (const ChannelException& e) {
+        ctx.fireExceptionCaught(e);
+    }
+    catch (const std::exception& e) {
+        ctx.fireExceptionCaught(ChannelException(e.what()));
+    }
+
     ctx.fireMessageUpdated();
 }
 
@@ -73,7 +84,7 @@ void ChannelInboundBufferHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelInboundBufferHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
     ctx.fireUserEventTriggered(evt);
 }
 
@@ -103,6 +114,10 @@ ChannelHandlerContext* ChannelInboundBufferHandler::createContext(const std::str
 
 void ChannelInboundBufferHandler::setInboundChannelBuffer(const ChannelBufferPtr& buffer) {
     inboundBuffer = buffer;
+}
+
+void ChannelInboundBufferHandler::messageReceived(ChannelHandlerContext& ctx, const ChannelBufferPtr& msg) {
+    throw ChannelException("you must implement the messageReceived method.");
 }
 
 }

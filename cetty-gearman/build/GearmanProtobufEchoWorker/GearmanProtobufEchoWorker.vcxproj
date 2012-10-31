@@ -10,6 +10,13 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\sample\echo\protobuf\echo.pb.cc" />
+    <ClCompile Include="..\..\sample\echo\protobuf\GearmanProtobufEchoWorker.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\sample\echo\protobuf\echo.pb.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F25952F1-9ED5-4D5B-A644-97A4CF9EB495}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -56,7 +63,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;gearmand.lib;libprotobufd.lib;ProtobufServiced.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;gearmand.lib;libprotobufd.lib;ProtobufServiced.lib;yamld.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,13 +83,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\sample\protobufEcho\echo.pb.cc" />
-    <ClCompile Include="..\..\sample\protobufEcho\GearmanProtobufEchoWorker.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -23,7 +23,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>
+    </CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -101,17 +102,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cetty\cetty.vcxproj">
-      <Project>{5c94f9f3-765c-4614-badc-bcfec0ee4b7b}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppFile.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
     <ClCompile Include="..\..\src\cetty\config\generator\YamlGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +115,7 @@
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppGenerator.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppMessage.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\YamlGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -431,8 +431,8 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     return HttpMessagePtr();
 }
 
-bool HttpMessageDecoder::isContentAlwaysEmpty(const HttpMessage& msg) const {
-    const HttpResponse* response = dynamic_cast<const HttpResponse*>(&msg);
+bool HttpMessageDecoder::isContentAlwaysEmpty(const HttpMessagePtr& msg) const {
+    HttpResponsePtr response = boost::dynamic_pointer_cast<HttpResponse>(msg);
 
     if (response) {
         int code = response->getStatus().getCode();
@@ -631,7 +631,7 @@ int HttpMessageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
 
     }
 
-    if (isContentAlwaysEmpty(*message)) {
+    if (isContentAlwaysEmpty(message)) {
         message->setTransferEncoding(HttpTransferEncoding::SINGLE);
         nextState = SKIP_CONTROL_CHARS;
     }

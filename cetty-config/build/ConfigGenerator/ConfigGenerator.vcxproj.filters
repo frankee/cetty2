@@ -12,6 +12,9 @@
     <Filter Include="cpp">
       <UniqueIdentifier>{7e6796dd-7787-4d6b-8f7a-a3b8e7000b16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="yaml">
+      <UniqueIdentifier>{8c69b45b-744e-4593-9b61-b7e83e6b8d4d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp">
@@ -32,6 +35,9 @@
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppMessage.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc">
+      <Filter>cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\config\generator\YamlGenerator.h">
@@ -47,6 +53,9 @@
       <Filter>cpp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppMessage.h">
+      <Filter>cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h">
       <Filter>cpp</Filter>
     </ClInclude>
   </ItemGroup>

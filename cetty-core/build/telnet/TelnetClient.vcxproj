@@ -12,11 +12,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\example\telnet\client\TelnetClient.cpp" />
-    <ClCompile Include="..\..\example\telnet\client\TelnetClientHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\telnet\client\TelnetClientHandler.h" />
-    <ClInclude Include="..\..\example\telnet\client\TelnetClientPipelineFactory.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FCAD1955-36A2-472D-BCAD-2AD2E8778D49}</ProjectGuid>

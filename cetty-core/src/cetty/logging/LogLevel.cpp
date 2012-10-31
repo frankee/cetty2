@@ -26,8 +26,7 @@ const LogLevel LogLevel::INFO(2);
 const LogLevel LogLevel::DEBUG(1);
 const LogLevel LogLevel::TRACE(0);
 
-static const std::string LOG_LEVLE_STRS[] = 
-{
+static const std::string LOG_LEVLE_STRS[] = {
     "TRACE",
     "DEBUG",
     "INFO",
@@ -38,7 +37,7 @@ static const std::string LOG_LEVLE_STRS[] =
 };
 
 const std::string& LogLevel::toString() const {
-    return LOG_LEVLE_STRS[this->level];
+    return LOG_LEVLE_STRS[this->v];
 }
 
 }

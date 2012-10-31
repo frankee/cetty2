@@ -30,21 +30,21 @@ BufferToBufferEncoder::BufferToBufferEncoder() {
 
 BufferToBufferEncoder::~BufferToBufferEncoder() {
 }
-#if 0
+
 void BufferToBufferEncoder::flush(ChannelHandlerContext& ctx,
     const ChannelFuturePtr& future) {
-        Context* context = ctx.downcast<Context>();
 
-        const ChannelBufferPtr& in = context->getInboundChannelBuffer();
-    //ByteBuf out = ctx.nextOutboundByteBuffer();
+    const ChannelBufferPtr& in = getOutboundChannelBuffer();
+    ChannelBufferPtr out;
+    //out = ctx.nextOutboundByteBuffer();
 
-    int oldOutSize = out.readableBytes();
+    //int oldOutSize = out->readableBytes();
 
     while (in->readable()) {
         int oldInSize = in->readableBytes();
 
         try {
-            encode(ctx, in, out);
+            out = encode(ctx, in);
         }
         catch (const CodecException& e) {
             ctx.fireExceptionCaught(e);
@@ -58,13 +58,12 @@ void BufferToBufferEncoder::flush(ChannelHandlerContext& ctx,
         }
     }
 
-    if (out.readableBytes() > oldOutSize) {
-        in->discardReadBytes();
-    }
+    //if (out->readableBytes() > oldOutSize) {
+    //    in->discardReadBytes();
+    //}
 
     ctx.flush(future);
 }
-#endif
 
 }
 }

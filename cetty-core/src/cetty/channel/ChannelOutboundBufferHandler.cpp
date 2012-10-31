@@ -80,7 +80,7 @@ void ChannelOutboundBufferHandler::exceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelOutboundBufferHandler::userEventTriggered(ChannelHandlerContext& ctx,
-        const UserEvent& evt) {
+        const boost::any& evt) {
     ctx.fireUserEventTriggered(evt);
 }
 

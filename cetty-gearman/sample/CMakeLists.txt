@@ -1,1 +1,1 @@
-ADD_SUBDIRECTORY(protobufEcho)
+ADD_SUBDIRECTORY(echo)

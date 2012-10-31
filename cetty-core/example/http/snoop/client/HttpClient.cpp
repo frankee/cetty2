@@ -18,24 +18,51 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include "cetty/bootstrap/ClientBootstrap.h"
-#include "cetty/channel/Channel.h"
-#include "cetty/channel/SocketAddress.h"
-#include "cetty/channel/socket/asio/AsioClientSocketChannelFactory.h"
+#include <cetty/bootstrap/ClientBootstrap.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
 
-#include "cetty/handler/codec/http/HttpHeader.h"
-#include "cetty/handler/codec/http/HttpHeaders.h"
-#include "cetty/handler/codec/http/DefaultHttpRequest.h"
+#include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpClientCodec.h>
 
-#include "cetty/util/URI.h"
+#include <cetty/util/URI.h>
 
-#include "HttpClientPipelineFactory.h"
+#include "HttpResponseHandler.h"
 
 using namespace cetty::bootstrap;
 using namespace cetty::util;
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
 using namespace cetty::handler::codec::http;
+
+
+ChannelPipelinePtr getPipeline(bool ssl) {
+    // Create a default pipeline implementation.
+    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
+
+    // Enable HTTPS if necessary.
+    if (ssl) {
+        //             SSLEngine engine =
+        //                 SecureChatSslContextFactory.getClientContext().createSSLEngine();
+        //             engine.setUseClientMode(true);
+        // 
+        //             pipeline.addLast("ssl", new SslHandler(engine));
+    }
+
+    pipeline->addLast("codec", new HttpClientCodec);
+
+    // Remove the following line if you don't want automatic content decompression.
+    //pipeline->addLast("inflater", new HttpContentDecompressor());
+
+    // Uncomment the following line if you don't want to handle HttpChunks.
+    //pipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
+
+    pipeline->addLast("handler", new HttpResponseHandler());
+    return pipeline;
+}
 
 /**
  * A simple HTTP client that prints out the content of the HTTP response to
@@ -47,7 +74,6 @@ using namespace cetty::handler::codec::http;
  *
  * @version $Rev: 2226 $, $Date: 2010-03-31 11:26:51 +0900 (Wed, 31 Mar 2010) $
  */
-
 int main(int argc, const char* argv[]) {
     if (argc != 2) {
         printf("Usage: SnoopClient <URL>");
@@ -77,27 +103,26 @@ int main(int argc, const char* argv[]) {
 
     // Configure the client.
     ClientBootstrap bootstrap(
-        ChannelFactoryPtr(new AsioClientSocketChannelFactory()));
+        ChannelFactoryPtr(new AsioClientSocketChannelFactory(1)));
 
     // Set up the event pipeline factory.
-    bootstrap.setPipelineFactory(
-        ChannelPipelineFactoryPtr(new HttpClientPipelineFactory(ssl)));
+    bootstrap.setPipeline(getPipeline(ssl));
 
     // Start the connection attempt.
     ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
 
     // Wait until the connection attempt succeeds or fails.
-    Channel& channel = future->awaitUninterruptibly().getChannel();
+    ChannelPtr channel = future->awaitUninterruptibly()->getChannel();
 
     if (!future->isSuccess()) {
-        bootstrap.releaseExternalResources();
+        bootstrap.shutdown();
         return -1;
     }
 
     // Prepare the HTTP request.
     HttpRequestPtr request =
-        HttpRequestPtr(new DefaultHttpRequest(HttpVersion::HTTP_1_1,
-                       HttpMethod::HM_GET,
+        HttpRequestPtr(new HttpRequest(HttpVersion::HTTP_1_1,
+                       HttpMethod::GET,
                        uri.toString()));
 
     request->setHeader(HttpHeaders::Names::HOST, host);
@@ -111,13 +136,13 @@ int main(int argc, const char* argv[]) {
     //request->setHeader(HttpHeaders::Names::COOKIE, httpCookieEncoder.encode());
 
     // Send the HTTP request.
-    channel.write(ChannelMessage(request));
+    channel->write(request);
 
     // Wait for the server to close the connection.
-    channel.getCloseFuture()->awaitUninterruptibly();
+    channel->getCloseFuture()->awaitUninterruptibly();
 
     // Shut down executor threads to exit.
-    bootstrap.releaseExternalResources();
+    bootstrap.shutdown();
 
     return 0;
 };

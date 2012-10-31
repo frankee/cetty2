@@ -111,6 +111,15 @@
     <Filter Include="protobuf\service\handler">
       <UniqueIdentifier>{f0152698-03cc-451c-b94d-9dbfe73641f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="redis">
+      <UniqueIdentifier>{c1bafa32-a74f-4435-8063-2fb27d6ef0b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="redis\builder">
+      <UniqueIdentifier>{0e66e113-c2a0-4868-a81d-59e4f3d6b620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="redis\command">
+      <UniqueIdentifier>{3a6311cd-450e-4768-bfbf-b5fafc730e7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h">
@@ -482,17 +491,11 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h">
       <Filter>core\channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelSink.h">
-      <Filter>core\channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPtr.h">
       <Filter>core\channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\socket\asio\AsioClientSocketChannelFactory.h">
       <Filter>core\channel\socket\asio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOption.h">
       <Filter>core\channel</Filter>
@@ -538,12 +541,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEvent.h">
-      <Filter>core\channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\UserEventHolder.h">
-      <Filter>core\channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h">
       <Filter>core\channel</Filter>
@@ -962,9 +959,6 @@
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelConfig.h">
       <Filter>core\channel\socket\asio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSink.h">
-      <Filter>core\channel\socket\asio</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h">
       <Filter>core\channel\socket\asio</Filter>
     </ClInclude>
@@ -997,6 +991,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\cetty-config\src\cetty\config\ConfigIncludeFileFinder.h">
       <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.h">
+      <Filter>core\channel\socket\asio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1114,9 +1111,6 @@
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelConfig.cpp">
       <Filter>core\channel\socket\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSink.cpp">
-      <Filter>core\channel\socket\asio</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioWriteOperationQueue.cpp">
       <Filter>core\channel\socket\asio</Filter>
     </ClCompile>
@@ -1130,9 +1124,6 @@
       <Filter>core\channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelOutboundHandler.cpp">
-      <Filter>core\channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractChannelSink.cpp">
       <Filter>core\channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\AbstractServerChannel.cpp">
@@ -1211,9 +1202,6 @@
       <Filter>core\channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\SucceededChannelFuture.cpp">
-      <Filter>core\channel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\UserEvent.cpp">
       <Filter>core\channel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\handler\codec\BufferToBufferCodec.cpp">
@@ -1473,6 +1461,48 @@
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\KeyValuePair.cpp">
       <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.cpp">
+      <Filter>core\channel\socket\asio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelSinkHandler.cpp">
+      <Filter>core\channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisClient.cpp">
+      <Filter>redis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessageDecoder.cpp">
+      <Filter>redis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessage.cpp">
+      <Filter>redis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\builder\RedisClientBuilder.cpp">
+      <Filter>redis\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Connection.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Hashes.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Keys.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Scripting.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Server.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\SortedSets.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Strings.cpp">
+      <Filter>redis\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Transactions.cpp">
+      <Filter>redis\command</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

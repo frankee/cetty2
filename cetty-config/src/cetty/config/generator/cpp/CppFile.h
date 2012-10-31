@@ -42,9 +42,11 @@
 namespace google {
 namespace protobuf {
 class FileDescriptor;        // descriptor.h
+
 namespace io {
 class Printer;             // printer.h
 }
+
 }
 }
 
@@ -53,9 +55,9 @@ namespace config {
 namespace generator {
 namespace cpp {
 
-    using namespace std;
-    using namespace google::protobuf;
-    using namespace google::protobuf::io;
+using namespace std;
+using namespace google::protobuf;
+using namespace google::protobuf::io;
 
 class MessageGenerator;        // message.h
 
@@ -70,10 +72,6 @@ public:
     void GenerateSource(io::Printer* printer);
 
 private:
-    // Generate the BuildDescriptors() procedure, which builds all descriptors
-    // for types defined in the file.
-    void GenerateBuildDescriptors(io::Printer* printer);
-
     void GenerateNamespaceOpeners(io::Printer* printer);
     void GenerateNamespaceClosers(io::Printer* printer);
 

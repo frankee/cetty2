@@ -24,14 +24,9 @@
  *
  */
 
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuturePtr.h>
 #include <cetty/bootstrap/Bootstrap.h>
-
-namespace cetty {
-    namespace channel {
-        class SocketAddress;
-    }
-}
 
 namespace cetty {
 namespace bootstrap {
@@ -140,6 +135,12 @@ public:
 
     virtual ~ClientBootstrap() {}
 
+    ClientBootstrap& remoteAddress(const std::string& host, int port);
+
+    const SocketAddress& remoteAddress() const;
+
+    ChannelFuturePtr connect();
+
     /**
      * Attempts a new connection with the current <tt>"remoteAddress"</tt> and
      * <tt>"localAddress"</tt> option.  If the <tt>"localAddress"</tt> option is
@@ -195,8 +196,25 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress);
+    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
+                                     const SocketAddress& localAddress);
+
+
+private:
+    SocketAddress remote;
 };
+
+inline
+ClientBootstrap& ClientBootstrap::remoteAddress(const std::string& host,
+        int port) {
+    this->remote = SocketAddress(host, port);
+    return *this;
+}
+
+inline
+const SocketAddress& ClientBootstrap::remoteAddress() const {
+    return remote;
+}
 
 }
 }

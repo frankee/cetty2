@@ -17,13 +17,13 @@
  * under the License.
  */
 
+#include <boost/any.hpp>
 #include <cetty/channel/ChannelFuturePtr.h>
 
 namespace cetty {
 namespace channel {
 
 class SocketAddress;
-class UserEvent;
 
 class ChannelOutboundInvoker {
 public:
@@ -133,12 +133,6 @@ public:
      *
      */
     virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future) = 0;
-
-    /**
-     *
-     */
-    //virtual const ChannelFuturePtr& write(const ChannelMessage& message,
-    //                                      const ChannelFuturePtr& future) = 0;
 };
 
 }

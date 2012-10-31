@@ -50,8 +50,7 @@ public:
         StringUtil::strprintf(&str, "Welcome to %s !\r\n",
                               ctx.getChannel()->getLocalAddress().toString().c_str());
 
-        outboundTransfer.write(ctx,
-                               Unpooled::copiedBuffer(str),
+        outboundTransfer.write(Unpooled::copiedBuffer(str),
                                ctx.getChannel()->newSucceededFuture());
 
         boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
@@ -59,8 +58,7 @@ public:
         StringUtil::strprintf(&str, "It is %s now.\r\n",
                               boost::posix_time::to_iso_string(now).c_str());
 
-        outboundTransfer.write(ctx,
-                               Unpooled::copiedBuffer(str),
+        outboundTransfer.write(Unpooled::copiedBuffer(str),
                                ctx.getChannel()->newSucceededFuture());
     }
 
@@ -90,8 +88,7 @@ public:
         // We do not need to write a ChannelBuffer here.
         // We know the encoder inserted at TelnetPipelineFactory will do the conversion.
         ChannelFuturePtr future = ctx.getChannel()->newFuture();
-        outboundTransfer.write(ctx,
-                               Unpooled::copiedBuffer(response),
+        outboundTransfer.write(Unpooled::copiedBuffer(response),
                                future);
 
         // Close the connection after sending 'Have a good day!'
