@@ -1,25 +1,31 @@
-#if !defined(CETTY_ZURG_SLAVE_SLAVESERVICEIMPL_H)
-#define CETTY_ZURG_SLAVE_SLAVESERVICEIMPL_H
+/*
+ * SlaveServiceImpl.h
+ *
+ *  Created on: 2012-10-31
+ *      Author: chenhl
+ */
+
+#ifndef SLAVESERVICEIMPL_H_
+#define SLAVESERVICEIMPL_H_
+
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/channel/EventLoopPtr.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
-
-#include <cetty/zurg/proto/slave.pb.h>
-#include <cetty/channel/EventLoopPtr.h>
 
 namespace cetty {
 namespace zurg {
 namespace slave {
 
 using namespace cetty::channel;
-using namespace cetty::zurg::proto;
 
 class ProcessManager;
 class ApplicationManager;
 
-class SlaveServiceImpl : public cetty::zurg::proto::SlaveService {
+class SlaveServiceImpl : public SlaveService {
 public:
-    SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval);
+    SlaveServiceImpl(EventLoopPtr& loop, int zombieInterval);
     virtual ~SlaveServiceImpl();
 
     void start();
@@ -78,18 +84,14 @@ private:
                              const DoneCallback& done);
 
 private:
-    EventLoopPtr loop;
+    EventLoopPtr loop_;
 
-    boost::scoped_ptr<ProcessManager> children;
-    boost::scoped_ptr<ApplicationManager> apps;
+    boost::scoped_ptr<ProcessManager> processes_;
+    boost::scoped_ptr<ApplicationManager> apps_;
 };
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_ZURG_SLAVE_SLAVESERVICEIMPL_H)
-
-// Local Variables:
-// mode: c++
-// End:
+#endif /* SLAVESERVICEIMPL_H_ */
