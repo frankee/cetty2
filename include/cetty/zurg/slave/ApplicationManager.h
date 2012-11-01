@@ -1,7 +1,15 @@
-#if !defined(CETTY_ZURG_SLAVE_APPLICATIONMANAGER_H)
-#define CETTY_ZURG_SLAVE_APPLICATIONMANAGER_H
+/*
+ * ApplicationManager.h
+ *
+ *  Created on: 2012-11-1
+ *      Author: chenhl
+ */
 
-#include <cetty/zurg/proto/slave.pb.h>
+#ifndef APPLICATIONMANAGER_H_
+#define APPLICATIONMANAGER_H_
+
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/channel/EventLoopPtr.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -11,57 +19,72 @@
 
 struct rusage;
 
+namespace cetty {
+namespace zurg {
+namespace slave {
 
-namespace cetty { namespace zurg { namespace slave { 
-
-using namespace cetty::zurg::proto;
-
-struct Application;
+class Process;
 class ProcessManager;
 
-//typedef boost::shared_ptr<Application> ApplicationPtr;
-class Process;
-typedef boost::shared_ptr<Process> ProcessPtr;
+using namespace cetty::channel;
+
+struct Application{
+    AddApplicationRequestPtr request;
+    ApplicationStatus status;
+};
+typedef boost::shared_ptr<Application> ApplicationPtr;
 
 class ApplicationManager : boost::noncopyable {
 public:
     ApplicationManager(const EventLoopPtr&, ProcessManager*);
-    ~ApplicationManager();
+    virtual ~ApplicationManager();
 
-    virtual void add(const ConstAddApplicationRequestPtr& request,
-                     const AddApplicationResponsePtr& response,
-                     const SlaveService::DoneCallback& done);
+    virtual void add(
+        const ConstAddApplicationRequestPtr& request,
+        const AddApplicationResponsePtr& response,
+        const DoneCallback& done
+    );
 
-    virtual void start(const ConstStartApplicationsRequestPtr& request,
-                       const StartApplicationsResponsePtr& response,
-                       const SlaveService::DoneCallback& done);
+    virtual void start(
+        const ConstStartApplicationsRequestPtr& request,
+        const StartApplicationsResponsePtr& response,
+        const DoneCallback& done
+    );
 
-    virtual void stop(const ConstStopApplicationRequestPtr& request,
-                      const StopApplicationResponsePtr& response,
-                      const SlaveService::DoneCallback& done);
+    virtual void stop(
+        const ConstStopApplicationRequestPtr& request,
+        const StopApplicationResponsePtr& response,
+        const DoneCallback& done
+    );
 
-    virtual void get(const ConstGetApplicationsRequestPtr& request,
-                     const GetApplicationsResponsePtr& response,
-                     const SlaveService::DoneCallback& done);
+    virtual void get(
+        const ConstGetApplicationsRequestPtr& request,
+        const GetApplicationsResponsePtr& response,
+        const DoneCallback& done
+    );
 
-    virtual void list(const ConstListApplicationsRequestPtr& request,
-                      const ListApplicationsResponsePtr& response,
-                      const SlaveService::DoneCallback& done);
+    virtual void list(
+        const ConstListApplicationsRequestPtr& request,
+        const ListApplicationsResponsePtr& response,
+        const DoneCallback& done
+    );
 
-    virtual void remove(const ConstRemoveApplicationsRequestPtr& request,
-                        const RemoveApplicationsResponsePtr& response,
-                        const SlaveService::DoneCallback& done);
+    virtual void remove(
+        const ConstRemoveApplicationsRequestPtr& request,
+        const RemoveApplicationsResponsePtr& response,
+        const DoneCallback& done
+    );
 
 private:
-    void startApp(Application* app, ApplicationStatus* out);
+    void startApp(const ApplicationPtr &, ApplicationStatus* out);
     void onProcessExit(const ProcessPtr&, int status, const struct rusage&);
 
 private:
-    typedef std::map<std::string, Application> ApplicationMap;
+    typedef std::map<std::string, ApplicationPtr> ApplicationMap;
 
 private:
     EventLoopPtr loop_;
-    ProcessManager* processManager;
+    ProcessManager* processManager_;
 
     ApplicationMap apps_;
 };
@@ -69,8 +92,4 @@ private:
 
 }}}
 
-#endif //#if !defined(CETTY_ZURG_SLAVE_APPLICATIONMANAGER_H)
-
-// Local Variables:
-// mode: c++
-// End:
+#endif /* APPLICATIONMANAGER_H_ */

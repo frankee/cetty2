@@ -1,28 +1,47 @@
-#ifndef MUDUO_PROTORPC_ZURG_PROCESS_H
-#define MUDUO_PROTORPC_ZURG_PROCESS_H
+/*
+ * Process.h
+ *
+ *  Created on: 2012-11-1
+ *      Author: chenhl
+ */
 
-#include <string>
+#ifndef PROCESS_H_
+#define PROCESS_H_
+
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/protobuf/service/ProtobufService.h>
+#include <cetty/channel/EventLoopPtr.h>
+
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-
-#include <cetty/zurg/proto/slave.pb.h>
+#include <string>
 
 struct rusage;
 
 namespace cetty {
 namespace zurg {
+namespace slave {
 
 class Pipe;
 class Sink;
+class Process;
+
+using namespace cetty::protobuf::service;
+using namespace cetty::channel;
+
+typedef boost::shared_ptr<Process> ProcessPtr;
+typedef boost::function1<void, const MessagePtr&> DoneCallback;
 
 class Process : public boost::enable_shared_from_this<Process>,
-        boost::noncopyable {
+                boost::noncopyable {
 public:
-    Process(const EventLoopPtr& loop,
-            const ConstRunCommandRequestPtr& request,
-            const RunCommandResponsePtr& response,
-            const DoneCallback& done);
+    Process(
+        const EventLoopPtr& loop,
+        const ConstRunCommandRequestPtr& request,
+        const RunCommandResponsePtr& response,
+        const DoneCallback& done
+    );
 
     Process(const AddApplicationRequestPtr& request);
 
@@ -33,7 +52,7 @@ public:
     pid_t pid() const { return pid_; }
     const std::string& name() const { return name_; }
 
-    void setTimerId(const muduo::net::TimerId& timerId) {
+    void setTimerId(const cetty::channel::TimeoutPtr timerId) {
         timerId_ = timerId;
     }
 
@@ -44,14 +63,14 @@ public:
 
 private:
     void execChild(Pipe& execError, int stdOutput, int stdError)
-    __attribute__((__noreturn__));;
+    __attribute__((__noreturn__));
 
     int afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError);
 
 private:
     EventLoopPtr loop_;
     ConstRunCommandRequestPtr request_;
-    RunCommandResponsePtr response;
+    RunCommandResponsePtr response_;
     DoneCallback doneCallback_;
 
     pid_t pid_;
@@ -70,9 +89,9 @@ private:
     bool runCommand_;
 };
 
-typedef boost::shared_ptr<Process> ProcessPtr;
-
 }
 }
+}
 
-#endif  // MUDUO_PROTORPC_ZURG_PROCESS_H
+
+#endif /* PROCESS_H_ */
