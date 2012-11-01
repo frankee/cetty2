@@ -6,6 +6,7 @@
 #include <cetty/zurg/slave/GetHardwareTask.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/zurg/Util.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -13,60 +14,27 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
+using namespace cetty::zurg;
 using namespace cetty::util;
 using namespace cetty::zurg::slave;
 
-int g_tempFileCount = 0;
-
-std::string writeTempFile(StringPiece prefix, StringPiece content) {
-    char buf[256];
-    ::snprintf(buf, sizeof buf, "/tmp/%s-runScript-%s-%d-%05d-XXXXXX",
-               prefix.data(),
-               ProcessInfo::startTime().toString().c_str(),
-               ::getpid(),
-               ++g_tempFileCount);
-
-    int tempfd = ::mkostemp(buf, O_CLOEXEC);
-    ssize_t n = ::pwrite(tempfd, content.data(), content.size(), 0);
-    ::fchmod(tempfd, 0755);
-    ::close(tempfd);
-
-    return n == content.size() ? buf : "";
-}
-
-void parseMd5sum(const std::string& lines, std::map<StringPiece, StringPiece>* md5sums) {
-    const char* p = lines.c_str();
-    size_t nl = 0;
-
-    while (*p) {
-        StringPiece md5(p, 32);
-        nl = lines.find('\n', nl);
-        assert(nl != std::string::npos);
-
-        StringPiece file(p + 34, static_cast<int>(lines.c_str() + nl - p - 34));
-        (*md5sums)[file] = md5;
-
-        p = lines.c_str() + nl + 1;
-        ++nl;
-    }
-}
-
-SlaveServiceImpl::SlaveServiceImpl(EventLoopPtr& loop, int zombieInterval)
-    : loop(loop),
-      children(new ProcessManager(loop, zombieInterval)),
-      apps(new ApplicationManager(loop, children.get())) {
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
+    : loop_(loop),
+      psManager_(new ProcessManager(loop, zombieInterval)),
+      apps_(new ApplicationManager(loop, psManager_.get())) {
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
 }
 
 void SlaveServiceImpl::start() {
-    children->start();
+    psManager_->start();
 }
 
-void SlaveServiceImpl::getHardware(const ConstGetHardwareRequestPtr& request,
-                                   const GetHardwareResponsePtr& response,
-                                   const DoneCallback& done) {
+void SlaveServiceImpl::getHardware(
+    const ConstGetHardwareRequestPtr& request,
+    const GetHardwareResponsePtr& response,
+    const DoneCallback& done) {
 
     LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " << request->lshw();
 
@@ -112,8 +80,8 @@ void SlaveServiceImpl::getFileChecksum(const ConstGetFileChecksumRequestPtr& req
             runCommandReq->add_args(request->files(i));
         }
 
-        runCommand(runCommandReq, NULL,
-                   boost::bind(&SlaveServiceImpl::getFileChecksumDone, this, request, _1, done));
+    runCommand(runCommandReq, NULL,
+               boost::bind(&SlaveServiceImpl::getFileChecksumDone, this, request, _1, done));
     }
     else {
         GetFileChecksumResponse response;

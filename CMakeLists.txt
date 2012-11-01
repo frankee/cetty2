@@ -67,7 +67,7 @@ LINK_DIRECTORIES(${YAMLCPP_LIBRARY_DIRS})
 
 find_package(Soci)
 include_directories(${SOCI_INCLUDE_DIRS})
-LINK_DIRECTORIES($(SOCI_LIBRARY))
+LINK_DIRECTORIES(${SOCI_LIBRARY})
 
 # Defines the compiler/linker flags used to build cetty.  You can
 # tweak these definitions to suit your need.  A variable's value is

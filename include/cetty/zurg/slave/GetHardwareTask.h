@@ -1,20 +1,32 @@
-#ifndef MUDUO_PROTORPC_ZURG_GETHARDWARETASK_H
-#define MUDUO_PROTORPC_ZURG_GETHARDWARETASK_H
+/*
+ * GetHardwareTask.h
+ *
+ *  Created on: 2012-11-1
+ *      Author: chenhl
+ */
 
-#include <muduo/base/Logging.h>
+#ifndef GETHARDWARETASK_H_
+#define GETHARDWARETASK_H_
 
+#include <cetty/logging/LoggerHelper.h>
 #include <boost/enable_shared_from_this.hpp>
+#include <google/protobuf/stubs/common.h>
+
+#include <iostream>
 
 namespace cetty {
 namespace zurg {
+namespace slave {
+
+using namespace google::protobuf;
 
 class GetHardwareTask;
 typedef boost::shared_ptr<GetHardwareTask> GetHardwareTaskPtr;
 
 class GetHardwareTask : public boost::enable_shared_from_this<GetHardwareTask>,
-        boost::noncopyable {
+                        boost::noncopyable {
 public:
-    GetHardwareTask(const GetHardwareRequestPtr& request, const muduo::net::RpcDoneCallback& done)
+    GetHardwareTask(const GetHardwareRequestPtr& request, const DoneCallback& done)
         : lshw_(request->lshw()),
           lspciDone_(false),
           lscpuDone_(false),
@@ -58,7 +70,7 @@ private:
         assert(KEY##Done_ == false);                                \
         KEY##Done_ = true;                                          \
         const zurg::RunCommandResponse* out =                       \
-                google::protobuf::down_cast<const zurg::RunCommandResponse*>(message);    \
+                down_cast<const zurg::slave::RunCommandResponse*>(message);    \
         if (out->error_code() == 0)                                 \
         {                                                           \
             resp_.set_##KEY(out->std_output());                       \
@@ -90,10 +102,12 @@ private:
     bool lshwDone_;
 
     GetHardwareResponse resp_;
-    muduo::net::RpcDoneCallback done_;
+    DoneCallback done_;
 };
 
 }
 }
+}
 
-#endif  // MUDUO_PROTORPC_ZURG_GETHARDWARETASK_H
+
+#endif /* GETHARDWARETASK_H_ */

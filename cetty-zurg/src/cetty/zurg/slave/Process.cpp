@@ -1,27 +1,22 @@
-#include <muduo/base/Logging.h>
-#include <muduo/base/ProcessInfo.h>
-#include <muduo/base/FileUtil.h>
-#include <muduo/net/Channel.h>
-#include <muduo/net/EventLoop.h>
+#include <cetty/zurg/slave/Process.h>
+#include <cetty/util/Process.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <stdexcept>
-
-#include <assert.h>
-#include <errno.h>
-#include <fcntl.h> // O_CLOEXEC
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 
 namespace cetty{
 namespace zurg {
+namespace slave {
 
 extern sigset_t oldSigmask;
+
+const int kSleepAfterExec = 0; // for strace child
 
 float getSeconds(const struct timeval& tv) {
     int64_t microSeconds = tv.tv_sec*1000000 + tv.tv_usec;
@@ -35,134 +30,44 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
     if (toFile) {
         char buf[256];
         ::snprintf(buf, sizeof buf, "%s.%d.%s",
-                   prefix.c_str(), muduo::ProcessInfo::pid(), postfix);
+                   prefix.c_str(), cetty::util::Process::id(), postfix);
         fd = ::open(buf, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
-    }
-    else {
+    } else {
         fd = ::open("/dev/null", O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
     }
 
     return fd;
 }
 
-class Pipe : boost::noncopyable {
-public:
-    Pipe() {
-        if (::pipe2(pipefd_, O_CLOEXEC)) {
-            throw std::runtime_error(muduo::strerror_tl(errno));
-        }
-    }
+Process::Process(
+    const EventLoopPtr& loop,
+    const ConstRunCommandRequestPtr& request,
+    const RunCommandResponsePtr& response,
+    const DoneCallback& done
+): loop_(loop),
+   request_(request),
+   response_(response),
+   doneCallback_(done),
+   pid_(0),
+   startTimeInJiffies_(0),
+   redirectStdout_(false),
+   redirectStderr_(false),
+   runCommand_(true) {
 
-    ~Pipe() {
-        if (readFd() >= 0) {
-            closeRead();
-        }
-
-        if (writeFd() >= 0) {
-            closeWrite();
-        }
-    }
-
-    int readFd() const { return pipefd_[kRead]; }
-    int writeFd() const { return pipefd_[kWrite]; }
-
-    ssize_t read(int64_t* x) {
-        return ::read(readFd(), x, sizeof(*x));
-    }
-
-    void write(int64_t x) {
-        ssize_t n = ::write(writeFd(), &x, sizeof(x));
-        assert(n == sizeof(x)); (void)n;
-    }
-
-    void closeRead() {
-        ::close(readFd());
-        pipefd_[kRead] = -1;
-    }
-
-    void closeWrite() {
-        ::close(writeFd());
-        pipefd_[kWrite] = -1;
-    }
-
-private:
-    int pipefd_[2];
-    static const int kRead = 0, kWrite = 1;
-};
-
-struct ProcStatFile {
-public:
-    explicit ProcStatFile(int pid)
-        : valid(false),
-          error(0),
-          ppid(0),
-          startTime(0) {
-        char filename[64];
-        ::snprintf(filename, sizeof filename, "/proc/%d/stat", pid);
-        SmallFile file(filename);
-
-        if ((error = file.readToBuffer(NULL)) == 0) {
-            valid = true;
-            parse(file.buffer());
-        }
-    }
-
-    bool valid;
-    int error;
-    int ppid;
-    int64_t startTime;
-
-private:
-    void parse(const char* buffer) {
-        // do_task_stat() in fs/proc/array.c
-        // pid (cmd) S ppid pgid sid
-        const char* p = buffer;
-        p = strchr(p, ')');
-
-        for (int i = 0; i < 20 && (p); ++i) {
-            p = strchr(p, ' ');
-
-            if (p) {
-                if (i == 1) {
-                    ppid = atoi(p);
-                }
-
-                ++p;
-            }
-        }
-
-        if (p) {
-            startTime = StringUtil::atoi(p);
-        }
-    }
-};
-
-const int kSleepAfterExec = 0; // for strace child
-}
-
-Process::Process(EventLoop* loop,
-                 const RunCommandRequestPtr& request,
-                 const RpcDoneCallback& done)
-    : loop_(loop),
-      request_(request),
-      doneCallback_(done),
-      pid_(0),
-      startTimeInJiffies_(0),
-      redirectStdout_(false),
-      redirectStderr_(false),
-      runCommand_(true) {
 }
 
 Process::Process(const AddApplicationRequestPtr& appRequest)
     : loop_(NULL),
       request_(new RunCommandRequest),
       doneCallback_(),
+      response_(new RunCommandResponse()),
       pid_(0),
       name_(appRequest->name()),
       startTimeInJiffies_(0),
       redirectStdout_(appRequest->redirect_stdout()),
       redirectStderr_(appRequest->redirect_stderr()),
       runCommand_(false) {
+
     request_->set_command(appRequest->binary());
 
     char dir[256];
@@ -445,5 +350,6 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response.set_memory_maxrss_kb(ru.ru_maxrss);
 
     doneCallback_(&response);
+}
 }
 }

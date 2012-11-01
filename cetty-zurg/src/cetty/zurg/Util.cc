@@ -1,7 +1,7 @@
-
+#include <cetty/zurg/Util.h>
+#include <cetty/logging/LoggerHelper.h>
 
 #include <string>
-
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,13 +10,14 @@
 namespace cetty {
 namespace zurg {
 
+int kMicroSecondsPerSecond = 1000 * 1000;
 int g_tempFileCount = 0;
 
 std::string writeTempFile(StringPiece prefix, StringPiece content) {
     char buf[256];
     ::snprintf(buf, sizeof buf, "/tmp/%s-runScript-%s-%d-%05d-XXXXXX",
                prefix.data(),
-               ProcessInfo::startTime().toString().c_str(),
+               Integer::toString(now()).c_str(),
                ::getpid(),
                ++g_tempFileCount);
 
@@ -71,7 +72,7 @@ void setupWorkingDir(const std::string& cwd) {
     }
 
     if (::ftruncate(fd, 0)) {
-        LOG_SYSERR << "::ftruncate " << buf;
+        LOG_ERROR << "::ftruncate " << buf;
     }
 
     char pid[32];
@@ -98,5 +99,11 @@ void setNonBlockAndCloseOnExec(int fd) {
     (void)ret;
 }
 
+int64_t now(){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int64_t seconds = tv.tv_sec;
+    return seconds * kMicroSecondsPerSecond + tv.tv_usec;
+}
 }
 }

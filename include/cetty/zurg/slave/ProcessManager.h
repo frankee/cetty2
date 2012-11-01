@@ -1,5 +1,12 @@
-#ifndef MUDUO_PROTORPC_ZURG_CHILDMANAGER_H
-#define MUDUO_PROTORPC_ZURG_CHILDMANAGER_H
+/*
+ * ProcessManager.h
+ *
+ *  Created on: 2012-11-1
+ *      Author: chenhl
+ */
+
+#ifndef PROCESSMANAGER_H_
+#define PROCESSMANAGER_H_
 
 #include <cetty/channel/EventLoopPtr.h>
 
@@ -21,25 +28,22 @@ public:
     typedef boost::function<void (int status, const struct rusage&)> Callback;
 
 public:
-    ProcessManager(EventLoopPtr& loop, int zombieInterval);
+    ProcessManager(const EventLoopPtr& loop, int zombieInterval);
     ~ProcessManager();
 
     void start();
-
     void runAtExit(pid_t pid, const Callback&);
 
 private:
     void startSignalWait();
-
     void handleSignalWait(const boost::system::error_code& error, int signal);
     void onTimer();
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
     int zombieInterval_;
-    EventLoopPtr& loop_;
+    EventLoopPtr loop_;
     boost::asio::signal_set signals_;
-
     std::multimap<pid_t, Callback> callbacks_;
 };
 
@@ -47,4 +51,5 @@ private:
 }
 }
 
-#endif  // MUDUO_PROTORPC_ZURG_CHILDMANAGER_H
+
+#endif /* PROCESSMANAGER_H_ */
