@@ -131,6 +131,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
     const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
     BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
 
+    bool parsed = false;
     int fieldCnt = descriptor->field_count();
     std::string fieldName;
 
@@ -142,6 +143,9 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
             if (!parseField(tmpl, request, field, fieldName, message)) {
                 LOG_ERROR << "parse filed: " << fieldName << " error.";
                 return false;
+            }
+            else {
+                parsed = true;
             }
         }
     }
@@ -168,7 +172,7 @@ bool HttpRequest2ProtobufMessage::parseMessage(const HttpRequestTemplate& tmpl,
         }
     }
 
-    return true;
+    return parsed;
 }
 
 static bool getValue(const HttpRequestPtr& request,
