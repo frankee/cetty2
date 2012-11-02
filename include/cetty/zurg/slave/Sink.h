@@ -1,0 +1,113 @@
+/*
+ * Sink.h
+ *
+ *  Created on: 2012-11-2
+ *      Author: chenhl
+ */
+
+#ifndef SINK_H_
+#define SINK_H_
+
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPtr.h>
+
+namespace cetty {
+namespace zurg {
+namespace slave {
+
+using namespace cetty::logging;
+using namespace cetty::channel;
+
+// a minimal TcpConnection which only receives.
+class Sink : public boost::enable_shared_from_this<Sink>,
+             boost::noncopyable{
+public:
+    Sink(const EventLoopPtr &loop, int fd, int maxLength, const char* which)
+        : loop_(loop),
+          fd_(fd),
+          maxLength_(maxLength),
+          whoami_(which),
+          ch_(loop, fd_){
+    LOG_TRACE << whoami_ << fd_;
+    ch_.setReadCallback(boost::bind(&Sink::onRead, this, _1));
+    ch_.setCloseCallback(boost::bind(&Sink::onClose, this));
+    ch_.doNotLogHup();
+  }
+
+    ~Sink(){
+        LOG_TRACE << whoami_ << fd_;
+        assert(!loop_->eventHandling());
+        if (fd_ >= 0){
+            ch_.remove();
+            ::close(fd_);
+        }
+    }
+
+  void start()
+  {
+    ch_.tie(shared_from_this());
+    ch_.enableReading();
+  }
+
+  void stop(int pid)
+  {
+    if (!ch_.isNoneEvent())
+    {
+      LOG_WARN << pid << whoami_ << " stop before child hup";
+      ch_.disableAll();
+    }
+  }
+
+  std::string bufferAsStdString() const
+  {
+    return std::string(buf_.peek(), buf_.readableBytes());
+  }
+
+ private:
+  void onRead(muduo::Timestamp t)
+  {
+    int savedErrno = 0;
+    ssize_t n = buf_.readFd(fd_, &savedErrno);
+    LOG_TRACE << "read fd " << n << " bytes";
+    if (n == 0)
+    {
+      LOG_DEBUG << "disableAll";
+      ch_.disableAll();
+    }
+    if (static_cast<int32_t>(buf_.readableBytes()) > maxLength_)
+    {
+      ch_.disableAll();
+      // ::kill(pid_, SIGPIPE); doesn't work
+      loop_->queueInLoop(boost::bind(&Sink::delayedClose, shared_from_this()));
+    }
+  }
+
+  void onClose()
+  {
+    LOG_DEBUG << "disableAll";
+    ch_.disableAll();
+  }
+
+  void delayedClose()
+  {
+    assert(ch_.isNoneEvent());
+    ch_.remove();
+    ::close(fd_);
+    fd_ = -1;
+  }
+
+  EventLoopPtr loop_;
+  int fd_;
+  int maxLength_;
+  const char* whoami_;
+  ChannelPtr ch_;
+  muduo::net::Buffer buf_;
+};
+
+}
+}
+}
+
+
+#endif /* SINK_H_ */

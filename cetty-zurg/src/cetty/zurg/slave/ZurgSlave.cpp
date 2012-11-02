@@ -35,12 +35,13 @@ void ZurgSlave::start() {
     ProtobufServicePtr service(new SlaveServiceImpl(loop, 4));
     serverBuilder.registerService(service);
 
-    ProtobufClientBuilder clientBuilder(loop);
+    ProtobufClientBuilder clientBuilder(serverBuilder.getChildPool());
     clientBuilder.addConnection(config_.masterAddress_, config_.masterPort_);
 
     // todo what's mean
     MasterService_Stub masterClient(clientBuilder.build());
     // todo send heart beat interval
+
 
     serverBuilder.buildRpc(config_.listenPort_);
     serverBuilder.waitingForExit();

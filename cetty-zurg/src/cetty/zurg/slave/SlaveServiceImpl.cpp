@@ -6,6 +6,7 @@
 #include <cetty/zurg/slave/GetHardwareTask.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/zurg/Util.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -13,82 +14,54 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
+using namespace cetty::zurg;
 using namespace cetty::util;
 using namespace cetty::zurg::slave;
 
-int g_tempFileCount = 0;
-
-std::string writeTempFile(StringPiece prefix, StringPiece content) {
-    char buf[256];
-    ::snprintf(buf, sizeof buf, "/tmp/%s-runScript-%s-%d-%05d-XXXXXX",
-               prefix.data(),
-               ProcessInfo::startTime().toString().c_str(),
-               ::getpid(),
-               ++g_tempFileCount);
-
-    int tempfd = ::mkostemp(buf, O_CLOEXEC);
-    ssize_t n = ::pwrite(tempfd, content.data(), content.size(), 0);
-    ::fchmod(tempfd, 0755);
-    ::close(tempfd);
-
-    return n == content.size() ? buf : "";
-}
-
-void parseMd5sum(const std::string& lines, std::map<StringPiece, StringPiece>* md5sums) {
-    const char* p = lines.c_str();
-    size_t nl = 0;
-
-    while (*p) {
-        StringPiece md5(p, 32);
-        nl = lines.find('\n', nl);
-        assert(nl != std::string::npos);
-
-        StringPiece file(p + 34, static_cast<int>(lines.c_str() + nl - p - 34));
-        (*md5sums)[file] = md5;
-
-        p = lines.c_str() + nl + 1;
-        ++nl;
-    }
-}
-
-SlaveServiceImpl::SlaveServiceImpl(EventLoopPtr& loop, int zombieInterval)
-    : loop(loop),
-      children(new ProcessManager(loop, zombieInterval)),
-      apps(new ApplicationManager(loop, children.get())) {
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
+    : loop_(loop),
+      psManager_(new ProcessManager(loop, zombieInterval)),
+      apps_(new ApplicationManager(loop, psManager_.get())) {
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
 }
 
 void SlaveServiceImpl::start() {
-    children->start();
+    psManager_->start();
 }
 
-void SlaveServiceImpl::getHardware(const ConstGetHardwareRequestPtr& request,
-                                   const GetHardwareResponsePtr& response,
-                                   const DoneCallback& done) {
+void SlaveServiceImpl::getHardware(
+    const ConstGetHardwareRequestPtr& request,
+    const GetHardwareResponsePtr& response,
+    const DoneCallback& done) {
 
-    LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " << request->lshw();
+    LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " 
+             << request->lshw();
 
     GetHardwareTaskPtr task(new GetHardwareTask(request, done));
     task->start(this);
 }
 
-void SlaveServiceImpl::getFileContent(const ConstGetFileContentRequestPtr& request,
-                                      const GetFileContentResponsePtr& response,
-                                      const DoneCallback& done) {
+void SlaveServiceImpl::getFileContent(
+    const ConstGetFileContentRequestPtr& request,
+    const GetFileContentResponsePtr& response,
+    const DoneCallback& done) {
+
     LOG_INFO << "SlaveServiceImpl::getFileContent - " << request->file_name()
              << " maxSize = " << request->max_size();
 
     int64_t file_size = 0;
     int64_t modify_time = 0;
     int64_t create_time = 0;
-    int err = SmallFile::readFile(request->file_name(),
-                                  request->max_size(),
-                                  response->mutable_content(),
-                                  &file_size,
-                                  &modify_time,
-                                  &create_time);
+    int err = SmallFile::readFile(
+                  request->file_name(),
+                  request->max_size(),
+                  response->mutable_content(),
+                  &file_size,
+                  &modify_time,
+                  &create_time
+              );
     response->set_error_code(err);
     response->set_file_size(file_size);
     response->set_modify_time(modify_time);
@@ -98,9 +71,11 @@ void SlaveServiceImpl::getFileContent(const ConstGetFileContentRequestPtr& reque
     done(response);
 }
 
-void SlaveServiceImpl::getFileChecksum(const ConstGetFileChecksumRequestPtr& request,
-                                       const GetFileChecksumResponsePtr& response,
-                                       const DoneCallback& done) {
+void SlaveServiceImpl::getFileChecksum(
+    const ConstGetFileChecksumRequestPtr& request,
+    const GetFileChecksumResponsePtr& response,
+    const DoneCallback& done) {
+
     DLOG_DEBUG ;
 
     if (request->files_size() > 0) {
@@ -112,69 +87,87 @@ void SlaveServiceImpl::getFileChecksum(const ConstGetFileChecksumRequestPtr& req
             runCommandReq->add_args(request->files(i));
         }
 
-        runCommand(runCommandReq, NULL,
-                   boost::bind(&SlaveServiceImpl::getFileChecksumDone, this, request, _1, done));
-    }
-    else {
+        runCommand(
+            runCommandReq,
+            NULL,
+            boost::bind(
+                &SlaveServiceImpl::getFileChecksumDone,
+                this,
+                request,
+                _1, // response
+                done
+            )
+        );
+    } else {
         GetFileChecksumResponse response;
         done(&response);
     }
 }
 
-void SlaveServiceImpl::getFileChecksumDone(const RunCommandRequestPtr& request,
-        const RunCommandResponsePtr& response,
-        const GetFileChecksumResponsePtr& checksumResponse,
-        const DoneCallback& done) {
+void SlaveServiceImpl::getFileChecksumDone(
+    const ConstGetFileChecksumRequestPtr& request,
+    const GetFileChecksumResponsePtr& checksumResponse,
+    const DoneCallback& done){
 
-    const std::string& lines = response->std_output();
+    const RunCommandResponse* runCommandResp =
+          google::protobuf::down_cast<const RunCommandResponse*>(checksumResponse);
+
+    const std::string& lines = runCommandResp->std_output();
     std::map<StringPiece, StringPiece> md5sums;
     parseMd5sum(lines, &md5sums);
 
     GetFileChecksumResponse response;
-
-    for (int i = 0; i < request->files_size(); ++i) {
+    for (int i = 0; i < request->files_size(); ++i){
         md5sums[request->files(i)].copy_to(response.add_md5sums());
     }
-
-    done(checksumResponse);
+    done(&response);
 }
 
-void SlaveServiceImpl::runCommand(const ConstRunCommandRequestPtr& request,
-                                  const RunCommandResponsePtr& response,
-                                  const DoneCallback& done) {
+void SlaveServiceImpl::runCommand(
+    const ConstRunCommandRequestPtr& request,
+    const RunCommandResponsePtr& response,
+    const DoneCallback& done) {
+
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(loop, request, done));
+    ProcessPtr process(new Process(loop_, request, response, done));
     int err = 12; // ENOMEM;
 
     try {
         err = process->start();
-    }
-    catch (...) {
-    }
+    } catch (...) {}
 
     if (err) {
         response->set_error_code(err);
         done(response);
-    }
-    else {
-        children->runAtExit(process->pid(),  // bind strong ptr
-                            boost::bind(&Process::onCommandExit, process, _1, _2));
+    } else {
+        psManager_->runAtExit(
+            process->pid(),  // bind strong ptr
+            boost::bind(
+                &Process::onCommandExit,
+                process,
+                _1,
+                _2
+            )
+        );
 
         boost::weak_ptr<Process> weakProcessPtr(process);
-        TimeoutPtr timerId = loop_->runAfter(request->timeout(),
-                                             boost::bind(&Process::onTimeoutWeak, weakProcessPtr));
+        TimeoutPtr timerId = loop_->runAfter(
+            request->timeout(),
+            boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
+        );
 
         process->setTimerId(timerId);
     }
 }
 
-void SlaveServiceImpl::runScript(const ConstRunScriptRequestPtr& request,
-                                 const RunCommandResponsePtr& response,
-                                 const DoneCallback& done) {
-    RunCommandRequestPtr runCommandReq(new RunCommandRequest);
+void SlaveServiceImpl::runScript(
+    const ConstRunScriptRequestPtr& request,
+    const RunCommandResponsePtr& response,
+    const DoneCallback& done) {
 
-    std::string scriptFile = writeTempFile(SlaveApp::instance().name(), request->script());
+    RunCommandRequestPtr runCommandReq(new RunCommandRequest);
+    std::string scriptFile = writeTempFile(ZurgSlave::instance().getName(), request->script());
 
     if (!scriptFile.empty()) {
         LOG_INFO << "runScript - write to " << scriptFile;
@@ -184,47 +177,53 @@ void SlaveServiceImpl::runScript(const ConstRunScriptRequestPtr& request,
 
         // FIXME: others
         runCommand(runCommandReq, NULL, done);
-    }
-    else {
+    }else {
         LOG_ERROR << "runScript - failed to write script file";
         // FIXME: done
     }
 }
 
-void SlaveServiceImpl::addApplication(const ConstAddApplicationRequestPtr& request,
-                                      const AddApplicationResponsePtr& response,
-                                      const DoneCallback& done) {
-    apps->add(request, done);
+void SlaveServiceImpl::addApplication(
+    const ConstAddApplicationRequestPtr& request,
+    const AddApplicationResponsePtr& response,
+    const DoneCallback& done) {
+
+    apps_->add(request, response, done);
 }
 
-void SlaveServiceImpl::startApplications(const ConstStartApplicationsRequestPtr& request,
-        const StartApplicationsResponsePtr& response,
-        const DoneCallback& done) {
-    apps->start(request, done);
+void SlaveServiceImpl::startApplications(
+    const ConstStartApplicationsRequestPtr& request,
+    const StartApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+    apps_->start(request, response, done);
 }
 
-void SlaveServiceImpl::stopApplication(const ConstStopApplicationRequestPtr& request,
-                                       const StopApplicationResponsePtr& response,
-                                       const DoneCallback& done) {
-    apps->stop(request, response, done);
+void SlaveServiceImpl::stopApplication(
+    const ConstStopApplicationRequestPtr& request,
+    const StopApplicationResponsePtr& response,
+    const DoneCallback& done) {
+    apps_->stop(request, response, done);
 }
 
-void SlaveServiceImpl::getApplications(const ConstGetApplicationsRequestPtr& request,
-                                       const GetApplicationsResponsePtr& response,
-                                       const DoneCallback& done) {
-    apps->get(request, response, done);
+void SlaveServiceImpl::getApplications(
+    const ConstGetApplicationsRequestPtr& request,
+    const GetApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+    apps_->get(request, response, done);
 }
 
-void SlaveServiceImpl::listApplications(const ConstListApplicationsRequestPtr& request,
-                                        const ListApplicationsResponsePtr& response,
-                                        const DoneCallback& done) {
-    apps->list(request, response, done);
+void SlaveServiceImpl::listApplications(
+    const ConstListApplicationsRequestPtr& request,
+    const ListApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+    apps_->list(request, response, done);
 }
 
-void SlaveServiceImpl::removeApplications(const ConstRemoveApplicationsRequestPtr& request,
-        const RemoveApplicationsResponsePtr& response,
-        const DoneCallback& done) {
-    apps->remove(request, response, done);
+void SlaveServiceImpl::removeApplications(
+    const ConstRemoveApplicationsRequestPtr& request,
+    const RemoveApplicationsResponsePtr& response,
+    const DoneCallback& done) {
+    apps_->remove(request, response, done);
 }
 
 }
