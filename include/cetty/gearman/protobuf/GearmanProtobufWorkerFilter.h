@@ -52,7 +52,8 @@ protected:
 
     virtual GearmanMessagePtr filterResponse(ChannelHandlerContext& ctx,
         const GearmanMessagePtr& req,
-        const ProtobufServiceMessagePtr& rep);
+        const ProtobufServiceMessagePtr& rep,
+        const ChannelFuturePtr& future);
 };
 
 }

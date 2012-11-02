@@ -57,7 +57,8 @@ ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterRequest(
 GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
     ChannelHandlerContext& ctx,
     const GearmanMessagePtr& req,
-    const ProtobufServiceMessagePtr& rep) {
+    const ProtobufServiceMessagePtr& rep,
+    const ChannelFuturePtr& future) {
     std::string jobHandle = req->getParameters().front();
     ChannelBufferPtr buffer = Unpooled::buffer(rep->getMessageSize() + 8);
 
