@@ -1,5 +1,6 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/util/SmallFile.h>
 
 #include <string>
 #include <fcntl.h>
@@ -10,10 +11,20 @@
 namespace cetty {
 namespace zurg {
 
+using namespace cetty::util;
+
 int kMicroSecondsPerSecond = 1000 * 1000;
 int g_tempFileCount = 0;
+int t_numOpenedFiles = 0;
 
-std::string writeTempFile(StringPiece prefix, StringPiece content) {
+int fdDirFilter(const struct dirent* d){
+    if (::isdigit(d->d_name[0])){
+        ++t_numOpenedFiles;
+    }
+    return 0;
+}
+
+std::string writeTempFile(const StringPiece prefix, const StringPiece content) {
     char buf[256];
     ::snprintf(buf, sizeof buf, "/tmp/%s-runScript-%s-%d-%05d-XXXXXX",
                prefix.data(),
@@ -105,5 +116,45 @@ int64_t now(){
     int64_t seconds = tv.tv_sec;
     return seconds * kMicroSecondsPerSecond + tv.tv_usec;
 }
+
+int numThreads(){
+    int result = 0;
+    std::string status = procStatus();
+    size_t pos = status.find("Threads:");
+    if (pos != std::string::npos){
+      result = ::atoi(status.c_str() + pos + 8);
+    }
+    return result;
+}
+
+std::string procStatus(){
+    std::string result;
+    SmallFile::readFile("/proc/self/status", 65536, &result);
+
+    return result;
+}
+
+int scanDir(const char *dirpath, filter fil){
+    struct dirent** namelist = NULL;
+    int result = ::scandir(dirpath, &namelist, fil, alphasort);
+    assert(namelist == NULL);
+    return result;
+}
+
+int openedFiles(){
+    t_numOpenedFiles = 0;
+    scanDir("/proc/self/fd", fdDirFilter);
+    return t_numOpenedFiles;
+}
+
+int maxOpenFiles(){
+    struct rlimit rl;
+    if (::getrlimit(RLIMIT_NOFILE, &rl)){
+        return openedFiles();
+    } else {
+        return static_cast<int>(rl.rlim_cur);
+    }
+}
+
 }
 }

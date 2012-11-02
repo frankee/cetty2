@@ -19,15 +19,15 @@ public:
     ZurgSlave();
     void start();
 
-    const std::string &getName(){
+    const std::string &getName() const {
         return config_.name_;
     }
 
-    const std::string &getPrefix(){
+    const std::string &getPrefix() const {
         return config_.prefix_;
     }
 
-    const ZurgSlave &instance(){
+   static const ZurgSlave &instance(){
         static ZurgSlave zs;
         return zs;
     }
