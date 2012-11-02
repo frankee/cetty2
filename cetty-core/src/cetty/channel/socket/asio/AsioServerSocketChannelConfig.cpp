@@ -34,7 +34,7 @@ using namespace cetty::util;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
     boost::asio::ip::tcp::acceptor& acceptor)
-    : reuseAddress(true), receiveBufferSize(0), backlog(0), acceptor(acceptor) {
+    : reuseAddress(false), receiveBufferSize(0), backlog(0), acceptor(acceptor) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {

@@ -23,6 +23,7 @@
 
 #include <boost/asio.hpp>
 
+#include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/socket/ServerSocketChannel.h>
@@ -60,6 +61,7 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
+    virtual bool isOpen() const;
     virtual bool isActive() const;
 
 protected:
@@ -88,6 +90,8 @@ private:
     ChildChannels childChannels;
 
     AsioServerSocketChannelConfig config;
+
+    IpAddress::Family ipFamily;
     mutable SocketAddress localAddress;
 };
 

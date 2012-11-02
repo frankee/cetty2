@@ -80,6 +80,7 @@ public:
     virtual const SocketAddress& getLocalAddress() const;
     virtual const SocketAddress& getRemoteAddress() const;
 
+    virtual bool isOpen() const;
     virtual bool isActive() const;
 
     virtual void setPipeline(const ChannelPipelinePtr& pipeline);
@@ -103,10 +104,17 @@ protected:
     void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);
 
     void handleConnect(const boost::system::error_code& error,
-                       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+                       boost::asio::ip::tcp::resolver::iterator endpointIterator,
+                       const ChannelFuturePtr& cf);
+
+    void handleResolve(const boost::system::error_code& error,
+                       boost::asio::ip::tcp::resolver::iterator itr,
                        const ChannelFuturePtr& cf);
 
     void cleanUpWriteBuffer();
+
+    void connectFailed(const ChannelFuturePtr& connectFuture,
+                       const ChannelException& e);
 
 private:
     void init(const ChannelPipelinePtr& pipeline);
@@ -117,6 +125,7 @@ private:
     friend class AsioSocketChannelSinkHandler;
 
 protected:
+    bool opened;
     bool isWriting;
     int  highWaterMarkCounter;
 

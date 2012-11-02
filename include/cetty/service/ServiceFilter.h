@@ -97,7 +97,7 @@ protected:
                        const ChannelFuturePtr& future) {
         while (!outboundQueue.empty()) {
             ResponseInT& rep = outboundQueue.front();
-            ResponseOutT orep = filterResponse(ctx, reqs.front(), rep);
+            ResponseOutT orep = filterResponse(ctx, reqs.front(), rep, future);
             reqs.pop_front();
 
             if (!orep) {
@@ -120,7 +120,8 @@ protected:
 
     virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
                                         const RequestInT& req,
-                                        const ResponseInT& rep) = 0;
+                                        const ResponseInT& rep,
+                                        const ChannelFuturePtr& future) = 0;
 
 private:
     std::deque<RequestInT>reqs;

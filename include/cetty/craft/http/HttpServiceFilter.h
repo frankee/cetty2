@@ -57,7 +57,8 @@ protected:
 
     virtual HttpPackage filterResponse(ChannelHandlerContext& ctx,
                                        const HttpMessagePtr& req,
-                                       const ProtobufServiceMessagePtr& rep);
+                                       const ProtobufServiceMessagePtr& rep,
+                                       const ChannelFuturePtr& future);
 
 private:
     ServiceRequestMapperPtr requestMapper;

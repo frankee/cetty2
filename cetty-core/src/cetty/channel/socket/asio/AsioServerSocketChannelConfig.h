@@ -21,8 +21,8 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/optional.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <cetty/channel/DefaultChannelConfig.h>
 #include <cetty/channel/socket/ServerSocketChannelConfig.h>
 

@@ -55,8 +55,6 @@ public:
 
     virtual const ChannelPipelinePtr& getPipeline() const;
 
-    virtual bool isOpen() const;
-
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
@@ -160,9 +158,7 @@ protected:
      * are doing.
      *
      * @return <tt>true</tt> if and only if this channel was not marked as
-
-
-    *                      closed yet
+     *                      closed yet
      */
     virtual bool setClosed();
 
@@ -184,7 +180,6 @@ private:
     static ChannelMap allChannels;
 
 protected:
-    bool active;
     int id;
 
     EventLoopPtr eventLoop;

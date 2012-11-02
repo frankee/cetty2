@@ -488,9 +488,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\UnreplayableOperationException.h">
       <Filter>core\handler\codec</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h">
-      <Filter>core\channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPtr.h">
       <Filter>core\channel</Filter>
     </ClInclude>
@@ -499,9 +496,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOption.h">
       <Filter>core\channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerContext.h">
       <Filter>core\channel</Filter>

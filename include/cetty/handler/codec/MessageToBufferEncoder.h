@@ -88,10 +88,10 @@ public:
                     encode(ctx, msg, out);
                 }
                 else {
-                    ChannelBufferPtr decodedBuf = encode(ctx, msg, out);
+                    ChannelBufferPtr encodedBuf = encode(ctx, msg, out);
 
-                    if (decodedBuf) {
-                        outboundTransfer.write(decodedBuf, future);
+                    if (encodedBuf) {
+                        outboundTransfer.write(encodedBuf, future);
                     }
                 }
             }

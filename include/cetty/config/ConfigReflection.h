@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/noncopyable.hpp>
 #include <cetty/Types.h>
 #include <cetty/config/ConfigDescriptor.h>
 
@@ -28,7 +29,7 @@ namespace config {
 class ConfigObject;
 class ConfigFieldDescriptor;
 
-class ConfigReflection {
+class ConfigReflection : public boost::noncopyable {
 public:
     ConfigReflection();
 
