@@ -145,6 +145,7 @@
     <ClCompile Include="..\..\src\cetty\bootstrap\Bootstrap.cpp" />
     <ClCompile Include="..\..\src\cetty\bootstrap\ClientBootstrap.cpp" />
     <ClCompile Include="..\..\src\cetty\bootstrap\ServerBootstrap.cpp" />
+    <ClCompile Include="..\..\src\cetty\channel\VoidChannelFuture.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\BufferToBufferCodec.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\BufferToBufferDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\BufferToBufferEncoder.cpp" />
@@ -304,6 +305,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelFactory.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\Common.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferCodec.h" />

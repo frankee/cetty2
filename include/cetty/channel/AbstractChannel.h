@@ -91,22 +91,17 @@ public:
     virtual ChannelFuturePtr newSucceededFuture();
 
     /**
+     * Compares the {@link #getId() ID} of the two channels.
+     */
+    virtual int compareTo(const ChannelPtr& c) const;
+
+    /**
      * Returns the {@link std::string} representation of this channel.  The returned
      * string contains the @link #getId() ID}, {@link #getLocalAddress() local address},
      * and {@link #getRemoteAddress() remote address} of this channel for
      * easier identification.
      */
-    std::string toString() const;
-
-    /**
-     * Compares the {@link #getId() ID} of the two channels.
-     */
-    virtual int compareTo(const ChannelPtr& c) const;
-
-    //TODO: should use a concurrent hash map.
-    typedef std::map<int, ChannelPtr> ChannelMap;
-
-    virtual void doPreClose() {} // NOOP by default
+    virtual std::string toString() const;
 
 protected:
     /**
@@ -150,6 +145,8 @@ protected:
 
     virtual void doBind(const SocketAddress& localAddress) = 0;
     virtual void doDisconnect() = 0;
+
+    virtual void doPreClose() {} // NOOP by default
     virtual void doClose() = 0;
 
     /**
@@ -162,22 +159,19 @@ protected:
      */
     virtual bool setClosed();
 
-    /**
-     * Returns the {@link FailedChannelFuture} whose cause is an
-     * {@link UnsupportedOperationException}.
-     */
-    virtual ChannelFuturePtr getUnsupportedOperationFuture();
-
     virtual void setPipeline(const ChannelPipelinePtr& pipeline);
 
 private:
+    void init();
+
     void idDeallocatorCallback(ChannelFuture& future);
     int  allocateId(const ChannelPtr& channel);
 
 private:
     friend class ChannelSinkHandler;
+    friend class ChannelCloseFuture;
 
-    static ChannelMap allChannels;
+    static std::map<int, ChannelPtr> allChannels;
 
 protected:
     int id;

@@ -132,7 +132,7 @@ public:
     virtual std::string toString() const;
 
 protected:
-    void readTimedOut(ChannelHandlerContext& ctx);
+    virtual void readTimedOut(ChannelHandlerContext& ctx);
 
 private:
     void initialize(ChannelHandlerContext& ctx);

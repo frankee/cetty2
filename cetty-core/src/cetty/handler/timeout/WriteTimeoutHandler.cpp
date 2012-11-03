@@ -75,13 +75,6 @@ std::string WriteTimeoutHandler::toString() const {
 
 void WriteTimeoutHandler::handleWriteTimeout(ChannelHandlerContext& ctx,
     const ChannelFuturePtr& future) {
-    if (timeout && timeout->isCancelled()) {
-        return;
-    }
-
-    if (!ctx.getChannel()->isOpen()) {
-        return;
-    }
 
     // Mark the future as failure
     if (future->setFailure(EXCEPTION)) {

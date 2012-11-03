@@ -34,7 +34,7 @@
 namespace cetty {
 namespace channel {
 
-AbstractChannel::ChannelMap AbstractChannel::allChannels;
+std::map<int, ChannelPtr> AbstractChannel::allChannels;
 
 class ChannelCloseFuture : public DefaultChannelFuture {
 public:
@@ -58,7 +58,7 @@ public:
             try {
                 channel->doPreClose();
             }
-            catch(const Exception& e) {
+            catch (const Exception& e) {
                 LOG_WARN << "doPreClose() raised an exception: " << e.getDisplayText();
             }
         }
@@ -79,17 +79,7 @@ AbstractChannel::AbstractChannel(const EventLoopPtr& eventLoop,
       parent(parent),
       factory(factory),
       pipeline(pipeline) {
-    BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
-
-    succeededFuture = new SucceededChannelFuture(shared_from_this());
-    closeFuture = new ChannelCloseFuture(shared_from_this());
-
-    if (!id) {
-        id = allocateId(this);
-    }
-
-    closeFuture->addListener(
-        boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
+    init();
 }
 
 AbstractChannel::AbstractChannel(int id,
@@ -102,6 +92,13 @@ AbstractChannel::AbstractChannel(int id,
       parent(parent),
       factory(factory),
       pipeline(pipeline) {
+    init();
+}
+
+AbstractChannel::~AbstractChannel() {
+}
+
+void AbstractChannel::init() {
     BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
 
     succeededFuture = new SucceededChannelFuture(shared_from_this());
@@ -111,11 +108,10 @@ AbstractChannel::AbstractChannel(int id,
         id = allocateId(this);
     }
 
+#if 0  // FIXME need concurrent hash map
     closeFuture->addListener(
         boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
-}
-
-AbstractChannel::~AbstractChannel() {
+#endif
 }
 
 void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
@@ -154,13 +150,8 @@ bool AbstractChannel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
 }
 
-ChannelFuturePtr AbstractChannel::getUnsupportedOperationFuture() {
-    return new FailedChannelFuture(shared_from_this(),
-                                   UnsupportedOperationException());
-}
-
 void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
-    AbstractChannel::ChannelMap::iterator itr
+    std::map<int, ChannelPtr>::iterator itr
         = AbstractChannel::allChannels.find(future.getChannel()->getId());
 
     if (itr != AbstractChannel::allChannels.end()) {
@@ -172,6 +163,8 @@ int AbstractChannel::allocateId(const ChannelPtr& channel) {
     boost::crc_32_type crc32;
     crc32.process_bytes((void const*)this, sizeof(this));
     int id = crc32.checksum();
+
+#if 0 //FIXME need concurrent hash map
 
     for (;;) {
         // Loop until a unique ID is acquired.
@@ -185,6 +178,10 @@ int AbstractChannel::allocateId(const ChannelPtr& channel) {
             id += 1;
         }
     }
+
+#endif
+
+    return id;
 }
 
 std::string AbstractChannel::toString() const {

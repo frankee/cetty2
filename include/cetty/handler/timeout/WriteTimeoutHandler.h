@@ -115,13 +115,14 @@ public:
 
     virtual std::string toString() const;
 
+protected:
+    virtual void writeTimedOut(ChannelHandlerContext& ctx);
+
 private:
     void handleWriteTimeout(ChannelHandlerContext& ctx,
                             const ChannelFuturePtr& future);
 
     void cancelTimeout(ChannelFuture& future);
-
-    void writeTimedOut(ChannelHandlerContext& ctx);
 
 private:
     static const WriteTimeoutException EXCEPTION;

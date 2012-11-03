@@ -21,6 +21,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
+#include <cetty/Types.h>
 #include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
@@ -53,8 +54,8 @@ public:
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
                              const Functor& timerCallback) = 0;
 
-    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) = 0;
-    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) = 0;
+    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback) = 0;
+    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback) = 0;
 
 private:
     EventLoop(const EventLoop&);
