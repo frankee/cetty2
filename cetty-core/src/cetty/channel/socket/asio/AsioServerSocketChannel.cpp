@@ -201,7 +201,7 @@ void AsioServerSocketChannel::accept() {
 
 
     LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
-    c->getPipeline()->fireChannelCreated();
+    c->getPipeline()->fireChannelOpen();
 
     acceptor.async_accept(c->getSocket(),
                           makeCustomAllocHandler(acceptAllocator,
@@ -237,7 +237,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
             pipeline);
 
         LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
-        newChannel->getPipeline()->fireChannelCreated();
+        newChannel->getPipeline()->fireChannelOpen();
 
         acceptor.async_accept(newChannel->getSocket(),
                               makeCustomAllocHandler(acceptAllocator,

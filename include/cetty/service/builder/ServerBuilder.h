@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <boost/noncopyable.hpp>
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/service/builder/ServerBuilderConfig.h>
@@ -33,7 +34,7 @@ using namespace cetty::bootstrap;
 using namespace cetty::service;
 using namespace cetty::config;
 
-class ServerBuilder {
+class ServerBuilder : private boost::noncopyable {
 public:
     ServerBuilder();
     ServerBuilder(int parentThreadCnt, int childThreadCnt = 0);

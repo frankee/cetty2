@@ -119,7 +119,7 @@ public:
 
     virtual void afterRemove(ChannelHandlerContext& ctx);
 
-    virtual void channelCreated(ChannelHandlerContext& ctx);
+    virtual void channelOpen(ChannelHandlerContext& ctx);
 
     virtual void channelActive(ChannelHandlerContext& ctx);
 

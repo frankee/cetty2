@@ -32,8 +32,8 @@ ChannelInboundBufferHandler::~ChannelInboundBufferHandler() {
 
 }
 
-void ChannelInboundBufferHandler::channelCreated(ChannelHandlerContext& ctx) {
-    ctx.fireChannelCreated();
+void ChannelInboundBufferHandler::channelOpen(ChannelHandlerContext& ctx) {
+    ctx.fireChannelOpen();
 }
 
 void ChannelInboundBufferHandler::channelActive(ChannelHandlerContext& ctx) {
@@ -56,10 +56,6 @@ void ChannelInboundBufferHandler::messageUpdated(ChannelHandlerContext& ctx) {
     }
 
     ctx.fireMessageUpdated();
-}
-
-void ChannelInboundBufferHandler::writeCompleted(ChannelHandlerContext& ctx) {
-    ctx.fireWriteCompleted();
 }
 
 void ChannelInboundBufferHandler::beforeAdd(ChannelHandlerContext& ctx) {

@@ -74,9 +74,9 @@ public:
                  ctx.close();
     }
 
-    virtual void writeCompleted(ChannelHandlerContext& ctx) {
-        generateTraffic();
-    }
+    //virtual void writeCompleted(ChannelHandlerContext& ctx) {
+    //    generateTraffic();
+    //}
 
     virtual ChannelHandlerPtr clone() {
         return new DiscardClientHandler(content->readableBytes());

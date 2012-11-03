@@ -31,7 +31,7 @@ public:
     /**
      *
      */
-    virtual void fireChannelCreated() = 0;
+    virtual void fireChannelOpen() = 0;
 
     /**
      *
@@ -51,17 +51,12 @@ public:
     /**
      *
      */
-    virtual void fireUserEventTriggered(const boost::any& event) = 0;
+    virtual void fireUserEventTriggered(const boost::any& evt) = 0;
 
     /**
      *
      */
     virtual void fireMessageUpdated() = 0;
-
-    /**
-     *
-     */
-    virtual void fireWriteCompleted() = 0;
 };
 
 }

@@ -82,44 +82,44 @@ const ChannelPtr& ChannelHandlerContext::getChannel() const {
     return pipeline.getChannel();
 }
 
-void ChannelHandlerContext::fireChannelCreated() {
+void ChannelHandlerContext::fireChannelOpen() {
     ChannelHandlerContext* next = nextInboundContext;
 
     if (next) {
-        fireChannelCreated(*next);
+        fireChannelOpen(*next);
     }
 }
 
-void ChannelHandlerContext::fireChannelCreated(ChannelHandlerContext& ctx) {
+void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
     if (ctx.eventloop->inLoopThread()) {
         try {
-            ctx.inboundHandler->channelCreated(ctx);
+            ctx.inboundHandler->channelOpen(ctx);
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
-                      << ") was thrown by a user handler's channelCreated() method";
+                      << ") was thrown by a user handler's channelOpen() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.getMessage(), e.getCode()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
-                      << ") was thrown by a user handler's channelCreated() method";
+                      << ") was thrown by a user handler's channelOpen() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
         }
         catch (...) {
             LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " channelCreated() method";
+                      " channelOpen() method";
 
             notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle channelCreated"));
+                ChannelPipelineException("unknown exception from handle channelOpen"));
         }
     }
     else {
         ctx.eventloop->post(
-            boost::bind(&ChannelHandlerContext::fireChannelCreated,
+            boost::bind(&ChannelHandlerContext::fireChannelOpen,
                         this,
                         boost::ref(ctx)));
     }
@@ -343,49 +343,6 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
     else {
         ctx.eventloop->post(
             boost::bind(&ChannelHandlerContext::fireMessageUpdated,
-                        this,
-                        boost::ref(ctx)));
-    }
-}
-
-void ChannelHandlerContext::fireWriteCompleted() {
-    ChannelHandlerContext* next = nextInboundContext;
-
-    if (next) {
-        fireWriteCompleted(*next);
-    }
-}
-
-void ChannelHandlerContext::fireWriteCompleted(ChannelHandlerContext& ctx) {
-    if (ctx.eventloop->inLoopThread()) {
-        try {
-            ctx.inboundHandler->writeCompleted(ctx);
-        }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
-                      << ") was thrown by a user handler's writeCompleted() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
-        }
-        catch (const std::exception& e) {
-            LOG_ERROR << "An exception (" << e.what()
-                      << ") was thrown by a user handler's writeCompleted() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " writeCompleted() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle writeCompleted"));
-        }
-    }
-    else {
-        ctx.eventloop->post(
-            boost::bind(&ChannelHandlerContext::fireWriteCompleted,
                         this,
                         boost::ref(ctx)));
     }

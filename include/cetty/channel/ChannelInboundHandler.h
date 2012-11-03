@@ -30,7 +30,7 @@ public:
     /**
      *
      */
-    virtual void channelCreated(ChannelHandlerContext& ctx) = 0;
+    virtual void channelOpen(ChannelHandlerContext& ctx) = 0;
 
     /**
      *
@@ -46,11 +46,6 @@ public:
      *
      */
     virtual void messageUpdated(ChannelHandlerContext& ctx) = 0;
-
-    /**
-     *
-     */
-    virtual void writeCompleted(ChannelHandlerContext& ctx) = 0;
 };
 
 }

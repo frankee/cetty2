@@ -808,9 +808,9 @@ boost::any ChannelPipeline::getAttachment(const std::string& name) const {
     return boost::any();
 }
 
-void ChannelPipeline::fireChannelCreated() {
+void ChannelPipeline::fireChannelOpen() {
     if (inboundHead) {
-        inboundHead->fireChannelCreated(*inboundHead);
+        inboundHead->fireChannelOpen(*inboundHead);
     }
 }
 
@@ -860,12 +860,6 @@ void ChannelPipeline::fireMessageUpdated() {
 
     if (inboundHead) {
         inboundHead->fireMessageUpdated(*inboundHead);
-    }
-}
-
-void ChannelPipeline::fireWriteCompleted() {
-    if (inboundHead) {
-        inboundHead->fireWriteCompleted(*inboundHead);
     }
 }
 

@@ -490,13 +490,12 @@ public:
     void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
     void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
 
-    virtual void fireChannelCreated();
+    virtual void fireChannelOpen();
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
     virtual void fireExceptionCaught(const ChannelException& cause);
     virtual void fireUserEventTriggered(const boost::any& evt);
     virtual void fireMessageUpdated();
-    virtual void fireWriteCompleted();
 
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
     virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);

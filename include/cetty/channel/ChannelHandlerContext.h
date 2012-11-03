@@ -285,13 +285,12 @@ public:
      */
     bool canHandleOutboundMessage() const;
 
-    virtual void fireChannelCreated();
+    virtual void fireChannelOpen();
     virtual void fireChannelActive();
     virtual void fireChannelInactive();
     virtual void fireExceptionCaught(const ChannelException& cause);
     virtual void fireUserEventTriggered(const boost::any& evt);
     virtual void fireMessageUpdated();
-    virtual void fireWriteCompleted();
 
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
@@ -341,11 +340,10 @@ public:
     const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
                                   const ChannelFuturePtr& future);
 
-    virtual void fireChannelCreated(ChannelHandlerContext& ctx);
+    virtual void fireChannelOpen(ChannelHandlerContext& ctx);
     virtual void fireChannelActive(ChannelHandlerContext& ctx);
     virtual void fireChannelInactive(ChannelHandlerContext& ctx);
     virtual void fireMessageUpdated(ChannelHandlerContext& ctx);
-    virtual void fireWriteCompleted(ChannelHandlerContext& ctx);
     virtual void fireExceptionCaught(ChannelHandlerContext& ctx,
                                      const ChannelException& cause);
     virtual void fireUserEventTriggered(ChannelHandlerContext& ctx,
