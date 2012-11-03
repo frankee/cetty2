@@ -114,11 +114,7 @@ bool AsioServerSocketChannel::setClosed() {
 }
 
 void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
-    bool bound = false;
-    bool bossStarted = false;
-
     boost::system::error_code ec;
-
     boost::asio::ip::tcp::endpoint ep(
         boost::asio::ip::address::from_string(localAddress.address()),
         localAddress.port());
