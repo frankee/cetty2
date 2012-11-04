@@ -49,11 +49,14 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
 
+using namespace boost::asio::ip;
+
 AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
                                      const EventLoopPtr& eventLoop,
                                      const ChannelFactoryPtr& factory,
                                      const ChannelPipelinePtr& pipeline)
     : SocketChannel(eventLoop, parent, factory, pipeline),
+      opened(false),
       isWriting(false),
       highWaterMarkCounter(0),
       ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
@@ -91,11 +94,13 @@ const SocketAddress& AsioSocketChannel::getLocalAddress() const {
     }
 
     boost::system::error_code ec;
-    boost::asio::ip::tcp::endpoint endpoint = tcpSocket.local_endpoint(ec);
+    tcp::endpoint endpoint = tcpSocket.local_endpoint(ec);
 
     if (!ec) {
         localAddress = SocketAddress(SocketAddressImplPtr(
-                                         new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+                                         new AsioTcpSocketAddressImpl(
+                                             ioService->service(),
+                                             endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the local address of the channel from asio.";
@@ -110,11 +115,13 @@ const SocketAddress& AsioSocketChannel::getRemoteAddress() const {
     }
 
     boost::system::error_code ec;
-    boost::asio::ip::tcp::endpoint endpoint = tcpSocket.remote_endpoint(ec);
+    tcp::endpoint endpoint = tcpSocket.remote_endpoint(ec);
 
     if (!ec) {
         remoteAddress = SocketAddress(SocketAddressImplPtr(
-                                          new AsioTcpSocketAddressImpl(ioService->service(), endpoint)));
+                                          new AsioTcpSocketAddressImpl(
+                                              ioService->service(),
+                                              endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the remote address of the channel from asio.";
@@ -124,7 +131,11 @@ const SocketAddress& AsioSocketChannel::getRemoteAddress() const {
 }
 
 bool AsioSocketChannel::isActive() const {
-    return tcpSocket.is_open();
+    return tcpSocket.is_open() && getRemoteAddress().validated();
+}
+
+bool AsioSocketChannel::isOpen() const {
+    return opened;
 }
 
 bool AsioSocketChannel::setClosed() {
@@ -176,8 +187,32 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
     }
 }
 
+void AsioSocketChannel::handleResolve(const boost::system::error_code& error,
+                                      boost::asio::ip::tcp::resolver::iterator itr,
+                                      const ChannelFuturePtr& cf) {
+    if (!error) {
+        tcp::endpoint endpoint = *itr;
+        tcpSocket.async_connect(
+            endpoint,
+            boost::bind(&AsioSocketChannel::handleConnect,
+                        this,
+                        boost::asio::placeholders::error,
+                        ++itr,
+                        cf));
+    }
+    else {
+        LOG_ERROR << "boost asio can NOT resolve "
+                  << remoteAddress.toString()
+                  << " , code=" << error.value() << ", msg=" << error.message();
+
+        ChannelException exception(error.message(), error.value());
+        connectFailed(cf, exception);
+        return;
+    }
+}
+
 void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
-                                      boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+                                      boost::asio::ip::tcp::resolver::iterator endpointIterator,
                                       const ChannelFuturePtr& cf) {
     if (!error) {
         LOG_INFO << "channel connected to the remote server %s, firing connected event."
@@ -187,8 +222,8 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
 
         beginRead();
     }
-    else if (endpoint_iterator != boost::asio::ip::tcp::resolver::iterator()) {
-        LOG_WARN << "resolved more than one address, try to connect the next address.";
+    else if (endpointIterator != boost::asio::ip::tcp::resolver::iterator()) {
+        LOG_INFO << "resolved more than one address, try to connect the next address.";
         boost::system::error_code error;
         tcpSocket.close(error);
 
@@ -197,20 +232,24 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
                       << error.value()
                       << ":"
                       << error.message()
-                      << ", but skip it.";
+                      << ", but skip it, error will be processed by the next handleConnect.";
         }
 
-        boost::asio::ip::tcp::endpoint endpoint = *endpoint_iterator;
+        tcp::endpoint endpoint = *endpointIterator;
         tcpSocket.async_connect(endpoint,
                                 boost::bind(&AsioSocketChannel::handleConnect,
                                             this,
                                             boost::asio::placeholders::error,
-                                            ++endpoint_iterator,
+                                            ++endpointIterator,
                                             cf));
     }
     else {
-        cf->setFailure(ChannelException("failed to connect to remote server", error.value()));
-        doClose();
+        LOG_ERROR << "failed to connect to remote server "
+                  << remoteAddress.toString()
+                  << " , code=" << error.value() << ", msg=" << error.message();
+
+        ChannelException exception(error.message(), error.value());
+        connectFailed(cf, exception);
     }
 }
 
@@ -254,31 +293,12 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
     boost::asio::ip::tcp::resolver resolver(getService()->service());
     boost::asio::ip::tcp::resolver::query query(hostname, port);
 
-    boost::system::error_code error;
-    boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query, error);
-
-    if (error) {
-        LOG_ERROR << "boost asio can NOT resolve "
-                  << hostname << ":" << port
-                  << " , code=" << error.value() << ", msg=" << error.message()
-                  << ", then firing this exception.";
-
-        ChannelException exception(error.message(), error.value());
-        connectFuture->setFailure(exception);
-        //Channels::fireExceptionCaught(channel, exception);
-
-        close(getCloseFuture());
-        return;
-    }
-
-    boost::asio::ip::tcp::endpoint endpoint = *iterator;
-    getSocket().async_connect(
-        endpoint,
-        boost::bind(&AsioSocketChannel::handleConnect,
-                    this,
-                    boost::asio::placeholders::error,
-                    ++iterator,
-                    connectFuture));
+    resolver.async_resolve(query, boost::bind(
+                               &AsioSocketChannel::handleResolve,
+                               this,
+                               _1,
+                               _2,
+                               boost::cref(connectFuture)));
 
     const EventLoopPoolPtr& pool = eventLoop->getEventLoopPool();
 
@@ -335,10 +355,12 @@ void AsioSocketChannel::doDisconnect() {
 }
 
 void AsioSocketChannel::doClose() {
-    if (!isOpen() || !tcpSocket.is_open() || getCloseFuture()->isDone()) {
-        LOG_INFO << "close the socket channel, but the channel already closed.";
+    if (!isOpen()) {
+        LOG_WARN << "do close the socket channel, but the channel already closed.";
         return;
     }
+
+    opened = false;
 
     boost::system::error_code error;
 
@@ -357,16 +379,6 @@ void AsioSocketChannel::doClose() {
     if (error) {
         LOG_ERROR << "failed to close the tcp socket."
                   << error.value() << ":" << error.message();
-
-        IOException e("failed to close the tcp socket.", error.value());
-        //future->setFailure(e);
-
-        //setClosed();
-        //Channels::fireExceptionCaught(this, e);
-    }
-    else {
-        //future->setSuccess();
-        //setClosed();
     }
 }
 
@@ -424,9 +436,6 @@ void AsioSocketChannel::init(const ChannelPipelinePtr& pipeline) {
     writeQueue.reset(new AsioWriteOperationQueue(*this));
 
     setPipeline(pipeline);
-
-    LOG_INFO << "AsioSocketChannel firing the Channel Create Event.";
-    pipeline->fireChannelCreated();
 }
 
 void AsioSocketChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
@@ -435,6 +444,16 @@ void AsioSocketChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
             boost::static_pointer_cast<AsioSocketChannel>(shared_from_this())));
 
     pipeline->attach(shared_from_this());
+
+    opened = true;
+}
+
+void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
+                                      const ChannelException& e) {
+    connectFuture->setFailure(e);
+    getPipeline()->fireExceptionCaught(e);
+    //closeIfClosed();
+    doClose();
 }
 
 }

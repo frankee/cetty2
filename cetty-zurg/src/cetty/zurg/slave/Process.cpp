@@ -1,5 +1,8 @@
 #include <cetty/zurg/slave/Process.h>
 #include <cetty/util/Process.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/zurg/slave/slave.pb.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -72,8 +75,8 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
 
     char dir[256];
     snprintf(dir, sizeof dir, "%s/%s/%s",
-             SlaveApp::instance().prefix().c_str(),
-             SlaveApp::instance().name().c_str(),
+             ZurgSlave::instance().getPrefix().c_str(),
+             ZurgSlave::instance().getName().c_str(),
              appRequest->name().c_str());
 
     request_->set_cwd(dir);
@@ -91,13 +94,14 @@ Process::~Process() {
     LOG_DEBUG << "Process[" << pid_ << "] dtor";
 
     if (stdoutSink_ || stderrSink_) {
+        // todo how to judge if the event loop is working is cettt's event loop
         assert(!loop_->eventHandling());
     }
 }
 
 int Process::start() {
-    assert(ProcessInfo::numThreads() == 1);
-    int availabltFds = ProcessInfo::maxOpenFiles() - ProcessInfo::openedFiles();
+    assert(numThreads() == 1);
+    int availabltFds = maxOpenFiles() - openedFiles();
 
     if (availabltFds < 20) {
         // to fork() and capture stdout/stderr, we need new file descriptors.
@@ -125,9 +129,8 @@ int Process::start() {
         if (runCommand_) {
             stdoutFd = stdOutput.writeFd();
             stderrFd = stdError.writeFd();
-        }
-        else {
-            string startTimeStr = startTime_.toString();
+        } else {
+            std::string startTimeStr = to_iso_string(startTime_);
             // FIXME: capture errno
             stdoutFd = redirect(redirectStdout_, request_->cwd()+"/stdout", startTimeStr.c_str());
             stderrFd = redirect(redirectStderr_, request_->cwd()+"/stderr", startTimeStr.c_str());
@@ -153,7 +156,7 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
     }
 
     try {
-        ProcStatFile stat(ProcessInfo::pid());
+        ProcStatFile stat(cetty::util::Process::id());
 
         if (!stat.valid) { throw stat.error; }
 
@@ -208,12 +211,13 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
         // should not reach here
         throw static_cast<int>(errno);
-    }
-    catch (int error) {
+    } catch (int error) {
         execError.write(error);
-        fprintf(stderr, "CHILD %s (errno=%d)\n", muduo::strerror_tl(error), error);
-    }
-    catch (...) {
+        char buf[512];
+        fprintf(stderr, "CHILD %s (errno=%d)\n",
+                strerror_r(error, buf, sizeof buf),
+                error);
+    } catch (...) {
         int error = EINVAL;
         execError.write(error);
     }
@@ -245,7 +249,7 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
             LOG_INFO << filename << " -> " << exe_file_;
         }
         else {
-            LOG_SYSERR << "Fail to read link " << filename;
+            LOG_ERROR << "Fail to read link " << filename;
         }
 
         // read nothing, child process exec successfully.
@@ -261,12 +265,12 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
                 return errno;
             }
 
-            setNonBlockAndCloseOnExec(stdoutFd);
-            setNonBlockAndCloseOnExec(stderrFd);
-            stdoutSink_.reset(new Sink(loop_, stdoutFd, request_->max_stdout(), "stdout"));
-            stderrSink_.reset(new Sink(loop_, stderrFd, request_->max_stderr(), "stderr"));
-            stdoutSink_->start();
-            stderrSink_->start();
+            //setNonBlockAndCloseOnExec(stdoutFd);
+            //setNonBlockAndCloseOnExec(stderrFd);
+            //stdoutSink_.reset(new Sink(loop_, stdoutFd, request_->max_stdout(), "stdout"));
+            //stderrSink_.reset(new Sink(loop_, stderrFd, request_->max_stderr(), "stderr"));
+            //stdoutSink_->start();
+            //stderrSink_->start();
         }
         else {
             // FIXME: runApp
@@ -276,13 +280,14 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
     }
     else if (n == sizeof(childErrno)) {
         int err = static_cast<int>(childErrno);
-        LOG_ERROR << "PARENT child error " << muduo::strerror_tl(err)
+        char buf[512];
+        LOG_ERROR << "PARENT child error " << strerror_r(err, buf, sizeof buf)
                   << " (errno=" << childErrno << ")";
         return err;
     }
     else if (n < 0) {
         int err = errno;
-        LOG_SYSERR << "PARENT";
+        LOG_ERROR << "PARENT";
         return err;
     }
     else {
@@ -306,8 +311,8 @@ void Process::onTimeout() {
     const ProcStatFile stat(pid_);
 
     if (stat.valid
-            && stat.ppid == muduo::ProcessInfo::pid()
-            && stat.startTime == startTimeInJiffies_) {
+        && stat.ppid == cetty::util::Process::id()
+        && stat.startTime == startTimeInJiffies_) {
         ::kill(pid_, SIGINT);
     }
 }

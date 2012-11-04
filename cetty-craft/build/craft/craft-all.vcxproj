@@ -190,7 +190,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelinePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelines.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSink.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CompleteChannelFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\DefaultChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\DefaultChannelFuture.h" />

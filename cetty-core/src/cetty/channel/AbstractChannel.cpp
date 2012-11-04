@@ -55,7 +55,12 @@ public:
 
     bool setClosed() {
         if (channel) {
-            channel->doPreClose();
+            try {
+                channel->doPreClose();
+            }
+            catch(const Exception& e) {
+                LOG_WARN << "doPreClose() raised an exception: " << e.getDisplayText();
+            }
         }
 
         return DefaultChannelFuture::setSuccess();
@@ -139,10 +144,6 @@ const ChannelFactoryPtr& AbstractChannel::getFactory() const {
 
 const ChannelPipelinePtr& AbstractChannel::getPipeline() const {
     return pipeline;
-}
-
-bool AbstractChannel::isOpen() const {
-    return !closeFuture->isDone();
 }
 
 ChannelFuturePtr& AbstractChannel::getCloseFuture() {

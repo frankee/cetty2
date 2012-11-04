@@ -1,22 +1,16 @@
-#ifndef MUDUO_PROTORPC_ZURG_HEARTBEAT_H
-#define MUDUO_PROTORPC_ZURG_HEARTBEAT_H
+#ifndef HEARTBEAT_H_
+#define HEARTBEAT_H_
 
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include <muduo/base/Types.h>
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoop.h>
 #include <string>
 
-namespace muduo
-{
-namespace net
-{
-class EventLoop;
-}
-}
-
-namespace zurg
-{
+namespace cetty {
+namespace zurg {
+namespace slave {
 class MasterService_Stub;
 class SlaveConfig;
 class ProcFs;
@@ -24,7 +18,7 @@ class ProcFs;
 class Heartbeat : boost::noncopyable
 {
  public:
-  Heartbeat(muduo::net::EventLoop* loop,
+  Heartbeat(const EventLoopPtr &loop,
             const SlaveConfig& config,
             MasterService_Stub* stub);
   ~Heartbeat();
@@ -36,7 +30,7 @@ class Heartbeat : boost::noncopyable
 
   void beat(bool showStatic);
 
-  muduo::net::EventLoop* loop_;
+  EventLoopPtr loop_;
   const std::string name_;
   const int port_;
   MasterService_Stub* stub_;
@@ -45,4 +39,6 @@ class Heartbeat : boost::noncopyable
 };
 
 }
-#endif  // MUDUO_PROTORPC_ZURG_HEARTBEAT_H
+}
+}
+#endif  // #ifndef HEARTBEAT_H_

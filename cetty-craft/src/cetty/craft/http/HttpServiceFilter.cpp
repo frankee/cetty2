@@ -16,9 +16,11 @@
 
 #include <cetty/craft/http/HttpServiceFilter.h>
 
+#include <cetty/config/ConfigCenter.h>
+#include <cetty/channel/ChannelFutureListener.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/config/ConfigCenter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/craft/http/ServiceRequestMapper.h>
 #include <cetty/craft/http/ServiceResponseMapper.h>
@@ -27,6 +29,7 @@ namespace cetty {
 namespace craft {
 namespace http {
 
+using namespace cetty::channel;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
@@ -74,7 +77,8 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext
 
 HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const HttpMessagePtr& req,
-        const ProtobufServiceMessagePtr& rep) {
+        const ProtobufServiceMessagePtr& rep,
+        const ChannelFuturePtr& future) {
     HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);
 
     HttpResponsePtr response = proto2http.getHttpResponse(request, rep);
@@ -84,6 +88,10 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         response = HttpResponsePtr(new HttpResponse(
                                        request->getProtocolVersion(),
                                        HttpResponseStatus::BAD_REQUEST));
+    }
+
+    if (!HttpHeaders::isKeepAlive(*req)) {
+        future->addListener(ChannelFutureListener::CLOSE);
     }
 
     return boost::static_pointer_cast<HttpMessage>(response);

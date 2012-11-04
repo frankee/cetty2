@@ -16,9 +16,9 @@
 
 #include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
 
+#include <google/protobuf/descriptor.h>
+
 #include <cetty/Types.h>
-
-
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -582,9 +582,22 @@ bool printMessage(const google::protobuf::Message& message,
     const google::protobuf::Descriptor* descriptor = message.GetDescriptor();
 
     int fieldCnt = descriptor->field_count();
+    const google::protobuf::FieldDescriptor* field = NULL;
+
+    // if has encoded field as whole message, just use it.
+    for (int i = 0; i < fieldCnt; ++i) {
+        field = descriptor->field(i);
+
+        if (field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES
+                && field->name() == "encoded") {
+            const google::protobuf::Reflection* reflection = message.GetReflection();
+            printer.printValue(reflection->GetString(message, field));
+            return true;
+        }
+    }
 
     for (int i = 0; i < fieldCnt; ++i) {
-        const google::protobuf::FieldDescriptor* field = descriptor->field(i);
+        field = descriptor->field(i);
         bool serialized = printField(message, field, printer);
 
         if (serialized) {

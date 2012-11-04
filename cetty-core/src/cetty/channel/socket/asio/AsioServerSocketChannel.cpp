@@ -45,9 +45,33 @@ AsioServerSocketChannel::AsioServerSocketChannel(
       acceptor(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       childPipeline(childPipeline),
       childServicePool(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
-      config(acceptor) {
+      config(acceptor),
+      ipFamily(IpAddress::IPv4) {
 
     AbstractChannel::setPipeline(pipeline);
+
+    boost::system::error_code ec;
+
+    if (ipFamily == IpAddress::IPv4) {
+        acceptor.open(boost::asio::ip::tcp::v4(), ec);
+
+        if (ec) {
+            LOG_ERROR << "the server channel (acceptor) opened in IPV4 mode failed.";
+        }
+        else {
+            LOG_INFO << "the server channel (acceptor) opened in IPV4 mode default.";
+        }
+    }
+    else {
+        acceptor.open(boost::asio::ip::tcp::v6(), ec);
+
+        if (ec) {
+            LOG_ERROR << "the server channel (acceptor) opened in IPV6 mode failed.";
+        }
+        else {
+            LOG_INFO << "the server channel (acceptor) opened in IPV6 mode default.";
+        }
+    }
 }
 
 AsioServerSocketChannel::~AsioServerSocketChannel() {
@@ -74,7 +98,8 @@ const SocketAddress& AsioServerSocketChannel::getLocalAddress() const {
     }
 
     localAddress = SocketAddress(
-                       new AsioTcpSocketAddressImpl(ioService->service(), endpoint));
+                       new AsioTcpSocketAddressImpl(ioService->service(),
+                               endpoint));
 
     return localAddress;
 }
@@ -89,72 +114,72 @@ bool AsioServerSocketChannel::setClosed() {
 }
 
 void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
-    bool bound = false;
-    bool bossStarted = false;
+    boost::system::error_code ec;
+    boost::asio::ip::tcp::endpoint ep(
+        boost::asio::ip::address::from_string(localAddress.address()),
+        localAddress.port());
 
-    try {
-        boost::asio::ip::tcp::endpoint ep(
-            boost::asio::ip::address::from_string(localAddress.address()),
-            localAddress.port());
+    if (localAddress.family() != ipFamily) {
+        acceptor.close(ec);
 
-        if (localAddress.family() == IpAddress::IPv4) {
-            acceptor.open(boost::asio::ip::tcp::v4());
-            LOG_INFO << "the server channel (acceptor) opened in IPV4 mode.";
+        if (ec) {
+            LOG_ERROR << "close the acceptor before change ip family, but skip it.";
+        }
+
+        acceptor.open(ep.protocol(), ec);
+
+        if (ec) {
+            LOG_ERROR << "failed to reopen the acceptor in different ip family.";
+            return doClose();
         }
         else {
-            acceptor.open(boost::asio::ip::tcp::v6());
-            LOG_INFO << "the server channel (acceptor) opened in IPV6 mode.";
+            LOG_INFO << "the server channel (acceptor) changed to open in IPV6 mode.";
         }
+    }
 
-        config.setReuseAddress(acceptor);
-        config.setReceiveBufferSize(acceptor);
+    //config.setReuseAddress(acceptor);
+    //config.setReceiveBufferSize(acceptor);
 
-        acceptor.bind(ep);
+    acceptor.bind(ep, ec);
 
-        const boost::optional<int> backlog = config.getBacklog();
+    if (ec) {
+        LOG_ERROR << "the server channel (acceptor) can not bind to the " << localAddress.toString();
+        return doClose();
+    }
 
-        if (backlog) {
-            acceptor.listen(*backlog);
+    const boost::optional<int> backlog = config.getBacklog();
+
+    if (backlog) {
+        acceptor.listen(*backlog, ec);
+    }
+    else {
+        acceptor.listen(tcp::acceptor::max_connections, ec);
+    }
+
+    if (ec) {
+        LOG_ERROR << "the server channel (acceptor) can not listen the " << localAddress.toString();
+        return doClose();
+    }
+
+    accept();
+
+    // start the event loop pool if in main thread mode.
+    const EventLoopPoolPtr& loop = ioService->getEventLoopPool();
+
+    if (loop && loop->isMainThread()) {
+        LOG_INFO << "the asio service pool starting to run in main thread.";
+
+        if (!loop->start()) {
+            LOG_ERROR << "start the boost asio service error, stop service pool and close channel.";
+            loop->stop();
+            getPipeline()->fireExceptionCaught(
+                ChannelException("failed to start the asio service in main thread."));
+
+            return doClose();
         }
         else {
-            acceptor.listen();
+            LOG_INFO << "the asio service pool started to running.";
         }
-
-        bound = true;
-        //Channels::fireChannelBound(channel, channel->getLocalAddress());
-
-        accept();
-        bossStarted = true;
-
-        this->active = true;
-        //future->setSuccess();
-
-        // start the event loop pool if in main thread mode.
-        const EventLoopPoolPtr& loop = ioService->getEventLoopPool();
-        if (loop && loop->isMainThread()) {
-            LOG_INFO << "the asio service pool starting to run in main thread.";
-
-            if (!loop->start()) {
-                LOG_ERROR << "start the boost asio service error, stop service pool and close channel.";
-                loop->stop();
-                getPipeline()->fireExceptionCaught(
-                    ChannelException("failed to start the asio service."));
-
-                close();
-            }
-            else {
-                LOG_INFO << "the asio service pool started to running.";
-            }
-        }
-    }
-    catch (const std::exception& e) {
-        //Exception exception(e.what());
-        //future->setFailure(exception);
-        //Channels::fireExceptionCaught(channel, exception);
-    }
-
-    if (!bossStarted && bound) {
-        doClose();
     }
 }
 
@@ -169,6 +194,10 @@ void AsioServerSocketChannel::accept() {
                               ioService,
                               factory,
                               pipeline);
+
+
+    LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
+    c->getPipeline()->fireChannelCreated();
 
     acceptor.async_accept(c->getSocket(),
                           makeCustomAllocHandler(acceptAllocator,
@@ -203,6 +232,9 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
             factory,
             pipeline);
 
+        LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
+        newChannel->getPipeline()->fireChannelCreated();
+
         acceptor.async_accept(newChannel->getSocket(),
                               makeCustomAllocHandler(acceptAllocator,
                                       boost::bind(&AsioServerSocketChannel::handleAccept,
@@ -211,7 +243,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                               newChannel)));
     }
     else {
-        LOG_WARN << "Failed to accept a connection any more. ErrorCode:" << error.value();
+        LOG_ERROR << "Failed to accept a connection any more. ErrorCode:" << error.value();
     }
 }
 
@@ -223,19 +255,8 @@ void AsioServerSocketChannel::doClose() {
 
         if (error) {
             LOG_ERROR << "failed to close acceptor, error:"
-                << error.value() << ":" << error.message();
-            ChannelException e(error.message(), error.value());
-            //future->setFailure(e);
-
-            LOG_INFO << "firing the above exception event.";
-            //Channels::fireExceptionCaught(channel, e);
+                      << error.value() << ":" << error.message();
         }
-    }
-
-    //future->setSuccess();
-
-    if (getCloseFuture()->isDone()) {
-        LOG_INFO << "closing the server channel, but the channel has been closed yet.";
     }
 
     //close all children Channels
@@ -252,11 +273,15 @@ void AsioServerSocketChannel::doClose() {
 }
 
 void AsioServerSocketChannel::doDisconnect() {
-
+    // NOOP
 }
 
 bool AsioServerSocketChannel::isActive() const {
-    return this->active;
+    return acceptor.is_open() && localAddress.validated();
+}
+
+bool AsioServerSocketChannel::isOpen() const {
+    return acceptor.is_open();
 }
 
 }
