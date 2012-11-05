@@ -31,34 +31,51 @@ CompleteChannelFuture::CompleteChannelFuture(const ChannelPtr& channel)
     : channel(channel) {
 }
 
-void CompleteChannelFuture::addListener(const CompletedCallback& listener, int priority) {
-    if (listener.empty()) { return; }
+ChannelFuturePtr CompleteChannelFuture::addListener(
+    const CompletedCallback& listener,
+    int priority) {
+    if (listener.empty()) {
+        return shared_from_this();
+    }
 
     try {
         listener(*this);
     }
     catch (const Exception& e) {
-        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
+        LOG_WARN << "An exception ("
+                 << e.getMessage()
+                 << ") thrown by ChannelFutureListener.";
     }
+
+    return shared_from_this();
 }
 
-void CompleteChannelFuture::addProgressListener(const ProgressedCallback& listener) {
-    if (listener.empty()) { return; }
+ChannelFuturePtr CompleteChannelFuture::addProgressListener(
+    const ProgressedCallback& listener) {
+    if (listener.empty()) {
+        return shared_from_this();
+    }
 
     try {
         listener(*this, 0, 0, 0);
     }
     catch (const Exception& e) {
-        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
+        LOG_WARN << "An exception ("
+                 << e.getMessage()
+                 << ") thrown by ChannelFutureListener.";
     }
+
+    return shared_from_this();
 }
 
-void CompleteChannelFuture::removeListener(const CompletedCallback& listener) {
-
+ChannelFuturePtr CompleteChannelFuture::removeListener(
+    const CompletedCallback& listener) {
+    return shared_from_this();
 }
 
-void CompleteChannelFuture::removeProgressListener(const ProgressedCallback& listener) {
-
+ChannelFuturePtr CompleteChannelFuture::removeProgressListener(
+    const ProgressedCallback& listener) {
+    return shared_from_this();
 }
 
 ChannelFuturePtr CompleteChannelFuture::await() {
@@ -69,7 +86,7 @@ ChannelFuturePtr CompleteChannelFuture::await() {
     return shared_from_this();
 }
 
-bool CompleteChannelFuture::await(int timeoutMillis) {
+bool CompleteChannelFuture::await(int64_t timeoutMillis) {
     if (boost::this_thread::interruption_requested()) {
         throw InterruptedException();
     }
@@ -81,7 +98,7 @@ ChannelFuturePtr CompleteChannelFuture::awaitUninterruptibly() {
     return shared_from_this();
 }
 
-bool CompleteChannelFuture::awaitUninterruptibly(int timeoutMillis) {
+bool CompleteChannelFuture::awaitUninterruptibly(int64_t timeoutMillis) {
     return true;
 }
 

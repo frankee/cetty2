@@ -75,12 +75,13 @@ public:
     virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
                                             const SocketAddress& localAddress,
                                             const ChannelFuturePtr& future);
+
     virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
     virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
 
     virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
-    virtual ChannelFuturePtr& getCloseFuture();
+    virtual const ChannelFuturePtr& getCloseFuture();
 
     virtual ChannelFuturePtr newFuture();
     virtual ChannelFuturePtr newFailedFuture(const Exception& e);

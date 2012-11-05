@@ -149,6 +149,10 @@ public:
         return false;
     }
 
+    void write(const ChannelBufferPtr& msg, const ChannelFuturePtr& future) {
+        BOOST_ASSERT("InboundBuffer Transfer does not support write");
+    }
+
 private:
     ChannelHandlerContext* ctx;
     ChannelInboundBufferHandlerContext* nextCtx;

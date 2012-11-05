@@ -40,17 +40,17 @@ class CompleteChannelFuture : public ChannelFuture {
 public:
     virtual ~CompleteChannelFuture() {}
 
-    virtual void addListener(const CompletedCallback& listener, int priority = 0);
-    virtual void addProgressListener(const ProgressedCallback& listener);
+    virtual ChannelFuturePtr addListener(const CompletedCallback& listener, int priority = 0);
+    virtual ChannelFuturePtr addProgressListener(const ProgressedCallback& listener);
 
-    virtual void removeListener(const CompletedCallback& listener);
-    virtual void removeProgressListener(const ProgressedCallback& listener);
+    virtual ChannelFuturePtr removeListener(const CompletedCallback& listener);
+    virtual ChannelFuturePtr removeProgressListener(const ProgressedCallback& listener);
 
     virtual ChannelFuturePtr await();
-    virtual bool await(int timeoutMillis);
+    virtual bool await(int64_t timeoutMillis);
 
     virtual ChannelFuturePtr awaitUninterruptibly();
-    virtual bool awaitUninterruptibly(int timeoutMillis);
+    virtual bool awaitUninterruptibly(int64_t timeoutMillis);
 
     virtual const ChannelPtr& getChannel() const;
 
@@ -70,10 +70,6 @@ protected:
      * @param channel the {@link Channel} associated with this future
      */
     CompleteChannelFuture(const ChannelPtr& channel);
-
-private:
-    CompleteChannelFuture(const CompleteChannelFuture&);
-    CompleteChannelFuture& operator=(const CompleteChannelFuture&);
 
 private:
     ChannelPtr channel;
