@@ -24,9 +24,9 @@
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
-#include <cetty/gearman/GearmanDecoder.h>
-#include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanWorkerHandler.h>
+#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
+#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
 #include <cetty/gearman/protobuf/GearmanProtobufWorkerFilter.h>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -40,7 +40,7 @@ using namespace google::protobuf;
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service::handler;
-
+using namespace cetty::gearman::protocol;
 
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder() {
 }
@@ -58,8 +58,8 @@ ChannelPipelinePtr GearmanProtobufWorkerBuilder::getDefaultPipeline() {
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
 
-    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+    pipeline->addLast("gearmanDecoder", new GearmanMessageDecoder());
+    pipeline->addLast("gearmanEncoder", new GearmanMessageEncoder());
     pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
     pipeline->addLast("gearmanProtobufFilter", new GearmanProtobufWorkerFilter());
     pipeline->addLast("protobufMessageHandler", new ProtobufServiceMessageHandler());

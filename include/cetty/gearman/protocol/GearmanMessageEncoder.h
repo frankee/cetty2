@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANENCODER_H)
-#define CETTY_GEARMAN_GEARMANENCODER_H
+#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H)
+#define CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,24 +18,25 @@
  */
 
 #include <cetty/handler/codec/MessageToMessageEncoder.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 
-class GearmanEncoder : public MessageToMessageEncoder<GearmanMessagePtr, ChannelBufferPtr> {
+class GearmanMessageEncoder : public MessageToMessageEncoder<GearmanMessagePtr, ChannelBufferPtr> {
 public:
-    GearmanEncoder();
-    virtual ~GearmanEncoder();
+    GearmanMessageEncoder();
+    virtual ~GearmanMessageEncoder();
 
     virtual ChannelHandlerPtr clone();
     virtual std::string toString() const;
 
     virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-        const GearmanMessagePtr& msg);
+                                    const GearmanMessagePtr& msg);
 
 private:
     int caculateParametersLength(const GearmanMessagePtr& msg);
@@ -52,8 +53,9 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANENCODER_H)
+#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H)
 
 // Local Variables:
 // mode: c++

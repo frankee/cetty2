@@ -20,7 +20,7 @@
 #include <string>
 
 #include <cetty/buffer/Unpooled.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
@@ -28,8 +28,9 @@
 namespace cetty {
 namespace gearman {
 namespace protobuf {
+
 using namespace cetty::channel;
-using namespace cetty::gearman;
+using namespace cetty::gearman::protocol;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 

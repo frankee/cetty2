@@ -18,7 +18,7 @@
  */
 
 #include <cetty/service/builder/ClientBuilder.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -26,6 +26,7 @@ namespace builder {
 
 using namespace cetty::service;
 using namespace cetty::service::builder;
+using namespace cetty::gearman::protocol;
 
 class GearmanClientBuilder
         : public cetty::service::builder::ClientBuilder<GearmanMessagePtr, GearmanMessagePtr> {

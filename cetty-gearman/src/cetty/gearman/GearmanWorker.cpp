@@ -42,7 +42,6 @@ GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
 }
 
 GearmanWorker::~GearmanWorker() {
-
 }
 
 }

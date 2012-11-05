@@ -23,7 +23,7 @@
 #include <cetty/service/Connection.h>
 #include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -31,7 +31,7 @@ namespace builder {
 
 using namespace cetty::service;
 using namespace cetty::service::builder;
-using namespace cetty::gearman;
+using namespace cetty::gearman::protocol;
 
 class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
 public:

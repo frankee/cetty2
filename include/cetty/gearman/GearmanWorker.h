@@ -37,6 +37,16 @@ public:
 
     virtual ~GearmanWorker();
 
+    void setCando(const std::string& cando);
+    void setCando(const std::string& cando, int64_t timeout);
+
+    void setCantdo(const std::string& cantdo);
+    void resetAbilities();
+    
+    void preSleep();
+    void grabJob();
+    void grabUniqueJob();
+
 private:
     WatermarkConnectionPool connectionPool;
 };

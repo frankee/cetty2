@@ -26,7 +26,7 @@
 #include <cetty/buffer/ChannelBufferUtil.h>
 #include <cetty/logging/LoggerHelper.h>
 
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
 namespace cetty {
 namespace gearman {

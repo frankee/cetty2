@@ -21,12 +21,13 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
 
 using namespace cetty::channel;
+using namespace cetty::gearman::protocol;
 
 class GearmanClientHandler
         : public ChannelMessageHandlerAdapter<GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr> {

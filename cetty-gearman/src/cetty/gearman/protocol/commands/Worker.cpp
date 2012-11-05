@@ -1,5 +1,3 @@
-#if !defined(CETTY_GEARMAN_GEARMANMESSAGEPTR_H)
-#define CETTY_GEARMAN_GEARMANMESSAGEPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,20 +15,8 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+#include <cetty/gearman/protocol/commands/Worker.h>
 
-namespace cetty {
-namespace gearman {
+namespace cetty { namespace gearman { namespace protocol { namespace commands { 
 
-class GearmanMessage;
-typedef boost::intrusive_ptr<GearmanMessage> GearmanMessagePtr;
-typedef boost::intrusive_ptr<GearmanMessage const> GearmanMessageConstPtr;
-
-}
-}
-
-#endif //#if !defined(CETTY_GEARMAN_GEARMANMESSAGEPTR_H)
-
-// Local Variables:
-// mode: c++
-// End:
+}}}}

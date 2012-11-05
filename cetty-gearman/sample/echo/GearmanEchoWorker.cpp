@@ -4,11 +4,12 @@
 
 #include <cetty/buffer/ChannelBufferUtil.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
 using namespace cetty::buffer;
 using namespace cetty::gearman;
+using namespace cetty::gearman::protocol;
 using namespace cetty::gearman::builder;
 
 GearmanMessagePtr echo(const GearmanMessagePtr& message) {

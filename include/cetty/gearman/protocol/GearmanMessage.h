@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANMESSAGE_H)
-#define CETTY_GEARMAN_GEARMANMESSAGE_H
+#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANMESSAGE_H)
+#define CETTY_GEARMAN_PROTOCOL_GEARMANMESSAGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,7 +21,7 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 #if defined(WIN32) && defined(ERROR)
 #undef ERROR
@@ -29,6 +29,7 @@
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
 using namespace cetty::buffer;
 
@@ -115,6 +116,7 @@ public:
     GearmanMessage() {}
     GearmanMessage(int type);
     GearmanMessage(int type, const ChannelBufferPtr& payload);
+
     GearmanMessage(int type, const std::string& param);
     GearmanMessage(int type, const std::string& param, const ChannelBufferPtr& payload);
 
@@ -154,5 +156,6 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANMESSAGE_H)
+#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANMESSAGE_H)

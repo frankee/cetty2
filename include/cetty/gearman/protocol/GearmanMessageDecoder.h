@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
-#define CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H
+#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANDECODER_H)
+#define CETTY_GEARMAN_PROTOCOL_GEARMANDECODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,26 +17,34 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
-#include <cetty/service/OutstandingCall.h>
-#include <cetty/service/ServiceRequestHandler.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
-using namespace cetty::service;
-using namespace cetty::gearman::protocol;
+using namespace cetty::channel;
+using namespace cetty::handler::codec;
 
-typedef OutstandingCall<GearmanMessagePtr, GearmanMessagePtr> GearmanClientCall;
-typedef boost::intrusive_ptr<GearmanClientCall> GearmanClientCallPtr;
+class GearmanMessageDecoder
+        : public MessageToMessageDecoder<ChannelBufferPtr, GearmanMessagePtr> {
+public:
+    GearmanMessageDecoder();
+    virtual ~GearmanMessageDecoder();
 
-typedef ServiceRequestHandler<GearmanMessagePtr, GearmanMessagePtr> GearmanClientRequestHandler;
+    virtual ChannelHandlerPtr clone();
+    virtual std::string toString() const;
+
+    virtual GearmanMessagePtr decode(ChannelHandlerContext& ctx,
+                                     const ChannelBufferPtr& msg);
+};
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
+#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANDECODER_H)
 
 // Local Variables:
 // mode: c++

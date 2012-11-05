@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
-#define CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H
+#if !defined(CETTY_GEARMAN_GEARMANMESSAGEPTR_H)
+#define CETTY_GEARMAN_GEARMANMESSAGEPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,25 +18,20 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
-#include <cetty/service/OutstandingCall.h>
-#include <cetty/service/ServiceRequestHandler.h>
-#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
-using namespace cetty::service;
-using namespace cetty::gearman::protocol;
-
-typedef OutstandingCall<GearmanMessagePtr, GearmanMessagePtr> GearmanClientCall;
-typedef boost::intrusive_ptr<GearmanClientCall> GearmanClientCallPtr;
-
-typedef ServiceRequestHandler<GearmanMessagePtr, GearmanMessagePtr> GearmanClientRequestHandler;
+class GearmanMessage;
+typedef boost::intrusive_ptr<GearmanMessage> GearmanMessagePtr;
+typedef boost::intrusive_ptr<GearmanMessage const> GearmanMessageConstPtr;
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENTREQUESTHANDLER_H)
+#endif //#if !defined(CETTY_GEARMAN_GEARMANMESSAGEPTR_H)
 
 // Local Variables:
 // mode: c++

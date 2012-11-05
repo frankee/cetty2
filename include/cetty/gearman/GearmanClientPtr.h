@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_GEARMANDECODER_H)
-#define CETTY_GEARMAN_GEARMANDECODER_H
+#if !defined(CETTY_GEARMAN_GEARMANCLIENTPTR_H)
+#define CETTY_GEARMAN_GEARMANCLIENTPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,32 +17,19 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageDecoder.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
 namespace gearman {
 
-using namespace cetty::channel;
-using namespace cetty::handler::codec;
-
-class GearmanDecoder
-    : public MessageToMessageDecoder<ChannelBufferPtr, GearmanMessagePtr> {
-public:
-    GearmanDecoder();
-    virtual ~GearmanDecoder();
-
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
-
-    virtual GearmanMessagePtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& msg);
-};
+class GearmanClient;
+typedef boost::intrusive_ptr<GearmanClient> GearmanClientPtr;
 
 }
 }
 
-#endif //#if !defined(CETTY_GEARMAN_GEARMANDECODER_H)
+
+#endif //#if !defined(CETTY_GEARMAN_GEARMANCLIENTPTR_H)
 
 // Local Variables:
 // mode: c++

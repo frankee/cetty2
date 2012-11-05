@@ -23,12 +23,13 @@
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
 
 using namespace cetty::channel;
+using namespace cetty::gearman::protocol;
 
 class GearmanWorkerHandler;
 typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;

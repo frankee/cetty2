@@ -14,8 +14,8 @@
  * under the License.
  */
 
-#include <cetty/gearman/GearmanEncoder.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBufferUtil.h>
@@ -24,27 +24,28 @@
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-GearmanEncoder::GearmanEncoder() {
+GearmanMessageEncoder::GearmanMessageEncoder() {
 
 }
 
-GearmanEncoder::~GearmanEncoder() {
+GearmanMessageEncoder::~GearmanMessageEncoder() {
 
 }
 
-ChannelHandlerPtr GearmanEncoder::clone() {
-    return ChannelHandlerPtr(new GearmanEncoder);
+ChannelHandlerPtr GearmanMessageEncoder::clone() {
+    return ChannelHandlerPtr(new GearmanMessageEncoder);
 }
 
-std::string GearmanEncoder::toString() const {
+std::string GearmanMessageEncoder::toString() const {
     return "GearmanEncoder";
 }
 
-ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
+ChannelBufferPtr GearmanMessageEncoder::encode(ChannelHandlerContext& ctx,
                                         const GearmanMessagePtr& msg) {
 
     if (!msg) {
@@ -98,15 +99,16 @@ ChannelBufferPtr GearmanEncoder::encode(ChannelHandlerContext& ctx,
         if ((parametersLength - 1) > 0) {
             writeParameters(buffer, msg->getParameters(), false);
         }
+
         DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(buffer);
-        
+
         return buffer;
     }
 
     return ChannelBufferPtr();
 }
 
-int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
+int GearmanMessageEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
     int length = 0;
 
     const std::vector<std::string>& parameters = msg->getParameters();
@@ -119,23 +121,23 @@ int GearmanEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
     return length;
 }
 
-void GearmanEncoder::writeHeader(const ChannelBufferPtr& buffer,
-    int type,
-    int length) {
+void GearmanMessageEncoder::writeHeader(const ChannelBufferPtr& buffer,
+                                 int type,
+                                 int length) {
     buffer->writeBytes(GearmanMessage::REQUEST_MAGIC);
     buffer->writeInt(type);
     buffer->writeInt(length);
 }
 
-void GearmanEncoder::writeHeaderAhead(const ChannelBufferPtr& buffer,
-    int type,
-    int length) {
+void GearmanMessageEncoder::writeHeaderAhead(const ChannelBufferPtr& buffer,
+                                      int type,
+                                      int length) {
     buffer->writeIntAhead(length);
     buffer->writeIntAhead(type);
     buffer->writeBytesAhead(GearmanMessage::REQUEST_MAGIC);
 }
 
-void GearmanEncoder::writeParameters(const ChannelBufferPtr& buffer,
+void GearmanMessageEncoder::writeParameters(const ChannelBufferPtr& buffer,
                                      const std::vector<std::string>& parameters,
                                      bool withZeroPad) {
     int j = parameters.size();
@@ -152,7 +154,7 @@ void GearmanEncoder::writeParameters(const ChannelBufferPtr& buffer,
     }
 }
 
-void GearmanEncoder::writeParametersAhead(const ChannelBufferPtr& buffer,
+void GearmanMessageEncoder::writeParametersAhead(const ChannelBufferPtr& buffer,
         const std::vector<std::string>& parameters,
         bool withZeroPad) {
     int j = parameters.size();
@@ -171,5 +173,6 @@ void GearmanEncoder::writeParametersAhead(const ChannelBufferPtr& buffer,
     }
 }
 
+}
 }
 }

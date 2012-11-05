@@ -15,11 +15,12 @@
  * under the License.
  */
 
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 #include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace gearman {
+namespace protocol {
 
 const std::string GearmanMessage::RESPONSE_MAGIC("\0RES", 4);
 const std::string GearmanMessage::REQUEST_MAGIC("\0REQ", 4);
@@ -147,5 +148,6 @@ GearmanMessagePtr GearmanMessage::createOptionReqMessage(const std::string& opti
     return GearmanMessagePtr(new GearmanMessage(GearmanMessage::OPTION_REQ));
 }
 
+}
 }
 }
