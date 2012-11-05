@@ -43,7 +43,7 @@
     <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}</ProjectGuid>
+    <ProjectGuid>{4E884AF4-B887-470E-A89B-76261E66C3B5}</ProjectGuid>
     <RootNamespace>memcached</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>

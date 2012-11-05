@@ -104,6 +104,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TelnetClient", "..\telnet\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TelnetServer", "..\telnet\TelnetServer.vcxproj", "{E938F647-4942-4010-8DA3-4D338F077FD0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memcached", "..\..\..\cetty-memcached\build\memcached\Memcached.vcxproj", "{4E884AF4-B887-470E-A89B-76261E66C3B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -262,6 +264,10 @@ Global
 		{E938F647-4942-4010-8DA3-4D338F077FD0}.Debug|Win32.Build.0 = Debug|Win32
 		{E938F647-4942-4010-8DA3-4D338F077FD0}.Release|Win32.ActiveCfg = Release|Win32
 		{E938F647-4942-4010-8DA3-4D338F077FD0}.Release|Win32.Build.0 = Release|Win32
+		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Debug|Win32.Build.0 = Debug|Win32
+		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.ActiveCfg = Release|Win32
+		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
