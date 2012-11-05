@@ -2,15 +2,18 @@
 
 #include <map>
 #include <dirent.h>
+#include <boost/date_time/posix_time/ptime.hpp>
 
 namespace cetty {
 namespace zurg {
 
+using namespace boost::posix_time;
 using namespace cetty::util;
 
 extern int kMicroSecondsPerSecond;
 extern int g_tempFileCount;
 extern int t_numOpenedFiles;
+extern ptime g_startTime;
 
 typedef int (*filter)(const struct dirent *);
 
@@ -40,6 +43,9 @@ int openedFiles();
 int maxOpenFiles();
 
 int fdDirFilter(const struct dirent* d);
+
+int64_t getMicroSecs(const ptime &p);
+std::string hostname();
 
 }
 }

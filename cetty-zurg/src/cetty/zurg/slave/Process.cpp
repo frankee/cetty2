@@ -3,9 +3,11 @@
 #include <cetty/zurg/slave/ZurgSlave.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/Util.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <fcntl.h>
 #include <signal.h>
@@ -18,6 +20,7 @@ namespace zurg {
 namespace slave {
 
 extern sigset_t oldSigmask;
+using namespace boost::posix_time;
 
 const int kSleepAfterExec = 0; // for strace child
 
@@ -348,13 +351,15 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response.set_std_output(stdoutSink_->bufferAsStdString());
     response.set_std_error(stderrSink_->bufferAsStdString());
     response.set_executable_file(exe_file_);
-    response.set_start_time_us(startTime_.microSecondsSinceEpoch());
-    response.set_finish_time_us(muduo::Timestamp::now().microSecondsSinceEpoch());
+    response.set_start_time_us(getMicroSecs(startTime_));
+    response.set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
     response.set_user_time(getSeconds(ru.ru_utime));
     response.set_system_time(getSeconds(ru.ru_stime));
     response.set_memory_maxrss_kb(ru.ru_maxrss);
 
     doneCallback_(&response);
+}
+
 }
 }
 }
