@@ -61,7 +61,7 @@ public:
     template<typename Iterator>
     void get(const Iterator& keyBegin, const Iterator& keyEnd, const MultiBulkCallBack& callback) {
         RedisCommandPtr command =
-            cetty::redis::command::stringsCommandGet<Iterator>(keyBegin, keyEnd);
+            cetty::redis::protocol::commands::stringsCommandGet<Iterator>(keyBegin, keyEnd);
 
         RedisServiceFuturePtr future(new RedisServiceFuture(
             boost::bind(&RedisClient::multiBulkCallBack, _1, _2, callback)));

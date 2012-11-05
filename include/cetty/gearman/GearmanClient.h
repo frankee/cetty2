@@ -18,14 +18,15 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/service/ClientServicePtr.h>
+#include <cetty/service/ClientService.h>
 #include <cetty/gearman/GearmanServiceFuture.h>
 #include <cetty/gearman/GearmanClientRequestHandler.h>
 
 namespace cetty {
 namespace gearman {
 
-using namespace  cetty::service;
+using namespace cetty::channel;
+using namespace cetty::service;
 
 class GearmanClient : public cetty::util::ReferenceCounter<GearmanClient, int> {
 public:

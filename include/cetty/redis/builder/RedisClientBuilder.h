@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <cetty/redis/protocol/RedisReplyPtr.h>
-#include <cetty/redis/protocol/RedisCommandPtr.h>
+#include <cetty/redis/protocol/RedisReply.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 #include <cetty/service/builder/ClientBuilder.h>
 
 namespace cetty {
