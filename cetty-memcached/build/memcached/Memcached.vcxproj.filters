@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="builder">
+      <UniqueIdentifier>{35b967c5-1adc-4c48-8b92-fffe67705091}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol">
+      <UniqueIdentifier>{529b2f03-cc58-4c12-be4c-3c3c35e76c61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol\commands">
+      <UniqueIdentifier>{5a4e1c38-d4f9-452e-829d-3c2e8e393430}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
+    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReply.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReplyDecoder.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Connection.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Hashes.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Keys.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Scripting.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Server.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\SortedSets.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Strings.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Transactions.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Connection.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Hashes.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Keys.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Scripting.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Server.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\SortedSets.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Strings.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Transactions.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommand.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandEncoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandPtr.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReply.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyDecoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyPtr.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
