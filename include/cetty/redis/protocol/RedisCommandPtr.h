@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISREPLYMESSAGEPTR_H)
-#define CETTY_REDIS_REDISREPLYMESSAGEPTR_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDPTR_H)
+#define CETTY_REDIS_PROTOCOL_REDISCOMMANDPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,14 +21,16 @@
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
-class RedisReplyMessage;
-typedef boost::intrusive_ptr<RedisReplyMessage> RedisReplyMessagePtr;
+class RedisCommand;
+typedef boost::intrusive_ptr<RedisCommand> RedisCommandPtr;
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISREPLYMESSAGEPTR_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDPTR_H)
 
 // Local Variables:
 // mode: c++

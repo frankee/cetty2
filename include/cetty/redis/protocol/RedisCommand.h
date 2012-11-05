@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISCOMMAND_H)
-#define CETTY_REDIS_REDISCOMMAND_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMAND_H)
+#define CETTY_REDIS_PROTOCOL_REDISCOMMAND_H
 
 /*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
@@ -28,10 +28,11 @@
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
 
-#include <cetty/redis/RedisCommandPtr.h>
+#include <cetty/redis/protocol/RedisCommandPtr.h>
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
 using namespace cetty::buffer;
 using namespace cetty::util;
@@ -134,8 +135,9 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISCOMMAND_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMAND_H)
 
 // Local Variables:
 // mode: c++

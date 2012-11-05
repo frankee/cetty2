@@ -14,11 +14,12 @@
  * under the License.
  */
 
-#include <cetty/redis/command/SortedSets.h>
+#include <cetty/redis/protocol/commands/SortedSets.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 // Sorted Sets
 static const std::string ZADD              = "ZADD";
@@ -38,6 +39,7 @@ static const std::string ZREVRANK          = "ZREVRANK";
 static const std::string ZSCORE            = "ZSCORE";
 static const std::string ZUNIONSTORE       = "ZUNIONSTORE";
 
+}
 }
 }
 }

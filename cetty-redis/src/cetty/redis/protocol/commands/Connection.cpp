@@ -14,20 +14,20 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Scripting.h>
+#include <cetty/redis/protocol/commands/Connection.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
-// Miscellaneous
-static const std::string EVAL          = "FLUSHDB";
-static const std::string EVALSHA       = "SELECT";
-static const std::string SCRIPT_EXISTS = "SCRIPT EXISTS";
-static const std::string SCRIPT_FLUSH  = "SCRIPT FLUSH";
-static const std::string SCRIPT_KILL   = "SCRIPT KILL";
-static const std::string SCRIPT_LOAD   = "SCRIPT LOAD";
+static const std::string AUTH   = "AUTH";
+static const std::string ECHO   = "ECHO";
+static const std::string PING   = "PING";
+static const std::string SELECT = "SELECT";
+static const std::string QUIT   = "QUIT";
 
+}
 }
 }
 }

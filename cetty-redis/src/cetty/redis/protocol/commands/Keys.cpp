@@ -14,12 +14,13 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Keys.h>
-#include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/protocol/commands/Keys.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 using namespace cetty::redis;
 
@@ -60,6 +61,7 @@ RedisCommandPtr keysCommandRenameNx(const std::string& key, const std::string& n
     return command;
 }
 
+}
 }
 }
 }

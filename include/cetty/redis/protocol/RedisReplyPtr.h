@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
-#define CETTY_REDIS_COMMAND_KEYS_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEPTR_H)
+#define CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,26 +17,20 @@
  * under the License.
  */
 
-#include <vector>
-#include <string>
-#include <cetty/redis/RedisCommandPtr.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
 
-using namespace cetty::redis;
-
-RedisCommandPtr keysCommandDel(const std::string& key);
-RedisCommandPtr keysCommandDel(const std::vector<std::string>& keys);
-RedisCommandPtr keysCommandRename(const std::string& key, const std::string& newKey);
-RedisCommandPtr keysCommandRenameNx(const std::string& key, const std::string& newKey);
+class RedisReply;
+typedef boost::intrusive_ptr<RedisReply> RedisReplyPtr;
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_KEYS_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEPTR_H)
 
 // Local Variables:
 // mode: c++

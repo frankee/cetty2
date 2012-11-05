@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_SERVER_H)
-#define CETTY_REDIS_COMMAND_SERVER_H
+#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_CONNECTION_H)
+#define CETTY_REDIS_PROTOCOL_COMMAND_CONNECTION_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -22,13 +22,15 @@
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_SERVER_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_CONNECTION_H)
 
 // Local Variables:
 // mode: c++

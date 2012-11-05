@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_TRANSACTIONS_H)
-#define CETTY_REDIS_COMMAND_TRANSACTIONS_H
+#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_TRANSACTIONS_H)
+#define CETTY_REDIS_PROTOCOL_COMMAND_TRANSACTIONS_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -19,11 +19,12 @@
 
 #include <string>
 #include <cetty/util/StringPiece.h>
-#include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 using namespace cetty::redis;
 
@@ -52,8 +53,9 @@ RedisCommandPtr transactionsCommandWatch(const Iterator& begin,
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_TRANSACTIONS_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_TRANSACTIONS_H)
 
 // Local Variables:
 // mode: c++

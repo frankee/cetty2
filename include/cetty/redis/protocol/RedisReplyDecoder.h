@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISREPLYMESSAGEDECODER_H)
-#define CETTY_REDIS_REDISREPLYMESSAGEDECODER_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEDECODER_H)
+#define CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEDECODER_H
 
 /*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
@@ -20,16 +20,17 @@
 #include <vector>
 #include <cetty/util/StringPiece.h>
 #include <cetty/handler/codec/ReplayingDecoder.h>
-#include <cetty/redis/RedisReplyMessagePtr.h>
+#include <cetty/redis/protocol/RedisReplyPtr.h>
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
 using namespace cetty::channel;
 using namespace cetty::util;
 using namespace cetty::handler::codec;
 
-class RedisReplyMessageDecoder : public ReplayingDecoder<RedisReplyMessagePtr> {
+class RedisReplyMessageDecoder : public ReplayingDecoder<RedisReplyPtr> {
 public:
     enum State {
         READ_INITIAL,
@@ -39,12 +40,12 @@ public:
 
 public:
     RedisReplyMessageDecoder()
-        : ReplayingDecoder<RedisReplyMessagePtr>(READ_INITIAL, true),
+        : ReplayingDecoder<RedisReplyPtr>(READ_INITIAL, true),
           maxBulkSize(1024*1024),
           bulkSize(0),
           multiBulkSize(0) {}
     RedisReplyMessageDecoder(int maxBulkSize)
-        : ReplayingDecoder<RedisReplyMessagePtr>(READ_INITIAL, true),
+        : ReplayingDecoder<RedisReplyPtr>(READ_INITIAL, true),
           maxBulkSize(maxBulkSize),
           bulkSize(0),
           multiBulkSize(0) {}
@@ -55,12 +56,12 @@ public:
     virtual std::string toString() const { return "RedisReplyMessageDecoder"; }
 
 protected:
-    virtual RedisReplyMessagePtr decode(ChannelHandlerContext& ctx,
+    virtual RedisReplyPtr decode(ChannelHandlerContext& ctx,
                                         const ReplayingDecoderBufferPtr& buffer,
                                         int state);
 
 private:
-    RedisReplyMessagePtr readMultiBukls(const ReplayingDecoderBufferPtr& buffer,
+    RedisReplyPtr readMultiBukls(const ReplayingDecoderBufferPtr& buffer,
                                         const StringPiece& bytes,
                                         std::vector<StringPiece>* bulks);
 
@@ -77,20 +78,21 @@ private:
      */
     int indexOf(const StringPiece& bytes, int offset);
 
-    RedisReplyMessagePtr reset();
+    RedisReplyPtr reset();
 
 private:
     int maxBulkSize;
 
     int bulkSize;
     int multiBulkSize;
-    RedisReplyMessagePtr reply;
+    RedisReplyPtr reply;
 };
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISREPLYMESSAGEDECODER_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGEDECODER_H)
 
 // Local Variables:
 // mode: c++

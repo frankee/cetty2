@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISREPLYMESSAGE_H)
-#define CETTY_REDIS_REDISREPLYMESSAGE_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGE_H)
+#define CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -23,7 +23,7 @@
 #include <cetty/util/Enum.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/redis/RedisReplyMessagePtr.h>
+#include <cetty/redis/protocol/RedisReplyPtr.h>
 
 #if defined(WIN32)
 #if defined(ERROR)
@@ -33,30 +33,31 @@
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
 using namespace cetty::util;
 
-class RedisReplyMessageType : public cetty::util::Enum<RedisReplyMessageType> {
+class RedisReplyType : public cetty::util::Enum<RedisReplyType> {
 public:
-    static const RedisReplyMessageType STRING;
-    static const RedisReplyMessageType ARRAY;
-    static const RedisReplyMessageType INTEGER;
-    static const RedisReplyMessageType NIL;
-    static const RedisReplyMessageType STATUS;
-    static const RedisReplyMessageType ERROR;
+    static const RedisReplyType STRING;
+    static const RedisReplyType ARRAY;
+    static const RedisReplyType INTEGER;
+    static const RedisReplyType NIL;
+    static const RedisReplyType STATUS;
+    static const RedisReplyType ERROR;
 
 private:
-    RedisReplyMessageType(int value) : cetty::util::Enum<RedisReplyMessageType>(value) {}
+    RedisReplyType(int value) : cetty::util::Enum<RedisReplyType>(value) {}
 };
 
-class RedisReplyMessage : public ReferenceCounter<RedisReplyMessage> {
+class RedisReply : public ReferenceCounter<RedisReply> {
 public:
-    RedisReplyMessage() : type(RedisReplyMessageType::NIL) {}
+    RedisReply() : type(RedisReplyType::NIL) {}
 
-    void setType(const RedisReplyMessageType& type) {
+    void setType(const RedisReplyType& type) {
         this->type = type;
     }
-    const RedisReplyMessageType& getType() const {
+    const RedisReplyType& getType() const {
         return this->type;
     }
 
@@ -75,34 +76,38 @@ public:
     int64_t getInteger() const;
 
     StringPiece getString() const {
-        if (type == RedisReplyMessageType::STRING) {
+        if (type == RedisReplyType::STRING) {
             return boost::get<StringPiece>(value);
         }
+
         return StringPiece();
     }
 
     StringPiece getStatus() const {
-        if (type == RedisReplyMessageType::STATUS) {
+        if (type == RedisReplyType::STATUS) {
             return boost::get<StringPiece>(value);
         }
+
         return StringPiece();
     }
 
     StringPiece getError() const {
-        if (type == RedisReplyMessageType::ERROR) {
+        if (type == RedisReplyType::ERROR) {
             return boost::get<StringPiece>(value);
         }
+
         return StringPiece();
     }
 
     bool isNil() const {
-        return type == RedisReplyMessageType::NIL;
+        return type == RedisReplyType::NIL;
     }
 
     const std::vector<StringPiece>& getArray() const {
-        if (type == RedisReplyMessageType::ARRAY) {
+        if (type == RedisReplyType::ARRAY) {
             return boost::get<std::vector<StringPiece> >(value);
         }
+
         return EMPTY_STRING_PIECES;
     }
 
@@ -110,11 +115,11 @@ public:
 
 private:
     typedef boost::variant<int64_t,
-        StringPiece,
-        std::vector<StringPiece> > Value;
+            StringPiece,
+            std::vector<StringPiece> > Value;
 
 private:
-    RedisReplyMessageType  type;
+    RedisReplyType  type;
     Value value;
 
 private:
@@ -123,8 +128,9 @@ private:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISREPLYMESSAGE_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISREPLYMESSAGE_H)
 
 // Local Variables:
 // mode: c++

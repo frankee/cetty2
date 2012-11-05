@@ -14,11 +14,12 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Transactions.h>
+#include <cetty/redis/protocol/commands/Transactions.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 // Miscellaneous
 const std::string DISCARD  = "DISCARD";
@@ -57,6 +58,7 @@ RedisCommandPtr transactionsCommandWatch(const std::string& key) {
     return command;
 }
 
+}
 }
 }
 }

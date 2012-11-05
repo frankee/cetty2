@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISCOMMANDPTR_H)
-#define CETTY_REDIS_REDISCOMMANDPTR_H
+#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_SCRIPTING_H)
+#define CETTY_REDIS_PROTOCOL_COMMAND_SCRIPTING_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,18 +17,20 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+#include <string>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace redis {
-
-class RedisCommand;
-typedef boost::intrusive_ptr<RedisCommand> RedisCommandPtr;
+namespace protocol {
+namespace commands {
 
 }
 }
+}
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISCOMMANDPTR_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_SCRIPTING_H)
 
 // Local Variables:
 // mode: c++

@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_HASHES_H)
-#define CETTY_REDIS_COMMAND_HASHES_H
+#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_HASHES_H)
+#define CETTY_REDIS_PROTOCOL_COMMAND_HASHES_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -22,11 +22,12 @@
 
 #include <cetty/Types.h>
 #include <cetty/util/StringPiece.h>
-#include <cetty/redis/RedisCommandPtr.h>
+#include <cetty/redis/protocol/RedisCommandPtr.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 using namespace cetty::util;
 using namespace cetty::redis;
@@ -54,18 +55,18 @@ RedisCommandPtr hashesCommandFieldCnt(const std::string& key);
 
 
 RedisCommandPtr hashesCommandSet(const std::string& key,
-    const std::vector<std::pair<std::string, std::string> >& values);
+                                 const std::vector<std::pair<std::string, std::string> >& values);
 
 RedisCommandPtr hashesCommandSet(const std::string& key,
-    const std::vector<std::pair<std::string, StringPiece> >& values);
+                                 const std::vector<std::pair<std::string, StringPiece> >& values);
 
 RedisCommandPtr hashesCommandSet(const std::string& key,
-    const std::vector<std::string>& fields,
-    const std::vector<std::string>& values);
+                                 const std::vector<std::string>& fields,
+                                 const std::vector<std::string>& values);
 
 RedisCommandPtr hashesCommandSet(const std::string& key,
-    const std::vector<std::string>& fields,
-    const std::vector<StringPiece>& values);
+                                 const std::vector<std::string>& fields,
+                                 const std::vector<StringPiece>& values);
 
 RedisCommandPtr hashesCommandSet(const std::string& key,
                                  const std::string& field,
@@ -88,8 +89,9 @@ RedisCommandPtr hashesCommandValues(const std::string& key);
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_HASHES_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_HASHES_H)
 
 // Local Variables:
 // mode: c++

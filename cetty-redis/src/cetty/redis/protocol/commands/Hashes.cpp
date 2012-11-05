@@ -14,14 +14,15 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Hashes.h>
-#include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/protocol/commands/Hashes.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
-    using namespace cetty::redis;
+using namespace cetty::redis;
 
 // Hash Sets
 static const std::string HDEL         = "HDEL";
@@ -74,24 +75,12 @@ RedisCommandPtr hashesCommandSet(const std::string& key, const std::string& fiel
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::pair<std::string, std::string> >& values) {
+RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::pair<std::string, std::string> >& values) {
     RedisCommandPtr command(new RedisCommand(HMSET));
     *command << key;
 
     std::size_t j = values.size();
-    for (std::size_t i = 0; i < j; ++i) {
-        *command << values[i].first << values[i].second;
-    }
-    
-    command->done();
-    return command;
-}
 
-cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::pair<std::string, StringPiece> >& values) {
-    RedisCommandPtr command(new RedisCommand(HMSET));
-    *command << key;
-
-    std::size_t j = values.size();
     for (std::size_t i = 0; i < j; ++i) {
         *command << values[i].first << values[i].second;
     }
@@ -100,11 +89,26 @@ cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::string>& fields, const std::vector<std::string>& values) {
+RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::pair<std::string, StringPiece> >& values) {
     RedisCommandPtr command(new RedisCommand(HMSET));
     *command << key;
 
     std::size_t j = values.size();
+
+    for (std::size_t i = 0; i < j; ++i) {
+        *command << values[i].first << values[i].second;
+    }
+
+    command->done();
+    return command;
+}
+
+RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::string>& fields, const std::vector<std::string>& values) {
+    RedisCommandPtr command(new RedisCommand(HMSET));
+    *command << key;
+
+    std::size_t j = values.size();
+
     for (std::size_t i = 0; i < j; ++i) {
         *command << fields[i] << values[i];
     }
@@ -113,11 +117,12 @@ cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::string>& fields, const std::vector<StringPiece>& values) {
+RedisCommandPtr hashesCommandSet(const std::string& key, const std::vector<std::string>& fields, const std::vector<StringPiece>& values) {
     RedisCommandPtr command(new RedisCommand(HMSET));
     *command << key;
 
     std::size_t j = values.size();
+
     for (std::size_t i = 0; i < j; ++i) {
         *command << fields[i] << values[i];
     }
@@ -144,42 +149,43 @@ RedisCommandPtr hashesCommandValues(const std::string& key) {
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandDel(const std::string& key, const std::string& field) {
+RedisCommandPtr hashesCommandDel(const std::string& key, const std::string& field) {
     RedisCommandPtr command(new RedisCommand(HDEL));
     (*command << key << field).done();
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandDel(const std::string& key, const std::vector<std::string>& fields) {
+RedisCommandPtr hashesCommandDel(const std::string& key, const std::vector<std::string>& fields) {
     RedisCommandPtr command(new RedisCommand(HDEL));
     (*command << key << fields).done();
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandExist(const std::string& key, const std::string& field) {
+RedisCommandPtr hashesCommandExist(const std::string& key, const std::string& field) {
     RedisCommandPtr command(new RedisCommand(HEXISTS));
     (*command << key << field).done();
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandGet(const std::string& key, const std::string& field) {
+RedisCommandPtr hashesCommandGet(const std::string& key, const std::string& field) {
     RedisCommandPtr command(new RedisCommand(HGET));
     (*command << key << field).done();
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandGet(const std::string& key, const std::vector<std::string>& fields) {
+RedisCommandPtr hashesCommandGet(const std::string& key, const std::vector<std::string>& fields) {
     RedisCommandPtr command(new RedisCommand(HMGET));
     (*command << key << fields).done();
     return command;
 }
 
-cetty::redis::RedisCommandPtr hashesCommandFieldCnt(const std::string& key) {
+RedisCommandPtr hashesCommandFieldCnt(const std::string& key) {
     RedisCommandPtr command(new RedisCommand(HLEN));
     (*command << key).done();
     return command;
 }
 
+}
 }
 }
 }

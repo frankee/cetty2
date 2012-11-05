@@ -15,14 +15,17 @@
  */
 
 #include <cetty/redis/builder/RedisClientBuilder.h>
-#include <cetty/redis/RedisCommandEncoder.h>
-#include <cetty/redis/RedisReplyMessageDecoder.h>
+
+#include <cetty/redis/protocol/RedisReply.h>
+#include <cetty/redis/protocol/RedisReplyDecoder.h>
+#include <cetty/redis/protocol/RedisCommandEncoder.h>
 
 namespace cetty {
 namespace redis {
 namespace builder {
 
 using namespace cetty::redis;
+using namespace cetty::redis::protocol;
 
 RedisClientBuilder::RedisClientBuilder()
     : ClientBuilderType() {

@@ -14,12 +14,13 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Strings.h>
-#include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/protocol/commands/Strings.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 using namespace cetty::redis;
 
@@ -115,8 +116,9 @@ RedisCommandPtr stringsCommandIncrement(const std::string& key, double value) {
 
 RedisCommandPtr stringsCommandSet(const std::string& key, const StringPiece& value, int expiration) {
     RedisCommandPtr command;
-    
+
     int second = expiration / 1000;
+
     if (second * 1000 == expiration) {
         command = new RedisCommand(PSETEX);
         (*command << key << expiration << value).done();
@@ -125,7 +127,7 @@ RedisCommandPtr stringsCommandSet(const std::string& key, const StringPiece& val
         command = new RedisCommand(SETEX);
         (*command << key << second << value).done();
     }
-    
+
     return command;
 }
 
@@ -159,6 +161,7 @@ RedisCommandPtr stringsCommandStrlen(const std::string& key) {
     return command;
 }
 
+}
 }
 }
 }

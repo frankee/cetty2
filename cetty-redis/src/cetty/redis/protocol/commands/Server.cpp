@@ -14,16 +14,18 @@
  * under the License.
  */
 
-#include <cetty/redis/command/Server.h>
+#include <cetty/redis/protocol/commands/Server.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 // Server
 static const std::string BGREWRITEAOF      = "BGREWRITEAOF";
 static const std::string FLUSHDB           = "FLUSHDB";
 
+}
 }
 }
 }

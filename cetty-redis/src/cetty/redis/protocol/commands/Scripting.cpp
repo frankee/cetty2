@@ -1,6 +1,3 @@
-#if !defined(CETTY_REDIS_COMMAND_SCRIPTING_H)
-#define CETTY_REDIS_COMMAND_SCRIPTING_H
-
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -17,19 +14,22 @@
  * under the License.
  */
 
-#include <string>
-#include <cetty/util/StringPiece.h>
+#include <cetty/redis/protocol/commands/Scripting.h>
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
+
+// Miscellaneous
+static const std::string EVAL          = "FLUSHDB";
+static const std::string EVALSHA       = "SELECT";
+static const std::string SCRIPT_EXISTS = "SCRIPT EXISTS";
+static const std::string SCRIPT_FLUSH  = "SCRIPT FLUSH";
+static const std::string SCRIPT_KILL   = "SCRIPT KILL";
+static const std::string SCRIPT_LOAD   = "SCRIPT LOAD";
 
 }
 }
 }
-
-#endif //#if !defined(CETTY_REDIS_COMMAND_SCRIPTING_H)
-
-// Local Variables:
-// mode: c++
-// End:
+}

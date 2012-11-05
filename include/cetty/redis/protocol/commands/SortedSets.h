@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_COMMAND_SORTEDSETS_H)
-#define CETTY_REDIS_COMMAND_SORTEDSETS_H
+#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_SORTEDSETS_H)
+#define CETTY_REDIS_PROTOCOL_COMMAND_SORTEDSETS_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,13 +21,15 @@
 
 namespace cetty {
 namespace redis {
-namespace command {
+namespace protocol {
+namespace commands {
 
 }
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_COMMAND_SORTEDSETS_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_COMMAND_SORTEDSETS_H)
 
 // Local Variables:
 // mode: c++

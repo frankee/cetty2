@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_REDISCOMMANDENCODER_H)
-#define CETTY_REDIS_REDISCOMMANDENCODER_H
+#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H)
+#define CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,10 +18,11 @@
  */
 
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
-#include <cetty/redis/RedisCommand.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
@@ -45,8 +46,9 @@ protected:
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_REDIS_REDISCOMMANDENCODER_H)
+#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H)
 
 // Local Variables:
 // mode: c++

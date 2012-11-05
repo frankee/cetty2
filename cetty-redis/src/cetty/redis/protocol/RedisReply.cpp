@@ -14,24 +14,25 @@
  * under the License.
  */
 
-#include <cetty/redis/RedisReplyMessage.h>
+#include <cetty/redis/protocol/RedisReply.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace redis {
+namespace protocol {
 
-const RedisReplyMessageType RedisReplyMessageType::STRING  = 0;
-const RedisReplyMessageType RedisReplyMessageType::ARRAY   = 1;
-const RedisReplyMessageType RedisReplyMessageType::INTEGER = 2;
-const RedisReplyMessageType RedisReplyMessageType::NIL     = 3;
-const RedisReplyMessageType RedisReplyMessageType::STATUS  = 4;
-const RedisReplyMessageType RedisReplyMessageType::ERROR   = 5;
+const RedisReplyType RedisReplyType::STRING  = 0;
+const RedisReplyType RedisReplyType::ARRAY   = 1;
+const RedisReplyType RedisReplyType::INTEGER = 2;
+const RedisReplyType RedisReplyType::NIL     = 3;
+const RedisReplyType RedisReplyType::STATUS  = 4;
+const RedisReplyType RedisReplyType::ERROR   = 5;
 
-const std::vector<StringPiece> RedisReplyMessage::EMPTY_STRING_PIECES;
+const std::vector<StringPiece> RedisReply::EMPTY_STRING_PIECES;
 
-int64_t RedisReplyMessage::getInteger() const {
-    if (type == RedisReplyMessageType::INTEGER) {
+int64_t RedisReply::getInteger() const {
+    if (type == RedisReplyType::INTEGER) {
         return boost::get<int64_t>(value);
     }
     else {
@@ -40,16 +41,18 @@ int64_t RedisReplyMessage::getInteger() const {
     }
 }
 
-std::vector<StringPiece>* RedisReplyMessage::getMutableArray() {
-    if (type == RedisReplyMessageType::ARRAY) {
+std::vector<StringPiece>* RedisReply::getMutableArray() {
+    if (type == RedisReplyType::ARRAY) {
         if (value.which() == 0) {
             value = std::vector<StringPiece>();
         }
 
         return boost::get<std::vector<StringPiece> >(&value);
     }
+
     return NULL;
 }
 
+}
 }
 }
