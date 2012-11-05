@@ -21,6 +21,7 @@
 *.cc-
 .project
 .cproject
+.sh
 tags
 
 CMakeCache.txt

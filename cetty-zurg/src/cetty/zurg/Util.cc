@@ -1,12 +1,15 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/SmallFile.h>
+#include <cetty/util/Integer.h>
 
 #include <string>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/file.h>
+#include <sys/stat.h>
+#include <sys/resource.h>
 
 namespace cetty {
 namespace zurg {

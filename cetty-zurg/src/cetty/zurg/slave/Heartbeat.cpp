@@ -196,7 +196,8 @@ void Heartbeat::beat(bool showStatic){
     strip_stat(hb.mutable_proc_stat());
 
     // todo fix error
-    stub_->slaveHeartbeat(hb, ignoreCallback);
+    slaveHeartbeatServiceFuturePtr hbsf = new slaveHeartbeatServiceFuture();
+    stub_->slaveHeartbeat(&hb, hbsf);
 }
 
 }

@@ -11,10 +11,12 @@
 #include <cetty/zurg/slave/slave.pb.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/TimeoutPtr.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 #include <string>
 
 struct rusage;
@@ -29,6 +31,7 @@ class Process;
 
 using namespace cetty::protobuf::service;
 using namespace cetty::channel;
+using namespace boost::posix_time;
 
 typedef boost::shared_ptr<Process> ProcessPtr;
 typedef boost::function1<void, const MessagePtr&> DoneCallback;
@@ -60,7 +63,6 @@ public:
     void onTimeout();
 
     static void onTimeoutWeak(const boost::weak_ptr<Process>& wkPtr);
-
 private:
     void execChild(Pipe& execError, int stdOutput, int stdError)
     __attribute__((__noreturn__));
@@ -69,7 +71,7 @@ private:
 
 private:
     EventLoopPtr loop_;
-    ConstRunCommandRequestPtr request_;
+    RunCommandRequestPtr request_;
     RunCommandResponsePtr response_;
     DoneCallback doneCallback_;
 

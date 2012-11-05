@@ -96,10 +96,14 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
 Process::~Process() {
     LOG_DEBUG << "Process[" << pid_ << "] dtor";
 
+    //todo complete destructor like below
+
+    /*
     if (stdoutSink_ || stderrSink_) {
-        // todo how to judge if the event loop is working is cettt's event loop
+        // todo how to judge if the cetty's event loop is working.
         assert(!loop_->eventHandling());
     }
+    */
 }
 
 int Process::start() {
@@ -330,8 +334,7 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     if (WIFEXITED(status)) {
         snprintf(buf, sizeof buf, "exit status %d", WEXITSTATUS(status));
         response.set_exit_status(WEXITSTATUS(status));
-    }
-    else if (WIFSIGNALED(status)) {
+    } else if (WIFSIGNALED(status)) {
         snprintf(buf, sizeof buf, "signaled %d%s",
                  WTERMSIG(status), WCOREDUMP(status) ? " (core dump)" : "");
         response.set_signaled(WTERMSIG(status));
@@ -340,10 +343,12 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
 
     LOG_INFO << "Process[" << pid_ << "] onCommandExit " << buf;
 
-    assert(!loop_->eventHandling());
+    // todo how to replace below code by cetty's event loop
+    //assert(!loop_->eventHandling());
+
     // FIXME: defer 100ms or blocking read to capture all outputs.
-    stdoutSink_->stop(pid_);
-    stderrSink_->stop(pid_);
+    //stdoutSink_->stop(pid_);
+    //stderrSink_->stop(pid_);
 
     response.set_error_code(0);
     response.set_pid(pid_);
