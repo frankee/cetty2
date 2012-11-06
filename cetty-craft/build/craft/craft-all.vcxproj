@@ -476,17 +476,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\builder\RedisClientBuilder.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Connection.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Hashes.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Keys.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Scripting.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Server.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\SortedSets.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Strings.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Transactions.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Connection.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Hashes.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Keys.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Scripting.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Server.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\SortedSets.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Strings.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Transactions.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\RedisReply.cpp" />
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\RedisReplyDecoder.cpp" />
     <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisClient.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessage.cpp" />
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessageDecoder.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />

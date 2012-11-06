@@ -117,7 +117,10 @@
     <Filter Include="redis\builder">
       <UniqueIdentifier>{0e66e113-c2a0-4868-a81d-59e4f3d6b620}</UniqueIdentifier>
     </Filter>
-    <Filter Include="redis\command">
+    <Filter Include="redis\protocol">
+      <UniqueIdentifier>{53cf205c-c13d-42b0-8b87-fff5c798da54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="redis\protocol\commands">
       <UniqueIdentifier>{3a6311cd-450e-4768-bfbf-b5fafc730e7c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -505,9 +508,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandlerPtr.h">
       <Filter>core\channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h">
       <Filter>core\channel</Filter>
@@ -1465,38 +1465,38 @@
     <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisClient.cpp">
       <Filter>redis</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessageDecoder.cpp">
-      <Filter>redis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\RedisReplyMessage.cpp">
-      <Filter>redis</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\builder\RedisClientBuilder.cpp">
       <Filter>redis\builder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Connection.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Connection.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Hashes.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Hashes.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Keys.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Keys.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Scripting.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Scripting.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Server.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Server.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\SortedSets.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\SortedSets.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Strings.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Strings.cpp">
+      <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\command\Transactions.cpp">
-      <Filter>redis\command</Filter>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Transactions.cpp">
+      <Filter>redis\protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\RedisReply.cpp">
+      <Filter>redis\protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\RedisReplyDecoder.cpp">
+      <Filter>redis\protocol</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
