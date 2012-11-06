@@ -11,7 +11,9 @@
 #include <cetty/zurg/slave/slave.pb.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoop.h>
 #include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/Timeout.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -26,7 +28,6 @@ namespace zurg {
 namespace slave {
 
 class Pipe;
-class Sink;
 class Process;
 
 using namespace cetty::protobuf::service;
@@ -41,7 +42,7 @@ class Process : public boost::enable_shared_from_this<Process>,
 public:
     Process(
         const EventLoopPtr& loop,
-        const ConstRunCommandRequestPtr& request,
+        const RunCommandRequestPtr& request,
         const RunCommandResponsePtr& response,
         const DoneCallback& done
     );
@@ -83,8 +84,8 @@ private:
     int64_t startTimeInJiffies_;
     cetty::channel::TimeoutPtr timerId_;
 
-    boost::shared_ptr<Sink> stdoutSink_;
-    boost::shared_ptr<Sink> stderrSink_;
+    //boost::shared_ptr<Sink> stdoutSink_;
+    //boost::shared_ptr<Sink> stderrSink_;
 
     bool redirectStdout_;
     bool redirectStderr_;

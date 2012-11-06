@@ -7,6 +7,7 @@
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/zurg/Util.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -20,7 +21,7 @@ using namespace cetty::zurg::slave;
 
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
     : loop_(loop),
-      psManager_(new ProcessManager(loop, zombieInterval)),
+      psManager_(new ProcessManager(loop)),
       apps_(new ApplicationManager(loop, psManager_.get())) {
 }
 
@@ -106,11 +107,11 @@ void SlaveServiceImpl::getFileChecksum(
 
 void SlaveServiceImpl::getFileChecksumDone(
     const ConstGetFileChecksumRequestPtr& request,
-    const GetFileChecksumResponsePtr& checksumResponse,
+    const google::protobuf::Message* message,
     const DoneCallback& done){
 
     const RunCommandResponse* runCommandResp =
-          google::protobuf::down_cast<const RunCommandResponse*>(checksumResponse);
+          google::protobuf::down_cast<const RunCommandResponse*>(message);
 
     const std::string& lines = runCommandResp->std_output();
     std::map<StringPiece, StringPiece> md5sums;
@@ -130,7 +131,10 @@ void SlaveServiceImpl::runCommand(
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(loop_, request, response, done));
+    ProcessPtr process(new Process(loop_,
+                          const_cast<RunCommandRequestPtr &>(request),
+                          response,
+                          done));
     int err = 12; // ENOMEM;
 
     try {
