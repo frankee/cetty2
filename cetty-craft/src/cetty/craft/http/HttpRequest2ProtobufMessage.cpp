@@ -91,7 +91,6 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                     ProtobufParser* jsonParser = ProtobufParser::getParser("json");
 
                     if (jsonParser) {
-                        Message* req = prototype->New();
                         const std::string& reqStr = request->getQueryParameters().get("req");
 
                         if (req && !jsonParser->parse(reqStr, req)) {
@@ -108,6 +107,8 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 LOG_ERROR << "can not parse the message: "
                           << prototype->GetDescriptor()->full_name();
             }
+
+            delete req;
         }
         else {
             LOG_ERROR << "has no such service register: "
