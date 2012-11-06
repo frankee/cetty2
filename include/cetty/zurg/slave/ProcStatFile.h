@@ -8,6 +8,8 @@
 #ifndef PROCSTATFILE_H_
 #define PROCSTATFILE_H_
 
+#include <stdint.h>
+
 namespace cetty {
 namespace zurg {
 namespace slave {
@@ -16,10 +18,10 @@ struct ProcStatFile {
 public:
     explicit ProcStatFile(int pid);
 
-    bool valid;
-    int error;
-    int ppid;
-    int64_t startTime;
+    bool valid_;
+    int error_;
+    int ppid_;
+    int64_t startTime_;
 
 private:
     void parse(const char* buffer);

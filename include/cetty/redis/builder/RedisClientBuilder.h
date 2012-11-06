@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <cetty/redis/RedisCommand.h>
-#include <cetty/redis/RedisReplyMessage.h>
+#include <cetty/redis/protocol/RedisReply.h>
+#include <cetty/redis/protocol/RedisCommand.h>
 #include <cetty/service/builder/ClientBuilder.h>
 
 namespace cetty {
@@ -26,12 +26,12 @@ namespace redis {
 namespace builder {
 
 using namespace cetty::service::builder;
-using namespace cetty::redis;
+using namespace cetty::redis::protocol;
 
 class RedisClientBuilder
-        : public ClientBuilder<RedisCommandPtr, RedisReplyMessagePtr> {
+        : public ClientBuilder<RedisCommandPtr, RedisReplyPtr> {
 public:
-    typedef ClientBuilder<RedisCommandPtr, RedisReplyMessagePtr> ClientBuilderType;
+    typedef ClientBuilder<RedisCommandPtr, RedisReplyPtr> ClientBuilderType;
 
 public:
     RedisClientBuilder();

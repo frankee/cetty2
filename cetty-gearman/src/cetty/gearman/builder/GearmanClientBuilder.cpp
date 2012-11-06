@@ -19,9 +19,9 @@
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
-#include <cetty/gearman/GearmanDecoder.h>
-#include <cetty/gearman/GearmanEncoder.h>
 #include <cetty/gearman/GearmanClientHandler.h>
+#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
+#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
 
 namespace cetty {
 namespace gearman {
@@ -56,8 +56,8 @@ void GearmanClientBuilder::init() {
 
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
 
-    pipeline->addLast("gearmanDecoder", new GearmanDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanEncoder());
+    pipeline->addLast("gearmanDecoder", new GearmanMessageDecoder());
+    pipeline->addLast("gearmanEncoder", new GearmanMessageEncoder());
     pipeline->addLast("gearmanClient", new GearmanClientHandler());
 
     ClientBuilderType::setPipeline(pipeline);

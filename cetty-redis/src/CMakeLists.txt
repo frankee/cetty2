@@ -4,9 +4,12 @@
 
 AUX_SOURCE_DIRECTORY(cetty/redis REDIS_DIR)
 AUX_SOURCE_DIRECTORY(cetty/redis/builder REDIS_BUILDER_DIR)
-AUX_SOURCE_DIRECTORY(cetty/redis/command REDIS_COMMAND_DIR)
+AUX_SOURCE_DIRECTORY(cetty/redis/protocol REDIS_PROTOCOL_DIR)
+AUX_SOURCE_DIRECTORY(cetty/redis/protocol/commands REDIS_PROTOCOL_COMMANDS_DIR)
 
-SET(redis_sources ${REDIS_DIR} ${REDIS_BUILDER_DIR} ${REDIS_COMMAND_DIR})
+SET(redis_sources ${REDIS_DIR} ${REDIS_BUILDER_DIR}
+                  ${REDIS_PROTOCOL_DIR} ${REDIS_PROTOCOL_COMMANDS_DIR})
+				  
 SET(redis_lib cetty-redis)
 
 cxx_static_library(${redis_lib} ${redis_sources})

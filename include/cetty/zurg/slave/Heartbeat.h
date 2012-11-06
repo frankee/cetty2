@@ -1,41 +1,50 @@
 #ifndef HEARTBEAT_H_
 #define HEARTBEAT_H_
 
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoop.h>
+#include <cetty/zurg/slave/ZurgSlaveConfig.h>
+
+#include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <string>
 
 namespace cetty {
 namespace zurg {
+namespace master {
+    class MasterService_Stub;
+}}}
+
+namespace cetty {
+namespace zurg {
 namespace slave {
-class MasterService_Stub;
-class SlaveConfig;
 class ProcFs;
 
-class Heartbeat : boost::noncopyable
-{
+using namespace cetty::zurg::master;
+using namespace cetty::channel;
+
+class Heartbeat : boost::noncopyable{
  public:
   Heartbeat(const EventLoopPtr &loop,
-            const SlaveConfig& config,
             MasterService_Stub* stub);
   ~Heartbeat();
   void start();
   void stop();
 
  private:
+  void init();
   void onTimer();
 
   void beat(bool showStatic);
 
   EventLoopPtr loop_;
-  const std::string name_;
-  const int port_;
+  std::string name_;
+  int port_;
   MasterService_Stub* stub_;
   boost::scoped_ptr<ProcFs> procFs_;
   bool beating_;
+
+  ZurgSlaveConfig config_;
 };
 
 }

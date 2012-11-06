@@ -13,12 +13,10 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanWorkerBuilder.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClient.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientRequestHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessagePtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorker.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h" />
@@ -26,20 +24,31 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufClientFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Client.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Common.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Worker.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessagePtr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanWorkerBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorker.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\GearmanWorkerHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\builder\GearmanProtobufWorkerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufClientFilter.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protobuf\GearmanProtobufWorkerFilter.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Client.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Common.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Worker.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageEncoder.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}</ProjectGuid>

@@ -69,7 +69,7 @@ ClientService::ClientService(const EventLoopPtr& eventLoop,
     pipeline->attach(shared_from_this());
 
     LOG_INFO << "ClientService firing the Channel Create Event.";
-    pipeline->fireChannelCreated();
+    pipeline->fireChannelOpen();
 }
 
 void ClientService::setPipeline(const ChannelPipelinePtr& pipeline) {

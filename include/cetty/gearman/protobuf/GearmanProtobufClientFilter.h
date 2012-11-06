@@ -18,7 +18,7 @@
  */
 #include <cetty/service/ClientServiceFilter.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -27,7 +27,7 @@ namespace protobuf {
 using namespace cetty::service;
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
-using namespace cetty::gearman;
+using namespace cetty::gearman::protocol;
 
 class GearmanProtobufClientFilter
     : public cetty::service::ClientServiceFilter<

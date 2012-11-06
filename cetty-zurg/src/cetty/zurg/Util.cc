@@ -1,12 +1,15 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/SmallFile.h>
+#include <cetty/util/Integer.h>
 
 #include <string>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/file.h>
+#include <sys/stat.h>
+#include <sys/resource.h>
 
 namespace cetty {
 namespace zurg {
@@ -16,6 +19,7 @@ using namespace cetty::util;
 int kMicroSecondsPerSecond = 1000 * 1000;
 int g_tempFileCount = 0;
 int t_numOpenedFiles = 0;
+ptime g_startTime = microsec_clock::local_time();
 
 int fdDirFilter(const struct dirent* d){
     if (::isdigit(d->d_name[0])){
@@ -154,6 +158,18 @@ int maxOpenFiles(){
     } else {
         return static_cast<int>(rl.rlim_cur);
     }
+}
+
+int64_t getMicroSecs(const ptime &p){
+    ptime epoch(boost::gregorian::date(1970,1,1));
+    time_duration::tick_type x = (p - epoch).total_nanoseconds();
+    return static_cast<int64_t>(x);
+}
+
+std::string hostname(){
+    char buf[64] = "unknownhost";
+    ::gethostname(buf, sizeof buf);
+    return buf;
 }
 
 }

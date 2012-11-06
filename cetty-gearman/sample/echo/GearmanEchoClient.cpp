@@ -4,7 +4,7 @@
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/gearman/builder/GearmanClientBuilder.h>
-#include <cetty/gearman/GearmanMessage.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
 using namespace cetty::buffer;
 using namespace cetty::channel;
@@ -12,6 +12,7 @@ using namespace cetty::gearman;
 using namespace cetty::bootstrap;
 using namespace cetty::service;
 using namespace cetty::gearman::builder;
+using namespace cetty::gearman::protocol;
 
 class GearmanEchoClient {
 private:

@@ -3,21 +3,27 @@
 #include <cetty/zurg/slave/ZurgSlave.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/Util.h>
+#include <cetty/zurg/slave/Pipe.h>
+#include <cetty/zurg/slave/ProcStatFile.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 namespace cetty{
 namespace zurg {
 namespace slave {
 
 extern sigset_t oldSigmask;
+using namespace boost::posix_time;
 
 const int kSleepAfterExec = 0; // for strace child
 
@@ -44,7 +50,7 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
 
 Process::Process(
     const EventLoopPtr& loop,
-    const ConstRunCommandRequestPtr& request,
+    const RunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
     const DoneCallback& done
 ): loop_(loop),
@@ -93,10 +99,14 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
 Process::~Process() {
     LOG_DEBUG << "Process[" << pid_ << "] dtor";
 
+    //todo complete destructor like below
+
+    /*
     if (stdoutSink_ || stderrSink_) {
-        // todo how to judge if the event loop is working is cettt's event loop
+        // todo how to judge if the cetty's event loop is working.
         assert(!loop_->eventHandling());
     }
+    */
 }
 
 int Process::start() {
@@ -158,9 +168,9 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
     try {
         ProcStatFile stat(cetty::util::Process::id());
 
-        if (!stat.valid) { throw stat.error; }
+        if (!stat.valid_) { throw stat.error_; }
 
-        execError.write(stat.startTime);
+        execError.write(stat.startTime_);
 
         std::vector<const char*> argv;
         argv.reserve(request_->args_size() + 2);
@@ -310,9 +320,9 @@ void Process::onTimeout() {
 
     const ProcStatFile stat(pid_);
 
-    if (stat.valid
-        && stat.ppid == cetty::util::Process::id()
-        && stat.startTime == startTimeInJiffies_) {
+    if (stat.valid_
+        && stat.ppid_ == cetty::util::Process::id()
+        && stat.startTime_ == startTimeInJiffies_) {
         ::kill(pid_, SIGINT);
     }
 }
@@ -327,8 +337,7 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     if (WIFEXITED(status)) {
         snprintf(buf, sizeof buf, "exit status %d", WEXITSTATUS(status));
         response.set_exit_status(WEXITSTATUS(status));
-    }
-    else if (WIFSIGNALED(status)) {
+    } else if (WIFSIGNALED(status)) {
         snprintf(buf, sizeof buf, "signaled %d%s",
                  WTERMSIG(status), WCOREDUMP(status) ? " (core dump)" : "");
         response.set_signaled(WTERMSIG(status));
@@ -337,24 +346,28 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
 
     LOG_INFO << "Process[" << pid_ << "] onCommandExit " << buf;
 
-    assert(!loop_->eventHandling());
+    // todo how to replace below code by cetty's event loop
+    //assert(!loop_->eventHandling());
+
     // FIXME: defer 100ms or blocking read to capture all outputs.
-    stdoutSink_->stop(pid_);
-    stderrSink_->stop(pid_);
+    //stdoutSink_->stop(pid_);
+    //stderrSink_->stop(pid_);
 
     response.set_error_code(0);
     response.set_pid(pid_);
     response.set_status(status);
-    response.set_std_output(stdoutSink_->bufferAsStdString());
-    response.set_std_error(stderrSink_->bufferAsStdString());
+    //response.set_std_output(stdoutSink_->bufferAsStdString());
+    //response.set_std_error(stderrSink_->bufferAsStdString());
     response.set_executable_file(exe_file_);
-    response.set_start_time_us(startTime_.microSecondsSinceEpoch());
-    response.set_finish_time_us(muduo::Timestamp::now().microSecondsSinceEpoch());
+    response.set_start_time_us(getMicroSecs(startTime_));
+    response.set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
     response.set_user_time(getSeconds(ru.ru_utime));
     response.set_system_time(getSeconds(ru.ru_stime));
     response.set_memory_maxrss_kb(ru.ru_maxrss);
 
     doneCallback_(&response);
+}
+
 }
 }
 }

@@ -275,7 +275,7 @@ private:
         pipeline->addLast("lastMesssage", new LastInboundMessageHandler(*this));
         pipeline->addLast("lastBuffer", new LastInboundBufferHandler(*this));
         AbstractChannel::setPipeline(pipeline);
-        pipeline->fireChannelCreated();
+        pipeline->fireChannelOpen();
         pipeline->fireChannelActive();
         state = 1;
     }

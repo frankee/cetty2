@@ -22,8 +22,8 @@
 namespace cetty {
 namespace channel {
 
-void AbstractChannelInboundHandler::channelCreated(ChannelHandlerContext& ctx) {
-    ctx.fireChannelCreated();
+void AbstractChannelInboundHandler::channelOpen(ChannelHandlerContext& ctx) {
+    ctx.fireChannelOpen();
 }
 
 void AbstractChannelInboundHandler::channelActive(ChannelHandlerContext& ctx) {
@@ -36,10 +36,6 @@ void AbstractChannelInboundHandler::channelInactive(ChannelHandlerContext& ctx) 
 
 void AbstractChannelInboundHandler::messageUpdated(ChannelHandlerContext& ctx) {
     ctx.fireMessageUpdated();
-}
-
-void AbstractChannelInboundHandler::writeCompleted(ChannelHandlerContext& ctx) {
-    ctx.fireWriteCompleted();
 }
 
 void AbstractChannelInboundHandler::beforeAdd(ChannelHandlerContext& ctx) {

@@ -32,8 +32,8 @@ public:
 public:
     virtual ~ChannelInboundMessageHandler() {}
 
-    virtual void channelCreated(ChannelHandlerContext& ctx) {
-        ctx.fireChannelCreated();
+    virtual void channelOpen(ChannelHandlerContext& ctx) {
+        ctx.fireChannelOpen();
     }
 
     virtual void channelActive(ChannelHandlerContext& ctx) {
@@ -42,10 +42,6 @@ public:
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
         ctx.fireChannelInactive();
-    }
-
-    virtual void writeCompleted(ChannelHandlerContext& ctx) {
-        ctx.fireWriteCompleted();
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {

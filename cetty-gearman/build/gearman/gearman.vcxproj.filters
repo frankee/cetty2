@@ -13,28 +13,19 @@
     <Filter Include="gearman\protobuf\builder">
       <UniqueIdentifier>{1d99c92f-a48d-4f06-aa2a-73f3e2bf0fa9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gearman\protocol">
+      <UniqueIdentifier>{ee912063-952b-474f-963d-62bd3f5ba172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gearman\protocol\commands">
+      <UniqueIdentifier>{e00d0269-70fb-4bc7-9bdc-812f4b7d78a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanEncoder.h">
-      <Filter>gearman</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanDecoder.h">
-      <Filter>gearman</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessage.h">
-      <Filter>gearman</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientRequestHandler.h">
-      <Filter>gearman</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerHandler.h">
       <Filter>gearman</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanClientBuilder.h">
       <Filter>gearman\builder</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanMessagePtr.h">
-      <Filter>gearman</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\builder\GearmanWorkerBuilder.h">
       <Filter>gearman\builder</Filter>
@@ -60,17 +51,38 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanWorkerPtr.h">
       <Filter>gearman</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Client.h">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Common.h">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Worker.h">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessage.h">
+      <Filter>gearman\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageDecoder.h">
+      <Filter>gearman\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageEncoder.h">
+      <Filter>gearman\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessagePtr.h">
+      <Filter>gearman\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClient.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanClientPtr.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\GearmanServiceFuture.h">
+      <Filter>gearman</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanDecoder.cpp">
-      <Filter>gearman</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanEncoder.cpp">
-      <Filter>gearman</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\GearmanMessage.cpp">
-      <Filter>gearman</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\builder\GearmanClientBuilder.cpp">
       <Filter>gearman\builder</Filter>
     </ClCompile>
@@ -96,6 +108,27 @@
       <Filter>gearman</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClientHandler.cpp">
+      <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Client.cpp">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Common.cpp">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Worker.cpp">
+      <Filter>gearman\protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessage.cpp">
+      <Filter>gearman\protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageDecoder.cpp">
+      <Filter>gearman\protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageEncoder.cpp">
+      <Filter>gearman\protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp">
       <Filter>gearman</Filter>
     </ClCompile>
   </ItemGroup>

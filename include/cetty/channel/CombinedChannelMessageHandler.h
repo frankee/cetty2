@@ -108,8 +108,8 @@ public:
         in->userEventTriggered(ctx, evt);
     }
 
-    virtual void channelCreated(ChannelHandlerContext& ctx) {
-        in->channelCreated(ctx);
+    virtual void channelOpen(ChannelHandlerContext& ctx) {
+        in->channelOpen(ctx);
     }
 
     virtual void channelActive(ChannelHandlerContext& ctx) {
@@ -118,10 +118,6 @@ public:
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
         in->channelInactive(ctx);
-    }
-
-    virtual void writeCompleted(ChannelHandlerContext& ctx) {
-        in->writeCompleted(ctx);
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {

@@ -89,7 +89,7 @@ public:
 
     ConfigObject* mutableConfigObject(ConfigObject* object,
                                       const ConfigFieldDescriptor* field) const {
-        return mutableRaw<ConfigObject>(object, field);
+        return *mutableRaw<ConfigObject*>(object, field);
     }
 
     void addInt32(ConfigObject* object,

@@ -10,6 +10,8 @@
 
 #include <cetty/zurg/slave/slave.pb.h>
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/zurg/slave/Process.h>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>

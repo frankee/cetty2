@@ -20,12 +20,13 @@
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/service/OutstandingCall.h>
 #include <cetty/service/ServiceRequestHandler.h>
-#include <cetty/gearman/GearmanMessagePtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
-namespace cetty { namespace gearman { 
+namespace cetty {
+namespace gearman {
 
 using namespace cetty::service;
-using namespace cetty::protobuf::service;
+using namespace cetty::gearman::protocol;
 
 typedef OutstandingCall<GearmanMessagePtr, GearmanMessagePtr> GearmanClientCall;
 typedef boost::intrusive_ptr<GearmanClientCall> GearmanClientCallPtr;

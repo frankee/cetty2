@@ -169,8 +169,6 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         writeQueue->peek().setSuccess();
         writeQueue->popup();
 
-        pipeline->fireWriteCompleted();
-
         if (writeQueue->empty()) {
             isWriting = false;
         }

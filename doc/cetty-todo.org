@@ -1,14 +1,27 @@
-* cetty-doto
+cetty-doto
 
-** cetty-core
+* cetty-core
+** channel
+	1，future增加线程不安全类型（服务器端）
 
 *** channelpipeline
 	1. 异常、错误处理机制，fireexception应该从 inboundinvoker独立出来，
 	   异常的处理可以三种方式，inbound、outbound、handler的序列
 	   哪个handler抛出的异常是否需要先给他处理？
-	   
 
-** cetty-protobuf
+** buffer
+	1, 提供CompositeChannelBuffer的写功能（同步netty4）
+	
+** http
+	1，同步netty4 release之后的版本，主要是content codec部分，以及一些优化部分
+	2，优化decode的效率
+
+* cetty-config
+	1，config descript中增加父class信息，以及自身的一些信息
+	2, 单个对象，使用mutable设值时，如果初始化为NULL，则存在问题
+	3，对象内嵌对象的class名称，应该包含其父对象（或者就可以包含namespace）
+	
+* cetty-craft
    1. HTTP与protobuf之间转换时，field的验证（参数的绑定与校验）
       具体做法，在定义protobuf时，增加field相关的验证option
       regexp = "\\w{4,30}"
@@ -25,6 +38,4 @@
          增加开发的复杂度，而且并不能保证所有的参数安装规定校验。
 		 
 
-** cetty-core-http
-	1，同步netty4 release之后的版本，主要是content codec部分，以及一些优化部分
-	2，优化decode的效率
+

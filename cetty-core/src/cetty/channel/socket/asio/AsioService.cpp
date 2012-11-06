@@ -21,6 +21,8 @@ namespace channel {
 namespace socket {
 namespace asio {
 
+using namespace cetty::channel;
+
 void AsioService::stop() {
     EventLoop::stop();
     ioService.stop();
@@ -30,16 +32,18 @@ void AsioService::post(const Functor& handler) {
     ioService.post(handler);
 }
 
-cetty::channel::TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp, const Functor& timerCallback) {
+TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp,
+                              const Functor& timerCallback) {
     if (timerCallback) {
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, timestamp);
 
-        timeout->getTimer().async_wait(boost::bind(&AsioService::timerExpiresCallback,
-                                       this,
-                                       boost::asio::placeholders::error,
-                                       timerCallback,
-                                       boost::cref(timeout)));
+        timeout->getTimer().async_wait(boost::bind(
+                                           &AsioService::timerExpiresCallback,
+                                           this,
+                                           boost::asio::placeholders::error,
+                                           timerCallback,
+                                           boost::cref(timeout)));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers.push_back(timeout);
@@ -50,16 +54,18 @@ cetty::channel::TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& ti
     }
 }
 
-cetty::channel::TimeoutPtr AsioService::runAfter(int millisecond, const Functor& timerCallback) {
+TimeoutPtr AsioService::runAfter(int64_t millisecond,
+                                 const Functor& timerCallback) {
     if (timerCallback) {
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, millisecond);
 
-        timeout->getTimer().async_wait(boost::bind(&AsioService::timerExpiresCallback,
-                                       this,
-                                       boost::asio::placeholders::error,
-                                       timerCallback,
-                                       boost::cref(timeout)));
+        timeout->getTimer().async_wait(boost::bind(
+                                           &AsioService::timerExpiresCallback,
+                                           this,
+                                           boost::asio::placeholders::error,
+                                           timerCallback,
+                                           boost::cref(timeout)));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers.push_back(timeout);
@@ -70,17 +76,19 @@ cetty::channel::TimeoutPtr AsioService::runAfter(int millisecond, const Functor&
     }
 }
 
-cetty::channel::TimeoutPtr AsioService::runEvery(int millisecond, const Functor& timerCallback) {
+TimeoutPtr AsioService::runEvery(int64_t millisecond,
+                                 const Functor& timerCallback) {
     if (timerCallback) {
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, millisecond);
 
-        timeout->getTimer().async_wait(boost::bind(&AsioService::repeatTimerExpiresCallback,
-                                       this,
-                                       boost::asio::placeholders::error,
-                                       timerCallback,
-                                       millisecond,
-                                       boost::cref(timeout)));
+        timeout->getTimer().async_wait(boost::bind(
+                                           &AsioService::repeatTimerExpiresCallback,
+                                           this,
+                                           boost::asio::placeholders::error,
+                                           timerCallback,
+                                           millisecond,
+                                           boost::cref(timeout)));
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers.push_back(timeout);
         return boost::static_pointer_cast<Timeout>(timeout);
@@ -90,7 +98,9 @@ cetty::channel::TimeoutPtr AsioService::runEvery(int millisecond, const Functor&
     }
 }
 
-void AsioService::timerExpiresCallback(const boost::system::error_code& code, const Functor& timerCallback, const AsioDeadlineTimeoutPtr& timeout) {
+void AsioService::timerExpiresCallback(const boost::system::error_code& code,
+                                       const Functor& timerCallback,
+                                       const AsioDeadlineTimeoutPtr& timeout) {
     if (code != boost::asio::error::operation_aborted) {
         timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
         timerCallback();
@@ -102,7 +112,10 @@ void AsioService::timerExpiresCallback(const boost::system::error_code& code, co
     timers.remove(timeout);
 }
 
-void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& code, const Functor& timerCallback, int millisecond, const AsioDeadlineTimeoutPtr& timeout) {
+void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& code,
+        const Functor& timerCallback,
+        int64_t millisecond,
+        const AsioDeadlineTimeoutPtr& timeout) {
     if (code != boost::asio::error::operation_aborted) {
         timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
         timerCallback();

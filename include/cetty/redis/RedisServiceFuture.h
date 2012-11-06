@@ -18,12 +18,12 @@
  */
 
 #include <cetty/service/ServiceFuture.h>
-#include <cetty/redis/RedisReplyMessagePtr.h>
+#include <cetty/redis/protocol/RedisReplyPtr.h>
 
 namespace cetty {
 namespace redis {
 
-typedef cetty::service::ServiceFuture<RedisReplyMessagePtr> RedisServiceFuture;
+typedef cetty::service::ServiceFuture<protocol::RedisReplyPtr> RedisServiceFuture;
 typedef boost::intrusive_ptr<RedisServiceFuture> RedisServiceFuturePtr;
 
 }

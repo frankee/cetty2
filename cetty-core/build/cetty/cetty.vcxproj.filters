@@ -401,6 +401,9 @@
     <ClCompile Include="..\..\src\cetty\handler\timeout\IdleStateEvent.cpp">
       <Filter>handler\timeout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\VoidChannelFuture.cpp">
+      <Filter>channel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
@@ -751,9 +754,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelines.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -1064,6 +1064,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\logging\LoggingHandler.h">
       <Filter>handler\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelFuture.h">
+      <Filter>channel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

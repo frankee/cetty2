@@ -29,7 +29,6 @@ void ApplicationManager::add(
 
     AddApplicationRequestPtr& requestRef = apps_[request->name()]->request;
     AddApplicationRequestPtr prev_request(requestRef);
-    requestRef = request;
 
     ApplicationStatus& status = apps_[request->name()]->status;
     status.set_name(request->name());
@@ -43,7 +42,7 @@ void ApplicationManager::add(
         response->mutable_prev_request()->CopyFrom(*prev_request);
     }
 
-    done(&response);
+    done(response);
 }
 
 void ApplicationManager::start(
@@ -66,7 +65,7 @@ void ApplicationManager::start(
         }
     }
 
-    done(&response);
+    done(response);
 }
 
 void ApplicationManager::startApp(const ApplicationPtr &app, ApplicationStatus* out) {

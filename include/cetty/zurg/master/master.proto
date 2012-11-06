@@ -6,8 +6,8 @@ option py_generic_services = true;
 option java_package = "cetty.zurg.master";
 option java_outer_classname = "MasterProto";
 
-import "include/cetty/protobuf/service/service.proto";
-import "include/cetty/zurg/slave/slave.proto";
+import "cetty/protobuf/service/service.proto";
+import "cetty/zurg/slave/slave.proto";
 
 message SlaveHeartbeat {
   message Uname {

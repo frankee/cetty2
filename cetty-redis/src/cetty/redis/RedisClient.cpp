@@ -25,79 +25,82 @@
 
 #include <cetty/logging/LoggerHelper.h>
 
-#include <cetty/redis/RedisCommand.h>
-#include <cetty/redis/RedisReplyMessage.h>
-#include <cetty/redis/command/Transactions.h>
-#include <cetty/redis/command/Keys.h>
+#include <cetty/redis/protocol/RedisReply.h>
+#include <cetty/redis/protocol/RedisCommand.h>
+#include <cetty/redis/protocol/commands/Keys.h>
+#include <cetty/redis/protocol/commands/Strings.h>
+#include <cetty/redis/protocol/commands/Transactions.h>
+
 
 namespace cetty {
 namespace redis {
 
 using namespace cetty::channel;
-using namespace cetty::redis::command;
+using namespace cetty::redis::protocol;
+using namespace cetty::redis::protocol::commands;
 
 void dummySetCallback(const RedisServiceFuture& future,
-                      const RedisReplyMessagePtr& reply) {
+                      const RedisReplyPtr& reply) {
     LOG_DEBUG << "redis replied the set command";
 }
 
 void RedisClient::statusCallBack(const RedisServiceFuture& future,
-                    const RedisReplyMessagePtr& reply,
+                    const RedisReplyPtr& reply,
                     const RedisClient::StatusCallBack& callback) {
     if (!reply) {
         callback(-1);
     }
-    else if (reply->getType() == RedisReplyMessageType::STATUS) {
+    else if (reply->getType() == RedisReplyType::STATUS) {
         callback(0);
     }
-    else if (reply->getType() == RedisReplyMessageType::ERROR) {
+    else if (reply->getType() == RedisReplyType::ERROR) {
         callback(-1);
     }
 }
 
-void integerCallBack(const RedisReplyMessagePtr& reply,
+void integerCallBack(const RedisReplyPtr& reply,
                      const RedisClient::StatusCallBack& callback) {
     if (!reply) {
         callback(-1);
     }
-    else if (reply->getType() == RedisReplyMessageType::INTEGER) {
+    else if (reply->getType() == RedisReplyType::INTEGER) {
         callback(0);
     }
-    else if (reply->getType() == RedisReplyMessageType::STATUS) {
+    else if (reply->getType() == RedisReplyType::STATUS) {
         callback(0);
     }
-    else if (reply->getType() == RedisReplyMessageType::ERROR) {
+    else if (reply->getType() == RedisReplyType::ERROR) {
         callback(-1);
     }
 }
 
 void RedisClient::bulkCallBack(const RedisServiceFuture& future,
-                  const RedisReplyMessagePtr& reply,
+                  const RedisReplyPtr& reply,
                   const RedisClient::BulkCallBack& callback) {
     if (!reply) {
         callback(-1, StringPiece());
     }
-    else if (reply->getType() == RedisReplyMessageType::NIL) {
+    else if (reply->getType() == RedisReplyType::NIL) {
         callback(-1, StringPiece());
     }
-    else if (reply->getType() == RedisReplyMessageType::STATUS) {
+    else if (reply->getType() == RedisReplyType::STATUS) {
         callback(0, reply->getStatus());
     }
-    else if (reply->getType() == RedisReplyMessageType::STRING) {
+    else if (reply->getType() == RedisReplyType::STRING) {
         callback(0, reply->getString());
     }
 }
 
 void RedisClient::multiBulkCallBack(const RedisServiceFuture& future,
-                                    const RedisReplyMessagePtr& reply,
+                                    const RedisReplyPtr& reply,
                                     const MultiBulkCallBack& callback) {
     if (!reply) {
         callback(-1, std::vector<StringPiece>());
     }
-    else if (reply->getType() == RedisReplyMessageType::NIL) {
+    else if (reply->getType() == RedisReplyType::NIL) {
         callback(-1, std::vector<StringPiece>());
     }
-    else if (reply->getType() == RedisReplyMessageType::ARRAY) {
+    else if (reply->getType() == RedisReplyType::ARRAY) {
         callback(0, reply->getArray());
     }
 }

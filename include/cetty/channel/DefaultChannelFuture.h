@@ -69,8 +69,14 @@ public:
      *        the {@link Channel} associated with this future
      * @param cancellable
      *        <tt>true</tt> if and only if this future can be canceled
+     * @param threadUnsaft
+     *        <tt>true</tt> if the future only used in the one thread loop
+     *        is mainly internal used.
      */
-    DefaultChannelFuture(const ChannelPtr& channel, bool cancellable);
+    DefaultChannelFuture(const ChannelPtr& channel,
+        bool cancellable,
+        bool threadUnsafe = false);
+
     virtual ~DefaultChannelFuture();
 
     virtual const ChannelPtr& getChannel() const;
@@ -80,16 +86,16 @@ public:
     virtual const Exception* getCause() const;
     virtual bool isCancelled() const;
 
-    virtual void addListener(const CompletedCallback& listener, int priority = 0);
-    virtual void addProgressListener(const ProgressedCallback& listener);
-    virtual void removeListener(const CompletedCallback& listener);
-    virtual void removeProgressListener(const ProgressedCallback& listener);
+    virtual ChannelFuturePtr addListener(const CompletedCallback& listener, int priority = 0);
+    virtual ChannelFuturePtr addProgressListener(const ProgressedCallback& listener);
+    virtual ChannelFuturePtr removeListener(const CompletedCallback& listener);
+    virtual ChannelFuturePtr removeProgressListener(const ProgressedCallback& listener);
 
     virtual ChannelFuturePtr await();
-    virtual bool await(int timeoutMillis);
+    virtual bool await(int64_t timeoutMillis);
 
     virtual ChannelFuturePtr awaitUninterruptibly();
-    virtual bool awaitUninterruptibly(int timeoutMillis);
+    virtual bool awaitUninterruptibly(int64_t timeoutMillis);
 
     virtual bool setSuccess();
     virtual bool setFailure(const Exception& cause);
@@ -98,7 +104,7 @@ public:
     virtual bool cancel();
 
 private:
-    bool await0(int timeoutMillis, bool interruptable);
+    bool await0(int64_t timeoutMillis, bool interruptable);
 
     void checkDeadLock();
 
@@ -155,6 +161,8 @@ private:
 private:
     bool cancellable;
     bool done;
+
+    bool threadUnsafe;
 
     ChannelPtr channel;
 

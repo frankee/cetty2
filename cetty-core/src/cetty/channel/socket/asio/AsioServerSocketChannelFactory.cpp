@@ -92,7 +92,7 @@ ChannelPtr AsioServerSocketChannelFactory::newChannel(const ChannelPipelinePtr& 
 
     if (channel->isOpen()) {
         LOG_INFO << "Created the AsioServerSocketChannel, firing the Channel Created Event.";
-        channel->getPipeline()->fireChannelCreated();
+        channel->getPipeline()->fireChannelOpen();
 
         serverChannels.push_back(channel);
     }

@@ -52,9 +52,9 @@ public:
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
                              const Functor& timerCallback);
 
-    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback);
+    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback);
 
-    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback);
+    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback);
 
 private:
     void timerExpiresCallback(const boost::system::error_code& code,
@@ -63,7 +63,7 @@ private:
 
     void repeatTimerExpiresCallback(const boost::system::error_code& code,
                                     const Functor& timerCallback,
-                                    int millisecond,
+                                    int64_t millisecond,
                                     const AsioDeadlineTimeoutPtr& timeout);
 
 private:

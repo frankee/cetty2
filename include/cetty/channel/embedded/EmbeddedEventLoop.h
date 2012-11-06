@@ -49,10 +49,10 @@ public:
         return TimeoutPtr();
     }
 
-    virtual TimeoutPtr runAfter(int millisecond, const Functor& timerCallback) {
+    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback) {
         return TimeoutPtr();
     }
-    virtual TimeoutPtr runEvery(int millisecond, const Functor& timerCallback) {
+    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback) {
         return TimeoutPtr();
     }
 };

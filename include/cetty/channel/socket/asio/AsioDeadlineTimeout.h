@@ -47,7 +47,7 @@ public:
     }
 
     AsioDeadlineTimeout(boost::asio::io_service& ioService,
-        int delay)
+        int64_t delay)
         : deadlineTimer(ioService, boost::posix_time::milliseconds(delay)) {
     }
 

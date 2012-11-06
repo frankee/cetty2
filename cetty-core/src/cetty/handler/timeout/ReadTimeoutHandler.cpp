@@ -154,13 +154,13 @@ void ReadTimeoutHandler::afterRemove(ChannelHandlerContext& ctx) {
     // NOOP
 }
 
-void ReadTimeoutHandler::channelCreated(ChannelHandlerContext& ctx) {
+void ReadTimeoutHandler::channelOpen(ChannelHandlerContext& ctx) {
     // Initialize early if channel is active already.
     if (ctx.getChannel()->isActive()) {
         initialize(ctx);
     }
 
-    AbstractChannelInboundHandler::channelCreated(ctx);
+    AbstractChannelInboundHandler::channelOpen(ctx);
 }
 
 void ReadTimeoutHandler::channelActive(ChannelHandlerContext& ctx) {

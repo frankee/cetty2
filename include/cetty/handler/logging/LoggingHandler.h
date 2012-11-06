@@ -82,7 +82,7 @@ public:
         return level;
     }
 
-    virtual void channelCreated(ChannelHandlerContext& ctx);
+    virtual void channelOpen(ChannelHandlerContext& ctx);
 
     virtual void channelActive(ChannelHandlerContext& ctx);
 

@@ -32,11 +32,10 @@ public:
     ChannelInboundBufferHandler();
     virtual ~ChannelInboundBufferHandler();
 
-    virtual void channelCreated(ChannelHandlerContext& ctx);
+    virtual void channelOpen(ChannelHandlerContext& ctx);
     virtual void channelActive(ChannelHandlerContext& ctx);
     virtual void channelInactive(ChannelHandlerContext& ctx);
     virtual void messageUpdated(ChannelHandlerContext& ctx);
-    virtual void writeCompleted(ChannelHandlerContext& ctx);
 
     virtual void beforeAdd(ChannelHandlerContext& ctx);
     virtual void afterAdd(ChannelHandlerContext& ctx);

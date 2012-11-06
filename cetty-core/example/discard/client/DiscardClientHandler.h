@@ -74,9 +74,9 @@ public:
                  ctx.close();
     }
 
-    virtual void writeCompleted(ChannelHandlerContext& ctx) {
-        generateTraffic();
-    }
+    //virtual void writeCompleted(ChannelHandlerContext& ctx) {
+    //    generateTraffic();
+    //}
 
     virtual ChannelHandlerPtr clone() {
         return new DiscardClientHandler(content->readableBytes());
@@ -85,6 +85,13 @@ public:
     virtual std::string toString() const { return "DiscardClientHandler"; }
 
 private:
+    void writeCompleted(ChannelFuture& future, ChannelHandlerContext& ctx) {
+        if (future.isSuccess()) {
+            //ctx.nextOutboundByteBuffer().discardReadBytes();
+            generateTraffic();
+        }
+    }
+
     void generateTraffic() {
         // Fill the outbound buffer up to 64KiB
         ChannelBufferPtr out = Unpooled::buffer(65536);
@@ -95,7 +102,11 @@ private:
 
         // Flush the outbound buffer to the socket.
         // Once flushed, generate the same amount of traffic again.
-        context->flush();
+        context->flush()->addListener(boost::bind(
+                                          &DiscardClientHandler::writeCompleted,
+                                          this,
+                                          _1,
+                                          boost::ref(*context)));
     }
 
 private:

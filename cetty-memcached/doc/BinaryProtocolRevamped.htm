@@ -1,0 +1,1130 @@
+
+
+
+ 
+ 
+ 
+
+
+
+ 
+ 
+ <!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+ <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" >
+ 
+ <meta name="ROBOTS" content="NOARCHIVE">
+ 
+ <link rel="icon" type="image/vnd.microsoft.icon" href="https://ssl.gstatic.com/codesite/ph/images/phosting.ico">
+ 
+ 
+ <link rel="canonical" href="http://code.google.com/BinaryProtocolRevamped" />
+ 
+ <script type="text/javascript">
+ 
+ 
+ 
+ 
+ var codesite_token = "Q8zTMN4cHO0mCV1FaDPCebnXpew:1352092265676";
+ 
+ 
+ var CS_env = {"profileUrl":"/u/104737122987988875517/","token":"Q8zTMN4cHO0mCV1FaDPCebnXpew:1352092265676","assetHostPath":"https://ssl.gstatic.com/codesite/ph","domainName":null,"assetVersionPath":"https://ssl.gstatic.com/codesite/ph/4212538301465177006","projectHomeUrl":"/p/memcached","relativeBaseUrl":"","projectName":"memcached","loggedInUserEmail":"kingliang@gmail.com"};
+ var _gaq = _gaq || [];
+ _gaq.push(
+ ['siteTracker._setAccount', 'UA-18071-1'],
+ ['siteTracker._trackPageview']);
+ 
+ _gaq.push(
+ ['projectTracker._setAccount', 'UA-6824558-2'],
+ ['projectTracker._trackPageview']);
+ 
+ (function() {
+ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+ })();
+ 
+ </script>
+ 
+ 
+ <title>BinaryProtocolRevamped - 
+ memcached -
+ 
+ 
+ Memcached - Google Project Hosting
+ </title>
+ <link type="text/css" rel="stylesheet" href="https://ssl.gstatic.com/codesite/ph/4212538301465177006/css/core.css">
+ 
+ <link type="text/css" rel="stylesheet" href="https://ssl.gstatic.com/codesite/ph/4212538301465177006/css/ph_detail.css" >
+ 
+ 
+ 
+ <link type="application/atom+xml" rel="alternate" href="/feeds/p/memcached/gitchanges/basic?repo=wiki&amp;path=/BinaryProtocolRevamped.wiki">
+ 
+ 
+<!--[if IE]>
+ <link type="text/css" rel="stylesheet" href="https://ssl.gstatic.com/codesite/ph/4212538301465177006/css/d_ie.css" >
+<![endif]-->
+ <style type="text/css">
+ .menuIcon.off { background: no-repeat url(https://ssl.gstatic.com/codesite/ph/images/dropdown_sprite.gif) 0 -42px }
+ .menuIcon.on { background: no-repeat url(https://ssl.gstatic.com/codesite/ph/images/dropdown_sprite.gif) 0 -28px }
+ .menuIcon.down { background: no-repeat url(https://ssl.gstatic.com/codesite/ph/images/dropdown_sprite.gif) 0 0; }
+ 
+ 
+ #maincol {
+ padding-top: 0;
+ padding-bottom: 0;
+ }
+
+ 
+ </style>
+</head>
+<body class="t6">
+<script type="text/javascript">
+ window.___gcfg = {lang: 'en'};
+ (function() 
+ {var po = document.createElement("script");
+ po.type = "text/javascript"; po.async = true;po.src = "https://apis.google.com/js/plusone.js";
+ var s = document.getElementsByTagName("script")[0];
+ s.parentNode.insertBefore(po, s);
+ })();
+</script>
+<div class="headbg">
+
+ <div id="gaia">
+ 
+
+ <span>
+ 
+ 
+ 
+ <a href="#" id="multilogin-dropdown" onclick="return false;"
+ ><u><b>kingliang@gmail.com</b></u> <small>&#9660;</small></a>
+ 
+ 
+ | <a href="/u/104737122987988875517/" id="projects-dropdown" onclick="return false;"
+ ><u>My favorites</u> <small>&#9660;</small></a>
+ | <a href="/u/104737122987988875517/" onclick="_CS_click('/gb/ph/profile');"
+ title="Profile, Updates, and Settings"
+ ><u>Profile</u></a>
+ | <a href="https://www.google.com/accounts/Logout?continue=https%3A%2F%2Fcode.google.com%2Fp%2Fmemcached%2Fwiki%2FBinaryProtocolRevamped" 
+ onclick="_CS_click('/gb/ph/signout');"
+ ><u>Sign out</u></a>
+ 
+ </span>
+
+ </div>
+
+ <div class="gbh" style="left: 0pt;"></div>
+ <div class="gbh" style="right: 0pt;"></div>
+ 
+ 
+ <div style="height: 1px"></div>
+<!--[if lte IE 7]>
+<div style="text-align:center;">
+Your version of Internet Explorer is not supported. Try a browser that
+contributes to open source, such as <a href="http://www.firefox.com">Firefox</a>,
+<a href="http://www.google.com/chrome">Google Chrome</a>, or
+<a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a>.
+</div>
+<![endif]-->
+
+
+
+ <table style="padding:0px; margin: 0px 0px 10px 0px; width:100%" cellpadding="0" cellspacing="0"
+ itemscope itemtype="http://schema.org/CreativeWork">
+ <tr style="height: 58px;">
+ 
+ 
+ 
+ <td id="plogo">
+ <link itemprop="url" href="/p/memcached">
+ <a href="/p/memcached/">
+ 
+ <img src="https://ssl.gstatic.com/codesite/ph/images/defaultlogo.png" alt="Logo" itemprop="image">
+ 
+ </a>
+ </td>
+ 
+ <td style="padding-left: 0.5em">
+ 
+ <div id="pname">
+ <a href="/p/memcached/"><span itemprop="name">memcached</span></a>
+ </div>
+ 
+ <div id="psum">
+ <a id="project_summary_link"
+ href="/p/memcached/"><span itemprop="description">Memcached</span></a>
+ 
+ </div>
+ 
+ 
+ </td>
+ <td style="white-space:nowrap;text-align:right; vertical-align:bottom;">
+ 
+ <form action="/hosting/search">
+ <input size="30" name="q" value="" type="text">
+ 
+ <input type="submit" name="projectsearch" value="Search projects" >
+ </form>
+ 
+ </tr>
+ </table>
+
+</div>
+
+ 
+<div id="mt" class="gtb"> 
+ <a href="/p/memcached/" class="tab ">Project&nbsp;Home</a>
+ 
+ 
+ 
+ 
+ <a href="/p/memcached/downloads/list" class="tab ">Downloads</a>
+ 
+ 
+ 
+ 
+ 
+ <a href="/p/memcached/wiki/NewStart?tm=6" class="tab active">Wiki</a>
+ 
+ 
+ 
+ 
+ 
+ <a href="/p/memcached/issues/list"
+ class="tab ">Issues</a>
+ 
+ 
+ 
+ 
+ 
+ <a href="/p/memcached/wiki/DevelopmentRepos?tm=4"
+ class="tab ">Source</a>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ <div class=gtbc></div>
+</div>
+<table cellspacing="0" cellpadding="0" width="100%" align="center" border="0" class="st">
+ <tr>
+ 
+ 
+ 
+ 
+ <td class="subt">
+ <div class="issueDetail">
+<div class="isf">
+ 
+ <span class="inIssueList"> 
+ <span>Search</span>
+ <form action="/p/memcached/w/list" method="GET" style="display:inline">
+ <select id="can" name="can" >
+ <option disabled="disabled">Search within:</option>
+ 
+ <option value="1" >&nbsp;All wiki pages</option>
+ <option value="3" >&nbsp;Featured pages</option>
+ <option value="2" selected="selected">&nbsp;Current pages</option>
+ 
+ 
+ <option value="5" >&nbsp;My starred pages</option>
+ 
+ <option value="4" >&nbsp;Deprecated pages</option>
+ 
+ </select>
+ <span>for</span>
+ <span id="qq"><input type="text" size="38" id="searchq" name="q" value=""
+ autocomplete="off" ></span>
+ 
+ 
+ 
+ <input type="submit" value="Search" >
+ </form>
+ </span>
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+</div>
+</div>
+
+ </td>
+ 
+ 
+ 
+ 
+ 
+ 
+ <td align="right" valign="top" class="bevel-right"></td>
+ </tr>
+</table>
+
+
+<script type="text/javascript">
+ var cancelBubble = false;
+ function _go(url) { document.location = url; }
+</script>
+<div id="maincol"
+ 
+>
+
+ 
+
+
+
+
+
+
+
+ <style type="text/css">
+ .delcom { background: #e8e8e8 }
+ .commentcontent {
+ margin: 2em;
+ padding: 0px 10px;
+ width: 66em;
+ }
+ .artifactcomment {
+ border-top: 3px solid #c3d9ff;
+ }
+ #commentform {
+ border-top: 3px solid #c3d9ff;
+ }
+ </style>
+
+<div id="wikipage">
+<table>
+ <tr>
+ 
+ 
+ <td style="vertical-align:top; padding-left:5px">
+ 
+ <div id="wikiheader">
+ 
+ <img width="15" height="15" id="star_img"
+ src="https://ssl.gstatic.com/codesite/ph/images/star_off.gif"
+ style="cursor:pointer"
+ onclick="_CS_toggleStar(this,
+ {'scope': 'wiki',
+ 'user': '_CURRENT_USER',
+ 'item': 'memcached:BinaryProtocolRevamped'
+ });"/>
+ 
+ <span style="font-size:120%;font-weight:bold">BinaryProtocolRevamped</span>
+ &nbsp;
+ <div> 
+ 
+ 
+ 
+ <div id="wikiauthor" style="float:right">
+ Updated <span title="Mon Jul  9 10:24:46 2012">
+ Jul 9, 2012</span>
+ 
+ by 
+
+ <a class="userlink"
+ href="/u/110529046755652980001/">trond.no...@gmail.com</a
+>
+ 
+ </div>
+ </div>
+ </div>
+ 
+ <div id="wikicontent">
+ <div class="vt" id="wikimaincol">
+ <p><ul><li><a href="#Introduction">Introduction</a></li><ul><li><a href="#Conventions_Used_In_This_Document">Conventions Used In This Document</a></li></ul><li><a href="#Packet_Structure">Packet Structure</a></li><ul><li><a href="#Request_header">Request header</a></li><li><a href="#Response_header">Response header</a></li><li><a href="#Header_fields_description">Header fields description</a></li></ul><li><a href="#Defined_Values">Defined Values</a></li><ul><li><a href="#Magic_Byte">Magic Byte</a></li><li><a href="#Response_Status">Response Status</a></li><li><a href="#Command_Opcodes">Command Opcodes</a></li><li><a href="#Data_Types">Data Types</a></li></ul><li><a href="#Commands">Commands</a></li><ul><li><a href="#Introduction">Introduction</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Get,_Get_Quietly,_Get_Key,_Get_Key_Quietly">Get, Get Quietly, Get Key, Get Key Quietly</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Set,_Add,_Replace">Set, Add, Replace</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Delete">Delete</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Increment,_Decrement">Increment, Decrement</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#quit">quit</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Flush">Flush</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#noop">noop</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#version">version</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Append,_Prepend">Append, Prepend</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Stat">Stat</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Verbosity">Verbosity</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Touch,_GAT_and_GATQ">Touch, GAT and GATQ</a></li><ul><li><a href="#Example">Example</a></li></ul><li><a href="#Get/Set/Del_VBucket">Get/Set/Del VBucket</a></li><li><a href="#TAP_Connect">TAP Connect</a></li><li><a href="#TAP_Mutation_/_Delete_/_Flush">TAP Mutation / Delete / Flush</a></li><li><a href="#TAP_Opaque">TAP Opaque</a></li><li><a href="#TAP_VBucket_set">TAP VBucket set</a></li><li><a href="#TAP_Checkpoint_start/stop">TAP Checkpoint start/stop</a></li></ul><li><a href="#Security_Considerations">Security Considerations</a></li><li><a href="#Normative_References">Normative References</a></li></ul> </p><h1><a name="Introduction"></a>Introduction<a href="#Introduction" class="section_anchor"></a></h1><p>Memcache is a high performance key-value cache. It is intentionally a dumb cache, optimized for speed only. Applications using memcache should not rely on it for data -- a persistent database with guaranteed reliability is strongly recommended -- but applications can run much faster when cached data is available in memcache. </p><p>Memcache was originally written to make LiveJournal <tt>[LJ]</tt> faster. It now powers all of the fastest web sites that you love. </p><h2><a name="Conventions_Used_In_This_Document"></a>Conventions Used In This Document<a href="#Conventions_Used_In_This_Document" class="section_anchor"></a></h2><p>The key words &quot;MUST&quot;, &quot;MUST NOT&quot;, &quot;REQUIRED&quot;, &quot;SHALL&quot;, &quot;SHALL NOT&quot;, &quot;SHOULD&quot;, &quot;SHOULD NOT&quot;, &quot;RECOMMENDED&quot;, &quot;MAY&quot;, and &quot;OPTIONAL&quot; in this document are to be interpreted as described in <a href="#Normative_References">BinaryProtocolRevamped#Normative_References</a>. </p><h1><a name="Packet_Structure"></a>Packet Structure<a href="#Packet_Structure" class="section_anchor"></a></h1><p>General format of a packet: <pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0/ HEADER                                                        /
+        /                                                               /
+        /                                                               /
+        /                                                               /
+        +---------------+---------------+---------------+---------------+
+      24/ COMMAND-SPECIFIC EXTRAS (as needed)                           /
+       +/  (note length in the extras length header field)              /
+        +---------------+---------------+---------------+---------------+
+       m/ Key (as needed)                                               /
+       +/  (note length in key length header field)                     /
+        +---------------+---------------+---------------+---------------+
+       n/ Value (as needed)                                             /
+       +/  (note length is total body length header field, minus        /
+       +/   sum of the extras and key length body fields)               /
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </p><p></pre> </p><h2><a name="Request_header"></a>Request header<a href="#Request_header" class="section_anchor"></a></h2><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Magic         | Opcode        | Key length                    |
+        +---------------+---------------+---------------+---------------+
+       4| Extras length | Data type     | vbucket id                    |
+        +---------------+---------------+---------------+---------------+
+       8| Total body length                                             |
+        +---------------+---------------+---------------+---------------+
+      12| Opaque                                                        |
+        +---------------+---------------+---------------+---------------+
+      16| CAS                                                           |
+        |                                                               |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </pre> </p><h2><a name="Response_header"></a>Response header<a href="#Response_header" class="section_anchor"></a></h2><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Magic         | Opcode        | Key Length                    |
+        +---------------+---------------+---------------+---------------+
+       4| Extras length | Data type     | Status                        |
+        +---------------+---------------+---------------+---------------+
+       8| Total body length                                             |
+        +---------------+---------------+---------------+---------------+
+      12| Opaque                                                        |
+        +---------------+---------------+---------------+---------------+
+      16| CAS                                                           |
+        |                                                               |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </pre> </p><h2><a name="Header_fields_description"></a>Header fields description<a href="#Header_fields_description" class="section_anchor"></a></h2><blockquote><dt>Magic</dt><dd>Magic number identifying the package (See <a href="#Magic_Byte">BinaryProtocolRevamped#Magic_Byte</a>)</dd> 
+<dt>Opcode</dt><dd>Command code (See <a href="#Command_opcodes">BinaryProtocolRevamped#Command_opcodes</a>)</dd> 
+<dt>Key length</dt><dd>Length in bytes of the text key that follows the command extras</dd> 
+<dt>Status</dt><dd>Status of the response (non-zero on error) (See <a href="#Response_Status">BinaryProtocolRevamped#Response_Status</a>)</dd> 
+<dt>Extras length</dt><dd>Length in bytes of the command extras</dd> 
+<dt>Data type</dt><dd>Reserved for future use (See <a href="#Data_Type">BinaryProtocolRevamped#Data_Type</a>)</dd> 
+<dt>vbucket id</dt><dd>The virtual bucket for this command</dd> 
+<dt>Total body length</dt><dd>Length in bytes of extra + key + value</dd> 
+<dt>Opaque</dt><dd>Will be copied back to you in the response</dd> 
+<dt>CAS</dt><dd>Data version check</dd> 
+</blockquote><h1><a name="Defined_Values"></a>Defined Values<a href="#Defined_Values" class="section_anchor"></a></h1><h2><a name="Magic_Byte"></a>Magic Byte<a href="#Magic_Byte" class="section_anchor"></a></h2><p> <table class="wikitable"><tr><td style="border: 1px solid #ccc; padding: 5px;">0x80</td><td style="border: 1px solid #ccc; padding: 5px;">Request packet for this protocol version</td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;">0x81</td><td style="border: 1px solid #ccc; padding: 5px;">Response packet for this protocol version</td></tr>  </table></p><p>Magic byte / version. For each version of the protocol, we&#x27;ll use a different request/response value pair. This is useful for protocol analyzers to distinguish the nature of the packet from the direction which it is moving. Note, it is common to run a memcached instance on a host that also runs an application server. Such a host will both send and receive memcache packets. </p><p>The version should hopefully correspond only to different meanings of the command byte.  In an ideal world, we will not change the header format. As reserved bytes are given defined meaning, the protocol version / magic byte values should be incremented. </p><p>Traffic analysis tools are encouraged to identify memcache packets and provide detailed interpretation if the magic bytes are recognized and otherwise to provide a generic breakdown of the packet. Note, that the key and value positions can always be identified even if the magic byte or command opcode are not recognized. </p><h2><a name="Response_Status"></a>Response Status<a href="#Response_Status" class="section_anchor"></a></h2><p>Possible values of this two-byte field: </p><p> <table class="wikitable"><tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0000 </td><td style="border: 1px solid #ccc; padding: 5px;"> No error </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0001 </td><td style="border: 1px solid #ccc; padding: 5px;"> Key not found </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0002 </td><td style="border: 1px solid #ccc; padding: 5px;"> Key exists </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0003 </td><td style="border: 1px solid #ccc; padding: 5px;"> Value too large </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0004 </td><td style="border: 1px solid #ccc; padding: 5px;"> Invalid arguments </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0005 </td><td style="border: 1px solid #ccc; padding: 5px;"> Item not stored </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0006 </td><td style="border: 1px solid #ccc; padding: 5px;"> Incr/Decr on non-numeric value. </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0007 </td><td style="border: 1px solid #ccc; padding: 5px;"> The vbucket belongs to another server </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0008 </td><td style="border: 1px solid #ccc; padding: 5px;"> Authentication error </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0009 </td><td style="border: 1px solid #ccc; padding: 5px;"> Authentication continue </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0081 </td><td style="border: 1px solid #ccc; padding: 5px;"> Unknown command </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0082 </td><td style="border: 1px solid #ccc; padding: 5px;"> Out of memory </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0083 </td><td style="border: 1px solid #ccc; padding: 5px;"> Not supported </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0084 </td><td style="border: 1px solid #ccc; padding: 5px;"> Internal error </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0085 </td><td style="border: 1px solid #ccc; padding: 5px;"> Busy </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0086 </td><td style="border: 1px solid #ccc; padding: 5px;"> Temporary failure </td></tr>  </table></p><h2><a name="Command_Opcodes"></a>Command Opcodes<a href="#Command_Opcodes" class="section_anchor"></a></h2><p>Possible values of the one-byte field. See <a href="BinaryProtocolRevamped#Commands">BinaryProtocolRevamped#Commands</a> for more information about a given command. </p><p> <table class="wikitable"><tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x00 </td><td style="border: 1px solid #ccc; padding: 5px;"> Get </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x01 </td><td style="border: 1px solid #ccc; padding: 5px;"> Set </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x02 </td><td style="border: 1px solid #ccc; padding: 5px;"> Add </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x03 </td><td style="border: 1px solid #ccc; padding: 5px;"> Replace </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x04 </td><td style="border: 1px solid #ccc; padding: 5px;"> Delete </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x05 </td><td style="border: 1px solid #ccc; padding: 5px;"> Increment </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x06 </td><td style="border: 1px solid #ccc; padding: 5px;"> Decrement </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x07 </td><td style="border: 1px solid #ccc; padding: 5px;"> Quit </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x08 </td><td style="border: 1px solid #ccc; padding: 5px;"> Flush </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x09 </td><td style="border: 1px solid #ccc; padding: 5px;"> GetQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0a </td><td style="border: 1px solid #ccc; padding: 5px;"> No-op </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0b </td><td style="border: 1px solid #ccc; padding: 5px;"> Version </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0c </td><td style="border: 1px solid #ccc; padding: 5px;"> GetK </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0d </td><td style="border: 1px solid #ccc; padding: 5px;"> GetKQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0e </td><td style="border: 1px solid #ccc; padding: 5px;"> Append </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x0f </td><td style="border: 1px solid #ccc; padding: 5px;"> Prepend </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x10 </td><td style="border: 1px solid #ccc; padding: 5px;"> Stat </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x11 </td><td style="border: 1px solid #ccc; padding: 5px;"> SetQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x12 </td><td style="border: 1px solid #ccc; padding: 5px;"> AddQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x13 </td><td style="border: 1px solid #ccc; padding: 5px;"> ReplaceQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x14 </td><td style="border: 1px solid #ccc; padding: 5px;"> DeleteQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x15 </td><td style="border: 1px solid #ccc; padding: 5px;"> IncrementQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x16 </td><td style="border: 1px solid #ccc; padding: 5px;"> DecrementQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x17 </td><td style="border: 1px solid #ccc; padding: 5px;"> QuitQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x18 </td><td style="border: 1px solid #ccc; padding: 5px;"> FlushQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x19 </td><td style="border: 1px solid #ccc; padding: 5px;"> AppendQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x1a </td><td style="border: 1px solid #ccc; padding: 5px;"> PrependQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x1b </td><td style="border: 1px solid #ccc; padding: 5px;"> Verbosity <strong> </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x1c </td><td style="border: 1px solid #ccc; padding: 5px;"> Touch </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x1d </td><td style="border: 1px solid #ccc; padding: 5px;"> GAT <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x1e </td><td style="border: 1px solid #ccc; padding: 5px;"> GATQ </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x20 </td><td style="border: 1px solid #ccc; padding: 5px;"> SASL list mechs </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x21 </td><td style="border: 1px solid #ccc; padding: 5px;"> SASL Auth </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x22 </td><td style="border: 1px solid #ccc; padding: 5px;"> SASL Step </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x30 </td><td style="border: 1px solid #ccc; padding: 5px;"> RGet </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x31 </td><td style="border: 1px solid #ccc; padding: 5px;"> RSet </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x32 </td><td style="border: 1px solid #ccc; padding: 5px;"> RSetQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x33 </td><td style="border: 1px solid #ccc; padding: 5px;"> RAppend </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x34 </td><td style="border: 1px solid #ccc; padding: 5px;"> RAppendQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x35 </td><td style="border: 1px solid #ccc; padding: 5px;"> RPrepend </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x36 </td><td style="border: 1px solid #ccc; padding: 5px;"> RPrependQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x37 </td><td style="border: 1px solid #ccc; padding: 5px;"> RDelete </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x38 </td><td style="border: 1px solid #ccc; padding: 5px;"> RDeleteQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x39 </td><td style="border: 1px solid #ccc; padding: 5px;"> RIncr </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3a </td><td style="border: 1px solid #ccc; padding: 5px;"> RIncrQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3b </td><td style="border: 1px solid #ccc; padding: 5px;"> RDecr </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3c </td><td style="border: 1px solid #ccc; padding: 5px;"> RDecrQ </td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3d </td><td style="border: 1px solid #ccc; padding: 5px;"> Set VBucket <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3e </td><td style="border: 1px solid #ccc; padding: 5px;"> Get VBucket </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x3f </td><td style="border: 1px solid #ccc; padding: 5px;"> Del VBucket <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x40 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Connect </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x41 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Mutation <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x42 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Delete </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x43 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Flush <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x44 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Opaque </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x45 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP VBucket Set <strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x46 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Checkpoint Start </strong></td></tr> <tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x47 </td><td style="border: 1px solid #ccc; padding: 5px;"> TAP Checkpoint End <strong></td></tr>  </table></strong></p><p>Commands marked with <strong> is not currently fixed, but this is the current proposal for 1.6. </strong></p><p>As a convention all of the commands ending with &quot;Q&quot; for Quiet. A quiet version of a command will omit responses that are considered uninteresting. Whether a given response is interesting is dependent upon the command. See the descriptions of the set commands (Section 4.2) and set commands (Section 4.3) for examples of commands that include quiet variants. </p><h2><a name="Data_Types"></a>Data Types<a href="#Data_Types" class="section_anchor"></a></h2><p>Possible values of the one-byte field: </p><p> <table class="wikitable"><tr><td style="border: 1px solid #ccc; padding: 5px;"> 0x00 </td><td style="border: 1px solid #ccc; padding: 5px;"> Raw bytes </td></tr>  </table></p><h1><a name="Commands"></a>Commands<a href="#Commands" class="section_anchor"></a></h1><h2><a name="Introduction"></a>Introduction<a href="#Introduction" class="section_anchor"></a></h2><p>All communication is initiated by a request from the client, and the server will respond to each request with zero or multiple packets for each request.  If the status code of a response packet is non-nil, the body of the packet will contain a textual error message.  If the status code is nil, the command opcode will define the layout of the body of the message. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following figure illustrates the packet layout for a packet with an error message. </p><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x01          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x09          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x4e (&#x27;N&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x74 (&#x27;t&#x27;)    | 0x20 (&#x27; &#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x66 (&#x27;f&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x75 (&#x27;u&#x27;)    | 0x6e (&#x27;n&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      32| 0x64 (&#x27;d&#x27;)    |
+        +---------------+
+        Total 33 bytes (24 byte header, and 9 bytes value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x00
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0001
+    Total body   (8-11) : 0x00000009
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : None
+    Value        (24-32): The textual string &quot;Not found&quot;
+ </pre> </p><h2><a name="Get,_Get_Quietly,_Get_Key,_Get_Key_Quietly"></a>Get, Get Quietly, Get Key, Get Key Quietly<a href="#Get,_Get_Quietly,_Get_Key,_Get_Key_Quietly" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST have key. </li><li>MUST NOT have value. </li></ul></p><p>Response (if found): <ul><li>MUST have extras. </li><li>MAY have key. </li><li>MAY have value. </li></ul></p><blockquote>Extra data for the get commands: 
+</blockquote><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Flags                                                         |
+        +---------------+---------------+---------------+---------------+
+        Total 4 bytes
+ </pre> </p><p>The get command gets a single key. The getq command will not send a response on a cache miss. Getk and getkq differs from get and getq by adding the key into the response packet. </p><p>Clients should implement multi-get (still important for reducing network roundtrips!) as n pipelined requests, the first n-1 being getq/getkq, the last being a regular get/getk.  That way you&#x27;re guaranteed to get a response, and you know when the server&#x27;s done. You can also do the naive thing and send n pipelined get/getks, but then you could potentially get back a lot of &quot;NOT_FOUND&quot; error code packets. Alternatively, you can send &#x27;n&#x27; getq/getkqs, followed by a &#x27;noop&#x27; command. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>To request the data associated with the key &quot;Hello&quot; the following fields must be specified in the packet. </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x48 (&#x27;H&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x6c (&#x27;l&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x6f (&#x27;o&#x27;)    |
+        +---------------+
+ </p><p>       Total 29 bytes (24 byte header, and 5 bytes key)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x00
+    Key length   (2,3)  : 0x0005
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000005
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key          (24-29): The textual string: &quot;Hello&quot;
+    Value               : None
+ </p><p></pre> </p><p>If the item exist on the server the following packet is returned, otherwise a packet with status code != 0 will be returned (see Introduction (Section 4.1)) </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x04          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x09          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x01          |
+        +---------------+---------------+---------------+---------------+
+      24| 0xde          | 0xad          | 0xbe          | 0xef          |
+        +---------------+---------------+---------------+---------------+
+      28| 0x57 (&#x27;W&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x72 (&#x27;r&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      32| 0x64 (&#x27;d&#x27;)    |
+        +---------------+
+ </p><p>       Total 33 bytes (24 byte header, 4 byte extras and 5 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x00
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x04
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000009
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000001
+    Extras              :
+      Flags      (24-27): 0xdeadbeef
+    Key                 : None
+    Value        (28-32): The textual string &quot;World&quot;
+ </p><p></pre> </p><p>The response packet for a getk and getkq request differs from get(q) in that the key is present: </p><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x04          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x09          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x01          |
+        +---------------+---------------+---------------+---------------+
+      24| 0xde          | 0xad          | 0xbe          | 0xef          |
+        +---------------+---------------+---------------+---------------+
+      28| 0x48 (&#x27;H&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x6c (&#x27;l&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      32| 0x6f (&#x27;o&#x27;)    | 0x57 (&#x27;W&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x72 (&#x27;r&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      36| 0x6c (&#x27;l&#x27;)    | 0x64 (&#x27;d&#x27;)    |
+        +---------------+---------------+
+ </p><p>       Total 38 bytes (24 byte header, 4 byte extras, 5 byte key
+                        and 5 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x00
+    Key length   (2,3)  : 0x0005
+    Extra length (4)    : 0x04
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000009
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000001
+    Extras              :
+      Flags      (24-27): 0xdeadbeef
+    Key          (28-32): The textual string: &quot;Hello&quot;
+    Value        (33-37): The textual string: &quot;World&quot;
+ </p><p></pre> </p><h2><a name="Set,_Add,_Replace"></a>Set, Add, Replace<a href="#Set,_Add,_Replace" class="section_anchor"></a></h2><p>Request: <ul><li>MUST have extras. </li><li>MUST have key. </li><li>MAY have value. </li></ul></p><blockquote>Extra data for set/add/replace: 
+</blockquote><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Flags                                                         |
+        +---------------+---------------+---------------+---------------+
+       4| Expiration                                                    |
+        +---------------+---------------+---------------+---------------+
+        Total 8 bytes
+ </pre> </p><p>Response: <ul><li>MUST have CAS </li><li>MUST NOT have extras </li><li>MUST NOT have key </li><li>MUST NOT have value </li></ul></p><p>Constraints: <ul><li>If the Data Version Check (CAS) is nonzero, the requested operation MUST only succeed if the item exists and has a CAS value identical to the provided value. </li><li>Add MUST fail if the item already exist. </li><li>Replace MUST fail if the item doesn&#x27;t exist. </li><li>Set should store the data unconditionally if the item exists or not. </li></ul></p><p>Quiet mutations only return responses on failure. Success is considered the general case and is suppressed when in quiet mode, but errors should not be allowed to go unnoticed. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following figure shows an add-command for with key = &quot;Hello&quot;, value = &quot;World&quot;, flags = 0xdeadbeef and expiry: in two hours. </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x02          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x08          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x12          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0xde          | 0xad          | 0xbe          | 0xef          |
+        +---------------+---------------+---------------+---------------+
+      28| 0x00          | 0x00          | 0x0e          | 0x10          |
+        +---------------+---------------+---------------+---------------+
+      32| 0x48 (&#x27;H&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x6c (&#x27;l&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      36| 0x6f (&#x27;o&#x27;)    | 0x57 (&#x27;W&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x72 (&#x27;r&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      40| 0x6c (&#x27;l&#x27;)    | 0x64 (&#x27;d&#x27;)    |
+        +---------------+---------------+
+ </p><p>       Total 42 bytes (24 byte header, 8 byte extras, 5 byte key and
+                        5 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x02
+    Key length   (2,3)  : 0x0005
+    Extra length (4)    : 0x08
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000012
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              :
+      Flags      (24-27): 0xdeadbeef
+      Expiry     (28-31): 0x00000e10
+    Key          (32-36): The textual string &quot;Hello&quot;
+    Value        (37-41): The textual string &quot;World&quot;
+ </p><p></pre> </p><p>The result of the operation is signaled through the status code.  If the command succeeds, the CAS value for the item is returned in the CAS-field of the packet: </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x02          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x01          |
+        +---------------+---------------+---------------+---------------+
+ </p><p>       Total 24 bytes
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x02
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000000
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000001
+    Extras              : None
+    Key                 : None
+    Value               : None
+ </pre> </p><h2><a name="Delete"></a>Delete<a href="#Delete" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST have key. </li><li>MUST NOT have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras </li><li>MUST NOT have key </li><li>MUST NOT have value </li></ul>   Delete the item with the specific key. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following figure shows a delete message for the item &quot;Hello&quot;. </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x04          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x48 (&#x27;H&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x6c (&#x27;l&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x6f (&#x27;o&#x27;)    |
+        +---------------+
+ </p><p>       Total 29 bytes (24 byte header, 5 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x04
+    Key length   (2,3)  : 0x0005
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000005
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : The textual string &quot;Hello&quot;
+    Value               : None
+ </p><p></pre> </p><p>The result of the operation is signaled through the status code. </p><h2><a name="Increment,_Decrement"></a>Increment, Decrement<a href="#Increment,_Decrement" class="section_anchor"></a></h2><p>Request: <ul><li>MUST have extras. </li><li>MUST have key. </li><li>MUST NOT have value. </li></ul></p><blockquote>Extra data for incr/decr: 
+</blockquote><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Amount to add / subtract                                      |
+        |                                                               |
+        +---------------+---------------+---------------+---------------+
+       8| Initial value                                                 |
+        |                                                               |
+        +---------------+---------------+---------------+---------------+
+      16| Expiration                                                    |
+        +---------------+---------------+---------------+---------------+
+        Total 20 bytes
+ </pre> </p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST have value. </li></ul></p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 64-bit unsigned response.                                     |
+        |                                                               |
+        +---------------+---------------+---------------+---------------+
+        Total 8 bytes
+ </p><p></pre> </p><p>These commands will either add or remove the specified amount to the requested counter. If you want to set the value of the counter with add/set/replace, the objects data must be the ascii representation of the value and not the byte values of a 64 bit integer.  </p><p>If the counter does not exist, one of two things may happen: </p><ol><li>  If the expiration value is all one-bits (0xffffffff), the </li><blockquote>operation will fail with NOT_FOUND. 
+</blockquote></ol><blockquote>2.  For all other expiration values, the operation will succeed by 
+<blockquote>seeding the value for this key with the provided initial value to 
+expire with the provided expiration time.  The flags will be set 
+to zero. 
+</blockquote></blockquote><p>Decrementing a counter will never result in a &quot;negative value&quot; (or cause the counter to &quot;wrap&quot;). instead the counter is set to 0. Incrementing the counter may cause the counter to wrap. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following figure shows an incr-command for key = &quot;counter&quot;, delta = 0x01, initial = 0x00 which expires in two hours. </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x05          | 0x00          | 0x07          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x14          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x1b          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      28| 0x00          | 0x00          | 0x00          | 0x01          |
+        +---------------+---------------+---------------+---------------+
+      32| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      36| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      40| 0x00          | 0x00          | 0x0e          | 0x10          |
+        +---------------+---------------+---------------+---------------+
+      44| 0x63 (&#x27;c&#x27;)    | 0x6f (&#x27;o&#x27;)    | 0x75 (&#x27;u&#x27;)    | 0x6e (&#x27;n&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      48| 0x74 (&#x27;t&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x72 (&#x27;r&#x27;)    |
+        +---------------+---------------+---------------+
+        Total 51 bytes (24 byte header, 20 byte extras, 7 byte key)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x05
+    Key length   (2,3)  : 0x0007
+    Extra length (4)    : 0x14
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x0000001b
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              :
+      delta      (24-31): 0x0000000000000001
+      initial    (32-39): 0x0000000000000000
+      exipration (40-43): 0x00000e10
+    Key                 : Textual string &quot;counter&quot;
+    Value               : None
+ </p><p></pre> </p><p>If the key doesn&#x27;t exist, the server will respond with the initial value. If not the incremented value will be returned.  Let&#x27;s assume that the key didn&#x27;t exist, so the initial value is returned: </p><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x05          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x08          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      28| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+        Total 32 bytes (24 byte header, 8 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x05
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000008
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000005
+    Extras              : None
+    Key                 : None
+    Value               : 0x0000000000000000
+ </p><p></pre> </p><h2><a name="quit"></a>quit<a href="#quit" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Close the connection to the server. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x07          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x07
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000000
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : None
+    Value               : None
+ </p><p></pre> </p><p>The response-packet contains no extra data, and the result of the operation is signaled through the status code. The server will then close the connection. </p><h2><a name="Flush"></a>Flush<a href="#Flush" class="section_anchor"></a></h2><p>Request: <ul><li>MAY have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><blockquote>Extra data for flush: 
+</blockquote><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Expiration                                                    |
+        +---------------+---------------+---------------+---------------+
+      Total 4 bytes
+ </pre> </p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Flush the items in the cache now or some time in the future as specified by the expiration field. See the documentation of the textual protocol for the full description on how to specify the expiration time. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>To flush the cache (delete all items) in two hours, the set the following values in the request </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x08          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x04          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x04          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x00          | 0x00          | 0x0e          | 0x10          |
+        +---------------+---------------+---------------+---------------+
+        Total 28 bytes (24 byte header, 4 byte body)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x08
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x04
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000004
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              :
+       Expiry    (24-27): 0x000e10
+    Key                 : None
+    Value               : None
+ </p><p></pre> </p><p>The result of the operation is signaled through the status code. </p><h2><a name="noop"></a>noop<a href="#noop" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Used as a keep alive. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>Noop request: </p><p><pre> </p><p>     Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x0a          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x0a
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000000
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : None
+    Value               : None
+ </p><p></pre> </p><p>The result of the operation is signaled through the status code. </p><h2><a name="version"></a>version<a href="#version" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST have value. </li></ul></p><p>Request the server version. </p><p>The server responds with a packet containing the version string in the body with the following format: &quot;x.y.z&quot; </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>Request: <pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x0b          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x0b
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000000
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+ </p><p></pre> </p><p>Response: <pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x0b          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x31 (&#x27;1&#x27;)    | 0x2e (&#x27;.&#x27;)    | 0x33 (&#x27;3&#x27;)    | 0x2e (&#x27;.&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x31 (&#x27;1&#x27;)    |
+        +---------------+
+        Total 29 bytes (24 byte header, 5 byte body)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x0b
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000005
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : None
+    Value               : Textual string &quot;1.3.1&quot;
+ </p><p></pre> </p><h2><a name="Append,_Prepend"></a>Append, Prepend<a href="#Append,_Prepend" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MUST have key. </li><li>MUST have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li><li>MUST have CAS </li></ul></p><p>These commands will either append or prepend the specified value to the requested key. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following example appends &#x27;!&#x27; to the &#x27;Hello&#x27; key. </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x0e          | 0x00          | 0x05          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x06          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x48 (&#x27;H&#x27;)    | 0x65 (&#x27;e&#x27;)    | 0x6c (&#x27;l&#x27;)    | 0x6c (&#x27;l&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x6f (&#x27;o&#x27;)    | 0x21 (&#x27;!&#x27;)    |
+        +---------------+---------------+
+        Total 30 bytes (24 byte header, 5 byte key, 1 byte value)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x0e
+    Key length   (2,3)  : 0x0005
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000006
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key          (24-28): The textual string &quot;Hello&quot;
+    Value        (29)   : &quot;!&quot;
+ </pre> </p><p>The result of the operation is signaled through the status code. </p><h2><a name="Stat"></a>Stat<a href="#Stat" class="section_anchor"></a></h2><p>Request: <ul><li>MUST NOT have extras. </li><li>MAY have key. </li><li>MUST NOT have value. </li></ul></p><p>Response: <ul><li>MUST NOT have extras. </li><li>MAY have key. </li><li>MAY have value. </li></ul></p><p>Request server statistics. Without a key specified the server will respond with a &quot;default&quot; set of statistics information.  Each piece of statistical information is returned in its own packet (key contains the name of the statistical item and the body contains the value in ASCII format). The sequence of return packets is terminated with a packet that contains no key and no value. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>The following example requests all statistics from the server </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x80          | 0x10          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+        Total 24 bytes
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x80
+    Opcode       (1)    : 0x10
+    Key length   (2,3)  : 0x0000
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    VBucket      (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000000
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Extras              : None
+    Key                 : None
+    Value               : None
+ </pre> </p><p>The server will send each value in a separate packet with an &quot;empty&quot; packet (no key / no value) to terminate the sequence. Each of the response packets look like the following example: </p><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| 0x81          | 0x10          | 0x00          | 0x03          |
+        +---------------+---------------+---------------+---------------+
+       4| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+       8| 0x00          | 0x00          | 0x00          | 0x07          |
+        +---------------+---------------+---------------+---------------+
+      12| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      16| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      20| 0x00          | 0x00          | 0x00          | 0x00          |
+        +---------------+---------------+---------------+---------------+
+      24| 0x70 (&#x27;p&#x27;)    | 0x69 (&#x27;i&#x27;)    | 0x64 (&#x27;d&#x27;)    | 0x33 (&#x27;3&#x27;)    |
+        +---------------+---------------+---------------+---------------+
+      28| 0x30 (&#x27;0&#x27;)    | 0x37 (&#x27;7&#x27;)    | 0x38 (&#x27;8&#x27;)    |
+        +---------------+---------------+---------------+
+        Total 31 bytes (24 byte header, 3 byte key, 4 byte body)
+ </p><p>   Field        (offset) (value)
+    Magic        (0)    : 0x81
+    Opcode       (1)    : 0x10
+    Key length   (2,3)  : 0x0003
+    Extra length (4)    : 0x00
+    Data type    (5)    : 0x00
+    Status       (6,7)  : 0x0000
+    Total body   (8-11) : 0x00000007
+    Opaque       (12-15): 0x00000000
+    CAS          (16-23): 0x0000000000000000
+    Exstras             : None
+    Key                 : The textual string &quot;pid&quot;
+    Value               : The textual string &quot;3078&quot;
+ </pre> </p><h2><a name="Verbosity"></a>Verbosity<a href="#Verbosity" class="section_anchor"></a></h2><p>Request: <ul><li>MUST have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><blockquote>Extra data for flush: 
+</blockquote><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Verbosity                                                     |
+        +---------------+---------------+---------------+---------------+
+      Total 4 bytes
+ </pre> </p><p>Response: <ul><li>MUST NOT have extras. </li><li>MUST NOT have key. </li><li>MUST NOT have value. </li></ul></p><p>Set the verbosity level of the server. This may cause your memcached server to generate more or less output. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p>To set the verbosity level to two, set the following values in the request </p><p><pre> @todo add me
+ </pre> </p><p>The result of the operation is signaled through the status code. </p><h2><a name="Touch,_GAT_and_GATQ"></a>Touch, GAT and GATQ<a href="#Touch,_GAT_and_GATQ" class="section_anchor"></a></h2><p>Request: <ul><li>MUST have extras. </li><li>MUST have key. </li><li>MUST NOT have value. </li></ul></p><blockquote>Extra data for set/add/replace: 
+</blockquote><p><pre>      Byte/     0       |       1       |       2       |       3       |
+         /              |               |               |               |
+        |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+        +---------------+---------------+---------------+---------------+
+       0| Expiration                                                    |
+        +---------------+---------------+---------------+---------------+
+        Total 4 bytes
+ </pre> </p><p>Touch is used to set a new expiration time for an existing item. GAT (Get and touch) and GATQ will return the value for the object if it is present in the cache. </p><h3><a name="Example"></a>Example<a href="#Example" class="section_anchor"></a></h3><p><pre> @todo add me
+ </pre> </p><h2><a name="Get/Set/Del_VBucket"></a>Get/Set/Del VBucket<a href="#Get/Set/Del_VBucket" class="section_anchor"></a></h2><p>@todo add me </p><h2><a name="TAP_Connect"></a>TAP Connect<a href="#TAP_Connect" class="section_anchor"></a></h2><p>@todo add me </p><h2><a name="TAP_Mutation_/_Delete_/_Flush"></a>TAP Mutation / Delete / Flush<a href="#TAP_Mutation_/_Delete_/_Flush" class="section_anchor"></a></h2><p>@todo add me </p><h2><a name="TAP_Opaque"></a>TAP Opaque<a href="#TAP_Opaque" class="section_anchor"></a></h2><p>@todo add me </p><h2><a name="TAP_VBucket_set"></a>TAP VBucket set<a href="#TAP_VBucket_set" class="section_anchor"></a></h2><p>@todo add me </p><h2><a name="TAP_Checkpoint_start/stop"></a>TAP Checkpoint start/stop<a href="#TAP_Checkpoint_start/stop" class="section_anchor"></a></h2><p>@todo add me </p><h1><a name="Security_Considerations"></a>Security Considerations<a href="#Security_Considerations" class="section_anchor"></a></h1><p>Memcache has no authentication or security layers whatsoever. It is RECOMMENDED that memcache be deployed strictly on closed, protected, back-end networks within a single data center, within a single cluster of servers, or even on a single host, providing shared caching for multiple applications. Memcache MUST NOT be made available on a public network. </p><h1><a name="Normative_References"></a>Normative References<a href="#Normative_References" class="section_anchor"></a></h1><blockquote>KEYWORDS 
+<blockquote>Bradner, S., &quot;Key words for use in RFCs to Indicate 
+Requirement Levels&quot;, BCP 14, RFC 2119, March 1997. 
+</blockquote></blockquote><blockquote>LJ       Danga Interactive, &quot;LJ NEEDS MOAR SPEED&quot;, 10 1999. 
+</blockquote>
+ </div>
+ </div>
+ </td><tr>
+</table>
+ </div>
+
+
+ 
+ 
+ 
+ <form name="delcom" action="../w/delComment.do" method="POST">
+ <input type="hidden" name="sequence_num" value="" >
+ <input type="hidden" name="create_time" value="" >
+ <input type="hidden" name="mode" value="" >
+ <input type="hidden" name="pagename" value="BinaryProtocolRevamped" >
+ <input type="hidden" name="token" value="Q8zTMN4cHO0mCV1FaDPCebnXpew:1352092265676" >
+ </form>
+
+
+ <script src="https://ssl.gstatic.com/codesite/ph/4212538301465177006/js/prettify/prettify.js"></script>
+ <script type="text/javascript">
+ prettyPrint();
+ </script>
+
+<script type="text/javascript" src="https://ssl.gstatic.com/codesite/ph/4212538301465177006/js/dit_scripts.js"></script>
+
+
+
+  
+ 
+ 
+ <script type="text/javascript" src="https://ssl.gstatic.com/codesite/ph/4212538301465177006/js/ph_core.js"></script>
+ 
+ <script type="text/javascript" src="https://ssl.gstatic.com/codesite/ph/4212538301465177006/js/ph_dwiki.js"></script>
+ 
+ 
+ 
+ 
+</div> 
+
+<div id="footer" dir="ltr">
+ <div class="text">
+ <a href="/projecthosting/terms.html">Terms</a> -
+ <a href="http://www.google.com/privacy.html">Privacy</a> -
+ <a href="/p/support/">Project Hosting Help</a>
+ </div>
+</div>
+ <div class="hostedBy" style="margin-top: -20px;">
+ <span style="vertical-align: top;">Powered by <a href="http://code.google.com/projecthosting/">Google Project Hosting</a></span>
+ </div>
+
+ 
+ 
+
+
+ 
+ </body>
+</html>
+
+

@@ -132,10 +132,12 @@ static void createPidFile(const char* pidfile) {}
 #endif
 
 ServerBuilder::ServerBuilder() {
+    ConfigCenter::instance().configure(&config);
     init();
 }
 
 ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
+    ConfigCenter::instance().configure(&config);
     config.parentThreadCount = parentThreadCnt;
     config.childThreadCount = childThreadCnt;
     init();

@@ -30,11 +30,12 @@
 #include <cetty/channel/SucceededChannelFuture.h>
 
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace channel {
 
-AbstractChannel::ChannelMap AbstractChannel::allChannels;
+std::map<int, ChannelPtr> AbstractChannel::allChannels;
 
 class ChannelCloseFuture : public DefaultChannelFuture {
 public:
@@ -43,12 +44,12 @@ public:
     }
     ~ChannelCloseFuture() {}
 
-    bool setSuccess() {
+    virtual bool setSuccess() {
         // User is not supposed to call this method - ignore silently.
         return false;
     }
 
-    bool setFailure(const Exception& cause) {
+    virtual bool setFailure(const Exception& cause) {
         // User is not supposed to call this method - ignore silently.
         return false;
     }
@@ -58,7 +59,7 @@ public:
             try {
                 channel->doPreClose();
             }
-            catch(const Exception& e) {
+            catch (const Exception& e) {
                 LOG_WARN << "doPreClose() raised an exception: " << e.getDisplayText();
             }
         }
@@ -79,17 +80,7 @@ AbstractChannel::AbstractChannel(const EventLoopPtr& eventLoop,
       parent(parent),
       factory(factory),
       pipeline(pipeline) {
-    BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
-
-    succeededFuture = new SucceededChannelFuture(shared_from_this());
-    closeFuture = new ChannelCloseFuture(shared_from_this());
-
-    if (!id) {
-        id = allocateId(this);
-    }
-
-    closeFuture->addListener(
-        boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
+    init();
 }
 
 AbstractChannel::AbstractChannel(int id,
@@ -102,6 +93,13 @@ AbstractChannel::AbstractChannel(int id,
       parent(parent),
       factory(factory),
       pipeline(pipeline) {
+    init();
+}
+
+AbstractChannel::~AbstractChannel() {
+}
+
+void AbstractChannel::init() {
     BOOST_ASSERT(factory && pipeline && "input must not to be NULL!");
 
     succeededFuture = new SucceededChannelFuture(shared_from_this());
@@ -111,11 +109,10 @@ AbstractChannel::AbstractChannel(int id,
         id = allocateId(this);
     }
 
+#if 0  // FIXME need concurrent hash map
     closeFuture->addListener(
         boost::bind(&AbstractChannel::idDeallocatorCallback, this, _1));
-}
-
-AbstractChannel::~AbstractChannel() {
+#endif
 }
 
 void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
@@ -146,104 +143,13 @@ const ChannelPipelinePtr& AbstractChannel::getPipeline() const {
     return pipeline;
 }
 
-ChannelFuturePtr& AbstractChannel::getCloseFuture() {
-    return this->closeFuture;
-}
-
-bool AbstractChannel::setClosed() {
-    return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
-}
-
-ChannelFuturePtr AbstractChannel::getUnsupportedOperationFuture() {
-    return new FailedChannelFuture(shared_from_this(),
-                                   UnsupportedOperationException());
-}
-
-void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
-    AbstractChannel::ChannelMap::iterator itr
-        = AbstractChannel::allChannels.find(future.getChannel()->getId());
-
-    if (itr != AbstractChannel::allChannels.end()) {
-        AbstractChannel::allChannels.erase(itr);
-    }
-}
-
-int AbstractChannel::allocateId(const ChannelPtr& channel) {
-    boost::crc_32_type crc32;
-    crc32.process_bytes((void const*)this, sizeof(this));
-    int id = crc32.checksum();
-
-    for (;;) {
-        // Loop until a unique ID is acquired.
-        // It should be found in one loop practically.
-        if (allChannels.insert(std::make_pair<int, ChannelPtr>(id, channel)).second) {
-            // Successfully acquired.
-            return id;
-        }
-        else {
-            // Taken by other channel at almost the same moment.
-            id += 1;
-        }
-    }
-}
-
-std::string AbstractChannel::toString() const {
-    char buf[512] = {0};
-
-    bool active = isActive();
-
-    if (active && !strVal.empty()) {
-        return strVal;
-    }
-
-    const SocketAddress& localAddress = getLocalAddress();
-    const SocketAddress& remoteAddress = getRemoteAddress();
-
-    if (remoteAddress.validated()) {
-        if (NULL == getParent()) { // server channel or client channel
-            sprintf(buf, "[id: 0x%08x, %s => %s]", getId(),
-                    localAddress.toString().c_str(),
-                    remoteAddress.toString().c_str());
-        }
-        else { // connection channel
-            sprintf(buf, "[id: 0x%08x, %s => %s]", getId(),
-                    remoteAddress.toString().c_str(),
-                    localAddress.toString().c_str());
-        }
-    }
-    else if (localAddress.validated()) {
-        sprintf(buf, "[id: 0x%08x, %s]", getId(),
-                localAddress.toString().c_str());
-    }
-    else {
-        sprintf(buf, "[id: 0x%08x]", getId());
-    }
-
-    if (active) {
-        strVal = (const char*)buf;
-    }
-    else {
-        strVal.empty();
-    }
-
-    return buf;
-}
-
-int AbstractChannel::compareTo(const ChannelPtr& c) const {
-    if (c) {
-        return (getId() - c->getId());
-    }
-
-    return 1;
-}
-
 ChannelFuturePtr AbstractChannel::bind(const SocketAddress& localAddress) {
     return pipeline->bind(localAddress);
 }
 
 const ChannelFuturePtr& AbstractChannel::bind(const SocketAddress& localAddress,
-        const ChannelFuturePtr& future) {
-    return pipeline->bind(localAddress, future);
+    const ChannelFuturePtr& future) {
+        return pipeline->bind(localAddress, future);
 }
 
 ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress) {
@@ -251,19 +157,19 @@ ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress) {
 }
 
 ChannelFuturePtr AbstractChannel::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress) {
-    return pipeline->connect(remoteAddress, localAddress);
+    const SocketAddress& localAddress) {
+        return pipeline->connect(remoteAddress, localAddress);
 }
 
 const ChannelFuturePtr& AbstractChannel::connect(const SocketAddress& remoteAddress,
-        const ChannelFuturePtr& future) {
-    return pipeline->connect(remoteAddress, future);
+    const ChannelFuturePtr& future) {
+        return pipeline->connect(remoteAddress, future);
 }
 
 const ChannelFuturePtr& AbstractChannel::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
-        const ChannelFuturePtr& future) {
-    return pipeline->connect(remoteAddress, localAddress, future);
+    const SocketAddress& localAddress,
+    const ChannelFuturePtr& future) {
+        return pipeline->connect(remoteAddress, localAddress, future);
 }
 
 ChannelFuturePtr AbstractChannel::disconnect() {
@@ -300,6 +206,94 @@ ChannelFuturePtr AbstractChannel::newFailedFuture(const Exception& e) {
 
 ChannelFuturePtr AbstractChannel::newSucceededFuture() {
     return succeededFuture;
+}
+
+const ChannelFuturePtr& AbstractChannel::getCloseFuture() {
+    return this->closeFuture;
+}
+
+bool AbstractChannel::setClosed() {
+    return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
+}
+
+void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
+    std::map<int, ChannelPtr>::iterator itr
+        = AbstractChannel::allChannels.find(future.getChannel()->getId());
+
+    if (itr != AbstractChannel::allChannels.end()) {
+        AbstractChannel::allChannels.erase(itr);
+    }
+}
+
+int AbstractChannel::allocateId(const ChannelPtr& channel) {
+    boost::crc_32_type crc32;
+    crc32.process_bytes((void const*)this, sizeof(this));
+    int id = crc32.checksum();
+
+#if 0 //FIXME need concurrent hash map
+
+    for (;;) {
+        // Loop until a unique ID is acquired.
+        // It should be found in one loop practically.
+        if (allChannels.insert(std::make_pair<int, ChannelPtr>(id, channel)).second) {
+            // Successfully acquired.
+            return id;
+        }
+        else {
+            // Taken by other channel at almost the same moment.
+            id += 1;
+        }
+    }
+
+#endif
+
+    return id;
+}
+
+int AbstractChannel::compareTo(const ChannelPtr& c) const {
+    if (c) {
+        return (getId() - c->getId());
+    }
+
+    return 1;
+}
+
+std::string AbstractChannel::toString() const {
+    bool active = isActive();
+
+    if (!active) {
+        strVal.empty();
+        return strVal;
+    }
+
+    if (!strVal.empty()) {
+        return strVal;
+    }
+
+    const SocketAddress& localAddress = getLocalAddress();
+    const SocketAddress& remoteAddress = getRemoteAddress();
+
+    if (remoteAddress.validated()) {
+        if (!getParent()) { // server channel or client channel
+            StringUtil::strprintf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
+                    localAddress.toString().c_str(),
+                    remoteAddress.toString().c_str());
+        }
+        else { // connection channel
+            StringUtil::strprintf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
+                    remoteAddress.toString().c_str(),
+                    localAddress.toString().c_str());
+        }
+    }
+    else if (localAddress.validated()) {
+        StringUtil::strprintf(&strVal, "[id: 0x%08x, %s]", getId(),
+                localAddress.toString().c_str());
+    }
+    else {
+        StringUtil::strprintf(&strVal, "[id: 0x%08x]", getId());
+    }
+
+    return strVal;
 }
 
 }

@@ -21,8 +21,10 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/Types.h>
 #include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+
+#include <cetty/Types.h>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuturePtr.h>
@@ -215,27 +217,29 @@ using namespace cetty::util;
  *
  */
 
-class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture> {
+class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture>,
+    private boost::noncopyable {
+
 public:
-/**
- * Listens to the result of a {@link ChannelFuture}.  The result of the
- * asynchronous {@link Channel} I/O operation is notified once this listener
- * is added by calling {@link ChannelFuture#addListener(ChannelFutureListener)}.
- *
- * <h3>Return the control to the caller quickly</h3>
- *
- * {@link #operationComplete(ChannelFuture)} is directly called by an I/O
- * thread.  Therefore, performing a time consuming task or a blocking operation
- * in the handler method can cause an unexpected pause during I/O.  If you need
- * to perform a blocking operation on I/O completion, try to execute the
- * operation in a different thread using a thread pool.
-     
+    /**
+     * Listens to the result of a {@link ChannelFuture}.  The result of the
+     * asynchronous {@link Channel} I/O operation is notified once this listener
+     * is added by calling {@link ChannelFuture#addListener(ChannelFutureListener)}.
+     *
+     * <h3>Return the control to the caller quickly</h3>
+     *
+     * {@link #operationComplete(ChannelFuture)} is directly called by an I/O
+     * thread.  Therefore, performing a time consuming task or a blocking operation
+     * in the handler method can cause an unexpected pause during I/O.  If you need
+     * to perform a blocking operation on I/O completion, try to execute the
+     * operation in a different thread using a thread pool.
+
      * Invoked when the I/O operation associated with the
      * {@link ChannelFuture const ChannelFuturePtr&} has been completed.
      *
      * @param future  the source {@link ChannelFuture} which called this
      *                callback
- */
+     */
     typedef boost::function<void (ChannelFuture&)> CompletedCallback;
     typedef boost::function<void (ChannelFuture&, int, int, int)> ProgressedCallback;
 
@@ -326,16 +330,8 @@ public:
      * Use this function, you may not have to take care the listener's
      * life circle, otherwise, the ChannelFutureListener should.
      */
-    virtual void addListener(const CompletedCallback& listenerr, int priority = 0) = 0;
-    virtual void addProgressListener(const ProgressedCallback& listener) = 0;
-
-    /**
-     * Adds the specified listener to this future.  The
-     * specified listener is notified when this future is
-     * {@link #isDone() done}.  If this future is already
-     * completed, the specified listener is notified immediately.
-     */
-    //virtual void addListener(ChannelFutureListener* listener) = 0;
+    virtual ChannelFuturePtr addListener(const CompletedCallback& listenerr, int priority = 0) = 0;
+    virtual ChannelFuturePtr addProgressListener(const ProgressedCallback& listener) = 0;
 
     /**
      * Removes the specified listener from this future.
@@ -344,8 +340,8 @@ public:
      * listener is not associated with this future, this method
      * does nothing and returns silently.
      */
-    virtual void removeListener(const CompletedCallback& listener) = 0;
-    virtual void removeProgressListener(const ProgressedCallback& listener) = 0;
+    virtual ChannelFuturePtr removeListener(const CompletedCallback& listener) = 0;
+    virtual ChannelFuturePtr removeProgressListener(const ProgressedCallback& listener) = 0;
 
     /**
      * Waits for this future to be completed.
@@ -372,7 +368,7 @@ public:
      * @throws InterruptedException
      *         if the current thread was interrupted
      */
-    virtual bool await(int timeoutMillis) = 0;
+    virtual bool await(int64_t timeoutMillis) = 0;
 
     /**
      * Waits for this future to be completed within the
@@ -382,7 +378,7 @@ public:
      * @return <tt>true</tt> if and only if the future was completed within
      *         the specified time limit
      */
-    virtual bool awaitUninterruptibly(int timeoutMillis) = 0;
+    virtual bool awaitUninterruptibly(int64_t timeoutMillis) = 0;
 };
 
 }

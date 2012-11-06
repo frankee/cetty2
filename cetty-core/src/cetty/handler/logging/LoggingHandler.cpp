@@ -31,14 +31,14 @@ using namespace cetty::buffer;
 using namespace cetty::channel;
 
 
-void LoggingHandler::channelCreated(ChannelHandlerContext& ctx) {
+void LoggingHandler::channelOpen(ChannelHandlerContext& ctx) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
                 << ctx.getChannel()->toString()
-                << " CREATED";
+                << " OPEN";
     }
 
-    AbstractChannelHandler::channelCreated(ctx);
+    AbstractChannelHandler::channelOpen(ctx);
 }
 
 void LoggingHandler::channelActive(ChannelHandlerContext& ctx) {

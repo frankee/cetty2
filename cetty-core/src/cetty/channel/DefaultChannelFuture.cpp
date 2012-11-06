@@ -15,17 +15,12 @@
  */
 #include <cetty/channel/DefaultChannelFuture.h>
 
+#include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
-
-#include <boost/thread/detail/thread.hpp>
 
 #include <cetty/channel/Channel.h>
-
-#include <cetty/logging/LoggerHelper.h>
-
 #include <cetty/util/Exception.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
@@ -39,9 +34,11 @@ bool DefaultChannelFuture::disabledDeadLockCheckerOnce = false;
 Exception DefaultChannelFuture::CANCELLED("Future canceled");
 
 DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
-        bool cancellable)
+        bool cancellable,
+        bool threadUnsafe)
     : cancellable(cancellable),
       done(false),
+      threadUnsafe(threadUnsafe),
       channel(channel),
       completedListeners(NULL),
       progressListeners(NULL),
@@ -49,6 +46,11 @@ DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
       mutex(NULL),
       cond(NULL),
       waiters(0) {
+
+    if (!threadUnsafe) {
+        condition();
+        getMutex();
+    }
 }
 
 DefaultChannelFuture::~DefaultChannelFuture() {
@@ -109,9 +111,11 @@ bool DefaultChannelFuture::isCancelled() const {
     return cause == &CANCELLED;
 }
 
-void DefaultChannelFuture::addListener(const CompletedCallback& listener, int priority) {
+ChannelFuturePtr DefaultChannelFuture::addListener(
+    const CompletedCallback& listener,
+    int priority) {
     if (listener.empty()) {
-        return;
+        return shared_from_this();
     }
 
     bool notifyNow = false;
@@ -142,11 +146,14 @@ void DefaultChannelFuture::addListener(const CompletedCallback& listener, int pr
     if (notifyNow) {
         notifyListener(listener);
     }
+
+    return shared_from_this();
 }
 
-void DefaultChannelFuture::addProgressListener(const ProgressedCallback& listener) {
+ChannelFuturePtr DefaultChannelFuture::addProgressListener(
+    const ProgressedCallback& listener) {
     if (!listener) {
-        return;
+        return shared_from_this();
     }
 
     {
@@ -160,14 +167,17 @@ void DefaultChannelFuture::addProgressListener(const ProgressedCallback& listene
             progressListeners->push_back(listener);
         }
     }
+
+    return shared_from_this();
 }
 
-void DefaultChannelFuture::removeListener(const CompletedCallback& listener) {
+ChannelFuturePtr DefaultChannelFuture::removeListener(
+    const CompletedCallback& listener) {
     if (!listener) {
-        return;
+        return shared_from_this();
     }
 
-#if 0
+#if 0 // FIXME
     boost::lock_guard<boost::mutex> guard(getMutex());
 
     if (!done) {
@@ -186,14 +196,17 @@ void DefaultChannelFuture::removeListener(const CompletedCallback& listener) {
     }
 
 #endif
+
+    return shared_from_this();
 }
 
-void DefaultChannelFuture::removeProgressListener(const ProgressedCallback& listener) {
+ChannelFuturePtr DefaultChannelFuture::removeProgressListener(
+    const ProgressedCallback& listener) {
     if (!listener) {
-        return;
+        return shared_from_this();
     }
 
-#if 0
+#if 0 // FIXME
     boost::lock_guard<boost::mutex> guard(getMutex());
 
     if (!done && completedListeners != NULL) {
@@ -201,8 +214,8 @@ void DefaultChannelFuture::removeProgressListener(const ProgressedCallback& list
     }
 
 #endif
+    return shared_from_this();
 }
-
 
 ChannelFuturePtr DefaultChannelFuture::await() {
     if (boost::this_thread::interruption_requested()) {
@@ -228,7 +241,7 @@ ChannelFuturePtr DefaultChannelFuture::await() {
     return shared_from_this();
 }
 
-bool DefaultChannelFuture::await(int timeoutMillis) {
+bool DefaultChannelFuture::await(int64_t timeoutMillis) {
     return await0(timeoutMillis, true);
 }
 
@@ -262,7 +275,7 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
     return shared_from_this();
 }
 
-bool DefaultChannelFuture::awaitUninterruptibly(int timeoutMillis) {
+bool DefaultChannelFuture::awaitUninterruptibly(int64_t timeoutMillis) {
     try {
         return await0(timeoutMillis, false);
     }
@@ -371,7 +384,7 @@ bool DefaultChannelFuture::setProgress(int amount, int current, int total) {
     return true;
 }
 
-bool DefaultChannelFuture::await0(int timeoutMillis, bool interruptable) {
+bool DefaultChannelFuture::await0(int64_t timeoutMillis, bool interruptable) {
     if (interruptable && boost::this_thread::interruption_requested()) {
         throw InterruptedException("");
     }
@@ -405,6 +418,7 @@ bool DefaultChannelFuture::await0(int timeoutMillis, bool interruptable) {
                 }
                 catch (const boost::thread_interrupted& e) {
                     (void)e;
+
                     if (interruptable) {
                         throw InterruptedException("");
                     }
@@ -476,7 +490,9 @@ void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {
         l(*this);
     }
     catch (const Exception& e) {
-        LOG_WARN_E(e) << "An exception was thrown by ChannelFutureListener .";
+        LOG_WARN << "An exception ("
+                 << e.getMessage()
+                 << ") thrown by ChannelFutureListener.";
     }
 }
 
@@ -491,7 +507,9 @@ void DefaultChannelFuture::notifyProgressListener(const ProgressedCallback& l,
         l(*this, amount, current, total);
     }
     catch (const Exception& e) {
-        LOG_WARN_E(e) << "An exception was thrown by process callback.";
+        LOG_WARN << "An exception ("
+                 << e.getMessage()
+                 << ") thrown by ChannelFutureListener.";
     }
 }
 
