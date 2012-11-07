@@ -403,6 +403,11 @@ protected:
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
+        if (!replayable) {
+            LOG_WARN << "ReplayingDecoder has not received any data, then close.";
+            return;
+        }
+
         replayable->terminate();
 
         ChannelBufferPtr in = this->cumulation;
