@@ -105,7 +105,7 @@ public:
 private:
     void getFileChecksumDone(
         const ConstGetFileChecksumRequestPtr& request,
-        const GetFileChecksumResponsePtr& response,
+        const google::protobuf::Message* message,
         const DoneCallback& done
     );
 

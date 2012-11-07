@@ -4,6 +4,8 @@
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/zurg/slave/slave.pb.h>
 #include <cetty/zurg/Util.h>
+#include <cetty/zurg/slave/Pipe.h>
+#include <cetty/zurg/slave/ProcStatFile.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -14,6 +16,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 namespace cetty{
 namespace zurg {
@@ -47,7 +50,7 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
 
 Process::Process(
     const EventLoopPtr& loop,
-    const ConstRunCommandRequestPtr& request,
+    const RunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
     const DoneCallback& done
 ): loop_(loop),
@@ -165,9 +168,9 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
     try {
         ProcStatFile stat(cetty::util::Process::id());
 
-        if (!stat.valid) { throw stat.error; }
+        if (!stat.valid_) { throw stat.error_; }
 
-        execError.write(stat.startTime);
+        execError.write(stat.startTime_);
 
         std::vector<const char*> argv;
         argv.reserve(request_->args_size() + 2);
@@ -317,9 +320,9 @@ void Process::onTimeout() {
 
     const ProcStatFile stat(pid_);
 
-    if (stat.valid
-        && stat.ppid == cetty::util::Process::id()
-        && stat.startTime == startTimeInJiffies_) {
+    if (stat.valid_
+        && stat.ppid_ == cetty::util::Process::id()
+        && stat.startTime_ == startTimeInJiffies_) {
         ::kill(pid_, SIGINT);
     }
 }
@@ -353,8 +356,8 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response.set_error_code(0);
     response.set_pid(pid_);
     response.set_status(status);
-    response.set_std_output(stdoutSink_->bufferAsStdString());
-    response.set_std_error(stderrSink_->bufferAsStdString());
+    //response.set_std_output(stdoutSink_->bufferAsStdString());
+    //response.set_std_error(stderrSink_->bufferAsStdString());
     response.set_executable_file(exe_file_);
     response.set_start_time_us(getMicroSecs(startTime_));
     response.set_finish_time_us(getMicroSecs(microsec_clock::local_time()));

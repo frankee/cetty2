@@ -128,14 +128,11 @@ void Session::setAttribute(const std::string& key, const std::string& value) {
     if (value.empty()) {
         LOG_WARN << "without value, will remove the attribute";
         removeAttribute(key);
+        return;
     }
 
-    if(key.empty() || value.empty()) return;
     attributes.insert(std::pair<std::string, std::string>(key, value));
-
-    if (updateCallback) {
-        updateCallback(shared_from_this());
-    }
+    update(shared_from_this());
 }
 
 void Session::removeAttribute(const std::string& key) {
@@ -145,15 +142,11 @@ void Session::removeAttribute(const std::string& key) {
     }
 
     attributes.erase(key);
-
-    if (updateCallback) {
-        updateCallback(shared_from_this());
-    }
+    update(shared_from_this());
 }
 
 void Session::stop() {
     doStop();
-
     if (stopCallback) {
         stopCallback(shared_from_this());
     }
@@ -161,16 +154,19 @@ void Session::stop() {
 
 void Session::expire() {
     doExpire();
-    if(expireCallback) expireCallback(shared_from_this());
+    if(expireCallback) {
+    	expireCallback(shared_from_this());
+    }
 }
 
 void Session::doStop() {
-    if (this->stopTime.is_not_a_date_time())
-        this->stopTime = second_clock::universal_time();
+    if (stopTime.is_not_a_date_time()){
+        stopTime = second_clock::universal_time();
+    }
 }
 
 void Session::doExpire() {
-    this->expired = true;
+    expired = true;
     doStop();
 }
 
@@ -179,43 +175,43 @@ void Session::setId(const std::string& id) {
 }
 
 void Session::setStartTimestamp(const ptime& startTimestamp) {
-    this->startTime = startTimestamp;
-    if(updateCallback) updateCallback(shared_from_this());
+    startTime = startTimestamp;
+    update(shared_from_this());
 }
 
 void Session::setStopTimestamp(const ptime& stopTimestamp) {
     this->stopTime = stopTimestamp;
-    if(updateCallback) updateCallback(shared_from_this());
+    update(shared_from_this());
 }
 
 void Session::setLastAccessTime(ptime& lastAccessTime) {
     this->lastAccessTime = lastAccessTime;
-    if(updateCallback) updateCallback(shared_from_this());
+    update(shared_from_this());
 }
 
 void Session::setTimeout(int timeout) {
     if (this->timeout != timeout) {
         this->timeout = timeout;
-        if (updateCallback) {
-            updateCallback(shared_from_this());
-        }
+        update(shared_from_this());
     }
 }
 
 void Session::setHost(const std::string& host) {
-    this->host = host;
-    if(updateCallback) updateCallback(shared_from_this());
+	if(this->host != host){
+        this->host = host;
+        update(shared_from_this());
+	}
 }
 
 void Session::touch() {
-    this->lastAccessTime =  second_clock::universal_time();
-    if(updateCallback) updateCallback(shared_from_this());
+    lastAccessTime = second_clock::universal_time();
+    update(shared_from_this());
 }
 
 void Session::setLogin(bool login) {
     if(this->login != login){
         this->login = login;
-        if(updateCallback) updateCallback(shared_from_this());
+        update(shared_from_this());
     }
 }
 

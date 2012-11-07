@@ -21,7 +21,7 @@
 *.cc-
 .project
 .cproject
-.sh
+proto.sh
 tags
 
 CMakeCache.txt

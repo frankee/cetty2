@@ -6,6 +6,7 @@
  */
 
 #include <cetty/zurg/slave/Pipe.h>
+#include <stdexcept>
 
 namespace cetty {
 namespace zurg {

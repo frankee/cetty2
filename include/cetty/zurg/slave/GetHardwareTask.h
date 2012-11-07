@@ -8,11 +8,17 @@
 #ifndef GETHARDWARETASK_H_
 #define GETHARDWARETASK_H_
 
-#include <cetty/logging/LoggerHelper.h>
+
 #include <boost/enable_shared_from_this.hpp>
 #include <google/protobuf/stubs/common.h>
 
+
 #include <iostream>
+
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/slave/SlaveServiceImpl.h>
+#include <cetty/zurg/slave/Process.h>
 
 namespace cetty {
 namespace zurg {

@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 namespace cetty {
 namespace zurg {
@@ -26,7 +27,21 @@ ZurgSlave::ZurgSlave(){
 }
 
 void ZurgSlave::init(){
+    if (config_.parentThreadCnt_ < 0)  config_.parentThreadCnt_ = 1;
+    if (config_.childThreadCnt_ < 0) config_.childThreadCnt_ = 0;
+    if (config_.masterAddress_.empty()){
+        LOG_ERROR << "Master address is empty.";
+        exit(0);
+    }
+    if(config_.masterPort_ <= 0){
+        LOG_ERROR << "Master listen port is error.";
+        exit(0);
+    }
 
+    if(config_.listenPort_ <= 0){
+        LOG_ERROR << "Slave listen port is error.";
+        exit(0);
+    }
 }
 
 void ZurgSlave::start() {
@@ -40,8 +55,8 @@ void ZurgSlave::start() {
 
     // todo what's mean
     MasterService_Stub masterClient(clientBuilder.build());
-    // todo send heart beat interval
-
+    Heartbeat hb(loop, &masterClient);
+    hb.start();
 
     serverBuilder.buildRpc(config_.listenPort_);
     serverBuilder.waitingForExit();
