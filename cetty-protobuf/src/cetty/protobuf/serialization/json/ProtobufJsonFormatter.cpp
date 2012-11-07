@@ -400,6 +400,29 @@ public:
         return *this;
     }
 
+    JsonPrinter& printRawValue(const std::string& value) {
+        if (Style) {
+            if (inArray) {
+                stream.append("\n").append(indent);
+            }
+        }
+
+        stream.append(value);
+        stream.append(",");
+
+        return *this;
+    }
+
+    JsonPrinter& print(const std::string& value) {
+        stream.append(value);
+        return *this;
+    }
+
+    JsonPrinter& print(const char* value) {
+        stream.append(value);
+        return *this;
+    }
+
     // print values
     template<typename V>
     JsonPrinter& operator<<(V value) {
@@ -573,6 +596,27 @@ bool printField(const google::protobuf::Message& message,
     return false;
 }
 
+const std::string& getEncodedField(const google::protobuf::Message& message) {
+    static std::string empty;
+
+    const google::protobuf::Reflection* reflection = message.GetReflection();
+    const google::protobuf::Descriptor* descriptor = message.GetDescriptor();
+
+    int fieldCnt = descriptor->field_count();
+    const google::protobuf::FieldDescriptor* field = NULL;
+
+    for (int i = 0; i < fieldCnt; ++i) {
+        field = descriptor->field(i);
+
+        if (field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES
+                && field->name() == "encoded") {
+            return reflection->GetStringReference(message, field, NULL);
+        }
+    }
+
+    return empty;
+}
+
 template<typename T, int U> inline
 bool printMessage(const google::protobuf::Message& message,
                   JsonPrinter<T, U>& printer) {
@@ -585,15 +629,11 @@ bool printMessage(const google::protobuf::Message& message,
     const google::protobuf::FieldDescriptor* field = NULL;
 
     // if has encoded field as whole message, just use it.
-    for (int i = 0; i < fieldCnt; ++i) {
-        field = descriptor->field(i);
+    const std::string& value = getEncodedField(message);
 
-        if (field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES
-                && field->name() == "encoded") {
-            const google::protobuf::Reflection* reflection = message.GetReflection();
-            printer.printValue(reflection->GetString(message, field));
-            return true;
-        }
+    if (!value.empty()) {
+        printer.printRawValue(value);
+        return true;
     }
 
     for (int i = 0; i < fieldCnt; ++i) {
@@ -648,8 +688,16 @@ void doFormat(const google::protobuf::Message& value,
               const T& output) {
     if (output) {
         JsonPrinter<T, U> printer(output);
-        printer.beginObject();
-        printer.endObject(!printMessage(value, printer));
+
+        const std::string& encodedValue = getEncodedField(value);
+
+        if (!encodedValue.empty()) {
+            printer.print(encodedValue);
+        }
+        else {
+            printer.beginObject();
+            printer.endObject(!printMessage(value, printer));
+        }
     }
 }
 
