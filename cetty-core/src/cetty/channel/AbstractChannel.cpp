@@ -181,11 +181,23 @@ const ChannelFuturePtr& AbstractChannel::disconnect(const ChannelFuturePtr& futu
 }
 
 ChannelFuturePtr AbstractChannel::close() {
-    return pipeline->close();
+    if (pipeline->isAttached()) {
+        return pipeline->close();
+    }
+    else {
+        LOG_INFO << "close the channel, but the pipeline has detached.";
+        return closeFuture;
+    }
 }
 
 const ChannelFuturePtr& AbstractChannel::close(const ChannelFuturePtr& future) {
-    return pipeline->close(future);
+    if (pipeline->isAttached()) {
+        return pipeline->close(future);
+    }
+    else {
+        LOG_INFO << "close the channel, but the pipeline has detached.";
+        return closeFuture;
+    }
 }
 
 ChannelFuturePtr AbstractChannel::flush() {

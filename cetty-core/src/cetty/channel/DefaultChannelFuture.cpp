@@ -114,7 +114,7 @@ bool DefaultChannelFuture::isCancelled() const {
 ChannelFuturePtr DefaultChannelFuture::addListener(
     const CompletedCallback& listener,
     int priority) {
-    if (listener.empty()) {
+    if (!listener) {
         return shared_from_this();
     }
 

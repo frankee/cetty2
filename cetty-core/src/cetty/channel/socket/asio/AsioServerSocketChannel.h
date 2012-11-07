@@ -76,6 +76,8 @@ private:
     void handleAccept(const boost::system::error_code& error,
                       AsioSocketChannelPtr channel);
 
+    void handleChildClosed(const ChannelFuture& future);
+
 private:
     typedef std::map<int, ChannelPtr> ChildChannels;
 

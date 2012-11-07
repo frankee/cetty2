@@ -101,6 +101,7 @@ void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
         if (wasActive && !channel->isActive()) {
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             channel->getPipeline()->fireChannelInactive();
+            channel->getPipeline()->detach();
         }
     }
     else {

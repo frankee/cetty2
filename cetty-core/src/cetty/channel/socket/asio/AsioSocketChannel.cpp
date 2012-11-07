@@ -329,7 +329,7 @@ void AsioSocketChannel::beginRead() {
 
     // auto increment the capacity.
     if (size < 128) {
-        if (!buffer->ensureWritableBytes(1024, true)) {
+        if (!buffer->ensureWritableBytes(4096, true)) {
             // error!
         }
 
