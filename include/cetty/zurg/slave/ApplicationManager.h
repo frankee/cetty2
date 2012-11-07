@@ -78,11 +78,11 @@ public:
     );
 
 private:
-    void startApp(const ApplicationPtr &, ApplicationStatus* out);
+    void startApp(const Application &, ApplicationStatus* out);
     void onProcessExit(const ProcessPtr&, int status, const struct rusage&);
 
 private:
-    typedef std::map<std::string, ApplicationPtr> ApplicationMap;
+    typedef std::map<std::string, Application> ApplicationMap;
 
 private:
     EventLoopPtr loop_;

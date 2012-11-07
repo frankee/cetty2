@@ -67,3 +67,7 @@ void ZurgSlave::start() {
 }
 }
 }
+
+int main() {
+
+}

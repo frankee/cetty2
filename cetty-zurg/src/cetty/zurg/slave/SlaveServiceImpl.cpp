@@ -4,10 +4,10 @@
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
+#include <cetty/zurg/Util.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/Util.h>
-#include <cetty/zurg/slave/ZurgSlave.h>
 
 #include <boost/weak_ptr.hpp>
 

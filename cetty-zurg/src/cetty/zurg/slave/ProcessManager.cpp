@@ -1,6 +1,7 @@
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/channel/socket/asio/AsioService.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/config/ConfigCenter.h>
 
 #include <assert.h>
 #include <signal.h>
@@ -22,8 +23,9 @@ using namespace cetty::config;
 ProcessManager::ProcessManager(const EventLoopPtr& loop)
     : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service(), SIGCHLD),
       loop_(loop){
-    // todo Call start here ?
-    //start();
+    ConfigCenter::instance().configure(&config_);
+    if(config_.zombieInterval_ <= 0)
+        config_.zombieInterval_ = 3000;
 }
 
 ProcessManager::~ProcessManager() {
@@ -38,6 +40,7 @@ ProcessManager::~ProcessManager() {
 
 void ProcessManager::start() {
     startSignalWait();
+    loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
 }
 
 void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
@@ -53,10 +56,6 @@ void ProcessManager::handleSignalWait(const boost::system::error_code& error, in
     LOG_DEBUG << "Receive a SIGCHLD signal.";
 
     if (!error) {
-        if(signal != SIGCHLD){
-            startSignalWait();
-            return;
-        }
         int status = 0;
         struct rusage resourceUsage;
         bzero(&resourceUsage, sizeof(resourceUsage));
@@ -73,6 +72,17 @@ void ProcessManager::handleSignalWait(const boost::system::error_code& error, in
         LOG_WARN << "Waiting the SIGCHLD signal has an error : "
                  << error.value()
                  << " : " << error.message();
+    }
+}
+
+void ProcessManager::onTimer(){
+    int status = 0;
+    struct rusage resourceUsage;
+    bzero(&resourceUsage, sizeof(resourceUsage));
+    pid_t pid = 0;
+    while ( (pid = ::wait4(-1, &status, WNOHANG, &resourceUsage)) > 0){
+      LOG_INFO << "ChildManager::onTimer - child process " << pid << " exited.";
+      onExit(pid, status, resourceUsage);
     }
 }
 
