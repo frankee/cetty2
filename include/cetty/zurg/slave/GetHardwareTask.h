@@ -43,7 +43,7 @@ private:
 private:
 
 #define DEFINE_DONE(KEY)                                         \
-    void KEY##Done(const google::protobuf::Message* response,    \
+    void KEY##DONE(const google::protobuf::Message* response,    \
                    const google::protobuf::Message* request) {   \
         assert(KEY##Done == false);                              \
         KEY##Done = true;                                        \
@@ -51,7 +51,7 @@ private:
                 google::protobuf::down_cast<const zurg::slave::RunCommandResponse*>(    \
                         response); \
         if (out->error_code() == 0) {               \
-            response->set_##KEY(out->std_output()); \
+            this->response->set_##KEY(out->std_output()); \
         }                                           \
         delete response;                           \
         delete request;                            \

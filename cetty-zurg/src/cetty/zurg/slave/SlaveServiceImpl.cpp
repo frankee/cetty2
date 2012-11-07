@@ -19,7 +19,7 @@ using namespace cetty::zurg;
 using namespace cetty::util;
 using namespace cetty::zurg::slave;
 
-SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
     : loop_(loop),
       psManager_(new ProcessManager(loop)),
       apps_(new ApplicationManager(loop, psManager_.get())) {
@@ -40,8 +40,7 @@ void SlaveServiceImpl::getHardware(
     LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " 
              << request->lshw();
 
-    GetHardwareTaskPtr task(new GetHardwareTask(request, done));
-    task->start(this);
+    GetHardwareTaskPtr task(new GetHardwareTask(request, response, done, *this));
 }
 
 void SlaveServiceImpl::getFileContent(

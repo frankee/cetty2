@@ -70,7 +70,7 @@ void ApplicationManager::start(
 
 void ApplicationManager::startApp(const Application &app, ApplicationStatus* out) {
     const AddApplicationRequestPtr& appRequest(app.request);
-    ApplicationStatus* status = &app.status;
+    ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
         ProcessPtr process(new Process(appRequest));
@@ -127,8 +127,8 @@ void ApplicationManager::onProcessExit(
     ApplicationMap::iterator it = apps_.find(appName);
 
     if (it != apps_.end()) {
-        ApplicationPtr& app = it->second;
-        app->status.set_state(kExited);
+        Application& app = it->second;
+        app.status.set_state(kExited);
 
         //todo: notify master
     } else {

@@ -40,7 +40,7 @@ void GetHardwareTask::start(SlaveServiceImpl& slave) {
         lshw->set_command("lshw");
         slave.runCommand(lshw,
                          new RunCommandResponse,
-                         boost::bind(&GetHardwareTask::lshwDone,
+                         boost::bind(&GetHardwareTask::lshwDONE,
                                      self,
                                      _1,
                                      lshw));
@@ -50,19 +50,19 @@ void GetHardwareTask::start(SlaveServiceImpl& slave) {
     lspci->set_command("lspci");
     slave.runCommand(lspci,
                      new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::lspciDone, self, _1, lspci));
+                     boost::bind(&GetHardwareTask::lspciDONE, self, _1, lspci));
 
     RunCommandRequestPtr lscpu(new RunCommandRequest);
     lscpu->set_command("lscpu");
     slave.runCommand(lscpu,
                      new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::lscpuDone, self, _1, lscpu));
+                     boost::bind(&GetHardwareTask::lscpuDONE, self, _1, lscpu));
 
     RunCommandRequestPtr ifconfig(new RunCommandRequest);
     ifconfig->set_command("/sbin/ifconfig");
     slave.runCommand(ifconfig,
                      new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::ifconfigDone, self, _1, ifconfig));
+                     boost::bind(&GetHardwareTask::ifconfigDONE, self, _1, ifconfig));
 }
 
 void GetHardwareTask::checkAllDone() {

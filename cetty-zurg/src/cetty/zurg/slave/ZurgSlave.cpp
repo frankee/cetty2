@@ -47,7 +47,7 @@ void ZurgSlave::init(){
 void ZurgSlave::start() {
     ProtobufServerBuilder serverBuilder(config_.parentThreadCnt_, config_.childThreadCnt_);
     EventLoopPtr loop = serverBuilder.getParentPool()->getNextLoop();
-    ProtobufServicePtr service(new SlaveServiceImpl(loop, 4));
+    ProtobufServicePtr service(new SlaveServiceImpl(loop));
     serverBuilder.registerService(service);
 
     ProtobufClientBuilder clientBuilder(serverBuilder.getChildPool());
@@ -68,6 +68,3 @@ void ZurgSlave::start() {
 }
 }
 
-int main() {
-
-}
