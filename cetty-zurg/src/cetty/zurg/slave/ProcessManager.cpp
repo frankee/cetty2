@@ -22,7 +22,8 @@ using namespace cetty::config;
 ProcessManager::ProcessManager(const EventLoopPtr& loop)
     : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service(), SIGCHLD),
       loop_(loop){
-    start();
+    // todo Call start here ?
+    //start();
 }
 
 ProcessManager::~ProcessManager() {
@@ -52,7 +53,7 @@ void ProcessManager::handleSignalWait(const boost::system::error_code& error, in
     LOG_DEBUG << "Receive a SIGCHLD signal.";
 
     if (!error) {
-        if(signal != ::SIGCHILD)f{
+        if(signal != SIGCHLD){
             startSignalWait();
             return;
         }
@@ -76,15 +77,14 @@ void ProcessManager::handleSignalWait(const boost::system::error_code& error, in
 }
 
 void ProcessManager::onExit(pid_t pid, int status, const struct rusage& resourceUsage) {
+    LOG_INFO << "Process [" << pid << "] has exited";
     std::map<pid_t, Callback>::iterator it = callbacks_.find(pid);
 
     if (it != callbacks_.end()) {
-        // defer
         loop_->post(boost::bind(it->second, status, resourceUsage));
         callbacks_.erase(it);
     } else {
-        // could be failed run commands.
-        LOG_ERROR << "ProcessManager::onExit - unknown pid " << pid;
+        LOG_ERROR << "No callback is found for process [" << pid << "].";
     }
 }
 

@@ -131,10 +131,14 @@ void SlaveServiceImpl::runCommand(
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(loop_,
-                          const_cast<RunCommandRequestPtr &>(request),
-                          response,
-                          done));
+    ProcessPtr process(
+        new Process(
+            loop_,
+            const_cast<RunCommandRequestPtr &>(request),
+            response,
+            done
+        )
+    );
     int err = 12; // ENOMEM;
 
     try {

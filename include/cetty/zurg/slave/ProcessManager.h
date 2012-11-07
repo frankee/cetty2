@@ -26,7 +26,9 @@ namespace slave {
 using namespace cetty::channel;
 
 /**
- *  @brief Manage processes belongs to this slave
+ * @brief Manage processes belongs to this slave
+ *    Register process exit call back, wait for process exiting
+ *  and call call back.
  */
 class ProcessManager : boost::noncopyable {
 public:
@@ -47,9 +49,8 @@ private:
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
-
-    EventLoopPtr loop_;
     boost::asio::signal_set signals_;
+    EventLoopPtr loop_;
     std::map<pid_t, Callback> callbacks_;
 };
 
