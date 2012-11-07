@@ -132,17 +132,23 @@ void SessionManager::start(const std::string& host,
                            const SessionCallback& callback) {
 
     enableSessionValidationIfNecessary();
-    SessionPtr session = new Session(host,
+    SessionPtr session = new Session(
+        host,
         boost::bind(&SessionManager::stop, this, _1),
         boost::bind(&SessionManager::onChange, this, _1),
-        boost::bind(&SessionManager::expire, this, _1));
+        boost::bind(&SessionManager::expire, this, _1)
+    );
 
-    sessionDAO->create(session,
-                       boost::bind(&SessionManager::createSessionCallback,
-                       this,
-                       _1, // operation code: 0 success, -1 failed
-                       _2, // SessionPtr
-                       boost::cref(callback)));
+    sessionDAO->create(
+    	session,
+        boost::bind(
+            &SessionManager::createSessionCallback,
+            this,
+            _1, // operation code: 0 success, -1 failed
+            _2, // SessionPtr
+            boost::cref(callback)
+        )
+    );
 }
 
 void SessionManager::createSessionCallback(int result,
@@ -169,17 +175,22 @@ void SessionManager::getSession(const std::string& id,
         return;
     }
 
-    sessionDAO->readSession(id,
-                            boost::bind(&SessionManager::readSessionCallback,
-                                        this,
-                                        _1, // return code
-                                        _2, // session
-                                        callback));
+    sessionDAO->readSession(
+        id,
+        boost::bind(&SessionManager::readSessionCallback,
+            this,
+            _1, // return code
+            _2, // session
+            callback
+        )
+    );
 }
 
-void SessionManager::readSessionCallback(int result,
-        const SessionPtr& session,
-        const SessionCallback& callback) {
+void SessionManager::readSessionCallback(
+    int result,
+    const SessionPtr& session,
+    const SessionCallback& callback)
+{
     if (!result) {
         Session::SessionState state = validate(session);
         if(state == Session::STOPPED|| state == Session::EXPIRED){

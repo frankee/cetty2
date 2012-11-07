@@ -127,7 +127,6 @@ void SecurityManager::bind(const AuthenticationToken& token,
                            const AuthenticationInfo& info,
                            const SessionPtr& session) {
     session->setPrincipal(token.getPrincipal());
-    session->setHost(token.getHost());
     session->setLogin(true);
 }
 
@@ -141,7 +140,7 @@ void SecurityManager::fireFailedLoginEvent(const AuthenticationToken& token) {
               << " is failed to login.";
 }
 void SecurityManager::fireSuccessfulLoginEvent(const AuthenticationToken& token,
-        const AuthenticationInfoPtr& info) {
+                                               const AuthenticationInfoPtr& info) {
     LOG_TRACE << token.getPrincipal()
               << " is successful to login.";
 }

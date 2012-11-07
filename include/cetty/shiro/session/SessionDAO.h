@@ -41,7 +41,7 @@ namespace session {
  */
 class SessionDAO {
 public:
-    typedef boost::function2<void, int, const SessionPtr&> SessionCallback;
+    typedef boost::function2<void, int, SessionPtr> SessionCallback;
 
 public:
     virtual ~SessionDAO() {}
