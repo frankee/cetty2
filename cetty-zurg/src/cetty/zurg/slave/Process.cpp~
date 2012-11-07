@@ -255,7 +255,8 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
         if (len >= 0) {
             exe_file_.assign(buf, len);
             LOG_INFO << filename << " -> " << exe_file_;
-        } else {
+        }
+        else {
             LOG_ERROR << "Fail to read link " << filename;
         }
 
