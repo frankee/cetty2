@@ -205,19 +205,12 @@ message StopApplicationResponse {
   required ApplicationStatus status = 1;
 }
 
-message GetApplicationsRequest {
+message ListApplicationsRequest {
   repeated string names = 1;
 }
 
-message GetApplicationsResponse {
-  repeated ApplicationStatus status = 1;
-}
-
-message ListApplicationsRequest {
-}
-
 message ListApplicationsResponse {
-  repeated string names = 2;
+  repeated ApplicationStatus status = 1;
 }
 
 message RemoveApplicationsRequest {
@@ -237,7 +230,6 @@ service SlaveService {
   rpc addApplication (AddApplicationRequest) returns (AddApplicationResponse);
   rpc startApplications (StartApplicationsRequest) returns (StartApplicationsResponse);
   rpc stopApplication (StopApplicationRequest) returns (StopApplicationResponse);
-  rpc getApplications (GetApplicationsRequest) returns (GetApplicationsResponse);
   rpc listApplications (ListApplicationsRequest) returns (ListApplicationsResponse);
   rpc removeApplications (RemoveApplicationsRequest) returns (RemoveApplicationsResponse);
 }
