@@ -9,13 +9,12 @@
 #define GETHARDWARETASK_H_
 
 
-#include <boost/enable_shared_from_this.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <google/protobuf/stubs/common.h>
 
-
-#include <iostream>
-
+#include <cetty/util/ReferenceCounter.h>
 #include <cetty/logging/LoggerHelper.h>
+
 #include <cetty/zurg/slave/slave.pb.h>
 #include <cetty/zurg/slave/SlaveServiceImpl.h>
 #include <cetty/zurg/slave/Process.h>
@@ -24,34 +23,39 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
-using namespace google::protobuf;
-
 class GetHardwareTask;
-typedef boost::shared_ptr<GetHardwareTask> GetHardwareTaskPtr;
+typedef boost::intrusive_ptr<GetHardwareTask> GetHardwareTaskPtr;
 
-class GetHardwareTask : public boost::enable_shared_from_this<GetHardwareTask>,
-                        boost::noncopyable {
+class GetHardwareTask : public cetty::util::ReferenceCounter<GetHardwareTask, int> {
 public:
-    GetHardwareTask(const ConstGetHardwareRequestPtr& request, const DoneCallback& done);
+    GetHardwareTask(const ConstGetHardwareRequestPtr& request,
+                    const GetHardwareResponsePtr& response,
+                    const DoneCallback& done,
+                    SlaveServiceImpl& slaveService);
 
     ~GetHardwareTask() {
         LOG_DEBUG << this;
     }
 
-    void start(SlaveServiceImpl* slave);
+private:
+    void start(SlaveServiceImpl& slave);
 
 private:
 
 #define DEFINE_DONE(KEY)                                         \
-    void KEY##Done(const google::protobuf::Message* message) { \
-        assert(KEY##Done_ == false);                                \
-        KEY##Done_ = true;                                          \
-        const RunCommandResponse* out =                       \
-              down_cast<const zurg::slave::RunCommandResponse*>(message);    \
-        if (out->error_code() == 0) { \
-            resp_.set_##KEY(out->std_output()); \
-        } \
-        checkAllDone();                                             \
+    void KEY##Done(const google::protobuf::Message* response,    \
+                   const google::protobuf::Message* request) {   \
+        assert(KEY##Done == false);                              \
+        KEY##Done = true;                                        \
+        const RunCommandResponse* out =                          \
+                google::protobuf::down_cast<const zurg::slave::RunCommandResponse*>(    \
+                        response); \
+        if (out->error_code() == 0) {               \
+            response->set_##KEY(out->std_output()); \
+        }                                           \
+        delete response;                           \
+        delete request;                            \
+        checkAllDone();                             \
     }
 
     DEFINE_DONE(lspci)
@@ -63,14 +67,15 @@ private:
 
     void checkAllDone();
 
-    bool lshw_;
-    bool lspciDone_;
-    bool lscpuDone_;
-    bool ifconfigDone_;
-    bool lshwDone_;
+private:
+    bool lshw;
+    bool lshwDone;
+    bool lspciDone;
+    bool lscpuDone;
+    bool ifconfigDone;
 
-    GetHardwareResponse resp_;
-    DoneCallback done_;
+    GetHardwareResponsePtr response;
+    DoneCallback done;
 };
 
 }
