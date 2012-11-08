@@ -14,7 +14,7 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
-class ZurgSlave{
+class ZurgSlave {
 public:
     ZurgSlave();
     void start();

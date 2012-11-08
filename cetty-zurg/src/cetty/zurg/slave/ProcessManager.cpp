@@ -24,8 +24,12 @@ ProcessManager::ProcessManager(const EventLoopPtr& loop)
     : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service(), SIGCHLD),
       loop_(loop){
     ConfigCenter::instance().configure(&config_);
-    if(config_.zombieInterval_ <= 0)
+    if(config_.zombieInterval_ <= 0) {
         config_.zombieInterval_ = 3000;
+    }
+
+    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
+        //loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
 }
 
 ProcessManager::~ProcessManager() {
@@ -39,8 +43,7 @@ ProcessManager::~ProcessManager() {
 }
 
 void ProcessManager::start() {
-    startSignalWait();
-    loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
+
 }
 
 void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
@@ -49,7 +52,7 @@ void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
 }
 
 void ProcessManager::startSignalWait() {
-    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
+
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {

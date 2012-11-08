@@ -84,12 +84,6 @@ public:
         const DoneCallback& done
     );
 
-    virtual void getApplications(
-        const ConstGetApplicationsRequestPtr& request,
-        const GetApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
-
     virtual void listApplications(
         const ConstListApplicationsRequestPtr& request,
         const ListApplicationsResponsePtr& response,
@@ -110,8 +104,6 @@ private:
     );
 
 private:
-    EventLoopPtr loop_;
-
     boost::scoped_ptr<ProcessManager> psManager_;
     boost::scoped_ptr<ApplicationManager> apps_;
 };

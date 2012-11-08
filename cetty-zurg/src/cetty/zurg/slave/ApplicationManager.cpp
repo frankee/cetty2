@@ -11,9 +11,8 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
-ApplicationManager::ApplicationManager(const EventLoopPtr &loop, ProcessManager *psManager)
-    : loop_(loop),
-      processManager_(psManager) {
+ApplicationManager::ApplicationManager(ProcessManager *psManager)
+    :   processManager_(psManager) {
 }
 
 ApplicationManager::~ApplicationManager() {
@@ -56,7 +55,8 @@ void ApplicationManager::start(
 
         if (it != apps_.end()) {
             startApp(it->second, response->add_status());
-        } else {
+        }
+        else {
             // application not found
             ApplicationStatus* status = response->add_status();
             status->set_state(kUnknown);
@@ -134,13 +134,6 @@ void ApplicationManager::onProcessExit(
     } else {
         LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
     }
-}
-
-void ApplicationManager::get(
-    const ConstGetApplicationsRequestPtr& request,
-    const GetApplicationsResponsePtr& response,
-    const DoneCallback& done) {
-
 }
 
 void ApplicationManager::list(

@@ -124,8 +124,6 @@ void strip_stat(std::string* proc_stat) {
     }
 }
 
-extern const char* slave_version;
-
 Heartbeat::Heartbeat(const EventLoopPtr &loop,
                      MasterService_Stub* stub)
     : loop_(loop),
@@ -184,7 +182,7 @@ void Heartbeat::beat(bool showStatic){
         }
         hb.set_slave_pid(cetty::util::Process::id());
         hb.set_start_time_us(getMicroSecs(g_startTime));
-        hb.set_slave_version(slave_version);
+       // hb.set_slave_version(slave_version);
         FILL_HB("/proc/cpuinfo", cpuinfo);
         FILL_HB("/proc/version", version);
         FILL_HB("/etc/mtab", etc_mtab);

@@ -26,7 +26,7 @@ message DiskUsage {
 }
 
 message GetHardwareRequest {
-  optional bool lshw = 1 [default = false];
+  optional int32 lshw = 1 [default = 0];
 }
 
 message GetHardwareResponse {

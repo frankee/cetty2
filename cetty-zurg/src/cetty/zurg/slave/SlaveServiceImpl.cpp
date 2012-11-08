@@ -8,6 +8,8 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
+#include <cetty/channel/EventLoopPool.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -17,12 +19,11 @@ namespace slave {
 
 using namespace cetty::zurg;
 using namespace cetty::util;
-using namespace cetty::zurg::slave;
+using namespace cetty::channel;
 
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
-    : loop_(loop),
-      psManager_(new ProcessManager(loop)),
-      apps_(new ApplicationManager(loop, psManager_.get())) {
+    : psManager_(new ProcessManager(loop)),
+      apps_(new ApplicationManager(psManager_.get())) {
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
@@ -132,7 +133,6 @@ void SlaveServiceImpl::runCommand(
 
     ProcessPtr process(
         new Process(
-            loop_,
             const_cast<RunCommandRequestPtr &>(request),
             response,
             done
@@ -158,14 +158,20 @@ void SlaveServiceImpl::runCommand(
             )
         );
 
+        EventLoopPtr elp = EventLoopPool::current();
+        assert(elp);
         boost::weak_ptr<Process> weakProcessPtr(process);
-        TimeoutPtr timerId = loop_->runAfter(
+        TimeoutPtr timerId = elp->runAfter(
             request->timeout(),
+
             boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
         );
 
+
         process->setTimerId(timerId);
+
     }
+
 }
 
 void SlaveServiceImpl::runScript(
@@ -173,6 +179,7 @@ void SlaveServiceImpl::runScript(
     const RunCommandResponsePtr& response,
     const DoneCallback& done) {
 
+    /*
     RunCommandRequestPtr runCommandReq(new RunCommandRequest);
     std::string scriptFile = writeTempFile(ZurgSlave::instance().getName(), request->script());
 
@@ -188,6 +195,15 @@ void SlaveServiceImpl::runScript(
         LOG_ERROR << "runScript - failed to write script file";
         // FIXME: done
     }
+    */
+}
+
+void SlaveServiceImpl::listProcesses(
+       const ConstListProcessesRequestPtr& request,
+       const ListProcessesResponsePtr& response,
+       const DoneCallback& done
+   ){
+
 }
 
 void SlaveServiceImpl::addApplication(
@@ -210,13 +226,6 @@ void SlaveServiceImpl::stopApplication(
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {
     apps_->stop(request, response, done);
-}
-
-void SlaveServiceImpl::getApplications(
-    const ConstGetApplicationsRequestPtr& request,
-    const GetApplicationsResponsePtr& response,
-    const DoneCallback& done) {
-    apps_->get(request, response, done);
 }
 
 void SlaveServiceImpl::listApplications(

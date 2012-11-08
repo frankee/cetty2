@@ -22,7 +22,6 @@ namespace cetty{
 namespace zurg {
 namespace slave {
 
-extern sigset_t oldSigmask;
 using namespace boost::posix_time;
 
 const int kSleepAfterExec = 0; // for strace child
@@ -49,12 +48,10 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
 }
 
 Process::Process(
-    const EventLoopPtr& loop,
     const RunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
     const DoneCallback& done
-): loop_(loop),
-   request_(request),
+): request_(request),
    response_(response),
    doneCallback_(done),
    pid_(0),
@@ -66,8 +63,7 @@ Process::Process(
 }
 
 Process::Process(const AddApplicationRequestPtr& appRequest)
-    : loop_(NULL),
-      request_(new RunCommandRequest),
+    : request_(new RunCommandRequest),
       response_(new RunCommandResponse()),
       doneCallback_(),
       pid_(0),
@@ -110,7 +106,8 @@ Process::~Process() {
 }
 
 int Process::start() {
-    assert(numThreads() == 1);
+    // todo what's mean
+    //assert(numThreads() == 1);
     int availabltFds = maxOpenFiles() - openedFiles();
 
     if (availabltFds < 20) {
@@ -181,7 +178,7 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         argv.push_back(NULL);
 
         // FIXME: new process group, new session
-        ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
+       // ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
 
         if (::chdir(request_->cwd().c_str()) < 0) {
             throw static_cast<int>(errno);
