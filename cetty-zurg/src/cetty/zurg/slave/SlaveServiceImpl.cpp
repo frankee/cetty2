@@ -4,10 +4,10 @@
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
+#include <cetty/zurg/Util.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/Util.h>
-#include <cetty/zurg/slave/ZurgSlave.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -19,7 +19,7 @@ using namespace cetty::zurg;
 using namespace cetty::util;
 using namespace cetty::zurg::slave;
 
-SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
     : loop_(loop),
       psManager_(new ProcessManager(loop)),
       apps_(new ApplicationManager(loop, psManager_.get())) {
@@ -40,8 +40,7 @@ void SlaveServiceImpl::getHardware(
     LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " 
              << request->lshw();
 
-    GetHardwareTaskPtr task(new GetHardwareTask(request, done));
-    task->start(this);
+    GetHardwareTaskPtr task(new GetHardwareTask(request, response, done, *this));
 }
 
 void SlaveServiceImpl::getFileContent(

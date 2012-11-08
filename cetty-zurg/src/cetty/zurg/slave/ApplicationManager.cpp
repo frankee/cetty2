@@ -27,10 +27,10 @@ void ApplicationManager::add(
 
     assert(request->name().find('/') == std::string::npos); // FIXME
 
-    AddApplicationRequestPtr& requestRef = apps_[request->name()]->request;
+    AddApplicationRequestPtr& requestRef = apps_[request->name()].request;
     AddApplicationRequestPtr prev_request(requestRef);
 
-    ApplicationStatus& status = apps_[request->name()]->status;
+    ApplicationStatus& status = apps_[request->name()].status;
     status.set_name(request->name());
     if (!status.has_state()) {
         LOG_INFO << "new app";
@@ -68,9 +68,9 @@ void ApplicationManager::start(
     done(response);
 }
 
-void ApplicationManager::startApp(const ApplicationPtr &app, ApplicationStatus* out) {
-    const AddApplicationRequestPtr& appRequest(app->request);
-    ApplicationStatus* status = &app->status;
+void ApplicationManager::startApp(const Application &app, ApplicationStatus* out) {
+    const AddApplicationRequestPtr& appRequest(app.request);
+    ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
         ProcessPtr process(new Process(appRequest));
@@ -127,8 +127,8 @@ void ApplicationManager::onProcessExit(
     ApplicationMap::iterator it = apps_.find(appName);
 
     if (it != apps_.end()) {
-        ApplicationPtr& app = it->second;
-        app->status.set_state(kExited);
+        Application& app = it->second;
+        app.status.set_state(kExited);
 
         //todo: notify master
     } else {

@@ -44,11 +44,14 @@ public:
     void runAtExit(pid_t pid, const Callback&);
 
 private:
+    void onTimer();
     void startSignalWait();
     void handleSignalWait(const boost::system::error_code& error, int signal);
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
+
+    ZurgSlaveConfig config_;
     boost::asio::signal_set signals_;
     EventLoopPtr loop_;
     std::map<pid_t, Callback> callbacks_;

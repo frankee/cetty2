@@ -25,7 +25,7 @@ class ApplicationManager;
 
 class SlaveServiceImpl : public SlaveService {
 public:
-    SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval);
+    SlaveServiceImpl(const EventLoopPtr& loop);
     virtual ~SlaveServiceImpl();
 
     void start();
