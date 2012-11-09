@@ -48,7 +48,13 @@ FIND_LIBRARY(
     SOCI_LIBRARY
     NAMES soci_core
     HINTS ${SOCI_INCLUDE_DIR}/..
-    PATH_SUFFIXES lib${LIB_SUFFIX})
+    PATH_SUFFIXES lib${LIB_SUFFIX}
+    PATHS
+   /usr/local/lib
+   /usr/local/lib64
+   /usr/lib
+   /usr/lib64
+)
 MARK_AS_ADVANCED(SOCI_LIBRARY)
 
 GET_FILENAME_COMPONENT(SOCI_LIBRARY_DIR ${SOCI_LIBRARY} PATH)
