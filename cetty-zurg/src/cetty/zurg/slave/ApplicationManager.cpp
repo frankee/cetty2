@@ -26,8 +26,9 @@ void ApplicationManager::add(
 
     assert(request->name().find('/') == std::string::npos); // FIXME
 
-    AddApplicationRequestPtr& requestRef = apps_[request->name()].request;
-    AddApplicationRequestPtr prev_request(requestRef);
+    AddApplicationRequest &requestRef = apps_[request->name()].request;
+    requestRef.CopyFrom(*request);
+    AddApplicationRequestPtr prev_request(&requestRef);
 
     ApplicationStatus& status = apps_[request->name()].status;
     status.set_name(request->name());
@@ -69,7 +70,7 @@ void ApplicationManager::start(
 }
 
 void ApplicationManager::startApp(const Application &app, ApplicationStatus* out) {
-    const AddApplicationRequestPtr& appRequest(app.request);
+    const AddApplicationRequestPtr appRequest = const_cast<AddApplicationRequest *>(&(app.request)) ;
     ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
