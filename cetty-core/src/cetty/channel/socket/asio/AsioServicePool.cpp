@@ -98,13 +98,20 @@ AsioServicePool::AsioServicePool(int threadCnt)
                                 boost::bind(&AsioServicePool::runIOservice,
                                             this,
                                             holder)));
+
+            boost::thread::id id = holder->thread->get_id();
+            holder->service->setThreadId(id);
+            allEventLoops.insert(std::make_pair(id, holder->eventLoop));
         }
 
         started = true;
     }
     else {
         AsioServiceHolder* holder = (AsioServiceHolder*)eventLoops.front();
-        holder->service->setThreadId(boost::this_thread::get_id());
+
+        boost::thread::id id = boost::this_thread::get_id();
+        holder->service->setThreadId(id);
+        allEventLoops.insert(std::make_pair(id, holder->eventLoop));
     }
 }
 
@@ -152,7 +159,6 @@ int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
     BOOST_ASSERT(holder && holder->service && "ioservice can not be NULL.");
 
     AsioServicePtr& service = holder->service;
-    service->setThreadId(boost::this_thread::get_id());
 
     boost::system::error_code err;
     std::size_t opCount = service->service().run(err);
