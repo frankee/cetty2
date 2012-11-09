@@ -41,7 +41,7 @@ class Process : public boost::enable_shared_from_this<Process>,
                 boost::noncopyable {
 public:
     Process(
-        const RunCommandRequestPtr& request,
+        const ConstRunCommandRequestPtr& request,
         const RunCommandResponsePtr& response,
         const DoneCallback& done
     );
@@ -70,7 +70,7 @@ private:
     int afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError);
 
 private:
-    RunCommandRequestPtr request_;
+    ConstRunCommandRequestPtr request_;
     RunCommandResponsePtr response_;
     DoneCallback doneCallback_;
 

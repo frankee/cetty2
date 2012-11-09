@@ -48,7 +48,7 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
 }
 
 Process::Process(
-    const RunCommandRequestPtr& request,
+    const ConstRunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
     const DoneCallback& done
 ): request_(request),
@@ -63,7 +63,7 @@ Process::Process(
 }
 
 Process::Process(const AddApplicationRequestPtr& appRequest)
-    : request_(new RunCommandRequest),
+    : request_(),
       response_(new RunCommandResponse()),
       doneCallback_(),
       pid_(0),
@@ -73,7 +73,9 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
       redirectStderr_(appRequest->redirect_stderr()),
       runCommand_(false) {
 
-    request_->set_command(appRequest->binary());
+    // Transform application request to run command request.
+    RunCommandRequestPtr request = new RunCommandRequest;
+    request->set_command(appRequest->binary());
 
     char dir[256];
     snprintf(dir, sizeof dir, "%s/%s/%s",
@@ -81,15 +83,17 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
              ZurgSlave::instance().getName().c_str(),
              appRequest->name().c_str());
 
-    request_->set_cwd(dir);
+    request->set_cwd(dir);
 
-    request_->mutable_args()->CopyFrom(appRequest->args());
-    request_->mutable_envs()->CopyFrom(appRequest->envs());
-    request_->set_envs_only(appRequest->envs_only());
-    request_->set_max_stdout(0);
-    request_->set_max_stderr(0);
-    request_->set_timeout(-1);
-    request_->set_max_memory_mb(appRequest->max_memory_mb());
+    request->mutable_args()->CopyFrom(appRequest->args());
+    request->mutable_envs()->CopyFrom(appRequest->envs());
+    request->set_envs_only(appRequest->envs_only());
+    request->set_max_stdout(0);
+    request->set_max_stderr(0);
+    request->set_timeout(-1);
+    request->set_max_memory_mb(appRequest->max_memory_mb());
+
+    request_ = request;
 }
 
 Process::~Process() {
@@ -128,7 +132,14 @@ int Process::start() {
 
     if (result == 0) {
         // child process
-        ::mkdir(request_->cwd().c_str(), 0755); // FIXME: check return value
+
+        int ret = ::mkdir(request_->cwd().c_str(), 0755);
+        if(ret < 0){
+            char buf[512];
+            strerror_r(errno, buf, sizeof(buf));
+            LOG_INFO << "Change process's work directory to "
+                     << request_->cwd() << " error :" << buf;
+        }
 
         int stdoutFd = -1;
         int stderrFd = -1;
@@ -163,7 +174,12 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
     try {
         ProcStatFile stat(cetty::util::Process::id());
 
-        if (!stat.valid_) { throw stat.error_; }
+        if (!stat.valid_) {
+            LOG_INFO << "Process [pid = "
+                     << cetty::util::Process::id()
+                     << "]state is not valid.";
+            stat.startTime_ = 0;
+        }
 
         execError.write(stat.startTime_);
 
@@ -179,8 +195,8 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
 
         // FIXME: new process group, new session
        // ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
-
         if (::chdir(request_->cwd().c_str()) < 0) {
+            LOG_INFO << "Set process's work directory failed.";
             throw static_cast<int>(errno);
         }
 
@@ -188,7 +204,10 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         // FIXME: environ with execvpe
         int stdInput = ::open("/dev/null", O_RDONLY);
 
-        if (stdInput < 0) { throw static_cast<int>(errno); }
+        if (stdInput < 0) {
+            LOG_INFO << "Open /dev/null failed.";
+            throw static_cast<int>(errno);
+        }
 
         if (stdOutput < 0 || stdError < 0) {
             if (stdOutput >= 0) { ::close(stdOutput); }
@@ -199,23 +218,27 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         }
 
         if (::dup2(stdInput, STDIN_FILENO) < 0) {
+            LOG_INFO << "Duplicate stdin failed.";
             throw static_cast<int>(errno);
         }
 
         ::close(stdInput);
 
         if (::dup2(stdOutput, STDOUT_FILENO) < 0) {
+            LOG_INFO << "Duplicate stdout failed.";
             throw static_cast<int>(errno);
         }
 
         if (::dup2(stdError, STDERR_FILENO) < 0) {
+            LOG_INFO << "Duplicate stderr failed.";
             throw static_cast<int>(errno);
         }
 
+        LOG_INFO << "Run command "<< request_->command();
         const char* cmd = request_->command().c_str();
-
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
-        // should not reach here
+
+        LOG_INFO << "Execute new process image failed.";
         throw static_cast<int>(errno);
     } catch (int error) {
         execError.write(error);
@@ -318,20 +341,19 @@ void Process::onTimeout() {
 }
 
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-// FIXME: dup AppManager::onProcessExit
 void Process::onCommandExit(const int status, const struct rusage& ru) {
-    RunCommandResponse response;
+    assert(response_);
 
     char buf[256];
 
     if (WIFEXITED(status)) {
         snprintf(buf, sizeof buf, "exit status %d", WEXITSTATUS(status));
-        response.set_exit_status(WEXITSTATUS(status));
+        response_->set_exit_status(WEXITSTATUS(status));
     } else if (WIFSIGNALED(status)) {
         snprintf(buf, sizeof buf, "signaled %d%s",
                  WTERMSIG(status), WCOREDUMP(status) ? " (core dump)" : "");
-        response.set_signaled(WTERMSIG(status));
-        response.set_coredump(WCOREDUMP(status));
+        response_->set_signaled(WTERMSIG(status));
+        response_->set_coredump(WCOREDUMP(status));
     }
 
     LOG_INFO << "Process[" << pid_ << "] onCommandExit " << buf;
@@ -343,19 +365,19 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     //stdoutSink_->stop(pid_);
     //stderrSink_->stop(pid_);
 
-    response.set_error_code(0);
-    response.set_pid(pid_);
-    response.set_status(status);
-    //response.set_std_output(stdoutSink_->bufferAsStdString());
-    //response.set_std_error(stderrSink_->bufferAsStdString());
-    response.set_executable_file(exe_file_);
-    response.set_start_time_us(getMicroSecs(startTime_));
-    response.set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
-    response.set_user_time(getSeconds(ru.ru_utime));
-    response.set_system_time(getSeconds(ru.ru_stime));
-    response.set_memory_maxrss_kb(ru.ru_maxrss);
+    response_->set_error_code(0);
+    response_->set_pid(pid_);
+    response_->set_status(status);
+    //response_->set_std_output(stdoutSink_->bufferAsStdString());
+    //response_->set_std_error(stderrSink_->bufferAsStdString());
+    response_->set_executable_file(exe_file_);
+    response_->set_start_time_us(getMicroSecs(startTime_));
+    response_->set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
+    response_->set_user_time(getSeconds(ru.ru_utime));
+    response_->set_system_time(getSeconds(ru.ru_stime));
+    response_->set_memory_maxrss_kb(ru.ru_maxrss);
 
-    doneCallback_(&response);
+    doneCallback_(response_);
 }
 
 }

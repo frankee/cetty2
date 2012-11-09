@@ -31,7 +31,7 @@ class ProcessManager;
 using namespace cetty::channel;
 
 struct Application{
-    AddApplicationRequestPtr request;
+    AddApplicationRequest request;
     ApplicationStatus status;
 };
 typedef boost::shared_ptr<Application> ApplicationPtr;

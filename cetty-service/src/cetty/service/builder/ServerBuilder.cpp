@@ -167,19 +167,6 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return ChannelPtr();
     }
 
-    if (!parentEventLoopPool) {
-        parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
-    }
-
-    if (!childEventLoopPool) {
-        if (config.childThreadCount) {
-            childEventLoopPool = new AsioServicePool(config.childThreadCount);
-        }
-        else {
-            childEventLoopPool = parentEventLoopPool;
-        }
-    }
-
     ServerBootstrap* bootstrap = new ServerBootstrap(
         new AsioServerSocketChannelFactory(parentEventLoopPool,
                                            childEventLoopPool));
@@ -220,6 +207,19 @@ ChannelPtr ServerBuilder::build(const std::string& name, int port) {
 int ServerBuilder::init() {
     if (config.deamonize) {
         daemonize();
+    }
+
+    if (!parentEventLoopPool) {
+        parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
+    }
+
+    if (!childEventLoopPool) {
+        if (config.childThreadCount) {
+            childEventLoopPool = new AsioServicePool(config.childThreadCount);
+        }
+        else {
+            childEventLoopPool = parentEventLoopPool;
+        }
     }
 
     return 0;

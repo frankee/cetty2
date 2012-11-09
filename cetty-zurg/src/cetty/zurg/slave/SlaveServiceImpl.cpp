@@ -30,7 +30,7 @@ SlaveServiceImpl::~SlaveServiceImpl() {
 }
 
 void SlaveServiceImpl::start() {
-    psManager_->start();
+
 }
 
 void SlaveServiceImpl::getHardware(
@@ -131,13 +131,8 @@ void SlaveServiceImpl::runCommand(
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(
-        new Process(
-            const_cast<RunCommandRequestPtr &>(request),
-            response,
-            done
-        )
-    );
+    ProcessPtr process(new Process(request, response, done));
+
     int err = 12; // ENOMEM;
 
     try {

@@ -8,12 +8,14 @@
 #include <cetty/zurg/slave/ProcStatFile.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace zurg {
 namespace slave {
 
 using namespace cetty::util;
+using namespace cetty::logging;
 
 ProcStatFile::ProcStatFile(int pid)
     :valid_(false),
