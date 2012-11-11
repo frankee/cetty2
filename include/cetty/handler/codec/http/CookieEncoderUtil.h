@@ -98,7 +98,7 @@ public:
             out->append(name);
             out->append(1, HttpCodecUtil::EQUALS);
 
-            cetty::util::StringUtil::strprintf(out, "%d", val);
+            cetty::util::StringUtil::printf(out, "%d", val);
 
             out->append(1, HttpCodecUtil::SEMICOLON);
             out->append(1, HttpCodecUtil::SP);

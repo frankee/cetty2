@@ -126,7 +126,7 @@ ChannelPipelinePtr ChannelPipelines::pipeline(const std::vector<ChannelHandlerPt
             continue;
         }
 
-        newPipeline->addLast(StringUtil::strprintf("%d", i), handlers[i]);
+        newPipeline->addLast(StringUtil::printf("%d", i), handlers[i]);
     }
 
     return newPipeline;

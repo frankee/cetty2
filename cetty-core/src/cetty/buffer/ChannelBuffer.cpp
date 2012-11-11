@@ -194,7 +194,7 @@ void ChannelBuffer::ensureWritableBytes(int minWritableBytes) {
     if (minWritableBytes > maximumCapacity - writerIdx) {
         CETTY_NDC_SCOPE();
         throw RangeException(
-            StringUtil::strprintf(
+            StringUtil::printf(
                 "writerIndex(%d) + minWritableBytes(%d) exceeds maxCapacity(%d)",
                 writerIdx, minWritableBytes, maximumCapacity));
     }
@@ -264,7 +264,7 @@ int ChannelBuffer::getBytes(int index, std::string* dst, int length) const {
         int oldSize = dst->size();
 
         STLStringResizeUninitialized(dst, oldSize + length);
-        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
+        char* start = reinterpret_cast<char*>(stringAsArray(dst) + oldSize);
 
         return getBytes(index, start, length);
     }
@@ -521,7 +521,7 @@ int ChannelBuffer::readBytes(std::string* dst) {
         int length = readableBytes();
 
         STLStringResizeUninitialized(dst, oldSize + length);
-        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
+        char* start = reinterpret_cast<char*>(stringAsArray(dst) + oldSize);
 
         return readBytes(start, length);
     }
@@ -534,7 +534,7 @@ int ChannelBuffer::readBytes(std::string* dst, int length) {
         int oldSize = dst->size();
 
         STLStringResizeUninitialized(dst, oldSize + length);
-        char* start = reinterpret_cast<char*>(string_as_array(dst) + oldSize);
+        char* start = reinterpret_cast<char*>(stringAsArray(dst) + oldSize);
 
         return readBytes(start, length);
     }
@@ -888,7 +888,7 @@ bool ChannelBuffer::checkReadableBytes(int minReadableBytes, bool throwException
 
 std::string ChannelBuffer::toString() const {
     std::string buf = typeid(this).name();
-    StringUtil::strprintf(&buf, "(ridx=&d, widx=%d, cap=%d)",
+    StringUtil::printf(&buf, "(ridx=&d, widx=%d, cap=%d)",
                           readerIdx, writerIdx, capacity());
     return buf;
 }

@@ -1,7 +1,7 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/SmallFile.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
 
 #include <string>
 #include <fcntl.h>
@@ -21,20 +21,21 @@ int g_tempFileCount = 0;
 int t_numOpenedFiles = 0;
 ptime g_startTime = microsec_clock::local_time();
 
-int fdDirFilter(const struct dirent* d){
-    if (::isdigit(d->d_name[0])){
+int fdDirFilter(const struct dirent* d) {
+    if (::isdigit(d->d_name[0])) {
         ++t_numOpenedFiles;
     }
+
     return 0;
 }
 
 std::string writeTempFile(const StringPiece prefix, const StringPiece content) {
-    char buf[256];
-    ::snprintf(buf, sizeof buf, "/tmp/%s-runScript-%s-%d-%05d-XXXXXX",
-               prefix.data(),
-               Integer::toString(now()).c_str(),
-               ::getpid(),
-               ++g_tempFileCount);
+    std::string buf;
+    StringUtil::printf(&buf, "/tmp/%s-runScript-%ld-%d-%05d-XXXXXX",
+                      prefix.data(),
+                      now(),
+                      ::getpid(),
+                      ++g_tempFileCount);
 
     int tempfd = ::mkostemp(buf, O_CLOEXEC);
     ssize_t n = ::pwrite(tempfd, content.data(), content.size(), 0);
@@ -114,59 +115,63 @@ void setNonBlockAndCloseOnExec(int fd) {
     (void)ret;
 }
 
-int64_t now(){
+int64_t now() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int64_t seconds = tv.tv_sec;
     return seconds * kMicroSecondsPerSecond + tv.tv_usec;
 }
 
-int numThreads(){
+int numThreads() {
     int result = 0;
     std::string status = procStatus();
     size_t pos = status.find("Threads:");
-    if (pos != std::string::npos){
-      result = ::atoi(status.c_str() + pos + 8);
+
+    if (pos != std::string::npos) {
+        result = ::atoi(status.c_str() + pos + 8);
     }
+
     return result;
 }
 
-std::string procStatus(){
+std::string procStatus() {
     std::string result;
     SmallFile::readFile("/proc/self/status", 65536, &result);
 
     return result;
 }
 
-int scanDir(const char *dirpath, filter fil){
+int scanDir(const char* dirpath, filter fil) {
     struct dirent** namelist = NULL;
     int result = ::scandir(dirpath, &namelist, fil, alphasort);
     assert(namelist == NULL);
     return result;
 }
 
-int openedFiles(){
+int openedFiles() {
     t_numOpenedFiles = 0;
     scanDir("/proc/self/fd", fdDirFilter);
     return t_numOpenedFiles;
 }
 
-int maxOpenFiles(){
+int maxOpenFiles() {
     struct rlimit rl;
-    if (::getrlimit(RLIMIT_NOFILE, &rl)){
+
+    if (::getrlimit(RLIMIT_NOFILE, &rl)) {
         return openedFiles();
-    } else {
+    }
+    else {
         return static_cast<int>(rl.rlim_cur);
     }
 }
 
-int64_t getMicroSecs(const ptime &p){
+int64_t getMicroSecs(const ptime& p) {
     ptime epoch(boost::gregorian::date(1970,1,1));
     time_duration::tick_type x = (p - epoch).total_nanoseconds();
     return static_cast<int64_t>(x);
 }
 
-std::string hostname(){
+std::string hostname() {
     char buf[64] = "unknownhost";
     ::gethostname(buf, sizeof buf);
     return buf;

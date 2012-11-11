@@ -17,10 +17,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include <cetty/util/StringUtil.h>
-#include <cetty/util/Character.h>
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 
 #include <cetty/handler/codec/http/HttpVersion.h>
@@ -52,6 +50,7 @@ cetty::handler::codec::http::HttpVersion HttpVersion::valueOf(const std::string&
 
 HttpVersion HttpVersion::valueOf(const StringPiece& text) {
     StringPiece version = text.trim();
+
     if (version.iequals("HTTP/1.1")) {
         return HTTP_1_1;
     }
@@ -83,8 +82,8 @@ HttpVersion::HttpVersion(const std::string& text, bool keepAliveDefault)
         throw InvalidArgumentException(std::string("invalid version format: ") + text);
     }
 
-    majorVersion = Integer::parse(major);
-    minorVersion = Integer::parse(minor);
+    majorVersion = StringUtil::strto32(major);
+    minorVersion = StringUtil::strto32(minor);
     this->text = protocolName + "/" + major + "." + minor;
 }
 
@@ -116,11 +115,11 @@ HttpVersion::HttpVersion(const std::string& protocolName,
         throw InvalidArgumentException("negative minorVersion");
     }
 
-    text = this->protocolName;
-    text.append("/");
-    Integer::appendString(majorVersion, &text);
-    text.append(".");
-    Integer::appendString(minorVersion, &text);
+    StringUtil::printf(&text,
+                          "%s/%d.%d",
+                          protocolName.c_str(),
+                          majorVersion,
+                          minorVersion);
 }
 
 int HttpVersion::hashCode() const {
@@ -173,8 +172,8 @@ bool HttpVersion::match(const std::string& text, std::string& protocol, std::str
 
 bool HttpVersion::verifyProtocl(const std::string& protocolName) {
     for (size_t i = 0; i < protocolName.size(); ++i) {
-        if (Character::isISOControl(protocolName[i])
-                || Character::isWhitespace(protocolName[i])) {
+        if (StringUtil::isISOControl(protocolName[i])
+                || StringUtil::isWhitespace(protocolName[i])) {
             return false;
         }
     }
@@ -184,7 +183,7 @@ bool HttpVersion::verifyProtocl(const std::string& protocolName) {
 
 bool HttpVersion::verifyVersion(const std::string& version) {
     for (size_t i = 0; i < version.size(); ++i) {
-        if (!Character::isDigit(version[i])) {
+        if (!StringUtil::isDigit(version[i])) {
             return false;
         }
     }

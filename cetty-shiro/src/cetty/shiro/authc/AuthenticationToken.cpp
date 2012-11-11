@@ -21,7 +21,7 @@ const std::string& AuthenticationToken::getCredentials() const {
 
 
 std::string AuthenticationToken::toString() {
-    return StringUtil::strprintf("principal: %s host: %s rememberMe: %s",
+    return StringUtil::printf("principal: %s host: %s rememberMe: %s",
                                  principal.c_str(),
                                  host.c_str(),
                                  rememberMe ? "true" : "false");

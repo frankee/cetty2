@@ -23,7 +23,6 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/Unpooled.h>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
@@ -57,7 +56,7 @@ public:
             return *this;
         }
 
-        buffer->writeBytes(StringUtil::strprintf("$%d\r\n", size));
+        buffer->writeBytes(StringUtil::printf("$%d\r\n", size));
         buffer->writeBytes(param, size);
         buffer->writeBytes("\r\n");
 
@@ -70,7 +69,7 @@ public:
             return *this;
         }
 
-        buffer->writeBytes(StringUtil::strprintf("$%d\r\n", param.size()));
+        buffer->writeBytes(StringUtil::printf("$%d\r\n", param.size()));
         buffer->writeBytes(param); // binary safe string
         buffer->writeBytes("\r\n");
 
@@ -118,7 +117,7 @@ public:
 
     void done() {
         std::string header;
-        StringUtil::strprintf(&header, "*%d\r\n", paramCnt);
+        StringUtil::printf(&header, "*%d\r\n", paramCnt);
 
         BOOST_ASSERT(buffer->aheadWritableBytes() >= (int)header.size());
 

@@ -24,7 +24,6 @@
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/Exception.h>
 
@@ -467,7 +466,7 @@ void HttpHeaders::setHeader(HttpMessage& message, const std::string& name, const
 }
 
 void HttpHeaders::setHeader(HttpMessage& message, const std::string& name, int vlaue) {
-    message.setHeader(name, Integer::toString(vlaue));
+    message.setHeader(name, StringUtil::numtostr(vlaue));
 }
 
 void HttpHeaders::setHeader(HttpMessage& message, const std::string& name, const std::vector<std::string>& values) {
@@ -478,7 +477,7 @@ void HttpHeaders::setHeader(HttpMessage& message, const std::string& name, const
     std::vector<std::string> strValues;
 
     for (size_t i = 0; i < values.size(); ++i) {
-        strValues.push_back(Integer::toString(values[i]));
+        strValues.push_back(StringUtil::numtostr(values[i]));
     }
 
     setHeader(message, name, strValues);
@@ -489,7 +488,7 @@ void HttpHeaders::addHeader(HttpMessage& message, const std::string& name, const
 }
 
 void HttpHeaders::addHeader(HttpMessage& message, const std::string& name, int value) {
-    message.addHeader(name, Integer::toString(value));
+    message.addHeader(name, StringUtil::numtostr(value));
 }
 
 int HttpHeaders::getIntHeader(const HttpMessage& message, const std::string& name) {
@@ -499,7 +498,7 @@ int HttpHeaders::getIntHeader(const HttpMessage& message, const std::string& nam
         throw NumberFormatException("empty");
     }
 
-    return Integer::parse(value);
+    return StringUtil::strto32(value);
 }
 
 int HttpHeaders::getIntHeader(const HttpMessage& message, const std::string& name, int defaultValue) {
@@ -510,7 +509,7 @@ int HttpHeaders::getIntHeader(const HttpMessage& message, const std::string& nam
     }
 
     try {
-        return Integer::parse(value);
+        return StringUtil::strto32(value);
     }
     catch (...) {
         return defaultValue;
@@ -518,7 +517,7 @@ int HttpHeaders::getIntHeader(const HttpMessage& message, const std::string& nam
 }
 
 void HttpHeaders::setIntHeader(HttpMessage& message, const std::string& name, int value) {
-    message.setHeader(name, Integer::toString(value));
+    message.setHeader(name, StringUtil::numtostr(value));
 }
 
 void HttpHeaders::setIntHeader(HttpMessage& message, const std::string& name, std::vector<int>& values) {
@@ -526,7 +525,7 @@ void HttpHeaders::setIntHeader(HttpMessage& message, const std::string& name, st
 }
 
 void HttpHeaders::addIntHeader(HttpMessage& message, const std::string& name, int value) {
-    message.addHeader(name, Integer::toString(value));
+    message.addHeader(name, StringUtil::numtostr(value));
 }
 
 int HttpHeaders::getContentLength(const HttpMessage& message) {
@@ -537,7 +536,7 @@ int HttpHeaders::getContentLength(const HttpMessage& message, int defaultValue) 
     const std::string& contentLength = message.getHeader(Names::CONTENT_LENGTH);
 
     if (!contentLength.empty()) {
-        return Integer::parse(contentLength);
+        return StringUtil::strto32(contentLength);
     }
 
     // WebSockset messages have constant content-lengths.
@@ -567,7 +566,7 @@ int HttpHeaders::getContentLength(const HttpMessage& message, int defaultValue) 
 }
 
 void HttpHeaders::setContentLength(HttpMessage& message, int length) {
-    message.setHeader(Names::CONTENT_LENGTH, StringUtil::strprintf("%d", length));
+    message.setHeader(Names::CONTENT_LENGTH, StringUtil::printf("%d", length));
 }
 
 const std::string& HttpHeaders::getHost(const HttpMessage& message) {

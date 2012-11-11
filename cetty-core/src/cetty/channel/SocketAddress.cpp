@@ -21,7 +21,7 @@
 #include <cetty/channel/SocketAddress.h>
 
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace channel {
@@ -101,8 +101,7 @@ SocketAddress::SocketAddress(const std::string& hostAndPort) {
     }
 
     if (port[0] >= '0' && port[0] <= '9') {
-        int p;
-        Integer::tryParse(port, p);
+        int p = StringUtil::strto32(port);
 
         if (p > 0 && p < 0xFFFF) {
             init(host, p);

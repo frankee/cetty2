@@ -17,7 +17,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include <cetty/util/Character.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
@@ -158,8 +157,8 @@ HttpMethod::HttpMethod(const std::string& name) {
     }
 
     for (size_t i = 0; i < this->name.size(); ++i) {
-        if (Character::isISOControl(this->name.at(i)) ||
-                Character::isWhitespace(this->name.at(i))) {
+        if (StringUtil::isISOControl(this->name.at(i)) ||
+                StringUtil::isWhitespace(this->name.at(i))) {
             throw InvalidArgumentException("invalid character in name");
         }
     }

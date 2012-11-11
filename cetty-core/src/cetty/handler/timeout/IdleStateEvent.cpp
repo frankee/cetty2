@@ -39,7 +39,7 @@ IdleStateEvent::IdleStateEvent(IdleState state,
 }
 
 std::string IdleStateEvent::toString() const {
-    return cetty::util::StringUtil::strprintf("%s(%d, %dms)",
+    return cetty::util::StringUtil::printf("%s(%d, %dms)",
             state.toString().c_str(),
             count,
             durationMillis);

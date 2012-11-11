@@ -16,8 +16,8 @@
 
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 
 namespace cetty {
@@ -255,7 +255,7 @@ cetty::handler::codec::http::HttpResponseStatus HttpResponseStatus::valueOf(int 
         reasonPhrase = "Unknown Status ";
     }
 
-    Integer::appendString(code, &reasonPhrase);
+    StringUtil::numtostr(code, &reasonPhrase);
     return HttpResponseStatus(code, reasonPhrase);
 }
 
@@ -277,13 +277,7 @@ HttpResponseStatus::HttpResponseStatus(int code, const StringPiece& reasonPhrase
 }
 
 std::string HttpResponseStatus::toString() const {
-    std::string buf;
-    buf.reserve(reasonPhrase.size() + 16);
-
-    Integer::appendString(code, &buf);
-    buf.append(" ");
-    buf.append(reasonPhrase);
-    return buf;
+    return StringUtil::printf("%d %s", code, reasonPhrase.c_str());
 }
 
 }

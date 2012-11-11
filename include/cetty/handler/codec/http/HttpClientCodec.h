@@ -192,7 +192,7 @@ private:
 
                 if (missingResponses > 0) {
                     ctx.fireExceptionCaught(
-                        ChannelException(StringUtil::strprintf(
+                        ChannelException(StringUtil::printf(
                                              "channel gone inactive with %d missing response(s)",
                                              missingResponses)));
                 }

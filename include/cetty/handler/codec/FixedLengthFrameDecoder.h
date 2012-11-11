@@ -67,7 +67,7 @@ public:
     FixedLengthFrameDecoder(int frameLength) : frameLength(frameLength) {
         if (frameLength <= 0) {
             throw InvalidArgumentException(
-                StringUtil::strprintf(
+                StringUtil::printf(
                     "frameLength must be a positive integer: %d",
                     frameLength));
         }

@@ -83,8 +83,8 @@ bool WSSE::isExpried(const std::string& created) {
     std::string now;
     generatorCreated(&now);
 
-    int64_t createdTime = StringUtil::atoi(created);
-    int64_t nowTime = StringUtil::atoi(now);
+    int64_t createdTime = StringUtil::strto64(created);
+    int64_t nowTime = StringUtil::strto64(now);
 
     int64_t interval = nowTime - createdTime;
 
