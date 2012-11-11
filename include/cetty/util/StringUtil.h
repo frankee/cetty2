@@ -85,8 +85,8 @@ public:
      * @return the number of result elements.
      */
     static size_t split(const std::string& str,
-                           char delim,
-                           std::vector<std::string>* elems);
+                        char delim,
+                        std::vector<std::string>* elems);
 
     /**
      * Split a string with delimiters.
@@ -96,8 +96,8 @@ public:
      * @return the number of result elements.
      */
     static size_t split(const std::string& str,
-                           const std::string& delims,
-                           std::vector<std::string>* elems);
+                        const std::string& delims,
+                        std::vector<std::string>* elems);
 
     /**
      * Convert the letters of a string into upper case.
@@ -113,6 +113,10 @@ public:
      */
     static std::string* toLower(std::string* str);
 
+    static inline bool iequals(const std::string& astr, const std::string& bstr) {
+        return iequals(astr.c_str(), bstr.c_str());
+    }
+
     static inline bool iequals(const char* astr, const char* bstr) {
         BOOST_ASSERT(astr && bstr);
 
@@ -122,9 +126,16 @@ public:
                     && *astr != *bstr + 0x20) {
                 return false;
             }
+
+            ++astr;
+            ++bstr;
         }
 
-        return true;
+        return *bstr == '\0';
+    }
+
+    static inline int icompare(const std::string& astr, const std::string& bstr) {
+        return icompare(astr.c_str(), bstr.c_str());
     }
 
     /**
@@ -156,7 +167,7 @@ public:
     // HasPrefixString()
     //    Check if a string begins with a given prefix.
     static inline bool hasPrefixString(const std::string& str,
-                                const std::string& prefix) {
+                                       const std::string& prefix) {
         return str.size() >= prefix.size() &&
                str.compare(0, prefix.size(), prefix) == 0;
     }
@@ -166,7 +177,7 @@ public:
     //    prefix string if the prefix matches, otherwise the original
     //    string.
     static inline std::string stripPrefixString(const std::string& str,
-                                         const std::string& prefix) {
+            const std::string& prefix) {
         if (hasPrefixString(str, prefix)) {
             return str.substr(prefix.size());
         }
@@ -178,7 +189,7 @@ public:
     // HasSuffixString()
     //    Return true if str ends in suffix.
     static inline bool hasSuffixString(const std::string& str,
-                                const std::string& suffix) {
+                                       const std::string& suffix) {
         return str.size() >= suffix.size() &&
                str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
     }
@@ -188,7 +199,7 @@ public:
     //    suffix string if the suffix matches, otherwise the original
     //    string.
     static inline std::string stripSuffixString(const std::string& str,
-                                         const std::string& suffix) {
+            const std::string& suffix) {
         if (hasSuffixString(str, suffix)) {
             return str.substr(0, str.size() - suffix.size());
         }
@@ -245,10 +256,10 @@ public:
     //    happened or not.
     // ----------------------------------------------------------------------
     static void replace(const std::string& s,
-                 const std::string& oldsub,
-                 const std::string& newsub,
-                 bool replaceAll,
-                 std::string* res) {
+                        const std::string& oldsub,
+                        const std::string& newsub,
+                        bool replaceAll,
+                        std::string* res) {
         if (oldsub.empty()) {
             res->append(s);  // if empty, append the given string.
             return;
@@ -274,9 +285,9 @@ public:
     }
 
     static inline std::string replace(const std::string& s,
-                        const std::string& oldsub,
-                        const std::string& newsub,
-                        bool replace_all) {
+                                      const std::string& oldsub,
+                                      const std::string& newsub,
+                                      bool replace_all) {
         std::string ret;
         replace(s, oldsub, newsub, replace_all, &ret);
         return ret;
@@ -297,11 +308,11 @@ public:
     //
     // ----------------------------------------------------------------------
     static std::string* join(const std::vector<std::string>& components,
-                            const char* delim,
-                            std::string* result);
+                             const char* delim,
+                             std::string* result);
 
     static std::string join(const std::vector<std::string>& components,
-                                   const char* delim);
+                            const char* delim);
 
     /**
      * Convert a decimal string to an integer.
@@ -389,7 +400,7 @@ public:
 
     static std::string numtostr(unsigned long long number);
     static std::string* numtostr(unsigned long long number, std::string* str);
-    
+
     //    Description: converts a double or float to a string which, if
     //    passed to NoLocaleStrtod(), will produce the exact same original double
     //    (except in case of NaN; all NaNs are considered the same value).

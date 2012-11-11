@@ -118,7 +118,7 @@
     <ClCompile Include="..\..\src\cetty\zurg\slave\SlaveServiceImpl.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlave.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlaveConfig.cpp" />
-    <ClCompile Include="..\..\src\cetty\zurg\Util.cc" />
+    <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ApplicationManager.h" />
@@ -132,9 +132,9 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\SlaveServiceImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlaveConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
     <ClInclude Include="..\..\src\cetty\zurg\slave\Heartbeat.h" />
     <ClInclude Include="..\..\src\cetty\zurg\slave\ProcessManager.h" />
-    <ClInclude Include="..\..\src\cetty\zurg\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto" />
