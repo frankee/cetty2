@@ -46,7 +46,7 @@ void ProcStatFile::parse(const char* buffer) {
             ++p;
         }
     }
-    if (p) startTime_ = StringUtil::atoi(p);
+    if (p) startTime_ = StringUtil::strto64(p);
 }
 
 }

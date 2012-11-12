@@ -21,6 +21,7 @@
 #include <vector>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
+#include <cstring>
 
 #include <cetty/Types.h>
 

@@ -30,8 +30,8 @@ int fdDirFilter(const struct dirent* d) {
 }
 
 std::string writeTempFile(const StringPiece prefix, const StringPiece content) {
-    std::string buf;
-    StringUtil::printf(&buf, "/tmp/%s-runScript-%ld-%d-%05d-XXXXXX",
+    char buf[512];
+    snprintf(buf, sizeof buf, "/tmp/%s-runScript-%ld-%d-%05d-XXXXXX",
                       prefix.data(),
                       now(),
                       ::getpid(),
