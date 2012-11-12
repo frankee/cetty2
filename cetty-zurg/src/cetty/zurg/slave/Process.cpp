@@ -6,6 +6,7 @@
 #include <cetty/zurg/Util.h>
 #include <cetty/zurg/slave/Pipe.h>
 #include <cetty/zurg/slave/ProcStatFile.h>
+#include <cetty/util/SmallFile.h>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -23,8 +24,12 @@ namespace zurg {
 namespace slave {
 
 using namespace boost::posix_time;
+using namespace cetty::util;
 
-const int kSleepAfterExec = 0; // for strace child
+const std::string Process::STDOUT_PREFIX_ = "stdout";
+const std::string Process::STDERR_PREFIX_ = "stderr";
+
+const int Process::CHILD_SLEEP_SECS_ = 1;
 
 float getSeconds(const struct timeval& tv) {
     int64_t microSeconds = tv.tv_sec*1000000 + tv.tv_usec;
@@ -32,13 +37,19 @@ float getSeconds(const struct timeval& tv) {
     return static_cast<float>(seconds);
 }
 
+/**
+ * @brief Create a file and return file description
+ *     If #toFile is true, open a file consist of #prefix.pid.#postfix
+ *  (create if not exist) for reading and writing, else open "/dev/null".
+ * @param toFile Hint if use a normal file
+ */
 int redirect(bool toFile, const std::string& prefix, const char* postfix) {
     int fd = -1;
 
     if (toFile) {
         char buf[256];
-        ::snprintf(buf, sizeof buf, "%s.%d.%s",
-                   prefix.c_str(), cetty::util::Process::id(), postfix);
+        ::snprintf(buf, sizeof buf, "%s.%d.%s", prefix.c_str(),
+                   cetty::util::Process::id(), postfix);
         fd = ::open(buf, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
     } else {
         fd = ::open("/dev/null", O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
@@ -47,18 +58,45 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
     return fd;
 }
 
+std::string getFileConent(const std::string &fileName, bool remove){
+	SmallFile sf(fileName);
+	int size = -1;
+	int err = sf.readToBuffer(&size);
+	if(remove) unlink(fileName.c_str());
+	if(!err) return std::string().assign(sf.buffer(), size);
+	else return std::string();
+}
+
+bool setFl(int fd, int flag){
+	int val = fcntl(fd, F_GETFL, 0);
+	if(val < 0) return false;
+	val |= flag;
+	if(fcntl(fd, F_SETFL, val) < 0)
+		return false;
+	return true;
+}
+
+bool delFl(int fd, int flag){
+	int val = fcntl(fd, F_GETFL, 0);
+	if(val < 0) return false;
+	val &= (~flag);
+	if(fcntl(fd, F_SETFL, val) < 0)
+		return false;
+	return true;
+}
+
 Process::Process(
     const ConstRunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
-    const DoneCallback& done
-): request_(request),
-   response_(response),
-   doneCallback_(done),
-   pid_(0),
-   startTimeInJiffies_(0),
-   redirectStdout_(false),
-   redirectStderr_(false),
-   runCommand_(true) {
+    const DoneCallback& done)
+    : request_(request),
+      response_(response),
+      doneCallback_(done),
+      childPid_(0),
+      startTimeInJiffies_(0),
+      redirectStdout_(ZurgSlave::instance().config_.isRdtCmdStdout_),
+      redirectStderr_(ZurgSlave::instance().config_.isRdtCmdStderr_),
+      runCommand_(true) {
 
 }
 
@@ -66,7 +104,7 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
     : request_(),
       response_(new RunCommandResponse()),
       doneCallback_(),
-      pid_(0),
+      childPid_(0),
       name_(appRequest->name()),
       startTimeInJiffies_(0),
       redirectStdout_(appRequest->redirect_stdout()),
@@ -97,145 +135,136 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
 }
 
 Process::~Process() {
-    LOG_DEBUG << "Process[" << pid_ << "] dtor";
-
-    //todo complete destructor like below
-
-    /*
-    if (stdoutSink_ || stderrSink_) {
-        // todo how to judge if the cetty's event loop is working.
-        assert(!loop_->eventHandling());
-    }
-    */
+    LOG_DEBUG << "Process[" << childPid_ << "] dtor";
 }
 
 int Process::start() {
-    // todo what's mean
-    //assert(numThreads() == 1);
-    int availabltFds = maxOpenFiles() - openedFiles();
+	 startTime_ = boost::posix_time::microsec_clock::universal_time();
 
+    // todo: assert(numThreads() == 1);
+    int availabltFds = maxOpenFiles() - openedFiles();
     if (availabltFds < 20) {
         // to fork() and capture stdout/stderr, we need new file descriptors.
         return EMFILE;
     }
 
-    // The self-pipe trick
-    // http://cr.yp.to/docs/selfpipe.html
     Pipe execError;
-
     Pipe stdOutput;
     Pipe stdError;
 
-    startTime_ = boost::posix_time::microsec_clock::universal_time();
-
-    const pid_t result = ::fork(); // FORKED HERE
-
+    pid_t result = ::fork();
     if (result == 0) {
-        // child process
-
         int ret = ::mkdir(request_->cwd().c_str(), 0755);
         if(ret < 0){
-            char buf[512];
-            strerror_r(errno, buf, sizeof(buf));
-            LOG_INFO << "Change process's work directory to "
-                     << request_->cwd() << " error :" << buf;
+        	if(errno == EEXIST) {
+        		LOG_INFO << request_->cwd()
+        				 << " is already exist.";
+        	} else {
+                char buf[512];
+                char *error = strerror_r(errno, buf, sizeof(buf));
+                LOG_INFO << "Make process's work directory : "
+                     << request_->cwd() << " error :" << error;
+                exit(1);
+        	}
         }
 
         int stdoutFd = -1;
         int stderrFd = -1;
 
-        if (runCommand_) {
-            stdoutFd = stdOutput.writeFd();
-            stderrFd = stdError.writeFd();
-        } else {
-            std::string startTimeStr = to_iso_string(startTime_);
-            // FIXME: capture errno
-            stdoutFd = redirect(redirectStdout_, request_->cwd()+"/stdout", startTimeStr.c_str());
-            stderrFd = redirect(redirectStderr_, request_->cwd()+"/stderr", startTimeStr.c_str());
-        }
+        std::string startTimeStr = to_iso_string(startTime_);
+        stdoutFd = redirect(
+            redirectStdout_,
+        	request_->cwd() + "/" + STDOUT_PREFIX_,
+        	startTimeStr.c_str()
+        );
+        stderrFd = redirect(
+        	redirectStderr_,
+        	request_->cwd() + "/" + STDERR_PREFIX_,
+        	startTimeStr.c_str()
+        );
 
-        execChild(execError, stdoutFd, stderrFd); // never return
+        execChild(execError, stdoutFd, stderrFd);
     } else if (result > 0) {
-        // parent
-        pid_ = result;
+        childPid_ = result;
         return afterFork(execError, stdOutput, stdError);
     } else {
-        // failed
         return errno;
     }
 }
 
 void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
-    if (kSleepAfterExec > 0) {
+    if (CHILD_SLEEP_SECS_ > 0) {
         ::fprintf(stderr, "Child pid = %d", ::getpid());
-        ::sleep(kSleepAfterExec);
+        ::sleep(CHILD_SLEEP_SECS_);
     }
 
     try {
+    	execError.closeRead();
         ProcStatFile stat(cetty::util::Process::id());
-
         if (!stat.valid_) {
             LOG_INFO << "Process [pid = "
                      << cetty::util::Process::id()
                      << "]state is not valid.";
             stat.startTime_ = 0;
         }
-
         execError.write(stat.startTime_);
 
         std::vector<const char*> argv;
         argv.reserve(request_->args_size() + 2);
         argv.push_back(request_->command().c_str());
-
         for (int i = 0; i < request_->args_size(); ++i) {
             argv.push_back(request_->args(i).c_str());
         }
-
         argv.push_back(NULL);
 
-        // FIXME: new process group, new session
-       // ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
+        //todo ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
         if (::chdir(request_->cwd().c_str()) < 0) {
-            LOG_INFO << "Set process's work directory failed.";
+        	LOG_ERROR << "Set process's work directory failed.";
             throw static_cast<int>(errno);
         }
 
         // FIXME: max_memory_mb
         // FIXME: environ with execvpe
         int stdInput = ::open("/dev/null", O_RDONLY);
-
         if (stdInput < 0) {
-            LOG_INFO << "Open /dev/null failed.";
+        	LOG_ERROR << "Open /dev/null failed.";
             throw static_cast<int>(errno);
         }
 
         if (stdOutput < 0 || stdError < 0) {
             if (stdOutput >= 0) { ::close(stdOutput); }
-
             if (stdError >= 0) { ::close(stdError); }
-
             throw static_cast<int>(EACCES);
         }
 
         if (::dup2(stdInput, STDIN_FILENO) < 0) {
-            LOG_INFO << "Duplicate stdin failed.";
+        	LOG_ERROR << "Duplicate stdin failed.";
             throw static_cast<int>(errno);
         }
-
         ::close(stdInput);
 
         if (::dup2(stdOutput, STDOUT_FILENO) < 0) {
-            LOG_INFO << "Duplicate stdout failed.";
+            LOG_ERROR << "Duplicate stdout failed.";
             throw static_cast<int>(errno);
         }
+        close(stdOutput);
+        if(!setFl(STDOUT_FILENO, O_SYNC)) {
+        	LOG_ERROR << "Set file O_SYNC failed.";
+        }
+        /*
+        if(!delFl(STDOUT_FILENO, FD_CLOEXEC)){
+
+        }
+        */
 
         if (::dup2(stdError, STDERR_FILENO) < 0) {
-            LOG_INFO << "Duplicate stderr failed.";
+            LOG_ERROR << "Duplicate stderr failed.";
             throw static_cast<int>(errno);
         }
+        close(stdError);
 
-        LOG_INFO << "Run command "<< request_->command();
         const char* cmd = request_->command().c_str();
+        //LOG_INFO << "Run command: " << cmd;
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
 
         LOG_INFO << "Execute new process image failed.";
@@ -254,21 +283,31 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
 }
 
 int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
-    LOG_DEBUG << "PARENT child pid " << pid_;
+    LOG_INFO << "PARENT child pid " << childPid_;
+
+    execError.closeWrite();
+    stdOutput.closeWrite();
+    stdError.closeWrite();
+
     int64_t childStartTime = 0;
     int64_t childErrno = 0;
-    execError.closeWrite();
-    ssize_t n = execError.read(&childStartTime);
-    assert(n == sizeof(childStartTime));
-    startTimeInJiffies_ = childStartTime;
-    LOG_DEBUG << "PARENT child start time " << childStartTime;
-    n = execError.read(&childErrno);
 
+    ssize_t n = execError.read(&childStartTime);
+    if (n != sizeof(childStartTime) || childStartTime == 0){
+    	LOG_ERROR << "PARENT read start time from child ["
+    			  << childPid_
+    			  << "] error. ";
+    }
+    startTimeInJiffies_ = childStartTime;
+
+    n = execError.read(&childErrno);
     if (n == 0) {
-        LOG_INFO << "started child pid " << pid_;
+        LOG_INFO << "PARENT child process ["
+        		 << childPid_
+        		 << "] start successfully";
 
         char filename[64];
-        ::snprintf(filename, sizeof filename, "/proc/%d/exe", pid_);
+        ::snprintf(filename, sizeof filename, "/proc/%d/exe", childPid_);
         char buf[1024];
         ssize_t len = ::readlink(filename, buf, sizeof buf);
 
@@ -279,27 +318,11 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
             LOG_ERROR << "Fail to read link " << filename;
         }
 
-        // read nothing, child process exec successfully.
+
         if (runCommand_) {
-            int stdoutFd = ::dup(stdOutput.readFd());
-            int stderrFd = ::dup(stdError.readFd());
 
-            if (stdoutFd < 0 || stderrFd < 0) {
-                if (stdoutFd >= 0) { ::close(stdoutFd); }
-
-                if (stderrFd >= 0) { ::close(stderrFd); }
-
-                return errno;
-            }
-
-            setNonBlockAndCloseOnExec(stdoutFd);
-            setNonBlockAndCloseOnExec(stderrFd);
-            //stdoutSink_.reset(new Sink(loop_, stdoutFd, request_->max_stdout(), "stdout"));
-            //stderrSink_.reset(new Sink(loop_, stderrFd, request_->max_stderr(), "stderr"));
-            //stdoutSink_->start();
-            //stderrSink_->start();
         } else {
-            // FIXME: runApp
+
         }
 
         return 0;
@@ -311,32 +334,36 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
         return err;
     } else if (n < 0) {
         int err = errno;
-        LOG_ERROR << "PARENT";
+        LOG_ERROR << "PARENT child errno: " << err;
         return err;
     } else {
-        LOG_ERROR << "PARENT read " << n;
+        LOG_ERROR << "PARENT read :" << n;
         return EINVAL;
     }
+
+    execError.closeRead();
+    stdOutput.closeRead();
+    stdError.closeRead();
 }
 
 void Process::onTimeoutWeak(const boost::weak_ptr<Process>& wkPtr) {
     ProcessPtr ptr(wkPtr.lock());
-
-    if (ptr) {
-        ptr->onTimeout();
-    }
+    if (ptr) ptr->onTimeout();
 }
 
 void Process::onTimeout() {
-    // kill process
-    LOG_INFO << "Process[" << pid_ << "] onTimeout";
+    LOG_INFO << "Process[" << childPid_ << "] onTimeout";
 
-    const ProcStatFile stat(pid_);
-
+    const ProcStatFile stat(childPid_);
     if (stat.valid_
         && stat.ppid_ == cetty::util::Process::id()
         && stat.startTime_ == startTimeInJiffies_) {
-        ::kill(pid_, SIGINT);
+        int ret = ::kill(childPid_, SIGINT);
+        if(ret < 0){
+        	if(errno == ESRCH)
+        		LOG_INFO << "Process [" << childPid_
+        		         << " is not exist.";
+        }
     }
 }
 
@@ -356,20 +383,13 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
         response_->set_coredump(WCOREDUMP(status));
     }
 
-    LOG_INFO << "Process[" << pid_ << "] onCommandExit " << buf;
-
-    // todo how to replace below code by cetty's event loop
-    //assert(!loop_->eventHandling());
-
-    // FIXME: defer 100ms or blocking read to capture all outputs.
-    //stdoutSink_->stop(pid_);
-    //stderrSink_->stop(pid_);
+    LOG_INFO << "Process[" << childPid_ << "] onCommandExit " << buf;
 
     response_->set_error_code(0);
-    response_->set_pid(pid_);
+    response_->set_pid(childPid_);
     response_->set_status(status);
-    //response_->set_std_output(stdoutSink_->bufferAsStdString());
-    //response_->set_std_error(stderrSink_->bufferAsStdString());
+    response_->set_std_output(getCommandOutput());
+    response_->set_std_error(getCommandError());
     response_->set_executable_file(exe_file_);
     response_->set_start_time_us(getMicroSecs(startTime_));
     response_->set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
@@ -378,6 +398,34 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response_->set_memory_maxrss_kb(ru.ru_maxrss);
 
     doneCallback_(response_);
+}
+
+std::string Process::getCommandOutput(){
+	if(!redirectStdout_)
+		return std::string("Standard out is redirected to /dev/null");
+
+    std::string startTimeStr = to_iso_string(startTime_);
+    char buf[256];
+    bzero(buf, sizeof(buf));
+    ::snprintf(buf, sizeof buf, "%s.%d.%s",
+    		   (request_->cwd() + "/" + STDOUT_PREFIX_).c_str(),
+               childPid_, startTimeStr.c_str());
+    std::string fileName(buf);
+    return getFileConent(fileName, true);
+}
+
+std::string Process::getCommandError(){
+	if(!redirectStderr_)
+		return std::string("Standard error is redirected to /dev/null");
+
+	std::string startTimeStr = to_iso_string(startTime_);
+	char buf[256];
+	bzero(buf, sizeof(buf));
+	::snprintf(buf, sizeof buf, "%s.%d.%s",
+	    	   (request_->cwd() + "/" + STDERR_PREFIX_).c_str(),
+	           childPid_, startTimeStr.c_str());
+	std::string fileName(buf);
+	return getFileConent(fileName, true);
 }
 
 }

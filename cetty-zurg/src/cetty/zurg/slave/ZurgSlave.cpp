@@ -27,8 +27,6 @@ ZurgSlave::ZurgSlave(){
 }
 
 void ZurgSlave::init(){
-    if (config_.parentThreadCnt_ < 0)  config_.parentThreadCnt_ = 1;
-    if (config_.childThreadCnt_ < 0) config_.childThreadCnt_ = 0;
     if (config_.masterAddress_.empty()){
         LOG_WARN << "Master address is empty.";
         config_.masterAddress_="127.0.0.1";
@@ -44,20 +42,18 @@ void ZurgSlave::init(){
     }
 
    if(config_.prefix_.empty()){
-       config_.prefix_ = "/home/chenhl";
+       config_.prefix_ = "/tmp";
        LOG_WARN << "Zurg slave profix is not set, set to "
                 << config_.prefix_;
    }
 
    if(config_.name_.empty()){
-       config_.name_ = "zurg";
-       LOG_WARN << "Zurg slave name is not set, set to "
-                << config_.name_;
+       LOG_WARN << "Zurg slave name is empty";
    }
 }
 
 void ZurgSlave::start() {
-    ProtobufServerBuilder serverBuilder(config_.parentThreadCnt_, config_.childThreadCnt_);
+    ProtobufServerBuilder serverBuilder(1, 0);
     EventLoopPtr loop = serverBuilder.getParentPool()->getNextLoop();
     ProtobufServicePtr service(new SlaveServiceImpl(loop));
     serverBuilder.registerService(service);

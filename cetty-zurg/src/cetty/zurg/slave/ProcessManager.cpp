@@ -28,7 +28,7 @@ ProcessManager::ProcessManager(const EventLoopPtr& loop)
         config_.zombieInterval_ = 3000;
     }
 
-    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
+    startSignalWait();
         //loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
 }
 
@@ -52,7 +52,7 @@ void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
 }
 
 void ProcessManager::startSignalWait() {
-
+	signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {

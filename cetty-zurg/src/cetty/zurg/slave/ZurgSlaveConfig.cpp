@@ -17,7 +17,7 @@ using namespace cetty::config;
 CETTY_CONFIG_ADD_DESCRIPTOR(
     ZurgSlaveConfig,
     new ConfigDescriptor(
-        10,
+        9,
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, name_, STRING),
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, prefix_, STRING),
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterAddress_, STRING),
@@ -25,9 +25,8 @@ CETTY_CONFIG_ADD_DESCRIPTOR(
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterPort_, STRING),
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, zombieInterval_, INT32),
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, heartbeatInterval_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, parentThreadCnt_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, childThreadCnt_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, error_, BOOL)
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStdout_, BOOL),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStderr_, BOOL)
     ),
     new ZurgSlaveConfig
 );
@@ -41,9 +40,8 @@ ZurgSlaveConfig::ZurgSlaveConfig() :
     masterPort_(0),
     zombieInterval_(3000),
     heartbeatInterval_(3000),
-    parentThreadCnt_(1),
-    childThreadCnt_(0),
-    error_(0) {
+    isRdtCmdStdout_(true),
+    isRdtCmdStderr_(true){
 
 }
 

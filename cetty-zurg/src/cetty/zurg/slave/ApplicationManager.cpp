@@ -87,12 +87,9 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
         }else {
             status->set_state(kRunning);
             status->set_pid(process->pid());
-            // FIXME
-            //processManager->runAtExit(process->pid(),
-            //    boost::bind());
 
             processManager_->runAtExit(
-                process->pid(),  // bind strong ptr
+                process->pid(),
                 boost::bind(
                     &ApplicationManager::onProcessExit,
                     this,
@@ -101,13 +98,13 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
                     _2 // rusage
                 )
             );
-        } // if (err)
+        }
 
         out->CopyFrom(*status);
     } else {
         out->CopyFrom(*status);
         out->set_message("Already running.");
-    } // if (status->state() != kRunning)
+    }
 }
 
 void ApplicationManager::stop(

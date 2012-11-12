@@ -99,17 +99,13 @@ void setupWorkingDir(const std::string& cwd) {
 }
 
 void setNonBlockAndCloseOnExec(int fd) {
-    // non-block
     int flags = ::fcntl(fd, F_GETFL, 0);
     flags |= O_NONBLOCK;
     int ret = ::fcntl(fd, F_SETFL, flags);
-    // FIXME check
 
-    // close-on-exec
     flags = ::fcntl(fd, F_GETFD, 0);
     flags |= FD_CLOEXEC;
     ret = ::fcntl(fd, F_SETFD, flags);
-    // FIXME check
 
     (void)ret;
 }
@@ -153,11 +149,9 @@ int openedFiles(){
 
 int maxOpenFiles(){
     struct rlimit rl;
-    if (::getrlimit(RLIMIT_NOFILE, &rl)){
-        return openedFiles();
-    } else {
-        return static_cast<int>(rl.rlim_cur);
-    }
+    int ret = ::getrlimit(RLIMIT_NOFILE, &rl);
+    if (ret == -1) return openedFiles();
+    else return static_cast<int>(rl.rlim_cur);
 }
 
 int64_t getMicroSecs(const ptime &p){

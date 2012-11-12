@@ -158,13 +158,10 @@ void SlaveServiceImpl::runCommand(
         boost::weak_ptr<Process> weakProcessPtr(process);
         TimeoutPtr timerId = elp->runAfter(
             request->timeout(),
-
             boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
         );
 
-
         process->setTimerId(timerId);
-
     }
 
 }

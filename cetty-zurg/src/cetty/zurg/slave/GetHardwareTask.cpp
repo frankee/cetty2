@@ -36,33 +36,34 @@ void GetHardwareTask::start(SlaveServiceImpl& slave) {
     GetHardwareTaskPtr self = shared_from_this();
 
     if (lshw) {
-        RunCommandRequestPtr lshw(new RunCommandRequest);
-        lshw->set_command("lshw");
-        slave.runCommand(lshw,
-                         new RunCommandResponse,
-                         boost::bind(&GetHardwareTask::lshwDONE,
-                                     self,
-                                     _1,
-                                     lshw));
+        RunCommandRequestPtr lshwRequest(new RunCommandRequest);
+        RunCommandResponsePtr lshwResponse(new RunCommandResponse);
+        lshwRequest->set_command("lshw");
+        slave.runCommand(lshwRequest,
+        		         lshwResponse,
+                         boost::bind(&GetHardwareTask::lshwDONE, self, _1, lshwRequest));
     }
 
-    RunCommandRequestPtr lspci(new RunCommandRequest);
-    lspci->set_command("lspci");
-    slave.runCommand(lspci,
-                     new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::lspciDONE, self, _1, lspci));
+    RunCommandRequestPtr lspciRequest(new RunCommandRequest);
+    RunCommandResponsePtr lspciResponse(new RunCommandResponse);
+    lspciRequest->set_command("lspci");
+    slave.runCommand(lspciRequest,
+    		         lspciResponse,
+                     boost::bind(&GetHardwareTask::lspciDONE, self, _1, lspciRequest));
 
-    RunCommandRequestPtr lscpu(new RunCommandRequest);
-    lscpu->set_command("lscpu");
-    slave.runCommand(lscpu,
-                     new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::lscpuDONE, self, _1, lscpu));
+    RunCommandRequestPtr lscpuRequest(new RunCommandRequest);
+    RunCommandResponsePtr lscpuResponse(new RunCommandResponse);
+    lscpuRequest->set_command("lscpu");
+    slave.runCommand(lscpuRequest,
+    		         lscpuResponse,
+                     boost::bind(&GetHardwareTask::lscpuDONE, self, _1, lscpuRequest));
 
-    RunCommandRequestPtr ifconfig(new RunCommandRequest);
-    ifconfig->set_command("/sbin/ifconfig");
-    slave.runCommand(ifconfig,
-                     new RunCommandResponse,
-                     boost::bind(&GetHardwareTask::ifconfigDONE, self, _1, ifconfig));
+    RunCommandRequestPtr ifconfigRequest(new RunCommandRequest);
+    RunCommandResponsePtr ifconfigResponse(new RunCommandResponse);
+    ifconfigRequest->set_command("/sbin/ifconfig");
+    slave.runCommand(ifconfigRequest,
+    		         ifconfigResponse,
+                     boost::bind(&GetHardwareTask::ifconfigDONE, self, _1, ifconfigRequest));
 }
 
 void GetHardwareTask::checkAllDone() {
