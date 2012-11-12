@@ -98,7 +98,7 @@ message RunCommandRequest {
   optional bool      envs_only = 5 [default = false];
   optional int32    max_stdout = 6 [default = 1048576];
   optional int32    max_stderr = 7 [default = 1048576];
-  optional int32       timeout = 8 [default = 60];
+  optional int32       timeout = 8 [default = 3000];
   optional int32 max_memory_mb = 9 [default = 32768];
 }
 

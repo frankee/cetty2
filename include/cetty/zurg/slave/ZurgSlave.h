@@ -32,10 +32,9 @@ public:
         return zs;
     }
 
+    ZurgSlaveConfig config_;
 private:
     void init();
-
-    ZurgSlaveConfig config_;
 };
 
 }

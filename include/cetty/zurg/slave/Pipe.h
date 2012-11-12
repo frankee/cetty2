@@ -45,9 +45,6 @@ inline
 void Pipe::write(int64_t x){
     ssize_t n = ::write(writeFd(), &x, sizeof(x));
     assert(n == sizeof(x));
-
-    // todo what's mean?
-    (void)n;
 }
 
 inline

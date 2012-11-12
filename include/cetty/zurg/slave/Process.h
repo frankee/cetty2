@@ -37,6 +37,11 @@ using namespace boost::posix_time;
 typedef boost::shared_ptr<Process> ProcessPtr;
 typedef boost::function1<void, const MessagePtr&> DoneCallback;
 
+/**
+ * @brief start a new process
+ *  We can start a new process by calling start, and
+ *  get child process's run state.
+ */
 class Process : public boost::enable_shared_from_this<Process>,
                 boost::noncopyable {
 public:
@@ -50,9 +55,10 @@ public:
 
     ~Process();
 
-    int start(); // may throw
+    // start a new process
+    int start();
 
-    pid_t pid() const { return pid_; }
+    pid_t pid() const { return childPid_; }
     const std::string& name() const { return name_; }
 
     void setTimerId(const cetty::channel::TimeoutPtr timerId) {
@@ -64,17 +70,29 @@ public:
 
     static void onTimeoutWeak(const boost::weak_ptr<Process>& wkPtr);
 private:
+    /*
+     * @brief launch new process image
+     * @param execError A pipe used for communicating with parent process
+     *        Just use writing point.
+     * @param stdOutput Redirect standard output of child process to #stdOutput
+     * @param stdError Redirect standard error of child process to #stdError
+     */
     void execChild(Pipe& execError, int stdOutput, int stdError)
     __attribute__((__noreturn__));
 
+    // get new process's run information
     int afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError);
 
 private:
+    static const std::string STDOUT_PREFIX_;
+    static const std::string STDERR_PREFIX_;
+    static const int CHILD_SLEEP_SECS_;
+
     ConstRunCommandRequestPtr request_;
     RunCommandResponsePtr response_;
     DoneCallback doneCallback_;
 
-    pid_t pid_;
+    pid_t childPid_;
     std::string name_;
     std::string exe_file_;
 
@@ -82,12 +100,13 @@ private:
     int64_t startTimeInJiffies_;
     cetty::channel::TimeoutPtr timerId_;
 
-    //boost::shared_ptr<Sink> stdoutSink_;
-    //boost::shared_ptr<Sink> stderrSink_;
-
     bool redirectStdout_;
     bool redirectStderr_;
     bool runCommand_;
+
+private:
+    std::string getCommandOutput();
+    std::string getCommandError();
 };
 
 }

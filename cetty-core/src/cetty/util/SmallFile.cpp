@@ -75,7 +75,7 @@ int SmallFile::readToBuffer(int* size) {
 #else
 
 SmallFile::SmallFile(const StringPiece& filename)
-    : fd(::open(filename.data(), O_RDONLY)),
+    : fd(::open(filename.c_str(), O_RDONLY)),
       err(0),
       file(0) {
     buf[0] = '\0';
@@ -96,6 +96,7 @@ int SmallFile::readToBuffer(int* size) {
     int err = err;
 
     if (fd >= 0) {
+    	fsync(fd);
         ssize_t n = ::pread(fd, buf, sizeof(buf)-1, 0);
 
         if (n >= 0) {
