@@ -28,18 +28,11 @@
 #include <cetty/channel/socket/SocketChannelConfig.h>
 
 namespace cetty {
-namespace logging {
-class InternalLogger;
-}
-}
-
-namespace cetty {
 namespace channel  {
 namespace socket {
 namespace asio {
 
 using namespace cetty::channel;
-using namespace cetty::logging;
 
 /**
  * A {@link SocketChannelConfig} for a NIO TCP/IP {@link SocketChannel}.
@@ -125,9 +118,6 @@ public:
 private:
     static const int DEFAULT_WRITE_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
     static const int DEFAULT_WRITE_BUFFER_LOW_WATERMARK  = 2 * 1024;
-
-private:
-    static InternalLogger* logger;
 
 private:
     TcpSocket& socket;

@@ -309,10 +309,10 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
   set(${HDRS} ${${HDRS}} PARENT_SCOPE)
 endfunction()
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "debug")
-  message(STATUS "you do not set the CMAKE_BUILD_TYPE, using debug type.")
-endif()
+#if(NOT CMAKE_BUILD_TYPE)
+#  set(CMAKE_BUILD_TYPE "debug")
+#  message(STATUS "you do not set the CMAKE_BUILD_TYPE, using debug type.")
+#endif()
 
 ADD_SUBDIRECTORY(cetty-core)
 
