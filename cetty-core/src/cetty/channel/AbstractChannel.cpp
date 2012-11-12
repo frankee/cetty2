@@ -226,6 +226,9 @@ const ChannelFuturePtr& AbstractChannel::getCloseFuture() {
 
 bool AbstractChannel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
+
+    closeFuture.reset();
+    succeededFuture.reset();
 }
 
 void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {
