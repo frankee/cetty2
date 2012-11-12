@@ -207,12 +207,14 @@ void AsioServerSocketChannel::accept() {
 }
 
 void AsioServerSocketChannel::handleAccept(const boost::system::error_code& error,
-        AsioSocketChannelPtr channel) {
+        const AsioSocketChannelPtr& channel) {
     BOOST_ASSERT(channel);
 
     if (!error) {
         // create the socket add it to the buffer and fire the event
-        pipeline->addInboundMessage<ChannelPtr>(boost::static_pointer_cast<Channel>(channel));
+        pipeline->addInboundMessage<ChannelPtr>(
+            boost::static_pointer_cast<Channel>(channel));
+
         pipeline->fireMessageUpdated();
 
         channel->getCloseFuture()->addListener(boost::bind(

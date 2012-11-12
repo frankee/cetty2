@@ -97,6 +97,7 @@ AbstractChannel::AbstractChannel(int id,
 }
 
 AbstractChannel::~AbstractChannel() {
+    LOG_DEBUG << "AbstractChannel decotr";
 }
 
 void AbstractChannel::init() {
@@ -116,10 +117,7 @@ void AbstractChannel::init() {
 }
 
 void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->setSinkHandler(
-        new ChannelSinkHandler(
-            boost::static_pointer_cast<AbstractChannel>(shared_from_this())));
-
+    pipeline->setSinkHandler(new ChannelSinkHandler);
     pipeline->attach(shared_from_this());
 }
 
@@ -181,7 +179,7 @@ const ChannelFuturePtr& AbstractChannel::disconnect(const ChannelFuturePtr& futu
 }
 
 ChannelFuturePtr AbstractChannel::close() {
-    if (pipeline->isAttached()) {
+    if (pipeline && pipeline->isAttached()) {
         return pipeline->close();
     }
     else {
@@ -226,9 +224,6 @@ const ChannelFuturePtr& AbstractChannel::getCloseFuture() {
 
 bool AbstractChannel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture)->setClosed();
-
-    closeFuture.reset();
-    succeededFuture.reset();
 }
 
 void AbstractChannel::idDeallocatorCallback(ChannelFuture& future) {

@@ -74,7 +74,7 @@ protected:
 private:
     void accept();
     void handleAccept(const boost::system::error_code& error,
-                      AsioSocketChannelPtr channel);
+                      const AsioSocketChannelPtr& channel);
 
     void handleChildClosed(const ChannelFuture& future);
 

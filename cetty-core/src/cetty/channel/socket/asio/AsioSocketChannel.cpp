@@ -439,10 +439,7 @@ void AsioSocketChannel::init(const ChannelPipelinePtr& pipeline) {
 }
 
 void AsioSocketChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->setSinkHandler(
-        new AsioSocketChannelSinkHandler(
-            boost::static_pointer_cast<AsioSocketChannel>(shared_from_this())));
-
+    pipeline->setSinkHandler(new AsioSocketChannelSinkHandler);
     pipeline->attach(shared_from_this());
 
     opened = true;

@@ -32,8 +32,8 @@ public:
     typedef boost::intrusive_ptr<AsioSocketChannel> AsioSocketChannelPtr;
     
 public:
-    AsioSocketChannelSinkHandler(const AsioSocketChannelPtr& channel);
-    virtual ~AsioSocketChannelSinkHandler() {}
+    AsioSocketChannelSinkHandler();
+    virtual ~AsioSocketChannelSinkHandler();
 
 public:
     virtual void connect(ChannelHandlerContext& ctx,
@@ -46,6 +46,9 @@ public:
 
     // TODO: seperated with flush.
     //virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
+
+private:
+    void ensureChannelSet(ChannelHandlerContext& ctx);
 
 private:
     AsioSocketChannelPtr channel;

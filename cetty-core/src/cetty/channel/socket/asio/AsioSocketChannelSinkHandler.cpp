@@ -20,21 +20,27 @@
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/socket/asio/AsioSocketChannel.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
 
-AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler(
-    const AsioSocketChannelPtr& channel)
-    : ChannelSinkHandler(boost::static_pointer_cast<AbstractChannel>(channel)),
-      channel(channel) {
+AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler() {
 }
+
+AsioSocketChannelSinkHandler::~AsioSocketChannelSinkHandler() {
+    LOG_DEBUG << "decotr";
+}
+
 
 void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
         const SocketAddress& remoteAddress,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
+    ensureChannelSet(ctx);
+
     if (!ensureOpen(future)) {
         return;
     }
@@ -83,7 +89,16 @@ void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
 
 void AsioSocketChannelSinkHandler::flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
+    ensureChannelSet(ctx);
     channel->doFlush(getOutboundChannelBuffer(), future);
+}
+
+void AsioSocketChannelSinkHandler::ensureChannelSet(ChannelHandlerContext& ctx) {
+    if (!channel) {
+        channel = boost::dynamic_pointer_cast<AsioSocketChannel>(ctx.getChannel());
+    }
+
+    BOOST_ASSERT(channel);
 }
 
 #if 0

@@ -103,6 +103,7 @@ void ChannelPipeline::detach() {
     this->eventLoop.reset();
 
     remove(SINK_HANDLER_NAME);
+    this->sinkHandler.reset();
 }
 
 bool ChannelPipeline::isAttached() const {
