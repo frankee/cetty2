@@ -136,7 +136,7 @@ private:
             : priority(priority), callback(callback) {}
 
         bool empty() const {
-            return callback.empty();
+            return !callback;
         }
 
         void clear() {

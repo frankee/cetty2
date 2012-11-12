@@ -97,6 +97,7 @@ AbstractChannel::AbstractChannel(int id,
 }
 
 AbstractChannel::~AbstractChannel() {
+    LOG_DEBUG << "AbstractChannel decotr";
 }
 
 void AbstractChannel::init() {
@@ -116,10 +117,7 @@ void AbstractChannel::init() {
 }
 
 void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->setSinkHandler(
-        new ChannelSinkHandler(
-            boost::static_pointer_cast<AbstractChannel>(shared_from_this())));
-
+    pipeline->setSinkHandler(new ChannelSinkHandler);
     pipeline->attach(shared_from_this());
 }
 
@@ -181,11 +179,23 @@ const ChannelFuturePtr& AbstractChannel::disconnect(const ChannelFuturePtr& futu
 }
 
 ChannelFuturePtr AbstractChannel::close() {
-    return pipeline->close();
+    if (pipeline && pipeline->isAttached()) {
+        return pipeline->close();
+    }
+    else {
+        LOG_INFO << "close the channel, but the pipeline has detached.";
+        return closeFuture;
+    }
 }
 
 const ChannelFuturePtr& AbstractChannel::close(const ChannelFuturePtr& future) {
-    return pipeline->close(future);
+    if (pipeline->isAttached()) {
+        return pipeline->close(future);
+    }
+    else {
+        LOG_INFO << "close the channel, but the pipeline has detached.";
+        return closeFuture;
+    }
 }
 
 ChannelFuturePtr AbstractChannel::flush() {
