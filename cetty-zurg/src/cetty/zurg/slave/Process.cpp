@@ -67,24 +67,6 @@ std::string getFileConent(const std::string &fileName, bool remove){
 	else return std::string();
 }
 
-bool setFl(int fd, int flag){
-	int val = fcntl(fd, F_GETFL, 0);
-	if(val < 0) return false;
-	val |= flag;
-	if(fcntl(fd, F_SETFL, val) < 0)
-		return false;
-	return true;
-}
-
-bool delFl(int fd, int flag){
-	int val = fcntl(fd, F_GETFL, 0);
-	if(val < 0) return false;
-	val &= (~flag);
-	if(fcntl(fd, F_SETFL, val) < 0)
-		return false;
-	return true;
-}
-
 Process::Process(
     const ConstRunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
@@ -251,11 +233,6 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         if(!setFl(STDOUT_FILENO, O_SYNC)) {
         	LOG_ERROR << "Set file O_SYNC failed.";
         }
-        /*
-        if(!delFl(STDOUT_FILENO, FD_CLOEXEC)){
-
-        }
-        */
 
         if (::dup2(stdError, STDERR_FILENO) < 0) {
             LOG_ERROR << "Duplicate stderr failed.";

@@ -21,6 +21,42 @@ int g_tempFileCount = 0;
 int t_numOpenedFiles = 0;
 ptime g_startTime = microsec_clock::local_time();
 
+bool setFl(int fd, int flag){
+	int val = fcntl(fd, F_GETFL, 0);
+	if(val < 0) return false;
+	val |= flag;
+	if(fcntl(fd, F_SETFL, val) < 0)
+		return false;
+	return true;
+}
+
+bool delFl(int fd, int flag){
+	int val = fcntl(fd, F_GETFL, 0);
+	if(val < 0) return false;
+	val &= (~flag);
+	if(fcntl(fd, F_SETFL, val) < 0)
+		return false;
+	return true;
+}
+
+bool setFd(int fd, int flag){
+	int val = fcntl(fd, F_GETFD, 0);
+	if(val < 0) return false;
+	val |= FD_CLOEXEC;
+	if(fcntl(fd, F_SETFD, val) < 0)
+		return false;
+	return true;
+}
+
+bool delFd(int fd, int flag){
+	int val = fcntl(fd, F_GETFD, 0);
+	if(val < 0) return false;
+	val &= (~flag);
+	if(fcntl(fd, F_SETFD, val) < 0)
+		return false;
+	return true;
+}
+
 int fdDirFilter(const struct dirent* d) {
     if (::isdigit(d->d_name[0])) {
         ++t_numOpenedFiles;
@@ -37,7 +73,10 @@ std::string writeTempFile(const StringPiece prefix, const StringPiece content) {
                       ::getpid(),
                       ++g_tempFileCount);
 
-    int tempfd = ::mkostemp(buf, O_CLOEXEC);
+    int tempfd = ::mkstemp(buf);
+    if(!setFd(tempfd, FD_CLOEXEC)){
+    	LOG_ERROR << "Set FD_CLOEXEC failed.";
+    }
     ssize_t n = ::pwrite(tempfd, content.data(), content.size(), 0);
     ::fchmod(tempfd, 0755);
     ::close(tempfd);
@@ -76,7 +115,7 @@ void setupWorkingDir(const std::string& cwd) {
     ::unlink(buf);
 
     ::snprintf(buf, sizeof buf, "/%s/pid", cwd.c_str());
-    fd = ::open(buf, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+    fd = ::open(buf, O_WRONLY | O_CREAT | FD_CLOEXEC, 0644);
 
     if (fd < 0) {
         LOG_FATAL << "Failed to create pid file at " << buf;
@@ -100,15 +139,8 @@ void setupWorkingDir(const std::string& cwd) {
 }
 
 void setNonBlockAndCloseOnExec(int fd) {
-    int flags = ::fcntl(fd, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    int ret = ::fcntl(fd, F_SETFL, flags);
-
-    flags = ::fcntl(fd, F_GETFD, 0);
-    flags |= FD_CLOEXEC;
-    ret = ::fcntl(fd, F_SETFD, flags);
-
-    (void)ret;
+	setFl(fd, O_NONBLOCK);
+	setFd(fd, FD_CLOEXEC);
 }
 
 int64_t now() {

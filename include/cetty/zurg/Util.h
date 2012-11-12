@@ -17,6 +17,12 @@ extern ptime g_startTime;
 
 typedef int (*filter)(const struct dirent *);
 
+bool setFl(int fd, int flag);
+bool detFl(int fd, int flag);
+
+bool setFd(int fd, int flag);
+bool detFd(int fd, int flag);
+
 // returns file name
 std::string writeTempFile(
     const StringPiece &prefix,
