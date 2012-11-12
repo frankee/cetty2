@@ -50,11 +50,13 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
         char buf[256];
         ::snprintf(buf, sizeof buf, "%s.%d.%s", prefix.c_str(),
                    cetty::util::Process::id(), postfix);
-        fd = ::open(buf, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+        fd = ::open(buf, O_WRONLY | O_CREAT, 0644);
     } else {
-        fd = ::open("/dev/null", O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+        fd = ::open("/dev/null", O_WRONLY | O_CREAT, 0644);
     }
-
+    if(!setFd(fd, FD_CLOEXEC)) {
+    	LOG_ERROR << "Set FD_CLOEXEC failed";
+    }
     return fd;
 }
 
@@ -344,7 +346,6 @@ void Process::onTimeout() {
     }
 }
 
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 void Process::onCommandExit(const int status, const struct rusage& ru) {
     assert(response_);
 
