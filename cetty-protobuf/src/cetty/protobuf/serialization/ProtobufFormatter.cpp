@@ -65,7 +65,7 @@ void ProtobufFormatter::format(const std::string& key,
                                int64_t value,
                                std::string* str) {
     std::string v;
-    StringUtil::strprintf(&v, "%lld", key.c_str());
+    StringUtil::printf(&v, "%lld", key.c_str());
     format(key, v, str);
 }
 
@@ -73,7 +73,7 @@ void ProtobufFormatter::format(const std::string& key,
                                int64_t value,
                                const ChannelBufferPtr& buffer) {
     std::string v;
-    StringUtil::strprintf(&v, "%lld", key.c_str());
+    StringUtil::printf(&v, "%lld", key.c_str());
     format(key, v, buffer);
 }
 
@@ -81,7 +81,7 @@ void ProtobufFormatter::format(const std::string& key,
                                double value,
                                std::string* str) {
     std::string v;
-    StringUtil::strprintf(&v, "%lf", key.c_str());
+    StringUtil::printf(&v, "%lf", key.c_str());
     format(key, v, str);
 }
 
@@ -89,7 +89,7 @@ void ProtobufFormatter::format(const std::string& key,
                                double value,
                                const ChannelBufferPtr& buffer) {
     std::string v;
-    StringUtil::strprintf(&v, "%lf", key.c_str());
+    StringUtil::printf(&v, "%lf", key.c_str());
     format(key, v, buffer);
 }
 
@@ -101,7 +101,7 @@ void ProtobufFormatter::format(const std::string& key,
     strValues.resize(j);
 
     for (std::size_t i = 0; i < j; ++i) {
-        StringUtil::strprintf(&strValues[i], "%lld", value[i]);
+        StringUtil::printf(&strValues[i], "%lld", value[i]);
     }
 
     format(key, strValues, str);
@@ -115,7 +115,7 @@ void ProtobufFormatter::format(const std::string& key,
     strValues.resize(j);
 
     for (std::size_t i = 0; i < j; ++i) {
-        StringUtil::strprintf(&strValues[i], "%lld", value[i]);
+        StringUtil::printf(&strValues[i], "%lld", value[i]);
     }
 
     format(key, strValues, buffer);
@@ -129,7 +129,7 @@ void ProtobufFormatter::format(const std::string& key,
     strValues.resize(j);
 
     for (std::size_t i = 0; i < j; ++i) {
-        StringUtil::strprintf(&strValues[i], "%lf", value[i]);
+        StringUtil::printf(&strValues[i], "%lf", value[i]);
     }
 
     format(key, strValues, str);
@@ -143,7 +143,7 @@ void ProtobufFormatter::format(const std::string& key,
     strValues.resize(j);
 
     for (std::size_t i = 0; i < j; ++i) {
-        StringUtil::strprintf(&strValues[i], "%lf", value[i]);
+        StringUtil::printf(&strValues[i], "%lf", value[i]);
     }
 
     format(key, strValues, buffer);

@@ -19,7 +19,6 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -51,7 +50,7 @@ static const char REDIS_PREFIX_MULTI_BULK_REPLY  = '*';
 static inline
 int getFrameInt(const StringPiece& frame, int frameLength) {
     StringPiece value(frame.data() + 1, frameLength - 1);
-    return (int)StringUtil::atoi(value);
+    return StringUtil::strto32(value);
 }
 
 static inline
@@ -190,14 +189,14 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
 void RedisReplyMessageDecoder::fail(ChannelHandlerContext& ctx, long frameLength) {
     if (frameLength > 0) {
         ctx.fireExceptionCaught(ctx,
-                                TooLongFrameException(StringUtil::strprintf(
+                                TooLongFrameException(StringUtil::printf(
                                             "frame length exceeds %d: %d - discarded",
                                             maxBulkSize,
                                             frameLength)));
     }
     else {
         ctx.fireExceptionCaught(ctx,
-                                TooLongFrameException(StringUtil::strprintf(
+                                TooLongFrameException(StringUtil::printf(
                                             "frame length exceeds %d - discarded",
                                             maxBulkSize)));
     }

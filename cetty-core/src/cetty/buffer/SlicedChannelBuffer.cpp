@@ -191,7 +191,7 @@ void SlicedChannelBuffer::checkIndex(int index) const {
 void SlicedChannelBuffer::checkIndex(int startIndex, int length) const {
     if (length < 0) {
         throw InvalidArgumentException(
-            StringUtil::strprintf("length is negative: %d", length));
+            StringUtil::printf("length is negative: %d", length));
     }
 
     if (startIndex < 0) {

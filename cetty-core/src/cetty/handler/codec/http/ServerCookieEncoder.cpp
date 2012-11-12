@@ -113,7 +113,7 @@ void ServerCookieEncoder::encode(const Cookie& cookie, std::string* out) {
             out->append(1, HttpCodecUtil::DOUBLE_QUOTE);
 
             for (std::size_t i = 0, j = ports.size(); i < j; ++i) {
-                StringUtil::strprintf(out, "%d", ports[i]);
+                StringUtil::printf(out, "%d", ports[i]);
                 out->append(1, HttpCodecUtil::COMMA);
             }
 

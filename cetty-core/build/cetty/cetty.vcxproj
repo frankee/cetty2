@@ -203,7 +203,6 @@
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Base64.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
-    <ClCompile Include="..\..\src\cetty\util\Integer.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Process.cpp" />
@@ -414,11 +413,9 @@
     <ClInclude Include="..\..\..\include\cetty\bootstrap\Bootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrap.h" />
-    <ClInclude Include="..\..\..\include\cetty\util\Character.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Enum.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Exception.h" />
     <ClInclude Include="..\..\..\include\cetty\util\InputStream.h" />
-    <ClInclude Include="..\..\..\include\cetty\util\Integer.h" />
     <ClInclude Include="..\..\..\include\cetty\util\OutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Random.h" />
     <ClInclude Include="..\..\..\include\cetty\util\ReferenceCounter.h" />

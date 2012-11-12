@@ -31,10 +31,11 @@ namespace asio {
 using namespace cetty::channel;
 using namespace cetty::channel::socket;
 using namespace cetty::util;
+using namespace boost::asio::ip;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
-    boost::asio::ip::tcp::acceptor& acceptor)
-    : reuseAddress(false), receiveBufferSize(0), backlog(0), acceptor(acceptor) {
+    tcp::acceptor& acceptor)
+    : reuseAddress(true), acceptor(acceptor) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
@@ -53,7 +54,7 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         setReuseAddress(boost::get<bool>(value));
     }
     else if (option == ChannelOption::CO_SO_BACKLOG) {
-        setBacklog((int)StringUtil::atoi(boost::get<std::string>(value).c_str()));
+        setBacklog(StringUtil::strto32(boost::get<std::string>(value)));
     }
     else {
         return false;
@@ -76,7 +77,7 @@ const boost::optional<bool>& AsioServerSocketChannelConfig::isReuseAddress() con
 
 bool AsioServerSocketChannelConfig::isReuseAddress(tcp::acceptor& acceptor) const {
     try {
-        boost::asio::ip::tcp::acceptor::reuse_address option;
+        tcp::acceptor::reuse_address option;
         acceptor.get_option(option);
         return option.value();
     }
@@ -94,9 +95,9 @@ void AsioServerSocketChannelConfig::setReuseAddress(bool reuseAddress) {
 }
 
 void AsioServerSocketChannelConfig::setReuseAddress(tcp::acceptor& acceptor) {
-    if (reuseAddress) {
+    if (reuseAddress && boost::get<bool>(reuseAddress)) {
         boost::system::error_code error;
-        boost::asio::ip::tcp::acceptor::reuse_address option(*reuseAddress);
+        tcp::acceptor::reuse_address option(*reuseAddress);
         acceptor.set_option(option, error);
 
         if (error) {
@@ -105,7 +106,8 @@ void AsioServerSocketChannelConfig::setReuseAddress(tcp::acceptor& acceptor) {
     }
 }
 
-const boost::optional<int>& AsioServerSocketChannelConfig::getReceiveBufferSize() const {
+const boost::optional<int>&
+AsioServerSocketChannelConfig::getReceiveBufferSize() const {
     if (receiveBufferSize) {
         return receiveBufferSize;
     }
@@ -119,7 +121,7 @@ const boost::optional<int>& AsioServerSocketChannelConfig::getReceiveBufferSize(
 
 int AsioServerSocketChannelConfig::getReceiveBufferSize(tcp::acceptor& acceptor) const {
     try {
-        boost::asio::ip::tcp::acceptor::receive_buffer_size option;
+        tcp::acceptor::receive_buffer_size option;
         acceptor.get_option(option);
         return option.value();
     }
@@ -127,7 +129,6 @@ int AsioServerSocketChannelConfig::getReceiveBufferSize(tcp::acceptor& acceptor)
         throw ChannelException(e.what(), e.code().value());
     }
 }
-
 
 void AsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) {
     if (receiveBufferSize > 0) {
@@ -140,9 +141,9 @@ void AsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) 
 }
 
 void AsioServerSocketChannelConfig::setReceiveBufferSize(tcp::acceptor& acceptor) {
-    if (receiveBufferSize) {
+    if (receiveBufferSize && boost::get<int>(receiveBufferSize) > 0) {
         boost::system::error_code error;
-        boost::asio::ip::tcp::acceptor::receive_buffer_size option(*receiveBufferSize);
+        tcp::acceptor::receive_buffer_size option(*receiveBufferSize);
         acceptor.set_option(option, error);
 
         if (error) {
@@ -151,7 +152,9 @@ void AsioServerSocketChannelConfig::setReceiveBufferSize(tcp::acceptor& acceptor
     }
 }
 
-void AsioServerSocketChannelConfig::setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
+void AsioServerSocketChannelConfig::setPerformancePreferences(int connectionTime,
+        int latency,
+        int bandwidth) {
     //socket.setPerformancePreferences(connectionTime, latency, bandwidth);
 }
 

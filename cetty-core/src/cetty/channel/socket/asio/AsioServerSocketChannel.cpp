@@ -137,8 +137,8 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
         }
     }
 
-    //config.setReuseAddress(acceptor);
-    //config.setReceiveBufferSize(acceptor);
+    config.setReuseAddress(acceptor);
+    config.setReceiveBufferSize(acceptor);
 
     acceptor.bind(ep, ec);
 
@@ -194,7 +194,6 @@ void AsioServerSocketChannel::accept() {
                               ioService,
                               factory,
                               pipeline);
-
 
     LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
     c->getPipeline()->fireChannelOpen();

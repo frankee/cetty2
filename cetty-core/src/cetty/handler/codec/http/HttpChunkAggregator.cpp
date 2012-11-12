@@ -22,7 +22,7 @@
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
 
 #include <cetty/handler/codec/TooLongFrameException.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
@@ -98,10 +98,14 @@ public:
             //   and discard the traffic or close the connection.
             //       No need to notify the upstream handlers - just log.
             //       If decoding a response, just throw an exception.
-            throw TooLongFrameException(
-                std::string("HTTP content length exceeded ") +
-                Integer::toString(aggregator.maxContentLength) +
-                std::string(" bytes."));
+            std::string msg;
+            StringUtil::printf(&msg,
+                "HTTP content length exceeded %d bytes.",
+                aggregator.maxContentLength);
+
+            LOG_ERROR << msg;
+
+            throw TooLongFrameException(msg);
         }
 
         // Append the content of the chunk
@@ -113,7 +117,7 @@ public:
             // Set the 'Content-Length' header.
             currentMessage->setHeader(
                 HttpHeaders::Names::CONTENT_LENGTH,
-                Integer::toString(content->readableBytes()));
+                StringUtil::numtostr(content->readableBytes()));
 
             // All done - generate the event.
             return currentMessage;
@@ -136,7 +140,7 @@ public:
         // Set the 'Content-Length' header.
         currentMessage->setHeader(
             HttpHeaders::Names::CONTENT_LENGTH,
-            Integer::toString(currentMessage->getContent()->readableBytes()));
+            StringUtil::numtostr(currentMessage->getContent()->readableBytes()));
 
         return currentMessage;
     }

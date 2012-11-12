@@ -17,8 +17,8 @@
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
@@ -43,7 +43,7 @@ void HttpResponseEncoder::encodeInitialLine(ChannelBuffer& buf, const HttpMessag
 
     buf.writeBytes(response->getProtocolVersion().toString());
     buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(Integer::toString(response->getStatus().getCode()));
+    buf.writeBytes(StringUtil::numtostr(response->getStatus().getCode()));
     buf.writeByte(HttpCodecUtil::SP);
     buf.writeBytes(response->getStatus().getReasonPhrase());
     buf.writeByte(HttpCodecUtil::CR);

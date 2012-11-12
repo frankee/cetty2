@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\test\cetty\buffer\SlicedChannelBufferTest.cpp">
       <Filter>buffer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\cetty\util\StringUtilTest.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\test\cetty\handler\codec\http\HttpServerCodecTest.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>

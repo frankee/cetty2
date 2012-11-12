@@ -45,9 +45,9 @@ void CookieDecoder::decode(const std::string& header, std::vector<Cookie>* cooki
 
     // $Version is the only attribute that can appear before the actual
     // cookie name-value pair.
-    if (StringUtil::striequals(names[0].c_str(),
+    if (StringUtil::iequals(names[0].c_str(),
                                CookieHeaderNames::COOKIE_VERSION.c_str())) {
-        version = (int)StringUtil::atoi(values.at(0));
+        version = StringUtil::strto32(values.at(0));
         i = 1;
     }
     else {
@@ -74,35 +74,35 @@ void CookieDecoder::decode(const std::string& header, std::vector<Cookie>* cooki
             std::string& name = names.at(j);
             std::string& value = values.at(j);
 
-            if (StringUtil::striequals(
+            if (StringUtil::iequals(
                         CookieHeaderNames::COOKIE_DISCARD.c_str(), name.c_str())) {
                 discard = true;
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_SECURE.c_str(), name.c_str())) {
                 secure = true;
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_HTTP_ONLY.c_str(), name.c_str())) {
                 httpOnly = true;
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_COMMENT.c_str(), name.c_str())) {
                 comment = value;
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_COMMENT_URL.c_str(), name.c_str())) {
                 commentURL = value;
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_DOMAIN.c_str(), name.c_str())) {
                 c.setDomain(value);
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_PATH.c_str(), name.c_str())) {
                 c.setPath(value);
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_EXPIRES.c_str(), name.c_str())) {
                 boost::posix_time::ptime time;
                 HttpHeaderDateFormat::defaultFormat.parse(value, &time);
@@ -118,22 +118,22 @@ void CookieDecoder::decode(const std::string& header, std::vector<Cookie>* cooki
                     maxAge = (int)(maxAgeMillis / 1000 + (maxAgeMillis % 1000 != 0 ? 1 : 0));
                 }
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_MAX_AGE.c_str(), name.c_str())) {
-                maxAge = (int)StringUtil::atoi(value);
+                maxAge =StringUtil::strto32(value);
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_VERSION.c_str(), name.c_str())) {
-                version = (int)StringUtil::atoi(value);
+                version = StringUtil::strto32(value);
             }
-            else if (StringUtil::striequals(
+            else if (StringUtil::iequals(
                          CookieHeaderNames::COOKIE_PORT.c_str(), name.c_str())) {
 
                 std::vector<std::string> portList;
-                StringUtil::strsplit(value, ',', &portList);
+                StringUtil::split(value, ',', &portList);
 
                 for (std::size_t i = 0, j = portList.size(); i < j; ++i) {
-                    ports.push_back((int)StringUtil::atoi(portList[i]));
+                    ports.push_back(StringUtil::strto32(portList[i]));
                 }
             }
             else {

@@ -275,22 +275,22 @@ std::string AbstractChannel::toString() const {
 
     if (remoteAddress.validated()) {
         if (!getParent()) { // server channel or client channel
-            StringUtil::strprintf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
+            StringUtil::printf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
                     localAddress.toString().c_str(),
                     remoteAddress.toString().c_str());
         }
         else { // connection channel
-            StringUtil::strprintf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
+            StringUtil::printf(&strVal, "[id: 0x%08x, %s => %s]", getId(),
                     remoteAddress.toString().c_str(),
                     localAddress.toString().c_str());
         }
     }
     else if (localAddress.validated()) {
-        StringUtil::strprintf(&strVal, "[id: 0x%08x, %s]", getId(),
+        StringUtil::printf(&strVal, "[id: 0x%08x, %s]", getId(),
                 localAddress.toString().c_str());
     }
     else {
-        StringUtil::strprintf(&strVal, "[id: 0x%08x]", getId());
+        StringUtil::printf(&strVal, "[id: 0x%08x]", getId());
     }
 
     return strVal;

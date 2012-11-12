@@ -96,29 +96,38 @@ ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,
 void LengthFieldPrepender::validateParameters() {
     if (lengthFieldLength != 1 && lengthFieldLength != 2 &&
             lengthFieldLength != 4 && lengthFieldLength != 8) {
-        throw InvalidArgumentException(
-            std::string("lengthFieldLength must be either 1, 2, 4, or 8: ") +
-            Integer(lengthFieldLength).toString());
+                std::string msg;
+                StringUtil::printf(&msg,
+                    "lengthFieldLength must be either 1, 2, 4, or 8: %d",
+                    lengthFieldLength);
+        throw InvalidArgumentException(msg);
     }
 
     if (checksumFieldLength != 0 && checksumFieldLength != 2 && checksumFieldLength != 4) {
-        throw InvalidArgumentException(
-            std::string("checksumFieldLength must be either 2 or 4: ") +
-            Integer(checksumFieldLength).toString());
+        std::string msg;
+        StringUtil::printf(&msg,
+            "checksumFieldLength must be either 2 or 4: %d",
+            checksumFieldLength);
+
+        throw InvalidArgumentException(msg);
     }
 
     int preHeaderFieldLength = (int)header.size();
 
     if (lengthFieldOffset != 0 && lengthFieldOffset != preHeaderFieldLength
             && lengthFieldOffset != (preHeaderFieldLength + lengthFieldLength)) {
-        throw InvalidArgumentException(
-            std::string("lengthFieldOffset must be either 0, preHeaderFieldLength, lengthFieldLength : ") +
-            Integer(lengthFieldOffset).toString());
+                std::string msg;
+                StringUtil::printf(&msg,
+                    "lengthFieldOffset must be either 0, preHeaderFieldLength, "
+                    "lengthFieldLength : %d",
+                    lengthFieldLength);
+        throw InvalidArgumentException(msg);
     }
 
     if (checksumFieldLength > 0) {//enable checksum
         if (!checksumFunction) {
-            throw InvalidArgumentException(std::string("you must set the checksum function if you enable checksum."));
+            throw InvalidArgumentException(
+                std::string("you must set the checksum function if you enable checksum."));
         }
 
         /*
@@ -215,7 +224,7 @@ void LengthFieldPrepender::writeHeader(const ChannelBufferPtr& msg, int contentL
     case 1:
         if (contentLength >= 256) {
             throw InvalidArgumentException(
-                StringUtil::strprintf("length does not fit into a byte: %d",
+                StringUtil::printf("length does not fit into a byte: %d",
                                       contentLength));
         }
 
@@ -225,7 +234,7 @@ void LengthFieldPrepender::writeHeader(const ChannelBufferPtr& msg, int contentL
     case 2:
         if (contentLength >= 65536) {
             throw InvalidArgumentException(
-                StringUtil::strprintf("length does not fit into a short integer: %d",
+                StringUtil::printf("length does not fit into a short integer: %d",
                                       contentLength));
         }
 
@@ -258,7 +267,7 @@ void LengthFieldPrepender::preWriteHeader(const ChannelBufferPtr& msg, int conte
     case 1:
         if (contentLength >= 256) {
             throw InvalidArgumentException(
-                StringUtil::strprintf("length does not fit into a byte: %d",
+                StringUtil::printf("length does not fit into a byte: %d",
                                       contentLength));
         }
 
@@ -268,7 +277,7 @@ void LengthFieldPrepender::preWriteHeader(const ChannelBufferPtr& msg, int conte
     case 2:
         if (contentLength >= 65536) {
             throw InvalidArgumentException(
-                StringUtil::strprintf("length does not fit into a short integer: %d",
+                StringUtil::printf("length does not fit into a short integer: %d",
                                       contentLength));
         }
 

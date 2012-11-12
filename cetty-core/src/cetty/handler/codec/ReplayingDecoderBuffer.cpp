@@ -176,7 +176,7 @@ int ReplayingDecoderBuffer::slice(int index, int length, GatheringBuffer* gather
 }
 
 std::string ReplayingDecoderBuffer::toString() const {
-    return StringUtil::strprintf("ReplayingDecoderBuffer (ridx=%d, widx=%d)",
+    return StringUtil::printf("ReplayingDecoderBuffer (ridx=%d, widx=%d)",
                                  readerIndex(), writerIndex());
 }
 

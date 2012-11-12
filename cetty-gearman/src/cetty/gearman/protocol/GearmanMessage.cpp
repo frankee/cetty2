@@ -74,7 +74,7 @@ GearmanMessagePtr GearmanMessage::createCandoMessage(const std::string& function
 }
 
 GearmanMessagePtr GearmanMessage::createCandoTimeoutMessage(const std::string& functionName, int timeout) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::CAN_DO_TIMEOUT,functionName,StringUtil::strprintf("%d",timeout)));
+    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::CAN_DO_TIMEOUT,functionName,StringUtil::printf("%d",timeout)));
 }
 
 GearmanMessagePtr GearmanMessage::createCantdoMessage(const std::string& functionName) {
@@ -94,7 +94,7 @@ GearmanMessagePtr GearmanMessage::createGrabJobUniqMessage() {
 }
 
 GearmanMessagePtr GearmanMessage::createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_STATUS,jobHandle,StringUtil::strprintf("%d",numerator),StringUtil::strprintf("%d",numerator)));
+    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_STATUS,jobHandle,StringUtil::printf("%d",numerator),StringUtil::printf("%d",numerator)));
 }
 GearmanMessagePtr GearmanMessage::createWorkCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload) {
     return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_COMPLETE,jobHandle,payload));

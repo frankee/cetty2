@@ -18,7 +18,7 @@
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
 
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
@@ -106,7 +106,7 @@ public:
 
             ChannelBufferPtr content = value->getContent();
             int contentLength = content->readableBytes();
-            std::string lengthStr = Integer::toHexString(contentLength);
+            std::string lengthStr = StringUtil::hextostr(contentLength);
             int lengthPartSize = lengthStr.size() + 2;
 
             if (content->writableBytes() >= 2 && content->aheadWritableBytes() >= lengthPartSize) {

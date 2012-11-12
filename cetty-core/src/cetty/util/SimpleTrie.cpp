@@ -87,31 +87,31 @@ int SimpleTrie::countPrefix(const SimpleTrieNode& n, std::string* word, bool inc
 
 void SimpleTrie::addKey(const std::string& word) {
     std::string lower(word);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
     addKey(root, &lower, NULL);
 }
 
 void SimpleTrie::addKey(const std::string& word, void* data) {
     std::string lower(word);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
     addKey(root, &lower, data);
 }
 
 int SimpleTrie::countPrefix(const std::string& prefix) const {
     std::string lower(prefix);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
     return countPrefix(root, &lower, false);
 }
 
 int SimpleTrie::count(const std::string& prefix) const {
     std::string lower(prefix);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
     return countPrefix(root, &lower, true);
 }
 
 int SimpleTrie::countKey(const std::string& word) const {
     std::string lower(word);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
 
     const SimpleTrieNode* node = getLeafNode(root, &lower);
     return node ? node->words : 0;
@@ -119,7 +119,7 @@ int SimpleTrie::countKey(const std::string& word) const {
 
 void* SimpleTrie::getValue(const std::string& key) const {
     std::string lower(key);
-    StringUtil::strtolower(&lower);
+    StringUtil::toLower(&lower);
 
     const SimpleTrieNode* node = getLeafNode(root, &lower);
     return node ? node->data : 0;

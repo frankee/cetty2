@@ -127,32 +127,32 @@ public:
     }
 
     OutputStream& appendValue(int32_t value) {
-        StringUtil::strprintf(output, "%d", value);
+        StringUtil::printf(output, "%d", value);
         return *this;
     }
 
     OutputStream& appendValue(uint32_t value) {
-        StringUtil::strprintf(output, "%u", value);
+        StringUtil::printf(output, "%u", value);
         return *this;
     }
 
     OutputStream& appendValue(int64_t value) {
-        StringUtil::strprintf(output, "%lld", value);
+        StringUtil::printf(output, "%lld", value);
         return *this;
     }
 
     OutputStream& appendValue(uint64_t value) {
-        StringUtil::strprintf(output, "%llu", value);
+        StringUtil::printf(output, "%llu", value);
         return *this;
     }
 
     OutputStream& appendValue(float value) {
-        StringUtil::strprintf(output, "%f", value);
+        StringUtil::printf(output, "%f", value);
         return *this;
     }
 
     OutputStream& appendValue(double value) {
-        StringUtil::strprintf(output, "%lf", value);
+        StringUtil::printf(output, "%lf", value);
         return *this;
     }
 
@@ -247,27 +247,27 @@ public:
     }
 
     OutputStream& appendValue(uint32_t value) {
-        output->writeBytes(StringUtil::strprintf("%u", value));
+        output->writeBytes(StringUtil::printf("%u", value));
         return *this;
     }
 
     OutputStream& appendValue(int32_t value) {
-        output->writeBytes(StringUtil::strprintf("%d", value));
+        output->writeBytes(StringUtil::printf("%d", value));
         return *this;
     }
 
     OutputStream& appendValue(int64_t value) {
-        output->writeBytes(StringUtil::strprintf("%lld", value));
+        output->writeBytes(StringUtil::printf("%lld", value));
         return *this;
     }
 
     OutputStream& appendValue(uint64_t value) {
-        output->writeBytes(StringUtil::strprintf("%llu", value));
+        output->writeBytes(StringUtil::printf("%llu", value));
         return *this;
     }
 
     OutputStream& appendValue(double value) {
-        output->writeBytes(StringUtil::strprintf("%f", value));
+        output->writeBytes(StringUtil::printf("%f", value));
         return *this;
     }
 

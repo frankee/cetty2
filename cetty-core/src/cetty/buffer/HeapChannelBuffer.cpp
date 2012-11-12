@@ -162,7 +162,7 @@ int8_t HeapChannelBuffer::getByte(int index) const {
     if (index < 0 || index >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, getByte(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("getByte with %d", index));
+        throw RangeException(StringUtil::printf("getByte with %d", index));
     }
 
     return buf[index];
@@ -172,7 +172,7 @@ int16_t HeapChannelBuffer::getShort(int index) const {
     if (index < 0 || index + 1 >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, getShort(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("getShort with %d", index));
+        throw RangeException(StringUtil::printf("getShort with %d", index));
     }
 
     return (int16_t)((buf[index] << 8) | (buf[index + 1] & 0xFF));
@@ -182,7 +182,7 @@ int32_t HeapChannelBuffer::getInt(int index) const {
     if (index < 0 || index + 3 >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, getInt(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("getInt with %d", index));
+        throw RangeException(StringUtil::printf("getInt with %d", index));
     }
 
     return ((buf[index]   & 0xff) << 24) |
@@ -195,7 +195,7 @@ int64_t HeapChannelBuffer::getLong(int index) const {
     if (index < 0 || index + 7 >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, getLong(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("getLong with %d", index));
+        throw RangeException(StringUtil::printf("getLong with %d", index));
     }
 
     return (((int64_t) buf[index]   & 0xff) << 56) |
@@ -255,7 +255,7 @@ int HeapChannelBuffer::setByte(int index, int value) {
     if (index < 0 || index >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, setByte(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("setByte with %d", index));
+        throw RangeException(StringUtil::printf("setByte with %d", index));
     }
 
     buf[index] = (char)value;
@@ -266,7 +266,7 @@ int HeapChannelBuffer::setShort(int index, int value) {
     if (index < 0 || index + 1 >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, setShort(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("setShort with %d", index));
+        throw RangeException(StringUtil::printf("setShort with %d", index));
     }
 
     buf[index  ] = (int8_t)(value >> 8);
@@ -279,7 +279,7 @@ int HeapChannelBuffer::setInt(int index, int value) {
     if (index < 0 || index + 3 >= bufSize) {
         CETTY_NDC_SCOPE();
         LOG_ERROR << "RangeException, setInt(" << index << ")"; 
-        throw RangeException(StringUtil::strprintf("setInt with %d", index));
+        throw RangeException(StringUtil::printf("setInt with %d", index));
     }
 
     buf[index  ] = (int8_t)(value >> 24);
@@ -407,7 +407,7 @@ void HeapChannelBuffer::init(char* buf, int length, int maxCapacity, int readerI
     if (length <= 0 || length > maxCapacity) {
         CETTY_NDC_SCOPE();
         std::string msg;
-        StringUtil::strprintf(&msg,
+        StringUtil::printf(&msg,
             "length(%d) must greater than 0 and less then maxCapacity(%d).",
             length,
             maxCapacity);

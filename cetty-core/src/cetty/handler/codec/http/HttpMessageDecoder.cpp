@@ -16,8 +16,6 @@
 #include <cetty/handler/codec/http/HttpMessageDecoder.h>
 
 #include <cetty/buffer/Unpooled.h>
-#include <cetty/util/Integer.h>
-#include <cetty/util/Character.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
@@ -174,7 +172,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
 
             default:
                 throw IllegalStateException(
-                    StringUtil::strprintf("Unexpected state: %d", nextState));
+                    StringUtil::printf("Unexpected state: %d", nextState));
             }
         }
 
@@ -233,7 +231,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
 
     case READ_FIXED_LENGTH_CONTENT_AS_CHUNKS: {
-        BOOST_ASSERT(chunkSize <= Integer::MAX_VALUE);
+        BOOST_ASSERT(chunkSize <= MAX_INT32);
 
         int chunkSize = this->chunkSize;
         int readLimit = buffer->readableBytes();
@@ -317,7 +315,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
 
     case READ_CHUNKED_CONTENT: {
-        BOOST_ASSERT(chunkSize <= Integer::MAX_VALUE);
+        BOOST_ASSERT(chunkSize <= MAX_INT32);
         ChannelBufferPtr buff = buffer->readSlice(chunkSize);
 
         if (buffer->needMoreBytes()) {
@@ -330,7 +328,7 @@ HttpPackage HttpMessageDecoder::decode(ChannelHandlerContext& ctx,
     }
 
     case READ_CHUNKED_CONTENT_AS_CHUNKS: {
-        BOOST_ASSERT(chunkSize <= Integer::MAX_VALUE);
+        BOOST_ASSERT(chunkSize <= MAX_INT32);
 
         int chunkSize = this->chunkSize;
         int readLimit = buffer->readableBytes();
@@ -488,7 +486,7 @@ bool HttpMessageDecoder::skipControlCharacters(const ReplayingDecoderBufferPtr& 
             return false;
         }
 
-        if (!Character::isISOControl(c) && !Character::isWhitespace(c)) {
+        if (!StringUtil::isISOControl(c) && !StringUtil::isWhitespace(c)) {
             buffer->offsetReaderIndex(-1);
             return true;
         }
@@ -497,7 +495,7 @@ bool HttpMessageDecoder::skipControlCharacters(const ReplayingDecoderBufferPtr& 
 
 HttpPackage HttpMessageDecoder::readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer) {
     int length = HttpHeaders::getContentLength(*message, -1);
-    BOOST_ASSERT(length <= Integer::MAX_VALUE);
+    BOOST_ASSERT(length <= MAX_INT32);
     int readLimit = buffer->readableBytes();
 
     int toRead = (int) length - contentRead;
@@ -729,7 +727,7 @@ StringPiece HttpMessageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
             //       No need to notify the upstream handlers - just log.
             //       If decoding a response, just throw an exception.
             throw TooLongFrameException(
-                StringUtil::strprintf("HTTP header is larger than %d bytes.", maxHeaderSize));
+                StringUtil::printf("HTTP header is larger than %d bytes.", maxHeaderSize));
         }
 
         if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {
@@ -756,13 +754,13 @@ int HttpMessageDecoder::getChunkSize(const StringPiece& hex) const {
     for (int i = 0; i < h.length(); ++i) {
         char c = h.at(i);
 
-        if (c == ';' || Character::isWhitespace(c) || Character::isISOControl(c)) {
+        if (c == ';' || StringUtil::isWhitespace(c) || StringUtil::isISOControl(c)) {
             h = h.substr(0, i);
             break;
         }
     }
 
-    return Integer::parse(h.c_str(), 16);
+    return StringUtil::strto32(h.c_str(), 16);
 }
 
 StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer,
@@ -776,7 +774,7 @@ StringPiece HttpMessageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer
         //       No need to notify the upstream handlers - just log.
         //       If decoding a response, just throw an exception.
         throw TooLongFrameException(
-            StringUtil::strprintf("An HTTP line is larger than %d bytes.", maxLineLength));
+            StringUtil::printf("An HTTP line is larger than %d bytes.", maxLineLength));
     }
 
     for (int i = 0, j = bytesCnt - 1; i < j; ++i) {
@@ -835,7 +833,7 @@ void HttpMessageDecoder::splitHeader(StringPiece& sb, std::vector<StringPiece>* 
     for (nameEnd = nameStart; nameEnd < length; ++nameEnd) {
         char ch = sb.at(nameEnd);
 
-        if (ch == ':' || Character::isWhitespace(ch)) {
+        if (ch == ':' || StringUtil::isWhitespace(ch)) {
             break;
         }
     }
@@ -865,7 +863,7 @@ int HttpMessageDecoder::findNonWhitespace(const StringPiece& sb, int offset) {
     int result;
 
     for (result = offset; result < sb.length(); ++result) {
-        if (!Character::isWhitespace(sb.at(result))) {
+        if (!StringUtil::isWhitespace(sb.at(result))) {
             break;
         }
     }
@@ -877,7 +875,7 @@ int HttpMessageDecoder::findWhitespace(const StringPiece& sb, int offset) {
     int result;
 
     for (result = offset; result < sb.length(); ++result) {
-        if (Character::isWhitespace(sb.at(result))) {
+        if (StringUtil::isWhitespace(sb.at(result))) {
             break;
         }
     }
@@ -889,7 +887,7 @@ int HttpMessageDecoder::findEndOfString(const StringPiece& sb) {
     int result;
 
     for (result = sb.length(); result > 0; --result) {
-        if (!Character::isWhitespace(sb.at(result - 1))) {
+        if (!StringUtil::isWhitespace(sb.at(result - 1))) {
             break;
         }
     }

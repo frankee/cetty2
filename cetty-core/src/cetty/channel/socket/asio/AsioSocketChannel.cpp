@@ -37,8 +37,8 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
 
+#include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/util/Integer.h>
 
 namespace cetty {
 namespace channel {
@@ -175,9 +175,11 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
     }
     else {
         if (!writeQueue->empty()) {
-            writeQueue->peek().setFailure(
-                RuntimeException(std::string("write buffer failed, code=") +
-                                 Integer::toString(error.value())));
+            writeQueue->peek().setFailure(RuntimeException(
+                StringUtil::printf("write buffer failed, message:%d code:%d",
+                error.message().c_str(), 
+                error.value())));
+
             writeQueue->popup();
         }
 
@@ -286,7 +288,7 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
                                   const SocketAddress& localAddress,
                                   const ChannelFuturePtr& connectFuture) {
     const std::string& hostname = remoteAddress.hostName();
-    std::string port = Integer::toString(remoteAddress.port());
+    std::string port = StringUtil::numtostr(remoteAddress.port());
 
     boost::asio::ip::tcp::resolver resolver(getService()->service());
     boost::asio::ip::tcp::resolver::query query(hostname, port);
