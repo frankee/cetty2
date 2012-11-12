@@ -11,9 +11,8 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
-ApplicationManager::ApplicationManager(const EventLoopPtr &loop, ProcessManager *psManager)
-    : loop_(loop),
-      processManager_(psManager) {
+ApplicationManager::ApplicationManager(ProcessManager *psManager)
+    :   processManager_(psManager) {
 }
 
 ApplicationManager::~ApplicationManager() {
@@ -27,10 +26,11 @@ void ApplicationManager::add(
 
     assert(request->name().find('/') == std::string::npos); // FIXME
 
-    AddApplicationRequestPtr& requestRef = apps_[request->name()]->request;
-    AddApplicationRequestPtr prev_request(requestRef);
+    AddApplicationRequest &requestRef = apps_[request->name()].request;
+    requestRef.CopyFrom(*request);
+    AddApplicationRequestPtr prev_request(&requestRef);
 
-    ApplicationStatus& status = apps_[request->name()]->status;
+    ApplicationStatus& status = apps_[request->name()].status;
     status.set_name(request->name());
     if (!status.has_state()) {
         LOG_INFO << "new app";
@@ -56,7 +56,8 @@ void ApplicationManager::start(
 
         if (it != apps_.end()) {
             startApp(it->second, response->add_status());
-        } else {
+        }
+        else {
             // application not found
             ApplicationStatus* status = response->add_status();
             status->set_state(kUnknown);
@@ -68,9 +69,9 @@ void ApplicationManager::start(
     done(response);
 }
 
-void ApplicationManager::startApp(const ApplicationPtr &app, ApplicationStatus* out) {
-    const AddApplicationRequestPtr& appRequest(app->request);
-    ApplicationStatus* status = &app->status;
+void ApplicationManager::startApp(const Application &app, ApplicationStatus* out) {
+    const AddApplicationRequestPtr appRequest = const_cast<AddApplicationRequest *>(&(app.request)) ;
+    ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
         ProcessPtr process(new Process(appRequest));
@@ -127,20 +128,13 @@ void ApplicationManager::onProcessExit(
     ApplicationMap::iterator it = apps_.find(appName);
 
     if (it != apps_.end()) {
-        ApplicationPtr& app = it->second;
-        app->status.set_state(kExited);
+        Application& app = it->second;
+        app.status.set_state(kExited);
 
         //todo: notify master
     } else {
         LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
     }
-}
-
-void ApplicationManager::get(
-    const ConstGetApplicationsRequestPtr& request,
-    const GetApplicationsResponsePtr& response,
-    const DoneCallback& done) {
-
 }
 
 void ApplicationManager::list(

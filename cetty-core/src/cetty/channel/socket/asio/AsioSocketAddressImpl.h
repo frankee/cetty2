@@ -18,29 +18,28 @@
  */
 
 #include <string>
-#include <boost/asio/ip/basic_endpoint.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include <boost/asio/ip/basic_endpoint.hpp>
 
-#include <cetty/channel/SocketAddressImpl.h>
 #include <cetty/channel/IpAddress.h>
-
-#include <cetty/util/Integer.h>
-#include <cetty/util/Character.h>
-
+#include <cetty/channel/SocketAddressImpl.h>
 #include <cetty/channel/socket/asio/AsioIpAddressImpl.h>
+
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace channel {
 namespace socket {
 namespace asio {
 
+using namespace boost::asio::ip;
 using namespace cetty::util;
 
 template <typename InternetProtocol>
-class AsioSocketAddressImpl : public ::cetty::channel::SocketAddressImpl {
+class AsioSocketAddressImpl : public cetty::channel::SocketAddressImpl {
 public:
-    typedef boost::asio::ip::basic_endpoint<InternetProtocol> EndpointType;
+    typedef basic_endpoint<InternetProtocol> EndpointType;
 
 public:
     AsioSocketAddressImpl(boost::asio::io_service& ioService)
@@ -52,40 +51,50 @@ public:
     AsioSocketAddressImpl(boost::asio::io_service& ioService, int family, int port)
         : ioService(ioService) {
         if (family == IpAddress::IPv4) {
-            endpoint = EndpointType(boost::asio::ip::address_v4(), port);
+            endpoint = EndpointType(address_v4(), port);
         }
         else {
-            endpoint = EndpointType(boost::asio::ip::address_v6(), port);
+            endpoint = EndpointType(address_v6(), port);
         }
 
         hostNameStr = endpoint.address().to_string();
     }
 
     AsioSocketAddressImpl(boost::asio::io_service& ioService,
-                          const IpAddress& addr, int port) : ioService(ioService), hostNameStr(addr.toString()) {
+                          const IpAddress& addr, int port)
+        : ioService(ioService),
+          hostNameStr(addr.toString()) {
         init(hostNameStr, port);
     }
 
     AsioSocketAddressImpl(boost::asio::io_service& ioService,
-                          const std::string& addr, int port) : ioService(ioService), hostNameStr(addr) {
+                          const std::string& addr, int port)
+        : ioService(ioService),
+          hostNameStr(addr) {
         init(addr, port);
     }
 
     AsioSocketAddressImpl(boost::asio::io_service& ioService,
-                          const std::string& addr, const std::string& service) : ioService(ioService), hostNameStr(addr) {
+                          const std::string& addr, const std::string& service)
+        : ioService(ioService),
+          hostNameStr(addr) {
         init(addr, service);
     }
 
     AsioSocketAddressImpl(boost::asio::io_service& ioService,
                           const EndpointType& endpoint)
-        : ioService(ioService), endpoint(endpoint), hostNameStr(endpoint.address().to_string()) {}
+        : ioService(ioService),
+          endpoint(endpoint),
+          hostNameStr(endpoint.address().to_string()) {
+
+    }
 
     virtual ~AsioSocketAddressImpl() {}
 
     virtual const IpAddress& ipAddress() const {
         if (!hostAddress.validated()) {
             hostAddress = IpAddress(IpAddressImplPtr(
-                new AsioIpAddressImpl(endpoint.address())));
+                                        new AsioIpAddressImpl(endpoint.address())));
         }
 
         return hostAddress;
@@ -104,10 +113,13 @@ public:
     }
 
     virtual bool equals(const SocketAddressImpl& addr) const {
-        const AsioSocketAddressImpl* imp = dynamic_cast<const AsioSocketAddressImpl*>(&addr);
+        const AsioSocketAddressImpl* imp =
+            dynamic_cast<const AsioSocketAddressImpl*>(&addr);
 
         //TODO make comparable between two different impl.
-        if (NULL == imp) { return false; }
+        if (NULL == imp) {
+            return false;
+        }
 
         return endpoint == imp->endpoint;
     }
@@ -126,20 +138,22 @@ public:
 
 protected:
     void init(const std::string& addr, int port) {
-        if (Character::isHex(addr[0])) {
-            endpoint = boost::asio::ip::basic_endpoint<InternetProtocol>(
-                           boost::asio::ip::address::from_string(addr),
+        if (StringUtil::isHex(addr[0])) {
+            endpoint = basic_endpoint<InternetProtocol>(
+                           address::from_string(addr),
                            port);
         }
         else {
-            init(addr, Integer::toString(port));
+            init(addr, StringUtil::numtostr(port));
         }
     }
 
     void init(const std::string& addr, const std::string& service) {
-        boost::asio::ip::basic_resolver<InternetProtocol> resolver(ioService);
-        typename boost::asio::ip::basic_resolver<InternetProtocol>::query query(addr, service);
-        typename boost::asio::ip::basic_resolver<InternetProtocol>::iterator iterator = resolver.resolve(query);
+        basic_resolver<InternetProtocol> resolver(ioService);
+        typename basic_resolver<InternetProtocol>::query query(addr, service);
+        typename basic_resolver<InternetProtocol>::iterator iterator
+            = resolver.resolve(query);
+
         endpoint = *iterator;
     }
 
@@ -151,8 +165,8 @@ private:
     mutable IpAddress        hostAddress;
 };
 
-typedef AsioSocketAddressImpl<boost::asio::ip::tcp> AsioTcpSocketAddressImpl;
-typedef AsioSocketAddressImpl<boost::asio::ip::udp> AsioUdpSocketAddressImpl;
+typedef AsioSocketAddressImpl<tcp> AsioTcpSocketAddressImpl;
+typedef AsioSocketAddressImpl<udp> AsioUdpSocketAddressImpl;
 
 }
 }

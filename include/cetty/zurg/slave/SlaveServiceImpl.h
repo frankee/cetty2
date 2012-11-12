@@ -25,7 +25,7 @@ class ApplicationManager;
 
 class SlaveServiceImpl : public SlaveService {
 public:
-    SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval);
+    SlaveServiceImpl(const EventLoopPtr& loop);
     virtual ~SlaveServiceImpl();
 
     void start();
@@ -84,12 +84,6 @@ public:
         const DoneCallback& done
     );
 
-    virtual void getApplications(
-        const ConstGetApplicationsRequestPtr& request,
-        const GetApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
-
     virtual void listApplications(
         const ConstListApplicationsRequestPtr& request,
         const ListApplicationsResponsePtr& response,
@@ -105,13 +99,11 @@ public:
 private:
     void getFileChecksumDone(
         const ConstGetFileChecksumRequestPtr& request,
-        const GetFileChecksumResponsePtr& response,
+        const google::protobuf::Message* message,
         const DoneCallback& done
     );
 
 private:
-    EventLoopPtr loop_;
-
     boost::scoped_ptr<ProcessManager> psManager_;
     boost::scoped_ptr<ApplicationManager> apps_;
 };

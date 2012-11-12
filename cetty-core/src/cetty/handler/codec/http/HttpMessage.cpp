@@ -63,7 +63,7 @@ std::string HttpMessage::toString() const {
     std::string buf;
     buf.reserve(2048);
 
-    StringUtil::strprintf(&buf,
+    StringUtil::printf(&buf,
                           "HttpMessage (version: %d, keepAlive: %s,  transferEncoding: %s)",
                           getProtocolVersion().getText().c_str(),
                           HttpHeaders::isKeepAlive(*this) ? "true" : "false",
@@ -72,14 +72,14 @@ std::string HttpMessage::toString() const {
     ConstHeaderIterator end = getLastHeader();
 
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-        StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }
 
     return buf;
 }
 
 void HttpMessage::setHeader(const std::string& name, int value) {
-    httpHeader.set(name, StringUtil::strprintf("%d", value));
+    httpHeader.set(name, StringUtil::printf("%d", value));
 }
 
 HttpTransferEncoding HttpMessage::getTransferEncoding() const {

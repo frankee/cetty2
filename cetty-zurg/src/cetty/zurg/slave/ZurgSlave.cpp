@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 namespace cetty {
 namespace zurg {
@@ -26,13 +27,39 @@ ZurgSlave::ZurgSlave(){
 }
 
 void ZurgSlave::init(){
+    if (config_.parentThreadCnt_ < 0)  config_.parentThreadCnt_ = 1;
+    if (config_.childThreadCnt_ < 0) config_.childThreadCnt_ = 0;
+    if (config_.masterAddress_.empty()){
+        LOG_WARN << "Master address is empty.";
+        config_.masterAddress_="127.0.0.1";
+    }
+    if(config_.masterPort_ <= 0){
+        LOG_ERROR << "Master listen port is error.";
+        config_.masterPort_ = 6636;
+    }
 
+    if(config_.listenPort_ <= 0){
+        LOG_ERROR << "Slave listen port is error.";
+        config_.listenPort_ = 6637;
+    }
+
+   if(config_.prefix_.empty()){
+       config_.prefix_ = "/home/chenhl";
+       LOG_WARN << "Zurg slave profix is not set, set to "
+                << config_.prefix_;
+   }
+
+   if(config_.name_.empty()){
+       config_.name_ = "zurg";
+       LOG_WARN << "Zurg slave name is not set, set to "
+                << config_.name_;
+   }
 }
 
 void ZurgSlave::start() {
     ProtobufServerBuilder serverBuilder(config_.parentThreadCnt_, config_.childThreadCnt_);
     EventLoopPtr loop = serverBuilder.getParentPool()->getNextLoop();
-    ProtobufServicePtr service(new SlaveServiceImpl(loop, 4));
+    ProtobufServicePtr service(new SlaveServiceImpl(loop));
     serverBuilder.registerService(service);
 
     ProtobufClientBuilder clientBuilder(serverBuilder.getChildPool());
@@ -40,8 +67,8 @@ void ZurgSlave::start() {
 
     // todo what's mean
     MasterService_Stub masterClient(clientBuilder.build());
-    // todo send heart beat interval
-
+    Heartbeat hb(loop, &masterClient);
+    hb.start();
 
     serverBuilder.buildRpc(config_.listenPort_);
     serverBuilder.waitingForExit();
@@ -52,3 +79,4 @@ void ZurgSlave::start() {
 }
 }
 }
+

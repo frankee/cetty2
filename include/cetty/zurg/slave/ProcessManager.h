@@ -9,6 +9,8 @@
 #define PROCESSMANAGER_H_
 
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/zurg/slave/ZurgSlaveConfig.h>
 
 #include <map>
 #include <boost/noncopyable.hpp>
@@ -23,28 +25,36 @@ namespace slave {
 
 using namespace cetty::channel;
 
+/**
+ * @brief Manage processes belongs to this slave
+ *    Register process exit call back, wait for process exiting
+ *  and call call back.
+ */
 class ProcessManager : boost::noncopyable {
 public:
     typedef boost::function<void (int status, const struct rusage&)> Callback;
 
 public:
-    ProcessManager(const EventLoopPtr& loop, int zombieInterval);
+    ProcessManager(const EventLoopPtr& loop);
     ~ProcessManager();
 
     void start();
+
+    // @brief register callback which will be called after process exited.
     void runAtExit(pid_t pid, const Callback&);
 
 private:
+    void onTimer();
     void startSignalWait();
     void handleSignalWait(const boost::system::error_code& error, int signal);
-    void onTimer();
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
-    int zombieInterval_;
-    EventLoopPtr loop_;
+
+    ZurgSlaveConfig config_;
     boost::asio::signal_set signals_;
-    std::multimap<pid_t, Callback> callbacks_;
+    EventLoopPtr loop_;
+    std::map<pid_t, Callback> callbacks_;
 };
 
 }

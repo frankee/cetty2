@@ -96,8 +96,9 @@ public:
 
         if (value) {
             int size = value->ByteSize();
-            content = Unpooled::buffer(size * 4 + RESERVED_MIN_SIZE,
+            content = Unpooled::buffer(size + RESERVED_MIN_SIZE * 4,
                                                     RESERVED_AHEAD_WRITE_SIZE);
+
             formatter->format(*value, content);
         }
 

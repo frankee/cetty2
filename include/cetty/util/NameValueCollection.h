@@ -41,7 +41,8 @@
 #include <map>
 #include <vector>
 #include <boost/function.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/compare.hpp>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace util {
@@ -58,7 +59,7 @@ class NameValueCollection
 public:
     struct ILT {
         bool operator()(const std::string& s1, const std::string& s2) const {
-            return boost::to_upper_copy(s1) < boost::to_upper_copy(s2);
+            return cetty::util::StringUtil::icompare(s1, s2) < 0;
         }
     };
 

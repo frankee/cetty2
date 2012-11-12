@@ -47,7 +47,7 @@ public:
     virtual void channelActive(ChannelHandlerContext& ctx) {
         // Send greeting for a new connection.
         std::string str;
-        StringUtil::strprintf(&str, "Welcome to %s !\r\n",
+        StringUtil::printf(&str, "Welcome to %s !\r\n",
                               ctx.getChannel()->getLocalAddress().toString().c_str());
 
         outboundTransfer.write(Unpooled::copiedBuffer(str),
@@ -55,7 +55,7 @@ public:
 
         boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
         str.clear();
-        StringUtil::strprintf(&str, "It is %s now.\r\n",
+        StringUtil::printf(&str, "It is %s now.\r\n",
                               boost::posix_time::to_iso_string(now).c_str());
 
         outboundTransfer.write(Unpooled::copiedBuffer(str),

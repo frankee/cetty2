@@ -89,7 +89,7 @@ std::string HttpRequest::toString() const {
     std::string buf;
     buf.reserve(2048);
 
-    StringUtil::strprintf(&buf,
+    StringUtil::printf(&buf,
                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
                           getTransferEncoding().toString().c_str(),
                           getMethod().toString().c_str(),
@@ -99,7 +99,7 @@ std::string HttpRequest::toString() const {
     ConstHeaderIterator end = getLastHeader();
 
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-        StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }
 
     return buf;

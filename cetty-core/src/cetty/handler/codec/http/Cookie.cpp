@@ -8,7 +8,6 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/util/NameValueCollection.h>
 #include <cetty/handler/codec/http/CookieHeaderNames.h>
@@ -267,7 +266,7 @@ std::string Cookie::toString() const {
     }
 
     if (maxAge >= 0) {
-        StringUtil::strprintf(&buf, ", maxAge=%ds", maxAge);
+        StringUtil::printf(&buf, ", maxAge=%ds", maxAge);
     }
 
     if (isSecure()) {

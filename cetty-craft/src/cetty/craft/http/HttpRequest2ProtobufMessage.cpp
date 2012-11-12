@@ -255,7 +255,7 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-                reflection->AddDouble(message, field, StringUtil::atof(value));
+                reflection->AddDouble(message, field, StringUtil::strtof(value));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
@@ -281,7 +281,7 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-                reflection->SetDouble(message, field, StringUtil::atof(value));
+                reflection->SetDouble(message, field, StringUtil::strtof(value));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_STRING:

@@ -37,8 +37,8 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include <cetty/util/Integer.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 
 namespace cetty {
@@ -287,7 +287,7 @@ std::string URI::getAuthority() const {
 
     if (_port && !isWellKnownPort()) {
         auth += ':';
-        Integer::appendString(_port, &auth);
+        StringUtil::numtostr(_port, &auth);
     }
 
     return auth;
@@ -545,7 +545,7 @@ void URI::encode(const std::string& str, const std::string& reserved, std::strin
         }
         else if (c <= 0x20 || c >= 0x7F || ILLEGAL.find(c) != std::string::npos || reserved.find(c) != std::string::npos) {
             encodedStr += '%';
-            encodedStr += Integer::toHexString((unsigned int)(unsigned char) c, 2, true);
+            encodedStr += StringUtil::hextostr((unsigned int)(unsigned char) c);
         }
         else { encodedStr += c; }
     }
@@ -717,9 +717,9 @@ void URI::parseHostAndPort(std::string::const_iterator& it, const std::string::c
         while (it != end) { port += *it++; }
 
         if (!port.empty()) {
-            int nport = 0;
+            int nport = StringUtil::strto32(port);
 
-            if (Integer::tryParse(port, nport) && nport > 0 && nport < 65536) {
+            if (nport > 0 && nport < 65536) {
                 _port = (unsigned short) nport;
             }
             else {

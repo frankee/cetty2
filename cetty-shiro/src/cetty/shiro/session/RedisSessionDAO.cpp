@@ -41,14 +41,19 @@ void RedisSessionDAO::readSession(const std::string& sessionId,
     if (redis) {
         std::string key(KEY_PREFIX);
         key += sessionId;
-        redis->get(key, boost::bind(
-                       &RedisSessionDAO::getSessionCallback,
-                       this,
-                       _1, // return code
-                       _2, // session string
-                       callback));
+        redis->get(
+            key,
+            boost::bind(
+                &RedisSessionDAO::getSessionCallback,
+                this,
+                _1, // return code
+                _2, // session string
+                callback
+            )
+        );
     } else {
-
+        LOG_TRACE << "Redis client is NULL.";
+        callback(1, SessionPtr());
     }
 }
 
@@ -83,11 +88,13 @@ void RedisSessionDAO::update(const SessionPtr& session,
         session->toJson(&value);
         redis->set(key, value);
 
-        if(!callback.empty())
+        if(!callback.empty()){
             callback(0, session);
+        }
     } else {
-        if(!callback.empty())
+        if(!callback.empty()){
             callback(1, session);
+        }
     } //  if (redis && session)
 }
 
@@ -98,11 +105,14 @@ void RedisSessionDAO::remove(const SessionPtr& session,
         key += session->getId();
 
         redis->del(key);
-        if(!callback.empty())
+        if(!callback.empty()){
             callback(0, session);
+        }
     } else {
-        if(!callback.empty())
+        if(!callback.empty()) {
+        	LOG_TRACE << "Redis is NULL or session is NULL";
             callback(1, session);
+        }
     } // if (redis && session)
 }
 
@@ -112,19 +122,35 @@ void RedisSessionDAO::getSessionCallback(int result,
     if (!result) {
         SessionPtr session = new Session();
 
-        session->setStopCallback(boost::bind(&SessionManager::stop,
-            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
-        session->setUpdateCallback(boost::bind(&SessionManager::onChange,
-            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
-        session->setExpireCallback(boost::bind(&SessionManager::expire,
-            SecurityUtils::getSecurityManager()->getSessionManager(), _1));
+        session->setStopCallback(
+        	boost::bind(
+        		&SessionManager::stop,
+                SecurityUtils::getSecurityManager()->getSessionManager(),
+                _1
+            )
+        );
+        session->setUpdateCallback(
+            boost::bind(
+                &SessionManager::onChange,
+                SecurityUtils::getSecurityManager()->getSessionManager(),
+                _1
+            )
+        );
+        session->setExpireCallback(
+        	boost::bind(
+                &SessionManager::expire,
+                SecurityUtils::getSecurityManager()->getSessionManager(),
+                _1
+            )
+        );
 
         session->fromJson(data.c_str());
         if(!callback.empty())
             callback(result, session);
     } else {
-        if(!callback.empty())
+        if(!callback.empty()){
             callback(result, SessionPtr());
+        }
     } // if (!result)
 }
 

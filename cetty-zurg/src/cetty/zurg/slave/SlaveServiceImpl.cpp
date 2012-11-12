@@ -4,9 +4,12 @@
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
+#include <cetty/zurg/Util.h>
 #include <cetty/util/SmallFile.h>
 #include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/Util.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
+#include <cetty/channel/EventLoopPool.h>
 
 #include <boost/weak_ptr.hpp>
 
@@ -16,19 +19,18 @@ namespace slave {
 
 using namespace cetty::zurg;
 using namespace cetty::util;
-using namespace cetty::zurg::slave;
+using namespace cetty::channel;
 
-SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop, int zombieInterval)
-    : loop_(loop),
-      psManager_(new ProcessManager(loop, zombieInterval)),
-      apps_(new ApplicationManager(loop, psManager_.get())) {
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
+    : psManager_(new ProcessManager(loop)),
+      apps_(new ApplicationManager(psManager_.get())) {
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
 }
 
 void SlaveServiceImpl::start() {
-    psManager_->start();
+
 }
 
 void SlaveServiceImpl::getHardware(
@@ -39,8 +41,7 @@ void SlaveServiceImpl::getHardware(
     LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " 
              << request->lshw();
 
-    GetHardwareTaskPtr task(new GetHardwareTask(request, done));
-    task->start(this);
+    GetHardwareTaskPtr task(new GetHardwareTask(request, response, done, *this));
 }
 
 void SlaveServiceImpl::getFileContent(
@@ -106,11 +107,11 @@ void SlaveServiceImpl::getFileChecksum(
 
 void SlaveServiceImpl::getFileChecksumDone(
     const ConstGetFileChecksumRequestPtr& request,
-    const GetFileChecksumResponsePtr& checksumResponse,
+    const google::protobuf::Message* message,
     const DoneCallback& done){
 
     const RunCommandResponse* runCommandResp =
-          google::protobuf::down_cast<const RunCommandResponse*>(checksumResponse);
+          google::protobuf::down_cast<const RunCommandResponse*>(message);
 
     const std::string& lines = runCommandResp->std_output();
     std::map<StringPiece, StringPiece> md5sums;
@@ -130,7 +131,8 @@ void SlaveServiceImpl::runCommand(
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(loop_, request, response, done));
+    ProcessPtr process(new Process(request, response, done));
+
     int err = 12; // ENOMEM;
 
     try {
@@ -151,14 +153,20 @@ void SlaveServiceImpl::runCommand(
             )
         );
 
+        EventLoopPtr elp = EventLoopPool::current();
+        assert(elp);
         boost::weak_ptr<Process> weakProcessPtr(process);
-        TimeoutPtr timerId = loop_->runAfter(
+        TimeoutPtr timerId = elp->runAfter(
             request->timeout(),
+
             boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
         );
 
+
         process->setTimerId(timerId);
+
     }
+
 }
 
 void SlaveServiceImpl::runScript(
@@ -166,6 +174,7 @@ void SlaveServiceImpl::runScript(
     const RunCommandResponsePtr& response,
     const DoneCallback& done) {
 
+    /*
     RunCommandRequestPtr runCommandReq(new RunCommandRequest);
     std::string scriptFile = writeTempFile(ZurgSlave::instance().getName(), request->script());
 
@@ -181,6 +190,15 @@ void SlaveServiceImpl::runScript(
         LOG_ERROR << "runScript - failed to write script file";
         // FIXME: done
     }
+    */
+}
+
+void SlaveServiceImpl::listProcesses(
+       const ConstListProcessesRequestPtr& request,
+       const ListProcessesResponsePtr& response,
+       const DoneCallback& done
+   ){
+
 }
 
 void SlaveServiceImpl::addApplication(
@@ -203,13 +221,6 @@ void SlaveServiceImpl::stopApplication(
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {
     apps_->stop(request, response, done);
-}
-
-void SlaveServiceImpl::getApplications(
-    const ConstGetApplicationsRequestPtr& request,
-    const GetApplicationsResponsePtr& response,
-    const DoneCallback& done) {
-    apps_->get(request, response, done);
 }
 
 void SlaveServiceImpl::listApplications(

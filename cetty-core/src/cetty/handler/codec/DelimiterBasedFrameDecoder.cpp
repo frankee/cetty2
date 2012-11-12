@@ -15,13 +15,14 @@
  */
 
 #include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
+#include <cetty/handler/codec/TooLongFrameException.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/util/Integer.h>
-#include <cetty/util/Exception.h>
 
-#include <cetty/handler/codec/TooLongFrameException.h>
+#include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace handler {
@@ -84,7 +85,7 @@ DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
 ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& in) {
     // Try all delimiters and choose the delimiter which yields the shortest frame.
-    int minFrameLength = Integer::MAX_VALUE;
+    int minFrameLength = MAX_INT32;
     ChannelBufferPtr minDelim;
 
     for (size_t i = 0; i < delimiters.size(); ++i) {
@@ -155,18 +156,17 @@ void DelimiterBasedFrameDecoder::fail(ChannelHandlerContext& ctx, long frameLeng
     msg.reserve(64);
 
     if (frameLength > 0) {
-        msg.append("frame length exceeds ");
-        Integer::appendString(maxFrameLength, &msg);
-        msg.append(": ");
-        Integer::appendString(frameLength, &msg);
-        msg.append(" - discarded");
+        StringUtil::printf(&msg,
+            "frame length exceeds %d: %d - discarded.",
+            maxFrameLength,
+            frameLength);
 
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
-        msg.append("frame length exceeds ");
-        Integer::appendString(maxFrameLength, &msg);
-        msg.append(" - discarded");
+        StringUtil::printf(&msg,
+            "frame length exceeds %d - discarded",
+            maxFrameLength);
 
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
@@ -213,9 +213,13 @@ void DelimiterBasedFrameDecoder::validateDelimiter(const ChannelBufferPtr& delim
 
 void DelimiterBasedFrameDecoder::validateMaxFrameLength(int maxFrameLength) {
     if (maxFrameLength <= 0) {
-        throw InvalidArgumentException(
-            std::string("maxFrameLength must be a positive integer: ") +
-            Integer::toString(maxFrameLength));
+        std::string msg;
+        StringUtil::printf(&msg,
+            "maxFrameLength must be a positive integer: %d",
+            maxFrameLength);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 }
 

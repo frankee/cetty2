@@ -17,6 +17,6 @@ SET(ZURG_PROJECT_DEPENDENCIES cetty-zurg cetty-protobuf-serialization cetty-prot
 #option(BUILD_CETTY_ZURG_EXAMPLES "Build zurg example programs." ON)
 
 #if (BUILD_CETTY_ZURG_EXAMPLES)
-    MESSAGE(STATUS "BUILDING ZURG SAMPLES...")
-    ADD_SUBDIRECTORY(example)
+#    MESSAGE(STATUS "BUILDING ZURG SAMPLES...")
+#    ADD_SUBDIRECTORY(example)
 #endif()

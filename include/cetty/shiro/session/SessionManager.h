@@ -161,6 +161,7 @@ public:
     void expire(const SessionPtr& session);
     virtual void onChange(const SessionPtr& session);
 
+    // Do some cleaning work when session is removed.
     void setClearCallback(const SessionCallback &callback){
         this->clearCallback = callback;
     }

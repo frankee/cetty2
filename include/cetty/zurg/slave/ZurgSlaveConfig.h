@@ -24,7 +24,9 @@ public:
 
     int listenPort_;
     int masterPort_;
+    //  wait child process terminate cycle
     int zombieInterval_;
+    // deliver heart information to server cycle
     int heartbeatInterval_;
     int parentThreadCnt_;
     int childThreadCnt_;

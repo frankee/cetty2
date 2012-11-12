@@ -23,6 +23,7 @@
 
 #include <cetty/Types.h>
 #include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 

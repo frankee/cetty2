@@ -93,7 +93,7 @@ inline void STLStringResizeUninitialized(std::string* s, std::size_t new_size) {
 // (http://www.open-std.org/JTC1/SC22/WG21/docs/lwg-active.html#530)
 // proposes this as the method. According to Matt Austern, this should
 // already work on all current implementations.
-inline char* string_as_array(std::string* str) {
+inline char* stringAsArray(std::string* str) {
     // DO NOT USE const_cast<char*>(str->data())! See the unittest for why.
     return str->empty() ? NULL : &*str->begin();
 }

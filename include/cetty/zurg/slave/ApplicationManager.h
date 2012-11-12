@@ -31,61 +31,54 @@ class ProcessManager;
 using namespace cetty::channel;
 
 struct Application{
-    AddApplicationRequestPtr request;
+    AddApplicationRequest request;
     ApplicationStatus status;
 };
 typedef boost::shared_ptr<Application> ApplicationPtr;
 
 class ApplicationManager : boost::noncopyable {
 public:
-    ApplicationManager(const EventLoopPtr&, ProcessManager*);
-    virtual ~ApplicationManager();
+    ApplicationManager(ProcessManager*);
+    ~ApplicationManager();
 
-    virtual void add(
+    void add(
         const ConstAddApplicationRequestPtr& request,
         const AddApplicationResponsePtr& response,
         const DoneCallback& done
     );
 
-    virtual void start(
+    void start(
         const ConstStartApplicationsRequestPtr& request,
         const StartApplicationsResponsePtr& response,
         const DoneCallback& done
     );
 
-    virtual void stop(
+    void stop(
         const ConstStopApplicationRequestPtr& request,
         const StopApplicationResponsePtr& response,
         const DoneCallback& done
     );
 
-    virtual void get(
-        const ConstGetApplicationsRequestPtr& request,
-        const GetApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
-
-    virtual void list(
+    void list(
         const ConstListApplicationsRequestPtr& request,
         const ListApplicationsResponsePtr& response,
         const DoneCallback& done
     );
 
-    virtual void remove(
+    void remove(
         const ConstRemoveApplicationsRequestPtr& request,
         const RemoveApplicationsResponsePtr& response,
         const DoneCallback& done
     );
 
 private:
-    void startApp(const ApplicationPtr &, ApplicationStatus* out);
+    void startApp(const Application &, ApplicationStatus* out);
     void onProcessExit(const ProcessPtr&, int status, const struct rusage&);
 
 private:
-    typedef std::map<std::string, ApplicationPtr> ApplicationMap;
+    typedef std::map<std::string, Application> ApplicationMap;
 
 private:
-    EventLoopPtr loop_;
     ProcessManager* processManager_;
 
     ApplicationMap apps_;

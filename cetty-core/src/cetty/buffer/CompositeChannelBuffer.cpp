@@ -538,7 +538,7 @@ void CompositeChannelBuffer::discardReadBytes() {
 
 std::string CompositeChannelBuffer::toString() const {
     std::string result = ChannelBuffer::toString();
-    StringUtil::strprintf(&result, ", components=%d)", components.size());
+    StringUtil::printf(&result, ", components=%d)", components.size());
     return result;
 }
 

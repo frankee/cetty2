@@ -40,7 +40,7 @@
 #include <cetty/shiro/crypt/SHA1Engine.h>
 
 #include <cstring>
-#include <cetty/util/Platform.h>
+#include <cetty/Platform.h>
 
 #if CETTY_ARCH_LITTLE_ENDIAN
 #define SHA1_BYTE_REVERSE(x, y) byteReverse(x, y)

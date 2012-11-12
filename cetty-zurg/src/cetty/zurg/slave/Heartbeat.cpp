@@ -6,9 +6,12 @@
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/zurg/Util.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/util/SmallFile.h>
+#include <cetty/util/Process.h>
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <sys/utsname.h>
+#include <stdlib.h>
 
 namespace cetty {
 namespace zurg {
@@ -121,18 +124,16 @@ void strip_stat(std::string* proc_stat) {
     }
 }
 
-extern const char* slave_version;
-
 Heartbeat::Heartbeat(const EventLoopPtr &loop,
                      MasterService_Stub* stub)
     : loop_(loop),
+      name_(std::string()),
+      port_(0),
       stub_(stub),
       procFs_(new ProcFs),
       beating_(false) {
     ConfigCenter::instance().configure(&config_);
     init();
-
-    loop_->runEvery(config_.heartbeatInterval_, boost::bind(&Heartbeat::onTimer, this));
 }
 
 Heartbeat::~Heartbeat(){
@@ -140,14 +141,20 @@ Heartbeat::~Heartbeat(){
 }
 
 void Heartbeat::init(){
-    // todo init date about config if some data is not inited
-    name_(config_.name_);
-    port_(config_.listenPort_);
+    // todo init data about config if some data is not inited
+    name_ = config_.name_;
+    if(config_.listenPort_ <= 0) {
+        LOG_ERROR << "Slave listen port not greater than 0.";
+        exit(0);
+    }
+    port_ = config_.listenPort_;
+
+    if(config_.heartbeatInterval_ <= 0) config_.heartbeatInterval_ = 3000;
 }
 
 void Heartbeat::start(){
     beating_ = true;
-    beat(true);
+    loop_->runEvery(config_.heartbeatInterval_, boost::bind(&Heartbeat::onTimer, this));
 }
 
 void Heartbeat::stop(){
@@ -175,7 +182,7 @@ void Heartbeat::beat(bool showStatic){
         }
         hb.set_slave_pid(cetty::util::Process::id());
         hb.set_start_time_us(getMicroSecs(g_startTime));
-        hb.set_slave_version(slave_version);
+       // hb.set_slave_version(slave_version);
         FILL_HB("/proc/cpuinfo", cpuinfo);
         FILL_HB("/proc/version", version);
         FILL_HB("/etc/mtab", etc_mtab);

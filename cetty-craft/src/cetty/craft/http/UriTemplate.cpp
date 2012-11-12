@@ -66,7 +66,7 @@ static void appendPathSegments(const std::string& str,
         UriTemplate::PathSegment segment;
         std::vector<std::string> normalSegments;
 
-        StringUtil::strsplit(str,
+        StringUtil::split(str,
                              "/",
                              &normalSegments);
 

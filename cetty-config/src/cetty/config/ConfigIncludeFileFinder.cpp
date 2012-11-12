@@ -24,7 +24,8 @@
 namespace cetty {
 namespace config {
 
-    using namespace cetty::logging;
+using namespace cetty::util;
+using namespace cetty::logging;
 
 class FileNameMatchPattern {
 public:
@@ -58,7 +59,7 @@ ConfigIncludeFileFinder::ConfigIncludeFileFinder() {
 int ConfigIncludeFileFinder::find(const std::string& file,
                                   std::vector<std::string>* files) {
     if (files == NULL) {
-        std::cout<<"the files is null!\n"<<std::endl;
+        LOG_ERROR << "the files is null!";
         return 0;
     }
 
@@ -105,7 +106,8 @@ bool filterIncludeLine(const std::string line) {
     return false;
 }
 
-bool FileNameMatchPattern::parse(const std::string& str, boost::filesystem::path* filePath) {
+bool FileNameMatchPattern::parse(const std::string& str,
+                                 boost::filesystem::path* filePath) {
     //处理相对路径
     boost::filesystem::path p(str);
     *filePath = p.parent_path();
@@ -117,7 +119,7 @@ bool FileNameMatchPattern::parse(const std::string& str, boost::filesystem::path
 
     //取出文件名 并分割
     std::vector<std::string> keyWords;
-    cetty::util::StringUtil::strsplit(p.filename().string(),"*", &keyWords);
+    cetty::util::StringUtil::split(p.filename().string(),"*", &keyWords);
 
     if (1 == keyWords.size()) {
         fullName = p.filename().string();
@@ -140,16 +142,17 @@ bool FileNameMatchPattern::match(const std::string& filename) const {
     if (prefix.empty() && postfix.empty()) {
         return true;
     }
-    else if (!prefix.empty() && cetty::util::StringUtil::strfwm(filename, prefix)) {
-        if (!postfix.empty() && cetty::util::StringUtil::strbwm(filename, postfix)) {
+    else if (!prefix.empty() && StringUtil::hasPrefixString(filename, prefix)) {
+        if (!postfix.empty() && StringUtil::hasSuffixString(filename, postfix)) {
             return true;
         }
         else if (postfix.empty()) {
             return true;
         }
-
     }
-    else if (prefix.empty() && !postfix.empty() && cetty::util::StringUtil::strbwm(filename, postfix)) {
+    else if (prefix.empty()
+             && !postfix.empty()
+             && StringUtil::hasSuffixString(filename, postfix)) {
         return true;
     }
 
@@ -181,7 +184,8 @@ bool IncludeLine::parse(const std::string& str) {
     return true;
 }
 
-int ConfigIncludeFileFinder::getFileIncludes(const std::string& file, std::vector<IncludeLine>* includes) {
+int ConfigIncludeFileFinder::getFileIncludes(const std::string& file,
+        std::vector<IncludeLine>* includes) {
     BOOST_ASSERT(includes && "the includes is null!");
 
     std::vector<std::string> lines;

@@ -18,9 +18,9 @@
 
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/Unpooled.h>
-#include <cetty/util/Integer.h>
-#include <cetty/util/StringUtil.h>
+
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/handler/codec/CorruptedFrameException.h>
@@ -95,7 +95,7 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     if (frameLength < 0) {
         in->skipBytes(lengthFieldEndOffset);
         throw CorruptedFrameException(
-            StringUtil::strprintf("negative pre-adjustment length field: %d", frameLength));
+            StringUtil::printf("negative pre-adjustment length field: %d", frameLength));
     }
 
     frameLength += lengthAdjustment + lengthFieldEndOffset;
@@ -103,7 +103,7 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     if (frameLength < lengthFieldEndOffset) {
         in->skipBytes(lengthFieldEndOffset);
         throw CorruptedFrameException(
-            StringUtil::strprintf(
+            StringUtil::printf(
                 "Adjusted frame length (%d)  is less than lengthFieldEndOffset: %d",
                 frameLength,
                 lengthFieldEndOffset));
@@ -128,7 +128,7 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     if (initialBytesToStrip > frameLengthInt) {
         in->skipBytes(frameLengthInt);
         std::string msg;
-        StringUtil::strprintf(&msg,
+        StringUtil::printf(&msg,
                               "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
                               frameLength, initialBytesToStrip);
         throw CorruptedFrameException(msg);
@@ -145,77 +145,103 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
 }
 
 ChannelBufferPtr
-LengthFieldBasedFrameDecoder::extractFrame(const ChannelBufferPtr& buffer, int index, int length) {
+LengthFieldBasedFrameDecoder::extractFrame(const ChannelBufferPtr& buffer,
+        int index,
+        int length) {
     ChannelBufferPtr frame = Unpooled::buffer(length);
     frame->writeBytes(buffer, index, length);
     return frame;
 }
 
-void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx, int frameLength) {
+void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx,
+                                        int frameLength) {
     std::string msg;
 
     if (frameLength > 0) {
-        StringUtil::strprintf(&msg,
+        StringUtil::printf(&msg,
                               "Adjusted frame length exceeds %d: % - discarded.",
                               maxFrameLength, frameLength);
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
-        StringUtil::strprintf("Adjusted frame length exceeds %d - discarded.", maxFrameLength);
+        StringUtil::printf("Adjusted frame length exceeds %d - discarded.",
+                              maxFrameLength);
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
 }
 
 void LengthFieldBasedFrameDecoder::validateParameters() {
+    std::string msg;
+
     if (maxFrameLength <= 0) {
-        throw InvalidArgumentException(
-            std::string("maxFrameLength must be a positive integer: ") +
-            Integer::toString(maxFrameLength));
+        StringUtil::printf(&msg,
+                              "maxFrameLength must be a positive integer: %d",
+                              maxFrameLength);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (lengthFieldOffset < 0) {
-        throw InvalidArgumentException(
-            std::string("lengthFieldOffset must be a non-negative integer: ") +
-            Integer::toString(lengthFieldOffset));
+        StringUtil::printf(&msg,
+                              "lengthFieldOffset must be a non-negative integer: %d",
+                              lengthFieldOffset);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (initialBytesToStrip < 0) {
-        throw InvalidArgumentException(
-            std::string("initialBytesToStrip must be a non-negative integer: ") +
-            Integer::toString(initialBytesToStrip));
+        StringUtil::printf(&msg,
+                              "initialBytesToStrip must be a non-negative integer: %d",
+                              initialBytesToStrip);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (checksumFieldLength < 0) {
-        throw InvalidArgumentException(
-            std::string("checksumFieldLength must be a non-negative integer: ") +
-            Integer::toString(checksumFieldLength));
+        StringUtil::printf(&msg,
+                              "checksumFieldLength must be a non-negative integer: %d",
+                              checksumFieldLength);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (checksumCalcOffset < 0) {
-        throw InvalidArgumentException(
-            std::string("checksumFieldOffset must be a non-negative integer: ") +
-            Integer::toString(checksumCalcOffset));
+        StringUtil::printf(&msg,
+                              "checksumFieldOffset must be a non-negative integer:  %d",
+                              checksumCalcOffset);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (checksumFieldLength > 0 && !checksumFunction) {
-        throw InvalidArgumentException(
-            std::string("you set the checksumField but no checksum function set.\n"));
+        msg = "you set the checksumField but no checksum function set.";
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (lengthFieldLength != 1 && lengthFieldLength != 2 &&
             lengthFieldLength != 4 && lengthFieldLength != 8) {
-        throw InvalidArgumentException(
-            std::string("lengthFieldLength must be either 1, 2, 4, or 8: ") +
-            Integer::toString(lengthFieldLength));
+        StringUtil::printf(&msg,
+                              "lengthFieldLength must be either 1, 2, 4, or 8:  %d",
+                              lengthFieldLength);
+
+        LOG_ERROR << msg;
+        throw InvalidArgumentException(msg);
     }
 
     if (lengthFieldOffset > maxFrameLength - lengthFieldLength) {
-        std::string msg;
-        StringUtil::strprintf(&msg,
-                              "maxFrameLength (%d) must be equal to or greater \
-            than lengthFieldOffset (%d) + lengthFieldLength (%d).",
+        StringUtil::printf(&msg,
+                              "maxFrameLength (%d) must be equal to or greater "
+                              "than lengthFieldOffset (%d) + lengthFieldLength (%d).",
                               maxFrameLength, lengthFieldOffset, lengthFieldLength);
 
+        LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 }

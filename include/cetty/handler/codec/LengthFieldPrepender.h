@@ -23,7 +23,7 @@
 
 #include <boost/function.hpp>
 #include <cetty/util/Exception.h>
-#include <cetty/util/Integer.h>
+#include <cetty/util/StringUtil.h>
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
 
 namespace cetty {

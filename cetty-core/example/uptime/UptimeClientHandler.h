@@ -55,7 +55,7 @@ public:
             startTime = boost::get_system_time();
         }
 
-        println(StringUtil::strprintf("Connected to: %s",
+        println(StringUtil::printf("Connected to: %s",
                                       getRemoteAddress().c_str()));
     }
 
@@ -76,7 +76,7 @@ public:
     }
 
     virtual void channelInactive(ChannelHandlerContext& ctx) {
-        printf(StringUtil::strprintf("Sleeping for: %d s", RECONNECT_DELAY).c_str());
+        printf(StringUtil::printf("Sleeping for: %d s", RECONNECT_DELAY).c_str());
 
         timeout = ctx.getEventLoop()->runAfter(RECONNECT_DELAY * 1000,
                                                boost::bind(
@@ -99,7 +99,7 @@ public:
 
 private:
     void handleReConnection(ClientBootstrap& bootstrap) {
-        println(StringUtil::strprintf("Reconnecting to: %s", getRemoteAddress().c_str()));
+        println(StringUtil::printf("Reconnecting to: %s", getRemoteAddress().c_str()));
         bootstrap.connect();
     }
 

@@ -43,7 +43,7 @@ std::string HttpResponse::toString() const {
     std::string buf;
     buf.reserve(2048);
 
-    StringUtil::strprintf(&buf,
+    StringUtil::printf(&buf,
                           "HttpResponse (TransferEncoding: %s)\r\n%s %s",
                           getTransferEncoding().toString().c_str(),
                           getProtocolVersion().getText().c_str(),
@@ -52,7 +52,7 @@ std::string HttpResponse::toString() const {
     ConstHeaderIterator end = getLastHeader();
 
     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-        StringUtil::strprintf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
     }
 
     return buf;

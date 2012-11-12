@@ -51,7 +51,7 @@ public:
         : context() {
         if (messageSize <= 0) {
             throw InvalidArgumentException(
-                StringUtil::strprintf("messageSize: %d", messageSize));
+                StringUtil::printf("messageSize: %d", messageSize));
         }
 
         content = Unpooled::buffer(messageSize);

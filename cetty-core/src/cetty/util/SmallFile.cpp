@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 #include <boost/static_assert.hpp>
 #include <boost/implicit_cast.hpp>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace util {
@@ -80,6 +81,7 @@ SmallFile::SmallFile(const StringPiece& filename)
     buf[0] = '\0';
 
     if (fd < 0) {
+        LOG_DEBUG << "open filename.data() failed.";
         err = errno;
     }
 }

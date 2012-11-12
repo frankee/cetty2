@@ -98,7 +98,7 @@ protected:
 
     EventLoops eventLoops;
 
-private:
+protected:
     static EventLoopMap allEventLoops;
 };
 

@@ -14,6 +14,7 @@
 *.lib
 *.exe
 *#
+*~
 *.pb.cc
 *.pb.h
 *.h-
@@ -21,7 +22,7 @@
 *.cc-
 .project
 .cproject
-.sh
+proto.sh
 tags
 
 CMakeCache.txt

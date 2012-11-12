@@ -125,9 +125,6 @@
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp">
       <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\Integer.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp">
       <Filter>util</Filter>
     </ClCompile>
@@ -529,9 +526,6 @@
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrap.h">
       <Filter>bootstrap</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Character.h">
-      <Filter>util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\Enum.h">
       <Filter>util</Filter>
     </ClInclude>
@@ -539,9 +533,6 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\InputStream.h">
-      <Filter>util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Integer.h">
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\OutputStream.h">
@@ -756,9 +747,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h">
       <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\Cookie.h">
       <Filter>handler\codec\http</Filter>
