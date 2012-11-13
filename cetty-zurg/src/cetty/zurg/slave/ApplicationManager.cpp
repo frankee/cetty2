@@ -55,7 +55,7 @@ void ApplicationManager::start(
         ApplicationMap::iterator it = apps_.find(appName);
 
         if (it != apps_.end()) {
-            startApp(it->second, response->add_status());
+            startApp((*it).second, response->add_status());
         }
         else {
             // application not found
@@ -88,6 +88,8 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
             status->set_state(kRunning);
             status->set_pid(process->pid());
 
+            // without garentee of child process is running when
+            // execute flow come here.
             processManager_->runAtExit(
                 process->pid(),
                 boost::bind(
@@ -95,15 +97,17 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
                     this,
                     process,
                     _1, // status
-                    _2 // rusage
+                    _2  // rusage
                 )
             );
         }
 
-        out->CopyFrom(*status);
+        if(out != NULL) out->CopyFrom(*status);
     } else {
-        out->CopyFrom(*status);
-        out->set_message("Already running.");
+    	if(out != NULL){
+            out->CopyFrom(*status);
+            out->set_message("Already running.");
+    	}
     }
 }
 
@@ -123,12 +127,12 @@ void ApplicationManager::onProcessExit(
     LOG_WARN << "AppManager[" << appName << "] onProcessExit";
 
     ApplicationMap::iterator it = apps_.find(appName);
-
     if (it != apps_.end()) {
-        Application& app = it->second;
+        Application& app = (*it).second;
         app.status.set_state(kExited);
 
-        //todo: notify master
+        // restart it
+       startApp((*it).second, NULL);
     } else {
         LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
     }

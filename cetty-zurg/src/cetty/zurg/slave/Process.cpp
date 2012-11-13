@@ -243,7 +243,6 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         close(stdError);
 
         const char* cmd = request_->command().c_str();
-        //LOG_INFO << "Run command: " << cmd;
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
 
         LOG_INFO << "Execute new process image failed.";

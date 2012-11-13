@@ -34,11 +34,10 @@ ProcStatFile::ProcStatFile(int pid)
 }
 
 void ProcStatFile::parse(const char* buffer) {
-    // do_task_stat() in fs/proc/array.c
-    // pid (cmd) S ppid pgid sid
     const char* p = buffer;
     p = strchr(p, ')');
 
+    // the 22th word of proc/pid/stat is start time.
     for (int i = 0; i < 20 && (p); ++i) {
         p = strchr(p, ' ');
         if (p) {

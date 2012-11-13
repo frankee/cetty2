@@ -17,11 +17,11 @@ using namespace cetty::zurg;
 
 Pipe::Pipe(){
     if (::pipe(pipefd_)) {
-        setFd(pipefd_[0], FD_CLOEXEC);
-        setFd(pipefd_[1], FD_CLOEXEC);
         char buf[512];
         throw std::runtime_error(strerror_r(errno, buf, sizeof buf));
     }
+    setFd(pipefd_[0], FD_CLOEXEC);
+    setFd(pipefd_[1], FD_CLOEXEC);
 }
 
 Pipe::~Pipe() {
