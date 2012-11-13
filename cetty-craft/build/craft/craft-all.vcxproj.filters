@@ -323,9 +323,6 @@
     <ClInclude Include="..\..\..\include\cetty\util\InputStream.h">
       <Filter>core\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\Integer.h">
-      <Filter>core\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\OutputStream.h">
       <Filter>core\util</Filter>
     </ClInclude>
@@ -523,9 +520,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h">
       <Filter>core\channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
@@ -1340,9 +1334,6 @@
       <Filter>core\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\util\Exception.cpp">
-      <Filter>core\util</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\util\Integer.cpp">
       <Filter>core\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\util\NameValueCollection.cpp">
