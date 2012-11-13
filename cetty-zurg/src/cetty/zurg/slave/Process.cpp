@@ -50,11 +50,13 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
         char buf[256];
         ::snprintf(buf, sizeof buf, "%s.%d.%s", prefix.c_str(),
                    cetty::util::Process::id(), postfix);
-        fd = ::open(buf, O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+        fd = ::open(buf, O_WRONLY | O_CREAT, 0644);
     } else {
-        fd = ::open("/dev/null", O_WRONLY | O_CREAT | O_CLOEXEC, 0644);
+        fd = ::open("/dev/null", O_WRONLY | O_CREAT, 0644);
     }
-
+    if(!setFd(fd, FD_CLOEXEC)) {
+    	LOG_ERROR << "Set FD_CLOEXEC failed";
+    }
     return fd;
 }
 
@@ -65,24 +67,6 @@ std::string getFileConent(const std::string &fileName, bool remove){
 	if(remove) unlink(fileName.c_str());
 	if(!err) return std::string().assign(sf.buffer(), size);
 	else return std::string();
-}
-
-bool setFl(int fd, int flag){
-	int val = fcntl(fd, F_GETFL, 0);
-	if(val < 0) return false;
-	val |= flag;
-	if(fcntl(fd, F_SETFL, val) < 0)
-		return false;
-	return true;
-}
-
-bool delFl(int fd, int flag){
-	int val = fcntl(fd, F_GETFL, 0);
-	if(val < 0) return false;
-	val &= (~flag);
-	if(fcntl(fd, F_SETFL, val) < 0)
-		return false;
-	return true;
 }
 
 Process::Process(
@@ -251,11 +235,6 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         if(!setFl(STDOUT_FILENO, O_SYNC)) {
         	LOG_ERROR << "Set file O_SYNC failed.";
         }
-        /*
-        if(!delFl(STDOUT_FILENO, FD_CLOEXEC)){
-
-        }
-        */
 
         if (::dup2(stdError, STDERR_FILENO) < 0) {
             LOG_ERROR << "Duplicate stderr failed.";
@@ -264,7 +243,6 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
         close(stdError);
 
         const char* cmd = request_->command().c_str();
-        //LOG_INFO << "Run command: " << cmd;
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
 
         LOG_INFO << "Execute new process image failed.";
@@ -367,7 +345,6 @@ void Process::onTimeout() {
     }
 }
 
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 void Process::onCommandExit(const int status, const struct rusage& ru) {
     assert(response_);
 

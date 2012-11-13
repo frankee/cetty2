@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <signal.h>
 #include <sys/resource.h>
-#include <sys/signalfd.h>
 #include <sys/wait.h>
 
 #include <boost/bind.hpp>

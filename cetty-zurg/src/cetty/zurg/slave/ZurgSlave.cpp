@@ -61,7 +61,6 @@ void ZurgSlave::start() {
     ProtobufClientBuilder clientBuilder(serverBuilder.getChildPool());
     clientBuilder.addConnection(config_.masterAddress_, config_.masterPort_);
 
-    // todo what's mean
     MasterService_Stub masterClient(clientBuilder.build());
     Heartbeat hb(loop, &masterClient);
     hb.start();
