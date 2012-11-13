@@ -26,9 +26,12 @@ void ApplicationManager::add(
 
     assert(request->name().find('/') == std::string::npos); // FIXME
 
-    AddApplicationRequest &requestRef = apps_[request->name()].request;
+
+    std::pair<ApplicationMap::iterator, bool> insertRet =
+    		apps_.insert(std::pair<std::string, Application>(request->name(), Application()));
+    AddApplicationRequest &requestRef = (*(insertRet.first)).second.request;
     requestRef.CopyFrom(*request);
-    AddApplicationRequestPtr prev_request(&requestRef);
+    AddApplicationRequestPtr prev_request(insertRet.second ? NULL : &requestRef);
 
     ApplicationStatus& status = apps_[request->name()].status;
     status.set_name(request->name());

@@ -6,6 +6,7 @@
 #include <cetty/zurg/master/master.pb.h>
 #include <cetty/zurg/slave/ZurgSlave.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/craft/builder/CraftServerBuilder.h>
 
 #include <assert.h>
 #include <unistd.h>
@@ -20,6 +21,7 @@ using namespace cetty::protobuf::service::builder;
 using namespace cetty::zurg::slave;
 using namespace cetty::zurg::master;
 using namespace cetty::zurg;
+using namespace cetty::craft::builder;
 
 ZurgSlave::ZurgSlave(){
     ConfigCenter::instance().configure(&config_);
@@ -69,6 +71,20 @@ void ZurgSlave::start() {
     serverBuilder.waitingForExit();
 
     LOG_INFO << "Start zurg_slave";
+}
+
+
+int main(int argc, char* argv[]) {
+    ConfigCenter::instance().load(argc, argv);
+
+    CraftServerBuilder builder(1, 1);
+    builder.registerService(
+        new SlaveServiceImpl(builder.getParentPool()->getNextLoop()));
+
+    builder.buildHttp(8080);
+    builder.waitingForExit();
+
+    return 0;
 }
 
 }

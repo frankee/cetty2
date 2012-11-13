@@ -20,6 +20,7 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
+#include <string>
 
 namespace cetty {
 namespace shiro {
