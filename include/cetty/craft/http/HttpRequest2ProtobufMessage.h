@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <string>
 #include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/craft/http/ServiceMapperPtr.h>

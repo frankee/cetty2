@@ -77,7 +77,6 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
     init(handler);
 }
 
-inline
 const ChannelPtr& ChannelHandlerContext::getChannel() const {
     return pipeline.getChannel();
 }
