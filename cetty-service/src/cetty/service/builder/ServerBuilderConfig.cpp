@@ -45,7 +45,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Timeout,
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig,
                             new ConfigDescriptor(
-                                9,
+                                10,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, deamonize, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, pidfile, STRING),
                                 CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServerBuilderConfig, servers, Server),
@@ -53,6 +53,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, childThreadCount, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, backlog, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, logger, STRING),
+                                CETTY_CONFIG_FIELD(ServerBuilderConfig, logLevel, STRING),
                                 CETTY_CONFIG_OBJECT_FIELD(ServerBuilderConfig, limit, Limit),
                                 CETTY_CONFIG_OBJECT_FIELD(ServerBuilderConfig, timeout, Timeout)),
                             new ServerBuilderConfig);

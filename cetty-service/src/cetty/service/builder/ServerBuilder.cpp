@@ -21,6 +21,7 @@
 #include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/logging/Logger.h>
 #include <cetty/logging/LoggerHelper.h>
 
 #if (defined(linux) || defined(__linux) || defined(__linux__))
@@ -46,6 +47,7 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::bootstrap;
 using namespace cetty::service;
 using namespace cetty::config;
+using namespace cetty::logging;
 
 #if (defined(linux) || defined(__linux) || defined(__linux__))
 
@@ -221,6 +223,8 @@ int ServerBuilder::init() {
             childEventLoopPool = parentEventLoopPool;
         }
     }
+
+    Logger::logLevel(LogLevel::parseFrom(config.logLevel));
 
     return 0;
 }

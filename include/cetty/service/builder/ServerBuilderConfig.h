@@ -67,6 +67,7 @@ public:
     int childThreadCount;
     int backlog;
     std::string logger;
+    std::string logLevel;
 
     Limit* limit;
     Timeout* timeout;

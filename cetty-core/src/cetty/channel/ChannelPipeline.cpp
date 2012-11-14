@@ -55,6 +55,10 @@ ChannelPipeline::ChannelPipeline()
       receiveBuffer(Unpooled::buffer(1024*16)) {
 }
 
+ChannelPipeline::~ChannelPipeline() {
+    LOG_DEBUG << "ChannelPipeline dector";
+}
+
 void ChannelPipeline::attach(const ChannelPtr& channel) {
     if (!channel) {
         throw NullPointerException("channel");

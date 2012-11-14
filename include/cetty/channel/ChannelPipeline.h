@@ -255,7 +255,7 @@ public:
      */
     ChannelPipeline();
 
-    virtual ~ChannelPipeline() {}
+    virtual ~ChannelPipeline();
 
     const ChannelPtr& getChannel() const;
 

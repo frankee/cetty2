@@ -28,6 +28,10 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line)
       func(""),
       stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
 
+    if (level < Logger::logLevel()) {
+        return;
+    }
+
     memset(buffer, 0, sizeof(buffer));
 
     timestamp = boost::posix_time::microsec_clock::universal_time();
@@ -43,6 +47,10 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line, cons
       func(func),
       stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
 
+    if (level < Logger::logLevel()) {
+        return;
+    }
+
     memset(buffer, 0, sizeof(buffer));
 
     timestamp = boost::posix_time::microsec_clock::universal_time();
@@ -51,9 +59,15 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line, cons
     Logger::getFormatter().formatFirst(*this);
 }
 
-void LogMessage::finish() {
+bool LogMessage::finish() {
+    if (level < Logger::logLevel()) {
+        return false;
+    }
+
     Logger::getFormatter().formatLast(*this);
     stream << "\n";
+
+    return true;
 }
 
 }
