@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     
     CraftServerBuilder builder;
     builder.registerService(new echo::EchoServiceImpl);
-    builder.buildHttp(8080);
+    builder.buildAll();
 
     builder.waitingForExit();
 
