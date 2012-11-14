@@ -3,9 +3,10 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_SOURCE_DIR}/cetty-zurg/src
 )
 
+
 ADD_SUBDIRECTORY(src)
 
-SET(ZURG_PROJECT_DEPENDENCIES cetty-zurg cetty-protobuf-serialization cetty-protobuf cetty-service cetty-config cetty yaml-cpp)
+SET(ZURG_PROJECT_DEPENDENCIES cetty cetty-craft cetty-protobuf-serialization cetty-protobuf cetty-service cetty-config yaml-cpp)
 
 ########################################################################
 #

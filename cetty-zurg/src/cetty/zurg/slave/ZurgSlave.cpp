@@ -1,27 +1,24 @@
-#include <cetty/protobuf/service/builder/ProtobufClientBuilder.h>
-#include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
-#include <cetty/zurg/slave/SlaveServiceImpl.h>
-#include <cetty/zurg/slave/Heartbeat.h>
-#include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/master/master.pb.h>
-#include <cetty/zurg/slave/ZurgSlave.h>
-#include <cetty/config/ConfigCenter.h>
-#include <cetty/craft/builder/CraftServerBuilder.h>
-
 #include <assert.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#include <cetty/config/ConfigCenter.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/craft/builder/CraftServerBuilder.h>
+#include <cetty/channel/EventLoopPoolPtr.h>
+#include <cetty/channel/EventLoopPool.h>
+
+#include <cetty/zurg/master/master.pb.h>
+#include <cetty/zurg/slave/Heartbeat.h>
+#include <cetty/zurg/slave/ZurgSlave.h>
+#include <cetty/zurg/slave/SlaveServiceImpl.h>
 
 namespace cetty {
 namespace zurg {
 namespace slave {
 
 using namespace cetty::service;
-using namespace cetty::protobuf::service::builder;
-using namespace cetty::zurg::slave;
 using namespace cetty::zurg::master;
-using namespace cetty::zurg;
-using namespace cetty::craft::builder;
 
 ZurgSlave::ZurgSlave(){
     ConfigCenter::instance().configure(&config_);
@@ -55,6 +52,7 @@ void ZurgSlave::init(){
 }
 
 void ZurgSlave::start() {
+	/*
     ProtobufServerBuilder serverBuilder(1, 0);
     EventLoopPtr loop = serverBuilder.getParentPool()->getNextLoop();
     ProtobufServicePtr service(new SlaveServiceImpl(loop));
@@ -71,8 +69,17 @@ void ZurgSlave::start() {
     serverBuilder.waitingForExit();
 
     LOG_INFO << "Start zurg_slave";
+    */
 }
 
+}
+}
+}
+
+
+using namespace cetty::zurg;
+using namespace cetty::zurg::slave;
+using namespace cetty::craft::builder;
 
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
@@ -85,9 +92,5 @@ int main(int argc, char* argv[]) {
     builder.waitingForExit();
 
     return 0;
-}
-
-}
-}
 }
 

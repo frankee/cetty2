@@ -332,4 +332,4 @@ ADD_SUBDIRECTORY(cetty-gearman)
 
 ADD_SUBDIRECTORY(cetty-craft)
 
-#ADD_SUBDIRECTORY(cetty-zurg)
+ADD_SUBDIRECTORY(cetty-zurg)
