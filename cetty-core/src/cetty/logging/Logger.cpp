@@ -22,6 +22,7 @@
 namespace cetty {
 namespace logging {
 
+cetty::logging::LogLevel Logger::level = LogLevel::DEBUG;
 cetty::logging::LogPatternFormatter Logger::formatter;
 
 Logger::Logger(SourceFile file, int line)
@@ -41,14 +42,14 @@ Logger::Logger(SourceFile file, int line, bool toAbort)
 }
 
 Logger::~Logger() {
-    message.finish();
+    if (message.finish()) {
+        const char* buffer = message.getBuffer();
+        std::fwrite(buffer, strlen(buffer), 1, stdout);
+        //fwrite(msg, 1, len, stdout);
 
-    const char* buffer = message.getBuffer();
-    std::fwrite(buffer, strlen(buffer), 1, stdout);
-    //fwrite(msg, 1, len, stdout);
-
-    if (message.getLevel() == LogLevel::FATAL) {
-        std::fflush(stdout);
+        if (message.getLevel() == LogLevel::FATAL) {
+            std::fflush(stdout);
+        }
     }
 }
 

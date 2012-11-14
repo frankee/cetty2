@@ -15,9 +15,12 @@
  */
 
 #include <cetty/logging/LogLevel.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace logging {
+
+using namespace cetty::util;
 
 const LogLevel LogLevel::FATAL(5);
 const LogLevel LogLevel::ERROR(4);
@@ -33,11 +36,38 @@ static const std::string LOG_LEVLE_STRS[] = {
     "WARN",
     "ERROR",
     "FATAL",
-    "UNKNOWN"
+    "UNKNOWN",
+    ""
 };
 
 const std::string& LogLevel::toString() const {
     return LOG_LEVLE_STRS[this->v];
+}
+
+LogLevel LogLevel::parseFrom(const std::string& level) {
+    int i = 0;
+
+    while (!LOG_LEVLE_STRS[i].empty()) {
+        if (StringUtil::iequals(level, LOG_LEVLE_STRS[i])) {
+            switch (i) {
+            case 0: return TRACE;
+
+            case 1: return DEBUG;
+
+            case 2: return INFO;
+
+            case 3: return WARN;
+
+            case 4: return ERROR;
+
+            case 5: return FATAL;
+            }
+        }
+
+        ++i;
+    }
+
+    return TRACE;
 }
 
 }

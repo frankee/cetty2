@@ -820,9 +820,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\QueryStringEncoder.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h">
       <Filter>buffer</Filter>
     </ClInclude>

@@ -91,6 +91,7 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
     }
 
     if (!HttpHeaders::isKeepAlive(*req)) {
+        LOG_DEBUG << "not keep alive mode, close the channel after writer completed.";
         future->addListener(ChannelFutureListener::CLOSE);
     }
 

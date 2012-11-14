@@ -56,6 +56,8 @@ public:
         return v;
     }
 
+    static LogLevel parseFrom(const std::string& level);
+
 private:
     LogLevel(int value) : cetty::util::Enum<LogLevel>(value) {}
 };

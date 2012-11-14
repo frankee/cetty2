@@ -51,7 +51,7 @@ public:
 
     LogMessage(const LogLevel& level, const char* source, int line, const char* func);
 
-    void finish();
+    bool finish();
 
 public:
     Stream& getStream() { return stream; }

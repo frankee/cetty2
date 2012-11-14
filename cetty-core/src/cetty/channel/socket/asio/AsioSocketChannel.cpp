@@ -159,6 +159,10 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
+        LOG_WARN << "handleRead Error : " << error.value()
+                 << " msg: \"" << error.message()
+                 << "\" then close the channel.";
+
         close();
     }
 }
@@ -176,9 +180,9 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
     else {
         if (!writeQueue->empty()) {
             writeQueue->peek().setFailure(RuntimeException(
-                StringUtil::printf("write buffer failed, message:%d code:%d",
-                error.message().c_str(), 
-                error.value())));
+                                              StringUtil::printf("write buffer failed, message:%d code:%d",
+                                                      error.message().c_str(),
+                                                      error.value())));
 
             writeQueue->popup();
         }

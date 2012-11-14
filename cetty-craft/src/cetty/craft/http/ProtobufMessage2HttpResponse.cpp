@@ -20,8 +20,10 @@
 #include <boost/variant.hpp>
 #include <cetty/Types.h>
 
-#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/logging/LoggerHelper.h>
+
 #include <cetty/buffer/Unpooled.h>
+#include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
@@ -215,6 +217,11 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
+            LOG_DEBUG << "keep alive mode,set the content_length header";
+            
+            response->setHeader(HttpHeaders::Names::CONNECTION,
+                HttpHeaders::Values::KEEP_ALIVE);
+            
             response->setHeader(HttpHeaders::Names::CONTENT_LENGTH,
                                 response->getContent()->readableBytes());
         }
