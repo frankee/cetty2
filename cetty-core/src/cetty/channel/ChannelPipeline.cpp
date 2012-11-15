@@ -35,6 +35,7 @@
 #include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/util/Exception.h>
+#include <cetty/util/StlUtil.h>
 
 namespace cetty {
 namespace channel {
@@ -57,6 +58,8 @@ ChannelPipeline::ChannelPipeline()
 
 ChannelPipeline::~ChannelPipeline() {
     LOG_DEBUG << "ChannelPipeline dector";
+
+    STLDeleteValues(&name2ctx);
 }
 
 void ChannelPipeline::attach(const ChannelPtr& channel) {

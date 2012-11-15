@@ -78,6 +78,7 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
 }
 
 AsioSocketChannel::~AsioSocketChannel() {
+    LOG_DEBUG << "AsioSocketChannel dector";
 }
 
 ChannelConfig& AsioSocketChannel::getConfig() {
@@ -159,11 +160,19 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
-        LOG_WARN << "handleRead Error : " << error.value()
-                 << " msg: \"" << error.message()
-                 << "\" then close the channel.";
+        if (pipeline && !pipeline->isAttached()) {
+            LOG_WARN << "handleRead Error : " << error.value()
+                << " msg: \"" << error.message()
+                << "\" then close the channel.";
+            close();
+        }
+        else {
+            LOG_WARN << "handleRead Error : " << error.value()
+                << " msg: \"" << error.message()
+                << "\" closed by self, do nothing.";
 
-        close();
+            release();
+        }
     }
 }
 

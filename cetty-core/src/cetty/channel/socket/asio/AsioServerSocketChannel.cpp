@@ -217,19 +217,17 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
 
         pipeline->fireMessageUpdated();
 
-#if 0
-        channel->getCloseFuture()->addListener(boost::bind(
-                &AsioServerSocketChannel::handleChildClosed,
-                this,
-                _1),
-                100);
-#endif
+        //childChannels.insert(
+        //    std::make_pair<int, ChannelPtr>(channel->getId(), channel));
+
+        //channel->getCloseFuture()->addListener(boost::bind(
+        //    &AsioServerSocketChannel::handleChildClosed,
+        //    this,
+        //    _1),
+        //    100);
 
         channel->getPipeline()->fireChannelActive();
         channel->beginRead();
-
-        childChannels.insert(
-            std::make_pair<int, ChannelPtr>(channel->getId(), channel));
 
         ChannelPipelinePtr pipeline =
             ChannelPipelines::pipeline(childPipeline);
