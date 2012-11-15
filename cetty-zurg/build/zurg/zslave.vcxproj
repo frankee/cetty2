@@ -133,8 +133,6 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlaveConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
-    <ClInclude Include="..\..\src\cetty\zurg\slave\Heartbeat.h" />
-    <ClInclude Include="..\..\src\cetty\zurg\slave\ProcessManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto" />

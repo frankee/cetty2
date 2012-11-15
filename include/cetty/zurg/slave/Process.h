@@ -43,7 +43,7 @@ typedef boost::function1<void, const MessagePtr&> DoneCallback;
  *  get child process's run state.
  */
 class Process : public boost::enable_shared_from_this<Process>,
-                boost::noncopyable {
+        boost::noncopyable {
 public:
     Process(
         const ConstRunCommandRequestPtr& request,

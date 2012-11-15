@@ -18,19 +18,19 @@ using namespace cetty::config;
 
 class ZurgSlaveConfig : public ConfigObject{
 public:
-    std::string name_;
-    std::string prefix_;
-    std::string masterAddress_;
+    std::string name;
+    std::string prefix;
+    std::string masterAddress;
 
-    int listenPort_;
-    int masterPort_;
+    int listenPort;
+    int masterPort;
 
-    int zombieInterval_;
-    int heartbeatInterval_;
+    int zombieInterval;
+    int heartbeatInterval;
 
     // redirect stream used by process
-    bool isRdtCmdStdout_;
-    bool isRdtCmdStderr_;
+    bool isRdtCmdStdout;
+    bool isRdtCmdStderr;
 
     ZurgSlaveConfig();
     virtual ConfigObject* create() const { return new ZurgSlaveConfig; }

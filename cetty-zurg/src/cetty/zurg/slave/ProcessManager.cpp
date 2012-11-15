@@ -21,14 +21,15 @@ using namespace cetty::config;
 
 ProcessManager::ProcessManager(const EventLoopPtr& loop)
     : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service(), SIGCHLD),
-      loop_(loop){
+      loop_(loop) {
     ConfigCenter::instance().configure(&config_);
-    if(config_.zombieInterval_ <= 0) {
-        config_.zombieInterval_ = 3000;
+
+    if (config_.zombieInterval <= 0) {
+        config_.zombieInterval = 3000;
     }
 
     startSignalWait();
-        //loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
+    //loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
 }
 
 ProcessManager::~ProcessManager() {
@@ -51,7 +52,7 @@ void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
 }
 
 void ProcessManager::startSignalWait() {
-	signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
+    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {
@@ -63,28 +64,32 @@ void ProcessManager::handleSignalWait(const boost::system::error_code& error, in
         bzero(&resourceUsage, sizeof(resourceUsage));
 
         pid_t pid = ::wait4(-1, &status, WNOHANG, &resourceUsage);
+
         if (pid > 0) {
             onExit(pid, status, resourceUsage);
-        } else {
+        }
+        else {
             LOG_FATAL << "ProcessManager::onChildProcessExit - wait4 ";
         }
 
         startSignalWait();
-    } else {
+    }
+    else {
         LOG_WARN << "Waiting the SIGCHLD signal has an error : "
                  << error.value()
                  << " : " << error.message();
     }
 }
 
-void ProcessManager::onTimer(){
+void ProcessManager::onTimer() {
     int status = 0;
     struct rusage resourceUsage;
     bzero(&resourceUsage, sizeof(resourceUsage));
     pid_t pid = 0;
-    while ( (pid = ::wait4(-1, &status, WNOHANG, &resourceUsage)) > 0){
-      LOG_INFO << "ChildManager::onTimer - child process " << pid << " exited.";
-      onExit(pid, status, resourceUsage);
+
+    while ((pid = ::wait4(-1, &status, WNOHANG, &resourceUsage)) > 0) {
+        LOG_INFO << "ChildManager::onTimer - child process " << pid << " exited.";
+        onExit(pid, status, resourceUsage);
     }
 }
 
@@ -95,7 +100,8 @@ void ProcessManager::onExit(pid_t pid, int status, const struct rusage& resource
     if (it != callbacks_.end()) {
         loop_->post(boost::bind(it->second, status, resourceUsage));
         callbacks_.erase(it);
-    } else {
+    }
+    else {
         LOG_ERROR << "No callback is found for process [" << pid << "].";
     }
 }

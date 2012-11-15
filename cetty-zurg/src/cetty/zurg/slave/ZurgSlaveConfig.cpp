@@ -18,30 +18,30 @@ CETTY_CONFIG_ADD_DESCRIPTOR(
     ZurgSlaveConfig,
     new ConfigDescriptor(
         9,
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, name_, STRING),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, prefix_, STRING),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterAddress_, STRING),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, listenPort_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterPort_, STRING),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, zombieInterval_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, heartbeatInterval_, INT32),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStdout_, BOOL),
-        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStderr_, BOOL)
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, name, STRING),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, prefix, STRING),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterAddress, STRING),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, listenPort, INT32),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, masterPort, STRING),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, zombieInterval, INT32),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, heartbeatInterval, INT32),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStdout, BOOL),
+        CETTY_CONFIG_FIELD(ZurgSlaveConfig, isRdtCmdStderr, BOOL)
     ),
     new ZurgSlaveConfig
 );
 
 
 ZurgSlaveConfig::ZurgSlaveConfig() :
-    name_(std::string()),
-    prefix_(std::string()),
-    masterAddress_(std::string()),
-    listenPort_(0),
-    masterPort_(0),
-    zombieInterval_(3000),
-    heartbeatInterval_(3000),
-    isRdtCmdStdout_(true),
-    isRdtCmdStderr_(true){
+    name(std::string()),
+    prefix(std::string()),
+    masterAddress(std::string()),
+    listenPort(0),
+    masterPort(0),
+    zombieInterval(3000),
+    heartbeatInterval(3000),
+    isRdtCmdStdout(true),
+    isRdtCmdStderr(true){
 
 }
 

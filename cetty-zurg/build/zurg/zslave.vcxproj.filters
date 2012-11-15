@@ -45,12 +45,6 @@
     <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\zurg\slave\Heartbeat.h">
-      <Filter>slave</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\zurg\slave\ProcessManager.h">
-      <Filter>slave</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ApplicationManager.h">
       <Filter>slave</Filter>
     </ClInclude>

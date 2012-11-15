@@ -15,18 +15,20 @@ namespace slave {
 
 using namespace cetty::zurg;
 
-Pipe::Pipe(){
+Pipe::Pipe() {
     if (::pipe(pipefd_)) {
         char buf[512];
         throw std::runtime_error(strerror_r(errno, buf, sizeof buf));
     }
+
     setFd(pipefd_[0], FD_CLOEXEC);
     setFd(pipefd_[1], FD_CLOEXEC);
 }
 
 Pipe::~Pipe() {
-    if (readFd() >= 0) closeRead();
-    if (writeFd() >= 0) closeWrite();
+    if (readFd() >= 0) { closeRead(); }
+
+    if (writeFd() >= 0) { closeWrite(); }
 }
 
 }

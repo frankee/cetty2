@@ -20,11 +20,11 @@ public:
     void start();
 
     const std::string &getName() const {
-        return config_.name_;
+        return config_.name;
     }
 
     const std::string &getPrefix() const {
-        return config_.prefix_;
+        return config_.prefix;
     }
 
    static const ZurgSlave &instance(){

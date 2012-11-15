@@ -11,12 +11,11 @@ namespace cetty {
 namespace zurg {
 namespace slave {
 
-ApplicationManager::ApplicationManager(ProcessManager *psManager)
-    :   processManager_(psManager) {
+ApplicationManager::ApplicationManager(ProcessManager* psManager)
+    :   processManager(psManager) {
 }
 
 ApplicationManager::~ApplicationManager() {
-
 }
 
 void ApplicationManager::add(
@@ -28,19 +27,23 @@ void ApplicationManager::add(
 
 
     std::pair<ApplicationMap::iterator, bool> insertRet =
-    		apps_.insert(std::pair<std::string, Application>(request->name(), Application()));
-    AddApplicationRequest &requestRef = (*(insertRet.first)).second.request;
+        applications.insert(
+            std::pair<std::string, Application>(request->name(), Application()));
+
+    AddApplicationRequest& requestRef = (*(insertRet.first)).second.request;
     requestRef.CopyFrom(*request);
     AddApplicationRequestPtr prev_request(insertRet.second ? NULL : &requestRef);
 
-    ApplicationStatus& status = apps_[request->name()].status;
+    ApplicationStatus& status = applications[request->name()].status;
     status.set_name(request->name());
+
     if (!status.has_state()) {
         LOG_INFO << "new app";
         status.set_state(kNewApp);
     }
 
     response->mutable_status()->CopyFrom(status);
+
     if (prev_request) {
         response->mutable_prev_request()->CopyFrom(*prev_request);
     }
@@ -55,9 +58,9 @@ void ApplicationManager::start(
 
     for (int i = 0; i < request->names_size(); ++i) {
         const std::string& appName = request->names(i);
-        ApplicationMap::iterator it = apps_.find(appName);
+        ApplicationMap::iterator it = applications.find(appName);
 
-        if (it != apps_.end()) {
+        if (it != applications.end()) {
             startApp((*it).second, response->add_status());
         }
         else {
@@ -72,8 +75,10 @@ void ApplicationManager::start(
     done(response);
 }
 
-void ApplicationManager::startApp(const Application &app, ApplicationStatus* out) {
-    const AddApplicationRequestPtr appRequest = const_cast<AddApplicationRequest *>(&(app.request)) ;
+void ApplicationManager::startApp(const Application& app, ApplicationStatus* out) {
+    const AddApplicationRequestPtr appRequest =
+        const_cast<AddApplicationRequest*>(&(app.request));
+
     ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
@@ -82,18 +87,20 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
 
         try {
             err = process->start();
-        } catch (...) {}
+        }
+        catch (...) {}
 
         if (err) {
             status->set_state(kError);
             // FIXME
-        }else {
+        }
+        else {
             status->set_state(kRunning);
             status->set_pid(process->pid());
 
             // without garentee of child process is running when
             // execute flow come here.
-            processManager_->runAtExit(
+            processManager->runAtExit(
                 process->pid(),
                 boost::bind(
                     &ApplicationManager::onProcessExit,
@@ -105,12 +112,13 @@ void ApplicationManager::startApp(const Application &app, ApplicationStatus* out
             );
         }
 
-        if(out != NULL) out->CopyFrom(*status);
-    } else {
-    	if(out != NULL){
+        if (out != NULL) { out->CopyFrom(*status); }
+    }
+    else {
+        if (out != NULL) {
             out->CopyFrom(*status);
             out->set_message("Already running.");
-    	}
+        }
     }
 }
 
@@ -129,14 +137,16 @@ void ApplicationManager::onProcessExit(
     const std::string& appName = process->name();
     LOG_WARN << "AppManager[" << appName << "] onProcessExit";
 
-    ApplicationMap::iterator it = apps_.find(appName);
-    if (it != apps_.end()) {
+    ApplicationMap::iterator it = applications.find(appName);
+
+    if (it != applications.end()) {
         Application& app = (*it).second;
         app.status.set_state(kExited);
 
         // restart it
-       startApp((*it).second, NULL);
-    } else {
+        startApp((*it).second, NULL);
+    }
+    else {
         LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
     }
 }

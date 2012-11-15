@@ -19,7 +19,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-namespace cetty{
+namespace cetty {
 namespace zurg {
 namespace slave {
 
@@ -51,22 +51,27 @@ int redirect(bool toFile, const std::string& prefix, const char* postfix) {
         ::snprintf(buf, sizeof buf, "%s.%d.%s", prefix.c_str(),
                    cetty::util::Process::id(), postfix);
         fd = ::open(buf, O_WRONLY | O_CREAT, 0644);
-    } else {
+    }
+    else {
         fd = ::open("/dev/null", O_WRONLY | O_CREAT, 0644);
     }
-    if(!setFd(fd, FD_CLOEXEC)) {
-    	LOG_ERROR << "Set FD_CLOEXEC failed";
+
+    if (!setFd(fd, FD_CLOEXEC)) {
+        LOG_ERROR << "Set FD_CLOEXEC failed";
     }
+
     return fd;
 }
 
-std::string getFileConent(const std::string &fileName, bool remove){
-	SmallFile sf(fileName);
-	int size = -1;
-	int err = sf.readToBuffer(&size);
-	if(remove) unlink(fileName.c_str());
-	if(!err) return std::string().assign(sf.buffer(), size);
-	else return std::string();
+std::string getFileConent(const std::string& fileName, bool remove) {
+    SmallFile sf(fileName);
+    int size = -1;
+    int err = sf.readToBuffer(&size);
+
+    if (remove) { unlink(fileName.c_str()); }
+
+    if (!err) { return std::string().assign(sf.buffer(), size); }
+    else { return std::string(); }
 }
 
 Process::Process(
@@ -78,8 +83,8 @@ Process::Process(
       doneCallback_(done),
       childPid_(0),
       startTimeInJiffies_(0),
-      redirectStdout_(ZurgSlave::instance().config_.isRdtCmdStdout_),
-      redirectStderr_(ZurgSlave::instance().config_.isRdtCmdStderr_),
+      redirectStdout_(ZurgSlave::instance().config_.isRdtCmdStdout),
+      redirectStderr_(ZurgSlave::instance().config_.isRdtCmdStderr),
       runCommand_(true) {
 
 }
@@ -123,10 +128,11 @@ Process::~Process() {
 }
 
 int Process::start() {
-	 startTime_ = boost::posix_time::microsec_clock::universal_time();
+    startTime_ = boost::posix_time::microsec_clock::universal_time();
 
     // todo: assert(numThreads() == 1);
     int availabltFds = maxOpenFiles() - openedFiles();
+
     if (availabltFds < 20) {
         // to fork() and capture stdout/stderr, we need new file descriptors.
         return EMFILE;
@@ -137,19 +143,22 @@ int Process::start() {
     Pipe stdError;
 
     pid_t result = ::fork();
+
     if (result == 0) {
         int ret = ::mkdir(request_->cwd().c_str(), 0755);
-        if(ret < 0){
-        	if(errno == EEXIST) {
-        		LOG_INFO << request_->cwd()
-        				 << " is already exist.";
-        	} else {
+
+        if (ret < 0) {
+            if (errno == EEXIST) {
+                LOG_INFO << request_->cwd()
+                         << " is already exist.";
+            }
+            else {
                 char buf[512];
-                char *error = strerror_r(errno, buf, sizeof(buf));
+                char* error = strerror_r(errno, buf, sizeof(buf));
                 LOG_INFO << "Make process's work directory : "
-                     << request_->cwd() << " error :" << error;
+                         << request_->cwd() << " error :" << error;
                 exit(1);
-        	}
+            }
         }
 
         int stdoutFd = -1;
@@ -157,21 +166,23 @@ int Process::start() {
 
         std::string startTimeStr = to_iso_string(startTime_);
         stdoutFd = redirect(
-            redirectStdout_,
-        	request_->cwd() + "/" + STDOUT_PREFIX_,
-        	startTimeStr.c_str()
-        );
+                       redirectStdout_,
+                       request_->cwd() + "/" + STDOUT_PREFIX_,
+                       startTimeStr.c_str()
+                   );
         stderrFd = redirect(
-        	redirectStderr_,
-        	request_->cwd() + "/" + STDERR_PREFIX_,
-        	startTimeStr.c_str()
-        );
+                       redirectStderr_,
+                       request_->cwd() + "/" + STDERR_PREFIX_,
+                       startTimeStr.c_str()
+                   );
 
         execChild(execError, stdoutFd, stderrFd);
-    } else if (result > 0) {
+    }
+    else if (result > 0) {
         childPid_ = result;
         return afterFork(execError, stdOutput, stdError);
-    } else {
+    }
+    else {
         return errno;
     }
 }
@@ -183,63 +194,74 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
     }
 
     try {
-    	execError.closeRead();
+        execError.closeRead();
         ProcStatFile stat(cetty::util::Process::id());
+
         if (!stat.valid_) {
             LOG_INFO << "Process [pid = "
                      << cetty::util::Process::id()
                      << "]state is not valid.";
             stat.startTime_ = 0;
         }
+
         execError.write(stat.startTime_);
 
         std::vector<const char*> argv;
         argv.reserve(request_->args_size() + 2);
         argv.push_back(request_->command().c_str());
+
         for (int i = 0; i < request_->args_size(); ++i) {
             argv.push_back(request_->args(i).c_str());
         }
+
         argv.push_back(NULL);
 
         //todo ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
         if (::chdir(request_->cwd().c_str()) < 0) {
-        	LOG_ERROR << "Set process's work directory failed.";
+            LOG_ERROR << "Set process's work directory failed.";
             throw static_cast<int>(errno);
         }
 
         // FIXME: max_memory_mb
         // FIXME: environ with execvpe
         int stdInput = ::open("/dev/null", O_RDONLY);
+
         if (stdInput < 0) {
-        	LOG_ERROR << "Open /dev/null failed.";
+            LOG_ERROR << "Open /dev/null failed.";
             throw static_cast<int>(errno);
         }
 
         if (stdOutput < 0 || stdError < 0) {
             if (stdOutput >= 0) { ::close(stdOutput); }
+
             if (stdError >= 0) { ::close(stdError); }
+
             throw static_cast<int>(EACCES);
         }
 
         if (::dup2(stdInput, STDIN_FILENO) < 0) {
-        	LOG_ERROR << "Duplicate stdin failed.";
+            LOG_ERROR << "Duplicate stdin failed.";
             throw static_cast<int>(errno);
         }
+
         ::close(stdInput);
 
         if (::dup2(stdOutput, STDOUT_FILENO) < 0) {
             LOG_ERROR << "Duplicate stdout failed.";
             throw static_cast<int>(errno);
         }
+
         close(stdOutput);
-        if(!setFl(STDOUT_FILENO, O_SYNC)) {
-        	LOG_ERROR << "Set file O_SYNC failed.";
+
+        if (!setFl(STDOUT_FILENO, O_SYNC)) {
+            LOG_ERROR << "Set file O_SYNC failed.";
         }
 
         if (::dup2(stdError, STDERR_FILENO) < 0) {
             LOG_ERROR << "Duplicate stderr failed.";
             throw static_cast<int>(errno);
         }
+
         close(stdError);
 
         const char* cmd = request_->command().c_str();
@@ -247,16 +269,19 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
 
         LOG_INFO << "Execute new process image failed.";
         throw static_cast<int>(errno);
-    } catch (int error) {
+    }
+    catch (int error) {
         execError.write(error);
         char buf[512];
         fprintf(stderr, "CHILD %s (errno=%d)\n",
                 strerror_r(error, buf, sizeof buf),
                 error);
-    } catch (...) {
+    }
+    catch (...) {
         int error = EINVAL;
         execError.write(error);
     }
+
     ::exit(1);
 }
 
@@ -271,18 +296,21 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
     int64_t childErrno = 0;
 
     ssize_t n = execError.read(&childStartTime);
-    if (n != sizeof(childStartTime) || childStartTime == 0){
-    	LOG_ERROR << "PARENT read start time from child ["
-    			  << childPid_
-    			  << "] error. ";
+
+    if (n != sizeof(childStartTime) || childStartTime == 0) {
+        LOG_ERROR << "PARENT read start time from child ["
+                  << childPid_
+                  << "] error. ";
     }
+
     startTimeInJiffies_ = childStartTime;
 
     n = execError.read(&childErrno);
+
     if (n == 0) {
         LOG_INFO << "PARENT child process ["
-        		 << childPid_
-        		 << "] start successfully";
+                 << childPid_
+                 << "] start successfully";
 
         char filename[64];
         ::snprintf(filename, sizeof filename, "/proc/%d/exe", childPid_);
@@ -292,29 +320,34 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
         if (len >= 0) {
             exe_file_.assign(buf, len);
             LOG_INFO << filename << " -> " << exe_file_;
-        } else {
+        }
+        else {
             LOG_ERROR << "Fail to read link " << filename;
         }
 
 
         if (runCommand_) {
 
-        } else {
+        }
+        else {
 
         }
 
         return 0;
-    } else if (n == sizeof(childErrno)) {
+    }
+    else if (n == sizeof(childErrno)) {
         int err = static_cast<int>(childErrno);
         char buf[512];
         LOG_ERROR << "PARENT child error " << strerror_r(err, buf, sizeof buf)
                   << " (errno=" << childErrno << ")";
         return err;
-    } else if (n < 0) {
+    }
+    else if (n < 0) {
         int err = errno;
         LOG_ERROR << "PARENT child errno: " << err;
         return err;
-    } else {
+    }
+    else {
         LOG_ERROR << "PARENT read :" << n;
         return EINVAL;
     }
@@ -326,21 +359,24 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
 
 void Process::onTimeoutWeak(const boost::weak_ptr<Process>& wkPtr) {
     ProcessPtr ptr(wkPtr.lock());
-    if (ptr) ptr->onTimeout();
+
+    if (ptr) { ptr->onTimeout(); }
 }
 
 void Process::onTimeout() {
     LOG_INFO << "Process[" << childPid_ << "] onTimeout";
 
     const ProcStatFile stat(childPid_);
+
     if (stat.valid_
-        && stat.ppid_ == cetty::util::Process::id()
-        && stat.startTime_ == startTimeInJiffies_) {
+            && stat.ppid_ == cetty::util::Process::id()
+            && stat.startTime_ == startTimeInJiffies_) {
         int ret = ::kill(childPid_, SIGINT);
-        if(ret < 0){
-        	if(errno == ESRCH)
-        		LOG_INFO << "Process [" << childPid_
-        		         << " is not exist.";
+
+        if (ret < 0) {
+            if (errno == ESRCH)
+                LOG_INFO << "Process [" << childPid_
+                         << " is not exist.";
         }
     }
 }
@@ -353,7 +389,8 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     if (WIFEXITED(status)) {
         snprintf(buf, sizeof buf, "exit status %d", WEXITSTATUS(status));
         response_->set_exit_status(WEXITSTATUS(status));
-    } else if (WIFSIGNALED(status)) {
+    }
+    else if (WIFSIGNALED(status)) {
         snprintf(buf, sizeof buf, "signaled %d%s",
                  WTERMSIG(status), WCOREDUMP(status) ? " (core dump)" : "");
         response_->set_signaled(WTERMSIG(status));
@@ -377,32 +414,34 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     doneCallback_(response_);
 }
 
-std::string Process::getCommandOutput(){
-	if(!redirectStdout_)
-		return std::string("Standard out is redirected to /dev/null");
+std::string Process::getCommandOutput() {
+    if (!redirectStdout_) {
+        return std::string("Standard out is redirected to /dev/null");
+    }
 
     std::string startTimeStr = to_iso_string(startTime_);
     char buf[256];
     bzero(buf, sizeof(buf));
     ::snprintf(buf, sizeof buf, "%s.%d.%s",
-    		   (request_->cwd() + "/" + STDOUT_PREFIX_).c_str(),
+               (request_->cwd() + "/" + STDOUT_PREFIX_).c_str(),
                childPid_, startTimeStr.c_str());
     std::string fileName(buf);
     return getFileConent(fileName, true);
 }
 
-std::string Process::getCommandError(){
-	if(!redirectStderr_)
-		return std::string("Standard error is redirected to /dev/null");
+std::string Process::getCommandError() {
+    if (!redirectStderr_) {
+        return std::string("Standard error is redirected to /dev/null");
+    }
 
-	std::string startTimeStr = to_iso_string(startTime_);
-	char buf[256];
-	bzero(buf, sizeof(buf));
-	::snprintf(buf, sizeof buf, "%s.%d.%s",
-	    	   (request_->cwd() + "/" + STDERR_PREFIX_).c_str(),
-	           childPid_, startTimeStr.c_str());
-	std::string fileName(buf);
-	return getFileConent(fileName, true);
+    std::string startTimeStr = to_iso_string(startTime_);
+    char buf[256];
+    bzero(buf, sizeof(buf));
+    ::snprintf(buf, sizeof buf, "%s.%d.%s",
+               (request_->cwd() + "/" + STDERR_PREFIX_).c_str(),
+               childPid_, startTimeStr.c_str());
+    std::string fileName(buf);
+    return getFileConent(fileName, true);
 }
 
 }

@@ -195,7 +195,7 @@ void AsioServerSocketChannel::accept() {
                               factory,
                               pipeline);
 
-    LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
+    LOG_INFO << "AsioSocketChannel firing the Channel Open Event.";
     c->getPipeline()->fireChannelOpen();
 
     acceptor.async_accept(c->getSocket(),
@@ -239,7 +239,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
             factory,
             pipeline);
 
-        LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
+        LOG_INFO << "AsioSocketChannel firing the Channel Open Event.";
         newChannel->getPipeline()->fireChannelOpen();
 
         acceptor.async_accept(newChannel->getSocket(),

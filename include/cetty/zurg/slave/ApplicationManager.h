@@ -30,10 +30,11 @@ class ProcessManager;
 
 using namespace cetty::channel;
 
-struct Application{
+struct Application {
     AddApplicationRequest request;
     ApplicationStatus status;
 };
+
 typedef boost::shared_ptr<Application> ApplicationPtr;
 
 class ApplicationManager : boost::noncopyable {
@@ -41,50 +42,40 @@ public:
     ApplicationManager(ProcessManager*);
     ~ApplicationManager();
 
-    void add(
-        const ConstAddApplicationRequestPtr& request,
+    void add(const ConstAddApplicationRequestPtr& request,
         const AddApplicationResponsePtr& response,
-        const DoneCallback& done
-    );
+        const DoneCallback& done);
 
-    void start(
-        const ConstStartApplicationsRequestPtr& request,
+    void start(const ConstStartApplicationsRequestPtr& request,
         const StartApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
+        const DoneCallback& done);
 
-    void stop(
-        const ConstStopApplicationRequestPtr& request,
+    void stop(const ConstStopApplicationRequestPtr& request,
         const StopApplicationResponsePtr& response,
-        const DoneCallback& done
-    );
+        const DoneCallback& done);
 
-    void list(
-        const ConstListApplicationsRequestPtr& request,
+    void list(const ConstListApplicationsRequestPtr& request,
         const ListApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
+        const DoneCallback& done);
 
-    void remove(
-        const ConstRemoveApplicationsRequestPtr& request,
+    void remove(const ConstRemoveApplicationsRequestPtr& request,
         const RemoveApplicationsResponsePtr& response,
-        const DoneCallback& done
-    );
+        const DoneCallback& done);
 
 private:
-    void startApp(const Application &, ApplicationStatus* out);
+    void startApp(const Application&, ApplicationStatus* out);
     void onProcessExit(const ProcessPtr&, int status, const struct rusage&);
 
 private:
     typedef std::map<std::string, Application> ApplicationMap;
 
 private:
-    ProcessManager* processManager_;
-
-    ApplicationMap apps_;
+    ProcessManager* processManager;
+    ApplicationMap applications;
 };
 
-
-}}}
+}
+}
+}
 
 #endif /* APPLICATIONMANAGER_H_ */

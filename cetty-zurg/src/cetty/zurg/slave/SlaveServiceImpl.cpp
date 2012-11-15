@@ -22,15 +22,11 @@ using namespace cetty::util;
 using namespace cetty::channel;
 
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
-    : psManager_(new ProcessManager(loop)),
-      apps_(new ApplicationManager(psManager_.get())) {
+    : processManager(new ProcessManager(loop)),
+      applicationManager(new ApplicationManager(processManager.get())) {
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
-}
-
-void SlaveServiceImpl::start() {
-
 }
 
 void SlaveServiceImpl::getHardware(
@@ -143,7 +139,7 @@ void SlaveServiceImpl::runCommand(
         response->set_error_code(err);
         done(response);
     } else {
-        psManager_->runAtExit(
+        processManager->runAtExit(
             process->pid(),  // bind strong ptr
             boost::bind(
                 &Process::onCommandExit,
@@ -203,35 +199,35 @@ void SlaveServiceImpl::addApplication(
     const AddApplicationResponsePtr& response,
     const DoneCallback& done) {
 
-    apps_->add(request, response, done);
+    applicationManager->add(request, response, done);
 }
 
 void SlaveServiceImpl::startApplications(
     const ConstStartApplicationsRequestPtr& request,
     const StartApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    apps_->start(request, response, done);
+    applicationManager->start(request, response, done);
 }
 
 void SlaveServiceImpl::stopApplication(
     const ConstStopApplicationRequestPtr& request,
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {
-    apps_->stop(request, response, done);
+    applicationManager->stop(request, response, done);
 }
 
 void SlaveServiceImpl::listApplications(
     const ConstListApplicationsRequestPtr& request,
     const ListApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    apps_->list(request, response, done);
+    applicationManager->list(request, response, done);
 }
 
 void SlaveServiceImpl::removeApplications(
     const ConstRemoveApplicationsRequestPtr& request,
     const RemoveApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    apps_->remove(request, response, done);
+    applicationManager->remove(request, response, done);
 }
 
 }

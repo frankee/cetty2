@@ -169,14 +169,15 @@ message ApplicationStatus {
 message AddApplicationRequest {
   required string          name = 1;
   required string        binary = 2;
-  repeated string          args = 3;
-  repeated string          envs = 4;
-  optional bool       envs_only = 5 [default = false];
-  optional bool redirect_stdout = 6 [default = true];
-  optional bool redirect_stderr = 7 [default = true];
-  required string    slave_name = 8;
-  optional int32  max_memory_mb = 9 [default = 32768];
-  optional string       comment = 10;
+  optional string           cwd = 3;
+  repeated string          args = 4;
+  repeated string          envs = 5;
+  optional bool       envs_only = 6 [default = false];
+  optional bool redirect_stdout = 7 [default = true];
+  optional bool redirect_stderr = 8 [default = true];
+  required string    slave_name = 9;
+  optional int32  max_memory_mb = 10 [default = 32768];
+  optional string       comment = 11;
 
   repeated string     md5sum_files = 20;
   repeated string expected_md5sums = 21;

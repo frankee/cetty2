@@ -26,27 +26,27 @@ ZurgSlave::ZurgSlave(){
 }
 
 void ZurgSlave::init(){
-    if (config_.masterAddress_.empty()){
+    if (config_.masterAddress.empty()){
         LOG_WARN << "Master address is empty.";
-        config_.masterAddress_="127.0.0.1";
+        config_.masterAddress ="127.0.0.1";
     }
-    if(config_.masterPort_ <= 0){
+    if(config_.masterPort <= 0){
         LOG_ERROR << "Master listen port is error.";
-        config_.masterPort_ = 6636;
+        config_.masterPort = 6636;
     }
 
-    if(config_.listenPort_ <= 0){
+    if(config_.listenPort <= 0){
         LOG_ERROR << "Slave listen port is error.";
-        config_.listenPort_ = 6637;
+        config_.listenPort = 6637;
     }
 
-   if(config_.prefix_.empty()){
-       config_.prefix_ = "/tmp";
+   if(config_.prefix.empty()){
+       config_.prefix = "/tmp";
        LOG_WARN << "Zurg slave profix is not set, set to "
-                << config_.prefix_;
+                << config_.prefix;
    }
 
-   if(config_.name_.empty()){
+   if(config_.name.empty()){
        LOG_WARN << "Zurg slave name is empty";
    }
 }
@@ -84,11 +84,12 @@ using namespace cetty::craft::builder;
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
 
-    CraftServerBuilder builder(1, 1);
+    CraftServerBuilder builder;
     builder.registerService(
         new SlaveServiceImpl(builder.getParentPool()->getNextLoop()));
 
-    builder.buildHttp(8080);
+    //builder.buildHttp(8080);
+    builder.buildAll();
     builder.waitingForExit();
 
     return 0;

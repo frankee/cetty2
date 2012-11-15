@@ -50,7 +50,6 @@ private:
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
-
     ZurgSlaveConfig config_;
     boost::asio::signal_set signals_;
     EventLoopPtr loop_;

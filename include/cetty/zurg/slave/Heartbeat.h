@@ -12,8 +12,10 @@
 namespace cetty {
 namespace zurg {
 namespace master {
-    class MasterService_Stub;
-}}}
+class MasterService_Stub;
+}
+}
+}
 
 namespace cetty {
 namespace zurg {
@@ -23,28 +25,28 @@ class ProcFs;
 using namespace cetty::zurg::master;
 using namespace cetty::channel;
 
-class Heartbeat : boost::noncopyable{
- public:
-  Heartbeat(const EventLoopPtr &loop,
-            MasterService_Stub* stub);
-  ~Heartbeat();
-  void start();
-  void stop();
+class Heartbeat : boost::noncopyable {
+public:
+    Heartbeat(const EventLoopPtr& loop,
+              MasterService_Stub* stub);
+    ~Heartbeat();
+    void start();
+    void stop();
 
- private:
-  void init();
-  void onTimer();
+private:
+    void init();
+    void onTimer();
 
-  void beat(bool showStatic);
+    void beat(bool showStatic);
 
-  EventLoopPtr loop_;
-  std::string name_;
-  int port_;
-  MasterService_Stub* stub_;
-  boost::scoped_ptr<ProcFs> procFs_;
-  bool beating_;
+    EventLoopPtr loop_;
+    std::string name_;
+    int port_;
+    MasterService_Stub* stub_;
+    boost::scoped_ptr<ProcFs> procFs_;
+    bool beating_;
 
-  ZurgSlaveConfig config_;
+    ZurgSlaveConfig config_;
 };
 
 }

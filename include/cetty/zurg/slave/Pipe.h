@@ -42,7 +42,7 @@ private:
 };
 
 inline
-void Pipe::write(int64_t x){
+void Pipe::write(int64_t x) {
     ssize_t n = ::write(writeFd(), &x, sizeof(x));
     assert(n == sizeof(x));
 }
