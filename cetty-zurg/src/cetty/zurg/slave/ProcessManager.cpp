@@ -56,7 +56,8 @@ void ProcessManager::startSignalWait() {
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {
-    LOG_DEBUG << "Receive a SIGCHLD signal.";
+    LOG_DEBUG << "Receive a SIGCHLD signal. ["
+    		  << signal << "]";
 
     if (!error) {
         int status = 0;

@@ -78,7 +78,6 @@ void ApplicationManager::start(
 void ApplicationManager::startApp(const Application& app, ApplicationStatus* out) {
     const AddApplicationRequestPtr appRequest =
         const_cast<AddApplicationRequest*>(&(app.request));
-
     ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
@@ -127,6 +126,28 @@ void ApplicationManager::stop(
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {
 
+	ApplicationStatus responseStatus = response->status();
+	const std::string& appName = request->names();
+
+	ApplicationMap::iterator it = applications.find(appName);
+	if (it != applications.end()) {
+	    pid_t pid = (*it).second.status.pid();
+	    if(!kill(pid, SIGSTOP)){
+	       // just send signal to process
+	       responseStatus.set_state(kExited);
+	       responseStatus.set_name(appName);
+	       responseStatus.set_message("Send SIGSTOP to stop application successfully.");
+	    } else {
+	    	responseStatus.set_state(kError);
+	        responseStatus.set_name(appName);
+	        responseStatus.set_message("Send SIGSTOP to stop application failed.");
+	    }
+	} else {
+		responseStatus.set_state(kUnknown);
+	    responseStatus.set_name(appName);
+	    responseStatus.set_message("Application is unknown.");
+	}
+	done(response);
 }
 
 void ApplicationManager::onProcessExit(
@@ -137,14 +158,18 @@ void ApplicationManager::onProcessExit(
     const std::string& appName = process->name();
     LOG_WARN << "AppManager[" << appName << "] onProcessExit";
 
+    bool isStart = false;
+    if(WIFSIGNALED(status)){
+    	if(WTERMSIG(status) != SIGINT && WTERMSIG(status) != SIGQUIT &&
+    	   WTERMSIG(status) != SIGTERM && WTERMSIG(status) != SIGSTOP)
+    		isStart = true;
+    }
     ApplicationMap::iterator it = applications.find(appName);
-
     if (it != applications.end()) {
         Application& app = (*it).second;
         app.status.set_state(kExited);
 
-        // restart it
-        startApp((*it).second, NULL);
+        if(isStart) startApp((*it).second, NULL);
     }
     else {
         LOG_ERROR << "AppManager[" << appName << "] - Unknown app ";
