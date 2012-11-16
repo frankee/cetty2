@@ -120,8 +120,14 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
         timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
         timerCallback();
 
+        timers.remove(timeout);
+
+        //FIXME
+        AsioDeadlineTimeoutPtr newTimeout
+            = new AsioDeadlineTimeout(ioService, millisecond);
+
         boost::system::error_code code;
-        boost::asio::deadline_timer& timer = timeout->getTimer();
+        boost::asio::deadline_timer& timer = newTimeout->getTimer();
         timer.expires_from_now(
             boost::posix_time::milliseconds(millisecond),
             code);
@@ -133,10 +139,11 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
                                          timerCallback,
                                          millisecond,
                                          boost::cref(timeout)));
-            timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
+            newTimeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
+            timers.push_back(newTimeout);
         }
         else {
-            timers.remove(timeout);
+            //timers.remove(timeout);
             //LOG_ERROR << "";
         }
     }
