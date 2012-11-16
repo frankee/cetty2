@@ -126,7 +126,7 @@ set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 
 if (CMAKE_COMPILER_IS_GNUCXX)
   set(CXX_FLAGS
-    #-g
+    -g
     # -DVALGRIND
     -D_FILE_OFFSET_BITS=64
     -Wall

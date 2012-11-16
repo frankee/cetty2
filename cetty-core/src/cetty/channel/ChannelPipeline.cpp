@@ -57,7 +57,7 @@ ChannelPipeline::ChannelPipeline()
 }
 
 ChannelPipeline::~ChannelPipeline() {
-    LOG_DEBUG << "ChannelPipeline dector";
+    //LOG_DEBUG << "ChannelPipeline dector";
 
     STLDeleteValues(&name2ctx);
 }
