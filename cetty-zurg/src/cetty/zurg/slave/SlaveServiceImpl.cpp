@@ -209,7 +209,7 @@ void SlaveServiceImpl::startApplications(
     applicationManager->start(request, response, done);
 }
 
-void SlaveServiceImpl::stopApplication(
+void SlaveServiceImpl::stopApplications(
     const ConstStopApplicationRequestPtr& request,
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {

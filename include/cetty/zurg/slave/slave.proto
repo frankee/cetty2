@@ -230,7 +230,7 @@ service SlaveService {
   rpc runScript (RunScriptRequest) returns (RunCommandResponse);
   rpc addApplication (AddApplicationRequest) returns (AddApplicationResponse);
   rpc startApplications (StartApplicationsRequest) returns (StartApplicationsResponse);
-  rpc stopApplication (StopApplicationRequest) returns (StopApplicationResponse);
+  rpc stopApplications (StopApplicationRequest) returns (StopApplicationResponse);
   rpc listApplications (ListApplicationsRequest) returns (ListApplicationsResponse);
   rpc removeApplications (RemoveApplicationsRequest) returns (RemoveApplicationsResponse);
 }
