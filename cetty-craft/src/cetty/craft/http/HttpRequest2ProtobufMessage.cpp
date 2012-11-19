@@ -289,10 +289,10 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
                     || StringUtil::iequals(value.c_str(), "1")
                     || StringUtil::iequals(value.c_str(), "yes")
                     || StringUtil::iequals(value.c_str(), "y")) {
-                        reflection->AddBool(message, field, true);
+                        reflection->SetBool(message, field, true);
                 }
                 else {
-                    reflection->AddBool(message, field, false);
+                    reflection->SetBool(message, field, false);
                 }
                 break;
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
