@@ -160,7 +160,7 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
-        if (pipeline && !pipeline->isAttached()) {
+        if (pipeline && pipeline->isAttached()) {
             LOG_WARN << "handleRead Error : " << error.value()
                 << " msg: \"" << error.message()
                 << "\" then close the channel.";
