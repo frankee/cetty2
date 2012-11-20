@@ -18,9 +18,11 @@
  */
 
 #include <vector>
-#include <cetty/Types.h>
 #include <boost/variant.hpp>
+#include <boost/function.hpp>
 #include <google/protobuf/stubs/common.h>
+
+#include <cetty/Types.h>
 
 namespace google {
 namespace protobuf {
@@ -45,7 +47,11 @@ public:
             std::vector<const std::string*>,
             std::vector<const Message*> > FieldValue;
 
+    typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
+
 public:
+    static ChecksumFunction adler32Checksum;
+
     static FieldValue getMessageField(const std::string& name,
                                       const Message& message);
 

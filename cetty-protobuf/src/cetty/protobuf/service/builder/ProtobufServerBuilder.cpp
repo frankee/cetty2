@@ -26,6 +26,7 @@
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
+#include <cetty/protobuf/service/ProtobufUtil.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -75,8 +76,19 @@ void ProtobufServerBuilder::init() {
 ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
     ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
-    pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
+                          16 * 1024 * 1024,
+                          0,
+                          4,
+                          0,
+                          4,
+                          4,
+                          ProtobufUtil::adler32Checksum));
+
+    pipeline->addLast("frameEncoder", new LengthFieldPrepender(
+                          4,
+                          4,
+                          ProtobufUtil::adler32Checksum));
 
     pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
     pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());

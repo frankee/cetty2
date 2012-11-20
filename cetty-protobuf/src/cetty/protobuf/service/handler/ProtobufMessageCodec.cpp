@@ -27,7 +27,10 @@ namespace handler {
 using namespace cetty::buffer;
 using namespace cetty::protobuf::service::handler;
 
-bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wireType, int* fieldNumber, int* fieldLength) {
+bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer,
+                                       int* wireType,
+                                       int* fieldNumber,
+                                       int* fieldLength) {
     if (NULL == wireType || NULL == fieldNumber || NULL == fieldLength) {
         return false;
     }
@@ -39,6 +42,7 @@ bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer, int* wire
     if (*wireType == WIRETYPE_LENGTH_DELIMITED) {
         *fieldLength = (int)decodeVarint(buffer);
     }
+
     return true;
 }
 
@@ -54,7 +58,8 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     int temp = 0;
     int ret = 0;
     int i = 0;
-	int off = 0;
+    int off = 0;
+
     while (true) {
         temp = buffer->readByte();
 
@@ -65,49 +70,55 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
             ++i;
         }
         else {
-			off = 7*i;
-			ret = ret + (temp<<off);
+            off = 7*i;
+            ret = ret + (temp<<off);
             //ret = ret + (temp<<0);
             //达到最后一个数据，并且是最高位
             break;
         }
     }
+
     return ret;
 }
 
-void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer, int64_t data) {
+void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer,
+        int64_t data) {
     buffer->writeLong(data);
 }
 
-void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,int data) {
+void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,
+        int data) {
     buffer->writeInt(data);
 }
 
-void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,int fieldNum,int type) {
+void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,
+                                     int fieldNum,
+                                     int type) {
     int tag = (fieldNum << 3) | type;
     ProtobufMessageCodec::encodeVarint(buffer, tag);
 }
 
-void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer, int val) {
+void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer,
+                                        int val) {
     uint8_t buf[10];
     int varintSize = 0;
+
     do {
         uint8_t byte = val & 0x7f;
 
-		if (val>>7) 
-		{
-			byte |= 0x80;
-		}
+        if (val>>7) {
+            byte |= 0x80;
+        }
 
         buf[varintSize] = byte;
-		varintSize++;
-	    val >>= 7;
+        varintSize++;
+        val >>= 7;
     }
     while (val);
 
-	//write to buffer
-	StringPiece bytes((const char*)buf, varintSize);
-	buffer->writeBytes(bytes);
+    //write to buffer
+    StringPiece bytes((const char*)buf, varintSize);
+    buffer->writeBytes(bytes);
 }
 
 }

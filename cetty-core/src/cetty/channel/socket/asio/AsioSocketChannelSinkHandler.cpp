@@ -31,9 +31,8 @@ AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler() {
 }
 
 AsioSocketChannelSinkHandler::~AsioSocketChannelSinkHandler() {
-    LOG_DEBUG << "decotr";
+    LOG_DEBUG << "dctr";
 }
-
 
 void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
         const SocketAddress& remoteAddress,
@@ -41,7 +40,7 @@ void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
     ensureChannelSet(ctx);
 
-    if (!ensureOpen(future)) {
+    if (!ensureOpen(ctx, future)) {
         return;
     }
 

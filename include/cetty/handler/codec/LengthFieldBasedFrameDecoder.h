@@ -215,31 +215,14 @@ public:
      *        the length of the length field
      *
      */
-    LengthFieldBasedFrameDecoder(
-        int maxFrameLength,
-        int lengthFieldOffset,
-        int lengthFieldLength)
-        : discardingTooLongFrame(false),
-          maxFrameLength(maxFrameLength),
-          tooLongFrameLength(0),
-          bytesToDiscard(0),
-          lengthFieldOffset(lengthFieldOffset),
-          lengthFieldLength(lengthFieldLength),
-          lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-          lengthAdjustment(0),
-          initialBytesToStrip(0),
-          checksumFieldLength(0),
-          checksumCalcOffset(0) {
-        validateParameters();
-    }
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength);
 
-    LengthFieldBasedFrameDecoder(
-        int maxFrameLength,
-        int lengthFieldOffset,
-        int lengthFieldLength,
-        const std::string& header1);
-
-
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 const std::string& header1);
 
     /**
      * Creates a new instance.
@@ -261,20 +244,7 @@ public:
                                  int lengthFieldOffset,
                                  int lengthFieldLength,
                                  int lengthAdjustment,
-                                 int initialBytesToStrip)
-        : discardingTooLongFrame(false),
-          maxFrameLength(maxFrameLength),
-          tooLongFrameLength(0),
-          bytesToDiscard(0),
-          lengthFieldOffset(lengthFieldOffset),
-          lengthFieldLength(lengthFieldLength),
-          lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-          lengthAdjustment(lengthAdjustment),
-          initialBytesToStrip(initialBytesToStrip),
-          checksumFieldLength(0),
-          checksumCalcOffset(0) {
-        validateParameters();
-    }
+                                 int initialBytesToStrip);
 
     LengthFieldBasedFrameDecoder(int maxFrameLength,
                                  int lengthFieldOffset,
@@ -290,21 +260,26 @@ public:
                                  int lengthAdjustment,
                                  int initialBytesToStrip,
                                  int checksumFieldLength,
-                                 const ChecksumFunction& checksumFunction)
-        : discardingTooLongFrame(false),
-          maxFrameLength(maxFrameLength),
-          tooLongFrameLength(0),
-          bytesToDiscard(0),
-          lengthFieldOffset(lengthFieldOffset),
-          lengthFieldLength(lengthFieldLength),
-          lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-          lengthAdjustment(lengthAdjustment),
-          initialBytesToStrip(initialBytesToStrip),
-          checksumFieldLength(checksumFieldLength),
-          checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
-          checksumFunction(checksumFunction) {
-        validateParameters();
-    }
+                                 const ChecksumFunction& checksumFunction);
+
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 int lengthAdjustment,
+                                 int initialBytesToStrip,
+                                 int checksumFieldLength,
+                                 const ChecksumFunction& checksumFunction,
+                                 const std::string& header1);
+
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 int lengthAdjustment,
+                                 int initialBytesToStrip,
+                                 int checksumFieldLength,
+                                 const ChecksumFunction& checksumFunction,
+                                 const std::string& header1,
+                                 const std::string& header2);
 
     LengthFieldBasedFrameDecoder(int maxFrameLength,
                                  int lengthFieldOffset,
@@ -313,43 +288,33 @@ public:
                                  int initialBytesToStrip,
                                  int checksumFieldLength,
                                  int checksumCalcOffset,
-                                 const ChecksumFunction& checksumFunction)
-        : discardingTooLongFrame(false),
-          maxFrameLength(maxFrameLength),
-          tooLongFrameLength(0),
-          bytesToDiscard(0),
-          lengthFieldOffset(lengthFieldOffset),
-          lengthFieldLength(lengthFieldLength),
-          lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-          lengthAdjustment(lengthAdjustment),
-          initialBytesToStrip(initialBytesToStrip),
-          checksumFieldLength(checksumFieldLength),
-          checksumCalcOffset(checksumCalcOffset),
-          checksumFunction(checksumFunction) {
-        validateParameters();
-    }
+                                 const ChecksumFunction& checksumFunction);
 
-    LengthFieldBasedFrameDecoder(const LengthFieldBasedFrameDecoder& decoder)
-        : discardingTooLongFrame(decoder.discardingTooLongFrame),
-          maxFrameLength(decoder.maxFrameLength),
-          tooLongFrameLength(0),
-          bytesToDiscard(0),
-          lengthFieldOffset(decoder.lengthFieldOffset),
-          lengthFieldLength(decoder.lengthFieldLength),
-          lengthFieldEndOffset(decoder.lengthFieldEndOffset),
-          lengthAdjustment(decoder.lengthAdjustment),
-          header1(decoder.header1),
-          header2(decoder.header2),
-          initialBytesToStrip(decoder.initialBytesToStrip),
-          checksumFieldLength(decoder.checksumFieldLength),
-          checksumCalcOffset(decoder.checksumCalcOffset),
-          checksumFunction(decoder.checksumFunction) {
-    }
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 int lengthAdjustment,
+                                 int initialBytesToStrip,
+                                 int checksumFieldLength,
+                                 int checksumCalcOffset,
+                                 const ChecksumFunction& checksumFunction,
+                                 const std::string& header1);
+
+    LengthFieldBasedFrameDecoder(int maxFrameLength,
+                                 int lengthFieldOffset,
+                                 int lengthFieldLength,
+                                 int lengthAdjustment,
+                                 int initialBytesToStrip,
+                                 int checksumFieldLength,
+                                 int checksumCalcOffset,
+                                 const ChecksumFunction& checksumFunction,
+                                 const std::string& header1,
+                                 const std::string& header2);
 
     virtual ~LengthFieldBasedFrameDecoder() {}
 
     virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const { return "LengthFieldBasedFrameDecoder"; }
+    virtual std::string toString() const;
 
 protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
@@ -373,6 +338,8 @@ protected:
     ChannelBufferPtr extractFrame(const ChannelBufferPtr& buffer, int index, int length);
 
 private:
+    LengthFieldBasedFrameDecoder(const LengthFieldBasedFrameDecoder& decoder);
+
     void fail(ChannelHandlerContext& ctx, int frameLength);
     void validateParameters();
 
@@ -387,14 +354,14 @@ private:
     int  lengthFieldEndOffset;
     int  lengthAdjustment;
 
-    std::string header1;
-    std::string header2;
-
     int  initialBytesToStrip;
-    
+
     int  checksumFieldLength;
     int  checksumCalcOffset;
     ChecksumFunction checksumFunction;
+
+    std::string header1;
+    std::string header2;
 };
 
 }

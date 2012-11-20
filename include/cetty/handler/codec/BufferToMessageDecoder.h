@@ -61,19 +61,19 @@ public:
 
         if (in && in->readable()) {
             callDecode(ctx);
-        }
 
-        try {
-            if (inboundTransfer.unfoldAndAdd(decodeLast(ctx, in))) {
-                in->discardReadBytes();
-                ctx.fireMessageUpdated();
+            try {
+                if (inboundTransfer.unfoldAndAdd(decodeLast(ctx, in))) {
+                    in->discardReadBytes();
+                    ctx.fireMessageUpdated();
+                }
             }
-        }
-        catch (const CodecException& e) {
-            ctx.fireExceptionCaught(e);
-        }
-        catch (const std::exception& e) {
-            ctx.fireExceptionCaught(DecoderException(e.what()));
+            catch (const CodecException& e) {
+                ctx.fireExceptionCaught(e);
+            }
+            catch (const std::exception& e) {
+                ctx.fireExceptionCaught(DecoderException(e.what()));
+            }
         }
 
         ctx.fireChannelInactive();

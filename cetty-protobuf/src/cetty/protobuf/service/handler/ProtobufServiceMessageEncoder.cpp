@@ -43,7 +43,8 @@ ChannelBufferPtr ProtobufServiceMessageEncoder::encode(ChannelHandlerContext& ct
         const ProtobufServiceMessagePtr& msg) {
     if (msg) {
         int msgSize = msg->getMessageSize();
-        ChannelBufferPtr buffer = Unpooled::buffer(msgSize + 8);
+        ChannelBufferPtr buffer = Unpooled::buffer(msgSize + 32, 4);
+        buffer->writeBytes("RPC0");
         encodeMessage(buffer, msg);
 
         return buffer;
@@ -74,14 +75,14 @@ void ProtobufServiceMessageEncoder::encodeMessage(const ChannelBufferPtr& buffer
 
     if (serviceMessage.type() == REQUEST) {
         int payloadSize = message->getPayload()->GetCachedSize();
-        ProtobufMessageCodec::encodeTag(buffer, 6, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufMessageCodec::encodeTag(buffer, 8, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
         ProtobufMessageCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobufMessage(buffer, *message->getPayload());
     }
     else if (serviceMessage.type() == RESPONSE) {
         int payloadSize = message->getPayload()->GetCachedSize();
-        ProtobufMessageCodec::encodeTag(buffer, 7, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufMessageCodec::encodeTag(buffer, 9, ProtobufMessageCodec::WIRETYPE_LENGTH_DELIMITED);
         ProtobufMessageCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobufMessage(buffer, *message->getPayload());

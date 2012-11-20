@@ -16,6 +16,8 @@
 
 #include <cetty/protobuf/service/ProtobufUtil.h>
 
+#include <zlib.h>
+
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
@@ -174,6 +176,18 @@ void ProtobufUtil::logHandler(google::protobuf::LogLevel level,
            logLevel).stream() << "Protobuf - " << message;
     //}
 }
+
+static uint32_t adler32Check(const uint8_t* buffer, int bufferSize) {
+    return static_cast<uint32_t>(
+               ::adler32(1,
+                         reinterpret_cast<const Bytef*>(buffer),
+                         static_cast<uInt>(bufferSize)));
+}
+
+ProtobufUtil::ChecksumFunction ProtobufUtil::adler32Checksum =
+    boost::bind(&adler32Check,
+                _1,
+                _2);
 
 }
 }

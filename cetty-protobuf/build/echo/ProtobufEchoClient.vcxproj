@@ -66,7 +66,7 @@
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;libprotobufd.lib;ProtobufServiced.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;libprotobufd.lib;ProtobufServiced.lib;zlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
       <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>

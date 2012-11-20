@@ -180,10 +180,32 @@ class ServiceMessage : public ::google::protobuf::Message {
   inline cetty::protobuf::service::ErrorCode error() const;
   inline void set_error(cetty::protobuf::service::ErrorCode value);
   
-  // optional bytes request = 6;
+  // optional string request_encoding = 6;
+  inline bool has_request_encoding() const;
+  inline void clear_request_encoding();
+  static const int kRequestEncodingFieldNumber = 6;
+  inline const ::std::string& request_encoding() const;
+  inline void set_request_encoding(const ::std::string& value);
+  inline void set_request_encoding(const char* value);
+  inline void set_request_encoding(const char* value, size_t size);
+  inline ::std::string* mutable_request_encoding();
+  inline ::std::string* release_request_encoding();
+  
+  // optional string response_encoding = 7;
+  inline bool has_response_encoding() const;
+  inline void clear_response_encoding();
+  static const int kResponseEncodingFieldNumber = 7;
+  inline const ::std::string& response_encoding() const;
+  inline void set_response_encoding(const ::std::string& value);
+  inline void set_response_encoding(const char* value);
+  inline void set_response_encoding(const char* value, size_t size);
+  inline ::std::string* mutable_response_encoding();
+  inline ::std::string* release_response_encoding();
+  
+  // optional bytes request = 8;
   inline bool has_request() const;
   inline void clear_request();
-  static const int kRequestFieldNumber = 6;
+  static const int kRequestFieldNumber = 8;
   inline const ::std::string& request() const;
   inline void set_request(const ::std::string& value);
   inline void set_request(const char* value);
@@ -191,10 +213,10 @@ class ServiceMessage : public ::google::protobuf::Message {
   inline ::std::string* mutable_request();
   inline ::std::string* release_request();
   
-  // optional bytes response = 7;
+  // optional bytes response = 9;
   inline bool has_response() const;
   inline void clear_response();
-  static const int kResponseFieldNumber = 7;
+  static const int kResponseFieldNumber = 9;
   inline const ::std::string& response() const;
   inline void set_response(const ::std::string& value);
   inline void set_response(const char* value);
@@ -214,6 +236,10 @@ class ServiceMessage : public ::google::protobuf::Message {
   inline void clear_has_method();
   inline void set_has_error();
   inline void clear_has_error();
+  inline void set_has_request_encoding();
+  inline void clear_has_request_encoding();
+  inline void set_has_response_encoding();
+  inline void clear_has_response_encoding();
   inline void set_has_request();
   inline void clear_has_request();
   inline void set_has_response();
@@ -226,11 +252,13 @@ class ServiceMessage : public ::google::protobuf::Message {
   int type_;
   int error_;
   ::std::string* method_;
+  ::std::string* request_encoding_;
+  ::std::string* response_encoding_;
   ::std::string* request_;
   ::std::string* response_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
   
   friend void  protobuf_AddDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto();
   friend void protobuf_AssignDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto();
@@ -510,15 +538,131 @@ inline void ServiceMessage::set_error(cetty::protobuf::service::ErrorCode value)
   error_ = value;
 }
 
-// optional bytes request = 6;
-inline bool ServiceMessage::has_request() const {
+// optional string request_encoding = 6;
+inline bool ServiceMessage::has_request_encoding() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void ServiceMessage::set_has_request() {
+inline void ServiceMessage::set_has_request_encoding() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void ServiceMessage::clear_has_request() {
+inline void ServiceMessage::clear_has_request_encoding() {
   _has_bits_[0] &= ~0x00000020u;
+}
+inline void ServiceMessage::clear_request_encoding() {
+  if (request_encoding_ != &::google::protobuf::internal::kEmptyString) {
+    request_encoding_->clear();
+  }
+  clear_has_request_encoding();
+}
+inline const ::std::string& ServiceMessage::request_encoding() const {
+  return *request_encoding_;
+}
+inline void ServiceMessage::set_request_encoding(const ::std::string& value) {
+  set_has_request_encoding();
+  if (request_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    request_encoding_ = new ::std::string;
+  }
+  request_encoding_->assign(value);
+}
+inline void ServiceMessage::set_request_encoding(const char* value) {
+  set_has_request_encoding();
+  if (request_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    request_encoding_ = new ::std::string;
+  }
+  request_encoding_->assign(value);
+}
+inline void ServiceMessage::set_request_encoding(const char* value, size_t size) {
+  set_has_request_encoding();
+  if (request_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    request_encoding_ = new ::std::string;
+  }
+  request_encoding_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceMessage::mutable_request_encoding() {
+  set_has_request_encoding();
+  if (request_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    request_encoding_ = new ::std::string;
+  }
+  return request_encoding_;
+}
+inline ::std::string* ServiceMessage::release_request_encoding() {
+  clear_has_request_encoding();
+  if (request_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = request_encoding_;
+    request_encoding_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+
+// optional string response_encoding = 7;
+inline bool ServiceMessage::has_response_encoding() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ServiceMessage::set_has_response_encoding() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ServiceMessage::clear_has_response_encoding() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ServiceMessage::clear_response_encoding() {
+  if (response_encoding_ != &::google::protobuf::internal::kEmptyString) {
+    response_encoding_->clear();
+  }
+  clear_has_response_encoding();
+}
+inline const ::std::string& ServiceMessage::response_encoding() const {
+  return *response_encoding_;
+}
+inline void ServiceMessage::set_response_encoding(const ::std::string& value) {
+  set_has_response_encoding();
+  if (response_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    response_encoding_ = new ::std::string;
+  }
+  response_encoding_->assign(value);
+}
+inline void ServiceMessage::set_response_encoding(const char* value) {
+  set_has_response_encoding();
+  if (response_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    response_encoding_ = new ::std::string;
+  }
+  response_encoding_->assign(value);
+}
+inline void ServiceMessage::set_response_encoding(const char* value, size_t size) {
+  set_has_response_encoding();
+  if (response_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    response_encoding_ = new ::std::string;
+  }
+  response_encoding_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceMessage::mutable_response_encoding() {
+  set_has_response_encoding();
+  if (response_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    response_encoding_ = new ::std::string;
+  }
+  return response_encoding_;
+}
+inline ::std::string* ServiceMessage::release_response_encoding() {
+  clear_has_response_encoding();
+  if (response_encoding_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = response_encoding_;
+    response_encoding_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+
+// optional bytes request = 8;
+inline bool ServiceMessage::has_request() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void ServiceMessage::set_has_request() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void ServiceMessage::clear_has_request() {
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void ServiceMessage::clear_request() {
   if (request_ != &::google::protobuf::internal::kEmptyString) {
@@ -568,15 +712,15 @@ inline ::std::string* ServiceMessage::release_request() {
   }
 }
 
-// optional bytes response = 7;
+// optional bytes response = 9;
 inline bool ServiceMessage::has_response() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void ServiceMessage::set_has_response() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void ServiceMessage::clear_has_response() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void ServiceMessage::clear_response() {
   if (response_ != &::google::protobuf::internal::kEmptyString) {
