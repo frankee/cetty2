@@ -27,6 +27,7 @@ SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
+
 }
 
 void SlaveServiceImpl::getHardware(

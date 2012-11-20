@@ -62,6 +62,9 @@ public:
         const RemoveApplicationsResponsePtr& response,
         const DoneCallback& done);
 
+    // kill all applications started by #startApp() and self
+    void stopAll();
+
 private:
     void startApp(const Application&, ApplicationStatus* out);
     void onProcessExit(const ProcessPtr&, int status, const struct rusage&);

@@ -33,6 +33,7 @@ using namespace cetty::channel;
 class ProcessManager : boost::noncopyable {
 public:
     typedef boost::function<void (int status, const struct rusage&)> Callback;
+    typedef boost::function<void ()> stopAllCallback;
 
 public:
     ProcessManager(const EventLoopPtr& loop);
@@ -42,6 +43,16 @@ public:
 
     // @brief register callback which will be called after process exited.
     void runAtExit(pid_t pid, const Callback&);
+
+    void setStopAll(stopAllCallback stopAll){
+    	stopAll_ = stopAll;
+    }
+
+    /*
+     * @brief stop all child process and self
+     *  Deal with SIGINT SIGTERM SIGQUIT
+     */
+    void stopAll(){ if(stopAll_) stopAll_();}
 
 private:
     void onTimer();
@@ -54,6 +65,7 @@ private:
     boost::asio::signal_set signals_;
     EventLoopPtr loop_;
     std::map<pid_t, Callback> callbacks_;
+    stopAllCallback stopAll_;
 };
 
 }

@@ -33,6 +33,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(
 
 
 ZurgSlaveConfig::ZurgSlaveConfig() :
+    ConfigObject("ZurgSlaveConfig"),
     name(std::string()),
     prefix(std::string()),
     masterAddress(std::string()),

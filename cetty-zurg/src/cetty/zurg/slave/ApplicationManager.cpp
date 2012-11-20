@@ -13,6 +13,7 @@ namespace slave {
 
 ApplicationManager::ApplicationManager(ProcessManager* psManager)
     :   processManager(psManager) {
+	psManager->setStopAll(boost::bind(&ApplicationManager::stopAll, this));
 }
 
 ApplicationManager::~ApplicationManager() {
@@ -62,9 +63,7 @@ void ApplicationManager::start(
 
         if (it != applications.end()) {
             startApp((*it).second, response->add_status());
-        }
-        else {
-            // application not found
+        } else {
             ApplicationStatus* status = response->add_status();
             status->set_state(kUnknown);
             status->set_name(appName);
@@ -86,14 +85,12 @@ void ApplicationManager::startApp(const Application& app, ApplicationStatus* out
 
         try {
             err = process->start();
-        }
-        catch (...) {}
+        } catch (...) {}
 
         if (err) {
             status->set_state(kError);
             // FIXME
-        }
-        else {
+        } else {
             status->set_state(kRunning);
             status->set_pid(process->pid());
 
@@ -112,8 +109,7 @@ void ApplicationManager::startApp(const Application& app, ApplicationStatus* out
         }
 
         if (out != NULL) { out->CopyFrom(*status); }
-    }
-    else {
+    } else {
         if (out != NULL) {
             out->CopyFrom(*status);
             out->set_message("Already running.");
@@ -132,7 +128,7 @@ void ApplicationManager::stop(
 	ApplicationMap::iterator it = applications.find(appName);
 	if (it != applications.end()) {
 	    pid_t pid = (*it).second.status.pid();
-	    if(!kill(pid, SIGSTOP)){
+	    if(pid > 0 && !kill(pid, SIGSTOP)){
 	       // just send signal to process
 	       responseStatus.set_state(kExited);
 	       responseStatus.set_name(appName);
@@ -181,6 +177,27 @@ void ApplicationManager::list(
     const ListApplicationsResponsePtr& response,
     const DoneCallback& done) {
 
+	ApplicationMap::iterator it = applications.begin();
+	for(; it != applications.end(); ++ it){
+		ApplicationStatus *as = response->add_status();
+		as->set_name((*it).second.status.name());
+		as->set_pid((*it).second.status.pid());
+
+		if((*it).second.status.state() == kNewApp){
+			as->set_message("NEW");
+		} else if((*it).second.status.state() == kRunning){
+			as->set_message("RUNNING");
+		} else if((*it).second.status.state() == kExited){
+			as->set_message("EXITED");
+		} else if((*it).second.status.state() == kError){
+			as->set_message("ERROR");
+		}
+		if((*it).second.status.state() == kRunning){
+			pid_t pid = (*it).second.status.pid();
+			if(pid > 0) kill(pid, SIGSTOP);
+		}
+	}
+	done(response);
 }
 
 void ApplicationManager::remove(
@@ -188,6 +205,26 @@ void ApplicationManager::remove(
     const RemoveApplicationsResponsePtr& response,
     const DoneCallback& done) {
 
+	int i = 0;
+	std::string name;
+	for(; i < request->name_size(); ++i){
+		name = request->name(i);
+		applications.erase(name);
+	}
+
+}
+
+void ApplicationManager::stopAll(){
+	ApplicationMap::iterator it = applications.begin();
+	for(; it != applications.end(); ++ it){
+		if((*it).second.status.state() == kRunning){
+			pid_t pid = (*it).second.status.pid();
+			LOG_INFO << "Kill process [" << pid << "]";
+			if(pid > 0) kill(pid, SIGSTOP);
+		}
+	}
+	LOG_INFO << "Main process [" << getpid() << "]exit.";
+	exit(0);
 }
 
 }

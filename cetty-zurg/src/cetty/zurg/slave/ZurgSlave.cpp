@@ -1,6 +1,9 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -19,6 +22,7 @@ namespace slave {
 
 using namespace cetty::service;
 using namespace cetty::zurg::master;
+
 
 ZurgSlave::ZurgSlave(){
     ConfigCenter::instance().configure(&config_);
