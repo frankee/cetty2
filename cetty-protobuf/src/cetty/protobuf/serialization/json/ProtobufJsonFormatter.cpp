@@ -152,7 +152,7 @@ public:
     }
 
     OutputStream& appendValue(double value) {
-        StringUtil::printf(output, "%lf", value);
+        StringUtil::printf(output, "%f", value);
         return *this;
     }
 
