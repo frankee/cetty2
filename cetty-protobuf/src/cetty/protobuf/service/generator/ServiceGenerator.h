@@ -73,6 +73,9 @@ class ServiceGenerator {
   // Generate implementations of everything declared by GenerateDeclarations().
   void GenerateImplementation(io::Printer* printer);
 
+public:
+    static bool protoHasService;
+
  private:
   enum RequestOrResponse { REQUEST, RESPONSE };
   enum VirtualOrNon { VIRTUAL, NON_VIRTUAL };
