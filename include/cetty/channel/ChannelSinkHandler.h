@@ -61,8 +61,7 @@ public:
     virtual std::string toString() const;
 
 protected:
-    bool ensureOpen(ChannelHandlerContext& ctx,
-        const ChannelFuturePtr& future);
+    bool ensureOpen(const ChannelFuturePtr& future);
 
     void closeIfClosed();
 

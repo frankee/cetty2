@@ -434,6 +434,8 @@ void AsioSocketChannel::doFlush(const ChannelBufferPtr& buffer,
             future->setFailure(ChannelException("Channel has been closed."));
         }
 
+        doClose();
+
         return;
     }
 

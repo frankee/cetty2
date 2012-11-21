@@ -174,7 +174,10 @@ ChannelPtr ServerBuilder::build(const std::string& name,
                                            childEventLoopPool));
     bootstraps.insert(std::make_pair(name, bootstrap));
 
-    bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+    //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+    //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
+    bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
     bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     bootstrap->setPipeline(pipeline);

@@ -30,7 +30,9 @@ namespace channel {
 void ChannelSinkHandler::bind(ChannelHandlerContext& ctx,
                               const SocketAddress& localAddress,
                               const ChannelFuturePtr& future) {
-    if (!ensureOpen(ctx, future)) {
+    ensureChannelSet(ctx);
+
+    if (!ensureOpen(future)) {
         return;
     }
 
@@ -137,11 +139,8 @@ std::string ChannelSinkHandler::toString() const {
     return "HeadHandler";
 }
 
-bool ChannelSinkHandler::ensureOpen(ChannelHandlerContext& ctx,
-                                    const ChannelFuturePtr& future) {
-    ensureChannelSet(ctx);
-
-    if (channel->isOpen()) {
+bool ChannelSinkHandler::ensureOpen(const ChannelFuturePtr& future) {
+    if (future->getChannel()->isOpen()) {
         return true;
     }
 

@@ -44,11 +44,8 @@ public:
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future);
 
-    // TODO: seperated with flush.
+    // TODO: separated with flush.
     //virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
-
-private:
-    void ensureChannelSet(ChannelHandlerContext& ctx);
 
 private:
     AsioSocketChannelPtr channel;

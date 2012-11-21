@@ -77,7 +77,7 @@ void ProtobufClientBuilder::init() {
     pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
     pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
 
-    pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
+    //pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 
     ClientBuilderType::setPipeline(pipeline);
 }

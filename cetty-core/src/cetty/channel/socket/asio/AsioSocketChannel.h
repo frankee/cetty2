@@ -124,7 +124,7 @@ private:
     friend class AsioServerSocketChannel;
     friend class AsioSocketChannelSinkHandler;
 
-protected:
+private:
     bool opened;
     bool isWriting;
     int  highWaterMarkCounter;
