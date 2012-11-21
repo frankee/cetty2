@@ -19,8 +19,8 @@ message(STATUS "generate header files ${ZURG_SLAVE_ACCESS_HDRS}")
 SET(zurg_lib cetty-zurg)
 cxx_static_library(${zurg_lib} ${zurg_sources})
 
-install(TARGETS ${zurg_lib} DESTINATION lib)
-install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/zurg/ DESTINATION include/cetty/zurg)
-
 cxx_executable_no_link(ZurgSlave cetty/zurg/slave ${zurg_sources} ${ZURG_SLAVE_ACCESS_SRCS} ${ZURG_MASTER_ACCESS_SRCS})
 cxx_link_with_pb(ZurgSlave cetty-zurg cetty-craft cetty-protobuf-serialization cetty-protobuf cetty-service cetty-config cetty yaml-cpp)
+
+install(TARGETS ${zurg_lib} DESTINATION lib)
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/cetty/zurg/ DESTINATION include/cetty/zurg)
