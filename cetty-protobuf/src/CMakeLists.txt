@@ -18,7 +18,7 @@ AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/png PNG_DIR)
 
 SET(GENERATOR_DIR cetty/protobuf/service/generator)
 
-cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR})
+cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR} cetty/protobuf/service/generator/ServiceGenerator.cpp)
 cxx_link_with_pb(ProtobufServiceGenerator protoc)
 
 PROTOBUF_GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service.proto)

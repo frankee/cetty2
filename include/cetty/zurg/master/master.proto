@@ -3,7 +3,7 @@ package cetty.zurg.master;
 option cc_generic_services = true;
 option java_generic_services = true;
 option py_generic_services = true;
-option java_package = "cetty.zurg.master";
+option java_package = "io.cetty.zurg.master";
 option java_outer_classname = "MasterProto";
 
 import "cetty/protobuf/service/service.proto";
