@@ -138,7 +138,7 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
                                          boost::asio::placeholders::error,
                                          timerCallback,
                                          millisecond,
-                                         boost::cref(timeout)));
+                                         newTimeout));
             newTimeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
             timers.push_back(newTimeout);
         }
