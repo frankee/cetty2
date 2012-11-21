@@ -267,7 +267,7 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
         map<string, string> sub_vars;
         sub_vars["classname"] = descriptor_->full_name();
         sub_vars["name"] = method->name();
-        sub_vars["response"] = method->output_type()->name();
+        sub_vars["response"] = method->output_type()->full_name();
 
         printer->Print(sub_vars,
 
