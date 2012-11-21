@@ -62,6 +62,7 @@ public:
 
 protected:
     bool ensureOpen(const ChannelFuturePtr& future);
+
     void closeIfClosed();
 
 private:

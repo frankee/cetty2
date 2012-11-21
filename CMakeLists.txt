@@ -248,9 +248,9 @@ endfunction()
 
 function(cxx_link_with_pb name)
   if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES})
+    target_link_libraries(${name} ${ARGN} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} z)
   elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES})
+    target_link_libraries(${name} ${ARGN} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} z)
   endif()
 endfunction()
 

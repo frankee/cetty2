@@ -101,7 +101,7 @@ void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
         if (wasActive && !channel->isActive()) {
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             channel->getPipeline()->fireChannelInactive();
-            
+
             channel->closeFuture.reset();
             channel->succeededFuture.reset();
 
@@ -140,7 +140,7 @@ std::string ChannelSinkHandler::toString() const {
 }
 
 bool ChannelSinkHandler::ensureOpen(const ChannelFuturePtr& future) {
-    if (channel->isOpen()) {
+    if (future->getChannel()->isOpen()) {
         return true;
     }
 

@@ -31,15 +31,16 @@ AsioSocketChannelSinkHandler::AsioSocketChannelSinkHandler() {
 }
 
 AsioSocketChannelSinkHandler::~AsioSocketChannelSinkHandler() {
-    LOG_DEBUG << "decotr";
+    LOG_DEBUG << "dctr";
 }
-
 
 void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
         const SocketAddress& remoteAddress,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    ensureChannelSet(ctx);
+    if (!channel) {
+        channel = boost::static_pointer_cast<AsioSocketChannel>(ctx.getChannel());
+    }
 
     if (!ensureOpen(future)) {
         return;
@@ -89,16 +90,11 @@ void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
 
 void AsioSocketChannelSinkHandler::flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
-    ensureChannelSet(ctx);
-    channel->doFlush(getOutboundChannelBuffer(), future);
-}
-
-void AsioSocketChannelSinkHandler::ensureChannelSet(ChannelHandlerContext& ctx) {
     if (!channel) {
-        channel = boost::dynamic_pointer_cast<AsioSocketChannel>(ctx.getChannel());
+        channel = boost::static_pointer_cast<AsioSocketChannel>(future->getChannel());
     }
 
-    BOOST_ASSERT(channel);
+    channel->doFlush(getOutboundChannelBuffer(), future);
 }
 
 #if 0

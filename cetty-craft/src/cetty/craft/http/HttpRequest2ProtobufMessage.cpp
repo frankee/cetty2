@@ -246,12 +246,24 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
             const std::string& value = *itr;
 
             switch (field->cpp_type()) {
+            case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
+                if (StringUtil::iequals(value.c_str(), "true")
+                    || StringUtil::iequals(value.c_str(), "1")
+                    || StringUtil::iequals(value.c_str(), "yes")
+                    || StringUtil::iequals(value.c_str(), "y")) {
+                        reflection->AddBool(message, field, true);
+                }
+                else {
+                    reflection->AddBool(message, field, false);
+                }
+
+                break;
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-                reflection->AddInt32(message, field, std::atoi(value.c_str()));
+                reflection->AddInt32(message, field, StringUtil::strto32(value));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-                reflection->AddInt64(message, field, std::atoi(value.c_str()));
+                reflection->AddInt64(message, field, StringUtil::strto64(value));
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
@@ -272,12 +284,23 @@ bool HttpRequest2ProtobufMessage::parseField(const HttpRequestTemplate& tmpl,
             const std::string& value = values.front();
 
             switch (field->cpp_type()) {
+            case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
+                if (StringUtil::iequals(value.c_str(), "true")
+                    || StringUtil::iequals(value.c_str(), "1")
+                    || StringUtil::iequals(value.c_str(), "yes")
+                    || StringUtil::iequals(value.c_str(), "y")) {
+                        reflection->SetBool(message, field, true);
+                }
+                else {
+                    reflection->SetBool(message, field, false);
+                }
+                break;
             case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-                reflection->SetInt32(message, field, std::atoi(value.c_str()));
+                reflection->SetInt32(message, field, StringUtil::strto32(value));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-                reflection->SetInt64(message, field, std::atoi(value.c_str()));
+                reflection->SetInt64(message, field, StringUtil::strto64(value));
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:

@@ -68,7 +68,7 @@ public:
         const StartApplicationsResponsePtr& response,
         const DoneCallback& done);
 
-    virtual void stopApplication(
+    virtual void stopApplications(
         const ConstStopApplicationRequestPtr& request,
         const StopApplicationResponsePtr& response,
         const DoneCallback& done);

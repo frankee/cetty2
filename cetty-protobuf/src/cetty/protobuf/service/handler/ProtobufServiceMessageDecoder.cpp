@@ -74,6 +74,9 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
     bool flag = false;
 
+    // for "RPC0"
+    buffer->offsetReaderIndex(4);
+
     while (buffer->readable() && !flag) {
         int wireType = 0;
         int fieldNum = 0;
@@ -114,12 +117,12 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
                 serviceMessage->set_error((ErrorCode)error);
                 break;
 
-            case 6:
+            case 8:
                 decodePayload(buffer, message);
                 flag = true;
                 break;
 
-            case 7:
+            case 9:
                 decodePayload(buffer, message);
                 flag = true;
                 break;

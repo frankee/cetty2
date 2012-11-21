@@ -21,6 +21,7 @@
 #include <cetty/handler/codec/LengthFieldPrepender.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 
+#include <cetty/protobuf/service/ProtobufUtil.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
@@ -34,7 +35,6 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
-using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
 ProtobufClientBuilder::ProtobufClientBuilder()
@@ -60,13 +60,24 @@ ProtobufClientBuilder::ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPo
 void ProtobufClientBuilder::init() {
     pipeline = ChannelPipelines::pipeline();
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 0, 4, 0, 4));
-    pipeline->addLast("frameEncoder", new LengthFieldPrepender(4));
+    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
+                          16 * 1024 * 1024,
+                          0,
+                          4,
+                          0,
+                          4,
+                          4,
+                          ProtobufUtil::adler32Checksum));
+
+    pipeline->addLast("frameEncoder", new LengthFieldPrepender(
+                          4,
+                          4,
+                          ProtobufUtil::adler32Checksum));
 
     pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
     pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
 
-    pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
+    //pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 
     ClientBuilderType::setPipeline(pipeline);
 }

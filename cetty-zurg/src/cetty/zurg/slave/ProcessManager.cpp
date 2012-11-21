@@ -20,7 +20,7 @@ using namespace cetty::channel::socket::asio;
 using namespace cetty::config;
 
 ProcessManager::ProcessManager(const EventLoopPtr& loop)
-    : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service(), SIGCHLD),
+    : signals_(boost::dynamic_pointer_cast<AsioService>(loop)->service()),
       loop_(loop) {
     ConfigCenter::instance().configure(&config_);
 
@@ -28,7 +28,13 @@ ProcessManager::ProcessManager(const EventLoopPtr& loop)
         config_.zombieInterval = 3000;
     }
 
+    signals_.add(SIGCHLD);
+    signals_.add(SIGTERM);
+    signals_.add(SIGQUIT);
+    signals_.add(SIGINT);
+
     startSignalWait();
+
     //loop_->runEvery(config_.zombieInterval_, boost::bind(&ProcessManager::onTimer, this));
 }
 
@@ -56,26 +62,30 @@ void ProcessManager::startSignalWait() {
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {
-    LOG_DEBUG << "Receive a SIGCHLD signal. ["
-    		  << signal << "]";
+    LOG_INFO << "Receive a signal. [" << signal << "]";
 
     if (!error) {
-        int status = 0;
-        struct rusage resourceUsage;
-        bzero(&resourceUsage, sizeof(resourceUsage));
+    	if(signal == SIGINT || signal == SIGTERM || signal == SIGQUIT){
+    		LOG_INFO << "Terminate all process.";
+            stopAll();
+    	} else if(signal == SIGCHLD){
+			int status = 0;
+			struct rusage resourceUsage;
+			bzero(&resourceUsage, sizeof(resourceUsage));
 
-        pid_t pid = ::wait4(-1, &status, WNOHANG, &resourceUsage);
+			pid_t pid = ::wait4(-1, &status, WNOHANG, &resourceUsage);
 
-        if (pid > 0) {
-            onExit(pid, status, resourceUsage);
-        }
-        else {
-            LOG_FATAL << "ProcessManager::onChildProcessExit - wait4 ";
-        }
+			if (pid > 0) {
+				onExit(pid, status, resourceUsage);
+			} else {
+				LOG_FATAL << "ProcessManager::onChildProcessExit - wait4 ";
+			}
 
-        startSignalWait();
-    }
-    else {
+			startSignalWait();
+    	} else {
+    		LOG_ERROR << "Unexcept signal :" << signal;
+    	}
+    } else {
         LOG_WARN << "Waiting the SIGCHLD signal has an error : "
                  << error.value()
                  << " : " << error.message();

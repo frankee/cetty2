@@ -110,7 +110,8 @@ public:
             while (!outboundQueue.empty()) {
                 OutstandingCallPtr& request = outboundQueue.front();
 
-                outboundTransfer.unfoldAndAdd(request);
+                ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                //outboundTransfer.unfoldAndAdd(request);
 
                 outStandingCalls.insert(std::make_pair(request->getId(), request));
                 notify = true;
@@ -143,7 +144,8 @@ public:
             while (!call.calls.empty()) {
                 OutstandingCallPtr& request = call.calls.front();
 
-                outboundTransfer.unfoldAndAdd(request);
+                channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                //outboundTransfer.unfoldAndAdd(request);
                 
                 outStandingCalls.insert(std::make_pair(request->getId(), request));
 

@@ -103,14 +103,17 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
     // Transform application request to run command request.
     RunCommandRequestPtr request = new RunCommandRequest;
     request->set_command(appRequest->binary());
+    if(!appRequest->cwd().empty()) {
+    	request->set_cwd(appRequest->cwd());
+    } else {
+        char dir[256];
+        snprintf(dir, sizeof dir, "%s/%s/%s",
+                 ZurgSlave::instance().getPrefix().c_str(),
+                 ZurgSlave::instance().getName().c_str(),
+                 appRequest->name().c_str());
 
-    char dir[256];
-    snprintf(dir, sizeof dir, "%s/%s/%s",
-             ZurgSlave::instance().getPrefix().c_str(),
-             ZurgSlave::instance().getName().c_str(),
-             appRequest->name().c_str());
-
-    request->set_cwd(dir);
+        request->set_cwd(dir);
+    }
 
     request->mutable_args()->CopyFrom(appRequest->args());
     request->mutable_envs()->CopyFrom(appRequest->envs());

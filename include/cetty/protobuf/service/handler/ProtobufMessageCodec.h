@@ -48,9 +48,9 @@ public:
     }
 
     static bool decodeField(const ChannelBufferPtr& buffer,
-        int* wireType,
-        int* fieldNumber,
-        int* fieldLength);
+                            int* wireType,
+                            int* fieldNumber,
+                            int* fieldLength);
 
     static int64_t decodeFixed64(const ChannelBufferPtr& buffer);
     static int decodeFixed32(const ChannelBufferPtr& buffer);
@@ -59,10 +59,11 @@ public:
     static void encodeFixed64(const ChannelBufferPtr& buffer, int64_t data);
     static void encodeFixed32(const ChannelBufferPtr& buffer, int data);
 
-    static void encodeTag(const ChannelBufferPtr& buffer, int fieldNum, int type);
-    static void encodeVarint(const ChannelBufferPtr& buffer, int val);
+    static void encodeTag(const ChannelBufferPtr& buffer,
+                          int fieldNum,
+                          int type);
 
-private:
+    static void encodeVarint(const ChannelBufferPtr& buffer, int val);
 
 private:
     ProtobufMessageCodec() {}

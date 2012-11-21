@@ -39,12 +39,14 @@ void protobuf_AssignDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto() {
       "cetty/protobuf/service/service.proto");
   GOOGLE_CHECK(file != NULL);
   ServiceMessage_descriptor_ = file->message_type(0);
-  static const int ServiceMessage_offsets_[7] = {
+  static const int ServiceMessage_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, service_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, method_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, request_encoding_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, response_encoding_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, request_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceMessage, response_),
   };
@@ -112,20 +114,21 @@ void protobuf_AddDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n$cetty/protobuf/service/service.proto\022\026"
     "cetty.protobuf.service\032 google/protobuf/"
-    "descriptor.proto\"\305\001\n\016ServiceMessage\0221\n\004t"
+    "descriptor.proto\"\372\001\n\016ServiceMessage\0221\n\004t"
     "ype\030\001 \002(\0162#.cetty.protobuf.service.Messa"
     "geType\022\n\n\002id\030\002 \002(\006\022\017\n\007service\030\003 \001(\t\022\016\n\006m"
     "ethod\030\004 \001(\t\0220\n\005error\030\005 \001(\0162!.cetty.proto"
-    "buf.service.ErrorCode\022\017\n\007request\030\006 \001(\014\022\020"
-    "\n\010response\030\007 \001(\014\"\007\n\005Empty*3\n\013MessageType"
-    "\022\013\n\007REQUEST\020\001\022\014\n\010RESPONSE\020\002\022\t\n\005ERROR\020\003*t"
-    "\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017\n\013WRONG_PROTO"
-    "\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_METHOD\020\003\022\023\n\017INV"
-    "ALID_REQUEST\020\004\022\024\n\020INVALID_RESPONSE\020\005:3\n\n"
-    "idempotent\022\036.google.protobuf.MethodOptio"
-    "ns\030\327\010 \001(\010:2\n\tno_return\022\036.google.protobuf"
-    ".MethodOptions\030\330\010 \001(\010B&\n\026cetty.protobuf."
-    "serviceB\014ServiceProto", 621);
+    "buf.service.ErrorCode\022\030\n\020request_encodin"
+    "g\030\006 \001(\t\022\031\n\021response_encoding\030\007 \001(\t\022\017\n\007re"
+    "quest\030\010 \001(\014\022\020\n\010response\030\t \001(\014\"\007\n\005Empty*3"
+    "\n\013MessageType\022\013\n\007REQUEST\020\001\022\014\n\010RESPONSE\020\002"
+    "\022\t\n\005ERROR\020\003*t\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017"
+    "\n\013WRONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_ME"
+    "THOD\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_R"
+    "ESPONSE\020\005:3\n\nidempotent\022\036.google.protobu"
+    "f.MethodOptions\030\327\010 \001(\010:2\n\tno_return\022\036.go"
+    "ogle.protobuf.MethodOptions\030\330\010 \001(\010B&\n\026ce"
+    "tty.protobuf.serviceB\014ServiceProto", 674);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "cetty/protobuf/service/service.proto", &protobuf_RegisterTypes);
   ServiceMessage::default_instance_ = new ServiceMessage();
@@ -190,6 +193,8 @@ const int ServiceMessage::kIdFieldNumber;
 const int ServiceMessage::kServiceFieldNumber;
 const int ServiceMessage::kMethodFieldNumber;
 const int ServiceMessage::kErrorFieldNumber;
+const int ServiceMessage::kRequestEncodingFieldNumber;
+const int ServiceMessage::kResponseEncodingFieldNumber;
 const int ServiceMessage::kRequestFieldNumber;
 const int ServiceMessage::kResponseFieldNumber;
 #endif  // !_MSC_VER
@@ -215,6 +220,8 @@ void ServiceMessage::SharedCtor() {
   service_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   method_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   error_ = 0;
+  request_encoding_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  response_encoding_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   request_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   response_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -230,6 +237,12 @@ void ServiceMessage::SharedDtor() {
   }
   if (method_ != &::google::protobuf::internal::kEmptyString) {
     delete method_;
+  }
+  if (request_encoding_ != &::google::protobuf::internal::kEmptyString) {
+    delete request_encoding_;
+  }
+  if (response_encoding_ != &::google::protobuf::internal::kEmptyString) {
+    delete response_encoding_;
   }
   if (request_ != &::google::protobuf::internal::kEmptyString) {
     delete request_;
@@ -276,11 +289,23 @@ void ServiceMessage::Clear() {
       }
     }
     error_ = 0;
+    if (has_request_encoding()) {
+      if (request_encoding_ != &::google::protobuf::internal::kEmptyString) {
+        request_encoding_->clear();
+      }
+    }
+    if (has_response_encoding()) {
+      if (response_encoding_ != &::google::protobuf::internal::kEmptyString) {
+        response_encoding_->clear();
+      }
+    }
     if (has_request()) {
       if (request_ != &::google::protobuf::internal::kEmptyString) {
         request_->clear();
       }
     }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_response()) {
       if (response_ != &::google::protobuf::internal::kEmptyString) {
         response_->clear();
@@ -384,12 +409,46 @@ bool ServiceMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(50)) goto parse_request;
+        if (input->ExpectTag(50)) goto parse_request_encoding;
         break;
       }
       
-      // optional bytes request = 6;
+      // optional string request_encoding = 6;
       case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_request_encoding:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_request_encoding()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->request_encoding().data(), this->request_encoding().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_response_encoding;
+        break;
+      }
+      
+      // optional string response_encoding = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_response_encoding:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_response_encoding()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->response_encoding().data(), this->response_encoding().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(66)) goto parse_request;
+        break;
+      }
+      
+      // optional bytes request = 8;
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_request:
@@ -398,12 +457,12 @@ bool ServiceMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(58)) goto parse_response;
+        if (input->ExpectTag(74)) goto parse_response;
         break;
       }
       
-      // optional bytes response = 7;
-      case 7: {
+      // optional bytes response = 9;
+      case 9: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_response:
@@ -469,16 +528,34 @@ void ServiceMessage::SerializeWithCachedSizes(
       5, this->error(), output);
   }
   
-  // optional bytes request = 6;
-  if (has_request()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      6, this->request(), output);
+  // optional string request_encoding = 6;
+  if (has_request_encoding()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->request_encoding().data(), this->request_encoding().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->request_encoding(), output);
   }
   
-  // optional bytes response = 7;
+  // optional string response_encoding = 7;
+  if (has_response_encoding()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->response_encoding().data(), this->response_encoding().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      7, this->response_encoding(), output);
+  }
+  
+  // optional bytes request = 8;
+  if (has_request()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      8, this->request(), output);
+  }
+  
+  // optional bytes response = 9;
   if (has_response()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      7, this->response(), output);
+      9, this->response(), output);
   }
   
   if (!unknown_fields().empty()) {
@@ -526,18 +603,38 @@ void ServiceMessage::SerializeWithCachedSizes(
       5, this->error(), target);
   }
   
-  // optional bytes request = 6;
+  // optional string request_encoding = 6;
+  if (has_request_encoding()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->request_encoding().data(), this->request_encoding().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->request_encoding(), target);
+  }
+  
+  // optional string response_encoding = 7;
+  if (has_response_encoding()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->response_encoding().data(), this->response_encoding().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        7, this->response_encoding(), target);
+  }
+  
+  // optional bytes request = 8;
   if (has_request()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        6, this->request(), target);
+        8, this->request(), target);
   }
   
-  // optional bytes response = 7;
+  // optional bytes response = 9;
   if (has_response()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        7, this->response(), target);
+        9, this->response(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -582,14 +679,30 @@ int ServiceMessage::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->error());
     }
     
-    // optional bytes request = 6;
+    // optional string request_encoding = 6;
+    if (has_request_encoding()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->request_encoding());
+    }
+    
+    // optional string response_encoding = 7;
+    if (has_response_encoding()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->response_encoding());
+    }
+    
+    // optional bytes request = 8;
     if (has_request()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->request());
     }
     
-    // optional bytes response = 7;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bytes response = 9;
     if (has_response()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
@@ -638,9 +751,17 @@ void ServiceMessage::MergeFrom(const ServiceMessage& from) {
     if (from.has_error()) {
       set_error(from.error());
     }
+    if (from.has_request_encoding()) {
+      set_request_encoding(from.request_encoding());
+    }
+    if (from.has_response_encoding()) {
+      set_response_encoding(from.response_encoding());
+    }
     if (from.has_request()) {
       set_request(from.request());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_response()) {
       set_response(from.response());
     }
@@ -673,6 +794,8 @@ void ServiceMessage::Swap(ServiceMessage* other) {
     std::swap(service_, other->service_);
     std::swap(method_, other->method_);
     std::swap(error_, other->error_);
+    std::swap(request_encoding_, other->request_encoding_);
+    std::swap(response_encoding_, other->response_encoding_);
     std::swap(request_, other->request_);
     std::swap(response_, other->response_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
@@ -858,3 +981,5 @@ void Empty::Swap(Empty* other) {
 }  // namespace cetty
 
 // @@protoc_insertion_point(global_scope)
+
+
