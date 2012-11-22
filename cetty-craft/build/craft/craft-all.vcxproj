@@ -102,6 +102,9 @@
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelConfig.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioWriteOperationQueue.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandlerContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h" />

@@ -11,7 +11,6 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/reflection_ops.h>
 #include <google/protobuf/wire_format.h>
-#include <cetty/protobuf/service/ProtobufServiceRegister.h>
 // @@protoc_insertion_point(includes)
 
 namespace cetty {
@@ -127,8 +126,8 @@ void protobuf_AddDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto() {
     "THOD\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_R"
     "ESPONSE\020\005:3\n\nidempotent\022\036.google.protobu"
     "f.MethodOptions\030\327\010 \001(\010:2\n\tno_return\022\036.go"
-    "ogle.protobuf.MethodOptions\030\330\010 \001(\010B&\n\026ce"
-    "tty.protobuf.serviceB\014ServiceProto", 674);
+    "ogle.protobuf.MethodOptions\030\330\010 \001(\010B)\n\031io"
+    ".cetty.protobuf.serviceB\014ServiceProto", 677);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "cetty/protobuf/service/service.proto", &protobuf_RegisterTypes);
   ServiceMessage::default_instance_ = new ServiceMessage();
@@ -981,5 +980,3 @@ void Empty::Swap(Empty* other) {
 }  // namespace cetty
 
 // @@protoc_insertion_point(global_scope)
-
-
