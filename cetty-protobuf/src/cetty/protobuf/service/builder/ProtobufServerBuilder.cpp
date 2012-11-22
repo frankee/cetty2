@@ -32,6 +32,8 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 
+#include <cetty/channel/CombinedChannelMessageHandler.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
@@ -73,6 +75,28 @@ void ProtobufServerBuilder::init() {
     registerPipeline(PROTOBUF_SERVICE_RPC, createProtobufServicePipeline());
 }
 
+class ProtobufServiceCodec
+    : public CombinedChannelMessageHandler<ChannelBufferPtr,
+    ProtobufServiceMessagePtr,
+    ProtobufServiceMessagePtr,
+    ChannelBufferPtr,
+    ChannelOutboundBufferHandlerContext> {
+public:
+    ProtobufServiceCodec()
+        : CombinedChannelMessageHandler(new ProtobufServiceMessageDecoder,
+        new ProtobufServiceMessageEncoder) {}
+
+    virtual ~ProtobufServiceCodec() {}
+
+    virtual ChannelHandlerPtr clone() {
+        return new ProtobufServiceCodec;
+    }
+
+    virtual std::string toString() const {
+        return "ProtobufServiceCodec";
+    }
+};
+
 ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
     ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
 
@@ -90,8 +114,9 @@ ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
                           4,
                           ProtobufUtil::adler32Checksum));
 
-    pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
-    pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
+    pipeline->addLast("protoCodec", new ProtobufServiceCodec);
+    //pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
+    //pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
 
     pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 

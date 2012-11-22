@@ -521,9 +521,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h">
       <Filter>core\channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelines.h">
       <Filter>core\channel</Filter>
     </ClInclude>
@@ -982,6 +979,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.h">
       <Filter>core\channel\socket\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h">
+      <Filter>core\channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandlerContext.h">
+      <Filter>core\channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h">
+      <Filter>core\channel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
