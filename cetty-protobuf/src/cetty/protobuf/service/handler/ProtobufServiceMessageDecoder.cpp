@@ -25,11 +25,14 @@
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
+using namespace cetty::logging;
 using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
@@ -57,6 +60,10 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
                         serviceMessage.service(), serviceMessage.method());
     }
 
+    if (prototype == NULL) {
+        LOG_ERROR << "prototype is null message maybe not parse correct!";
+        return false;
+    }
     google::protobuf::Message* payload = prototype->New();
     StringPiece arry;
     buffer->readableBytes(&arry);
