@@ -83,7 +83,11 @@ class ProtobufServiceCodec
     ChannelOutboundBufferHandlerContext> {
 public:
     ProtobufServiceCodec()
-        : CombinedChannelMessageHandler(new ProtobufServiceMessageDecoder,
+        : CombinedChannelMessageHandler<ChannelBufferPtr,
+    ProtobufServiceMessagePtr,
+    ProtobufServiceMessagePtr,
+    ChannelBufferPtr,
+    ChannelOutboundBufferHandlerContext> (new ProtobufServiceMessageDecoder,
         new ProtobufServiceMessageEncoder) {}
 
     virtual ~ProtobufServiceCodec() {}
