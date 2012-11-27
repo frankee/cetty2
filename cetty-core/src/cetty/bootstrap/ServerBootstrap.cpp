@@ -168,7 +168,7 @@ ServerBootstrap& ServerBootstrap::setFactory(const ChannelFactoryPtr& factory) {
         }
     }
 
-    Bootstrap::setFactory(factory);
+    AbstractBootstrap::setFactory(factory);
     return *this;
 }
 
@@ -185,7 +185,7 @@ ServerBootstrap& ServerBootstrap::setPipeline(const ChannelPipelinePtr& pipeline
         }
     }
 
-    Bootstrap::setPipeline(pipeline);
+    AbstractBootstrap::setPipeline(pipeline);
     return *this;
 }
 

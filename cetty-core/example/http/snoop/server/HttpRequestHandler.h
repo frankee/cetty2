@@ -53,7 +53,7 @@ using namespace cetty::handler::codec::http;
  * @version $Rev: 2288 $, $Date: 2010-05-27 21:40:50 +0900 (Thu, 27 May 2010) $
  */
 class HttpRequestHandler
-    : public ChannelInboundMessageHandlerAdapter<HttpPackage, VoidChannelMessage, HttpPackage> {
+    : public ChannelInboundMessageHandlerAdapter<HttpPackage, VoidMessage, HttpPackage> {
 public:
     HttpRequestHandler() : readingChunks(false) {}
     virtual ~HttpRequestHandler() {}
@@ -212,7 +212,7 @@ private:
 //         }
 
         // Write the response.
-        ChannelFuturePtr future = ctx.getChannel()->newFuture();
+        ChannelFuturePtr future = ctx.channel()->newFuture();
 
         // Close the non-keep-alive connection after the write operation is done.
         if (!keepAlive) {

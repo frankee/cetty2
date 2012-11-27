@@ -48,10 +48,10 @@ public:
         // Send greeting for a new connection.
         std::string str;
         StringUtil::printf(&str, "Welcome to %s !\r\n",
-                              ctx.getChannel()->getLocalAddress().toString().c_str());
+                              ctx.channel()->getLocalAddress().toString().c_str());
 
         outboundTransfer.write(Unpooled::copiedBuffer(str),
-                               ctx.getChannel()->newSucceededFuture());
+                               ctx.channel()->newSucceededFuture());
 
         boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
         str.clear();
@@ -59,7 +59,7 @@ public:
                               boost::posix_time::to_iso_string(now).c_str());
 
         outboundTransfer.write(Unpooled::copiedBuffer(str),
-                               ctx.getChannel()->newSucceededFuture());
+                               ctx.channel()->newSucceededFuture());
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
@@ -87,7 +87,7 @@ public:
 
         // We do not need to write a ChannelBuffer here.
         // We know the encoder inserted at TelnetPipelineFactory will do the conversion.
-        ChannelFuturePtr future = ctx.getChannel()->newFuture();
+        ChannelFuturePtr future = ctx.channel()->newFuture();
         outboundTransfer.write(Unpooled::copiedBuffer(response),
                                future);
 
@@ -100,7 +100,7 @@ public:
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx) {
         LOG_WARN_E(e) << "Unexpected exception from downstream.";
-        ctx.getChannel()->close();
+        ctx.channel()->close();
     }
 
     virtual ChannelHandlerPtr clone() {

@@ -56,7 +56,11 @@ int main(int argc, char* argv[]) {
     // Configure the client.
     ClientBootstrap bootstrap(new AsioClientSocketChannelFactory(ioThreadCount));
 
+    AsioClientBootstrap bootstrap(ioThreadCount);
     // Set up the pipeline factory.
+    bootstrap.setsss(ChannelInitializer(
+        new EchoClientHandler::context("", new EchoClientHandler())));
+
     bootstrap.setPipeline(
         ChannelPipelines::pipeline(
             new EchoClientHandler(firstMessageSize)));

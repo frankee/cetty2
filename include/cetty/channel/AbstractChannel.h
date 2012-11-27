@@ -41,13 +41,29 @@ class ChannelSinkHandler;
  *
  */
 
+class ChannelInitializer {
+public:
+    ChannelInitializer(const ChannelHandlerContext* ctx);
+
+    bool operator(const ChannelPtr& channel) {
+        const ChannelPipelinePtr pipeline = channel->getPipeline();
+        pipeline->addLast(contexts_.begin(), contexts_.end());
+    }
+
+private:
+    std::vector<ChannelHandlerContext*> contexts_;
+};
+
 class AbstractChannel : public Channel {
+public:
+    typedef boost::function<bool (ChannelPtr)> Initializer;
+
 public:
     virtual ~AbstractChannel();
 
     virtual int getId() const;
 
-    virtual const EventLoopPtr& getEventLoop() const;
+    virtual const EventLoopPtr& eventLoop() const;
 
     virtual const ChannelPtr& getParent() const;
 
@@ -177,7 +193,7 @@ private:
 protected:
     int id;
 
-    EventLoopPtr eventLoop;
+    EventLoopPtr eventLoop_;
     ChannelPtr parent; // just reference, do not maintenance it's life cycle
     ChannelFactoryPtr  factory; // just reference.
     ChannelPipelinePtr pipeline;

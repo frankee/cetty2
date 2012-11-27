@@ -176,7 +176,7 @@ protected:
     }
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
+    ChannelMessageTransfer<InboundOutT, ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
 };
 
 }

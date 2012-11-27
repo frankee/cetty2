@@ -29,7 +29,7 @@
 #include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelHandler.h>
 
-#include <cetty/bootstrap/Bootstrap.h>
+#include <cetty/bootstrap/AbstractBootstrap.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -155,7 +155,7 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ServerBootstrap : public Bootstrap {
+class ServerBootstrap : public AbstractBootstrap<ServerBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
@@ -164,31 +164,43 @@ public:
      */
     ServerBootstrap() {}
 
-    /**
-     * Creates a new instance with the specified initial {@link ChannelFactory}.
-     */
-    ServerBootstrap(const ChannelFactoryPtr& channelFactory)
-        : Bootstrap(channelFactory) {
-    }
-
     virtual ~ServerBootstrap() {}
 
-    virtual ServerBootstrap& setFactory(const ChannelFactoryPtr& factory);
-    virtual ServerBootstrap& setPipeline(const ChannelPipelinePtr& pipeline);
+    /**
+     * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
+     * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
+     * {@link Channel}'s.
+     */
+    ServerBootstrap& group(const EventLoopPoolPtr& parentGroup,
+        EventLoopGroup childGroup) {
 
+        super.group(parentGroup);
+        if (childGroup == null) {
+            throw new NullPointerException("childGroup");
+        }
+        if (this.childGroup != null) {
+            throw new IllegalStateException("childGroup set already");
+        }
+        this.childGroup = childGroup;
+        return this;
+    }
+
+    /**
+     * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they get created
+     * (after the acceptor accepted the {@link Channel}). Use a value of <code>null</code> to remove a previous set
+     * {@link ChannelOption}.
+     */
     ServerBootstrap& setChildOption(const ChannelOption& option,
         const ChannelOption::Variant& value);
 
     const ChannelOption::Options& getChildOptions() const;
 
     /**
-     * Returns an optional {@link ChannelHandler} which intercepts an event
-     * of a newly bound server-side channel which accepts incoming connections.
-     *
-     * @return the parent channel handler.
-     *         <tt>NULL</tt> if no parent channel handler is set.
+     * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
      */
-    const ChannelHandlerPtr& getParentHandler();
+    ServerBootstrap& childInitializer(ChannelHandler childHandler) {
+        return *this;
+    }
 
     /**
      * Sets an optional {@link ChannelHandler} which intercepts an event of
@@ -199,6 +211,9 @@ public:
      *        <tt>NULL</tt> to unset the current parent channel handler.
      */
     ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
+
+
+    virtual ChannelFuturePtr bind();
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -240,6 +255,14 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      */
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
+
+
+    public void shutdown() {
+        super.shutdown();
+        if (childGroup != null) {
+            childGroup.shutdown();
+        }
+    }
 
 private:
     ChannelHandlerPtr parentHandler;

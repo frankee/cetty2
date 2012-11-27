@@ -76,7 +76,7 @@ private:
                                 const ChannelBufferPtr& in);
 
 protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> inboundTransfer;
+    ChannelMessageTransfer<ChannelBufferPtr, BufferContext> inboundTransfer;
 };
 
 }

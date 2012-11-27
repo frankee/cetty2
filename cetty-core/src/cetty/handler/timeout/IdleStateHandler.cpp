@@ -61,7 +61,7 @@ IdleStateHandler::IdleStateHandler(
 }
 
 void IdleStateHandler::beforeAdd(ChannelHandlerContext& ctx) {
-    if (ctx.getPipeline().isAttached() && ctx.getChannel()->isActive()) {
+    if (ctx.pipeline().isAttached() && ctx.channel()->isActive()) {
         // channelActvie() event has been fired already, which means this.channelActive() will
         // not be invoked. We have to initialize here instead.
         initialize(ctx);
@@ -126,7 +126,7 @@ void IdleStateHandler::initialize(ChannelHandlerContext& ctx) {
                                   boost::ref(ctx));
     }
 
-    const EventLoopPtr& eventLoop = ctx.getEventLoop();
+    const EventLoopPtr& eventLoop = ctx.eventLoop();
 
     if (readerIdleTimeMillis > 0) {
         readerIdleTimeout =
@@ -162,7 +162,7 @@ void IdleStateHandler::destroy() {
 }
 
 void IdleStateHandler::handleReaderIdleTimeout(ChannelHandlerContext& ctx) {
-    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
+    if (readerIdleTimeout->isCancelled() || !ctx.channel()->isOpen()) {
         return;
     }
 
@@ -173,7 +173,7 @@ void IdleStateHandler::handleReaderIdleTimeout(ChannelHandlerContext& ctx) {
 
     if (nextDelay <= 0) {
         // Reader is idle - set a new timeout and notify the callback.
-        readerIdleTimeout = ctx.getEventLoop()->runAfter(readerIdleTimeMillis,
+        readerIdleTimeout = ctx.eventLoop()->runAfter(readerIdleTimeMillis,
                             readerIdleTimeCallback);
 
         try {
@@ -188,13 +188,13 @@ void IdleStateHandler::handleReaderIdleTimeout(ChannelHandlerContext& ctx) {
     }
     else {
         // Read occurred before the timeout - set a new timeout with shorter delay.
-        readerIdleTimeout = ctx.getEventLoop()->runAfter(nextDelay,
+        readerIdleTimeout = ctx.eventLoop()->runAfter(nextDelay,
                             readerIdleTimeCallback);
     }
 }
 
 void IdleStateHandler::handleWriterIdleTimeout(ChannelHandlerContext& ctx) {
-    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
+    if (readerIdleTimeout->isCancelled() || !ctx.channel()->isOpen()) {
         return;
     }
 
@@ -204,7 +204,7 @@ void IdleStateHandler::handleWriterIdleTimeout(ChannelHandlerContext& ctx) {
 
     if (nextDelay <= 0) {
         // Writer is idle - set a new timeout and notify the callback.
-        writerIdleTimeout = ctx.getEventLoop()->runAfter(writerIdleTimeMillis,
+        writerIdleTimeout = ctx.eventLoop()->runAfter(writerIdleTimeMillis,
                             writerIdleTimeCallback);
 
         try {
@@ -219,13 +219,13 @@ void IdleStateHandler::handleWriterIdleTimeout(ChannelHandlerContext& ctx) {
     }
     else {
         // Write occurred before the timeout - set a new timeout with shorter delay.
-        writerIdleTimeout = ctx.getEventLoop()->runAfter(nextDelay,
+        writerIdleTimeout = ctx.eventLoop()->runAfter(nextDelay,
                             writerIdleTimeCallback);
     }
 }
 
 void IdleStateHandler::handleAllIdleTimeout(ChannelHandlerContext& ctx) {
-    if (readerIdleTimeout->isCancelled() || !ctx.getChannel()->isOpen()) {
+    if (readerIdleTimeout->isCancelled() || !ctx.channel()->isOpen()) {
         return;
     }
 
@@ -238,7 +238,7 @@ void IdleStateHandler::handleAllIdleTimeout(ChannelHandlerContext& ctx) {
     if (nextDelay <= 0) {
         // Both reader and writer are idle - set a new timeout and
         // notify the callback.
-        allIdleTimeout =  ctx.getEventLoop()->runAfter(allIdleTimeMillis,
+        allIdleTimeout =  ctx.eventLoop()->runAfter(allIdleTimeMillis,
                           allIdleTimeCallback);
 
         try {
@@ -254,7 +254,7 @@ void IdleStateHandler::handleAllIdleTimeout(ChannelHandlerContext& ctx) {
     else {
         // Either read or write occurred before the timeout - set a new
         // timeout with shorter delay.
-        allIdleTimeout =  ctx.getEventLoop()->runAfter(nextDelay,
+        allIdleTimeout =  ctx.eventLoop()->runAfter(nextDelay,
                           allIdleTimeCallback);
     }
 }

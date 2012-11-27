@@ -39,7 +39,7 @@ void AsioSocketChannelSinkHandler::connect(ChannelHandlerContext& ctx,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
     if (!channel) {
-        channel = boost::static_pointer_cast<AsioSocketChannel>(ctx.getChannel());
+        channel = boost::static_pointer_cast<AsioSocketChannel>(ctx.channel());
     }
 
     if (!ensureOpen(future)) {

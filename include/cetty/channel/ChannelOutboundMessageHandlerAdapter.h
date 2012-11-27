@@ -18,7 +18,7 @@
  */
 
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/VoidChannelMessage.h>
+#include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
 
 namespace cetty {

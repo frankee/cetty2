@@ -83,24 +83,6 @@ public:
     virtual ChannelFuturePtr flush() = 0;
 
     /**
-     * Sends a message to this channel asynchronously.    If this channel was
-     * created by a connectionless transport (e.g. {@link DatagramChannel})
-     * and is not connected yet, you have to call
-     * {@link #write(const ChannelMessage&, const SocketAddress&, bool)}
-     * instead.  Otherwise, the write request will fail with
-     * {@link NotYetConnectedException} and an <tt>'exceptionCaught'</tt> event
-     * will be triggered.
-     *
-     * @param message the message to write
-     * @param withFuture indicated whether to return a future or not
-     *
-     * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
-     *         write request succeeds or fails
-     *
-     */
-    //virtual ChannelFuturePtr write(const ChannelMessage& message) = 0;
-
-    /**
      *
      */
     virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,

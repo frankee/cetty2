@@ -68,7 +68,7 @@ void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
 
     if (timeoutMillis > 0) {
         timeout =
-            ctx.getEventLoop()->runAfter(timeoutMillis, timeoutCallback);
+            ctx.eventLoop()->runAfter(timeoutMillis, timeoutCallback);
     }
 }
 
@@ -86,7 +86,7 @@ void ReadTimeoutHandler::handleReadTimeout(ChannelHandlerContext& ctx) {
         return;
     }
 
-    if (!ctx.getChannel()->isOpen()) {
+    if (!ctx.channel()->isOpen()) {
         return;
     }
 
@@ -97,7 +97,7 @@ void ReadTimeoutHandler::handleReadTimeout(ChannelHandlerContext& ctx) {
     if (nextDelay <= 0) {
         // Read timed out - set a new timeout and notify the callback.
         this->timeout =
-            ctx.getEventLoop()->runAfter(timeoutMillis, timeoutCallback);
+            ctx.eventLoop()->runAfter(timeoutMillis, timeoutCallback);
 
         try {
             readTimedOut(ctx);
@@ -112,7 +112,7 @@ void ReadTimeoutHandler::handleReadTimeout(ChannelHandlerContext& ctx) {
     else {
         // Read occurred before the timeout - set a new timeout with shorter delay.
         this->timeout =
-            ctx.getEventLoop()->runAfter(nextDelay, timeoutCallback);
+            ctx.eventLoop()->runAfter(nextDelay, timeoutCallback);
     }
 }
 
@@ -125,7 +125,7 @@ void ReadTimeoutHandler::readTimedOut(ChannelHandlerContext& ctx) {
 }
 
 void ReadTimeoutHandler::beforeAdd(ChannelHandlerContext& ctx) {
-    if (ctx.getChannel()->isActive()) {
+    if (ctx.channel()->isActive()) {
         // channelActvie() event has been fired already, which means this.channelActive() will
         // not be invoked. We have to initialize here instead.
         initialize(ctx);
@@ -156,7 +156,7 @@ void ReadTimeoutHandler::afterRemove(ChannelHandlerContext& ctx) {
 
 void ReadTimeoutHandler::channelOpen(ChannelHandlerContext& ctx) {
     // Initialize early if channel is active already.
-    if (ctx.getChannel()->isActive()) {
+    if (ctx.channel()->isActive()) {
         initialize(ctx);
     }
 

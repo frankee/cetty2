@@ -20,7 +20,12 @@ public:
             rep = new EchoResponse;
         }
 
-        rep->set_payload(request->payload());
+        for (int i = 0; i < 100; ++i) {
+            rep->mutable_payload()->append(request->payload());
+        }
+        
+        //boost::this_thread::sleep(boost::posix_time::microseconds(100));
+
         if (done) {
             done(rep);
         }

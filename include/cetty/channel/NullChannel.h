@@ -31,7 +31,7 @@ public:
 
     virtual const ChannelPtr& getParent() const;
 
-    virtual const EventLoopPtr& getEventLoop() const;
+    virtual const EventLoopPtr& eventLoop() const;
 
     virtual const ChannelFactoryPtr&  getFactory() const;
     virtual const ChannelPipelinePtr& getPipeline() const;

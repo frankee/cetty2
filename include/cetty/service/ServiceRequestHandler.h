@@ -21,7 +21,7 @@
 #include <cetty/channel/ChannelMessageHandlerAdapter.h>
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/VoidChannelMessage.h>
+#include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/service/OutstandingCall.h>
 
@@ -34,12 +34,12 @@ template<typename ReqT, typename RepT>
 class ServiceRequestHandler
     : public cetty::channel::ChannelMessageHandlerAdapter<
     RepT,
-    VoidChannelMessage,
+    VoidMessage,
     boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
     ReqT> {
 
         using ChannelMessageHandlerAdapter<RepT,
-            VoidChannelMessage,
+            VoidMessage,
             boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
             ReqT>::outboundTransfer;
 

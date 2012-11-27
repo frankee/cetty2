@@ -341,7 +341,7 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
     //                                _2,
     //                                connectFuture));
 
-    const EventLoopPoolPtr& pool = eventLoop->getEventLoopPool();
+    const EventLoopPoolPtr& pool = eventLoop_->getEventLoopPool();
 
     if (pool && pool->isMainThread()) {
         LOG_INFO << "the asio service pool starting to run in main thread.";

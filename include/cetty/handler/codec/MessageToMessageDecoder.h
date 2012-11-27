@@ -117,10 +117,10 @@ public:
                                const InboundInT& msg) = 0;
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT,
+    ChannelMessageTransfer<InboundOutT,
                                    ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
 
-    ChannelPipelineMessageTransfer<InboundInT,
+    ChannelMessageTransfer<InboundInT,
                                    ChannelInboundMessageHandlerContext<InboundInT> > skipInboundTransfer;
 };
 

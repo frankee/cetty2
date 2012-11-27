@@ -64,7 +64,7 @@ protected:
                                     const ChannelBufferPtr& in) = 0;
 
 protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> outboundTransfer;
+    ChannelMessageTransfer<ChannelBufferPtr, BufferContext> outboundTransfer;
 };
 
 }

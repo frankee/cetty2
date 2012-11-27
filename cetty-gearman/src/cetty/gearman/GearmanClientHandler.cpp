@@ -136,7 +136,7 @@ void GearmanClientHandler::flush(ChannelHandlerContext& ctx, const ChannelFuture
 }
 
 void GearmanClientHandler::channelActive(ChannelHandlerContext& ctx) {
-    channel = ctx.getChannel();
+    channel = ctx.channel();
 }
 
 }

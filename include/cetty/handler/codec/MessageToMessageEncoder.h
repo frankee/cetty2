@@ -110,7 +110,7 @@ protected:
 
 protected:
     typedef ChannelOutboundMessageHandlerContext<OutboundOutT> NextOutboundContext;
-    ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+    ChannelMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
 };
 
 }

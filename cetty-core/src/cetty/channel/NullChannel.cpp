@@ -113,7 +113,7 @@ int NullChannel::compareTo(const ChannelPtr& c) const {
     return 1;
 }
 
-const EventLoopPtr& NullChannel::getEventLoop() const {
+const EventLoopPtr& NullChannel::eventLoop() const {
     return eventLoop;
 }
 

@@ -131,9 +131,9 @@ class ChannelSink;
  * @enddot
  *
  */
-class Channel : public ChannelOutboundInvoker,
-    public ReferenceCounter<Channel>,
-    private boost::noncopyable {
+class Channel : public ChannelOutboundInvoker, public ReferenceCounter<Channel> {
+public:
+    typedef boost::function<bool (ChannelPtr)> Initializer;
 
 public:
     virtual ~Channel() {}
@@ -143,7 +143,7 @@ public:
      */
     virtual int getId() const = 0;
 
-    virtual const EventLoopPtr& getEventLoop() const = 0;
+    virtual const EventLoopPtr& eventLoop() const = 0;
 
     /**
      * Returns the parent of this channel.

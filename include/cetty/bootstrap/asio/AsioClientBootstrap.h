@@ -1,5 +1,8 @@
+#if !defined(CETTY_BOOTSTRAP_ASIO_ASIOCLIENTBOOTSTRAP_H)
+#define CETTY_BOOTSTRAP_ASIO_ASIOCLIENTBOOTSTRAP_H
+
 /*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -14,24 +17,27 @@
  * under the License.
  */
 
-#include <cetty/bootstrap/AbstractBootstrap.h>
-#include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/ChannelHandler.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelineFactory.h>
-#include <cetty/util/Exception.h>
-
-#include <cetty/logging/LoggerHelper.h>
+#include <cetty/bootstrap/ClientBootstrap.h>
 
 namespace cetty {
 namespace bootstrap {
+namespace asio {
 
-using namespace cetty::channel;
-using namespace cetty::util;
-using namespace cetty::logging;
+class AsioClientBootstrap : public ClientBootstrap {
+public:
+
+
+    virtual newChannel() {
+
+    }
+};
 
 }
 }
+}
+
+#endif //#if !defined(CETTY_BOOTSTRAP_ASIO_ASIOCLIENTBOOTSTRAP_H)
+
+// Local Variables:
+// mode: c++
+// End:

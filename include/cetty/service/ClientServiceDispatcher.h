@@ -83,7 +83,7 @@ public:
 
 public:
     virtual void channelActive(ChannelHandlerContext& ctx) {
-        ChannelPtr ch = ctx.getChannel();
+        ChannelPtr ch = ctx.channel();
         ChannelPipelinePtr pipeline = ChannelPipelines::pipeline(defaultPipeline);
         pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
 

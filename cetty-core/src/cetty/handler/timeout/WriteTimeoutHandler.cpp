@@ -48,7 +48,7 @@ void WriteTimeoutHandler::flush(ChannelHandlerContext& ctx,
     const ChannelFuturePtr& future) {
     if (timeoutMillis > 0) {
         // Schedule a timeout.
-        ctx.getEventLoop()->runAfter(timeoutMillis, boost::bind(
+        ctx.eventLoop()->runAfter(timeoutMillis, boost::bind(
             &WriteTimeoutHandler::handleWriteTimeout,
             this,
             boost::ref(ctx),

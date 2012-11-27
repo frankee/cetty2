@@ -49,7 +49,7 @@ public:
 
         Iterator& operator++() { ++iter; return *this; }
 
-        const EventLoopPtr& operator*() { return (*iter)->getEventLoop(); }
+        const EventLoopPtr& operator*() { return (*iter)->eventLoop(); }
         bool operator==(const Iterator& iter) const { return this->iter == iter.iter; }
         bool operator!=(const Iterator& iter) const { return this->iter != iter.iter; }
 

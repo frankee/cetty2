@@ -25,6 +25,58 @@ namespace channel {
 
 using namespace cetty::buffer;
 
+template<class T>
+class ChannelInboudBufferHandler {
+public:
+    typedef boost::shared_ptr<T> Ptr;
+
+    typedef ChannelMessageHandlerContext<EchoClientHandler,
+        ChannelBufferPtr,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferPtr,
+        ChannelBufferContainer,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        ChannelBufferContainer> Context;
+
+public:
+    virtual void registerTo(Context& ctx) {
+
+    }
+
+    virtual Ptr clone() const = 0;
+
+    virtual void inboundBufferUpdated(ChannelHandlerContext& ctx) {
+    }
+
+    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+        const Exception& cause) {
+    }
+
+    void generator() {
+        // Fill the outbound buffer up to 64KiB
+        ctx_->outboundTransfer().unfoldAndAdd(content);
+        ctx_->flush().addListener();
+
+        ByteBuf out = ctx.nextOutboundByteBuffer();
+
+        while (out.readableBytes() < 65536) {
+            out.writeBytes(content);
+        }
+
+        // Flush the outbound buffer to the socket.
+        // Once flushed, generate the same amount of traffic again.
+        ctx.flush().addListener(GENERATE_TRAFFIC);
+    }
+
+private:
+    Context* ctx_;
+};
+
+//pipeline.addLast(new ChannelMessageHandlerContext("xx", new ));
+//pipeline.addLast(new ChannelMessageHandlerContext("xxx", loop, new xx));
+
 class ChannelInboundBufferHandlerContext;
 
 class ChannelInboundBufferHandler : public ChannelInboundHandler {

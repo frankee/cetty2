@@ -26,7 +26,7 @@
 
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuturePtr.h>
-#include <cetty/bootstrap/Bootstrap.h>
+#include <cetty/bootstrap/AbstractBootstrap.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -119,7 +119,7 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ClientBootstrap : public Bootstrap {
+class ClientBootstrap : public AbstractBootstrap<ClientBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
@@ -128,16 +128,16 @@ public:
      */
     ClientBootstrap();
 
-    /**
-     * Creates a new instance with the specified initial {@link ChannelFactory}.
-     */
-    ClientBootstrap(const ChannelFactoryPtr& channelFactory);
-
     virtual ~ClientBootstrap() {}
 
-    ClientBootstrap& remoteAddress(const std::string& host, int port);
+    ClientBootstrap& setRemoteAddress(const std::string& host, int port);
 
     const SocketAddress& remoteAddress() const;
+
+    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer) {
+        initializer_ = initializer;
+        return *this;
+    }
 
     ChannelFuturePtr connect();
 
@@ -200,20 +200,24 @@ public:
                                      const SocketAddress& localAddress);
 
 
+protected:
+    virtual newChannel();
+
 private:
-    SocketAddress remote;
+    SocketAddress remoteAddress_;
+    Channel::Initializer initializer_;
 };
 
 inline
-ClientBootstrap& ClientBootstrap::remoteAddress(const std::string& host,
+ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
         int port) {
-    this->remote = SocketAddress(host, port);
+    remoteAddress_ = SocketAddress(host, port);
     return *this;
 }
 
 inline
 const SocketAddress& ClientBootstrap::remoteAddress() const {
-    return remote;
+    return remoteAddress_;
 }
 
 }

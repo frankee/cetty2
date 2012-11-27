@@ -76,7 +76,7 @@ AbstractChannel::AbstractChannel(const EventLoopPtr& eventLoop,
                                  const ChannelFactoryPtr& factory,
                                  const ChannelPipelinePtr& pipeline)
     : id(),
-      eventLoop(eventLoop),
+      eventLoop_(eventLoop),
       parent(parent),
       factory(factory),
       pipeline(pipeline) {
@@ -117,7 +117,9 @@ void AbstractChannel::init() {
 }
 
 void AbstractChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->setSinkHandler(new ChannelSinkHandler);
+    ChannelPipelineBridgeHandler::Ptr ptr(new ChannelPipelineBridgeHandler);
+
+    pipeline->addFirst(new ChannelPipelineBridgeHandler::Context("bridge", ptr));
     pipeline->attach(shared_from_this());
 }
 
@@ -125,8 +127,8 @@ int AbstractChannel::getId() const {
     return id;
 }
 
-const EventLoopPtr& AbstractChannel::getEventLoop() const {
-    return eventLoop;
+const EventLoopPtr& AbstractChannel::eventLoop() const {
+    return eventLoop_;
 }
 
 const ChannelPtr& AbstractChannel::getParent() const {

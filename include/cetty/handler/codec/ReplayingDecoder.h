@@ -574,7 +574,7 @@ private:
     }
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+    ChannelMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
 
 private:
     bool unfold;

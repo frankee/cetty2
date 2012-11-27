@@ -52,8 +52,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../include;../../src;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../../include; ../../src; ../../../../thirdparty/_include; %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32; _DEBUG; _WINDOWS; _WIN32_WINNT=0x0501; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -61,12 +61,12 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996; %(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).lib</OutputFile>
-      <AdditionalLibraryDirectories>../../lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../lib/win32; %(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
     </Lib>
   </ItemDefinitionGroup>
@@ -74,47 +74,38 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>../../include;../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../include; ../../src; %(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32; NDEBUG; _WINDOWS; _WIN32_WINNT=0x0501; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996; %(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalOptions>/FIXED %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libtcmalloc_minimal.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ForceSymbolReferences>__tcmalloc;%(ForceSymbolReferences)</ForceSymbolReferences>
+      <AdditionalDependencies>libtcmalloc_minimal.lib; %(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../lib/win32; %(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceSymbolReferences>__tcmalloc; %(ForceSymbolReferences)</ForceSymbolReferences>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractChannel.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\AbstractChannelHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\AbstractChannelInboundHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\AbstractChannelOutboundHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\AbstractServerChannel.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelBufferHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelException.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelFutureListener.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelHandlerLifeCycleException.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelSinkHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoop.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoopPool.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioService.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\socket\asio\AsioSocketChannelSinkHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelInboundBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelOption.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelOutboundBufferHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelOutboundBufferHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipelineException.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipelines.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\CompleteChannelFuture.cpp" />
@@ -213,28 +204,50 @@
     <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioClientBootstrap.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioServerBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelInboundHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerAdapter.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerAdapter.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractChannelOutboundHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\AbstractServerChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferContainer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerAdapter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelBufferHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundHandlerPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageContainer.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext_.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTransfer.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandlerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineMessageTransfer.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerAdapter.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerContext.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerFwd.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactoryPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelSinkHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandlerContext.h" />
@@ -255,26 +268,12 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuturePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFutureListener.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerLifeCycleException.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundInvoker.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOption.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundHandlerPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundInvoker.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerFwd.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineException.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelinePtr.h" />
@@ -304,8 +303,10 @@
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\socket\SocketChannelFactory.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\TimeoutPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\VoidChannelMessage.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\VoidMessage.h" />
     <ClInclude Include="..\..\..\include\cetty\Common.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferDecoder.h" />
@@ -410,7 +411,7 @@
     <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\SlicedChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\WrappedChannelBuffer.h" />
-    <ClInclude Include="..\..\..\include\cetty\bootstrap\Bootstrap.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\AbstractBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Enum.h" />

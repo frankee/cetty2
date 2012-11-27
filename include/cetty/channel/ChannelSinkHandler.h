@@ -24,6 +24,35 @@ namespace channel {
 
 class AbstractChannel;
 
+class ChannelPipelineBridgeHandler : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandlerContext<ChannelPipelineBridgeHandler,
+        void,
+        ChannelBufferPtr,
+        ChannelBufferPtr,
+        void,
+        void,
+        ChannelBufferContainer,
+        ChannelBufferContainer,
+        void> Context;
+
+    typedef ChannelHandlerContext::BindFunctor BindFunctor;
+
+    typedef boost::shared_ptr<ChannelPipelineBridgeHandler> Ptr;
+
+public:
+    void registerTo(ChannelHandlerContext& ctx) {
+        ctx.setBindFunctor(binder_);
+    }
+
+    const ChannelBufferPtr& inboundReadBuffer();
+
+    
+private:
+    BindFunctor binder_;
+
+};
+
 class ChannelSinkHandler : public ChannelOutboundBufferHandler {
 public:
     typedef boost::intrusive_ptr<AbstractChannel> AbstractChannelPtr;

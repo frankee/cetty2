@@ -56,7 +56,7 @@ protected:
     virtual void doClose();
 
 protected:
-    EventLoopPtr  eventLoop;
+    EventLoopPtr  eventLoop_;
     DefaultChannelConfig config;
 };
 

@@ -18,9 +18,9 @@ void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
         int readableBytes = buffer->readableBytes();
 
         ChannelBufferPtr tmp = buffer->readBytes();
-        ChannelPtr channel = ctx.getChannel();
+        ChannelPtr channel = ctx.channel();
 
-        outboundTransfer.write(tmp, ctx.getChannel()->newSucceededFuture());
+        outboundTransfer.write(tmp, ctx.channel()->newSucceededFuture());
         //channel->write(tmp);
         printf("received message from %d at %s with %dBytes.\n",
                channel->getId(),
@@ -33,7 +33,7 @@ void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
 
-    outboundTransfer.write(firstMessage, ctx.getChannel()->newSucceededFuture());
+    outboundTransfer.write(firstMessage, ctx.channel()->newSucceededFuture());
     //ctx.getChannel()->write(firstMessage);
     //ctx.getPipeline().write(firstMessage);
 }

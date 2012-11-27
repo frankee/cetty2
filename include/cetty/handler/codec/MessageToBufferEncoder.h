@@ -124,7 +124,7 @@ public:
                                     const ChannelBufferPtr& out) = 0;
 
 protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelOutboundBufferHandlerContext> outboundTransfer;
+    ChannelMessageTransfer<ChannelBufferPtr, ChannelOutboundBufferHandlerContext> outboundTransfer;
 
 private:
     bool hasOutBuffer;

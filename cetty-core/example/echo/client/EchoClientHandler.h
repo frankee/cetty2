@@ -44,6 +44,38 @@ using namespace cetty::util;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
+class EchoClientHandler {
+public:
+    typedef ChannelMessageHandlerContext<EchoClientHandler,
+        ChannelBufferPtr,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferPtr,
+        ChannelBufferContainer,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        ChannelBufferContainer> Context;
+
+    void registerTo(Context& ctx) {
+        ctx.setChannelActiveCallback(boost::bind(&EchoClientHandler::channelActive, this, _1));
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&EchoClientHandler::inboundBufferUpdated, this, _1));
+        ctx.setExceptionCallback(boost::bind(&EchoClientHandler::exceptionCaught, this, _1, boost::cref(_2)));
+    }
+
+    void channelActive(ChannelHandlerContext& ctx) {
+
+    }
+
+    void inboundBufferUpdated(ChannelHandlerContext& ctx) {
+
+    }
+
+    void exceptionCaught(ChannelHandlerContext& ctx,
+        const Exception& cause) {
+
+    }
+};
+
 class EchoClientHandler : public ChannelInboundBufferHandlerAdapter<> {
 public:
     /**

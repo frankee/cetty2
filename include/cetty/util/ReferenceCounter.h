@@ -17,15 +17,16 @@
  * under the License.
  */
 
-#include <boost/checked_delete.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/checked_delete.hpp>
 #include <boost/detail/atomic_count.hpp>
 
 namespace cetty {
 namespace util {
 
 template<typename T, typename Count = boost::detail::atomic_count>
-class ReferenceCounter {
+class ReferenceCounter : private boost::noncopyable {
 public:
     ReferenceCounter() : refCount(0) {}
     virtual ~ReferenceCounter() {}

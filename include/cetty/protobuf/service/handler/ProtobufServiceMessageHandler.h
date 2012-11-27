@@ -56,7 +56,7 @@ typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufServiceMessa
 
 class ProtobufServiceMessageHandler
     : public ChannelInboundMessageHandlerAdapter<ProtobufServiceMessagePtr,
-      VoidChannelMessage,
+      VoidMessage,
           ProtobufServiceMessagePtr> {
 public:
     ProtobufServiceMessageHandler();

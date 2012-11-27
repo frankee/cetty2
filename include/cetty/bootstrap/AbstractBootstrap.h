@@ -1,5 +1,5 @@
-#if !defined(CETTY_BOOTSTRAP_BOOTSTRAP_H)
-#define CETTY_BOOTSTRAP_BOOTSTRAP_H
+#if !defined(CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H)
+#define CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H
 /*
  * Copyright 2009 Red Hat, Inc.
  *
@@ -46,79 +46,70 @@ using namespace cetty::channel;
  * @apiviz.uses cetty::channel::ChannelFactory
  */
 
-class Bootstrap {
+template<typename T>
+class AbstractBootstrap {
 public:
-    virtual ~Bootstrap();
+    virtual ~AbstractBootstrap();
+
+    T& setLocalAddress(const SocketAddress& localAddress) {
+        localAddress_ = localAddress;
+        return castThis();
+    }
 
     /**
-     * Returns the {@link ChannelFactory} that will be used to perform an
-     * I/O operation.
-     *
-     * @throws IllegalStateException
-     *         if the factory is not set for this bootstrap yet.
-     *         The factory can be set in the constructor or
-     *         {@link #setFactory(ChannelFactory*)}.
+     * See {@link #localAddress(SocketAddress)}
      */
-    const ChannelFactoryPtr& getFactory();
+    T& setLocalAddress(int port) {
+        return castThis();
+    }
 
     /**
-     * Sets the {@link ChannelFactory} that will be used to perform an I/O
-     * operation.  This method can be called only once and can't be called at
-     * all if the factory was specified in the constructor.
-     *
-     * @throws IllegalStateException
-     *         if the factory is already set
-     *
-     * @throws NullPointerException
-     *         if the factory is null
+     * See {@link #localAddress(SocketAddress)}
      */
-    virtual Bootstrap& setFactory(const ChannelFactoryPtr& factory);
+    T& setLocalAddress(const std::string& host, int port) {
+        return castThis();
+    }
 
     /**
-    * Returns the default {@link ChannelPipeline} which is cloned when a new
-    * {@link Channel} is created.  {@link Bootstrap} creates a new pipeline
-    * which has the same entries with the returned pipeline for a new
-    * {@link Channel}.
-    *
-     * @return the default {@link ChannelPipeline}
-     *
-     * @throws IllegalStateException
-     *         if {@link #setPipelineFactory(ChannelPipelineFactory)} was
-     *         called by a user last time.
+     * See {@link #localAddress(SocketAddress)}
      */
-    const ChannelPipelinePtr& getPipeline();
+    T& setLocalAddress(InetAddress host, int port) {
+        return castThis();
+    }
 
-    /**
-     * Sets the default {@link ChannelPipeline} which is cloned when a new
-     * {@link Channel} is created.  {@link Bootstrap} creates a new pipeline
-     * which has the same entries with the specified pipeline for a new channel.
-     * <p>
-     * Calling this method also sets the <tt>pipelineFactory</tt> property to an
-     * internal {@link ChannelPipelineFactory} implementation which returns
-     * a shallow copy of the specified pipeline.
-     */
-    virtual Bootstrap& setPipeline(const ChannelPipelinePtr& pipeline);
+    const SocketAddress& localAddress() const {
+        return localAddress_;
+    }
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    const ChannelOption::Options& getOptions() const;
+    const ChannelOption::Options& options() const {
+        return options_;
+    }
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    ChannelOption::Options& getOptions();
+    ChannelOption::Options& options() {
+        return options_;
+    }
 
     /**
      * Sets the options which configures a new {@link Channel} and its child
      * {@link Channel}s.  To set the options of a child {@link Channel}, prefixed
      * <tt>"child."</tt> to the option name (e.g. <tt>"child.keepAlive"</tt>).
      */
-    Bootstrap& setOptions(const ChannelOption::Options& options);
+    AbstractBootstrap& setOptions(const ChannelOption::Options& options) {
+        LOG_INFO << "set options using map, will reset the original options.";
+        this->options = options;
+
+        return castThis();
+    }
 
     /**
      * Returns the value of the option with the specified key.  To retrieve
@@ -130,7 +121,16 @@ public:
      * @return the option value if the option is found.
      *         <tt>empty boost::any</tt> otherwise.
      */
-    ChannelOption::Variant getOption(const ChannelOption& option) const;
+    ChannelOption::Variant getOption(const ChannelOption& option) const {
+        ChannelOption::Options::const_iterator itr = options.find(option);
+
+        if (itr == options.end()) {
+            LOG_WARN << "can not get the option of " << option.getName();
+            return ChannelOption::Variant();
+        }
+
+        return itr->second;
+    }
 
     /**
      * Sets an option with the specified key and value.  If there's already
@@ -143,16 +143,28 @@ public:
      * @param key    the option name
      * @param value  the option value
      */
-    virtual Bootstrap& setOption(const ChannelOption& option,
-                                 const ChannelOption::Variant& value);
+    virtual AbstractBootstrap& setOption(const ChannelOption& option,
+                                 const ChannelOption::Variant& value) {
+        if (value.empty()) {
+            options.erase(option);
+            LOG_WARN << "setOption, the key ("
+                     << option.getName()
+                     << ") is empty value, remove from the options.";
+        }
+        else {
+            LOG_DEBUG << "set Option, the key is " << option.getName();
+            options.insert(std::make_pair(option, value));
+        }
+
+        return castThis();
+    }
 
     /**
-     * {@inheritDoc}  This method simply delegates the call to
-     * {@link ChannelFactory#releaseExternalResources()},
-     * and delete the ChannelFactory, but the ChannelPipeline or
-     * the ChannelPipelineFactory which set by user.
+     * Shutdown the {@link AbstractBootstrap} and the {@link EventLoopGroup} which is
+     * used by it. Only call this if you don't share the {@link EventLoopGroup}
+     * between different {@link AbstractBootstrap}'s.
      */
-    virtual void shutdown();
+    virtual void shutdown()  = 0;
 
 protected:
     /**
@@ -160,24 +172,22 @@ protected:
      * {@link #setFactory(ChannelFactory)} must be called at once before any
      * I/O operation is requested.
      */
-    Bootstrap();
-
-    /**
-     * Creates a new instance with the specified initial {@link ChannelFactory}.
-     */
-    Bootstrap(const ChannelFactoryPtr& channelFactory);
+    AbstractBootstrap();
 
 private:
-    ChannelOption::Options options;
+    T& castThis() {
+        return *(static_cast<T*>(this));
+    }
 
-    ChannelPipelinePtr pipeline;
-    ChannelFactoryPtr  factory;
+private:
+    ChannelOption::Options options_;
+    SocketAddress localAddress_;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_BOOTSTRAP_BOOTSTRAP_H)
+#endif //#if !defined(CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H)
 
 // Local Variables:
 // mode: c++

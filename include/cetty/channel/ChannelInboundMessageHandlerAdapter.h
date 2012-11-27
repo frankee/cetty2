@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/channel/VoidChannelMessage.h>
+#include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelPipelineMessageTransfer.h>
 
@@ -26,7 +26,7 @@ namespace channel {
 
 template<typename InboundInT,
          typename InboundOutT,
-         typename OutboundOutT = VoidChannelMessage,
+         typename OutboundOutT = VoidMessage,
          typename OutboundContext = ChannelOutboundMessageHandlerContext<OutboundOutT> >
 class ChannelInboundMessageHandlerAdapter
     : public ChannelInboundMessageHandler<InboundInT> {

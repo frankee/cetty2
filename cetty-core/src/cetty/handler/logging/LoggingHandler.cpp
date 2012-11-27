@@ -34,7 +34,7 @@ using namespace cetty::channel;
 void LoggingHandler::channelOpen(ChannelHandlerContext& ctx) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " OPEN";
     }
 
@@ -44,7 +44,7 @@ void LoggingHandler::channelOpen(ChannelHandlerContext& ctx) {
 void LoggingHandler::channelActive(ChannelHandlerContext& ctx) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " ACTIVE";
     }
 
@@ -54,7 +54,7 @@ void LoggingHandler::channelActive(ChannelHandlerContext& ctx) {
 void LoggingHandler::channelInactive(ChannelHandlerContext& ctx) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " INACTIVE";
     }
 
@@ -65,7 +65,7 @@ void LoggingHandler::exceptionCaught(ChannelHandlerContext& ctx,
                                      const ChannelException& cause) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " EXCEPTION: "
                 << cause.getMessage();
     }
@@ -77,7 +77,7 @@ void LoggingHandler::userEventTriggered(ChannelHandlerContext& ctx,
                                         const boost::any& evt) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " USER_EVENT: ";
     }
 
@@ -89,7 +89,7 @@ void LoggingHandler::bind(ChannelHandlerContext& ctx,
                           const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " BIND("
                 << localAddress.toString()
                 << ")";
@@ -104,7 +104,7 @@ void LoggingHandler::connect(ChannelHandlerContext& ctx,
                              const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " CONNECT("
                 << remoteAddress.toString()
                 << ", "
@@ -118,7 +118,7 @@ void LoggingHandler::connect(ChannelHandlerContext& ctx,
 void LoggingHandler::disconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " DISCONNECT()";
     }
 
@@ -129,7 +129,7 @@ void LoggingHandler::close(ChannelHandlerContext& ctx,
                            const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level)) {
         Logger("loggerHander", 0, level).stream()
-                << ctx.getChannel()->toString()
+                << ctx.channel()->toString()
                 << " CLOSE()";
     }
 

@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_VOIDCHANNELMESSAGE_H)
-#define CETTY_CHANNEL_VOIDCHANNELMESSAGE_H
+#if !defined(CETTY_CHANNEL_CHANNELBUFFERCONTAINER_H)
+#define CETTY_CHANNEL_CHANNELBUFFERCONTAINER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,18 +17,24 @@
  * under the License.
  */
 
+
 namespace cetty {
 namespace channel {
 
-class VoidChannelMessage {
+class ChannelBufferContainer {
 public:
-    operator bool() const { return false; }
+
+
+private:
+    bool accumulated_;
+    ChannelBufferPtr buffer_;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_VOIDCHANNELMESSAGE_H)
+
+#endif //#if !defined(CETTY_CHANNEL_CHANNELBUFFERCONTAINER_H)
 
 // Local Variables:
 // mode: c++

@@ -216,7 +216,7 @@ void GearmanWorkerHandler::flush(ChannelHandlerContext& ctx,
 }
 
 void GearmanWorkerHandler::channelActive(ChannelHandlerContext& ctx) {
-    channel = ctx.getChannel();
+    channel = ctx.channel();
 
     if (channel) {
         CallbackMap::iterator itr = workerFunctors.begin();

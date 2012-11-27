@@ -42,7 +42,7 @@ void ChannelSinkHandler::bind(ChannelHandlerContext& ctx,
         future->setSuccess();
 
         if (!wasActive && channel->isActive()) {
-            channel->getPipeline()->fireChannelActive();
+            channel->pipeline()->fireChannelActive();
         }
     }
     catch (const std::exception& e) {
@@ -69,7 +69,7 @@ void ChannelSinkHandler::disconnect(ChannelHandlerContext& ctx,
         future->setSuccess();
 
         if (wasActive && !channel->isActive()) {
-            channel->getPipeline()->fireChannelInactive();
+            channel->pipeline()->fireChannelInactive();
         }
     }
     catch (const std::exception& e) {
@@ -100,12 +100,12 @@ void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
 
         if (wasActive && !channel->isActive()) {
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
-            channel->getPipeline()->fireChannelInactive();
+            channel->pipeline()->fireChannelInactive();
 
             channel->closeFuture.reset();
             channel->succeededFuture.reset();
 
-            ChannelPipelinePtr pipeline = channel->getPipeline();
+            ChannelPipelinePtr pipeline = channel->pipeline();
             channel->pipeline.reset();
             pipeline->detach();
         }
@@ -160,7 +160,7 @@ void ChannelSinkHandler::closeIfClosed() {
 
 void ChannelSinkHandler::ensureChannelSet(ChannelHandlerContext& ctx) {
     if (!channel) {
-        channel = boost::dynamic_pointer_cast<AbstractChannel>(ctx.getChannel());
+        channel = boost::dynamic_pointer_cast<AbstractChannel>(ctx.channel());
     }
 
     BOOST_ASSERT(channel);

@@ -44,12 +44,8 @@ using namespace cetty::logging;
 ClientBootstrap::ClientBootstrap() {
 }
 
-ClientBootstrap::ClientBootstrap(const ChannelFactoryPtr& channelFactory)
-    : Bootstrap(channelFactory) {
-}
-
 ChannelFuturePtr ClientBootstrap::connect() {
-    return connect(this->remote);
+    return connect(this->remoteAddress_);
 }
 
 ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
@@ -74,17 +70,8 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
             ChannelPipelineException("Failed to initialize a pipeline."));
     }
 
-    try {
-        pipeline = ChannelPipelines::pipeline(getPipeline());
-    }
-    catch (...) {
-        LOG_ERROR << "has an exception when get pipeline from factory, then return a failed future.";
-        return NullChannel::instance()->newFailedFuture(
-                   ChannelPipelineException("Failed to initialize a pipeline."));
-    }
-
-    ch = getFactory()->newChannel(pipeline);
-
+    ch = newChannel();
+    
     if (!ch) {
         LOG_ERROR << "failed to create a new channel from the factory, then return a failed future.";
         return NullChannel::instance()->newFailedFuture(
@@ -92,10 +79,14 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     }
 
     // Set the options.
-    ch->getConfig().setOptions(getOptions());
+    ch->getConfig().setOptions(options());
+
+    if (initializer_) {
+        initializer_(ch);
+    }
 
     // Bind.
-    if (local.validated()) {
+    if (localAddress().validated()) {
         LOG_INFO << "bind the channel to local address" << local.toString();
         ChannelFuturePtr future = ch->bind(local);
         future->awaitUninterruptibly();

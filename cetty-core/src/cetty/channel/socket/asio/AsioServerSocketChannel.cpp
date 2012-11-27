@@ -292,11 +292,11 @@ bool AsioServerSocketChannel::isOpen() const {
 }
 
 void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
-    if (eventLoop->inLoopThread()) {
+    if (eventLoop_->inLoopThread()) {
         childChannels.erase(future.getChannel()->getId());
     }
     else {
-        eventLoop->post(boost::bind(&AsioServerSocketChannel::handleChildClosed,
+        eventLoop_->post(boost::bind(&AsioServerSocketChannel::handleChildClosed,
                                     this,
                                     boost::cref(future)));
     }

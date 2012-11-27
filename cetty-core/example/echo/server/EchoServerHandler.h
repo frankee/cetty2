@@ -47,7 +47,7 @@ public:
     }
 
     virtual void channelActive(ChannelHandlerContext& ctx) {
-        voidFuture = ctx.getChannel()->newSucceededFuture();
+        voidFuture = ctx.channel()->newSucceededFuture();
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
