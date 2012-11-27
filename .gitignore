@@ -1,6 +1,8 @@
 
 *.user
 *.pdb
+*.vsp
+*.psess
 *.ilk
 *.log
 *.idb
