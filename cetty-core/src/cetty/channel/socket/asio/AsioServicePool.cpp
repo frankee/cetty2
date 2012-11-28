@@ -160,6 +160,8 @@ int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
 
     AsioServicePtr& service = holder->service;
 
+    service->setThreadId(boost::this_thread::get_id());
+
     boost::system::error_code err;
     std::size_t opCount = service->service().run(err);
 
