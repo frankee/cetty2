@@ -19,10 +19,10 @@
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipelineFactory.h>
-#include <cetty/channel/socket/asio/AsioService.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioIpAddressImplFactory.h>
-#include <cetty/channel/socket/asio/AsioSocketAddressImplFactory.h>
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioIpAddressImplFactory.h>
+#include <cetty/channel/asio/AsioSocketAddressImplFactory.h>
 
 #include <cetty/service/ClientService.h>
 

@@ -28,8 +28,8 @@
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/ChannelMessageTransfer.h>
 #include <cetty/channel/ChannelMessageContainer.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
@@ -190,6 +190,8 @@ public:
                                   const ChannelFuturePtr&)> FlushFunctor;
 
 public:
+    virtual ~ChannelHandlerContext() {}
+
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
      * This method is a shortcut to <tt>getPipeline().getChannel()</tt>.
@@ -245,6 +247,8 @@ public:
 
     virtual void attach();
     void detach();
+
+    std::string toString() const { return name_; }
 
 public:
     virtual boost::any getInboundMessageContainer() = 0;
@@ -378,7 +382,7 @@ protected:
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
 
-    virtual ~ChannelHandlerContext() {}
+    
 
 private:
     void init();

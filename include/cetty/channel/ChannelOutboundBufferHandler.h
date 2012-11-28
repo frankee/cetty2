@@ -17,72 +17,23 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelOutboundHandler.h>
-#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-using namespace cetty::buffer;
-
-class ChannelOutboundBufferHandlerContext;
-
-class ChannelOutboundBufferHandler : public ChannelOutboundHandler {
+template<typename Handler>
+class ChannelOutboundBufferHandler : private boost::noncopyable {
 public:
-    ChannelOutboundBufferHandler();
-    virtual ~ChannelOutboundBufferHandler();
-
-    virtual void bind(ChannelHandlerContext& ctx,
-                      const SocketAddress& localAddress,
-                      const ChannelFuturePtr& future);
-
-    virtual void connect(ChannelHandlerContext& ctx,
-                         const SocketAddress& remoteAddress,
-                         const SocketAddress& localAddress,
-                         const ChannelFuturePtr& future);
-
-    virtual void disconnect(ChannelHandlerContext& ctx,
-                            const ChannelFuturePtr& future);
-
-    virtual void close(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
-
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
-
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-
-    virtual void afterAdd(ChannelHandlerContext& ctx);
-
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-
-    virtual void afterRemove(ChannelHandlerContext& ctx);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
-
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const boost::any& evt);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            const EventLoopPtr& eventLoop,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next);
-
-    virtual void setOutboundChannelBuffer(const ChannelBufferPtr& buffer);
-
-    const ChannelBufferPtr& getOutboundChannelBuffer() const {
-        return outboundBuffer;
-    }
-
-private:
-    ChannelBufferPtr outboundBuffer;
+    typedef ChannelMessageHandlerContext<Handler,
+            VoidMessage,
+            VoidMessage,
+            ChannelBufferPtr,
+            ChannelBufferPtr,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            ChannelBufferContainer,
+            ChannelBufferContainer> Context;
 };
 
 }

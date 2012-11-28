@@ -102,8 +102,8 @@ void ChannelSinkHandler::close(ChannelHandlerContext& ctx,
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             channel->pipeline()->fireChannelInactive();
 
-            channel->closeFuture.reset();
-            channel->succeededFuture.reset();
+            channel->closeFuture_.reset();
+            channel->succeededFuture_.reset();
 
             ChannelPipelinePtr pipeline = channel->pipeline();
             channel->pipeline.reset();

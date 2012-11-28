@@ -20,7 +20,7 @@
 
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
 
 #include <cetty/handler/codec/http/HttpServerCodec.h>
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>

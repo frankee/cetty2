@@ -13,8 +13,8 @@
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
 
 using namespace cetty::channel;
 using namespace cetty::channel::socket::asio;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            f->getChannel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

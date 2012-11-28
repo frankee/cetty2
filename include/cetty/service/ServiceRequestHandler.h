@@ -76,7 +76,7 @@ public:
             }
 
             if (parent) {
-                parent->getPipeline()->addInboundMessage<OutstandingCallPtr>(out);
+                parent->pipeline()->addInboundMessage<OutstandingCallPtr>(out);
                 notify = true;
             }
 
@@ -85,7 +85,7 @@ public:
         }
 
         if (notify) {
-            parent->getPipeline()->fireMessageUpdated();
+            parent->pipeline()->fireMessageUpdated();
         }
     }
 

@@ -27,20 +27,20 @@ public:
     NullChannel();
     virtual ~NullChannel() {}
 
-    virtual int getId() const;
+    virtual int id() const;
 
-    virtual const ChannelPtr& getParent() const;
+    virtual const ChannelPtr& parent() const;
 
     virtual const EventLoopPtr& eventLoop() const;
 
     virtual const ChannelFactoryPtr&  getFactory() const;
-    virtual const ChannelPipelinePtr& getPipeline() const;
+    virtual const ChannelPipelinePtr& pipeline() const;
 
-    virtual ChannelConfig& getConfig();
-    virtual const ChannelConfig& getConfig() const;
+    virtual ChannelConfig& config();
+    virtual const ChannelConfig& config() const;
 
-    virtual const SocketAddress& getLocalAddress() const;
-    virtual const SocketAddress& getRemoteAddress() const;
+    virtual const SocketAddress& localAddress() const;
+    virtual const SocketAddress& remoteAddress() const;
 
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
@@ -73,7 +73,7 @@ public:
     virtual ChannelFuturePtr newFuture();
     virtual ChannelFuturePtr newFailedFuture(const Exception& e);
     virtual ChannelFuturePtr newSucceededFuture();
-    virtual const ChannelFuturePtr& getCloseFuture();
+    virtual const ChannelFuturePtr& closeFuture();
 
     virtual std::string toString() const;
 

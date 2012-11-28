@@ -19,8 +19,8 @@
  */
 
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
 
 #include <cetty/util/StringUtil.h>
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            f->getChannel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

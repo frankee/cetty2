@@ -56,5 +56,5 @@ int main(int argc, char* argv[]) {
     ClientServicePtr service = builder.build();
     GearmanEchoClient client(service);
     client.sendRequest();
-    service->getCloseFuture()->awaitUninterruptibly();
+    service->closeFuture()->awaitUninterruptibly();
 }

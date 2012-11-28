@@ -6,8 +6,8 @@
 #include <boost/smart_ptr/enable_shared_from_this2.hpp>
 
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/IpAddress.h>
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
 
     // Wait until the connection is closed or the connection attempt fails.
     for (size_t i = 0; i < clientChannels.size(); ++i) {
-        clientChannels[i]->getCloseFuture()->awaitUninterruptibly();
+        clientChannels[i]->closeFuture()->awaitUninterruptibly();
     }
 
     // Shut down thread pools to exit.

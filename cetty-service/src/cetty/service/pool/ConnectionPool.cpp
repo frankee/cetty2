@@ -70,7 +70,7 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     ChannelPtr channel = future.getChannel();
     
     conn->channel = channel;
-    int id = channel->getId();
+    int id = channel->id();
     channels.insert(id, conn);
 
     while (!callbacks.empty()) {

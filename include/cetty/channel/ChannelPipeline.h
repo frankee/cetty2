@@ -29,11 +29,9 @@
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelHandlerPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
-#include <cetty/util/ReferenceCounter.h>
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -48,11 +46,8 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class Channel;
 class UserEvent;
-class ChannelHandlerContext;
 class ChannelPipelineException;
-class AdaptiveReceiveBuffer;
 
 /**
  * A list of {@link ChannelHandler}s which handles or intercepts
@@ -237,7 +232,7 @@ class AdaptiveReceiveBuffer;
  * @apiviz.owns       org.jboss.netty.channel.ChannelHandler
  * @apiviz.uses       org.jboss.netty.channel.ChannelSink - - sends events downstream
  */
-class ChannelPipeline : public cetty::util::ReferenceCounter<ChannelPipeline> {
+class ChannelPipeline : private boost::noncopyable {
 public:
     /**
      * Creates a new empty pipeline.
@@ -253,7 +248,7 @@ public:
     void attach(const ChannelPtr& channel);
     void detach();
 
-    bool isAttached() const;
+    bool attached() const;
 
 public:
     /**
@@ -267,7 +262,28 @@ public:
      * @throws NullPointerException
      *         if the specified name or handler is <tt>NULL</tt>
      */
-    void addFirst(ChannelHandlerContext* context);
+    bool addFirst(ChannelHandlerContext* context);
+
+    template<typename T>
+    bool addFirst(const std::string& name,
+                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addFirst(new T::Context(name, handler));
+    }
+
+    template<typename T>
+    bool addFirst(const std::string& name,
+                  const EventLoopPtr& loop,
+                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addFirst(new T::Context(name, loop, handler));
+    }
 
     /**
      * Appends a {@link ChannelHandler} at the last position of this pipeline.
@@ -280,7 +296,28 @@ public:
      * @throws NullPointerException
      *         if the specified name or handler is <tt>NULL</tt>
      */
-    void addLast(ChannelHandlerContext* context);
+    bool addLast(ChannelHandlerContext* context);
+
+    template<typename T>
+    bool addLast(const std::string& name,
+                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addLast(new T::Context(name, handler));
+    }
+
+    template<typename T>
+    bool addLast(const std::string& name,
+                 const EventLoopPtr& loop,
+                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addLast(new T::Context(name, loop, handler));
+    }
 
     /**
      * Inserts a {@link ChannelHandler} before an existing handler of this
@@ -297,7 +334,30 @@ public:
      * @throws NullPointerException
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
-    void addBefore(const std::string& name, ChannelHandlerContext* context);
+    bool addBefore(const std::string& name, ChannelHandlerContext* context);
+
+    template<typename T>
+    bool addBefore(const std::string& baseName,
+                   const std::string& name,
+                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addBefore(baseName, new T::Context(name, handler));
+    }
+
+    template<typename T>
+    bool addBefore(const std::string& baseName,
+                   const std::string& name,
+                   const EventLoopPtr& loop,
+                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (name.empty() || !handler) {
+            return false;
+        }
+
+        return addBefore(baseName, new T::Context(name, loop, handler));
+    }
 
     /**
      * Inserts a {@link ChannelHandler} after an existing handler of this
@@ -314,7 +374,22 @@ public:
      * @throws NullPointerException
      *         if the specified baseName, name, or handler is <tt>NULL</tt>
      */
-    void addAfter(const std::string& name, ChannelHandlerContext* context);
+    bool addAfter(const std::string& name, ChannelHandlerContext* context);
+
+    template<typename T>
+    bool addAfter(const std::string& baseName,
+                  const std::string& name,
+                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        bool addAfter(baseName, new T::Context(name, handler));
+    }
+
+    template<typename T>
+    bool addAfter(const std::string& baseName,
+                  const std::string& name,
+                  const EventLoopPtr& loop,
+                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        bool addAfter(baseName, new T::Context(name, loop, handler));
+    }
 
     /**
      * Removes the {@link ChannelHandler} with the specified name from this
@@ -327,7 +402,7 @@ public:
      * @throws NullPointerException
      *         if the specified name is <tt>NULL</tt>
      */
-    const ChannelHandlerContext* remove(const std::string& name);
+    void remove(const std::string& name);
 
     /**
      * Removes the first {@link ChannelHandler} in this pipeline.
@@ -337,7 +412,7 @@ public:
      * @throws NoSuchElementException
      *         if this pipeline is empty
      */
-    const ChannelHandlerContext* removeFirst();
+    void removeFirst();
 
     /**
      * Removes the last {@link ChannelHandler} in this pipeline.
@@ -347,7 +422,7 @@ public:
      * @throws NoSuchElementException
      *         if this pipeline is empty
      */
-    const ChannelHandlerContext* removeLast();
+    void removeLast();
 
     /**
      * Replaces the specified {@link ChannelHandler} with a new handler in
@@ -362,7 +437,22 @@ public:
      *         if the specified old handler, new name, or new handler is
      *         <tt>NULL</tt>
      */
-    void replace(const std::string& name, ChannelHandlerContext* context);
+    bool replace(const std::string& name, ChannelHandlerContext* context);
+
+    template<typename T>
+    bool replace(const std::string& baseName,
+                 const std::string& name,
+                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        return replace(baseName, new T::Context(name, handler));
+    }
+
+    template<typename T>
+    bool replace(const std::string& baseName,
+                 const std::string& name,
+                 const EventLoopPtr& loop,
+                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        return replace(baseName, new T::Context(name, loop, handler));
+    }
 
     /**
      * Returns the first {@link ChannelHandler} in this pipeline.
@@ -393,48 +483,50 @@ public:
     void fireChannelInactive();
 
     void fireMessageUpdated();
-    
+
     void fireUserEventTriggered(const boost::any& evt);
     void fireExceptionCaught(const ChannelException& cause);
 
     ChannelFuturePtr bind(const SocketAddress& localAddress);
     ChannelFuturePtr connect(const SocketAddress& remoteAddress);
     ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                                     const SocketAddress& localAddress);
+                             const SocketAddress& localAddress);
     ChannelFuturePtr disconnect();
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
     const ChannelFuturePtr& bind(const SocketAddress& localAddress,
-                                         const ChannelFuturePtr& future);
+                                 const ChannelFuturePtr& future);
     const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const ChannelFuturePtr& future);
+                                    const ChannelFuturePtr& future);
     const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const SocketAddress& localAddress,
-                                            const ChannelFuturePtr& future);
+                                    const SocketAddress& localAddress,
+                                    const ChannelFuturePtr& future);
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
     const ChannelFuturePtr& close(const ChannelFuturePtr& future);
     const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
 #if (DATA_PROCESS_BOCK || 1)
 
-    template<class T, int MessageT = MESSAGE_BLOCK>
+    template<class T, int MessageT>
     ChannelMessageContainer<T, MessageT>* inboundMessageContainer() {
         if (head_) {
             return head_->nextInboundMessageContainer<ChannelMessageContainer<T, MessageT> >(head_);
         }
+
         return NULL;
     }
 
-    template<class T, int MessageT = MESSAGE_BLOCK>
+    template<class T, int MessageT>
     ChannelMessageContainer<T, MessageT>* outboundMessageContainer() {
         if (tail_) {
             return tail_->nextOutboundMessageContainer<ChannelMessageContainer<T, MessageT> >(tail_);
         }
+
         return NULL;
     }
 
-    template<typename T, int MessageT = MESSAGE_BLOCK>
+    template<typename T, int MessageT>
     bool addInboundMessage(const T& message) {
         if (!!message) {
             ChannelMessageContainer<T, MessageT>* container =
@@ -445,7 +537,7 @@ public:
             }
             else {
                 LOG_WARN << "has no inboundMessageContainer in pipeline, "
-                    "you will lost the message.";
+                         "you will lost the message.";
             }
         }
         else {
@@ -453,7 +545,7 @@ public:
         }
     }
 
-    template<typename T, int MessageT = MESSAGE_BLOCK>
+    template<typename T, int MessageT>
     bool addOutboundMessage(const T& message) {
         if (!!message) {
             ChannelMessageContainer<T, MessageT>* container =
@@ -464,7 +556,7 @@ public:
             }
             else {
                 LOG_WARN << "has no outboundMessageContainer in pipeline, "
-                    "you will lost the message.";
+                         "you will lost the message.";
             }
         }
         else {
@@ -480,13 +572,13 @@ public:
         return addOutboundMessage<ChannelBufferPtr, MESSAGE_STREAM>(buffer);
     }
 
-    template<typename T, int MessageT = MESSAGE_BLOCK>
+    template<typename T, int MessageT>
     ChannelFuturePtr write(const T& message) {
         ChannelFuturePtr f = newFuture(channel_);
         return write<T, MessageT>(message, f);
     }
 
-    template<typename T, int MessageT = MESSAGE_BLOCK>
+    template<typename T, int MessageT>
     const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
         if (addOutboundMessage<T, MessageT>(message)) {
             tail_->flush(*tail_, future);
@@ -498,29 +590,29 @@ public:
         return future;
     }
 
+    template<typename T>
+    ChannelFuturePtr writeMessage(const T& message) {
+        return write<T, MESSAGE_BLOCK>(message);
+    }
+
+    template<typename T>
+    const ChannelFuturePtr& writeMessage(const T& message,
+                                         const ChannelFuturePtr& future) {
+        return write<T, MESSAGE_BLOCK>(message, future);
+    }
+
+    ChannelFuturePtr writeBuffer(const ChannelBufferPtr& buffer) {
+        return write<ChannelBufferPtr, MESSAGE_STREAM>(buffer);
+    }
+
+    const ChannelFuturePtr& writeBuffer(const ChannelBufferPtr& buffer,
+                                        const ChannelFuturePtr& future) {
+        return write<ChannelBufferPtr, MESSAGE_STREAM>(buffer, future);
+    }
+
 #endif
 
 public:
-    /**
-     * Retrieves a boost::any which is
-     * {@link #setAttachment(const std::string&, const boost::any&) attached} to
-     * this context.
-     *
-     * @param name the attachment's name, if the name is empty, then return the
-     *        first attachment in the attachments if attachments is not empty.
-     *
-     * @return Empty boost::any if no such attachment was attached.
-     *
-     */
-    boost::any getAttachment(const std::string& name) const;
-
-    /**
-     * Attaches an object to this pipeline to store a some information
-     * specific to the {@link ChannelPipeline} which will not take care of
-     * the life cycle of the attachment.
-     */
-    void setAttachment(const std::string& name, const boost::any& attachment);
-
     void notifyHandlerException(const Exception& e);
 
     ChannelFuturePtr newFuture(const ChannelPtr& channel);
@@ -531,54 +623,38 @@ public:
     std::string toString() const;
 
 protected:
-    void callBeforeAdd(ChannelHandlerContext* ctx);
-    void callAfterAdd(ChannelHandlerContext* ctx);
-    void callBeforeRemove(ChannelHandlerContext* ctx);
-    void callAfterRemove(ChannelHandlerContext* ctx);
+    bool callBeforeAdd(ChannelHandlerContext* ctx);
+    bool callAfterAdd(ChannelHandlerContext* ctx);
+    bool callBeforeRemove(ChannelHandlerContext* ctx);
+    bool callAfterRemove(ChannelHandlerContext* ctx);
 
 private:
-    void init(ChannelHandlerContext* ctx);
+    bool init(ChannelHandlerContext* ctx);
 
-    void checkDuplicateName(const std::string& name);
-
-    ChannelHandlerContext* getContextNoLock(const std::string& name) const;
-    ChannelHandlerContext* getContextNoLock(const ChannelHandlerPtr& handler) const;
-
-    ChannelHandlerContext* getContextOrDie(const std::string& name);
-    ChannelHandlerContext* getContextOrDie(const ChannelHandlerPtr& handler);
-
-    ChannelHandlerPtr remove(ChannelHandlerContext* ctx);
-    ChannelHandlerPtr replace(ChannelHandlerContext* ctx,
-                              const std::string& newName,
-                              const ChannelHandlerPtr& newHandler);
-
-    // upstream & downstream list operators.
-    void updateInboundHandlerContextList();
-    void updateOutboundHandlerContextList();
+    bool duplicated(const std::string& name) {
+        return contexts_.find(name) != contexts_.end();
+    }
 
 private:
     typedef std::map<std::string, ChannelHandlerContext*> ContextMap;
-    typedef std::map<std::string, boost::any> AttachmentMap;
 
 private:
-    bool firedChannelActive;
-    bool fireInboundBufferUpdatedOnActivation;
+    bool firedChannelActive_;
+    bool fireMessageUpdatedOnActivation_;
 
     ContextMap contexts_;
 
     ChannelPtr channel_;
     EventLoopPtr eventLoop_;
 
-    mutable boost::recursive_mutex mutex;
-
     ChannelHandlerContext* head_;
     ChannelHandlerContext* tail_;
 
-    AttachmentMap attachments_;
+    mutable boost::recursive_mutex mutex_;
 };
 
 inline
-    const ChannelPtr& ChannelPipeline::channel() const {
+const ChannelPtr& ChannelPipeline::channel() const {
     return this->channel_;
 }
 

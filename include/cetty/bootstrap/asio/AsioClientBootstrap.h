@@ -32,6 +32,141 @@ public:
     }
 };
 
+class AsioClientSocketChannelFactory
+        : public cetty::channel::socket::SocketChannelFactory {
+public:
+    /**
+     * Creates a new instance.  Calling this constructor is same with calling
+     * {@link #NioClientSocketChannelFactory(Executor, Executor, int)} with 2 *
+     * the number of available processors in the machine.  The number of
+     * available processors is obtained by {@link Runtime#availableProcessors()}.
+     *
+     * @param bossExecutor
+     *        the {@link Executor} which will execute the boss thread
+     * @param workerExecutor
+     *        the {@link Executor} which will execute the I/O worker threads
+     * @param workerCount
+     *        the maximum number of I/O worker threads
+     */
+    AsioClientSocketChannelFactory(int threadCnt);
+    AsioClientSocketChannelFactory(const EventLoopPtr& eventLoop);
+    AsioClientSocketChannelFactory(const EventLoopPoolPtr& eventLoopPool);
+
+    virtual ~AsioClientSocketChannelFactory();
+
+    virtual ChannelPtr newChannel(const ChannelPipelinePtr& pipeline);
+
+    virtual void shutdown();
+
+private:
+    void init();
+    void deinit();
+
+private:
+    typedef std::map<int, ChannelPtr> ClientChannels;
+
+private:
+    EventLoopPtr eventLoop;
+    EventLoopPoolPtr eventLoopPool;
+
+    std::vector<ChannelPtr> clientChannels;
+
+    AsioTcpSocketAddressImplFactory* socketAddressFactory;
+    AsioIpAddressImplFactory* ipAddressFactory;
+};
+
+
+AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
+    const EventLoopPtr& eventLoop)
+    : eventLoop(eventLoop),
+    eventLoopPool(),
+    socketAddressFactory(NULL),
+    ipAddressFactory(NULL) {
+        init();
+}
+
+AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(
+    const EventLoopPoolPtr& eventLoopPool)
+    : eventLoop(),
+    eventLoopPool(eventLoopPool),
+    socketAddressFactory(NULL),
+    ipAddressFactory(NULL) {
+        init();
+}
+
+AsioClientSocketChannelFactory::AsioClientSocketChannelFactory(int threadCnt)
+    : eventLoopPool(new AsioServicePool(threadCnt)),
+    socketAddressFactory(NULL),
+    ipAddressFactory(NULL) {
+        init();
+}
+
+AsioClientSocketChannelFactory::~AsioClientSocketChannelFactory() {
+    deinit();
+}
+
+void AsioClientSocketChannelFactory::init() {
+    if (!SocketAddress::hasFactory()) {
+        EventLoopPtr loop
+            = eventLoopPool ? eventLoopPool->getNextLoop() : eventLoop;
+        AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
+        BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
+
+        socketAddressFactory =
+            new AsioTcpSocketAddressImplFactory(service->service());
+
+        SocketAddress::setFacotry(socketAddressFactory);
+    }
+
+    if (!IpAddress::hasFactory()) {
+        ipAddressFactory = new AsioIpAddressImplFactory();
+        IpAddress::setFactory(ipAddressFactory);
+    }
+}
+
+void AsioClientSocketChannelFactory::deinit() {
+    if (socketAddressFactory) {
+        SocketAddress::resetFactory();
+
+        delete socketAddressFactory;
+        socketAddressFactory = NULL;
+    }
+
+    if (ipAddressFactory) {
+        IpAddress::resetFactory();
+
+        delete ipAddressFactory;
+        ipAddressFactory = NULL;
+    }
+}
+
+ChannelPtr AsioClientSocketChannelFactory::newChannel(const ChannelPipelinePtr& pipeline) {
+    const EventLoopPtr& eventLoop = eventLoopPool ?
+        eventLoopPool->getNextLoop()
+        : this->eventLoop;
+
+    ChannelPtr client =
+        new AsioSocketChannel(eventLoop,
+        shared_from_this(),
+        pipeline);
+
+    LOG_INFO << "AsioSocketChannel firing the Channel Created Event.";
+    client->pipeline()->fireChannelOpen();
+
+    clientChannels.push_back(client);
+
+    return client;
+}
+
+void AsioClientSocketChannelFactory::shutdown() {
+    if (eventLoopPool) {
+        eventLoopPool->stop();
+        eventLoopPool->waitForStop();
+    }
+
+    clientChannels.clear();
+}
+
 }
 }
 }

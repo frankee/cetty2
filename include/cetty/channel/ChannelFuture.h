@@ -217,8 +217,7 @@ using namespace cetty::util;
  *
  */
 
-class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture>,
-    private boost::noncopyable {
+class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture> {
 
 public:
     /**

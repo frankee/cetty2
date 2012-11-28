@@ -39,11 +39,11 @@ public:
 
     virtual ~ClientService() {}
 
-    virtual ChannelConfig& getConfig();
-    virtual const ChannelConfig& getConfig() const;
+    virtual ChannelConfig& config();
+    virtual const ChannelConfig& config() const;
 
-    virtual const SocketAddress& getLocalAddress() const;
-    virtual const SocketAddress& getRemoteAddress() const;
+    virtual const SocketAddress& localAddress() const;
+    virtual const SocketAddress& remoteAddress() const;
 
     virtual bool isOpen() const;
     virtual bool isActive() const;

@@ -18,7 +18,7 @@
 
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanWorker.h>
 #include <cetty/gearman/GearmanWorkerHandler.h>

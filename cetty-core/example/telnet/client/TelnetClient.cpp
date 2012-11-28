@@ -23,7 +23,7 @@
 #include <cetty/buffer/Unpooled.h>
 
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/handler/codec/Delimiters.h>
 #include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
         // If user typed the 'bye' command, wait until the server closes
         // the connection.
         if (line.compare("bye\r\n") == 0) {
-            channel->getCloseFuture()->awaitUninterruptibly();
+            channel->closeFuture()->awaitUninterruptibly();
             break;
         }
     }

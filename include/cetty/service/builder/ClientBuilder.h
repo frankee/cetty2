@@ -84,7 +84,7 @@ public:
 
     ClientServicePtr build() {
         ChannelPtr channel = bootstrap.newChannel();
-        channel->getPipeline()->fireChannelActive();
+        channel->pipeline()->fireChannelActive();
         return boost::dynamic_pointer_cast<ClientService>(channel);
     }
 

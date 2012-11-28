@@ -17,8 +17,8 @@
 #include <cetty/gearman/GearmanWorker.h>
 
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 namespace cetty {
 namespace gearman {

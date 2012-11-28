@@ -18,27 +18,10 @@
  */
 
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 
 namespace cetty {
 namespace channel {
-
-    template<class T>
-    struct HandlerWrapper {
-        typedef T Handler;
-        typedef boost::shared_ptr<T> HandlerPtr;
-    };
-
-    template<class T>
-    struct HandlerWrapper<boost::intrusive_ptr<T> > {
-        typedef T Handler;
-        typedef boost::intrusive_ptr<T> HandlerPtr;
-    };
-
-    template<class T>
-    struct HandlerWrapper<boost::shared_ptr<T> > {
-        typedef T Handler;
-        typedef boost::shared_ptr<T> HandlerPtr;
-    };
 
 template<class Handler,
          class InboundIn,
@@ -51,8 +34,8 @@ template<class Handler,
          class OutboundOutContainer>
 class ChannelMessageHandlerContext : public ChannelHandlerContext {
 public:
-    typedef HandlerWrapper<Handler>::Handler Handler;
-    typedef HandlerWrapper<Handler>::HandlerPtr HandlerPtr;
+    typedef typename ChannelHandlerWrapper<Handler>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<Handler>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageTransfer<InboundOut, InboundOutContainer, TRANSFER_INBOUND> InboundTransfer;
     typedef ChannelMessageTransfer<OutboundOut, OutboundOutContainer, TRANSFER_OUTBOUND> OutboundTransfer;

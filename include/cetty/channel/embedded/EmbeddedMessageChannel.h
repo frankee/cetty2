@@ -60,7 +60,7 @@ public:
     SinkHandler::MessageQueue& getLastOutboundMessageQueue() {
         boost::intrusive<SinkHandler> handler
             = boost::dynamic_pointer_cast<SinkHandler>(
-                  pipeline->getSinkHandler());
+                  pipeline_->getSinkHandler());
 
         BOOST_ASSERT(handler);
         return handler->getOutboundMessageQueue();

@@ -61,7 +61,7 @@ public:
     ChannelBufferPtr getLastOutboundBuffer() {
         boost::intrusive_ptr<ChannelOutboundBufferHandler> handler
             = boost::dynamic_pointer_cast<ChannelOutboundBufferHandler>(
-            pipeline->getSinkHandler());
+            pipeline_->getSinkHandler());
         
         BOOST_ASSERT(handler);
         return handler->getOutboundChannelBuffer();

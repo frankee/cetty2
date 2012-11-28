@@ -48,5 +48,5 @@ int main(int argc, char* argv[]) {
     EchoClient client(service);
     client.sendRequest();
 
-    service->getCloseFuture()->awaitUninterruptibly();
+    service->closeFuture()->awaitUninterruptibly();
 }

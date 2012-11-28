@@ -19,13 +19,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundHandler.h>
-#include <cetty/channel/ChannelOutboundHandler.h>
-#include <cetty/channel/ChannelOutboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
 
@@ -43,28 +37,27 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-static const char* SINK_HANDLER_NAME = "_sink";
-
 ChannelPipeline::ChannelPipeline()
-    : firedChannelActive(false),
-      fireInboundBufferUpdatedOnActivation(false),
-      channel_(),
+    : firedChannelActive_(false),
+      fireMessageUpdatedOnActivation_(false),
       head_(),
       tail_() {
 }
 
 ChannelPipeline::~ChannelPipeline() {
-    //LOG_DEBUG << "ChannelPipeline dector";
+    LOG_DEBUG << "ChannelPipeline dectr";
     STLDeleteValues(&contexts_);
 }
 
 void ChannelPipeline::attach(const ChannelPtr& channel) {
     if (!channel) {
         LOG_WARN << "attach a null channel to pipeline, ignore.";
+        return;
     }
 
     if (channel_) {
         LOG_WARN << "the pipeline has already attached, ignore.";
+        return;
     }
 
     channel_ = channel;
@@ -72,12 +65,7 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
 
     ChannelHandlerContext* ctx = head_;
 
-    while (true) {
-        if (ctx == tail_) {
-            ctx->attach();
-            break;
-        }
-
+    while (ctx) {
         ctx->attach();
         ctx = ctx->next();
     }
@@ -86,12 +74,7 @@ void ChannelPipeline::attach(const ChannelPtr& channel) {
 void ChannelPipeline::detach() {
     ChannelHandlerContext* ctx = head_;
 
-    while (true) {
-        if (ctx == tail_) {
-            ctx->detach();
-            break;
-        }
-
+    while (ctx) {
         ctx->detach();
         ctx = ctx->next();
     }
@@ -100,142 +83,168 @@ void ChannelPipeline::detach() {
     eventLoop_.reset();
 }
 
-bool ChannelPipeline::isAttached() const {
+bool ChannelPipeline::attached() const {
     return !!channel_;
 }
 
-void ChannelPipeline::addFirst(ChannelHandlerContext* ctx) {
-    if (!ctx || ctx->name().empty()) { return; }
+bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
+    if (!context) {
+        return false;
+    }
 
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+    const std::string& name = context->name();
+
+    if (name.empty()) {
+        return false;
+    }
 
     if (contexts_.empty()) {
-        init(ctx);
+        return init(context);
     }
-    else {
-        checkDuplicateName(ctx->name());
 
-        ChannelHandlerContext* oldHead = head_;
-        ctx->setPipeline(this);
-        
-        callBeforeAdd(ctx);
-
-        oldHead->setBefore(ctx);
-        head_ = ctx;
-
-        contexts_[ctx->name()] = ctx;
-
-        callAfterAdd(ctx);
+    if (duplicated(name)) {
+        return false;
     }
+
+    ChannelHandlerContext* oldHead = head_;
+    context->setPipeline(this);
+
+    callBeforeAdd(context);
+
+    oldHead->setBefore(context);
+    head_ = context;
+
+    context->setNext(oldHead);
+
+    contexts_[name] = context;
+
+    callAfterAdd(context);
+
+    return true;
 }
 
-void ChannelPipeline::addLast(ChannelHandlerContext* context) {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
+    if (!context) {
+        return false;
+    }
 
-    if (!handler) { return; }
+    const std::string& name = context->name();
+
+    if (name.empty()) {
+        return false;
+    }
 
     if (contexts_.empty()) {
-        init(name, handler);
+        return init(context);
     }
-    else {
-        checkDuplicateName(name);
-        ChannelHandlerContext* oldTail = this->tail_;
-        ChannelHandlerContext* newTail =
-            handler->createContext(name, *this, oldTail, NULL);
 
-        callBeforeAdd(newTail);
-
-        oldTail->next = newTail;
-        this->tail_ = newTail;
-
-        // for upstream and downstream single list.
-        if (newTail->canHandleInboundMessage()) {
-            updateInboundHandlerContextList();
-        }
-
-        if (newTail->canHandleOutboundMessage()) {
-            updateOutboundHandlerContextList();
-        }
-
-        contexts_[name] = newTail;
-
-        callAfterAdd(newTail);
+    if (duplicated(name)) {
+        return false;
     }
+
+    ChannelHandlerContext* oldTail = this->tail_;
+
+    callBeforeAdd(context);
+
+    oldTail->setNext(context);
+    this->tail_ = context;
+
+    context->setBefore(oldTail);
+
+    contexts_[name] = context;
+
+    callAfterAdd(context);
+
+    return true;
 }
 
-void ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* context) {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+bool ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* context) {
+    if (!context) {
+        return false;
+    }
 
-    if (!handler) { return; }
+    const std::string& newName = context->name();
 
-    ChannelHandlerContext* ctx = getContextOrDie(baseName);
+    if (name.empty()) {
+        return false;
+    }
+
+    ChannelHandlerContext* ctx = find(name);
+
+    if (!ctx) {
+        return false;
+    }
+
+    if (duplicated(newName)) {
+        return false;
+    }
 
     if (ctx == this->head_) {
-        addFirst(name, handler);
+        return addFirst(context);
     }
-    else {
-        checkDuplicateName(name);
-        ChannelHandlerContext* newCtx =
-            handler->createContext(name, *this, ctx->prev, ctx);
 
-        callBeforeAdd(newCtx);
+    callBeforeAdd(context);
 
-        ctx->prev->next = newCtx;
-        ctx->prev = newCtx;
+    ctx->before()->setNext(context);
+    ctx->setBefore(context);
 
-        // for upstream and downstream single list.
-        if (newCtx->canHandleInboundMessage()) {
-            updateInboundHandlerContextList();
-        }
+    context->setBefore(ctx->before());
+    context->setNext(ctx);
 
-        if (newCtx->canHandleOutboundMessage()) {
-            updateOutboundHandlerContextList();
-        }
+    contexts_[newName] = context;
 
-        contexts_[name] = newCtx;
-
-        callAfterAdd(newCtx);
-    }
+    callAfterAdd(context);
+    return true;
 }
 
-void ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* context) {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+bool ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* context) {
+    if (!context) {
+        return false;
+    }
 
-    if (!handler) { return; }
+    const std::string& newName = context->name();
 
-    ChannelHandlerContext* ctx = getContextOrDie(baseName);
+    if (name.empty()) {
+        return false;
+    }
+
+    ChannelHandlerContext* ctx = find(name);
+
+    if (!ctx) {
+        return false;
+    }
+
+    if (duplicated(newName)) {
+        return false;
+    }
 
     if (ctx == this->tail_) {
-        addLast(name, handler);
+        return addLast(context);
     }
-    else {
-        checkDuplicateName(name);
-        ChannelHandlerContext* newCtx =
-            handler->createContext(name, *this, ctx, ctx->next);
 
-        callBeforeAdd(newCtx);
+    callBeforeAdd(context);
 
-        ctx->next->prev = newCtx;
-        ctx->next = newCtx;
+    ctx->next()->setBefore(context);
+    ctx->setNext(context);
 
-        // for upstream and downstream single list.
-        if (newCtx->canHandleInboundMessage()) {
-            updateInboundHandlerContextList();
-        }
+    context->setBefore(ctx);
+    context->setNext(ctx->next());
 
-        if (newCtx->canHandleOutboundMessage()) {
-            updateOutboundHandlerContextList();
-        }
+    contexts_[newName] = context;
 
-        contexts_[name] = newCtx;
+    callAfterAdd(context);
 
-        callAfterAdd(newCtx);
-    }
+    return true;
 }
 
-const ChannelHandlerContext* ChannelPipeline::remove(const std::string& name) {
+void ChannelPipeline::remove(const std::string& name) {
     ChannelHandlerContext* ctx = find(name);
-    
+
+    if (!ctx) {
+        LOG_WARN << "no such context (" << name << "), do nothing";
+        return;
+    }
+
     if (head_ == tail_) {
         head_ = tail_ = NULL;
         contexts_.clear();
@@ -251,216 +260,161 @@ const ChannelHandlerContext* ChannelPipeline::remove(const std::string& name) {
 
         ChannelHandlerContext* prev = ctx->before();
         ChannelHandlerContext* next = ctx->next();
-        
-        prev->next = next;
-        next->prev = prev;
+
+        prev->setNext(next);
+        next->setBefore(prev);
 
         contexts_.erase(ctx->name());
 
         callAfterRemove(ctx);
     }
 
-    ChannelHandlerPtr ptr = ctx->getHandler();
     delete ctx;
-    return ptr;
 }
 
-ChannelHandlerPtr ChannelPipeline::removeFirst() {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+void ChannelPipeline::removeFirst() {
+    boost::lock_guard<boost::recursive_mutex> guard(mutex_);
 
     if (contexts_.empty()) {
-        throw RangeException("name2ctx is empty");
+        LOG_WARN << "contexts is empty";
+        return;
     }
 
     ChannelHandlerContext* oldHead = head_;
 
-    if (oldHead == NULL) {
-        throw RangeException("head is null");
+    if (!oldHead) {
+        LOG_WARN << "head is null";
+        return;
     }
 
     callBeforeRemove(oldHead);
 
-    if (oldHead->next == NULL) {
+    if (!oldHead->next()) {
         head_ = tail_ = NULL;
         contexts_.clear();
     }
     else {
-        oldHead->next->prev = NULL;
-        head_ = oldHead->next;
+        oldHead->next()->setBefore(NULL);
+        head_ = oldHead->next();
         contexts_.erase(oldHead->name());
-    }
-
-    // for upstream and downstream single list.
-    if (oldHead->canHandleInboundMessage()) {
-        updateInboundHandlerContextList();
-    }
-
-    if (oldHead->canHandleOutboundMessage()) {
-        updateOutboundHandlerContextList();
     }
 
     callAfterRemove(oldHead);
 
-    ChannelHandlerPtr ptr = oldHead->getHandler();
     delete oldHead;
-    return ptr;
 }
 
-const ChannelHandlerContext* ChannelPipeline::removeFirst() {
-
-}
-
-ChannelHandlerPtr ChannelPipeline::removeLast() {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
+void ChannelPipeline::removeLast() {
+    boost::lock_guard<boost::recursive_mutex> guard(mutex_);
 
     if (contexts_.empty()) {
-        throw RangeException("name2ctx is empty");
+        LOG_WARN << "contexts is empty";
+        return;
     }
 
     ChannelHandlerContext* oldTail = tail_;
 
     if (oldTail == NULL) {
-        throw RangeException("head is null");
+        LOG_WARN << "ChannelHandlerContext is null";
+        return;
     }
 
     callBeforeRemove(oldTail);
 
-    if (oldTail->prev == NULL) {
+    if (!oldTail->before()) {
         this->head_ = this->tail_ = NULL;
         contexts_.clear();
     }
     else {
-        oldTail->prev->next = NULL;
-        this->tail_ = oldTail->prev;
+        oldTail->before()->setNext(NULL);
+        this->tail_ = oldTail->before();
         contexts_.erase(oldTail->name());
-    }
-
-    // for upstream and downstream single list.
-    if (oldTail->canHandleInboundMessage()) {
-        updateInboundHandlerContextList();
-    }
-
-    if (oldTail->canHandleOutboundMessage()) {
-        updateOutboundHandlerContextList();
     }
 
     callAfterRemove(oldTail);
 
-    ChannelHandlerPtr ptr = oldTail->getHandler();
     delete oldTail;
-    return ptr;
 }
 
-const ChannelHandlerContext* ChannelPipeline::removeLast() {
+bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* context) {
+    if (name.empty() || !context) {
+        LOG_WARN << "input parameters is invalid.";
+        return false;
+    }
 
-}
+    ChannelHandlerContext* ctx = find(name);
 
-void ChannelPipeline::replace(const ChannelHandlerPtr& oldHandler,
-                              const std::string& newName,
-                              const ChannelHandlerPtr& newHandler) {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
-    replace(getContextOrDie(oldHandler), newName, newHandler);
-}
-
-ChannelHandlerPtr
-ChannelPipeline::replace(const std::string& oldName,
-                         const std::string& newName,
-                         const ChannelHandlerPtr& newHandler) {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex);
-    return replace(getContextOrDie(oldName), newName, newHandler);
-}
-
-ChannelHandlerPtr
-ChannelPipeline::replace(ChannelHandlerContext* ctx,
-                         const std::string& newName,
-                         const ChannelHandlerPtr& newHandler) {
-    ChannelHandlerPtr replacedHandle;
-
-    if (!newHandler) { return replacedHandle; }
+    if (!ctx) {
+        LOG_WARN << "can't find the src context: " << name;
+        return false;
+    }
 
     if (ctx == head_) {
-        replacedHandle = removeFirst();
-        addFirst(newName, newHandler);
+        removeFirst();
+        return addFirst(context);
     }
     else if (ctx == tail_) {
-        replacedHandle = removeLast();
-        addLast(newName, newHandler);
+        removeLast();
+        return addLast(context);
+    }
+
+
+    const std::string& oldName = ctx->name();
+    const std::string& newName = context->name();
+
+    ChannelHandlerContext* prev = ctx->before();
+    ChannelHandlerContext* next = ctx->next();
+
+    callBeforeRemove(ctx);
+    callBeforeAdd(context);
+
+    prev->setNext(context);
+    next->setBefore(context);
+
+    context->setBefore(prev);
+    context->setNext(next);
+
+    contexts_.erase(ctx->name());
+    contexts_[newName] = context;
+
+    ChannelHandlerLifeCycleException removeException;
+    ChannelHandlerLifeCycleException addException;
+    bool removed = false;
+
+    try {
+        callAfterRemove(ctx);
+        removed = true;
+    }
+    catch (const ChannelHandlerLifeCycleException& e) {
+        removeException = e;
+    }
+
+    bool added = false;
+
+    try {
+        callAfterAdd(context);
+        added = true;
+    }
+    catch (const ChannelHandlerLifeCycleException& e) {
+        addException = e;
+    }
+
+    if (!removed && !added) {
+        LOG_WARN << "Both " << ctx->toString() << " fireAfterRemove and "
+                 << context->toString() << " fireAfterAdd failed; see logs.";
+    }
+    else if (!removed) {
+        removeException.rethrow();
+    }
+    else if (!added) {
+        addException.rethrow();
     }
     else {
-        bool sameName = (ctx->name().compare(newName) == 0);
-
-        if (!sameName) {
-            checkDuplicateName(newName);
-        }
-
-        ChannelHandlerContext* prev = ctx->prev;
-        ChannelHandlerContext* next = ctx->next;
-        ChannelHandlerContext* newCtx =
-            newHandler->createContext(newName, *this, prev, next);
-
-        callBeforeRemove(ctx);
-        callBeforeAdd(newCtx);
-
-        prev->next = newCtx;
-        next->prev = newCtx;
-
-        if (!sameName) {
-            contexts_.erase(ctx->name());
-            contexts_[newName] = newCtx;
-        }
-
-        ChannelHandlerLifeCycleException removeException;
-        ChannelHandlerLifeCycleException addException;
-        bool removed = false;
-
-        try {
-            callAfterRemove(ctx);
-            removed = true;
-        }
-        catch (const ChannelHandlerLifeCycleException& e) {
-            removeException = e;
-        }
-
-        bool added = false;
-
-        try {
-            callAfterAdd(newCtx);
-            added = true;
-        }
-        catch (const ChannelHandlerLifeCycleException& e) {
-            addException = e;
-        }
-
-        if (!removed || !added) {
-            delete ctx;
-        }
-
-        if (!removed && !added) {
-            LOG_WARN_E(removeException);
-            LOG_WARN_E(addException);
-            throw ChannelHandlerLifeCycleException(
-                std::string("Both ") +
-                ctx->getHandler()->toString() +
-                std::string(".afterRemove() and ") +
-                newCtx->getHandler()->toString() +
-                std::string(".afterAdd() failed; see logs."));
-        }
-        else if (!removed) {
-            removeException.rethrow();
-        }
-        else if (!added) {
-            addException.rethrow();
-        }
-
-        replacedHandle = ctx->getHandler();
+        delete ctx;
+        return true;
     }
 
-    delete ctx;
-    return replacedHandle;
-}
-
-void ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* context) {
-
+    return true;
 }
 
 ChannelHandlerContext* ChannelPipeline::first() const {
@@ -473,6 +427,7 @@ ChannelHandlerContext* ChannelPipeline::last() const {
 
 ChannelHandlerContext* ChannelPipeline::find(const std::string& name) const {
     ContextMap::const_iterator itr = contexts_.find(name);
+
     if (itr != contexts_.end()) {
         return itr->second;
     }
@@ -487,11 +442,7 @@ std::string ChannelPipeline::toString() const {
     ChannelHandlerContext* ctx = this->head_;
 
     for (;;) {
-        buf.append("(");
-        buf.append(ctx->name());
-        buf.append(" = ");
-        buf.append(ctx->getHandler()->toString());
-        buf.append(")");
+        buf.append(ctx->toString());
 
         ctx = ctx->next();
 
@@ -517,31 +468,38 @@ void ChannelPipeline::notifyHandlerException(const Exception& e) {
     fireExceptionCaught(pe);
 }
 
-void ChannelPipeline::callBeforeAdd(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::callBeforeAdd(ChannelHandlerContext* ctx) {
     try {
         ctx->fireBeforeAdd();
+        return true;
     }
     catch (const Exception& e) {
-        throw ChannelHandlerLifeCycleException(
-            ".beforeAdd() has thrown an exception; not adding.", e);
+        LOG_WARN << "fireBeforeAdd has thrown an exception: "
+                 << e.what() << ", not adding.";
     }
+
+    return false;
 }
 
-void ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
     try {
         ctx->fireAfterAdd();
+        return true;
     }
     catch (const Exception& e) {
-        LOG_WARN_E(e) << "call afterAdd has throw an exception, then try to remove";
+        LOG_WARN << "call fireAfterAdd has throw an exception:"
+                 << e.what() << ", then try to remove";
 
         bool removed = false;
 
         try {
-            remove((ChannelHandlerContext*)ctx);
+            remove(ctx->name());
             removed = true;
         }
         catch (const Exception& e) {
-            LOG_WARN_E(e) << "Failed to remove a handler: " << ctx->name();
+            LOG_WARN << "Failed to remove a handler: "
+                     << ctx->name()
+                     << ", reason: " << e.what();
 
             if (removed) {
                 throw ChannelHandlerLifeCycleException(
@@ -552,32 +510,40 @@ void ChannelPipeline::callAfterAdd(ChannelHandlerContext* ctx) {
                     ".afterAdd() has thrown an exception; also failed to remove.", e);
             }
         }
+
     }
+
+    return false;
 }
 
-void ChannelPipeline::callBeforeRemove(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::callBeforeRemove(ChannelHandlerContext* ctx) {
     try {
         ctx->fireBeforeRemove();
+        return true;
     }
     catch (const Exception& e) {
-        throw ChannelHandlerLifeCycleException(
-            ".beforeRemove() has thrown an exception; not removing.", e);
+        LOG_WARN << "fireBeforeRemove has thrown an exception: "
+                 << e.what() << ", not removing.";
     }
+
+    return false;
 }
 
-void ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     try {
         ctx->fireAfterRemove();
+        return true;
     }
     catch (const Exception& e) {
-        throw ChannelHandlerLifeCycleException(
-            ".afterRemove() has thrown an exception.", e);
+        LOG_WARN << "fireAfterRemove has thrown an exception: " << e.what();
     }
+
+    return false;
 }
 
-void ChannelPipeline::init(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::init(ChannelHandlerContext* ctx) {
     if (!ctx || ctx->name().empty()) {
-        return;
+        return false;
     }
 
     ctx->setPipeline(this);
@@ -588,47 +554,7 @@ void ChannelPipeline::init(ChannelHandlerContext* ctx) {
     contexts_[ctx->name()] = ctx;
 
     callAfterAdd(ctx);
-}
-
-void ChannelPipeline::checkDuplicateName(const std::string& name) {
-    if (contexts_.find(name) != contexts_.end()) {
-        throw InvalidArgumentException("Duplicate handler name.");
-    }
-}
-
-ChannelHandlerContext* ChannelPipeline::getContextOrDie(const std::string& name) {
-    ChannelHandlerContext* ctx = getContextNoLock(name);
-
-    if (ctx == NULL) {
-        throw RangeException(name);
-    }
-    else {
-        return ctx;
-    }
-}
-
-ChannelHandlerContext* ChannelPipeline::getContextNoLock(const std::string& name) const {
-    ContextMap::const_iterator itr = contexts_.find(name);
-
-    if (itr == contexts_.end()) {
-        return NULL;
-    }
-
-    return itr->second;
-}
-
-void ChannelPipeline::setAttachment(const std::string& name, const boost::any& attachment) {
-    attachments_[name] = attachment;
-}
-
-boost::any ChannelPipeline::getAttachment(const std::string& name) const {
-    AttachmentMap::const_iterator itr = attachments_.find(name);
-
-    if (itr != attachments_.end()) {
-        return itr->second;
-    }
-
-    return boost::any();
+    return true;
 }
 
 void ChannelPipeline::fireChannelOpen() {
@@ -638,14 +564,14 @@ void ChannelPipeline::fireChannelOpen() {
 }
 
 void ChannelPipeline::fireChannelActive() {
-    firedChannelActive = true;
+    firedChannelActive_ = true;
 
     if (head_) {
         head_->fireChannelActive(*head_);
     }
 
-    if (fireInboundBufferUpdatedOnActivation) {
-        fireInboundBufferUpdatedOnActivation = false;
+    if (fireMessageUpdatedOnActivation_) {
+        fireMessageUpdatedOnActivation_ = false;
 
         if (head_) {
             head_->fireMessageUpdated(*head_);
@@ -676,8 +602,8 @@ void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
 }
 
 void ChannelPipeline::fireMessageUpdated() {
-    if (!firedChannelActive) {
-        fireInboundBufferUpdatedOnActivation = true;
+    if (!firedChannelActive_) {
+        fireMessageUpdatedOnActivation_ = true;
         return;
     }
 

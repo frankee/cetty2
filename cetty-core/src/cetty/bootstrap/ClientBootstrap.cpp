@@ -79,7 +79,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, co
     }
 
     // Set the options.
-    ch->getConfig().setOptions(options());
+    ch->config().setOptions(options());
 
     if (initializer_) {
         initializer_(ch);

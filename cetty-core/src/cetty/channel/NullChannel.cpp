@@ -57,7 +57,7 @@ NullChannel::NullChannel() {
     }
 }
 
-int NullChannel::getId() const {
+int NullChannel::id() const {
     return -1;
 }
 
@@ -65,27 +65,27 @@ const ChannelFactoryPtr& NullChannel::getFactory() const {
     return nullChannelFactory;
 }
 
-ChannelConfig& NullChannel::getConfig() {
+ChannelConfig& NullChannel::config() {
     return channelConfig;
 }
 
-const ChannelConfig& NullChannel::getConfig() const {
+const ChannelConfig& NullChannel::config() const {
     return channelConfig;
 }
 
-const ChannelPipelinePtr& NullChannel::getPipeline() const {
+const ChannelPipelinePtr& NullChannel::pipeline() const {
     return channelPipeline;
 }
 
-const SocketAddress& NullChannel::getLocalAddress() const {
+const SocketAddress& NullChannel::localAddress() const {
     return SocketAddress::NULL_ADDRESS;
 }
 
-const SocketAddress& NullChannel::getRemoteAddress() const {
+const SocketAddress& NullChannel::remoteAddress() const {
     return SocketAddress::NULL_ADDRESS;
 }
 
-const ChannelPtr& NullChannel::getParent() const {
+const ChannelPtr& NullChannel::parent() const {
     return fatherChannel;
 }
 
@@ -107,7 +107,7 @@ bool NullChannel::isActive() const {
 
 int NullChannel::compareTo(const ChannelPtr& c) const {
     if (c) {
-        return getId() - c->getId();
+        return id() - c->id();
     }
 
     return 1;
@@ -182,7 +182,7 @@ ChannelFuturePtr NullChannel::newSucceededFuture() {
     return failedFuture;
 }
 
-const ChannelFuturePtr& NullChannel::getCloseFuture() {
+const ChannelFuturePtr& NullChannel::closeFuture() {
     return failedFuture;
 }
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <deque>
 #include <boost/assert.hpp>
 #include <cetty/channel/VoidMessage.h>
 
@@ -44,11 +45,11 @@ template<>
 class ChannelMessageContainer<VoidMessage, MESSAGE_STREAM> {
 public:
     void addMessage(const VoidMessage& message) {
-        BOOST_ASSERT(false, "void type, should not addMessage");
+        BOOST_ASSERT(false && "void type, should not addMessage");
     }
 
     void setEventLoop(const EventLoopPtr& eventLoop) {
-        BOOST_ASSERT(false, "void type, should not setEventLoop");
+        BOOST_ASSERT(false && "void type, should not setEventLoop");
     }
 };
 
@@ -56,11 +57,11 @@ template<>
 class ChannelMessageContainer<VoidMessage, MESSAGE_BLOCK> {
 public:
     void addMessage(const VoidMessage& message) {
-        BOOST_ASSERT(false, "void type, should not addMessage");
+        BOOST_ASSERT(false && "void type, should not addMessage");
     }
 
     void setEventLoop(const EventLoopPtr& eventLoop) {
-        BOOST_ASSERT(false, "void type, should not setEventLoop");
+        BOOST_ASSERT(false && "void type, should not setEventLoop");
     }
 };
 
@@ -138,7 +139,7 @@ public:
         else {
             eventLoop_->post(boost::bind(&MessageQueue::push_back,
                                          &messageQueue_,
-                                         boost::cref(message));
+                                         boost::cref(message)));
         }
     }
 
@@ -161,9 +162,9 @@ void ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage(const 
         messageQueue_.push_back(message);
     }
     else {
-        eventLoop_->post(boost::bind(&MessageQueue::push_back,
-                                     &messageQueue_,
-                                     message->copy());
+        eventLoop_->post(boost::bind(&ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage,
+                                     this,
+                                     message->copy()));
     }
 }
 

@@ -2,8 +2,8 @@
 //
 
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/buffer/Unpooled.h>
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
 	//test4submitJobBG(c);
 
     system("PAUSE");
-    c->getCloseFuture()->awaitUninterruptibly();
+    c->closeFuture()->awaitUninterruptibly();
 
     // Shut down thread pools to exit.
     bootstrap.shutdown();

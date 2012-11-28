@@ -169,8 +169,8 @@ public:
     virtual ~AbstractEmbeddedChannel() {
     }
 
-    virtual ChannelConfig& getConfig() { return config; }
-    virtual const ChannelConfig& getConfig() const { return config; }
+    virtual ChannelConfig& config() { return config; }
+    virtual const ChannelConfig& config() const { return config; }
 
     virtual bool isActive(void) const {
         return state == 1;
@@ -180,10 +180,10 @@ public:
         return state < 2;
     }
 
-    virtual const SocketAddress& getLocalAddress(void) const {
+    virtual const SocketAddress& localAddress(void) const {
         return localAddress;
     }
-    virtual const SocketAddress& getRemoteAddress(void) const {
+    virtual const SocketAddress& remoteAddress(void) const {
         return remoteAddress;
     }
 
@@ -198,7 +198,7 @@ public:
 
     template<typename T>
     bool writeInbound(const T& data) {
-        ChannelPipelinePtr pipeline = getPipeline();
+        ChannelPipelinePtr pipeline = pipeline();
         pipeline->addInboundMessage(data);
         pipeline->fireMessageUpdated();
 
@@ -208,7 +208,7 @@ public:
 
     template<>
     bool writeInbound<ChannelBufferPtr>(const ChannelBufferPtr& data) {
-        ChannelPipelinePtr pipeline = getPipeline();
+        ChannelPipelinePtr pipeline = pipeline();
         pipeline->setInboundChannelBuffer(data);
         pipeline->fireMessageUpdated();
 
@@ -271,7 +271,7 @@ protected:
 private:
     void init() {
         
-        ChannelPipelinePtr pipeline = AbstractChannel::getPipeline();
+        ChannelPipelinePtr pipeline = AbstractChannel::pipeline();
         pipeline->addLast("lastMesssage", new LastInboundMessageHandler(*this));
         pipeline->addLast("lastBuffer", new LastInboundBufferHandler(*this));
         AbstractChannel::setPipeline(pipeline);

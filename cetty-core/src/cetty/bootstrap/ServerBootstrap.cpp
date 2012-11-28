@@ -71,7 +71,7 @@ public:
             const ChannelOption::Options& childOptions = bootstrap.getChildOptions();
             ChannelOption::Options::const_iterator itr = childOptions.begin();
             for (; itr != childOptions.end(); ++itr) {
-                if (!child->getConfig().setOption(itr->first, itr->second)) {
+                if (!child->config().setOption(itr->first, itr->second)) {
                     //logger.warn("Unknown channel option: " + e);
                 }
             }
@@ -119,14 +119,14 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
 
     if (!factory) {
         LOG_ERROR << "has not set the factory.";
-        return NullChannel::instance()->getCloseFuture();
+        return NullChannel::instance()->closeFuture();
     }
 
     ChannelPtr channel = factory->newChannel(serverPipeline);
 
     if (!channel) {
         LOG_ERROR << "Server channel factory failed to create a new channel.";
-        return NullChannel::instance()->getCloseFuture();
+        return NullChannel::instance()->closeFuture();
     }
 
     ChannelFuturePtr future = channel->newFuture();

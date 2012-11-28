@@ -27,8 +27,8 @@
 #include <cetty/channel/ChannelInboundMessageHandler.h>
 #include <cetty/channel/ChannelOutboundMessageHandler.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/service/Connection.h>
 #include <cetty/service/pool/ConnectionPool.h>
@@ -110,7 +110,7 @@ public:
             while (!outboundQueue.empty()) {
                 OutstandingCallPtr& request = outboundQueue.front();
 
-                ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                ch->pipeline()->addOutboundMessage<OutstandingCallPtr>(request);
                 //outboundTransfer.unfoldAndAdd(request);
 
                 outStandingCalls.insert(std::make_pair(request->getId(), request));
@@ -144,7 +144,7 @@ public:
             while (!call.calls.empty()) {
                 OutstandingCallPtr& request = call.calls.front();
 
-                channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
+                channel->pipeline()->addOutboundMessage<OutstandingCallPtr>(request);
                 //outboundTransfer.unfoldAndAdd(request);
                 
                 outStandingCalls.insert(std::make_pair(request->getId(), request));

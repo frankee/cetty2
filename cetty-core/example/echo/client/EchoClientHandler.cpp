@@ -23,7 +23,7 @@ void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
         outboundTransfer.write(tmp, ctx.channel()->newSucceededFuture());
         //channel->write(tmp);
         printf("received message from %d at %s with %dBytes.\n",
-               channel->getId(),
+               channel->id(),
                boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
                readableBytes);
     }

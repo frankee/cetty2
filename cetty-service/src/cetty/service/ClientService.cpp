@@ -25,19 +25,19 @@ namespace service {
 
 using namespace cetty::channel;
 
-ChannelConfig& ClientService::getConfig() {
+ChannelConfig& ClientService::config() {
     return this->config;
 }
 
-const ChannelConfig& ClientService::getConfig() const {
+const ChannelConfig& ClientService::config() const {
     return this->config;
 }
 
-const SocketAddress& ClientService::getLocalAddress() const {
+const SocketAddress& ClientService::localAddress() const {
     return SocketAddress::NULL_ADDRESS ;
 }
 
-const SocketAddress& ClientService::getRemoteAddress() const {
+const SocketAddress& ClientService::remoteAddress() const {
     return SocketAddress::NULL_ADDRESS;
 }
 

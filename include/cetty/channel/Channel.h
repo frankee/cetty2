@@ -22,15 +22,17 @@
  */
 
 #include <string>
+#include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelFuturePtr.h>
-#include <cetty/channel/ChannelFactoryPtr.h>
+#include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelInboundInvoker.h>
-#include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/channel/ChannelFuturePtr.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
+
 #include <cetty/util/Exception.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -131,19 +133,23 @@ class ChannelSink;
  * @enddot
  *
  */
-class Channel : public ChannelOutboundInvoker, public ReferenceCounter<Channel> {
+
+class Channel : public ReferenceCounter<Channel> {
 public:
-    typedef boost::function<bool (ChannelPtr)> Initializer;
+    typedef boost::function<bool (const ChannelPtr&)> Initializer;
 
 public:
-    virtual ~Channel() {}
+    virtual ~Channel();
 
     /**
      * Returns the unique integer ID of this channel.
      */
-    virtual int getId() const = 0;
+    int id() const;
 
-    virtual const EventLoopPtr& eventLoop() const = 0;
+    /**
+     *
+     */
+    const EventLoopPtr& eventLoop() const;
 
     /**
      * Returns the parent of this channel.
@@ -151,28 +157,23 @@ public:
      * @return the parent channel.
      *         <tt>NULL</tt> if this channel does not have a parent channel.
      */
-    virtual const ChannelPtr& getParent() const = 0;
-
-    /**
-     * Returns the {@link ChannelFactory} which created this channel.
-     */
-    virtual const ChannelFactoryPtr& getFactory() const = 0;
+    const ChannelPtr& parent() const;
 
     /**
      * Returns the configuration of this channel.
      */
-    virtual ChannelConfig& getConfig() = 0;
+    ChannelConfig& config();
 
     /**
      * Returns the const configuration reference of this channel.
      */
-    virtual const ChannelConfig& getConfig() const = 0;
+    const ChannelConfig& config() const;
 
     /**
      * Returns the {@link ChannelPipeline} which handles {@link ChannelEvent}s
      * associated with this channel.
      */
-    virtual const ChannelPipelinePtr& getPipeline() const  = 0;
+    const ChannelPipeline& pipeline() const;
 
     /**
      * Returns <tt>true</tt> if and only if this channel is open.
@@ -193,7 +194,7 @@ public:
      * @remark Return an {@link SocketAddress NULL_ADDRESS}
      * if this channel is not bound.
      */
-    virtual const SocketAddress& getLocalAddress() const = 0;
+    const SocketAddress& localAddress() const;
 
     /**
      * Returns the remote address where this channel is connected to.
@@ -207,23 +208,51 @@ public:
      *         the origination of the received message as this method will
      *         return {@link SocketAddress NULL_ADDRESS}.
      */
-    virtual const SocketAddress& getRemoteAddress() const = 0;
+    const SocketAddress& remoteAddress() const;
 
-    virtual ChannelFuturePtr newFuture() = 0;
-    virtual ChannelFuturePtr newFailedFuture(const Exception& e) = 0;
+
+    ChannelFuturePtr newFuture();
+    ChannelFuturePtr newFailedFuture(const Exception& e);
 
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which is already succeeded.
      * This method always returns the same future instance, which is cached
      * for easy use.
      */
-    virtual ChannelFuturePtr newSucceededFuture() = 0;
+    ChannelFuturePtr newSucceededFuture();
 
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
      * channel is closed.  This method always returns the same future instance.
      */
-    virtual const ChannelFuturePtr&  getCloseFuture() = 0;
+    const ChannelFuturePtr& closeFuture();
+
+public:
+    ChannelFuturePtr bind(const SocketAddress& localAddress);
+
+    ChannelFuturePtr connect(const SocketAddress& remoteAddress);
+
+    ChannelFuturePtr connect(const SocketAddress& remoteAddress,
+                             const SocketAddress& localAddress);
+
+    ChannelFuturePtr disconnect();
+    ChannelFuturePtr close();
+    ChannelFuturePtr flush();
+
+    const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+                                 const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                    const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                    const SocketAddress& localAddress,
+                                    const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+    const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
     /**
      * Sends a message to this channel asynchronously.    If this channel was
@@ -244,7 +273,7 @@ public:
     template<typename T>
     ChannelFuturePtr write(const T& message) {
         if (isActive()) {
-            return getPipeline()->write(message);
+            return pipeline()->write(message);
         }
         else {
             return newFailedFuture(ChannelException("write message before channel is Active."));
@@ -254,7 +283,7 @@ public:
     template<typename T>
     const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
         if (isActive()) {
-            return getPipeline()->write(message, future);
+            return pipeline()->write(message, future);
         }
         else {
             ChannelException e("channel is not active, do nothing with the write.");
@@ -262,18 +291,210 @@ public:
         }
     }
 
+public:
+    typedef ChannelMessageHandlerContext<ChannelPtr,
+            VoidMessage,
+            VoidMessage,
+            ChannelBufferPtr,
+            VoidMessage,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            ChannelBufferContainer,
+            VoidMessageContainer> Context;
+
+    virtual bool registerTo(Context& context);
+
     /**
      * Compares the {@link #getId() ID} of the two channels.
      */
-    virtual int compareTo(const ChannelPtr& c) const = 0;
+    int compareTo(const ChannelPtr& c) const;
 
     /**
-     * Returns a string representing this Channel
-     *
-     * @return  a string representation of this Channel.
+     * Returns the {@link std::string} representation of this channel.  The returned
+     * string contains the @link #getId() ID}, {@link #getLocalAddress() local address},
+     * and {@link #getRemoteAddress() remote address} of this channel for
+     * easier identification.
      */
-    virtual std::string toString() const = 0;
+    virtual std::string toString() const;
+
+protected:
+
+    Channel();
+
+    /**
+     * Creates a new instance.
+     *
+     * @param parent
+     *        the parent of this channel. <tt>NULL</tt> if there's no parent.
+     * @param factory
+     *        the factory which created this channel
+     * @param pipeline
+     *        the pipeline which is going to be attached to this channel
+     * @param sink
+     *        the sink which will receive downstream events from the pipeline
+     *        and send upstream events to the pipeline
+     */
+    Channel(const EventLoopPtr& eventLoop,
+            const ChannelPtr& parent);
+
+    /**
+     * (Internal use only) Creates a new temporary instance with the specified
+     * ID.
+     *
+     * @param parent
+     *        the parent of this channel. <tt>NULL</tt> if there's no parent.
+     * @param factory
+     *        the factory which created this channel
+     * @param pipeline
+     *        the pipeline which is going to be attached to this channel
+     * @param sink
+     *        the sink which will receive downstream events from the pipeline
+     *        and send upstream events to the pipeline
+
+    */
+    Channel(int id,
+            const EventLoopPtr& eventLoop,
+            const ChannelPtr& parent);
+
+    virtual void doBind(const SocketAddress& localAddress) = 0;
+    virtual void doDisconnect() = 0;
+
+    virtual void doPreClose() {} // NOOP by default
+    virtual void doClose() = 0;
+
+    /**
+     * Marks this channel as closed.  This method is intended to be called by
+     * an internal component - please do not call it unless you know what you
+     * are doing.
+     *
+     * @return <tt>true</tt> if and only if this channel was not marked as
+     *                      closed yet
+     */
+    virtual bool setClosed();
+
+    //virtual void setPipeline(const ChannelPipelinePtr& pipeline);
+
+    void closeIfClosed() {
+        if (isOpen()) {
+            return;
+        }
+
+        //close(voidFuture());
+    }
+
+private:
+    void init();
+
+    void idDeallocatorCallback(ChannelFuture& future);
+    int  allocateId(const ChannelPtr& channel);
+
+private:
+    void doBind(ChannelHandlerContext& ctx,
+                const SocketAddress& localAddress,
+                const ChannelFuturePtr& future);
+
+    void doDisconnect(ChannelHandlerContext& ctx,
+                      const ChannelFuturePtr& future);
+
+    void doClose(ChannelHandlerContext& ctx,
+                 const ChannelFuturePtr& future);
+
+private:
+    friend class ChannelCloseFuture;
+
+protected:
+    int id_;
+
+    ChannelPtr parent_;
+    EventLoopPtr eventLoop_;
+
+    ChannelConfig config_;
+    Initializer initializer_;
+    boost::scoped_ptr<ChannelPipeline> pipeline_;
+
+    ChannelFuturePtr succeededFuture_;
+    ChannelFuturePtr closeFuture_;
+
+    Context* context_;
+
+    /** Cache for the string representation of this channel */
+    mutable std::string strVal_;
 };
+
+inline
+int Channel::id() const {
+    return id_;
+}
+
+inline
+const EventLoopPtr& Channel::eventLoop() const {
+    return eventLoop_;
+}
+
+inline
+const ChannelPtr& Channel::parent() const {
+    return parent_;
+}
+
+inline
+const ChannelPipeline& Channel::pipeline() const {
+    return *pipeline_;
+}
+
+inline
+ChannelFuturePtr Channel::bind(const SocketAddress& localAddress) {
+    return pipeline_->bind(localAddress);
+}
+
+inline
+const ChannelFuturePtr& Channel::bind(const SocketAddress& localAddress,
+                                      const ChannelFuturePtr& future) {
+    return pipeline_->bind(localAddress, future);
+}
+
+inline
+ChannelFuturePtr Channel::connect(const SocketAddress& remoteAddress) {
+    return pipeline_->connect(remoteAddress);
+}
+
+inline
+ChannelFuturePtr Channel::connect(const SocketAddress& remoteAddress,
+                                  const SocketAddress& localAddress) {
+    return pipeline_->connect(remoteAddress, localAddress);
+}
+
+inline
+const ChannelFuturePtr& Channel::connect(const SocketAddress& remoteAddress,
+        const ChannelFuturePtr& future) {
+    return pipeline_->connect(remoteAddress, future);
+}
+
+inline
+const ChannelFuturePtr& Channel::connect(const SocketAddress& remoteAddress,
+        const SocketAddress& localAddress,
+        const ChannelFuturePtr& future) {
+    return pipeline_->connect(remoteAddress, localAddress, future);
+}
+
+inline
+ChannelFuturePtr Channel::disconnect() {
+    return pipeline_->disconnect();
+}
+
+inline
+const ChannelFuturePtr& Channel::disconnect(const ChannelFuturePtr& future) {
+    return pipeline_->disconnect(future);
+}
+
+inline
+ChannelFuturePtr Channel::flush() {
+    return pipeline_->flush();
+}
+
+inline
+const ChannelFuturePtr& Channel::flush(const ChannelFuturePtr& future) {
+    return pipeline_->flush(future);
+}
 
 }
 }
