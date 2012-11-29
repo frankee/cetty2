@@ -22,8 +22,12 @@
 namespace cetty {
 namespace channel {
 
-const ChannelPtr& VoidChannelFuture::getChannel() const {
-    return channel;
+const ChannelWeakPtr& VoidChannelFuture::channel() const {
+    return channel_;
+}
+
+ChannelPtr VoidChannelFuture::sharedChannel() const {
+    return channel_.lock();
 }
 
 bool VoidChannelFuture::isDone() const {
@@ -38,7 +42,7 @@ bool VoidChannelFuture::isSuccess() const {
     return false;
 }
 
-const Exception* VoidChannelFuture::getCause() const {
+const Exception* VoidChannelFuture::failedCause() const {
     return reinterpret_cast<const Exception*>(0);
 }
 

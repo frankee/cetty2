@@ -23,14 +23,14 @@
 
 #include <string>
 #include <boost/function.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelFuturePtr.h>
+#include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
 #include <cetty/util/Exception.h>
@@ -134,7 +134,7 @@ class ChannelSink;
  *
  */
 
-class Channel : public ReferenceCounter<Channel> {
+class Channel : public boost::enable_shared_from_this<Channel> {
 public:
     typedef boost::function<bool (const ChannelPtr&)> Initializer;
 
@@ -173,7 +173,7 @@ public:
      * Returns the {@link ChannelPipeline} which handles {@link ChannelEvent}s
      * associated with this channel.
      */
-    const ChannelPipeline& pipeline() const;
+    ChannelPipeline& pipeline();
 
     /**
      * Returns <tt>true</tt> if and only if this channel is open.
@@ -227,6 +227,10 @@ public:
      */
     const ChannelFuturePtr& closeFuture();
 
+    void setInitializer(const Initializer& initializer) {
+        initializer_ = initializer;
+    }
+
 public:
     ChannelFuturePtr bind(const SocketAddress& localAddress);
 
@@ -236,6 +240,8 @@ public:
                              const SocketAddress& localAddress);
 
     ChannelFuturePtr disconnect();
+
+    void open();
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
@@ -271,25 +277,16 @@ public:
      *
      */
     template<typename T>
-    ChannelFuturePtr write(const T& message) {
-        if (isActive()) {
-            return pipeline()->write(message);
-        }
-        else {
-            return newFailedFuture(ChannelException("write message before channel is Active."));
-        }
-    }
+    ChannelFuturePtr writeMessage(const T& message);
 
     template<typename T>
-    const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
-        if (isActive()) {
-            return pipeline()->write(message, future);
-        }
-        else {
-            ChannelException e("channel is not active, do nothing with the write.");
-            return future->setFailure(e);
-        }
-    }
+    const ChannelFuturePtr& writeMessage(const T& message,
+                                         const ChannelFuturePtr& future);
+
+    ChannelFuturePtr writeBuffer(const ChannelBufferPtr& buffer);
+
+    const ChannelFuturePtr& writeBuffer(const ChannelBufferPtr& buffer,
+                                        const ChannelFuturePtr& future);
 
 public:
     typedef ChannelMessageHandlerContext<ChannelPtr,
@@ -302,7 +299,7 @@ public:
             ChannelBufferContainer,
             VoidMessageContainer> Context;
 
-    virtual bool registerTo(Context& context);
+    virtual void registerTo(Context& context);
 
     /**
      * Compares the {@link #getId() ID} of the two channels.
@@ -318,9 +315,6 @@ public:
     virtual std::string toString() const;
 
 protected:
-
-    Channel();
-
     /**
      * Creates a new instance.
      *
@@ -334,8 +328,8 @@ protected:
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
      */
-    Channel(const EventLoopPtr& eventLoop,
-            const ChannelPtr& parent);
+    Channel(const ChannelPtr& parent,
+            const EventLoopPtr& eventLoop);
 
     /**
      * (Internal use only) Creates a new temporary instance with the specified
@@ -353,8 +347,8 @@ protected:
 
     */
     Channel(int id,
-            const EventLoopPtr& eventLoop,
-            const ChannelPtr& parent);
+            const ChannelPtr& parent,
+            const EventLoopPtr& eventLoop);
 
     virtual void doBind(const SocketAddress& localAddress) = 0;
     virtual void doDisconnect() = 0;
@@ -386,7 +380,7 @@ private:
     void init();
 
     void idDeallocatorCallback(ChannelFuture& future);
-    int  allocateId(const ChannelPtr& channel);
+    int  allocateId();
 
 private:
     void doBind(ChannelHandlerContext& ctx,
@@ -410,7 +404,7 @@ protected:
 
     ChannelConfig config_;
     Initializer initializer_;
-    boost::scoped_ptr<ChannelPipeline> pipeline_;
+    ChannelPipeline* pipeline_;
 
     ChannelFuturePtr succeededFuture_;
     ChannelFuturePtr closeFuture_;
@@ -437,7 +431,7 @@ const ChannelPtr& Channel::parent() const {
 }
 
 inline
-const ChannelPipeline& Channel::pipeline() const {
+ChannelPipeline& Channel::pipeline() {
     return *pipeline_;
 }
 
@@ -494,6 +488,55 @@ ChannelFuturePtr Channel::flush() {
 inline
 const ChannelFuturePtr& Channel::flush(const ChannelFuturePtr& future) {
     return pipeline_->flush(future);
+}
+
+template<typename T> inline
+ChannelFuturePtr Channel::writeMessage(const T& message) {
+    if (isActive()) {
+        return pipeline_->writeMessage(message);
+    }
+    else {
+        return newFailedFuture(ChannelException("write message before channel is Active."));
+    }
+}
+
+
+template<typename T> inline
+const ChannelFuturePtr& Channel::writeMessage(const T& message,
+        const ChannelFuturePtr& future) {
+    if (isActive()) {
+        return pipeline_->writeMessage(message, future);
+    }
+    else {
+        ChannelException e("channel is not active, do nothing with the write.");
+        future->setFailure(e);
+    }
+
+    return future;
+}
+
+inline
+ChannelFuturePtr Channel::writeBuffer(const ChannelBufferPtr& buffer) {
+    if (isActive()) {
+        return pipeline_->writeBuffer(buffer);
+    }
+    else {
+        return newFailedFuture(ChannelException("write message before channel is Active."));
+    }
+}
+
+inline
+const ChannelFuturePtr& Channel::writeBuffer(const ChannelBufferPtr& buffer,
+        const ChannelFuturePtr& future) {
+    if (isActive()) {
+        return pipeline_->writeBuffer(buffer, future);
+    }
+    else {
+        ChannelException e("channel is not active, do nothing with the write.");
+        future->setFailure(e);
+    }
+
+    return future;
 }
 
 }

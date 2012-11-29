@@ -80,7 +80,7 @@ int main(int argc, const char* argv[]) {
     ChannelFuturePtr future = bootstrap.connect(host, port);
     future->awaitUninterruptibly();
 
-    ChannelPtr channel = future->getChannel();
+    ChannelPtr channel = future->channel();
 
     // Wait until the connection is closed or the connection attempt fails.
     channel->closeFuture()->awaitUninterruptibly();

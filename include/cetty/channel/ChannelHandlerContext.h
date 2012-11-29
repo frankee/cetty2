@@ -192,18 +192,14 @@ public:
 public:
     virtual ~ChannelHandlerContext() {}
 
+    void initialize(ChannelPipeline* pipeline);
+
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
      * This method is a shortcut to <tt>getPipeline().getChannel()</tt>.
      * @return ChannelPtr which is NULL, when pipeline has detach the channel.
      */
-    const ChannelPtr& channel() const;
-
-    /**
-     * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
-     * belongs to.
-     */
-    const ChannelPipeline& pipeline() const;
+    const ChannelWeakPtr& channel() const;
 
     /**
      * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
@@ -211,7 +207,11 @@ public:
      */
     ChannelPipeline& pipeline();
 
-    void setPipeline(ChannelPipeline* pipeline);
+    /**
+     * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
+     * belongs to.
+     */
+    const ChannelPipeline& pipeline() const;
 
     /**
      * Returns the {@link EventLoop} that the {@link ChannelHandler}
@@ -245,8 +245,9 @@ public:
         return next();
     }
 
-    virtual void attach();
-    void detach();
+    ChannelFuturePtr newFuture();
+    ChannelFuturePtr newSucceededFuture();
+    ChannelFuturePtr newFailedFuture(const ChannelException& cause);
 
     std::string toString() const { return name_; }
 
@@ -256,34 +257,68 @@ public:
 
     template<class T>
     T* inboundMessageContainer() {
-        boost::any& container = getInboundMessageContainer();
-        return boost::any_cast<T>(&container);
+        boost::any container = getInboundMessageContainer();
+        if (!container.empty()) {
+             return boost::any_cast<T>(&container);
+        }
+
+       return NULL;
     }
 
     template<class T>
     T* nextInboundMessageContainer() {
-
+        if (next_) {
+            return nextInboundMessageContainer<T>(next_);
+        }
+        return NULL;
     }
 
     template<class T>
     T* nextInboundMessageContainer(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext* context = ctx;
+        while (context) {
+            T* t = context->inboundMessageContainer<T>();
+            if (t) {
+                return t;
+            }
 
+            context = context->next_;
+        }
+
+        return NULL;
     }
 
     template<class T>
     T* outboundMessageContainer() {
-        boost::any& container = getOutboundMessageContainer();
-        return boost::any_cast<T>(&container);
+        boost::any container = getOutboundMessageContainer();
+        if (!container.empty()) {
+            return boost::any_cast<T>(&container);
+        }
+
+        return NULL;
     }
 
     template<class T>
     T* nextOutboundMessageContainer() {
-
+        if (next_) {
+            return nextOutboundMessageContainer<T>(next_);
+        }
+        return NULL;
     }
 
     template<class T>
     T* nextOutboundMessageContainer(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext* context = ctx;
+        while (context) {
+            T* t = context->outboundMessageContainer<T>();
+            if (t) {
+                return t;
+            }
 
+            context = context->next_;
+        }
+
+        return NULL;
     }
 
 public:
@@ -382,14 +417,8 @@ protected:
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
 
-    
-
 private:
-    void init();
-
-    ChannelFuturePtr newFuture();
-    ChannelFuturePtr newSucceededFuture();
-    ChannelFuturePtr newFailedFuture(const ChannelException& cause);
+    virtual void onInitialized() {}
 
     void notifyHandlerException(const ChannelPipelineException& e);
 
@@ -422,9 +451,15 @@ private:
     ChannelHandlerContext* next_;
     ChannelHandlerContext* before_;
 
+    ChannelWeakPtr channel_;
     ChannelPipeline* pipeline_;
     EventLoopPtr eventLoop_;
 };
+
+inline
+const ChannelWeakPtr& ChannelHandlerContext::channel() const {
+    return channel_;
+}
 
 }
 }

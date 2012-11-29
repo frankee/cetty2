@@ -67,8 +67,8 @@ const boost::optional<bool>& AsioServerSocketChannelConfig::isReuseAddress() con
         return reuseAddress_;
     }
 
-    if (this->acceptor.is_open()) {
-        reuseAddress_ = isReuseAddress(this->acceptor);
+    if (this->acceptor_.is_open()) {
+        reuseAddress_ = isReuseAddress(this->acceptor_);
     }
 
     return reuseAddress_;
@@ -88,8 +88,8 @@ bool AsioServerSocketChannelConfig::isReuseAddress(tcp::acceptor& acceptor) cons
 void AsioServerSocketChannelConfig::setReuseAddress(bool reuseAddress) {
     this->reuseAddress_ = reuseAddress;
 
-    if (this->acceptor.is_open()) {
-        setReuseAddress(this->acceptor);
+    if (this->acceptor_.is_open()) {
+        setReuseAddress(this->acceptor_);
     }
 }
 
@@ -111,8 +111,8 @@ AsioServerSocketChannelConfig::getReceiveBufferSize() const {
         return receiveBufferSize_;
     }
 
-    if (this->acceptor.is_open()) {
-        this->receiveBufferSize_ = getReceiveBufferSize(this->acceptor);
+    if (this->acceptor_.is_open()) {
+        this->receiveBufferSize_ = getReceiveBufferSize(this->acceptor_);
     }
 
     return receiveBufferSize_;
@@ -133,8 +133,8 @@ void AsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) 
     if (receiveBufferSize > 0) {
         this->receiveBufferSize_ = receiveBufferSize;
 
-        if (this->acceptor.is_open()) {
-            setReceiveBufferSize(this->acceptor);
+        if (this->acceptor_.is_open()) {
+            setReceiveBufferSize(this->acceptor_);
         }
     }
 }

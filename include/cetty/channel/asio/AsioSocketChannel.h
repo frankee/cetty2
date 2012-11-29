@@ -57,11 +57,11 @@ public:
     virtual ~AsioSocketChannel();
 
     boost::asio::ip::tcp::socket& getSocket() {
-        return this->tcpSocket;
+        return tcpSocket_;
     }
 
     const AsioServicePtr& getService() {
-        return ioService;
+        return ioService_;
     }
 
     virtual const SocketAddress& localAddress() const;
@@ -70,10 +70,8 @@ public:
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
-    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
-
 public:
-    bool registerTo(Context& context) {
+    virtual void registerTo(Context& context) {
         Channel::registerTo(context);
 
         context.setConnectFunctor(boost::bind(
@@ -115,32 +113,16 @@ private:
             //connectFuture = future;
 
             doConnect(remoteAddress, localAddress, future);
-#if 0
+
             // Schedule connect timeout.
-            int connectTimeoutMillis = channel->config.getConnectTimeoutMillis();
+            int connectTimeoutMillis = config().connectTimeout();
 
             if (connectTimeoutMillis > 0) {
-
-                connectTimeoutFuture = eventLoop().schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (connectTimeoutException == null) {
-                            connectTimeoutException = new ConnectException("connection timed out");
-                        }
-
-                        ChannelFuture connectFuture = AbstractAioChannel.this.connectFuture;
-
-                        if (connectFuture != null &&
-                        connectFuture.setFailure(connectTimeoutException)) {
-                            pipeline().fireExceptionCaught(connectTimeoutException);
-                            close(voidFuture());
-                        }
-                    }
-                }, connectTimeoutMillis, TimeUnit.MILLISECONDS);
-
+                eventLoop_->runAfter(connectTimeoutMillis, boost::bind(
+                                         &AsioSocketChannel::handleConnectTimeout,
+                                         this));
             }
 
-#endif
         }
         catch (const std::exception& t) {
             //future.setFailure(t);
@@ -149,88 +131,96 @@ private:
         }
     }
 
-#if 0
-    void connectFailed(Throwable t) {
-        connectFuture.setFailure(t);
-        pipeline().fireExceptionCaught(t);
-        closeIfClosed();
+    void handleConnectTimeout() {
+        //         if (connectTimeoutException == null) {
+        //             connectTimeoutException = new ConnectException("connection timed out");
+        //         }
+        //
+        //         ChannelFuture connectFuture = AbstractAioChannel.this.connectFuture;
+        //
+        //         if (connectFuture != null &&
+        //             connectFuture.setFailure(connectTimeoutException)) {
+        //                 pipeline().fireExceptionCaught(connectTimeoutException);
+        //                 close(voidFuture());
+        //         }
     }
 
-    void connectSuccess() {
-        assert eventLoop().inEventLoop();
-        assert connectFuture != null;
-
-        try {
-            boolean wasActive = isActive();
-            connectFuture.setSuccess();
-
-            if (!wasActive && isActive()) {
-                pipeline().fireChannelActive();
-            }
-        }
-        catch (Throwable t) {
-            connectFuture.setFailure(t);
-            pipeline().fireExceptionCaught(t);
-            closeIfClosed();
-        } finally {
-
-            connectTimeoutFuture.cancel(false);
-            connectFuture = null;
-        }
+    void handleConnectFailed() {
+        //         connectFuture.setFailure(t);
+        //         pipeline().fireExceptionCaught(t);
+        //         closeIfClosed();
     }
 
-}
-#endif
+    void handleConnectSuccess() {
+        //         assert eventLoop().inEventLoop();
+        //         assert connectFuture != null;
+        //
+        //         try {
+        //             boolean wasActive = isActive();
+        //             connectFuture.setSuccess();
+        //
+        //             if (!wasActive && isActive()) {
+        //                 pipeline().fireChannelActive();
+        //             }
+        //         }
+        //         catch (Throwable t) {
+        //             connectFuture.setFailure(t);
+        //             pipeline().fireExceptionCaught(t);
+        //             closeIfClosed();
+        //         } finally {
+        //
+        //             connectTimeoutFuture.cancel(false);
+        //             connectFuture = null;
+        //         }
+    }
 
-void doConnect(const SocketAddress& remoteAddress,
-               const SocketAddress& localAddress,
-               const ChannelFuturePtr& connectFuture);
+    void doConnect(const SocketAddress& remoteAddress,
+                   const SocketAddress& localAddress,
+                   const ChannelFuturePtr& connectFuture);
 
-void doFlush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
+    void doFlush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
 
-void beginRead();
+    void beginRead();
 
-void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
-void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);
+    void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
+    void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);
 
-void handleConnect(const boost::system::error_code& error,
-                   boost::asio::ip::tcp::resolver::iterator endpointIterator,
-                   const ChannelFuturePtr& cf);
+    void handleConnect(const boost::system::error_code& error,
+                       boost::asio::ip::tcp::resolver::iterator endpointIterator,
+                       const ChannelFuturePtr& cf);
 
-void handleResolve(const boost::system::error_code& error,
-                   boost::asio::ip::tcp::resolver::iterator itr,
-                   const ChannelFuturePtr& cf);
+    void handleResolve(const boost::system::error_code& error,
+                       boost::asio::ip::tcp::resolver::iterator itr,
+                       const ChannelFuturePtr& cf);
 
-void cleanUpWriteBuffer();
+    void cleanUpWriteBuffer();
 
-void connectFailed(const ChannelFuturePtr& connectFuture,
-                   const ChannelException& e);
+    void connectFailed(const ChannelFuturePtr& connectFuture,
+                       const ChannelException& e);
 
 private:
-void init(const ChannelPipelinePtr& pipeline);
+    void init();
 
 private:
-friend class AsioWriteOperationQueue;
-friend class AsioServerSocketChannel;
-friend class AsioSocketChannelSinkHandler;
+    friend class AsioWriteOperationQueue;
+    friend class AsioServerSocketChannel;
+    friend class AsioSocketChannelSinkHandler;
 
 private:
-bool opened;
-bool isWriting;
-int  highWaterMarkCounter;
+    bool opened_;
+    bool isWriting_;
+    int  highWaterMarkCounter_;
 
-AsioServicePtr  ioService;
-boost::asio::ip::tcp::socket tcpSocket;
+    AsioServicePtr  ioService_;
+    boost::asio::ip::tcp::socket tcpSocket_;
 
-boost::scoped_ptr<AsioWriteOperationQueue> writeQueue;
+    ChannelBufferPtr readBuffer_;
+    boost::scoped_ptr<AsioWriteOperationQueue> writeQueue_;
 
-AsioSocketChannelConfig config;
+    AsioSocketChannelConfig socketConfig_;
 
-AsioHandlerAllocator<int> readAllocator;
-AsioHandlerAllocator<int> writeAllocator;
-
-mutable SocketAddress localAddress;
-mutable SocketAddress remoteAddress;
+    AsioHandlerAllocator<int> readAllocator_;
+    AsioHandlerAllocator<int> writeAllocator_;
 };
 
 }

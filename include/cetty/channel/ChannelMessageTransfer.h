@@ -56,6 +56,26 @@ public:
     void write(const T& msg, const ChannelFuturePtr& future);
 };
 
+#if 0
+template<>
+class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_INBOUND> {
+public:
+    void resetNextContainer() {}
+
+    bool unfoldAndAdd(const VoidMessage& msg) { return false; }
+    void write(const VoidMessage& msg, const ChannelFuturePtr& future) {}
+};
+
+template<>
+class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_OUTBOUND> {
+public:
+    void resetNextContainer() {}
+
+    bool unfoldAndAdd(const VoidMessage& msg) { return false; }
+    void write(const VoidMessage& msg, const ChannelFuturePtr& future) {}
+};
+#endif
+
 template<class T>
 class ChannelMessageTransfer<T, ChannelMessageContainer<T>, TRANSFER_INBOUND> {
 public:
@@ -139,7 +159,7 @@ public:
 
     bool unfoldAndAdd(const ChannelBufferPtr& msg) {
         if (!container) {
-            ctx.nextInboundBufferContainer();
+            ctx.nextInboundMessageContainer<ChannelBufferContainer>();
         }
 
         if (container && msg) {
@@ -170,7 +190,7 @@ public:
 
     bool unfoldAndAdd(const ChannelBufferPtr& msg) {
         if (!container) {
-            container = ctx.nextOutboundBufferContainer();
+            container = ctx.nextOutboundMessageContainer<ChannelBufferContainer>();
         }
 
         if (container && msg) {
@@ -222,7 +242,7 @@ public:
 
 private:
     ChannelHandlerContext* ctx;
-    ChannelMessageTransfer<T, U> transfer;
+    ChannelMessageTransfer<T, U, TransferType> transfer;
 };
 
 }

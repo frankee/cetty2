@@ -6,24 +6,22 @@
 
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
 void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
     // Send back the received message to the remote peer.
-    const ChannelBufferPtr& buffer = getInboundChannelBuffer();
+    const ChannelBufferPtr& buffer =
+        context_->inboundInContainer()->getMessages();
 
     if (buffer) {
         int readableBytes = buffer->readableBytes();
 
         ChannelBufferPtr tmp = buffer->readBytes();
-        ChannelPtr channel = ctx.channel();
 
-        outboundTransfer.write(tmp, ctx.channel()->newSucceededFuture());
-        //channel->write(tmp);
-        printf("received message from %d at %s with %dBytes.\n",
-               channel->id(),
+        outboundTransfer_->write(tmp, ctx.newSucceededFuture());
+
+        printf("received message at %s with %dBytes.\n",
                boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
                readableBytes);
     }
@@ -32,8 +30,13 @@ void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
 void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
+    if (!outboundTransfer_) {
+        outboundTransfer_ = context_->outboundTransfer();
+    }
+    
+    outboundTransfer_->write(firstMessage, ctx.newSucceededFuture());
 
-    outboundTransfer.write(firstMessage, ctx.channel()->newSucceededFuture());
+    //outboundTransfer.write(firstMessage, ctx.channel()->newSucceededFuture());
     //ctx.getChannel()->write(firstMessage);
     //ctx.getPipeline().write(firstMessage);
 }
@@ -52,18 +55,4 @@ EchoClientHandler::EchoClientHandler(int firstMessageSize)
     for (int i = 0; i < capacity; i ++) {
         firstMessage->writeByte(i);
     }
-}
-
-void EchoClientHandler::exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
-    // Close the connection when an exception is raised.
-    LOG_WARN_E(e) << "Unexpected exception from downstream.";
-    ctx.close();
-}
-
-cetty::channel::ChannelHandlerPtr EchoClientHandler::clone() {
-    return new EchoClientHandler(firstMessageSize);
-}
-
-std::string EchoClientHandler::toString() const {
-    return "EchoClientHandler";
 }

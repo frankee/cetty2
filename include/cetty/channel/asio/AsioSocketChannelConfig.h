@@ -116,7 +116,7 @@ private:
     static const int DEFAULT_WRITE_BUFFER_LOW_WATERMARK  = 2 * 1024;
 
 private:
-    TcpSocket& socket;
+    TcpSocket& socket_;
 
     mutable int writeBufferLowWaterMark_;
     mutable int writeBufferHighWaterMark_;

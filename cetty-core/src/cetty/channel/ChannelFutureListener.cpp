@@ -22,12 +22,12 @@ namespace cetty {
 namespace channel {
 
 void closeChannelCallback(ChannelFuture& future) {
-    future.getChannel()->close();
+    future.channel()->close();
 }
 
 void closeOnFailureChannelCallback(ChannelFuture& future) {
     if (!future.isSuccess()) {
-        future.getChannel()->close();
+        future.channel()->close();
     }
 }
 

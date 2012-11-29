@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->closeFuture()->awaitUninterruptibly();
+            f->channel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

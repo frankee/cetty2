@@ -26,7 +26,6 @@
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
-#include <cetty/channel/socket/ServerSocketChannel.h>
 
 #include <cetty/channel/asio/AsioSocketChannel.h>
 #include <cetty/channel/asio/AsioServicePoolPtr.h>
@@ -38,10 +37,9 @@ namespace channel {
 namespace asio {
 
 class AsioSocketChannel;
+typedef boost::shared_ptr<AsioSocketChannel> AsioSocketChannelPtr;
 
-using namespace cetty::logging;
 using namespace cetty::channel;
-using namespace cetty::channel::socket;
 
 // only response to bind port, open and close.
 class AsioServerSocketChannel : public cetty::channel::Channel {
@@ -72,16 +70,14 @@ private:
     typedef std::map<int, ChannelPtr> ChildChannels;
 
 private:
-    AsioServicePtr ioService;
+    AsioServicePtr ioService_;
 
-    AsioHandlerAllocator<int> acceptAllocator;
-    boost::asio::ip::tcp::acceptor acceptor;
+    boost::asio::ip::tcp::acceptor acceptor_;
+    AsioHandlerAllocator<int> acceptAllocator_;
+    AsioServerSocketChannelConfig socketConfig_;
 
-    ChannelPipelinePtr childPipeline;
-    AsioServicePoolPtr childServicePool;
-    ChildChannels childChannels;
-
-    AsioServerSocketChannelConfig config;
+    AsioServicePoolPtr childServicePool_;
+    ChildChannels childChannels_;
 
     IpAddress::Family ipFamily;
     mutable SocketAddress localAddress;

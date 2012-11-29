@@ -24,16 +24,17 @@ namespace channel {
 
 class VoidChannelFuture : public ChannelFuture {
 public:
-    VoidChannelFuture(const ChannelPtr& channel) : channel(channel) {}
+    VoidChannelFuture(const ChannelPtr& channel) : channel_(channel) {}
     virtual ~VoidChannelFuture() {}
 
-    virtual const ChannelPtr& getChannel() const;
+    virtual const ChannelWeakPtr& channel() const;
+    virtual ChannelPtr sharedChannel() const;
 
     virtual bool isDone() const;
     virtual bool isCancelled() const;
     virtual bool isSuccess() const;
 
-    virtual const Exception* getCause() const;
+    virtual const Exception* failedCause() const;
 
     virtual bool cancel();
     virtual bool setSuccess();
@@ -56,7 +57,7 @@ private:
     void fail();
 
 private:
-    ChannelPtr channel;
+    ChannelWeakPtr channel_;
 };
 
 }

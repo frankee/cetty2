@@ -29,7 +29,7 @@ namespace channel {
 
 using namespace cetty::buffer;
 
-enum IsStreamMessage {
+enum MessageTypeEnum {
     MESSAGE_STREAM,
     MESSAGE_BLOCK
 };
@@ -124,6 +124,7 @@ template<class T>
 class ChannelMessageContainer<T, MESSAGE_BLOCK> {
 public:
     typedef std::deque<T> MessageQueue;
+    typedef ChannelMessageContainer<T, MESSAGE_BLOCK> Self;
 
 public:
     ChannelMessageContainer() {}
@@ -137,9 +138,10 @@ public:
             messageQueue_.push_back(message);
         }
         else {
-            eventLoop_->post(boost::bind(&MessageQueue::push_back,
-                                         &messageQueue_,
-                                         boost::cref(message)));
+            eventLoop_->post(boost::bind(
+                &Self::addMessage,
+                this,
+                message));
         }
     }
 

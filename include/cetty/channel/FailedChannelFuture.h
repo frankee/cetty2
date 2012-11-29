@@ -46,13 +46,15 @@ public:
      * @param cause   the cause of failure
      */
     FailedChannelFuture(const ChannelPtr& channel, const Exception& cause);
+    FailedChannelFuture(const ChannelWeakPtr& channel, const Exception& cause);
+
     virtual ~FailedChannelFuture();
 
-    const Exception* getCause() const;
+    const Exception* failedCause() const;
     bool isSuccess() const;
 
 private:
-    cetty::util::Exception cause;
+    cetty::util::Exception cause_;
 };
 
 }

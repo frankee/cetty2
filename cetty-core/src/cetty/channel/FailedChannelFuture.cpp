@@ -23,14 +23,21 @@ namespace channel {
 
 FailedChannelFuture::FailedChannelFuture(const ChannelPtr& channel,
         const Exception& cause)
-    : CompleteChannelFuture(channel), cause(cause) {
+    : CompleteChannelFuture(channel),
+      cause_(cause) {
+}
+
+FailedChannelFuture::FailedChannelFuture(const ChannelWeakPtr& channel,
+        const Exception& cause)
+    : CompleteChannelFuture(channel),
+      cause_(cause) {
 }
 
 FailedChannelFuture::~FailedChannelFuture() {
 }
 
-const Exception* FailedChannelFuture::getCause() const {
-    return &(this->cause);
+const Exception* FailedChannelFuture::failedCause() const {
+    return &cause_;
 }
 
 bool FailedChannelFuture::isSuccess() const {

@@ -3,21 +3,17 @@
 
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-
 #include "EchoServerHandler.h"
 
 #include <cetty/bootstrap/ServerBootstrap.h>
 
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/asio/AsioServicePool.h>
-#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::channel::asio;
 
 using namespace cetty::bootstrap;
 using namespace cetty::buffer;
@@ -31,11 +27,9 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
-
-    ServerBootstrap bootstrap(factory);
-
-    bootstrap.setPipeline(ChannelPipelines::pipeline(new EchoServerHandler))
+    AsioServerBootstrap bootstrap(threadCount);
+    bootstrap.setChannelInitializer(
+        ChannelInitializer<EchoServerHandler>("echo", new EchoServerHandler))
     .setOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
@@ -52,7 +46,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->closeFuture()->awaitUninterruptibly();
+            f->channel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

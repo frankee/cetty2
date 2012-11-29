@@ -62,39 +62,47 @@ public:
     }
 
 private:
-    boost::intrusive_ptr<Channel> channel;
+    ChannelPtr channel;
 };
 
-Channel::Channel(const EventLoopPtr& eventLoop,
-                                 const ChannelPtr& parent)
+Channel::Channel(const ChannelPtr& parent,
+                 const EventLoopPtr& eventLoop)
     : id_(),
+      parent_(parent),
       eventLoop_(eventLoop),
-      parent(parent) {
+      pipeline_(),
+      context_() {
     init();
 }
 
 Channel::Channel(int id,
-                                 const EventLoopPtr& eventLoop,
-                                 const ChannelPtr& parent)
-    : id(id),
-      eventLoop(eventLoop),
-      parent(parent) {
+                 const ChannelPtr& parent,
+                 const EventLoopPtr& eventLoop)
+    : id_(id),
+      parent_(parent),
+      eventLoop_(eventLoop),
+      pipeline_(),
+      context_() {
     init();
 }
 
 Channel::~Channel() {
-    LOG_DEBUG << "Channel decotr";
+    LOG_DEBUG << "Channel dectr";
+
+    if (pipeline_) {
+        delete pipeline_;
+    }
 }
 
 void Channel::init() {
-    BOOST_ASSERT(factory && pipeline_ && "input must not to be NULL!");
-
     succeededFuture_ = new SucceededChannelFuture(shared_from_this());
     closeFuture_ = new ChannelCloseFuture(shared_from_this());
 
     if (!id_) {
-        id_ = allocateId(this);
+        id_ = allocateId();
     }
+
+    pipeline_ = new ChannelPipeline(shared_from_this());
 
 #if 0  // FIXME need concurrent hash map
     closeFuture->addListener(
@@ -102,15 +110,20 @@ void Channel::init() {
 #endif
 }
 
-void Channel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    ChannelPipelineBridgeHandler::Ptr ptr(new ChannelPipelineBridgeHandler);
+void Channel::open() {
+    ChannelPtr self = shared_from_this();
 
-    pipeline->addFirst(new ChannelPipelineBridgeHandler::Context("bridge", ptr));
-    pipeline->attach(shared_from_this());
+    if (initializer_) {
+        initializer_(self);
+    }
+
+    //pipeline_->addFirst(new Context("bridge", self));
+    pipeline_->addFirst<ChannelPtr>("bridge", self);
+    pipeline_->fireChannelOpen();
 }
 
 ChannelFuturePtr Channel::close() {
-    if (pipeline_ && pipeline_->attached()) {
+    if (pipeline_) {
         return pipeline_->close();
     }
     else {
@@ -120,13 +133,15 @@ ChannelFuturePtr Channel::close() {
 }
 
 const ChannelFuturePtr& Channel::close(const ChannelFuturePtr& future) {
-    if (pipeline_->attached()) {
-        return pipeline_->close(future);
-    }
-    else {
-        LOG_INFO << "close the channel, but the pipeline has detached.";
-        return closeFuture_;
-    }
+    return pipeline_->close(future);
+
+    //if (pipeline_->attached()) {
+    //    return pipeline_->close(future);
+    //}
+    //else {
+    //    LOG_INFO << "close the channel, but the pipeline has detached.";
+    //    return closeFuture_;
+    //}
 }
 
 ChannelFuturePtr Channel::newFuture() {
@@ -150,15 +165,15 @@ bool Channel::setClosed() {
 }
 
 void Channel::idDeallocatorCallback(ChannelFuture& future) {
-//     std::map<int, ChannelPtr>::iterator itr
-//         = Channel::allChannels.find(future.getChannel()->id());
-// 
-//     if (itr != Channel::allChannels.end()) {
-//         Channel::allChannels.erase(itr);
-//     }
+    //     std::map<int, ChannelPtr>::iterator itr
+    //         = Channel::allChannels.find(future.getChannel()->id());
+    //
+    //     if (itr != Channel::allChannels.end()) {
+    //         Channel::allChannels.erase(itr);
+    //     }
 }
 
-int Channel::allocateId(const ChannelPtr& channel) {
+int Channel::allocateId() {
     boost::crc_32_type crc32;
     crc32.process_bytes((void const*)this, sizeof(this));
     int id = crc32.checksum();
@@ -209,18 +224,18 @@ std::string Channel::toString() const {
     if (remote.validated()) {
         if (!parent()) { // server channel or client channel
             StringUtil::printf(&strVal_, "[id: 0x%08x, %s => %s]", id(),
-                    local.toString().c_str(),
-                    remote.toString().c_str());
+                               local.toString().c_str(),
+                               remote.toString().c_str());
         }
         else { // connection channel
             StringUtil::printf(&strVal_, "[id: 0x%08x, %s => %s]", id(),
-                    remote.toString().c_str(),
-                    local.toString().c_str());
+                               remote.toString().c_str(),
+                               local.toString().c_str());
         }
     }
     else if (local.validated()) {
         StringUtil::printf(&strVal_, "[id: 0x%08x, %s]", id(),
-                local.toString().c_str());
+                           local.toString().c_str());
     }
     else {
         StringUtil::printf(&strVal_, "[id: 0x%08x]", id());
@@ -229,24 +244,24 @@ std::string Channel::toString() const {
     return strVal_;
 }
 
-bool Channel::registerTo(Context& context) {
+void Channel::registerTo(Context& context) {
     context_ = &context;
 
     context.setBindFunctor(boost::bind(&Channel::doBind,
-        this,
-        _1,
-        _2,
-        _3));
+                                       this,
+                                       _1,
+                                       _2,
+                                       _3));
 
     context.setDisconnectFunctor(boost::bind(&Channel::doDisconnect,
-        this,
-        _1,
-        _2));
+                                 this,
+                                 _1,
+                                 _2));
 
     context.setCloseFunctor(boost::bind(&Channel::doClose,
-        this,
-        _1,
-        _2));
+                                        this,
+                                        _1,
+                                        _2));
 }
 
 void Channel::doBind(ChannelHandlerContext& ctx, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
@@ -310,8 +325,6 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
 
             closeFuture_.reset();
             succeededFuture_.reset();
-
-            pipeline_->detach();
         }
     }
     else {

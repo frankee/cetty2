@@ -192,7 +192,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (future->await()->isSuccess()) {
-        return future->getChannel();
+        return future->channel();
     }
     else {
         return ChannelPtr();

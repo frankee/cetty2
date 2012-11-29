@@ -25,10 +25,14 @@ SucceededChannelFuture::SucceededChannelFuture(const ChannelPtr& channel)
     : CompleteChannelFuture(channel) {
 }
 
+SucceededChannelFuture::SucceededChannelFuture(const ChannelWeakPtr& channel)
+    : CompleteChannelFuture(channel) {
+}
+
 SucceededChannelFuture::~SucceededChannelFuture() {
 }
 
-const Exception* SucceededChannelFuture::getCause() const {
+const Exception* SucceededChannelFuture::failedCause() const {
     return NULL;
 }
 

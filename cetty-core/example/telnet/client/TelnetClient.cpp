@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
             new TelnetClientHandler()));
 
     // Start the connection attempt.
-    ChannelPtr channel = bootstrap.connect(host, port)->awaitUninterruptibly()->getChannel();
+    ChannelPtr channel = bootstrap.connect(host, port)->awaitUninterruptibly()->channel();
 
     if (!channel->isActive()) {
         bootstrap.shutdown();

@@ -21,8 +21,6 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 using namespace cetty::channel;
@@ -36,36 +34,48 @@ using namespace cetty::buffer;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoServerHandler : public ChannelInboundBufferHandlerAdapter<> {
+class EchoServerHandler : public cetty::channel::ChannelInboudBufferHandler<EchoServerHandler> {
 public:
-    EchoServerHandler() : transferredBytes(0) {
+    EchoServerHandler()
+        : transferredBytes(0) {
     }
-    virtual ~EchoServerHandler() {}
+
+    ~EchoServerHandler() {}
+
+    void registerTo(Context& ctx) {
+        context_ = &ctx;
+        ctx.setChannelMessageUpdatedCallback(
+            boost::bind(EchoServerHandler::messageUpdated,
+            this,
+            _1));
+
+        ctx.setChannelActiveCallback(
+            boost::bind(EchoServerHandler::channelActive,
+            this,
+            _1));
+    }
 
     long getTransferredBytes() const {
         return transferredBytes;
     }
 
-    virtual void channelActive(ChannelHandlerContext& ctx) {
-        voidFuture = ctx.channel()->newSucceededFuture();
+    void channelActive(ChannelHandlerContext& ctx) {
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        const ChannelBufferPtr& buffer = getInboundChannelBuffer();
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& buffer =
+            context_->inboundInContainer()->getMessages();
+
         if (buffer) {
-            outboundTransfer.write(buffer->readBytes(), voidFuture);
+            context_->outboundTransfer()->write(
+                buffer->readBytes(),
+                voidFuture);
         }
     }
 
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new EchoServerHandler);
-    }
-
-    virtual std::string toString() const {
-        return "EchoServerHandler";
-    }
-
 private:
+    Context* context_;
+
     ChannelFuturePtr voidFuture;
     int transferredBytes;
 };

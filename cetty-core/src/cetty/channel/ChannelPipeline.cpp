@@ -19,6 +19,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/DefaultChannelFuture.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
@@ -37,9 +38,11 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-ChannelPipeline::ChannelPipeline()
+ChannelPipeline::ChannelPipeline(const ChannelPtr& channel)
     : firedChannelActive_(false),
       fireMessageUpdatedOnActivation_(false),
+      channel_(channel),
+      eventLoop_(channel->eventLoop()),
       head_(),
       tail_() {
 }
@@ -47,44 +50,6 @@ ChannelPipeline::ChannelPipeline()
 ChannelPipeline::~ChannelPipeline() {
     LOG_DEBUG << "ChannelPipeline dectr";
     STLDeleteValues(&contexts_);
-}
-
-void ChannelPipeline::attach(const ChannelPtr& channel) {
-    if (!channel) {
-        LOG_WARN << "attach a null channel to pipeline, ignore.";
-        return;
-    }
-
-    if (channel_) {
-        LOG_WARN << "the pipeline has already attached, ignore.";
-        return;
-    }
-
-    channel_ = channel;
-    eventLoop_ = channel_->eventLoop();
-
-    ChannelHandlerContext* ctx = head_;
-
-    while (ctx) {
-        ctx->attach();
-        ctx = ctx->next();
-    }
-}
-
-void ChannelPipeline::detach() {
-    ChannelHandlerContext* ctx = head_;
-
-    while (ctx) {
-        ctx->detach();
-        ctx = ctx->next();
-    }
-
-    channel_.reset();
-    eventLoop_.reset();
-}
-
-bool ChannelPipeline::attached() const {
-    return !!channel_;
 }
 
 bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
@@ -99,7 +64,7 @@ bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
     }
 
     if (contexts_.empty()) {
-        return init(context);
+        return initWith(context);
     }
 
     if (duplicated(name)) {
@@ -107,7 +72,7 @@ bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
     }
 
     ChannelHandlerContext* oldHead = head_;
-    context->setPipeline(this);
+    context->initialize(this);
 
     callBeforeAdd(context);
 
@@ -135,7 +100,7 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
     }
 
     if (contexts_.empty()) {
-        return init(context);
+        return initWith(context);
     }
 
     if (duplicated(name)) {
@@ -144,6 +109,7 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
 
     ChannelHandlerContext* oldTail = this->tail_;
 
+    context->initialize(this);
     callBeforeAdd(context);
 
     oldTail->setNext(context);
@@ -183,6 +149,7 @@ bool ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* 
         return addFirst(context);
     }
 
+    context->initialize(this);
     callBeforeAdd(context);
 
     ctx->before()->setNext(context);
@@ -222,6 +189,7 @@ bool ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* c
         return addLast(context);
     }
 
+    context->initialize(this);
     callBeforeAdd(context);
 
     ctx->next()->setBefore(context);
@@ -365,6 +333,7 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
     ChannelHandlerContext* prev = ctx->before();
     ChannelHandlerContext* next = ctx->next();
 
+    context->initialize(this);
     callBeforeRemove(ctx);
     callBeforeAdd(context);
 
@@ -541,12 +510,12 @@ bool ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     return false;
 }
 
-bool ChannelPipeline::init(ChannelHandlerContext* ctx) {
+bool ChannelPipeline::initWith(ChannelHandlerContext* ctx) {
     if (!ctx || ctx->name().empty()) {
         return false;
     }
 
-    ctx->setPipeline(this);
+    ctx->initialize(this);
     callBeforeAdd(ctx);
 
     head_ = tail_ = ctx;
@@ -613,7 +582,7 @@ void ChannelPipeline::fireMessageUpdated() {
 }
 
 ChannelFuturePtr ChannelPipeline::bind(const SocketAddress& localAddress) {
-    return bind(localAddress, channel_->newFuture());
+    return bind(localAddress, channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
@@ -629,12 +598,12 @@ const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
 }
 
 ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress) {
-    return connect(remoteAddress, channel_->newFuture());
+    return connect(remoteAddress, channel_.lock()->newFuture());
 }
 
 ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress,
         const SocketAddress& localAddress) {
-    return connect(remoteAddress, localAddress, channel_->newFuture());
+    return connect(remoteAddress, localAddress, channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress,
@@ -656,7 +625,7 @@ const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddr
 }
 
 ChannelFuturePtr ChannelPipeline::disconnect() {
-    return disconnect(channel_->newFuture());
+    return disconnect(channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::disconnect(const ChannelFuturePtr& future) {
@@ -671,7 +640,7 @@ const ChannelFuturePtr& ChannelPipeline::disconnect(const ChannelFuturePtr& futu
 }
 
 ChannelFuturePtr ChannelPipeline::close() {
-    return close(channel_->newFuture());
+    return close(channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::close(const ChannelFuturePtr& future) {
@@ -686,7 +655,7 @@ const ChannelFuturePtr& ChannelPipeline::close(const ChannelFuturePtr& future) {
 }
 
 ChannelFuturePtr ChannelPipeline::flush() {
-    return flush(channel_->newFuture());
+    return flush(channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::flush(const ChannelFuturePtr& future) {
@@ -700,8 +669,9 @@ const ChannelFuturePtr& ChannelPipeline::flush(const ChannelFuturePtr& future) {
     }
 }
 
-ChannelFuturePtr ChannelPipeline::newFuture(const ChannelPtr& channel) {
-    return channel_->newFuture();
+ChannelFuturePtr ChannelPipeline::newFuture() {
+    return new DefaultChannelFuture(channel_, false);
+    //return channel_.lock()->newFuture();
 }
 
 }

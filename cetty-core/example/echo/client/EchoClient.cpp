@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         future->awaitUninterruptibly();
         //BOOST_ASSERT(future->awaitUninterruptibly()->isSuccess());
 
-        clientChannels.push_back(future->getChannel());
+        clientChannels.push_back(future->channel());
     }
 
     // Wait until the connection is closed or the connection attempt fails.

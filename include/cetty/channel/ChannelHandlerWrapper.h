@@ -17,6 +17,10 @@
  * under the License.
  */
 
+#include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
+
 namespace cetty {
 namespace channel {
 
@@ -36,6 +40,12 @@ template<class T>
 struct ChannelHandlerWrapper<boost::shared_ptr<T> > {
     typedef T Handler;
     typedef boost::shared_ptr<T> HandlerPtr;
+};
+
+template<typename T>
+struct ChannelHandlerWrapper<boost::weak_ptr<T> > {
+    typedef T Handler;
+    typedef boost::weak_ptr<T> HandlerPtr;
 };
 
 }

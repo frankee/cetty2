@@ -237,18 +237,13 @@ public:
     /**
      * Creates a new empty pipeline.
      */
-    ChannelPipeline();
+    ChannelPipeline(const ChannelPtr& channel);
 
     ~ChannelPipeline();
 
-    const ChannelPtr& channel() const;
+    const ChannelWeakPtr& channel() const;
 
     const EventLoopPtr& eventLoop() const;
-
-    void attach(const ChannelPtr& channel);
-    void detach();
-
-    bool attached() const;
 
 public:
     /**
@@ -271,7 +266,8 @@ public:
             return false;
         }
 
-        return addFirst(new T::Context(name, handler));
+        return addFirst(
+                   new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -282,7 +278,8 @@ public:
             return false;
         }
 
-        return addFirst(new T::Context(name, loop, handler));
+        return addFirst(
+                   new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -305,7 +302,8 @@ public:
             return false;
         }
 
-        return addLast(new T::Context(name, handler));
+        return addLast(
+                   new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -316,7 +314,8 @@ public:
             return false;
         }
 
-        return addLast(new T::Context(name, loop, handler));
+        return addLast(
+                   new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -344,7 +343,8 @@ public:
             return false;
         }
 
-        return addBefore(baseName, new T::Context(name, handler));
+        return addBefore(baseName,
+                         new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -356,7 +356,8 @@ public:
             return false;
         }
 
-        return addBefore(baseName, new T::Context(name, loop, handler));
+        return addBefore(baseName,
+                         new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -380,7 +381,8 @@ public:
     bool addAfter(const std::string& baseName,
                   const std::string& name,
                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        bool addAfter(baseName, new T::Context(name, handler));
+        bool addAfter(baseName,
+                      new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -388,7 +390,8 @@ public:
                   const std::string& name,
                   const EventLoopPtr& loop,
                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        bool addAfter(baseName, new T::Context(name, loop, handler));
+        bool addAfter(baseName,
+                      new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -443,7 +446,8 @@ public:
     bool replace(const std::string& baseName,
                  const std::string& name,
                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        return replace(baseName, new T::Context(name, handler));
+        return replace(baseName,
+                       new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -451,7 +455,8 @@ public:
                  const std::string& name,
                  const EventLoopPtr& loop,
                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        return replace(baseName, new T::Context(name, loop, handler));
+        return replace(baseName,
+                       new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -534,6 +539,7 @@ public:
 
             if (container) {
                 container->addMessage(message);
+                return true;
             }
             else {
                 LOG_WARN << "has no inboundMessageContainer in pipeline, "
@@ -543,6 +549,8 @@ public:
         else {
             LOG_WARN << "you add an empty (invalid) message to pipeline inbound";
         }
+
+        return false;
     }
 
     template<typename T, int MessageT>
@@ -553,6 +561,7 @@ public:
 
             if (container) {
                 container->addMessage(message);
+                return true;
             }
             else {
                 LOG_WARN << "has no outboundMessageContainer in pipeline, "
@@ -562,6 +571,18 @@ public:
         else {
             LOG_WARN << "you add an empty (invalid) message to pipeline outbound";
         }
+
+        return false;
+    }
+
+    template<typename T>
+    bool addInboundChannelMessage(const T& message) {
+        return addInboundMessage<T, MESSAGE_BLOCK>(message);
+    }
+
+    template<typename T>
+    bool addOutboundChannelMessage(const T& message) {
+        return addOutboundMessage<T, MESSAGE_BLOCK>(message);
     }
 
     bool addInboundChannelBuffer(const ChannelBufferPtr& buffer) {
@@ -574,7 +595,7 @@ public:
 
     template<typename T, int MessageT>
     ChannelFuturePtr write(const T& message) {
-        ChannelFuturePtr f = newFuture(channel_);
+        ChannelFuturePtr f = newFuture();
         return write<T, MessageT>(message, f);
     }
 
@@ -615,7 +636,7 @@ public:
 public:
     void notifyHandlerException(const Exception& e);
 
-    ChannelFuturePtr newFuture(const ChannelPtr& channel);
+    ChannelFuturePtr newFuture();
 
     /**
      * Returns the {@link std::string} representation of this pipeline.
@@ -629,11 +650,13 @@ protected:
     bool callAfterRemove(ChannelHandlerContext* ctx);
 
 private:
-    bool init(ChannelHandlerContext* ctx);
+    bool initWith(ChannelHandlerContext* ctx);
 
     bool duplicated(const std::string& name) {
         return contexts_.find(name) != contexts_.end();
     }
+
+    void onPipelineChanged();
 
 private:
     typedef std::map<std::string, ChannelHandlerContext*> ContextMap;
@@ -644,7 +667,7 @@ private:
 
     ContextMap contexts_;
 
-    ChannelPtr channel_;
+    ChannelWeakPtr channel_;
     EventLoopPtr eventLoop_;
 
     ChannelHandlerContext* head_;
@@ -654,8 +677,8 @@ private:
 };
 
 inline
-const ChannelPtr& ChannelPipeline::channel() const {
-    return this->channel_;
+const ChannelWeakPtr& ChannelPipeline::channel() const {
+    return channel_;
 }
 
 inline

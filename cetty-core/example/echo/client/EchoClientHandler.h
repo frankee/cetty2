@@ -56,51 +56,32 @@ public:
         VoidMessageContainer,
         ChannelBufferContainer> Context;
 
+public:
+    EchoClientHandler(int firstMessageSize);
+
     void registerTo(Context& ctx) {
+        context_ = &ctx;
         ctx.setChannelActiveCallback(boost::bind(&EchoClientHandler::channelActive, this, _1));
-        ctx.setChannelMessageUpdatedCallback(boost::bind(&EchoClientHandler::inboundBufferUpdated, this, _1));
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&EchoClientHandler::messageUpdated, this, _1));
         ctx.setExceptionCallback(boost::bind(&EchoClientHandler::exceptionCaught, this, _1, boost::cref(_2)));
     }
 
-    void channelActive(ChannelHandlerContext& ctx) {
-
-    }
-
-    void inboundBufferUpdated(ChannelHandlerContext& ctx) {
-
-    }
+    void channelActive(ChannelHandlerContext& ctx);
+    void messageUpdated(ChannelHandlerContext& ctx);
 
     void exceptionCaught(ChannelHandlerContext& ctx,
         const Exception& cause) {
-
+            // Close the connection when an exception is raised.
+            LOG_WARN << "Unexpected exception from downstream.";
+            ctx.close();
     }
-};
-
-class EchoClientHandler : public ChannelInboundBufferHandlerAdapter<> {
-public:
-    /**
-     * Creates a client-side handler.
-     */
-    EchoClientHandler(int firstMessageSize);
-    virtual ~EchoClientHandler() {}
-
-    int getTransferredBytes() const {
-        return transferredBytes;
-    }
-
-    virtual void channelActive(ChannelHandlerContext& ctx);
-
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e);
-
-    virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const;
 
 private:
     int firstMessageSize;
     int transferredBytes;
+
+    Context* context_;
+    Context::OutboundTransfer* outboundTransfer_;
 
     ChannelBufferPtr firstMessage;
 };

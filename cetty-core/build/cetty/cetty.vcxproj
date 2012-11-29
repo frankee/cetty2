@@ -108,7 +108,6 @@
     <ClCompile Include="..\..\src\cetty\channel\ChannelFutureListener.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelHandlerContext.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelHandlerLifeCycleException.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\ChannelSinkHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoop.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\EventLoopPool.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelOption.cpp" />
@@ -231,7 +230,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSinkHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandlerContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h" />

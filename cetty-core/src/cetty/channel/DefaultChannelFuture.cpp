@@ -36,16 +36,36 @@ Exception DefaultChannelFuture::CANCELLED("Future canceled");
 DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
         bool cancellable,
         bool threadUnsafe)
-    : cancellable(cancellable),
-      done(false),
-      threadUnsafe(threadUnsafe),
-      channel(channel),
-      completedListeners(NULL),
-      progressListeners(NULL),
-      cause(NULL),
-      mutex(NULL),
-      cond(NULL),
-      waiters(0) {
+    : cancellable_(cancellable),
+      done_(false),
+      threadUnsafe_(threadUnsafe),
+      channel_(channel),
+      completedListeners_(NULL),
+      progressListeners_(NULL),
+      cause_(NULL),
+      mutex_(NULL),
+      cond_(NULL),
+      waiters_(0) {
+
+    if (!threadUnsafe) {
+        condition();
+        getMutex();
+    }
+}
+
+DefaultChannelFuture::DefaultChannelFuture(const ChannelWeakPtr& channel,
+        bool cancellable,
+        bool threadUnsafe /*= false*/)
+    : cancellable_(cancellable),
+      done_(false),
+      threadUnsafe_(threadUnsafe),
+      channel_(channel),
+      completedListeners_(NULL),
+      progressListeners_(NULL),
+      cause_(NULL),
+      mutex_(NULL),
+      cond_(NULL),
+      waiters_(0) {
 
     if (!threadUnsafe) {
         condition();
@@ -54,25 +74,33 @@ DefaultChannelFuture::DefaultChannelFuture(const ChannelPtr& channel,
 }
 
 DefaultChannelFuture::~DefaultChannelFuture() {
-    if (completedListeners) {
-        delete completedListeners;
+    if (completedListeners_) {
+        delete completedListeners_;
     }
 
-    if (progressListeners) {
-        delete progressListeners;
+    if (progressListeners_) {
+        delete progressListeners_;
     }
 
-    if (cause && cause != &CANCELLED) {
-        delete cause;
+    if (cause_ && cause_ != &CANCELLED) {
+        delete cause_;
     }
 
-    if (cond) {
-        delete cond;
+    if (cond_) {
+        delete cond_;
     }
 
-    if (mutex) {
-        delete mutex;
+    if (mutex_) {
+        delete mutex_;
     }
+}
+
+const ChannelWeakPtr& DefaultChannelFuture::channel() const {
+    return channel_;
+}
+
+ChannelPtr DefaultChannelFuture::sharedChannel() const {
+    return channel_.lock();
 }
 
 void DefaultChannelFuture::setUseDeadLockChecker(bool useDeadLockChecker) {
@@ -87,19 +115,19 @@ void DefaultChannelFuture::setUseDeadLockChecker(bool useDeadLockChecker) {
 
 bool DefaultChannelFuture::isDone() const {
     boost::lock_guard<boost::mutex> guard(getMutex());
-    return done;
+    return done_;
 }
 
 bool DefaultChannelFuture::isSuccess() const {
     boost::lock_guard<boost::mutex> guard(getMutex());
-    return done && cause == NULL;
+    return done_ && cause_ == NULL;
 }
 
-const Exception* DefaultChannelFuture::getCause() const {
+const Exception* DefaultChannelFuture::failedCause() const {
     boost::lock_guard<boost::mutex> guard(getMutex());
 
-    if (cause != &CANCELLED) {
-        return cause;
+    if (cause_ != &CANCELLED) {
+        return cause_;
     }
     else {
         return NULL;
@@ -108,7 +136,7 @@ const Exception* DefaultChannelFuture::getCause() const {
 
 bool DefaultChannelFuture::isCancelled() const {
     boost::lock_guard<boost::mutex> guard(getMutex());
-    return cause == &CANCELLED;
+    return cause_ == &CANCELLED;
 }
 
 ChannelFuturePtr DefaultChannelFuture::addListener(
@@ -123,22 +151,22 @@ ChannelFuturePtr DefaultChannelFuture::addListener(
     {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
-        if (done) {
+        if (done_) {
             notifyNow = true;
         }
         else {
-            if (firstListener.empty() && completedListeners == NULL) {
-                firstListener.callback = listener;
-                firstListener.priority = priority;
+            if (firstListener_.empty() && completedListeners_ == NULL) {
+                firstListener_.callback = listener;
+                firstListener_.priority = priority;
             }
             else {
-                if (completedListeners == NULL) {
-                    completedListeners = new PriorityCallbackQueue();
+                if (completedListeners_ == NULL) {
+                    completedListeners_ = new PriorityCallbackQueue();
                 }
 
-                completedListeners->push(firstListener);
-                completedListeners->push(PriorityCallback(listener, priority));
-                firstListener.clear();
+                completedListeners_->push(firstListener_);
+                completedListeners_->push(PriorityCallback(listener, priority));
+                firstListener_.clear();
             }
         }
     }
@@ -159,12 +187,12 @@ ChannelFuturePtr DefaultChannelFuture::addProgressListener(
     {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
-        if (!done) {
-            if (progressListeners == NULL) {
-                progressListeners = new ProgressedCallbackQueue();
+        if (!done_) {
+            if (progressListeners_ == NULL) {
+                progressListeners_ = new ProgressedCallbackQueue();
             }
 
-            progressListeners->push_back(listener);
+            progressListeners_->push_back(listener);
         }
     }
 
@@ -225,15 +253,15 @@ ChannelFuturePtr DefaultChannelFuture::await() {
     {
         boost::unique_lock<boost::mutex> lock(getMutex());
 
-        while (!done) {
+        while (!done_) {
             checkDeadLock();
-            waiters++;
+            waiters_++;
 
             try {
                 condition().wait(lock);
             }
             catch (...) {
-                waiters--;
+                waiters_--;
             }
         }
     }
@@ -250,9 +278,9 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
     {
         boost::unique_lock<boost::mutex> lock(getMutex());
 
-        while (!done) {
+        while (!done_) {
             checkDeadLock();
-            waiters++;
+            waiters_++;
 
             try {
                 condition().wait(lock);
@@ -260,7 +288,7 @@ ChannelFuturePtr DefaultChannelFuture::awaitUninterruptibly() {
             catch (const boost::thread_interrupted& e) {
                 (void)e;
                 interrupted = true;
-                waiters--;
+                waiters_--;
 
                 LOG_WARN << "thread interrupted while awaiting";
             }
@@ -290,14 +318,14 @@ bool DefaultChannelFuture::setSuccess() {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
         // Allow only once.
-        if (done) {
+        if (done_) {
             return false;
         }
 
-        done = true;
+        done_ = true;
 
-        if (waiters > 0) {
-            cond->notify_all();
+        if (waiters_ > 0) {
+            cond_->notify_all();
         }
     }
 
@@ -310,21 +338,21 @@ bool DefaultChannelFuture::setFailure(const Exception& cause) {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
         // Allow only once.
-        if (done) {
+        if (done_) {
             return false;
         }
 
-        if (this->cause && this->cause != &CANCELLED) {
-            delete this->cause;
-            this->cause = NULL;
+        if (this->cause_ && this->cause_ != &CANCELLED) {
+            delete this->cause_;
+            this->cause_ = NULL;
         }
 
-        this->cause = new Exception(cause);
+        this->cause_ = new Exception(cause);
 
-        done = true;
+        done_ = true;
 
-        if (waiters > 0) {
-            cond->notify_all();
+        if (waiters_ > 0) {
+            cond_->notify_all();
         }
     }
 
@@ -333,7 +361,7 @@ bool DefaultChannelFuture::setFailure(const Exception& cause) {
 }
 
 bool DefaultChannelFuture::cancel() {
-    if (!cancellable) {
+    if (!cancellable_) {
         return false;
     }
 
@@ -341,15 +369,15 @@ bool DefaultChannelFuture::cancel() {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
         // Allow only once.
-        if (done) {
+        if (done_) {
             return false;
         }
 
-        cause = &CANCELLED;
-        done = true;
+        cause_ = &CANCELLED;
+        done_ = true;
 
-        if (waiters > 0) {
-            cond->notify_all();
+        if (waiters_ > 0) {
+            cond_->notify_all();
         }
     }
 
@@ -364,16 +392,16 @@ bool DefaultChannelFuture::setProgress(int amount, int current, int total) {
         boost::lock_guard<boost::mutex> guard(getMutex());
 
         // Do not generate progress event after completion.
-        if (done) {
+        if (done_) {
             return false;
         }
 
-        if (progressListeners == NULL || progressListeners->empty()) {
+        if (progressListeners_ == NULL || progressListeners_->empty()) {
             // Nothing to notify - no need to create an empty array.
             return true;
         }
 
-        tmplist = *progressListeners;
+        tmplist = *progressListeners_;
     }
 
     while (!tmplist.empty()) {
@@ -401,15 +429,15 @@ bool DefaultChannelFuture::await0(int64_t timeoutMillis, bool interruptable) {
     try {
         boost::unique_lock<boost::mutex> lock(getMutex());
 
-        if (done) {
-            return done;
+        if (done_) {
+            return done_;
         }
         else if (timeoutMillis <= 0) {
-            return done;
+            return done_;
         }
 
         checkDeadLock();
-        waiters++;
+        waiters_++;
 
         try {
             for (;;) {
@@ -427,18 +455,18 @@ bool DefaultChannelFuture::await0(int64_t timeoutMillis, bool interruptable) {
                     }
                 }
 
-                if (done) {
+                if (done_) {
                     return true;
                 }
                 else {
                     if (boost::get_system_time() >= expiredTime) {
-                        return done;
+                        return done_;
                     }
                 }
             }
         }
         catch (...) {
-            waiters--;
+            waiters_--;
         }
     }
     catch (...) {
@@ -465,21 +493,21 @@ void DefaultChannelFuture::notifyListeners() {
     //    Hence any listener list modification happens-before this method.
     // 2) This method is called only when 'done' is true.  Once 'done'
     //    becomes true, the listener list is never modified - see add/removeListener()
-    if (!firstListener.empty()) {
-        notifyListener(firstListener.callback);
-        firstListener.clear();
+    if (!firstListener_.empty()) {
+        notifyListener(firstListener_.callback);
+        firstListener_.clear();
     }
 
-    if (completedListeners && !completedListeners->empty()) {
-        while (!completedListeners->empty()) {
-            const PriorityCallback& callback = completedListeners->top();
+    if (completedListeners_ && !completedListeners_->empty()) {
+        while (!completedListeners_->empty()) {
+            const PriorityCallback& callback = completedListeners_->top();
             notifyListener(callback.callback);
-            completedListeners->pop();
+            completedListeners_->pop();
         }
     }
 
-    if (progressListeners) {
-        progressListeners->clear();
+    if (progressListeners_) {
+        progressListeners_->clear();
     }
 }
 
@@ -514,23 +542,19 @@ void DefaultChannelFuture::notifyProgressListener(const ProgressedCallback& l,
 }
 
 boost::condition_variable& DefaultChannelFuture::condition() {
-    if (!cond) {
-        cond = new boost::condition_variable();
+    if (!cond_) {
+        cond_ = new boost::condition_variable();
     }
 
-    return *cond;
-}
-
-const ChannelPtr& DefaultChannelFuture::getChannel() const {
-    return this->channel;
+    return *cond_;
 }
 
 boost::mutex& DefaultChannelFuture::getMutex() const {
-    if (!mutex) {
-        mutex = new boost::mutex();
+    if (!mutex_) {
+        mutex_ = new boost::mutex();
     }
 
-    return *mutex;
+    return *mutex_;
 }
 
 }

@@ -67,7 +67,7 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     connecting = false;
 
     ChannelConnection* conn = new ChannelConnection;
-    ChannelPtr channel = future.getChannel();
+    ChannelPtr channel = future.channel();
     
     conn->channel = channel;
     int id = channel->id();

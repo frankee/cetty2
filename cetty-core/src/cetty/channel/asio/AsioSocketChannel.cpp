@@ -23,7 +23,6 @@
 
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelException.h>
 
@@ -48,55 +47,46 @@ using namespace cetty::util;
 using namespace boost::asio::ip;
 
 AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
-                                     const EventLoopPtr& eventLoop,
-                                     const ChannelFactoryPtr& factory,
-                                     const ChannelPipelinePtr& pipeline)
-    : SocketChannel(eventLoop, parent, factory, pipeline),
-      opened(false),
-      isWriting(false),
-      highWaterMarkCounter(0),
-      ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
-      tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      config(tcpSocket) {
-    init(pipeline);
+                                     const EventLoopPtr& eventLoop)
+    : Channel(parent, eventLoop),
+      opened_(false),
+      isWriting_(false),
+      highWaterMarkCounter_(0),
+      ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
+      readBuffer_(Unpooled::buffer(1024 * 16)),
+      socketConfig_(tcpSocket_) {
+    init();
 }
 
-AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop,
-                                     const ChannelFactoryPtr& factory,
-                                     const ChannelPipelinePtr& pipeline)
-    : SocketChannel(eventLoop, ChannelPtr(), factory, pipeline),
-      isWriting(false),
-      highWaterMarkCounter(0),
-      ioService(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
-      tcpSocket(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      config(tcpSocket) {
-    init(pipeline);
+AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
+    : Channel(ChannelPtr(), eventLoop),
+      isWriting_(false),
+      highWaterMarkCounter_(0),
+      ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
+      readBuffer_(Unpooled::buffer(1024 * 16)),
+      socketConfig_(tcpSocket_) {
+    init();
 }
 
 AsioSocketChannel::~AsioSocketChannel() {
     LOG_DEBUG << "AsioSocketChannel dector";
 }
 
-ChannelConfig& AsioSocketChannel::config() {
-    return this->config;
-}
-
-const ChannelConfig& AsioSocketChannel::config() const {
-    return this->config;
-}
-
+#if 0
 const SocketAddress& AsioSocketChannel::localAddress() const {
     if (localAddress.validated()) {
         return localAddress;
     }
 
     boost::system::error_code ec;
-    tcp::endpoint endpoint = tcpSocket.local_endpoint(ec);
+    tcp::endpoint endpoint = tcpSocket_.local_endpoint(ec);
 
     if (!ec) {
         localAddress = SocketAddress(SocketAddressImplPtr(
                                          new AsioTcpSocketAddressImpl(
-                                             ioService->service(),
+                                             ioService_->service(),
                                              endpoint)));
     }
     else {
@@ -112,12 +102,12 @@ const SocketAddress& AsioSocketChannel::remoteAddress() const {
     }
 
     boost::system::error_code ec;
-    tcp::endpoint endpoint = tcpSocket.remote_endpoint(ec);
+    tcp::endpoint endpoint = tcpSocket_.remote_endpoint(ec);
 
     if (!ec) {
         remoteAddress = SocketAddress(SocketAddressImplPtr(
                                           new AsioTcpSocketAddressImpl(
-                                              ioService->service(),
+                                              ioService_->service(),
                                               endpoint)));
     }
     else {
@@ -126,13 +116,14 @@ const SocketAddress& AsioSocketChannel::remoteAddress() const {
 
     return remoteAddress;
 }
+#endif
 
 bool AsioSocketChannel::isActive() const {
-    return tcpSocket.is_open() && remoteAddress().validated();
+    return tcpSocket_.is_open() && remoteAddress().validated();
 }
 
 bool AsioSocketChannel::isOpen() const {
-    return opened;
+    return opened_;
 }
 
 bool AsioSocketChannel::setClosed() {
@@ -141,56 +132,55 @@ bool AsioSocketChannel::setClosed() {
     LOG_INFO << "closed the socket channel, finally calling FutureListener"
              " which to the ChannelCloseFuture.";
 
-    return AbstractChannel::setClosed();
+    return Channel::setClosed();
 }
 
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
     if (!error) {
-        const ChannelBufferPtr& buffer = pipeline_->getReceiveBuffer();
-        buffer->offsetWriterIndex(bytes_transferred);
-        pipeline_->setInboundChannelBuffer(buffer);
+        readBuffer_->offsetWriterIndex(bytes_transferred);
+        pipeline_->addInboundChannelBuffer(readBuffer_);
 
         pipeline_->fireMessageUpdated();
 
         beginRead();
     }
     else {
-        if (pipeline_ && pipeline_->attached()) {
-            LOG_WARN << "handleRead Error : " << error.value()
-                     << " msg: \"" << error.message()
-                     << "\" then close the channel.";
-            close();
-        }
-        else {
-            LOG_WARN << "handleRead Error : " << error.value()
-                     << " msg: \"" << error.message()
-                     << "\" closed by self, do nothing.";
+        close();
 
-            release();
-        }
+//         if (pipeline_ && pipeline_->attached()) {
+//             LOG_WARN << "handleRead Error : " << error.value()
+//                      << " msg: \"" << error.message()
+//                      << "\" then close the channel.";
+//             
+//         }
+//         else {
+//             LOG_WARN << "handleRead Error : " << error.value()
+//                      << " msg: \"" << error.message()
+//                      << "\" closed by self, do nothing.";
+//         }
     }
 }
 
 void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
                                     size_t bytes_transferred) {
     if (!error) {
-        writeQueue->peek().setSuccess();
-        writeQueue->popup();
+        writeQueue_->peek().setSuccess();
+        writeQueue_->popup();
 
-        if (writeQueue->empty()) {
-            isWriting = false;
+        if (writeQueue_->empty()) {
+            isWriting_ = false;
         }
     }
     else {
-        if (!writeQueue->empty()) {
+        if (!writeQueue_->empty()) {
             std::string msg;
             StringUtil::printf(&msg, "write buffer failed, message:%s code:%d",
                                error.message().c_str(),
                                error.value());
 
-            writeQueue->peek().setFailure(RuntimeException(msg));
-            writeQueue->popup();
+            writeQueue_->peek().setFailure(RuntimeException(msg));
+            writeQueue_->popup();
 
             LOG_ERROR << msg;
         }
@@ -204,7 +194,7 @@ void AsioSocketChannel::handleResolve(const boost::system::error_code& error,
                                       const ChannelFuturePtr& cf) {
     if (!error) {
         tcp::endpoint endpoint = *itr;
-        tcpSocket.async_connect(
+        tcpSocket_.async_connect(
             endpoint,
             boost::bind(&AsioSocketChannel::handleConnect,
                         this,
@@ -214,7 +204,7 @@ void AsioSocketChannel::handleResolve(const boost::system::error_code& error,
     }
     else {
         LOG_ERROR << "boost asio can NOT resolve "
-                  << remoteAddress.toString()
+                  << remoteAddress().toString()
                   << " , code=" << error.value() << ", msg=" << error.message();
 
         ChannelException exception(error.message(), error.value());
@@ -228,7 +218,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
                                       const ChannelFuturePtr& cf) {
     if (!error) {
         LOG_INFO << "channel connected to the remote server %s, firing connected event."
-                 << remoteAddress.toString();
+                 << remoteAddress().toString();
         pipeline_->fireChannelActive();
         cf->setSuccess();
 
@@ -237,7 +227,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
     else if (endpointIterator != boost::asio::ip::tcp::resolver::iterator()) {
         LOG_INFO << "resolved more than one address, try to connect the next address.";
         boost::system::error_code error;
-        tcpSocket.close(error);
+        tcpSocket_.close(error);
 
         if (error) {
             LOG_ERROR << "failed to close tcp socket before connect, "
@@ -248,7 +238,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
         }
 
         tcp::endpoint endpoint = *endpointIterator;
-        tcpSocket.async_connect(endpoint,
+        tcpSocket_.async_connect(endpoint,
                                 boost::bind(&AsioSocketChannel::handleConnect,
                                             this,
                                             boost::asio::placeholders::error,
@@ -257,7 +247,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
     }
     else {
         LOG_ERROR << "failed to connect to remote server "
-                  << remoteAddress.toString()
+                  << remoteAddress().toString()
                   << " , code=" << error.value() << ", msg=" << error.message();
 
         ChannelException exception(error.message(), error.value());
@@ -270,7 +260,7 @@ void AsioSocketChannel::cleanUpWriteBuffer() {
     bool fireExceptionCaught = false;
 
     // Clean up the stale messages in the write buffer.
-    if (!writeQueue->empty()) {
+    if (!writeQueue_->empty()) {
         if (isOpen()) {
             LOG_WARN << "cleanUpWriteBuffer: The channel has not close yet.";
             cause = ChannelException("Channel has not close yet.");
@@ -281,10 +271,10 @@ void AsioSocketChannel::cleanUpWriteBuffer() {
 
         // last one in the writeBuffer should not been cleaned.
         // it is already sent asynchronously, will take care of itself.
-        while (writeQueue->size() > 1) {
+        while (writeQueue_->size() > 1) {
             LOG_WARN << "cleanUpWriteBuffer: poll and clean the write queue.";
-            writeQueue->peek().setFailure(cause);
-            writeQueue->popup();
+            writeQueue_->peek().setFailure(cause);
+            writeQueue_->popup();
 
             fireExceptionCaught = true;
         }
@@ -361,21 +351,20 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 }
 
 void AsioSocketChannel::beginRead() {
-    const ChannelBufferPtr& buffer = pipeline_->getReceiveBuffer();
     int size;
-    char* buf = buffer->writableBytes(&size);
+    char* buf = readBuffer_->writableBytes(&size);
     LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : " << size;
 
     // auto increment the capacity.
     if (size < 128) {
-        if (!buffer->ensureWritableBytes(4096, true)) {
+        if (!readBuffer_->ensureWritableBytes(4096, true)) {
             // error!
         }
 
-        buf = buffer->writableBytes(&size);
+        buf = readBuffer_->writableBytes(&size);
     }
 
-    tcpSocket.async_read_some(
+    tcpSocket_.async_read_some(
         boost::asio::buffer(buf, size),
         boost::bind(&AsioSocketChannel::handleRead,
                     this,
@@ -397,13 +386,13 @@ void AsioSocketChannel::doClose() {
         return;
     }
 
-    opened = false;
+    opened_ = false;
 
     boost::system::error_code error;
 
     if (isActive()) {
         // if shutdown failed, try to close tcp socket directly.
-        tcpSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+        tcpSocket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
 
         if (error) {
             LOG_ERROR << "failed to shutdown the tcp socket"
@@ -411,7 +400,7 @@ void AsioSocketChannel::doClose() {
         }
     }
 
-    tcpSocket.close(error);
+    tcpSocket_.close(error);
 
     if (error) {
         LOG_ERROR << "failed to close the tcp socket."
@@ -437,13 +426,13 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
         return;
     }
 
-    isWriting = true;
-    AsioWriteOperation& operation = writeQueue->offer(buffer, future);
+    isWriting_ = true;
+    AsioWriteOperation& operation = writeQueue_->offer(buffer, future);
 
     if (operation.writeBufferSize() == 0) {
         LOG_WARN << "write an empty message, do not write to the socket,\
                              just post a handleWrite operation.";
-        ioService->service().post(boost::bind(
+        ioService_->service().post(boost::bind(
                                       &AsioSocketChannel::handleWrite,
                                       this,
                                       boost::system::error_code(),
@@ -452,9 +441,9 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     }
 
     if (operation.isMultiBuffers()) {
-        boost::asio::async_write(tcpSocket,
+        boost::asio::async_write(tcpSocket_,
                                  operation.getAsioBufferArray(),
-                                 makeCustomAllocHandler(writeAllocator,
+                                 makeCustomAllocHandler(writeAllocator_,
                                          boost::bind(&AsioSocketChannel::handleWrite,
                                                  this,
                                                  boost::asio::placeholders::error,
@@ -462,9 +451,9 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
         LOG_WARN << "write a gathering buffer to the socket, may slow down the system.";
     }
     else {
-        boost::asio::async_write(tcpSocket,
+        boost::asio::async_write(tcpSocket_,
                                  boost::asio::const_buffers_1(operation.getAsioBuffer()),
-                                 makeCustomAllocHandler(writeAllocator,
+                                 makeCustomAllocHandler(writeAllocator_,
                                          boost::bind(&AsioSocketChannel::handleWrite,
                                                  this,
                                                  boost::asio::placeholders::error,
@@ -473,23 +462,19 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     }
 }
 
-void AsioSocketChannel::init(const ChannelPipelinePtr& pipeline) {
-    writeQueue.reset(new AsioWriteOperationQueue(*this));
+void AsioSocketChannel::init() {
+    writeQueue_.reset(new AsioWriteOperationQueue(*this));
 
-    setPipeline(pipeline);
-}
-
-void AsioSocketChannel::setPipeline(const ChannelPipelinePtr& pipeline) {
-    pipeline->setSinkHandler(new AsioSocketChannelSinkHandler);
-    pipeline->attach(shared_from_this());
-
-    opened = true;
+    //     pipeline->setSinkHandler(new AsioSocketChannelSinkHandler);
+    //     pipeline->attach(shared_from_this());
+    // 
+    //     opened_ = true;
 }
 
 void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
                                       const ChannelException& e) {
     connectFuture->setFailure(e);
-    pipeline()->fireExceptionCaught(e);
+    pipeline_->fireExceptionCaught(e);
     //closeIfClosed();
     doClose();
 }

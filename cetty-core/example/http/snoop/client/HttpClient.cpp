@@ -112,7 +112,7 @@ int main(int argc, const char* argv[]) {
     ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
 
     // Wait until the connection attempt succeeds or fails.
-    ChannelPtr channel = future->awaitUninterruptibly()->getChannel();
+    ChannelPtr channel = future->awaitUninterruptibly()->channel();
 
     if (!future->isSuccess()) {
         bootstrap.shutdown();

@@ -44,9 +44,11 @@ public:
      * @param channel the {@link Channel} associated with this future
      */
     SucceededChannelFuture(const ChannelPtr& channel);
+    SucceededChannelFuture(const ChannelWeakPtr& channel);
+
     virtual ~SucceededChannelFuture();
 
-    virtual const Exception* getCause() const;
+    virtual const Exception* failedCause() const;
     virtual bool isSuccess() const;
 };
 

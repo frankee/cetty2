@@ -169,7 +169,7 @@ int main()
 	ChannelFuturePtr future = bootstrap.connect(host,port);
 	future->awaitUninterruptibly();
 
-	ChannelPtr c = future->getChannel();
+	ChannelPtr c = future->channel();
 	
 	testForCando(c);
 	//testForPreSleep(c);

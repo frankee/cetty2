@@ -287,9 +287,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\ServerCookieEncoder.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\channel\ChannelSinkHandler.cpp">
-      <Filter>channel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\Delimiters.cpp">
       <Filter>handler\codec</Filter>
     </ClCompile>
@@ -764,9 +761,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\ServerCookieEncoder.h">
       <Filter>handler\codec\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelSinkHandler.h">
-      <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleState.h">
       <Filter>handler\timeout</Filter>

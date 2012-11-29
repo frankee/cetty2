@@ -36,21 +36,21 @@ public:
      * Creates a new instance.
      */
     AsioServerSocketChannelConfig(boost::asio::ip::tcp::acceptor& acceptor);
-    virtual ~AsioServerSocketChannelConfig();
+    ~AsioServerSocketChannelConfig();
 
-    virtual bool setOption(const ChannelOption& option,
+    bool setOption(const ChannelOption& option,
                            const ChannelOption::Variant& value);
 
-    virtual const boost::optional<bool>& isReuseAddress() const;
-    virtual void setReuseAddress(bool reuseAddress);
+    const boost::optional<bool>& isReuseAddress() const;
+    void setReuseAddress(bool reuseAddress);
 
-    virtual const boost::optional<int>& getReceiveBufferSize() const;
-    virtual void setReceiveBufferSize(int receiveBufferSize);
+    const boost::optional<int>& getReceiveBufferSize() const;
+    void setReceiveBufferSize(int receiveBufferSize);
 
-    virtual void setPerformancePreferences(int connectionTime, int latency, int bandwidth);
+    void setPerformancePreferences(int connectionTime, int latency, int bandwidth);
 
-    virtual const boost::optional<int>& getBacklog() const;
-    virtual void setBacklog(int backlog);
+    const boost::optional<int>& getBacklog() const;
+    void setBacklog(int backlog);
 
     bool isReuseAddress(tcp::acceptor& acceptor) const;
     void setReuseAddress(tcp::acceptor& acceptor);
@@ -59,7 +59,7 @@ public:
     void setReceiveBufferSize(tcp::acceptor& acceptor);
 
 private:
-    tcp::acceptor& acceptor;
+    tcp::acceptor& acceptor_;
 
     mutable boost::optional<bool> reuseAddress_;
     mutable boost::optional<int>  receiveBufferSize_;
