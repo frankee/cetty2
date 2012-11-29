@@ -18,7 +18,6 @@
  */
 
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/service/builder/ServerBuilder.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 
@@ -51,7 +50,6 @@ public:
 
 private:
     void init();
-    ChannelPipelinePtr createProtobufServicePipeline();
 };
 
 }

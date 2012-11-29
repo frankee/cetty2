@@ -259,28 +259,6 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
     validateParameters();
 }
 
-LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(
-    const LengthFieldBasedFrameDecoder& decoder)
-    : discardingTooLongFrame(decoder.discardingTooLongFrame),
-    maxFrameLength(decoder.maxFrameLength),
-    tooLongFrameLength(0),
-    bytesToDiscard(0),
-    lengthFieldOffset(decoder.lengthFieldOffset),
-    lengthFieldLength(decoder.lengthFieldLength),
-    lengthFieldEndOffset(decoder.lengthFieldEndOffset),
-    lengthAdjustment(decoder.lengthAdjustment),
-    header1(decoder.header1),
-    header2(decoder.header2),
-    initialBytesToStrip(decoder.initialBytesToStrip),
-    checksumFieldLength(decoder.checksumFieldLength),
-    checksumCalcOffset(decoder.checksumCalcOffset),
-    checksumFunction(decoder.checksumFunction) {
-}
-
-ChannelHandlerPtr LengthFieldBasedFrameDecoder::clone() {
-    return ChannelHandlerPtr(new LengthFieldBasedFrameDecoder(*this));
-}
-
 ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& in) {
     if (discardingTooLongFrame) {
@@ -487,10 +465,6 @@ void LengthFieldBasedFrameDecoder::validateParameters() {
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
-}
-
-std::string LengthFieldBasedFrameDecoder::toString() const {
-    return "LengthFieldBasedFrameDecoder";
 }
 
 }

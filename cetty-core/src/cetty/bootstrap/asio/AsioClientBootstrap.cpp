@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
  * Distributed under under the Apache License, version 2.0 (the "License").
  * you may not use this file except in compliance with the License.
@@ -13,20 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+namespace cetty { namespace bootstrap { namespace asio { 
 
-#include <cetty/bootstrap/AbstractBootstrap.h>
-#include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelPipeline.h>
-#include <cetty/util/Exception.h>
-
-#include <cetty/logging/LoggerHelper.h>
-
-namespace cetty {
-namespace bootstrap {
-
-using namespace cetty::channel;
-using namespace cetty::util;
-using namespace cetty::logging;
-
-}
-}
+}}}

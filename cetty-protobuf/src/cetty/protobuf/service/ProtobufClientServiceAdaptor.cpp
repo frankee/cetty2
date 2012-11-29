@@ -66,7 +66,7 @@ void ProtobufClientServiceAdaptor::doCallMethod(
                                    method->name(),
                                    (MessagePtr)request));
 
-    cetty::service::callMethod(service, message, future);
+    //cetty::service::callMethod(service, message, future);
 }
 
 }

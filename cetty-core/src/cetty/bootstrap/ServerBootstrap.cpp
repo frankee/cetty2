@@ -20,18 +20,15 @@
 #include <boost/thread.hpp>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelConfig.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/ServerChannelFactory.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelInitializer.h>
 #include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/socket/ServerSocketChannelFactory.h>
 #include <cetty/channel/IpAddress.h>
 
 #include <cetty/util/Exception.h>
@@ -42,25 +39,45 @@ namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket;
 using namespace cetty::util;
 
-class Acceptor : public cetty::channel::ChannelInboundMessageHandler<ChannelPtr> {
+class Acceptor : private boost::noncopyable {
 public:
-    Acceptor(ServerBootstrap& bootstrap) : bootstrap(bootstrap) {
+    typedef boost::shared_ptr<Acceptor> Ptr;
+    typedef ChannelMessageContainer<ChannelPtr, MESSAGE_BLOCK> InboundContainer;
+    typedef InboundContainer::MessageQueue InboundQueue;
+
+    typedef ChannelMessageHandlerContext<
+        Acceptor,
+        ChannelPtr,
+        VoidMessage,
+        VoidMessage,
+        VoidMessage,
+        InboundContainer,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        VoidMessageContainer> Context;
+
+public:
+    Acceptor(ServerBootstrap& bootstrap)
+        : bootstrap_(bootstrap),
+          context_() {
     }
 
-    virtual ~Acceptor() {}
+    ~Acceptor() {}
 
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
+    void registerTo(Context& ctx) {
+        context_ = &ctx;
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+            &Acceptor::messageUpdated,
+            this,
+            _1));
     }
 
-    virtual std::string toString() const {
-        return "Acceptor";
-    }
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        InboundQueue& inboundQueue = context_->inboundContainer()->getMessages();
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         while (!inboundQueue.empty()) {
             const ChannelPtr& child = inboundQueue.front();
 
@@ -68,7 +85,9 @@ public:
                 break;
             }
 
-            const ChannelOption::Options& childOptions = bootstrap.getChildOptions();
+            const ChannelOption::Options& childOptions =
+                bootstrap_.getChildOptions();
+
             ChannelOption::Options::const_iterator itr = childOptions.begin();
             for (; itr != childOptions.end(); ++itr) {
                 if (!child->config().setOption(itr->first, itr->second)) {
@@ -81,18 +100,9 @@ public:
     }
 
 private:
-    ServerBootstrap& bootstrap;
+    ServerBootstrap& bootstrap_;
+    Context* context_;
 };
-
-const ChannelHandlerPtr& ServerBootstrap::getParentHandler() {
-    return this->parentHandler;
-}
-
-ServerBootstrap& ServerBootstrap::setParentHandler(const ChannelHandlerPtr& parentHandler) {
-    this->parentHandler = parentHandler;
-
-    return *this;
-}
 
 ChannelFuturePtr ServerBootstrap::bind(int port) {
     return bind(SocketAddress(IpAddress::IPv4, port));
@@ -102,31 +112,40 @@ ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
     return bind(SocketAddress(ip, port));
 }
 
+bool ServerBootstrap::initChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<Acceptor>("acceptor", Acceptor::Ptr(new Acceptor(*this)));
+
+    return true;
+}
+
 ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     // bossPipeline's life cycle will be managed by the server channel.
-    ChannelPipelinePtr serverPipeline = ChannelPipelines::pipeline();
 
-    ChannelHandlerPtr acceptor(new Acceptor(*this));
-    ChannelHandlerPtr parentHandler = getParentHandler();
+//     if (parentHandler) {
+//         serverPipeline->addLast("userHandler", parentHandler->clone());
+//     }
 
-    serverPipeline->addLast("acceptor", acceptor);
-
-    if (parentHandler) {
-        serverPipeline->addLast("userHandler", parentHandler->clone());
-    }
-
-    const ChannelFactoryPtr& factory = getFactory();
-
-    if (!factory) {
-        LOG_ERROR << "has not set the factory.";
-        return NullChannel::instance()->closeFuture();
-    }
-
-    ChannelPtr channel = factory->newChannel(serverPipeline);
+    ChannelPtr channel = newChannel();
 
     if (!channel) {
         LOG_ERROR << "Server channel factory failed to create a new channel.";
-        return NullChannel::instance()->closeFuture();
+        return channel->newSucceededFuture();
+    }
+
+    channel->setInitializer(boost::bind(
+        &ServerBootstrap::initChannel,
+        this,
+        _1));
+
+    channel->open();
+
+    if (channel->isOpen()) {
+        LOG_INFO << "Created the AsioServerSocketChannel, firing the Channel Created Event.";
+        //channel->pipeline().fireChannelOpen();
+
+        serverChannels_.push_back(channel);
     }
 
     ChannelFuturePtr future = channel->newFuture();
@@ -138,55 +157,21 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
 ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
                                      const ChannelOption::Variant& value) {
     if (value.empty()) {
-        childOptions.erase(option);
+        childOptions_.erase(option);
         LOG_WARN << "setOption, the key ("
             << option.getName()
             << ") is empty value, remove from the options.";
     }
     else {
         LOG_INFO << "set Option, the key is " << option.getName();
-        childOptions.insert(std::make_pair(option, value));
+        childOptions_.insert(std::make_pair(option, value));
     }
 
     return *this;
 }
 
 const ChannelOption::Options& ServerBootstrap::getChildOptions() const {
-    return childOptions;
-}
-
-ServerBootstrap& ServerBootstrap::setFactory(const ChannelFactoryPtr& factory) {
-    ChannelPipelinePtr childPipeline = getPipeline();
-    if (childPipeline) {
-        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
-            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
-        if (serverFactory) {
-            serverFactory->setChildChannelPipeline(childPipeline);
-        }
-        else {
-            //
-        }
-    }
-
-    AbstractBootstrap::setFactory(factory);
-    return *this;
-}
-
-ServerBootstrap& ServerBootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
-    ChannelFactoryPtr factory = getFactory();
-    if (factory) {
-        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
-            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
-        if (serverFactory) {
-            serverFactory->setChildChannelPipeline(pipeline);
-        }
-        else {
-            //
-        }
-    }
-
-    AbstractBootstrap::setPipeline(pipeline);
-    return *this;
+    return childOptions_;
 }
 
 }

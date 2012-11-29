@@ -30,7 +30,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\service.pb.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />

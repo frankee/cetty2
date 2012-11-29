@@ -21,24 +21,6 @@
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp">
       <Filter>service\builder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ClientBuilder.cpp">
-      <Filter>service\builder</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-service\src\cetty\service\asio\AsioClientServiceFactory.cpp">
-      <Filter>service\asio</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp">
-      <Filter>service\pool</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\service\pool\CachingConnectionPool.cpp">
-      <Filter>service\pool</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\service\pool\WatermarkConnectionPool.cpp">
-      <Filter>service\pool</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\service\ClientService.cpp">
-      <Filter>service</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp">
       <Filter>service\builder</Filter>
     </ClCompile>
@@ -85,15 +67,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h">
       <Filter>service\http</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h">
-      <Filter>service\pool</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h">
-      <Filter>service\pool</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h">
-      <Filter>service\pool</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h">
       <Filter>service</Filter>

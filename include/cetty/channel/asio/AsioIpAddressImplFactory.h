@@ -21,7 +21,6 @@
 
 namespace cetty {
 namespace channel {
-namespace socket {
 namespace asio {
 
 class AsioIpAddressImplFactory : public ::cetty::channel::IpAddressImplFactory {
@@ -34,7 +33,6 @@ public:
     virtual IpAddressImpl* create(const std::string& addr,int family);
 };
 
-}
 }
 }
 }

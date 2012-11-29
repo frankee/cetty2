@@ -19,7 +19,6 @@
 
 namespace cetty {
 namespace channel {
-namespace socket {
 namespace asio {
 
 using namespace cetty::channel;
@@ -64,7 +63,6 @@ SocketAddressImpl* AsioUdpSocketAddressImplFactory::create(const std::string& ad
     return new AsioSocketAddressImpl<boost::asio::ip::udp>(ioService, addr, service);
 }
 
-}
 }
 }
 }

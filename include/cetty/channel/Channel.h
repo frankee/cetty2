@@ -24,7 +24,7 @@
 #include <string>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <boost/smart_ptr/enable_shared_from_this2.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
@@ -134,7 +134,7 @@ class ChannelSink;
  *
  */
 
-class Channel : public boost::enable_shared_from_this<Channel> {
+class Channel : public boost::enable_shared_from_this2<Channel> {
 public:
     typedef boost::function<bool (const ChannelPtr&)> Initializer;
 
@@ -162,12 +162,16 @@ public:
     /**
      * Returns the configuration of this channel.
      */
-    ChannelConfig& config();
+    ChannelConfig& config() {
+        return config_;
+    }
 
     /**
      * Returns the const configuration reference of this channel.
      */
-    const ChannelConfig& config() const;
+    const ChannelConfig& config() const {
+        return config_;
+    }
 
     /**
      * Returns the {@link ChannelPipeline} which handles {@link ChannelEvent}s
@@ -194,7 +198,9 @@ public:
      * @remark Return an {@link SocketAddress NULL_ADDRESS}
      * if this channel is not bound.
      */
-    const SocketAddress& localAddress() const;
+    const SocketAddress& localAddress() const {
+        return localAddress_;
+    }
 
     /**
      * Returns the remote address where this channel is connected to.
@@ -208,8 +214,9 @@ public:
      *         the origination of the received message as this method will
      *         return {@link SocketAddress NULL_ADDRESS}.
      */
-    const SocketAddress& remoteAddress() const;
-
+    const SocketAddress& remoteAddress() const {
+        return remoteAddress_;
+    }
 
     ChannelFuturePtr newFuture();
     ChannelFuturePtr newFailedFuture(const Exception& e);
@@ -408,6 +415,9 @@ protected:
 
     ChannelFuturePtr succeededFuture_;
     ChannelFuturePtr closeFuture_;
+
+    SocketAddress localAddress_;
+    SocketAddress remoteAddress_;
 
     Context* context_;
 

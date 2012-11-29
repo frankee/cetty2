@@ -123,11 +123,6 @@ public:
                          const std::string& header,
                          ChecksumFunction checksumFunction);
 
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
-    }
-
-    virtual std::string toString() const { return "LengthFieldPrepender"; }
 
 protected:
     virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,

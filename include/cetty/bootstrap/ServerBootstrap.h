@@ -26,8 +26,6 @@
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/ChannelHandler.h>
 
 #include <cetty/bootstrap/AbstractBootstrap.h>
 
@@ -171,18 +169,17 @@ public:
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
      * {@link Channel}'s.
      */
-    ServerBootstrap& group(const EventLoopPoolPtr& parentGroup,
-        EventLoopGroup childGroup) {
+    ServerBootstrap& setEventLoopPool(const EventLoopPoolPtr& parentPool,
+        const EventLoopPoolPtr& childPool) {
 
-        super.group(parentGroup);
-        if (childGroup == null) {
-            throw new NullPointerException("childGroup");
+        //super.group(parentGroup);
+
+        if (childPool) {
+            childPool_ = childPool;
         }
-        if (this.childGroup != null) {
-            throw new IllegalStateException("childGroup set already");
+        else {
+            childPool_ = parentPool;
         }
-        this.childGroup = childGroup;
-        return this;
     }
 
     /**
@@ -198,7 +195,8 @@ public:
     /**
      * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
      */
-    ServerBootstrap& childInitializer(ChannelHandler childHandler) {
+    ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer) {
+        childInitializer_ = initializer;
         return *this;
     }
 
@@ -210,10 +208,10 @@ public:
      *        the parent channel handler.
      *        <tt>NULL</tt> to unset the current parent channel handler.
      */
-    ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
+    //ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
 
 
-    virtual ChannelFuturePtr bind();
+    //virtual ChannelFuturePtr bind();
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -257,16 +255,23 @@ public:
     virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
 
 
-    public void shutdown() {
-        super.shutdown();
-        if (childGroup != null) {
-            childGroup.shutdown();
-        }
+    virtual void shutdown() {
     }
 
+
+protected:
+    virtual ChannelPtr newChannel() = 0;
+
 private:
-    ChannelHandlerPtr parentHandler;
-    ChannelOption::Options childOptions;
+    bool initChannel(const ChannelPtr& channel);
+
+private:
+    EventLoopPoolPtr childPool_;
+    ChannelOption::Options childOptions_;
+    
+    std::vector<ChannelPtr> serverChannels_;
+
+    Channel::Initializer childInitializer_;
 };
 
 }

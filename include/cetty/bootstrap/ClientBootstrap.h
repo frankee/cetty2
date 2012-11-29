@@ -126,7 +126,7 @@ public:
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ClientBootstrap();
+    ClientBootstrap(const EventLoopPoolPtr& pool);
 
     virtual ~ClientBootstrap() {}
 

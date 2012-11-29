@@ -28,12 +28,12 @@ namespace cetty {
 namespace channel {
 namespace embedded {
 
-template<typename InboundOutT,
-         typename OutboundOutT>
+template<typename InboundOut,
+         typename OutboundOut>
 class EmbeddedMessageChannel
-        : public AbstractEmbeddedChannel<InboundOutT, OutboundOutT> {
+        : public AbstractEmbeddedChannel<InboundOut, OutboundOut> {
 public:
-    typedef ChannelOutboundMessageHandler<OutboundOutT> SinkHandler;
+    typedef ChannelOutboundMessageHandler<OutboundOut> SinkHandler;
 
 public:
     EmbeddedMessageChannel(const ChannelHandlerPtr& handler)
@@ -66,17 +66,17 @@ public:
         return handler->getOutboundMessageQueue();
     }
 
-    OutboundOutT readOutbound() {
+    OutboundOut readOutbound() {
         SinkHandler::MessageQueue& lastOutboundQueue
             = getLastOutboundMessageQueue();
 
         if (!lastOutboundQueue.empty()) {
-            OutboundOutT out = lastOutboundQueue.front();
+            OutboundOut out = lastOutboundQueue.front();
             lastOutboundQueue.pop_front();
             return out;
         }
 
-        return OutboundOutT();
+        return OutboundOut();
     }
 
     template<T>

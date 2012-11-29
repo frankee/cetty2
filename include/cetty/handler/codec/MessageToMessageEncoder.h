@@ -32,8 +32,8 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
+#include <boost/noncopyable.hpp>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
@@ -42,25 +42,48 @@ namespace codec {
 
 using namespace cetty::channel;
 
-template<typename OutboundInT, typename OutboundOutT>
-class MessageToMessageEncoder
-        : public ChannelOutboundMessageHandler<OutboundInT> {
-protected:
-    using ChannelOutboundMessageHandler<OutboundInT>::outboundQueue;
+template<typename OutboundIn, typename OutboundOut>
+class MessageToMessageEncoder :private boost::noncopyable {
+public:
+    typedef MessageToMessageEncoder<OutboundIn, OutboundOut> Self;
+    typedef boost::shared_ptr<Self> Ptr;
+
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef typename OutboundContainer::MessageQueue OutboundMessageQueue;
+
+    typedef ChannelMessageHandlerContext<
+    Self,
+    VoidMessage,
+    VoidMessage,
+    OutboundIn,
+    OutboundOut,
+    VoidMessageContainer,
+    VoidMessageContainer,
+    OutboundContainer,
+    ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > Context;
 
 public:
     virtual ~MessageToMessageEncoder() {}
 
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        outboundTransfer.setContext(ctx);
+    virtual void registerTo(Context& ctx) {
+        context_ = &ctx;
+
+        ctx.setFlushFunctor(boost::bind(
+                                &Self::flush,
+                                this,
+                                _1,
+                                _2));
     }
 
-protected:
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future) {
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future) {
+
+        OutboundMessageQueue& outboundQueue =
+            context_->outboundContainer()->getMessages();
+
         while (!outboundQueue.empty()) {
             try {
-                OutboundInT& msg = outboundQueue.front();
+                OutboundIn& msg = outboundQueue.front();
 
                 if (!msg) {
                     break;
@@ -72,7 +95,7 @@ protected:
                     continue;
                 }
 
-                OutboundOutT omsg = encode(ctx, msg);
+                OutboundOut omsg = encode(ctx, msg);
 
                 if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
@@ -81,7 +104,7 @@ protected:
                     continue;
                 }
 
-                outboundTransfer.unfoldAndAdd(omsg);
+                context_->outboundTransfer()->unfoldAndAdd(omsg);
 
                 outboundQueue.pop_front();
             }
@@ -101,16 +124,15 @@ protected:
      *
      * @param msg the message
      */
-    virtual bool isEncodable(const OutboundInT& msg) {
+    virtual bool isEncodable(const OutboundIn& msg) {
         return true;
     }
 
-    virtual OutboundOutT encode(ChannelHandlerContext& ctx,
-                                const OutboundInT& msg) = 0;
+    virtual OutboundOut encode(ChannelHandlerContext& ctx,
+                               const OutboundIn& msg) = 0;
 
 protected:
-    typedef ChannelOutboundMessageHandlerContext<OutboundOutT> NextOutboundContext;
-    ChannelMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+    Context* context_;
 };
 
 }

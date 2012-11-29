@@ -23,10 +23,10 @@
 namespace cetty {
 namespace channel {
 
-template<typename OutboundInT>
+template<typename OutboundIn>
 class CombinedChannelBufferMessageHandlerContext
     : public ChannelInboundBufferHandlerContext,
-      public ChannelOutboundMessageHandlerContext<OutboundInT> {
+      public ChannelOutboundMessageHandlerContext<OutboundIn> {
 public:
     CombinedChannelBufferMessageHandlerContext(const std::string& name,
                                  ChannelPipeline& pipeline,
@@ -35,8 +35,8 @@ public:
                                  ChannelHandlerContext* next)
         : ChannelHandlerContext(name, pipeline, handler, prev, next),
           ChannelInboundBufferHandlerContext(name, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, pipeline, handler, prev, next) {
-        ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
+          ChannelOutboundMessageHandlerContext<OutboundIn>(name, pipeline, handler, prev, next) {
+        ChannelOutboundMessageHandlerContext<OutboundIn>::hasOutboundMessageHandler = true;
     }
 
     CombinedChannelBufferMessageHandlerContext(const std::string& name,
@@ -47,8 +47,8 @@ public:
                                  ChannelHandlerContext* next)
         : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next),
           ChannelInboundBufferHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, eventLoop, pipeline, handler, prev, next) {
-        ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
+          ChannelOutboundMessageHandlerContext<OutboundIn>(name, eventLoop, pipeline, handler, prev, next) {
+        ChannelOutboundMessageHandlerContext<OutboundIn>::hasOutboundMessageHandler = true;
     }
 
     virtual ~CombinedChannelBufferMessageHandlerContext() {}

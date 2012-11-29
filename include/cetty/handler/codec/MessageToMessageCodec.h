@@ -23,10 +23,10 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-template<InboundInT, InboundOutT, OutboundInT, OutboundOutT>
+template<InboundIn, InboundOut, OutboundIn, OutboundOut>
 class MessageToMessageCodec
-    : public MessageToMessageDecoder<InboundInT, InboundOutT>,
-      public MessageToMessageEncoder<OutboundInT, OutboundOutT> {
+    : public MessageToMessageDecoder<InboundIn, InboundOut>,
+      public MessageToMessageEncoder<OutboundIn, OutboundOut> {
 
 public:
     MessageToMessageCodec() {}

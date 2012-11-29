@@ -34,7 +34,7 @@ using namespace cetty::channel;
 AsioServerSocketChannel::AsioServerSocketChannel(
     const EventLoopPtr& eventLoop,
     const EventLoopPoolPtr& childEventLoopPool)
-    : Channel(shared_from_this(), eventLoop),
+    : Channel(ChannelPtr(), eventLoop),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       acceptor_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       childServicePool_(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),

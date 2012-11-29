@@ -30,7 +30,6 @@
 
 namespace cetty {
 namespace channel {
-namespace socket {
 namespace asio {
 
 using namespace boost::asio::ip;
@@ -168,7 +167,6 @@ private:
 typedef AsioSocketAddressImpl<tcp> AsioTcpSocketAddressImpl;
 typedef AsioSocketAddressImpl<udp> AsioUdpSocketAddressImpl;
 
-}
 }
 }
 }

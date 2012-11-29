@@ -46,9 +46,6 @@ public:
     ProtobufServiceMessageDecoder() {}
     virtual ~ProtobufServiceMessageDecoder() {}
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
-
     static int decode(const ChannelBufferPtr& buffer,
                       const ProtobufServiceMessagePtr& message);
 

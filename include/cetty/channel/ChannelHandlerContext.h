@@ -217,19 +217,31 @@ public:
      * Returns the {@link EventLoop} that the {@link ChannelHandler}
      * belongs to.
      */
-    const EventLoopPtr& eventLoop() const;
+    const EventLoopPtr& eventLoop() const {
+        return eventLoop_;
+    }
 
     /**
      * Returns the name of the {@link ChannelHandler} in the
      * {@link ChannelPipeline}.
      */
-    const std::string& name() const;
+    const std::string& name() const {
+        return name_;
+    }
 
-    ChannelHandlerContext* next() const;
-    ChannelHandlerContext* before() const;
+    ChannelHandlerContext* next() const {
+        return next_;
+    }
+    ChannelHandlerContext* before() const {
+        return before_;
+    }
 
-    virtual void setNext(ChannelHandlerContext* ctx);
-    virtual void setBefore(ChannelHandlerContext* ctx);
+    virtual void setNext(ChannelHandlerContext* ctx) {
+        next_ = ctx;
+    }
+    virtual void setBefore(ChannelHandlerContext* ctx) {
+        before_ = ctx;
+    }
 
     /**
      * Returns the next outbound context of this context object, excluding this context.

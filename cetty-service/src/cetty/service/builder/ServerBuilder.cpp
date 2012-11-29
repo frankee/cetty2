@@ -18,8 +18,7 @@
 
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/asio/AsioServicePool.h>
-#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
-#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/Logger.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -43,8 +42,8 @@ namespace service {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
-using namespace cetty::bootstrap;
+using namespace cetty::channel::asio;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::logging;
@@ -155,13 +154,13 @@ ServerBuilder::~ServerBuilder() {
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelPipelinePtr& pipeline,
+                                const Channel::Initializer& pipeline,
                                 int port) {
     return build(name, pipeline, std::string(), port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelPipelinePtr& pipeline,
+                                const Channel::Initializer& pipeline,
                                 const std::string& host,
                                 int port) {
     if (name.empty()) {
@@ -169,9 +168,9 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return ChannelPtr();
     }
 
-    ServerBootstrap* bootstrap = new ServerBootstrap(
-        new AsioServerSocketChannelFactory(parentEventLoopPool,
-                                           childEventLoopPool));
+    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(
+        parentEventLoopPool, childEventLoopPool);
+
     bootstraps.insert(std::make_pair(name, bootstrap));
 
     //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
@@ -180,7 +179,8 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
     bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setPipeline(pipeline);
+    bootstrap->setChildInitializer(pipeline);
+    //bootstrap->setPipeline(pipeline);
 
     ChannelFuturePtr future;
 
@@ -192,7 +192,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (future->await()->isSuccess()) {
-        return future->channel();
+        return future->sharedChannel();
     }
     else {
         return ChannelPtr();
@@ -200,11 +200,13 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name, int port) {
-    ChannelPipelinePtr pipeline = getPipeline(name);
-
-    if (pipeline) {
-        return build(name, pipeline, port);
-    }
+//     ChannelPipelinePtr pipeline = getPipeline(name);
+// 
+//     if (pipeline) {
+//         return build(name, pipeline, port);
+//     }
+// 
+//     return ChannelPtr();
 
     return ChannelPtr();
 }
@@ -267,56 +269,47 @@ void ServerBuilder::waitingForExit() {
 }
 
 void ServerBuilder::buildAll() {
-    std::size_t j = config.servers.size();
-
-    for (std::size_t i = 0; i < j; ++i) {
-        const ServerBuilderConfig::Server& server = *config.servers[i];
-
-        if (!server.pipeline.empty()) {
-            ChannelPipelinePtr pipeline = getPipeline(server.pipeline);
-
-            if (server.host.empty()) {
-                build(server.pipeline, pipeline, server.port);
-            }
-            else {
-                build(server.pipeline, pipeline, server.host, server.port);
-            }
-        }
-        else {
-            LOG_WARN << "has no pipeline config, will not start the server.";
-        }
-    }
+//     std::size_t j = config.servers.size();
+// 
+//     for (std::size_t i = 0; i < j; ++i) {
+//         const ServerBuilderConfig::Server& server = *config.servers[i];
+// 
+//         if (!server.pipeline.empty()) {
+//             ChannelPipelinePtr pipeline = getPipeline(server.pipeline);
+// 
+//             if (server.host.empty()) {
+//                 build(server.pipeline, pipeline, server.port);
+//             }
+//             else {
+//                 build(server.pipeline, pipeline, server.host, server.port);
+//             }
+//         }
+//         else {
+//             LOG_WARN << "has no pipeline config, will not start the server.";
+//         }
+//     }
 }
 
 void ServerBuilder::getBuiltServers(std::map<std::string, ChannelPtr>* names) {
 
 }
 
-void ServerBuilder::registerPipeline(const std::string& name,
-                                     const ChannelPipelinePtr& pipeline) {
-    if (!name.empty()) {
-        pipelines[name] = pipeline;
-    }
-}
+// void ServerBuilder::registerPipeline(const std::string& name,
+//                                      const ChannelPipelinePtr& pipeline) {
+//     if (!name.empty()) {
+//         pipelines[name] = pipeline;
+//     }
+// }
 
-void ServerBuilder::unregisterPipeline(const std::string& name) {
-    std::map<std::string, ChannelPipelinePtr>::iterator itr =
-        pipelines.find(name);
+// void ServerBuilder::unregisterPipeline(const std::string& name) {
+//     std::map<std::string, ChannelPipelinePtr>::iterator itr =
+//         pipelines.find(name);
+// 
+//     if (itr != pipelines.end()) {
+//         pipelines.erase(itr);
+//     }
+// }
 
-    if (itr != pipelines.end()) {
-        pipelines.erase(itr);
-    }
-}
-
-cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string& name) {
-    std::map<std::string, ChannelPipelinePtr>::iterator itr = pipelines.find(name);
-
-    if (itr != pipelines.end()) {
-        return itr->second;
-    }
-
-    return ChannelPipelinePtr();
-}
 
 }
 }

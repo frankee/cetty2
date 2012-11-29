@@ -64,7 +64,7 @@ public:
 
     void messageUpdated(ChannelHandlerContext& ctx) {
         const ChannelBufferPtr& buffer =
-            context_->inboundInContainer()->getMessages();
+            context_->inboundContainer()->getMessages();
 
         if (buffer) {
             context_->outboundTransfer()->write(

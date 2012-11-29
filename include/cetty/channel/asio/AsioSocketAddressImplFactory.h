@@ -27,7 +27,6 @@ class io_service;
 
 namespace cetty {
 namespace channel {
-namespace socket {
 namespace asio {
 
 class AsioTcpSocketAddressImplFactory : public ::cetty::channel::SocketAddressImplFactory {
@@ -64,7 +63,6 @@ private:
     boost::asio::io_service& ioService;
 };
 
-}
 }
 }
 }

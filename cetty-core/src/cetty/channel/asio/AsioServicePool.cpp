@@ -128,7 +128,7 @@ bool AsioServicePool::start() {
     return true;
 }
 
-void cetty::channel::socket::asio::AsioServicePool::waitForStop() {
+void AsioServicePool::waitForStop() {
     if (mainThread) {
         return;
     }

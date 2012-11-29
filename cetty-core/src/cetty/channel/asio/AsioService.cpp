@@ -37,7 +37,7 @@ TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp,
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, timestamp);
 
-        timeout->getTimer().async_wait(boost::bind(
+        timeout->timer().async_wait(boost::bind(
                                            &AsioService::timerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
@@ -59,7 +59,7 @@ TimeoutPtr AsioService::runAfter(int64_t millisecond,
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, millisecond);
 
-        timeout->getTimer().async_wait(boost::bind(
+        timeout->timer().async_wait(boost::bind(
                                            &AsioService::timerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
@@ -81,7 +81,7 @@ TimeoutPtr AsioService::runEvery(int64_t millisecond,
         AsioDeadlineTimeoutPtr timeout
             = new AsioDeadlineTimeout(ioService, millisecond);
 
-        timeout->getTimer().async_wait(boost::bind(
+        timeout->timer().async_wait(boost::bind(
                                            &AsioService::repeatTimerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
@@ -126,7 +126,7 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
             = new AsioDeadlineTimeout(ioService, millisecond);
 
         boost::system::error_code code;
-        boost::asio::deadline_timer& timer = newTimeout->getTimer();
+        boost::asio::deadline_timer& timer = newTimeout->timer();
         timer.expires_from_now(
             boost::posix_time::milliseconds(millisecond),
             code);

@@ -33,9 +33,9 @@ namespace embedded {
  * EmbeddedBufferChannel which OutboundOutT is ChannelBufferPtr type,
  * and its sink handler is ChannelOutboundBufferHandler using the default one in Channel Pipeline.
  */
-template<typename InboundOutT>
+template<typename InboundOut>
 class EmbeddedBufferChannel
-        : public AbstractEmbeddedChannel<InboundOutT, ChannelBufferPtr> {
+        : public AbstractEmbeddedChannel<InboundOut, ChannelBufferPtr> {
 public:
     EmbeddedBufferChannel(const ChannelHandlerPtr& handler)
         : AbstractEmbeddedChannel(handler) {

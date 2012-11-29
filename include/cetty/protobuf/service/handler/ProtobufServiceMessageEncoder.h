@@ -42,9 +42,6 @@ public:
     ProtobufServiceMessageEncoder() {}
     virtual ~ProtobufServiceMessageEncoder() {}
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
-
     static void encodeMessage(const ChannelBufferPtr& buffer,
                               const ProtobufServiceMessagePtr& message);
 

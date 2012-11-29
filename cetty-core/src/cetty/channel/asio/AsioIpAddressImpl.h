@@ -51,7 +51,6 @@
 
 namespace cetty {
 namespace channel {
-namespace socket {
 namespace asio {
 
 using namespace cetty::channel;
@@ -159,7 +158,6 @@ private:
     address_type address;
 };
 
-}
 }
 }
 }

@@ -68,9 +68,6 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp">
-      <Filter>protobuf</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp">
       <Filter>protobuf\handler</Filter>
     </ClCompile>
@@ -89,13 +86,13 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp">
       <Filter>protobuf\builder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp">
-      <Filter>protobuf\builder</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufUtil.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\service.pb.cc">
+      <Filter>protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
   </ItemGroup>

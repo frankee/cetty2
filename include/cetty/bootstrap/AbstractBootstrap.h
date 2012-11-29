@@ -20,10 +20,8 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelOption.h>
-#include <cetty/channel/ChannelFactoryPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
-#include <cetty/channel/ChannelPipelineFactoryPtr.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -49,33 +47,33 @@ using namespace cetty::channel;
 template<typename T>
 class AbstractBootstrap {
 public:
-    virtual ~AbstractBootstrap();
+    virtual ~AbstractBootstrap() {}
 
-    T& setLocalAddress(const SocketAddress& localAddress) {
-        localAddress_ = localAddress;
-        return castThis();
-    }
+//     T& setLocalAddress(const SocketAddress& localAddress) {
+//         localAddress_ = localAddress;
+//         return castThis();
+//     }
+// 
+//     /**
+//      * See {@link #localAddress(SocketAddress)}
+//      */
+//     T& setLocalAddress(int port) {
+//         return castThis();
+//     }
+// 
+//     /**
+//      * See {@link #localAddress(SocketAddress)}
+//      */
+//     T& setLocalAddress(const std::string& host, int port) {
+//         return castThis();
+//     }
 
     /**
      * See {@link #localAddress(SocketAddress)}
      */
-    T& setLocalAddress(int port) {
-        return castThis();
-    }
-
-    /**
-     * See {@link #localAddress(SocketAddress)}
-     */
-    T& setLocalAddress(const std::string& host, int port) {
-        return castThis();
-    }
-
-    /**
-     * See {@link #localAddress(SocketAddress)}
-     */
-    T& setLocalAddress(InetAddress host, int port) {
-        return castThis();
-    }
+//     T& setLocalAddress(InetAddress host, int port) {
+//         return castThis();
+//     }
 
     const SocketAddress& localAddress() const {
         return localAddress_;
@@ -146,14 +144,14 @@ public:
     virtual AbstractBootstrap& setOption(const ChannelOption& option,
                                  const ChannelOption::Variant& value) {
         if (value.empty()) {
-            options.erase(option);
+            options_.erase(option);
             LOG_WARN << "setOption, the key ("
                      << option.getName()
                      << ") is empty value, remove from the options.";
         }
         else {
             LOG_DEBUG << "set Option, the key is " << option.getName();
-            options.insert(std::make_pair(option, value));
+            options_.insert(std::make_pair(option, value));
         }
 
         return castThis();
@@ -172,7 +170,7 @@ protected:
      * {@link #setFactory(ChannelFactory)} must be called at once before any
      * I/O operation is requested.
      */
-    AbstractBootstrap();
+    AbstractBootstrap() {}
 
 private:
     T& castThis() {

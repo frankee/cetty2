@@ -34,14 +34,6 @@ using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 
-ChannelHandlerPtr ProtobufServiceMessageDecoder::clone() {
-    return shared_from_this();
-}
-
-std::string ProtobufServiceMessageDecoder::toString() const {
-    return "ProtobufServiceMessageDecoder";
-}
-
 int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
         const ProtobufServiceMessagePtr& message) {
     const google::protobuf::Message* prototype = NULL;

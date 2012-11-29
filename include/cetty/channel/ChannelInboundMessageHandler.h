@@ -17,37 +17,9 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandlerFwd.h>
-#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
-
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT> inline
-ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
-                                     pipeline,
-                                     shared_from_this(),
-                                     prev,
-                                     next);
-}
-
-template<typename InboundInT> inline
-ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
-                                     eventLoop,
-                                     pipeline,
-                                     shared_from_this(),
-                                     prev,
-                                     next);
-}
 
 }
 }

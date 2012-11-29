@@ -99,6 +99,8 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
         return false;
     }
 
+    context->initialize(this);
+
     if (contexts_.empty()) {
         return initWith(context);
     }
@@ -109,7 +111,6 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
 
     ChannelHandlerContext* oldTail = this->tail_;
 
-    context->initialize(this);
     callBeforeAdd(context);
 
     oldTail->setNext(context);

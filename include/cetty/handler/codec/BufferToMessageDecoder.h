@@ -32,9 +32,7 @@
  */
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/DecoderException.h>
 #include <cetty/util/Exception.h>
 
@@ -45,18 +43,47 @@ namespace codec {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-template<typename InboundOutT>
-class BufferToMessageDecoder : public ChannelInboundBufferHandler {
+template<typename InboundOut>
+class BufferToMessageDecoder : private boost::noncopyable {
 public:
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        inboundTransfer.setContext(ctx);
+    typedef BufferToMessageDecoder<InboundOut> Self;
+    typedef boost::shared_ptr<Self> Ptr;
+
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> InboundInContainer;
+    typedef typename InboundInContainer::MessageQueue MessageQueue;
+    
+    typedef ChannelMessageHandlerContext<
+        BufferToMessageDecoder<InboundOut>,
+        ChannelBufferPtr,
+        InboundOut,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferContainer,
+        InboundInContainer,
+        VoidMessageContainer,
+        VoidMessageContainer> Context;
+
+public:
+    virtual void registerTo(Context& ctx) {
+        context_ = &ctx;
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+            &Self::messageUpdated,
+            this,
+            _1));
+
+        ctx.setChannelInactiveCallback(boost::bind(
+            &Self::channelInactive,
+            this,
+            _1));
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+    void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx);
     }
 
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
+    void channelInactive(ChannelHandlerContext& ctx) {
+#if 0
         const ChannelBufferPtr& in = getInboundChannelBuffer();
 
         if (in && in->readable()) {
@@ -77,12 +104,13 @@ public:
         }
 
         ctx.fireChannelInactive();
+#endif
     }
 
-    virtual InboundOutT decode(ChannelHandlerContext& ctx,
+    virtual InboundOut decode(ChannelHandlerContext& ctx,
                                const ChannelBufferPtr& in) = 0;
 
-    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
+    InboundOut decodeLast(ChannelHandlerContext& ctx,
                                    const ChannelBufferPtr& in) {
         return decode(ctx, in);
     }
@@ -118,14 +146,15 @@ public:
 
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
-        const ChannelBufferPtr& in = getInboundChannelBuffer();
+        const ChannelBufferPtr& in =
+            context_->inboundContainer()->getMessages();
 
         bool decoded = false;
 
         for (;;) {
             try {
                 int oldInputLength = in->readableBytes();
-                InboundOutT o = decode(ctx, in);
+                InboundOut o = decode(ctx, in);
 
                 if (!o) {
                     if (oldInputLength == in->readableBytes()) {
@@ -142,7 +171,7 @@ protected:
                     }
                 }
 
-                if (inboundTransfer.unfoldAndAdd(o)) {
+                if (context_->inboundTransfer()->unfoldAndAdd(o)) {
                     decoded = true;
                 }
                 else {
@@ -176,7 +205,7 @@ protected:
     }
 
 protected:
-    ChannelMessageTransfer<InboundOutT, ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
+    Context* context_;
 };
 
 }

@@ -19,36 +19,31 @@
 
 #include <vector>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/AbstractChannel.h>
-#include <cetty/channel/DefaultChannelConfig.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelConfig.h>
 
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ClientServicePtr.h>
-#include <cetty/service/ServiceRequestHandler.h>
+//#include <cetty/service/ServiceRequestHandler.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
 
-class ClientService : public cetty::channel::AbstractChannel {
+class ClientService : public cetty::channel::Channel {
 public:
-    ClientService(const EventLoopPtr& eventLoop,
-                  const ChannelFactoryPtr& factory,
-                  const ChannelPipelinePtr& pipeline);
+    ClientService(const EventLoopPtr& eventLoop);
 
     virtual ~ClientService() {}
 
-    virtual ChannelConfig& config();
-    virtual const ChannelConfig& config() const;
-
-    virtual const SocketAddress& localAddress() const;
-    virtual const SocketAddress& remoteAddress() const;
+    //virtual const SocketAddress& localAddress() const;
+    //virtual const SocketAddress& remoteAddress() const;
 
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
-    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
+    //virtual void setPipeline(const ChannelPipelinePtr& pipeline);
 
 protected:
     virtual void doBind(const SocketAddress& localAddress);
@@ -57,7 +52,6 @@ protected:
 
 protected:
     EventLoopPtr  eventLoop_;
-    DefaultChannelConfig config;
 };
 
 template<typename ReqT, typename RepT>

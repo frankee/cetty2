@@ -22,7 +22,9 @@
  */
 
 #include <boost/optional.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <cetty/channel/ChannelOption.h>
 
 namespace cetty {
 namespace channel {

@@ -95,14 +95,13 @@ Channel::~Channel() {
 }
 
 void Channel::init() {
-    succeededFuture_ = new SucceededChannelFuture(shared_from_this());
-    closeFuture_ = new ChannelCloseFuture(shared_from_this());
+    
 
     if (!id_) {
         id_ = allocateId();
     }
 
-    pipeline_ = new ChannelPipeline(shared_from_this());
+    
 
 #if 0  // FIXME need concurrent hash map
     closeFuture->addListener(
@@ -112,6 +111,10 @@ void Channel::init() {
 
 void Channel::open() {
     ChannelPtr self = shared_from_this();
+
+    succeededFuture_ = new SucceededChannelFuture(self);
+    closeFuture_ = new ChannelCloseFuture(self);
+    pipeline_ = new ChannelPipeline(self);
 
     if (initializer_) {
         initializer_(self);

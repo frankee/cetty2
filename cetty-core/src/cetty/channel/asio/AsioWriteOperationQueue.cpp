@@ -20,9 +20,7 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/CompositeChannelBuffer.h>
-#include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/asio/AsioSocketChannel.h>
 
 namespace cetty {

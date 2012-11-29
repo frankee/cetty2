@@ -43,11 +43,11 @@ public:
     virtual ~ServerBuilder();
 
     ChannelPtr build(const std::string& name,
-                     const ChannelPipelinePtr& pipeline,
+                     const Channel::Initializer& initializer,
                      int port);
 
     ChannelPtr build(const std::string& name,
-                     const ChannelPipelinePtr& pipeline,
+                     const Channel::Initializer& initializer,
                      const std::string& host,
                      int port);
 
@@ -57,10 +57,8 @@ public:
 
     void waitingForExit();
 
-    void registerPipeline(const std::string& name, const ChannelPipelinePtr& pipeline);
-    void unregisterPipeline(const std::string& name);
-
-    ChannelPipelinePtr getPipeline(const std::string& name);
+    //void registerPipeline(const std::string& name, const ChannelPipelinePtr& pipeline);
+    //void unregisterPipeline(const std::string& name);
 
     const ServerBuilderConfig& getConfig() const { return config; }
 
@@ -82,7 +80,7 @@ private:
     EventLoopPoolPtr parentEventLoopPool;
     EventLoopPoolPtr childEventLoopPool;
 
-    std::map<std::string, ChannelPipelinePtr> pipelines;
+    //std::map<std::string, ChannelPipelinePtr> pipelines;
     std::map<std::string, ServerBootstrap*> bootstraps;
 };
 

@@ -43,23 +43,23 @@ namespace channel {
 
 using namespace cetty::util;
 
-template<typename InboundInT,
-         typename InboundOutT,
-         typename OutboundInT,
-         typename OutboundOutT,
+template<typename InboundIn,
+         typename InboundOut,
+         typename OutboundIn,
+         typename OutboundOut,
          // may be the ChannelOutboundMessageHandlerContext<OutboundOutT>
          // or be the ChannelOutboundBufferHandlerContext
-         typename OutboundContext = ChannelOutboundMessageHandlerContext<OutboundOutT> >
+         typename OutboundContext = ChannelOutboundMessageHandlerContext<OutboundOut> >
 class CombinedChannelMessageHandler
-        : public ChannelMessageHandler<InboundInT, OutboundInT> {
+        : public ChannelMessageHandler<InboundIn, OutboundIn> {
 public:
-    typedef ChannelInboundMessageHandler<InboundInT> InboundHandler;
-    typedef ChannelOutboundMessageHandler<OutboundInT> OutboundHandler;
+    typedef ChannelInboundMessageHandler<InboundIn> InboundHandler;
+    typedef ChannelOutboundMessageHandler<OutboundIn> OutboundHandler;
 
     typedef boost::intrusive_ptr<InboundHandler> InboundHandlerPtr;
     typedef boost::intrusive_ptr<OutboundHandler> OutboundHandlerPtr;
 
-    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
+    typedef ChannelInboundMessageHandlerContext<InboundOut> NextInboundContext;
     typedef OutboundContext NextOutboundContext;
 
 public:
@@ -152,11 +152,11 @@ public:
         out->flush(ctx, future);
     }
 
-    virtual void addInboundMessage(const InboundInT& message) {
+    virtual void addInboundMessage(const InboundIn& message) {
         in->addInboundMessage(message);
     }
 
-    virtual void addOutboundMessage(const OutboundInT& message) {
+    virtual void addOutboundMessage(const OutboundIn& message) {
         out->addOutboundMessage(message);
     }
 
@@ -184,8 +184,8 @@ protected:
     }
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
-    ChannelPipelineMessageTransfer<OutboundOutT, NextOutboundContext> outboundTransfer;
+    ChannelPipelineMessageTransfer<InboundOut, NextInboundContext> inboundTransfer;
+    ChannelPipelineMessageTransfer<OutboundOut, NextOutboundContext> outboundTransfer;
 
 private:
     OutboundHandlerPtr out;

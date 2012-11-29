@@ -22,6 +22,7 @@
  */
 
 #include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 #include <cetty/channel/ChannelOption.h>
 
 namespace cetty {

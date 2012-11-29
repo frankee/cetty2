@@ -27,14 +27,12 @@ namespace cetty {
 namespace channel {
 namespace asio {
 
-using namespace cetty::channel;
-using namespace cetty::channel::socket;
 using namespace cetty::util;
 using namespace boost::asio::ip;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
     tcp::acceptor& acceptor)
-    : reuseAddress_(true), acceptor(acceptor) {
+    : reuseAddress_(true), acceptor_(acceptor) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
@@ -42,9 +40,9 @@ AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
 
 bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         const ChannelOption::Variant& value) {
-    if (DefaultChannelConfig::setOption(option, value)) {
-        return true;
-    }
+    //if (DefaultChannelConfig::setOption(option, value)) {
+    //    return true;
+    //}
 
     if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));

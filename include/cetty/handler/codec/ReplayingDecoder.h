@@ -25,7 +25,6 @@
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 #include <cetty/handler/codec/DecoderException.h>
 
@@ -298,13 +297,13 @@ using namespace cetty::buffer;
  * @apiviz.has org.jboss.netty.handler.codec.replay.UnreplayableOperationException oneway - - throws
  */
 
-template<typename InboundOutT>
+template<typename InboundOut>
 class ReplayingDecoder
     : public ChannelInboundBufferHandler {
 
 public:
     typedef ChannelInboundBufferHandlerContext Context;
-    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
+    typedef ChannelInboundMessageHandlerContext<InboundOut> NextInboundContext;
 
 public:
     virtual ~ReplayingDecoder() {}
@@ -444,7 +443,7 @@ protected:
 
         while (in->readable()) {
             int oldReaderIndex = checkedPoint = in->readerIndex();
-            InboundOutT result;
+            InboundOut result;
             int oldState = state;
 
             try {
@@ -525,7 +524,7 @@ protected:
      *
      * @return the decoded frame
      */
-    virtual InboundOutT decode(ChannelHandlerContext& ctx,
+    virtual InboundOut decode(ChannelHandlerContext& ctx,
                                const ReplayingDecoderBufferPtr& buffer,
                                int state) = 0;
 
@@ -543,7 +542,7 @@ protected:
      *
      * @return the decoded frame
      */
-    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
+    virtual InboundOut decodeLast(ChannelHandlerContext& ctx,
                                    const ReplayingDecoderBufferPtr& buffer,
                                    int state) {
         return decode(ctx, buffer, state);
@@ -574,7 +573,7 @@ private:
     }
 
 protected:
-    ChannelMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+    ChannelMessageTransfer<InboundOut, NextInboundContext> inboundTransfer;
 
 private:
     bool unfold;

@@ -2,6 +2,11 @@
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 #include "echo.pb.h"
 
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
+
+using namespace cetty::channel;
+
 
 using namespace cetty::config;
 using namespace cetty::protobuf::service::builder;
@@ -29,6 +34,8 @@ public:
 };
 
 }
+
+//class Test : public boost::enable_shared_from_this2
 
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);

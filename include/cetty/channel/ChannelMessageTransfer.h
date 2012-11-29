@@ -92,7 +92,7 @@ public:
 
     bool unfoldAndAdd(const T& msg) {
         if (!container) {
-            container = ctx.nextInboundMessageContainer();
+            container = ctx.nextInboundMessageContainer<MessageContainer>();
         }
 
         if (container && !!msg) {
@@ -126,7 +126,7 @@ public:
 
     bool unfoldAndAdd(const T& msg) {
         if (!container) {
-            container = ctx.nextOutboundMessageContainer<T>();
+            container = ctx.nextOutboundMessageContainer<MessageContainer>();
         }
 
         if (container&& !!msg) {

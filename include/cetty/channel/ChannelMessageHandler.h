@@ -24,10 +24,10 @@
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT, typename OutboundInT>
+template<typename InboundIn, typename OutboundIn>
 class ChannelMessageHandler
-    : public ChannelInboundMessageHandler<InboundInT>,
-      public ChannelOutboundMessageHandler<OutboundInT> {
+    : public ChannelInboundMessageHandler<InboundIn>,
+      public ChannelOutboundMessageHandler<OutboundIn> {
 public:
     virtual ~ChannelMessageHandler() {}
 
@@ -58,7 +58,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
+        return new ChannelMessageHandlerContext<InboundIn, OutboundIn>(name,
                 pipeline,
                 ChannelHandler::shared_from_this(),
                 prev,
@@ -70,7 +70,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
+        return new ChannelMessageHandlerContext<InboundIn, OutboundIn>(name,
                 eventLoop,
                 pipeline,
                 ChannelHandler::shared_from_this(),

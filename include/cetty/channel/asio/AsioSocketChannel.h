@@ -64,8 +64,8 @@ public:
         return ioService_;
     }
 
-    virtual const SocketAddress& localAddress() const;
-    virtual const SocketAddress& remoteAddress() const;
+    //virtual const SocketAddress& localAddress() const;
+    //virtual const SocketAddress& remoteAddress() const;
 
     virtual bool isOpen() const;
     virtual bool isActive() const;

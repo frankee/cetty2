@@ -18,9 +18,6 @@
  */
 
 #include <cetty/Types.h>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
 #include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/service/OutstandingCall.h>

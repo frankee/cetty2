@@ -43,18 +43,18 @@ namespace channel {
 
 using namespace cetty::util;
 
-template<typename InboundOutT, typename OutboundInT = InboundOutT>
+template<typename InboundOut, typename OutboundIn = InboundOut>
 class CombinedChannelBufferMessageHandler
     : public ChannelInboundBufferHandler,
-      public ChannelOutboundMessageHandler<OutboundInT> {
+      public ChannelOutboundMessageHandler<OutboundIn> {
 public:
     typedef ChannelInboundBufferHandler InboundHandler;
-    typedef ChannelOutboundMessageHandler<OutboundInT> OutboundHandler;
+    typedef ChannelOutboundMessageHandler<OutboundIn> OutboundHandler;
 
     typedef boost::intrusive_ptr<InboundHandler> InboundHandlerPtr;
     typedef boost::intrusive_ptr<OutboundHandler> OutboundHandlerPtr;
 
-    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
+    typedef ChannelInboundMessageHandlerContext<InboundOut> NextInboundContext;
     typedef ChannelOutboundBufferHandlerContext NextOutboundContext;
 
 public:
@@ -151,7 +151,7 @@ public:
         in->setInboundChannelBuffer(buffer);
     }
 
-    virtual void addOutboundMessage(const OutboundInT& message) {
+    virtual void addOutboundMessage(const OutboundIn& message) {
         out->addOutboundMessage(message);
     }
 
@@ -159,7 +159,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new CombinedChannelBufferMessageHandlerContext<OutboundInT>(name,
+        return new CombinedChannelBufferMessageHandlerContext<OutboundIn>(name,
                 pipeline,
                 ChannelHandler::shared_from_this(),
                 prev,
@@ -171,7 +171,7 @@ public:
             ChannelPipeline& pipeline,
             ChannelHandlerContext* prev,
             ChannelHandlerContext* next) {
-        return new CombinedChannelBufferMessageHandlerContext<OutboundInT>(name,
+        return new CombinedChannelBufferMessageHandlerContext<OutboundIn>(name,
                 eventLoop,
                 pipeline,
                 ChannelHandler::shared_from_this(),
@@ -213,7 +213,7 @@ protected:
     }
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
+    ChannelPipelineMessageTransfer<InboundOut, NextInboundContext> inboundTransfer;
     ChannelPipelineMessageTransfer<ChannelBufferPtr, NextOutboundContext> outboundTransfer;
 
 private:

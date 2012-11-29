@@ -148,17 +148,17 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
     else {
         close();
 
-//         if (pipeline_ && pipeline_->attached()) {
-//             LOG_WARN << "handleRead Error : " << error.value()
-//                      << " msg: \"" << error.message()
-//                      << "\" then close the channel.";
-//             
-//         }
-//         else {
-//             LOG_WARN << "handleRead Error : " << error.value()
-//                      << " msg: \"" << error.message()
-//                      << "\" closed by self, do nothing.";
-//         }
+        //         if (pipeline_ && pipeline_->attached()) {
+        //             LOG_WARN << "handleRead Error : " << error.value()
+        //                      << " msg: \"" << error.message()
+        //                      << "\" then close the channel.";
+        //
+        //         }
+        //         else {
+        //             LOG_WARN << "handleRead Error : " << error.value()
+        //                      << " msg: \"" << error.message()
+        //                      << "\" closed by self, do nothing.";
+        //         }
     }
 }
 
@@ -239,11 +239,11 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
 
         tcp::endpoint endpoint = *endpointIterator;
         tcpSocket_.async_connect(endpoint,
-                                boost::bind(&AsioSocketChannel::handleConnect,
-                                            this,
-                                            boost::asio::placeholders::error,
-                                            ++endpointIterator,
-                                            cf));
+                                 boost::bind(&AsioSocketChannel::handleConnect,
+                                             this,
+                                             boost::asio::placeholders::error,
+                                             ++endpointIterator,
+                                             cf));
     }
     else {
         LOG_ERROR << "failed to connect to remote server "
@@ -411,7 +411,7 @@ void AsioSocketChannel::doClose() {
 void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                 const ChannelFuturePtr& future) {
 
-                                    ChannelBufferPtr buffer = context_->outboundInContainer()->getMessages();
+    const ChannelBufferPtr& buffer = context_->outboundContainer()->getMessages();
 
     if (!isActive()) {
         LOG_WARN << "sending the msg, but the socket is disconnected, clean up write buffer.";
@@ -433,10 +433,10 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
         LOG_WARN << "write an empty message, do not write to the socket,\
                              just post a handleWrite operation.";
         ioService_->service().post(boost::bind(
-                                      &AsioSocketChannel::handleWrite,
-                                      this,
-                                      boost::system::error_code(),
-                                      0));
+                                       &AsioSocketChannel::handleWrite,
+                                       this,
+                                       boost::system::error_code(),
+                                       0));
         return;
     }
 
@@ -467,7 +467,7 @@ void AsioSocketChannel::init() {
 
     //     pipeline->setSinkHandler(new AsioSocketChannelSinkHandler);
     //     pipeline->attach(shared_from_this());
-    // 
+    //
     //     opened_ = true;
 }
 

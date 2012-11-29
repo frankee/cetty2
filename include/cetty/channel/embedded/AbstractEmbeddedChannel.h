@@ -41,14 +41,14 @@ namespace embedded {
 
 using namespace cetty::channel;
 
-template<typename InboundOutT,
-         typename OutboundOutT>
+template<typename InboundOut,
+         typename OutboundOut>
 class AbstractEmbeddedChannel : public AbstractChannel {
 public:
     friend class LastInboundMessageHandler;
     friend class LastInboundBufferHandler;
 
-    class LastInboundMessageHandler : public ChannelInboundMessageHandler<InboundOutT> {
+    class LastInboundMessageHandler : public ChannelInboundMessageHandler<InboundOut> {
     public:
         LastInboundMessageHandler(AbstractEmbeddedChannel& channel)
             : channel(channel) {
@@ -216,7 +216,7 @@ public:
         return hasInboundOut();
     }
 
-    bool readInbound(InboundOutT* inboundOut) {
+    bool readInbound(InboundOut* inboundOut) {
         if (lastInboundMessageQueue && !lastInboundMessageQueue->empty()) {
             *inboundOut = lastInboundMessageQueue->front();
             lastInboundMessageQueue->pop_front();

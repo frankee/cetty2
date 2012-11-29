@@ -63,10 +63,10 @@ public:
         }
     }
 
-    InboundInContainer* inboundInContainer() {
+    InboundInContainer* inboundContainer() {
         return &inboundContainer_;
     }
-    OutboundInContainer* outboundInContainer() {
+    OutboundInContainer* outboundContainer() {
         return &outboundContainer_;
     }
 
@@ -83,10 +83,12 @@ public:
     }
 
     virtual void setNext(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext::setNext(ctx);
         outboundTransfer_.resetNextContainer();
     }
 
     virtual void setBefore(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext::setBefore(ctx);
         inboundTransfer_.resetNextContainer();
     }
 
@@ -155,13 +157,14 @@ public:
         return boost::any();
     }
 
-    VoidMessageContainer* inboundInContainer() { return NULL; }
-    VoidMessageContainer* outboundInContainer() { return NULL; }
+    VoidMessageContainer* inboundContainer() { return NULL; }
+    VoidMessageContainer* outboundContainer() { return NULL; }
 
     InboundTransfer* inboundTransfer() { return NULL; }
     OutboundTransfer* outboundTransfer() { return NULL; }
 };
 
+#if 0
 template<typename H,
          typename InboundIn,
          typename InboundOut,
@@ -230,8 +233,8 @@ public:
         return boost::any(&outboundTransfer_);
     }
 
-    InboundInContainer* inboundInContainer() { return &inboundContainer_; }
-    OutboundInContainer* outboundInContainer() { return &outboundContainer_; }
+    InboundInContainer* inboundContainer() { return &inboundContainer_; }
+    OutboundInContainer* outboundContainer() { return &outboundContainer_; }
 
     InboundTransfer* inboundTransfer() { return &inboundTransfer_; }
     OutboundTransfer* outboundTransfer() { return &outboundTransfer_; }
@@ -244,7 +247,6 @@ private:
     OutboundTransfer outboundTransfer_;
 };
 
-#if 0
 template<typename Handler, typename InboundOut>
 class ChannelMessageHandlerContext<Handler, ChannelBufferPtr, InboundOut, VoidMessage, VoidMessage> {
 public:

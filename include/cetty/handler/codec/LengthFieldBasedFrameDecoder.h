@@ -313,8 +313,6 @@ public:
 
     virtual ~LengthFieldBasedFrameDecoder() {}
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
 
 protected:
     virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
@@ -338,8 +336,6 @@ protected:
     ChannelBufferPtr extractFrame(const ChannelBufferPtr& buffer, int index, int length);
 
 private:
-    LengthFieldBasedFrameDecoder(const LengthFieldBasedFrameDecoder& decoder);
-
     void fail(ChannelHandlerContext& ctx, int frameLength);
     void validateParameters();
 
