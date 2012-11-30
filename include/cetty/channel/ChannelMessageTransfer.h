@@ -83,7 +83,8 @@ public:
 
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
-        : ctx(ctx) {
+        : ctx(ctx),
+          container() {
     }
 
     void resetNextContainer() {
@@ -118,7 +119,10 @@ public:
     typedef ChannelMessageContainer<T> MessageContainer;
 
 public:
-    ChannelMessageTransfer(ChannelHandlerContext& ctx) : ctx(ctx) {}
+    ChannelMessageTransfer(ChannelHandlerContext& ctx)
+        : ctx(ctx),
+          container() {
+    }
 
     void resetNextContainer() {
         container = NULL;
@@ -151,7 +155,10 @@ private:
 template<>
 class ChannelMessageTransfer<ChannelBufferPtr, ChannelBufferContainer, TRANSFER_INBOUND> {
 public:
-    ChannelMessageTransfer(ChannelHandlerContext& ctx) : ctx(ctx) {}
+    ChannelMessageTransfer(ChannelHandlerContext& ctx)
+        : ctx(ctx),
+          container() {
+    }
 
     void resetNextContainer() {
         container = NULL;
@@ -182,7 +189,10 @@ private:
 template<>
 class ChannelMessageTransfer<ChannelBufferPtr, ChannelBufferContainer, TRANSFER_OUTBOUND> {
 public:
-    ChannelMessageTransfer(ChannelHandlerContext& ctx) : ctx(ctx) {}
+    ChannelMessageTransfer(ChannelHandlerContext& ctx)
+        : ctx(ctx),
+          container() {
+    }
 
     void resetNextContainer() {
         container = NULL;
@@ -216,7 +226,8 @@ private:
 template<typename T, typename U, int TransferType>
 class ChannelMessageTransfer<std::vector<T>, U, TransferType> {
 public:
-    ChannelMessageTransfer() : ctx() {}
+    ChannelMessageTransfer()
+        : ctx() {}
 
     void resetNextContainer() {
         container = NULL;

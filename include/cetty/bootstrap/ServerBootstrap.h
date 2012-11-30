@@ -23,9 +23,9 @@
 
 #include <deque>
 
-#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/SocketAddress.h>
 
 #include <cetty/bootstrap/AbstractBootstrap.h>
 
@@ -198,6 +198,10 @@ public:
     ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer) {
         childInitializer_ = initializer;
         return *this;
+    }
+
+    const Channel::Initializer& childInitializer() {
+        return childInitializer_;
     }
 
     /**

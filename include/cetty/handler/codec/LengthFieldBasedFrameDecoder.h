@@ -197,7 +197,9 @@ using namespace cetty::channel;
  *
  * @see LengthFieldPrepender
  */
-class LengthFieldBasedFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
+class LengthFieldBasedFrameDecoder
+    : public BufferToMessageDecoder<LengthFieldBasedFrameDecoder, ChannelBufferPtr> {
+
 public:
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 

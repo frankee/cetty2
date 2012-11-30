@@ -35,11 +35,60 @@
 
 #include <cetty/logging/LoggerHelper.h>
 
+#include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
+#include <cetty/handler/codec/LengthFieldPrepender.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
+#include <cetty/protobuf/service/ProtobufUtil.h>
+
 namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
 using namespace cetty::util;
+
+
+using namespace cetty::handler::codec;
+using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::service::handler;
+
+bool initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<LengthFieldBasedFrameDecoder>("frameDecoder",
+        LengthFieldBasedFrameDecoder::Ptr(
+        new LengthFieldBasedFrameDecoder(
+        16 * 1024 * 1024,
+        0,
+        4,
+        0,
+        4,
+        4,
+        ProtobufUtil::adler32Checksum)));
+
+    pipeline.addLast<LengthFieldPrepender::Self>("frameEncoder",
+        LengthFieldPrepender::Ptr(new LengthFieldPrepender(
+        4,
+        4,
+        ProtobufUtil::adler32Checksum)));
+
+    //pipeline->addLast("protoCodec", new ProtobufServiceCodec);
+    pipeline.addLast<ProtobufServiceMessageDecoder::Self>(
+        "protobufDecoder",
+        ProtobufServiceMessageDecoder::Ptr(new ProtobufServiceMessageDecoder()));
+
+    pipeline.addLast<ProtobufServiceMessageEncoder::Self>(
+        "protobufEncoder",
+        ProtobufServiceMessageEncoder::Ptr(new ProtobufServiceMessageEncoder()));
+
+    pipeline.addLast<ProtobufServiceMessageHandler>(
+        "messageHandler",
+        ProtobufServiceMessageHandlerPtr(new ProtobufServiceMessageHandler()));
+
+    return true;
+}
 
 class Acceptor : private boost::noncopyable {
 public:
@@ -76,7 +125,9 @@ public:
     }
 
     void messageUpdated(ChannelHandlerContext& ctx) {
-        InboundQueue& inboundQueue = context_->inboundContainer()->getMessages();
+
+        InboundQueue& inboundQueue = ctx.inboundMessageContainer<InboundContainer>()->getMessages();
+        //InboundQueue& inboundQueue = context_->inboundContainer()->getMessages();
 
         while (!inboundQueue.empty()) {
             const ChannelPtr& child = inboundQueue.front();
@@ -85,15 +136,21 @@ public:
                 break;
             }
 
-            const ChannelOption::Options& childOptions =
-                bootstrap_.getChildOptions();
+            child->setInitializer(boost::bind(
+                initializeChannel,
+                _1));
 
-            ChannelOption::Options::const_iterator itr = childOptions.begin();
-            for (; itr != childOptions.end(); ++itr) {
-                if (!child->config().setOption(itr->first, itr->second)) {
-                    //logger.warn("Unknown channel option: " + e);
-                }
-            }
+            //child->setInitializer(bootstrap_.childInitializer());
+
+//             const ChannelOption::Options& childOptions =
+//                 bootstrap_.getChildOptions();
+// 
+//             ChannelOption::Options::const_iterator itr = childOptions.begin();
+//             for (; itr != childOptions.end(); ++itr) {
+//                 if (!child->config().setOption(itr->first, itr->second)) {
+//                     //logger.warn("Unknown channel option: " + e);
+//                 }
+//             }
 
             inboundQueue.pop_front();
         }

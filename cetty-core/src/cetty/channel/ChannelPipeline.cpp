@@ -572,10 +572,10 @@ void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
 }
 
 void ChannelPipeline::fireMessageUpdated() {
-    if (!firedChannelActive_) {
-        fireMessageUpdatedOnActivation_ = true;
-        return;
-    }
+//     if (!firedChannelActive_) {
+//         fireMessageUpdatedOnActivation_ = true;
+//         return;
+//     }
 
     if (head_) {
         head_->fireMessageUpdated(*head_);

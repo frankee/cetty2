@@ -43,27 +43,31 @@ namespace codec {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-template<typename InboundOut>
+template<typename H, typename InboundOut>
 class BufferToMessageDecoder : private boost::noncopyable {
 public:
-    typedef BufferToMessageDecoder<InboundOut> Self;
-    typedef boost::shared_ptr<Self> Ptr;
+    typedef H Self;
+    typedef boost::shared_ptr<H> Ptr;
 
-    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> InboundInContainer;
-    typedef typename InboundInContainer::MessageQueue MessageQueue;
-    
+    typedef ChannelMessageContainer<ChannelBufferPtr, MESSAGE_STREAM> InboundContainer;
+    typedef ChannelMessageTransfer<InboundOut,
+        ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+        TRANSFER_INBOUND> InboundTransfer;
+
     typedef ChannelMessageHandlerContext<
-        BufferToMessageDecoder<InboundOut>,
+        Self,
         ChannelBufferPtr,
         InboundOut,
         VoidMessage,
         VoidMessage,
         ChannelBufferContainer,
-        InboundInContainer,
+        ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>,
         VoidMessageContainer,
         VoidMessageContainer> Context;
 
 public:
+    virtual ~BufferToMessageDecoder() {}
+
     virtual void registerTo(Context& ctx) {
         context_ = &ctx;
 
@@ -147,7 +151,8 @@ public:
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
         const ChannelBufferPtr& in =
-            context_->inboundContainer()->getMessages();
+            ctx.inboundMessageContainer<InboundContainer>()->getMessages();
+            //context_->inboundContainer()->getMessages();
 
         bool decoded = false;
 
@@ -171,6 +176,7 @@ protected:
                     }
                 }
 
+                //if (ctx.inboundMessageTransfer<InboundTransfer>()->unfoldAndAdd(o)) {
                 if (context_->inboundTransfer()->unfoldAndAdd(o)) {
                     decoded = true;
                 }

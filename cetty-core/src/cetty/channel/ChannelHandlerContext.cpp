@@ -102,7 +102,7 @@ void ChannelHandlerContext::fireChannelInactive() {
     ChannelHandlerContext* next = next_;
 
     do {
-        if (next->channelOpenCallback_) {
+        if (next->channelInactiveCallback_) {
             fireChannelInactive(*next);
             break;
         }
@@ -156,7 +156,7 @@ void ChannelHandlerContext::fireChannelActive() {
     ChannelHandlerContext* next = next_;
 
     do {
-        if (next->channelOpenCallback_) {
+        if (next->channelActiveCallback_) {
             fireChannelActive(*next);
             break;
         }
@@ -210,7 +210,7 @@ void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
     ChannelHandlerContext* next = next_;
 
     do {
-        if (next->channelOpenCallback_) {
+        if (next->exceptionCallback_) {
             fireExceptionCaught(*next, cause);
             break;
         }
@@ -270,7 +270,7 @@ void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
     ChannelHandlerContext* next = next_;
 
     do {
-        if (next->channelOpenCallback_) {
+        if (next->userEventCallback_) {
             fireUserEventTriggered(*next, evt);
             break;
         }
@@ -326,7 +326,7 @@ void ChannelHandlerContext::fireMessageUpdated() {
     ChannelHandlerContext* next = next_;
 
     do {
-        if (next->channelOpenCallback_) {
+        if (next->channelMessageUpdatedCallback_) {
             fireMessageUpdated(*next);
             break;
         }
@@ -454,7 +454,7 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remo
     ChannelHandlerContext* before = before_;
 
     do {
-        if (before->bindFunctor_) {
+        if (before->connectFunctor_) {
             return connect(*before, remoteAddress, localAddress, future);
             break;
         }
@@ -526,7 +526,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr
     ChannelHandlerContext* before = before_;
 
     do {
-        if (before->bindFunctor_) {
+        if (before->disconnectFunctor_) {
             return disconnect(*before, future);
             break;
         }
@@ -595,7 +595,7 @@ const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& fut
     ChannelHandlerContext* before = before_;
 
     do {
-        if (before->bindFunctor_) {
+        if (before->closeFunctor_) {
             return close(*before, future);
             break;
         }
@@ -657,7 +657,7 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& fut
     ChannelHandlerContext* before = before_;
 
     do {
-        if (before->bindFunctor_) {
+        if (before->flushFunctor_) {
             return flush(*before, future);
             break;
         }
@@ -771,6 +771,8 @@ void ChannelHandlerContext::initialize(ChannelPipeline* pipeline) {
     if (!eventLoop_) {
         eventLoop_ = pipeline_->eventLoop();
     }
+
+    onInitialized();
 }
 
 }

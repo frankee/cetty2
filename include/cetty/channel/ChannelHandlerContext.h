@@ -266,12 +266,44 @@ public:
 public:
     virtual boost::any getInboundMessageContainer() = 0;
     virtual boost::any getOutboundMessageContainer() = 0;
+    
+    virtual boost::any getInboundMessageTransfer() = 0;
+    virtual boost::any getOutboundMessageTransfer() = 0;
+
+    template<typename T>
+    T* inboundMessageTransfer() {
+        boost::any transfer = getInboundMessageTransfer();
+        if (!transfer.empty()) {
+            T** t = boost::any_cast<T*>(&transfer);
+            if (t) {
+                return *t;
+            }
+        }
+
+        return NULL;
+    }
+
+    template<typename T>
+    T* outboundMessageTransfer() {
+        boost::any transfer = getOutboundMessageTransfer();
+        if (!transfer.empty()) {
+            T** t = boost::any_cast<T*>(&transfer);
+            if (t) {
+                return *t;
+            }
+        }
+
+        return NULL;
+    }
 
     template<class T>
     T* inboundMessageContainer() {
         boost::any container = getInboundMessageContainer();
         if (!container.empty()) {
-             return boost::any_cast<T>(&container);
+             T** t = boost::any_cast<T*>(&container);
+             if (t) {
+                 return *t;
+             }
         }
 
        return NULL;
@@ -304,7 +336,10 @@ public:
     T* outboundMessageContainer() {
         boost::any container = getOutboundMessageContainer();
         if (!container.empty()) {
-            return boost::any_cast<T>(&container);
+            T** t = boost::any_cast<T*>(&container);
+            if (t) {
+                return *t;
+            }
         }
 
         return NULL;
@@ -312,8 +347,8 @@ public:
 
     template<class T>
     T* nextOutboundMessageContainer() {
-        if (next_) {
-            return nextOutboundMessageContainer<T>(next_);
+        if (before_) {
+            return nextOutboundMessageContainer<T>(before_);
         }
         return NULL;
     }
@@ -327,7 +362,7 @@ public:
                 return t;
             }
 
-            context = context->next_;
+            context = context->before_;
         }
 
         return NULL;
@@ -429,9 +464,10 @@ protected:
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
 
-private:
+protected:
     virtual void onInitialized() {}
 
+private:
     void notifyHandlerException(const ChannelPipelineException& e);
 
     void clearOutboundChannelBuffer(ChannelHandlerContext& ctx);

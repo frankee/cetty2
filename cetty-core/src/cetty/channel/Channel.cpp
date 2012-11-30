@@ -72,7 +72,6 @@ Channel::Channel(const ChannelPtr& parent,
       eventLoop_(eventLoop),
       pipeline_(),
       context_() {
-    init();
 }
 
 Channel::Channel(int id,
@@ -83,7 +82,6 @@ Channel::Channel(int id,
       eventLoop_(eventLoop),
       pipeline_(),
       context_() {
-    init();
 }
 
 Channel::~Channel() {
@@ -95,22 +93,19 @@ Channel::~Channel() {
 }
 
 void Channel::init() {
-    
+}
+
+void Channel::open() {
+    ChannelPtr self = shared_from_this();
 
     if (!id_) {
         id_ = allocateId();
     }
 
-    
-
 #if 0  // FIXME need concurrent hash map
     closeFuture->addListener(
         boost::bind(&Channel::idDeallocatorCallback, this, _1));
 #endif
-}
-
-void Channel::open() {
-    ChannelPtr self = shared_from_this();
 
     succeededFuture_ = new SucceededChannelFuture(self);
     closeFuture_ = new ChannelCloseFuture(self);

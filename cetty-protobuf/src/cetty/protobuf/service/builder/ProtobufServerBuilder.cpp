@@ -59,9 +59,9 @@ ProtobufServerBuilder& ProtobufServerBuilder::registerService(
     return *this;
 }
 
-bool createProtobufServicePipeline(const ChannelPtr& channel) {
+bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
-
+#if 0
     pipeline.addLast<LengthFieldBasedFrameDecoder::Self>("frameDecoder",
         LengthFieldBasedFrameDecoder::Ptr(
         new LengthFieldBasedFrameDecoder(
@@ -92,12 +92,13 @@ bool createProtobufServicePipeline(const ChannelPtr& channel) {
         "messageHandler",
         ProtobufServiceMessageHandlerPtr(new ProtobufServiceMessageHandler()));
 
+#endif
     return true;
 }
 
 ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
     return build(PROTOBUF_SERVICE_RPC,
-        boost::bind(createProtobufServicePipeline, _1),
+        boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1),
         port);
 }
 

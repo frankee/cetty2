@@ -45,6 +45,7 @@ public:
     ChannelMessageHandlerContext(const std::string& name,
                                  const HandlerPtr& handler)
         : ChannelHandlerContext(name),
+          handler_(handler),
           inboundTransfer_(*this),
           outboundTransfer_(*this) {
         if (handler) {
@@ -97,10 +98,19 @@ public:
     }
 
     virtual boost::any getOutboundMessageContainer() {
+        return boost::any(&outboundContainer_);
+    }
+
+    virtual boost::any getInboundMessageTransfer() {
+        return boost::any(&inboundTransfer_);
+    }
+    virtual boost::any getOutboundMessageTransfer() {
         return boost::any(&outboundTransfer_);
     }
 
 private:
+    HandlerPtr handler_;
+
     InboundInContainer inboundContainer_;
     OutboundInContainer outboundContainer_;
 
@@ -157,11 +167,21 @@ public:
         return boost::any();
     }
 
+    virtual boost::any getInboundMessageTransfer() {
+        return boost::any();
+    }
+    virtual boost::any getOutboundMessageTransfer() {
+        return boost::any();
+    }
+
     VoidMessageContainer* inboundContainer() { return NULL; }
     VoidMessageContainer* outboundContainer() { return NULL; }
 
     InboundTransfer* inboundTransfer() { return NULL; }
     OutboundTransfer* outboundTransfer() { return NULL; }
+
+private:
+    HandlerPtr handler_;
 };
 
 #if 0

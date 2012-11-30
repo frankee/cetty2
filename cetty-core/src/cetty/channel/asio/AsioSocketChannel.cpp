@@ -119,7 +119,7 @@ const SocketAddress& AsioSocketChannel::remoteAddress() const {
 #endif
 
 bool AsioSocketChannel::isActive() const {
-    return tcpSocket_.is_open() && remoteAddress().validated();
+    return tcpSocket_.is_open() /*&& remoteAddress().validated()*/;
 }
 
 bool AsioSocketChannel::isOpen() const {

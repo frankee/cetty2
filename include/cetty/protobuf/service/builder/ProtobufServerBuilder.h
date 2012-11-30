@@ -50,6 +50,8 @@ public:
 
 private:
     void init();
+
+    bool initializeChannel(const ChannelPtr& channel);
 };
 
 }

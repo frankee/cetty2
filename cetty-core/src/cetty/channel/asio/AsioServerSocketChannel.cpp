@@ -190,8 +190,8 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
         LOG_INFO << "AsioSocketChannel firing the Channel Open Event.";
         channel->open();
 
-        //childChannels.insert(
-        //    std::make_pair<int, ChannelPtr>(channel->getId(), channel));
+        childChannels_.insert(
+            std::make_pair<int, ChannelPtr>(channel->id(), channel));
 
         //channel->getCloseFuture()->addListener(boost::bind(
         //    &AsioServerSocketChannel::handleChildClosed,

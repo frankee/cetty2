@@ -373,8 +373,6 @@ protected:
      */
     virtual bool setClosed();
 
-    //virtual void setPipeline(const ChannelPipelinePtr& pipeline);
-
     void closeIfClosed() {
         if (isOpen()) {
             return;

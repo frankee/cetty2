@@ -57,11 +57,11 @@ template<>
 class ChannelMessageContainer<VoidMessage, MESSAGE_BLOCK> {
 public:
     void addMessage(const VoidMessage& message) {
-        BOOST_ASSERT(false && "void type, should not addMessage");
+        //BOOST_ASSERT(false && "void type, should not addMessage");
     }
 
     void setEventLoop(const EventLoopPtr& eventLoop) {
-        BOOST_ASSERT(false && "void type, should not setEventLoop");
+        //BOOST_ASSERT(false && "void type, should not setEventLoop");
     }
 };
 
