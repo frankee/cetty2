@@ -17,24 +17,17 @@
 
 #include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 
+#include <boost/assert.hpp>
 #include <cetty/channel/asio/AsioService.h>
 #include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/channel/asio/AsioServerSocketChannel.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace bootstrap {
 namespace asio {
 
-    using namespace cetty::channel::asio;
-
-AsioServerBootstrap::AsioServerBootstrap(const EventLoopPoolPtr& pool)
-    : parentPool(pool),
-      childPool(pool),
-      socketAddressFactory(),
-      ipAddressFactory() {
-    BOOST_ASSERT(pool && "ioServicePool SHOULD NOT BE NULL.");
-    init();
-}
+using namespace cetty::channel::asio;
 
 AsioServerBootstrap::AsioServerBootstrap(
     int parentThreadCnt,
@@ -42,26 +35,36 @@ AsioServerBootstrap::AsioServerBootstrap(
     : socketAddressFactory(),
       ipAddressFactory() {
 
-    parentPool = new AsioServicePool(parentThreadCnt);
-
+    EventLoopPoolPtr parent = new AsioServicePool(parentThreadCnt);
+    EventLoopPoolPtr child;
     if (0 == childThreadCnt) {
-        childPool = parentPool;
+        child = parent;
     }
     else {
-        childPool = new AsioServicePool(childThreadCnt);
+        child = new AsioServicePool(childThreadCnt);
     }
 
-    BOOST_ASSERT(parentPool && childPool && "ioServicePool SHOULD NOT BE NULL.");
+    BOOST_ASSERT(parent && child && "ioServicePool SHOULD NOT BE NULL.");
+
+    ServerBootstrap::setEventLoopPool(parent, child);
+
+    init();
+}
+
+AsioServerBootstrap::AsioServerBootstrap(const EventLoopPoolPtr& pool)
+    : ServerBootstrap(pool),
+      socketAddressFactory(),
+      ipAddressFactory() {
+    BOOST_ASSERT(pool && "ioServicePool SHOULD NOT BE NULL.");
     init();
 }
 
 AsioServerBootstrap::AsioServerBootstrap(
     const EventLoopPoolPtr& parentPool,
     const EventLoopPoolPtr& childPool)
-    : parentPool(parentPool),
-      childPool(childPool),
-      socketAddressFactory(),
-      ipAddressFactory() {
+    : ServerBootstrap(parentPool, childPool),
+    socketAddressFactory(),
+    ipAddressFactory() {
 
     BOOST_ASSERT(parentPool && childPool && "ioServicePool SHOULD NOT BE NULL.");
     init();
@@ -72,36 +75,21 @@ AsioServerBootstrap::~AsioServerBootstrap() {
 }
 
 ChannelPtr AsioServerBootstrap::newChannel() {
-    ChannelPtr channel(
-        new AsioServerSocketChannel(parentPool->getNextLoop(),
-                                    childPool));
-
-//     if (channel->isOpen()) {
-//         LOG_INFO << "Created the AsioServerSocketChannel, firing the Channel Created Event.";
-//         channel->pipeline().fireChannelOpen();
-// 
-//         serverChannels.push_back(channel);
-//     }
-//     else {
-//         channel.reset();
-//     }
-
-    return channel;
-}
-
-void AsioServerBootstrap::shutdown() {
-    childPool->stop();
-    childPool->waitForStop();
-
-    parentPool->stop();
-    parentPool->waitForStop();
-
-    serverChannels.clear();
+    const EventLoopPoolPtr& parent = parentPool();
+    if (parent) {
+        return ChannelPtr(
+                   new AsioServerSocketChannel(parent->getNextLoop(),
+                                               childPool()));
+    }
+    else {
+        LOG_WARN << "has not set the parent EventLoopPool.";
+        return ChannelPtr();
+    }
 }
 
 void AsioServerBootstrap::init() {
     if (!SocketAddress::hasFactory()) {
-        EventLoopPtr loop = parentPool->getNextLoop();
+        EventLoopPtr loop = parentPool()->getNextLoop();
         AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
         BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
 

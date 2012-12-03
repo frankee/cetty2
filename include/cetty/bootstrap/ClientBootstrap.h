@@ -24,7 +24,7 @@
  *
  */
 
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuturePtr.h>
 #include <cetty/bootstrap/AbstractBootstrap.h>
 
@@ -126,18 +126,23 @@ public:
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ClientBootstrap(const EventLoopPoolPtr& pool);
+    ClientBootstrap() {}
+    ClientBootstrap(const EventLoopPoolPtr& pool)
+        : AbstractBootstrap<ClientBootstrap>(pool) {
+    }
 
     virtual ~ClientBootstrap() {}
+
+
+    ClientBootstrap& setRemoteAddress(const SocketAddress& address);
 
     ClientBootstrap& setRemoteAddress(const std::string& host, int port);
 
     const SocketAddress& remoteAddress() const;
 
-    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer) {
-        initializer_ = initializer;
-        return *this;
-    }
+    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer);
+
+    const Channel::Initializer& channelInitializer() const;
 
     ChannelFuturePtr connect();
 
@@ -196,17 +201,26 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                                     const SocketAddress& localAddress);
-
+    ChannelFuturePtr connect(const SocketAddress& remote, const SocketAddress& local);
 
 protected:
-    virtual newChannel();
+    virtual ChannelPtr newChannel() = 0;
+
+private:
+    typedef std::map<int, ChannelPtr> ClientChannels;
 
 private:
     SocketAddress remoteAddress_;
     Channel::Initializer initializer_;
+
+    ClientChannels clientChannels_;
 };
+
+inline
+ClientBootstrap& ClientBootstrap::setRemoteAddress(const SocketAddress& address) {
+    remoteAddress_ = address;
+    return *this;
+}
 
 inline
 ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
@@ -218,6 +232,28 @@ ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
 inline
 const SocketAddress& ClientBootstrap::remoteAddress() const {
     return remoteAddress_;
+}
+
+inline
+ClientBootstrap& ClientBootstrap::setChannelInitializer(
+    const Channel::Initializer& initializer) {
+    initializer_ = initializer;
+    return *this;
+}
+
+inline
+const Channel::Initializer& ClientBootstrap::channelInitializer() const {
+    return initializer_;
+}
+
+inline
+ChannelFuturePtr ClientBootstrap::connect() {
+    return connect(remoteAddress_);
+}
+
+inline
+ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
+    return connect(SocketAddress(host, port));
 }
 
 }

@@ -119,8 +119,7 @@ using namespace cetty::util;
  * @apiviz.landmark
  */
 
-class HttpMessageDecoder
-        : public cetty::handler::codec::ReplayingDecoder<HttpPackage> {
+class HttpMessageDecoder {
 private:
     /**
      * The internal state of {@link HttpMessageDecoder}.

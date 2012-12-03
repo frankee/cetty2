@@ -41,31 +41,69 @@ namespace codec {
 
 using namespace cetty::channel;
 
-template<typename InboundIn, typename InboundOut>
+template<typename H,
+    typename InboundIn,
+    typename InboundOut,
+    typename C = ChannelMessageHandlerContext<H,
+    InboundIn,
+    InboundOut,
+    VoidMessage,
+    VoidMessage,
+    ChannelMessageContainer<InboundIn, MESSAGE_BLOCK>,
+    ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+    VoidMessageContainer,
+    VoidMessageContainer> >
 class MessageToMessageDecoder : private boost::noncopyable {
 public:
-    typedef MessageToMessageDecoder<InboundIn, InboundOut> Self;
-    typedef boost::shared_ptr<Self> Ptr;
+    typedef MessageToMessageDecoder<H, InboundIn, InboundOut, C> Self;
+    typedef C Context;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageTransfer<InboundOut,
+    ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+    TRANSFER_INBOUND> InboundTransfer;
 
-    typedef ChannelMessageHandlerContext<
-        Self,
-        InboundIn,
-        InboundOut,
-        VoidMessage,
-        VoidMessage,
-        InboundContainer,
-        ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
-        VoidMessageContainer,
-        VoidMessageContainer> Context;
+    typedef boost::function<bool (InboundIn const&)> DecodableChecker;
+    typedef boost::function<InboundOut (ChannelHandlerContext&, InboundIn const&)> Decoder;
 
 public:
-    MessageToMessageDecoder() {}
-    virtual ~MessageToMessageDecoder() {}
+    MessageToMessageDecoder()
+        : transfer_(),
+        constainer_() {
+    }
 
-    virtual void registerTo(Context& ctx) {
-        context_ = &ctx;
+    MessageToMessageDecoder(const Decoder& decoder)
+        : decoder_(decoder),
+    transfer_(),
+    constainer_() {
+    }
+
+    MessageToMessageDecoder(const Decoder& decoder,
+                            const DecodableChecker& checker)
+                            : decoder_(decoder),
+    checker_(checker),
+    transfer_(),
+    constainer_() {
+    }
+
+    ~MessageToMessageDecoder() {}
+
+    void setDecoder(const Decoder& decoder) {
+        decoder_ = decoder;
+    }
+
+    void setDecodableChecker(const DecodableChecker& checker) {
+        checker_ = checker;
+    }
+
+    void registerTo(Context& ctx) {
+        BOOST_ASSERT(decoder_);
+
+        transfer_ = ctx.inboundTransfer();
+        constainer_ = ctx.inboundContainer();
 
         ctx.setChannelMessageUpdatedCallback(boost::bind(
             &Self::messageUpdated,
@@ -129,15 +167,13 @@ public:
      *
      * @param msg the message
      */
-    bool isDecodable(const InboundIn& msg) {
-        return true;
-    }
-
-    virtual InboundOut decode(ChannelHandlerContext& ctx,
-                               const InboundIn& msg) = 0;
 
 protected:
-    Context* context_;
+    Decoder decoder_;
+    DecodableChecker checker_;
+
+    InboundTransfer transfer_;
+    InboundContainer constainer_;
 };
 
 }

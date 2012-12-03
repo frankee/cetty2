@@ -21,11 +21,12 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <deque>
+#include <vector>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 
 #include <cetty/bootstrap/AbstractBootstrap.h>
 
@@ -160,7 +161,27 @@ public:
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ServerBootstrap() {}
+    ServerBootstrap()
+        : parentHandler_() {
+    }
+
+    ServerBootstrap(const EventLoopPoolPtr& pool)
+        : AbstractBootstrap<ServerBootstrap>(pool),
+          parentHandler_() {
+        setChildEventLoopPool(pool);
+    }
+
+    ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child)
+        : AbstractBootstrap<ServerBootstrap>(parent),
+          parentHandler_() {
+        if (child) {
+            setChildEventLoopPool(child);
+            LOG_WARN << "set null EventLoopPool to child, using parent.";
+        }
+        else {
+            setChildEventLoopPool(parent);
+        }
+    }
 
     virtual ~ServerBootstrap() {}
 
@@ -169,17 +190,42 @@ public:
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
      * {@link Channel}'s.
      */
-    ServerBootstrap& setEventLoopPool(const EventLoopPoolPtr& parentPool,
-        const EventLoopPoolPtr& childPool) {
-
-        //super.group(parentGroup);
-
-        if (childPool) {
-            childPool_ = childPool;
+    ServerBootstrap& setEventLoopPool(const EventLoopPoolPtr& parent,
+                                      const EventLoopPoolPtr& child) {
+        if (child) {
+            childPool_ = child;
         }
         else {
-            childPool_ = parentPool;
+            childPool_ = parent;
         }
+
+        return *this;
+    }
+
+    ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool) {
+        childPool_ = pool;
+        return *this;
+    }
+
+    const EventLoopPoolPtr& parentPool() const {
+        return AbstractBootstrap<ServerBootstrap>::eventLoopPool();
+    }
+
+    const EventLoopPoolPtr& childPool() const {
+        return childPool_;
+    }
+
+    template<typename T>
+    ServerBootstrap& setParentHandler(
+        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (parentHandler_) {
+            delete parentHandler_;
+        }
+
+        parentHandler_ =
+            new typename ChannelHandlerWrapper<T>::Handler::Context("parent", handler);
+
+        return *this;
     }
 
     /**
@@ -188,9 +234,13 @@ public:
      * {@link ChannelOption}.
      */
     ServerBootstrap& setChildOption(const ChannelOption& option,
-        const ChannelOption::Variant& value);
+                                    const ChannelOption::Variant& value);
 
-    const ChannelOption::Options& getChildOptions() const;
+    const ChannelOption::Options& childOptions() const;
+
+    const Channel::Initializer& childInitializer() const {
+        return childInitializer_;
+    }
 
     /**
      * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
@@ -200,22 +250,9 @@ public:
         return *this;
     }
 
-    const Channel::Initializer& childInitializer() {
-        return childInitializer_;
+    ChannelFuturePtr bind() {
+        return bind(localAddress());
     }
-
-    /**
-     * Sets an optional {@link ChannelHandler} which intercepts an event of
-     * a newly bound server-side channel which accepts incoming connections.
-     *
-     * @param parentHandler
-     *        the parent channel handler.
-     *        <tt>NULL</tt> to unset the current parent channel handler.
-     */
-    //ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
-
-
-    //virtual ChannelFuturePtr bind();
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -231,7 +268,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelFuturePtr bind(int port);
+    ChannelFuturePtr bind(int port);
 
     /**
      * Creates a new channel which is bound to the ip and port.  This method is
@@ -247,7 +284,9 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelFuturePtr bind(const std::string& ip, int port);
+    ChannelFuturePtr bind(const std::string& ip, int port) {
+        return bind(SocketAddress(ip, port));
+    }
 
     /**
      * Creates a new channel which is bound to the specified local address.
@@ -256,27 +295,29 @@ public:
      *         if failed to create a new channel and
      *                      bind it to the local address, return null ChannelPtr
      */
-    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
+    ChannelFuturePtr bind(const SocketAddress& localAddress);
 
-
-    virtual void shutdown() {
-    }
-
+    virtual void shutdown();
 
 protected:
     virtual ChannelPtr newChannel() = 0;
 
 private:
-    bool initChannel(const ChannelPtr& channel);
+    bool initServerChannel(const ChannelPtr& channel);
 
 private:
     EventLoopPoolPtr childPool_;
     ChannelOption::Options childOptions_;
-    
-    std::vector<ChannelPtr> serverChannels_;
-
     Channel::Initializer childInitializer_;
+
+    ChannelHandlerContext* parentHandler_;
+    std::vector<ChannelPtr> serverChannels_;
 };
+
+inline
+const ChannelOption::Options& ServerBootstrap::childOptions() const {
+    return childOptions_;
+}
 
 }
 }

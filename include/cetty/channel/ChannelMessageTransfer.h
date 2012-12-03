@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELPIPELINEMESSAGETRANSFER_H)
-#define CETTY_CHANNEL_CHANNELPIPELINEMESSAGETRANSFER_H
+#if !defined(CETTY_CHANNEL_CHANNELMESSAGETRANSFER_H)
+#define CETTY_CHANNEL_CHANNELMESSAGETRANSFER_H
 
 /*
  * Copyright 2012 The Netty Project
@@ -42,7 +42,7 @@ namespace channel {
 
 using namespace cetty::buffer;
 
-enum IsInboundType {
+enum TransferDirection {
     TRANSFER_INBOUND,
     TRANSFER_OUTBOUND
 };
@@ -51,16 +51,17 @@ template<typename T, typename U, int TransferType>
 class ChannelMessageTransfer {
 public:
     void resetNextContainer();
+    void resetNextContainer(U*);
 
     bool unfoldAndAdd(const T& msg);
     void write(const T& msg, const ChannelFuturePtr& future);
 };
 
-#if 0
 template<>
 class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_INBOUND> {
 public:
     void resetNextContainer() {}
+    void resetNextContainer(VoidMessageContainer*) {}
 
     bool unfoldAndAdd(const VoidMessage& msg) { return false; }
     void write(const VoidMessage& msg, const ChannelFuturePtr& future) {}
@@ -70,34 +71,38 @@ template<>
 class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_OUTBOUND> {
 public:
     void resetNextContainer() {}
+    void resetNextContainer(VoidMessageContainer*) {}
 
     bool unfoldAndAdd(const VoidMessage& msg) { return false; }
     void write(const VoidMessage& msg, const ChannelFuturePtr& future) {}
 };
-#endif
 
 template<class T>
-class ChannelMessageTransfer<T, ChannelMessageContainer<T>, TRANSFER_INBOUND> {
+class ChannelMessageTransfer<T, ChannelMessageContainer<T, MESSAGE_BLOCK>, TRANSFER_INBOUND> {
 public:
-    typedef ChannelMessageContainer<T> MessageContainer;
+    typedef ChannelMessageContainer<T, MESSAGE_BLOCK> MessageContainer;
 
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
         : ctx(ctx),
-          container() {
+          container_() {
     }
 
     void resetNextContainer() {
-        container = NULL;
+        container_ = NULL;
+    }
+
+    void resetNextContainer(MessageContainer* container) {
+        container_ = container;
     }
 
     bool unfoldAndAdd(const T& msg) {
-        if (!container) {
-            container = ctx.nextInboundMessageContainer<MessageContainer>();
+        if (!container_) {
+            container_ = ctx_.nextInboundMessageContainer<MessageContainer>();
         }
 
-        if (container && !!msg) {
-            container->addMessage(msg);
+        if (container_ && !!msg) {
+            container_->addMessage(msg);
             return true;
         }
 
@@ -109,32 +114,36 @@ public:
     }
 
 private:
-    ChannelHandlerContext& ctx;
-    MessageContainer* container;
+    ChannelHandlerContext& ctx_;
+    MessageContainer* container_;
 };
 
 template<typename T>
-class ChannelMessageTransfer<T, ChannelMessageContainer<T>, TRANSFER_OUTBOUND> {
+class ChannelMessageTransfer<T, ChannelMessageContainer<T, MESSAGE_BLOCK>, TRANSFER_OUTBOUND> {
 public:
-    typedef ChannelMessageContainer<T> MessageContainer;
+    typedef ChannelMessageContainer<T, MESSAGE_BLOCK> MessageContainer;
 
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
         : ctx(ctx),
-          container() {
+          container_() {
     }
 
     void resetNextContainer() {
-        container = NULL;
+        container_ = NULL;
+    }
+
+    void resetNextContainer(MessageContainer* container) {
+        container_ = container;
     }
 
     bool unfoldAndAdd(const T& msg) {
-        if (!container) {
-            container = ctx.nextOutboundMessageContainer<MessageContainer>();
+        if (!container_) {
+            container_ = ctx_.nextOutboundMessageContainer<MessageContainer>();
         }
 
-        if (container&& !!msg) {
-            container->addMessage(msg);
+        if (container_&& !!msg) {
+            container_->addMessage(msg);
             return true;
         }
 
@@ -143,34 +152,38 @@ public:
 
     void write(const T& msg, const ChannelFuturePtr& future) {
         if (unfoldAndAdd(msg)) {
-            ctx.flush(future);
+            ctx_.flush(future);
         }
     }
 
 private:
-    ChannelHandlerContext& ctx;
-    MessageContainer* container;
+    ChannelHandlerContext& ctx_;
+    MessageContainer* container_;
 };
 
 template<>
 class ChannelMessageTransfer<ChannelBufferPtr, ChannelBufferContainer, TRANSFER_INBOUND> {
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
-        : ctx(ctx),
-          container() {
+        : ctx_(ctx),
+          container_() {
     }
 
     void resetNextContainer() {
-        container = NULL;
+        container_ = NULL;
+    }
+
+    void resetNextContainer(ChannelBufferContainer* container) {
+        container_ = container;
     }
 
     bool unfoldAndAdd(const ChannelBufferPtr& msg) {
-        if (!container) {
-            ctx.nextInboundMessageContainer<ChannelBufferContainer>();
+        if (!container_) {
+            ctx_.nextInboundMessageContainer<ChannelBufferContainer>();
         }
 
-        if (container && msg) {
-            container->addMessage(msg);
+        if (container_ && msg) {
+            container_->addMessage(msg);
             return true;
         }
 
@@ -182,29 +195,33 @@ public:
     }
 
 private:
-    ChannelHandlerContext& ctx;
-    ChannelBufferContainer* container;
+    ChannelHandlerContext& ctx_;
+    ChannelBufferContainer* container_;
 };
 
 template<>
 class ChannelMessageTransfer<ChannelBufferPtr, ChannelBufferContainer, TRANSFER_OUTBOUND> {
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
-        : ctx(ctx),
-          container() {
+        : ctx_(ctx),
+          container_() {
     }
 
     void resetNextContainer() {
-        container = NULL;
+        container_ = NULL;
+    }
+
+    void resetNextContainer(ChannelBufferContainer* container) {
+        container_ = container;
     }
 
     bool unfoldAndAdd(const ChannelBufferPtr& msg) {
-        if (!container) {
-            container = ctx.nextOutboundMessageContainer<ChannelBufferContainer>();
+        if (!container_) {
+            container_ = ctx_.nextOutboundMessageContainer<ChannelBufferContainer>();
         }
 
-        if (container && msg) {
-            container->addMessage(msg);
+        if (container_ && msg) {
+            container_->addMessage(msg);
             return true;
         }
 
@@ -214,52 +231,19 @@ public:
     void write(const ChannelBufferPtr& msg,
                const ChannelFuturePtr& future) {
         if (unfoldAndAdd(msg)) {
-            ctx.flush(future);
+            ctx_.flush(future);
         }
     }
 
 private:
-    ChannelHandlerContext& ctx;
-    ChannelBufferContainer* container;
-};
-
-template<typename T, typename U, int TransferType>
-class ChannelMessageTransfer<std::vector<T>, U, TransferType> {
-public:
-    ChannelMessageTransfer()
-        : ctx() {}
-
-    void resetNextContainer() {
-        container = NULL;
-    }
-
-    bool unfoldAndAdd(const std::vector<T>& msg) {
-        if (msg.empty()) {
-            return false;
-        }
-
-        bool added = false;
-
-        std::size_t j = msg.size();
-
-        for (std::size_t i = 0; i < j; ++i) {
-            if (transfer.unfoldAndAdd(msg[i])) {
-                added = true;
-            }
-        }
-
-        return added;
-    }
-
-private:
-    ChannelHandlerContext* ctx;
-    ChannelMessageTransfer<T, U, TransferType> transfer;
+    ChannelHandlerContext& ctx_;
+    ChannelBufferContainer* container_;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELPIPELINEMESSAGETRANSFER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELMESSAGETRANSFER_H)
 
 // Local Variables:
 // mode: c++

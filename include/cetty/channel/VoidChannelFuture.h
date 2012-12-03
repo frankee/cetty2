@@ -24,7 +24,9 @@ namespace channel {
 
 class VoidChannelFuture : public ChannelFuture {
 public:
-    VoidChannelFuture(const ChannelPtr& channel) : channel_(channel) {}
+    VoidChannelFuture(const ChannelPtr& channel)
+        : channel_(channel) {}
+
     virtual ~VoidChannelFuture() {}
 
     virtual const ChannelWeakPtr& channel() const;

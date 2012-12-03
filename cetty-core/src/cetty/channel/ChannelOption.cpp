@@ -67,35 +67,11 @@ const ChannelOption  ChannelOption::CO_SCTP_PRIMARY_ADDR("SCTP_PRIMARY_ADDR", &S
 const ChannelOption  ChannelOption::CO_SCTP_SET_PEER_PRIMARY_ADDR("SCTP_SET_PEER_PRIMARY_ADDR", &STRING_VALUE_CHECKER);
 
 bool ChannelOption::validate(const ChannelOption::Variant& value) const {
-    if (checker) {
+    if (checker_) {
         //return boost::apply_visitor(*checker, value);
     }
 
     return true;
-}
-
-bool ChannelOption::operator<(const ChannelOption& option) const {
-    return name < option.name;
-}
-
-bool ChannelOption::operator==(const ChannelOption& option) const {
-    return name == option.name;
-}
-
-ChannelOption::ChannelOption(const std::string& name,
-    const boost::static_visitor<bool>* checker)
-: name(name), checker(checker) {
-}
-
-ChannelOption::ChannelOption(const ChannelOption& option)
-: name(option.name), checker(option.checker) {
-
-}
-
-ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
-    name = option.name;
-    checker = option.checker;
-    return *this;
 }
 
 }

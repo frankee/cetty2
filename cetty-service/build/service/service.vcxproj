@@ -93,7 +93,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />
+    <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp" />
+    <ClCompile Include="..\..\src\cetty\service\ClientService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h" />

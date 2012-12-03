@@ -40,22 +40,41 @@ using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
-class ProtobufServiceMessageDecoder
-    : public MessageToMessageDecoder<ChannelBufferPtr, ProtobufServiceMessagePtr> {
+class ProtobufServiceMessageDecoder : private boost::noncopyable {
 public:
-    ProtobufServiceMessageDecoder() {}
-    virtual ~ProtobufServiceMessageDecoder() {}
+    typedef MessageToMessageDecoder<ProtobufServiceMessageDecoder,
+            ChannelBufferPtr,
+            ProtobufServiceMessagePtr> MessageDecoder;
 
-    static int decode(const ChannelBufferPtr& buffer,
-                      const ProtobufServiceMessagePtr& message);
+    typedef typename MessageDecoder::Context Context;
 
-protected:
-    virtual ProtobufServiceMessagePtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& msg);
+public:
+    ProtobufServiceMessageDecoder() {
+        decoder_.setDecoder(boost::bind(
+        ProtobufServiceMessageDecoder::decode,
+        this,
+        _1,
+        _2));
+    }
+
+    ~ProtobufServiceMessageDecoder() {}
+
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+    }
+    
+private:
+    ProtobufServiceMessagePtr decode(ChannelHandlerContext& ctx,
+            const ChannelBufferPtr& msg);
+
+    int decode(const ChannelBufferPtr& buffer,
+        const ProtobufServiceMessagePtr& message);
+
+    int decodePayload(const ChannelBufferPtr& buffer,
+                             const ProtobufServiceMessagePtr& message);
 
 private:
-    static int decodePayload(const ChannelBufferPtr& buffer,
-                             const ProtobufServiceMessagePtr& message);
+    MessageDecoder decoder_;
 };
 
 }

@@ -26,8 +26,6 @@
 namespace cetty {
 namespace channel {
 
-using namespace cetty::util;
-
 /**
  * A {@link RuntimeException} which is thrown when an I/O operation fails.
  *
@@ -39,7 +37,7 @@ using namespace cetty::util;
  * @apiviz.hidden
  */
 
-CETTY_DECLARE_EXCEPTION(ChannelException, RuntimeException)
+CETTY_DECLARE_EXCEPTION(ChannelException, cetty::util::RuntimeException)
 
 }
 }

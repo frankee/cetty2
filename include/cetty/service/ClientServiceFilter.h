@@ -47,29 +47,22 @@ using namespace cetty::channel;
 *
 */
 
-template<typename RequestInT,
-         typename RequestOutT,
-         typename ResponseInT,
-         typename ResponseOutT>
-class ClientServiceFilter
-    : public ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT> {
-
-        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::inboundTransfer;
-        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::outboundTransfer;
-
-        using ChannelInboundMessageHandler<ResponseInT>::inboundQueue;
-        using ChannelOutboundMessageHandler<RequestInT>::outboundQueue;
-
+template<typename RequestIn,
+         typename RequestOut,
+         typename ResponseIn,
+         typename ResponseOut>
+class ClientServiceAdaptor {
 public:
-    virtual ~ClientServiceFilter() {}
+    ClientServiceAdaptor() {}
+    ~ClientServiceAdaptor() {}
 
 protected:
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
         while (!inboundQueue.empty()) {
-            ResponseInT& msg = inboundQueue.front();
-            ResponseOutT omsg = filterResponse(ctx, reqs.front(), msg);
+            ResponseIn& msg = inboundQueue.front();
+            ResponseOut omsg = filterResponse(ctx, reqs.front(), msg);
             reqs.pop_front();
 
             if (inboundTransfer.unfoldAndAdd(omsg)) {
@@ -87,10 +80,10 @@ protected:
     virtual void flush(ChannelHandlerContext& ctx,
                        const ChannelFuturePtr& future) {
         while (!outboundQueue.empty()) {
-            RequestInT& req = outboundQueue.front();
+            RequestIn& req = outboundQueue.front();
 
             reqs.push_back(req);
-            RequestOutT oreq = filterRequest(ctx, req);
+            RequestOut oreq = filterRequest(ctx, req);
 
             outboundTransfer.unfoldAndAdd(oreq);
 
@@ -100,15 +93,15 @@ protected:
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(ChannelHandlerContext& ctx,
-                                      const RequestInT& req) = 0;
+    virtual RequestOut filterRequest(ChannelHandlerContext& ctx,
+                                      const RequestIn& req) = 0;
 
-    virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
-                                        const RequestInT& req,
-                                        const ResponseInT& rep) = 0;
+    virtual ResponseOut filterResponse(ChannelHandlerContext& ctx,
+                                        const RequestIn& req,
+                                        const ResponseIn& rep) = 0;
 
 private:
-    std::deque<RequestInT> reqs;
+    std::deque<RequestIn> reqs;
 };
 
 }

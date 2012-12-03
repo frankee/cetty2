@@ -53,16 +53,15 @@ public:
 
     typedef InboundContainer::MessageQueue InboundQueue;
 
-    typedef ChannelMessageHandlerContext<
-    ProtobufServiceMessageHandler,
-    ProtobufServiceMessagePtr,
-    VoidMessage,
-    VoidMessage,
-    ProtobufServiceMessagePtr,
-    InboundContainer,
-    VoidMessageContainer,
-    VoidMessageContainer,
-    InboundContainer> Context;
+    typedef ChannelMessageHandlerContext<ProtobufServiceMessageHandler,
+            ProtobufServiceMessagePtr,
+            VoidMessage,
+            VoidMessage,
+            ProtobufServiceMessagePtr,
+            InboundContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            InboundContainer> Context;
 
 public:
     ProtobufServiceMessageHandler() {}
@@ -71,20 +70,19 @@ public:
 public:
     void registerTo(Context& ctx) {
         context_ = &ctx;
-        
+
         ctx.setChannelMessageUpdatedCallback(boost::bind(
-            &ProtobufServiceMessageHandler::messageUpdated,
-            this,
-            _1));
+                &ProtobufServiceMessageHandler::messageUpdated,
+                this,
+                _1));
     }
 
 private:
     void messageUpdated(ChannelHandlerContext& ctx);
 
     void messageReceived(ChannelHandlerContext& ctx,
-        const ProtobufServiceMessagePtr& msg);
+                         const ProtobufServiceMessagePtr& msg);
 
-private:
     void doneCallback(const MessagePtr& response,
                       ChannelHandlerContext& ctx,
                       ProtobufServiceMessagePtr req,

@@ -37,10 +37,6 @@ AsioSocketChannelConfig::AsioSocketChannelConfig(TcpSocket& socket)
 
 bool AsioSocketChannelConfig::setOption(const ChannelOption& option,
                                         const ChannelOption::Variant& value) {
-    //if (ChannelConfig::setOption(option, value)) {
-    //    return true;
-    //}
-
     if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
     }

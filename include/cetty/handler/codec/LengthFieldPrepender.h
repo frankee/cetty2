@@ -66,7 +66,7 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class LengthFieldPrepender : public MessageToBufferEncoder<ChannelBufferPtr> {
+class LengthFieldPrepender : private boost::noncopyable {
 public:
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 
@@ -123,16 +123,13 @@ public:
                          const std::string& header,
                          ChecksumFunction checksumFunction);
 
-
-protected:
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& msg,
-                                    const ChannelBufferPtr& out);
-
-
-
 private:
+    void init();
     void validateParameters();
+
+    ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg,
+        const ChannelBufferPtr& out);
 
     void writeHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
     void preWriteHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
@@ -144,15 +141,17 @@ private:
                                          uint32_t cs);
 
 private:
-    int  lengthFieldLength;
-    int  lengthFieldOffset;
-    int  lengthAdjustment;
+    int  lengthFieldLength_;
+    int  lengthFieldOffset_;
+    int  lengthAdjustment_;
 
-    std::string header;
+    std::string header_;
 
-    int  checksumFieldLength;
-    int  checksumCalcOffset;
-    ChecksumFunction checksumFunction;
+    int  checksumFieldLength_;
+    int  checksumCalcOffset_;
+    ChecksumFunction checksumFunction_;
+
+    MessageToBufferEncoder<LengthFieldPrepender, ChannelBufferPtr> encoder_;
 };
 
 }

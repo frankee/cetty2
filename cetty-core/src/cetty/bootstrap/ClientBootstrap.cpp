@@ -21,15 +21,9 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelFactory.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/ChannelPipelineFactory.h>
-#include <cetty/channel/ChannelPipelineException.h>
-#include <cetty/channel/socket/ClientSocketChannelFactory.h>
-#include <cetty/util/Exception.h>
+#include <cetty/channel/ChannelException.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -37,53 +31,35 @@ namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket;
-using namespace cetty::util;
-using namespace cetty::logging;
-
-ClientBootstrap::ClientBootstrap() {
-}
-
-ChannelFuturePtr ClientBootstrap::connect() {
-    return connect(this->remoteAddress_);
-}
-
-ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
-    SocketAddress remote(host, port);
-    return connect(remote);
-}
 
 ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress) {
     return connect(remoteAddress, SocketAddress::NULL_ADDRESS);
 }
 
-ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress, const SocketAddress& localAddress) {
-    ChannelPipelinePtr pipeline;
-    ChannelPtr ch;
-
-    SocketAddress remote = remoteAddress;
-    SocketAddress local  = localAddress;
-
+ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
+        const SocketAddress& local) {
     if (!remote.validated()) {
         LOG_ERROR << "the remote address is invalidated, then return a failed future.";
         return NullChannel::instance()->newFailedFuture(
-            ChannelPipelineException("Failed to initialize a pipeline."));
+                   ChannelException("Failed to initialize a pipeline."));
     }
 
-    ch = newChannel();
-    
+    ChannelPtr ch = newChannel();
+
     if (!ch) {
-        LOG_ERROR << "failed to create a new channel from the factory, then return a failed future.";
+        LOG_ERROR << "failed to create a new channel, then return a failed future.";
         return NullChannel::instance()->newFailedFuture(
-                   ChannelPipelineException("Failed to create a new channel."));
+                   ChannelException("Failed to create a new channel."));
     }
+
+    ch->setInitializer(initializer_);
 
     // Set the options.
     ch->config().setOptions(options());
 
-    if (initializer_) {
-        initializer_(ch);
-    }
+    ch->initialize();
+
+    clientChannels_[ch->id()] = ch;
 
     // Bind.
     if (localAddress().validated()) {

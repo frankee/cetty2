@@ -197,8 +197,7 @@ using namespace cetty::channel;
  *
  * @see LengthFieldPrepender
  */
-class LengthFieldBasedFrameDecoder
-    : public BufferToMessageDecoder<LengthFieldBasedFrameDecoder, ChannelBufferPtr> {
+class LengthFieldBasedFrameDecoder : private boost::noncopyable {
 
 public:
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
@@ -317,8 +316,8 @@ public:
 
 
 protected:
-    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& in);
+    ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+                            const ChannelBufferPtr& in);
 
     /**
      * Extract the sub-region of the specified buffer. This method is called by
@@ -338,28 +337,32 @@ protected:
     ChannelBufferPtr extractFrame(const ChannelBufferPtr& buffer, int index, int length);
 
 private:
+    void init();
+
     void fail(ChannelHandlerContext& ctx, int frameLength);
     void validateParameters();
 
 private:
-    bool discardingTooLongFrame;
-    int  maxFrameLength;
-    int  tooLongFrameLength;
-    int  bytesToDiscard;
+    bool discardingTooLongFrame_;
+    int  maxFrameLength_;
+    int  tooLongFrameLength_;
+    int  bytesToDiscard_;
 
-    int  lengthFieldOffset;
-    int  lengthFieldLength;
-    int  lengthFieldEndOffset;
-    int  lengthAdjustment;
+    int  lengthFieldOffset_;
+    int  lengthFieldLength_;
+    int  lengthFieldEndOffset_;
+    int  lengthAdjustment_;
 
-    int  initialBytesToStrip;
+    int  initialBytesToStrip_;
 
-    int  checksumFieldLength;
-    int  checksumCalcOffset;
-    ChecksumFunction checksumFunction;
+    int  checksumFieldLength_;
+    int  checksumCalcOffset_;
+    ChecksumFunction checksumFunction_;
 
-    std::string header1;
-    std::string header2;
+    std::string header1_;
+    std::string header2_;
+
+    BufferToMessageDecoder<LengthFieldBasedFrameDecoder, ChannelBufferPtr> decoder_;
 };
 
 }

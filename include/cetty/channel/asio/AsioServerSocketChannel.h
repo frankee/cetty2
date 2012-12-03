@@ -52,12 +52,30 @@ public:
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
+public:
+    typedef ChannelMessageHandlerContext<
+        Channel,
+        VoidMessage,
+        VoidMessage,
+        VoidMessage,
+        VoidMessage,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        VoidMessageContainer> Context;
+
+    void registerTo(Context& context) {
+        Channel::registerFuntorTo(context);
+    }
+
 protected:
     virtual bool setClosed();
 
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
+
+    virtual void doInitialize();
 
 private:
     void accept();

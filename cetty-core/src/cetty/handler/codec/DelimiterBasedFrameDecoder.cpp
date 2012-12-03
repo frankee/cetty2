@@ -35,51 +35,51 @@ using namespace cetty::buffer;
 DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
     int maxFrameLength,
     const ChannelBufferPtr& delimiter)
-    : maxFrameLength(maxFrameLength),
-      stripDelimiter(true),
-      discardingTooLongFrame(false),
-      tooLongFrameLength(0) {
-    validateMaxFrameLength(maxFrameLength);
+    : stripDelimiter_(true),
+      discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0) {
+    init();
     validateDelimiter(delimiter);
-    delimiters.push_back(delimiter->slice(delimiter->readerIndex(),
-                                          delimiter->readableBytes()));
+    delimiters_.push_back(delimiter->slice(delimiter->readerIndex(),
+                                           delimiter->readableBytes()));
 }
 
 DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
     int maxFrameLength,
     bool stripDelimiter,
     const ChannelBufferPtr& delimiter)
-    : maxFrameLength(maxFrameLength),
-      stripDelimiter(stripDelimiter),
-      discardingTooLongFrame(false),
-      tooLongFrameLength(0) {
-    validateMaxFrameLength(maxFrameLength);
+    : stripDelimiter_(stripDelimiter),
+      discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0) {
+    init();
     validateDelimiter(delimiter);
-    delimiters.push_back(delimiter->slice(delimiter->readerIndex(),
-                                          delimiter->readableBytes()));
+    delimiters_.push_back(delimiter->slice(delimiter->readerIndex(),
+                                           delimiter->readableBytes()));
 }
 
 DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
     int maxFrameLength,
     const std::vector<ChannelBufferPtr>& delimiters)
-    : maxFrameLength(maxFrameLength),
-      stripDelimiter(true),
-      discardingTooLongFrame(false),
-      tooLongFrameLength(0) {
-    validateMaxFrameLength(maxFrameLength);
-    initdelimiters(delimiters);
+    : stripDelimiter_(true),
+      discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0) {
+    init();
+    initDelimiters(delimiters);
 }
 
 DelimiterBasedFrameDecoder::DelimiterBasedFrameDecoder(
     int maxFrameLength,
     bool stripDelimiter,
     const std::vector<ChannelBufferPtr>& delimiters)
-    : maxFrameLength(maxFrameLength),
-      stripDelimiter(stripDelimiter),
-      discardingTooLongFrame(false),
-      tooLongFrameLength(0) {
-    validateMaxFrameLength(maxFrameLength);
-    initdelimiters(delimiters);
+    : stripDelimiter_(stripDelimiter),
+      discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0) {
+    init();
+    initDelimiters(delimiters);
 }
 
 ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
@@ -88,12 +88,12 @@ ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
     int minFrameLength = MAX_INT32;
     ChannelBufferPtr minDelim;
 
-    for (size_t i = 0; i < delimiters.size(); ++i) {
-        int frameLength = indexOf(in, delimiters[i]);
+    for (size_t i = 0; i < delimiters_.size(); ++i) {
+        int frameLength = indexOf(in, delimiters_[i]);
 
         if (frameLength >= 0 && frameLength < minFrameLength) {
             minFrameLength = frameLength;
-            minDelim = delimiters[i];
+            minDelim = delimiters_[i];
         }
     }
 
@@ -101,28 +101,28 @@ ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         int minDelimLength = minDelim->capacity();
         ChannelBufferPtr frame;
 
-        if (discardingTooLongFrame) {
+        if (discardingTooLongFrame_) {
             // We've just finished discarding a very large frame.
             // Go back to the initial state.
-            discardingTooLongFrame = false;
+            discardingTooLongFrame_ = false;
             in->skipBytes(minFrameLength + minDelimLength);
 
             // TODO Let user choose when the exception should be raised - early or late?
             //      If early, fail() should be called when discardingTooLongFrame is set to true.
-            int tooLongFrameLength = this->tooLongFrameLength;
-            this->tooLongFrameLength = 0;
+            int tooLongFrameLength = this->tooLongFrameLength_;
+            this->tooLongFrameLength_ = 0;
             fail(ctx, tooLongFrameLength);
             return ChannelBufferPtr();
         }
 
-        if (minFrameLength > maxFrameLength) {
+        if (minFrameLength > maxFrameLength_) {
             // Discard read frame.
             in->skipBytes(minFrameLength + minDelimLength);
             fail(ctx, minFrameLength);
             return ChannelBufferPtr();
         }
 
-        if (stripDelimiter) {
+        if (stripDelimiter_) {
             frame = in->readBytes(minFrameLength);
             in->skipBytes(minDelimLength);
         }
@@ -133,17 +133,17 @@ ChannelBufferPtr DelimiterBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         return frame;
     }
     else {
-        if (!discardingTooLongFrame) {
-            if (in->readableBytes() > maxFrameLength) {
+        if (!discardingTooLongFrame_) {
+            if (in->readableBytes() > maxFrameLength_) {
                 // Discard the content of the buffer until a delimiter is found.
-                tooLongFrameLength = in->readableBytes();
+                tooLongFrameLength_ = in->readableBytes();
                 in->skipBytes(in->readableBytes());
-                discardingTooLongFrame = true;
+                discardingTooLongFrame_ = true;
             }
         }
         else {
             // Still discarding the buffer since a delimiter is not found.
-            tooLongFrameLength += in->readableBytes();
+            tooLongFrameLength_ += in->readableBytes();
             in->skipBytes(in->readableBytes());
         }
 
@@ -157,16 +157,16 @@ void DelimiterBasedFrameDecoder::fail(ChannelHandlerContext& ctx, long frameLeng
 
     if (frameLength > 0) {
         StringUtil::printf(&msg,
-            "frame length exceeds %d: %d - discarded.",
-            maxFrameLength,
-            frameLength);
+                           "frame length exceeds %d: %d - discarded.",
+                           maxFrameLength_,
+                           frameLength);
 
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
         StringUtil::printf(&msg,
-            "frame length exceeds %d - discarded",
-            maxFrameLength);
+                           "frame length exceeds %d - discarded",
+                           maxFrameLength_);
 
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
@@ -211,19 +211,19 @@ void DelimiterBasedFrameDecoder::validateDelimiter(const ChannelBufferPtr& delim
     }
 }
 
-void DelimiterBasedFrameDecoder::validateMaxFrameLength(int maxFrameLength) {
-    if (maxFrameLength <= 0) {
+void DelimiterBasedFrameDecoder::validateMaxFrameLength() {
+    if (maxFrameLength_ <= 0) {
         std::string msg;
         StringUtil::printf(&msg,
-            "maxFrameLength must be a positive integer: %d",
-            maxFrameLength);
+                           "maxFrameLength must be a positive integer: %d",
+                           maxFrameLength_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 }
 
-void DelimiterBasedFrameDecoder::initdelimiters(
+void DelimiterBasedFrameDecoder::initDelimiters(
     const std::vector<ChannelBufferPtr>& delimiters) {
     if (delimiters.size() == 0) {
         throw InvalidArgumentException("empty delimiters");
@@ -232,8 +232,17 @@ void DelimiterBasedFrameDecoder::initdelimiters(
     for (size_t i = 0; i < delimiters.size(); ++i) {
         const ChannelBufferPtr& d = delimiters[i];
         validateDelimiter(d);
-        this->delimiters.push_back(d->slice(d->readerIndex(), d->readableBytes()));
+        this->delimiters_.push_back(d->slice(d->readerIndex(), d->readableBytes()));
     }
+}
+
+void DelimiterBasedFrameDecoder::init() {
+    validateMaxFrameLength();
+
+    decoder_.setDecoder(boost::bind(&DelimiterBasedFrameDecoder::decode,
+                                    this,
+                                    _1,
+                                    _2));
 }
 
 }

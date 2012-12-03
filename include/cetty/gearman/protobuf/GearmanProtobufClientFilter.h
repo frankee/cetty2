@@ -30,7 +30,7 @@ using namespace cetty::protobuf::service;
 using namespace cetty::gearman::protocol;
 
 class GearmanProtobufClientFilter
-    : public cetty::service::ClientServiceFilter<
+    : public cetty::service::ClientServiceAdaptor<
     ProtobufServiceMessagePtr,
     GearmanMessagePtr,
     GearmanMessagePtr,

@@ -28,13 +28,18 @@ void ChannelConfig::setOptions(const ChannelOption::Options& options) {
     ChannelOption::Options::const_iterator itr = options.begin();
 
     while (itr != options.end()) {
-        setOption(itr->first, itr->second);
+        if (callback_ && callback_(itr->first, itr->second)) {
+        }
+        else {
+            setOption(itr->first, itr->second);
+        }
+
         ++itr;
     }
 }
 
 bool ChannelConfig::setOption(const ChannelOption& option,
-    const ChannelOption::Variant& value) {
+                              const ChannelOption::Variant& value) {
     try {
         if (option == ChannelOption::CONNECT_TIMEOUT_MILLIS) {
             setConnectTimeout(boost::get<int>(value));

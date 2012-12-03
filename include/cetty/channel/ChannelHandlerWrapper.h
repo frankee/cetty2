@@ -28,24 +28,28 @@ template<class T>
 struct ChannelHandlerWrapper {
     typedef T Handler;
     typedef boost::shared_ptr<T> HandlerPtr;
+    typedef boost::shared_ptr<T> StoredHandlerPtr;
 };
 
 template<class T>
 struct ChannelHandlerWrapper<boost::intrusive_ptr<T> > {
     typedef T Handler;
     typedef boost::intrusive_ptr<T> HandlerPtr;
+    typedef boost::intrusive_ptr<T> StoredHandlerPtr;
 };
 
 template<class T>
 struct ChannelHandlerWrapper<boost::shared_ptr<T> > {
     typedef T Handler;
     typedef boost::shared_ptr<T> HandlerPtr;
+    typedef boost::shared_ptr<T> StoredHandlerPtr;
 };
 
 template<typename T>
 struct ChannelHandlerWrapper<boost::weak_ptr<T> > {
     typedef T Handler;
-    typedef boost::weak_ptr<T> HandlerPtr;
+    typedef boost::shared_ptr<T> HandlerPtr;
+    typedef boost::weak_ptr<T> StoredHandlerPtr;
 };
 
 }

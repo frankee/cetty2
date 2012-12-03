@@ -18,9 +18,9 @@
  */
 
 #include <cetty/bootstrap/ServerBootstrap.h>
+
 #include <cetty/channel/asio/AsioSocketAddressImplFactory.h>
 #include <cetty/channel/asio/AsioIpAddressImplFactory.h>
-
 
 namespace cetty {
 namespace bootstrap {
@@ -45,8 +45,6 @@ public:
 
     virtual ~AsioServerBootstrap();
 
-    virtual void shutdown();
-
 protected:
     virtual ChannelPtr newChannel();
 
@@ -55,11 +53,6 @@ private:
     void deinit();
 
 private:
-    EventLoopPoolPtr parentPool;
-    EventLoopPoolPtr childPool;
-
-    std::vector<ChannelPtr> serverChannels;
-
     AsioTcpSocketAddressImplFactory* socketAddressFactory;
     AsioIpAddressImplFactory* ipAddressFactory;
 };

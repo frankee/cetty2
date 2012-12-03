@@ -36,8 +36,7 @@ using namespace cetty::buffer;
 using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service;
 
-class ProtobufServiceMessageEncoder
-    : public MessageToMessageEncoder<ProtobufServiceMessagePtr, ChannelBufferPtr> {
+class ProtobufServiceMessageEncoder {
 public:
     ProtobufServiceMessageEncoder() {}
     virtual ~ProtobufServiceMessageEncoder() {}

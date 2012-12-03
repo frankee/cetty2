@@ -37,21 +37,24 @@ public:
 
     virtual ~ClientService() {}
 
-    //virtual const SocketAddress& localAddress() const;
-    //virtual const SocketAddress& remoteAddress() const;
-
     virtual bool isOpen() const;
     virtual bool isActive() const;
-
-    //virtual void setPipeline(const ChannelPipelinePtr& pipeline);
 
 protected:
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
 
+    template<typename ReqT, typename RepT>
+    void writeRequest(const ReqT& request,
+        const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+            boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
+                new OutstandingCall<ReqT, RepT>(request, future));
+            channel->writeMessage(outstanding);
+    }
+
 protected:
-    EventLoopPtr  eventLoop_;
+    EventLoopPtr eventLoop_;
 };
 
 template<typename ReqT, typename RepT>
@@ -61,7 +64,7 @@ void callMethod(const ChannelPtr& channel,
     if (channel) {
         boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
             new OutstandingCall<ReqT, RepT>(request, future));
-        channel->write(outstanding);
+        channel->writeMessage(outstanding);
     }
 }
 

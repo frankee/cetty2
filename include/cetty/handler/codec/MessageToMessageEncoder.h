@@ -32,7 +32,9 @@
  * under the License.
  */
 
+#include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/EncoderException.h>
 
@@ -42,31 +44,57 @@ namespace codec {
 
 using namespace cetty::channel;
 
-template<typename OutboundIn, typename OutboundOut>
+template<typename H,
+         typename OutboundIn,
+         typename OutboundOut,
+         typename Context = ChannelMessageHandlerContext<H,
+         VoidMessage,
+         VoidMessage,
+         OutboundIn,
+         OutboundOut,
+         VoidMessageContainer,
+         VoidMessageContainer,
+         ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
+         ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > >
 class MessageToMessageEncoder :private boost::noncopyable {
 public:
-    typedef MessageToMessageEncoder<OutboundIn, OutboundOut> Self;
-    typedef boost::shared_ptr<Self> Ptr;
+    typedef MessageToMessageEncoder<H, OutboundIn, OutboundOut, Context> Self;
+
+    typedef ChannelHandlerWrapper<H>::Handler Handler;
+    typedef ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
     typedef typename OutboundContainer::MessageQueue OutboundMessageQueue;
 
-    typedef ChannelMessageHandlerContext<
-    Self,
-    VoidMessage,
-    VoidMessage,
-    OutboundIn,
-    OutboundOut,
-    VoidMessageContainer,
-    VoidMessageContainer,
-    OutboundContainer,
-    ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > Context;
+    typedef ChannelMessageTransfer<OutboundOut,
+            ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK>,
+            TRANSFER_OUTBOUND> OutboundTransfer;
+
+    typedef boost::function<OutboundOut(ChannelHandlerContext&,
+                                        OutboundIn const&)> Encoder;
+
+    typedef boost::function<bool (OutboundIn const&)> EncodableChecker;
 
 public:
-    virtual ~MessageToMessageEncoder() {}
+    MessageToMessageEncoder(const Encoder& encoder)
+        : encoder_(encoder),
+          transfer_(),
+          container_() {
+    }
+
+    MessageToMessageEncoder(const Encoder& encoder,
+                            const EncodableChecker& checker)
+        : encoder_(encoder),
+          checker_(checker),
+          transfer_(),
+          container_() {
+    }
+
+    ~MessageToMessageEncoder() {}
 
     virtual void registerTo(Context& ctx) {
-        context_ = &ctx;
+        transfer_ = ctx.outboundTransfer();
+        container_ = ctx.outboundContainer();
 
         ctx.setFlushFunctor(boost::bind(
                                 &Self::flush,
@@ -78,8 +106,7 @@ public:
     void flush(ChannelHandlerContext& ctx,
                const ChannelFuturePtr& future) {
 
-        OutboundMessageQueue& outboundQueue =
-            context_->outboundContainer()->getMessages();
+        OutboundMessageQueue& outboundQueue = container_->getMessages();
 
         while (!outboundQueue.empty()) {
             try {
@@ -104,8 +131,7 @@ public:
                     continue;
                 }
 
-                context_->outboundTransfer()->unfoldAndAdd(omsg);
-
+                transfer_->unfoldAndAdd(omsg);
                 outboundQueue.pop_front();
             }
             catch (const CodecException& e) {
@@ -124,15 +150,13 @@ public:
      *
      * @param msg the message
      */
-    virtual bool isEncodable(const OutboundIn& msg) {
-        return true;
-    }
 
-    virtual OutboundOut encode(ChannelHandlerContext& ctx,
-                               const OutboundIn& msg) = 0;
+private:
+    Encoder encoder_;
+    EncodableChecker checker_;
 
-protected:
-    Context* context_;
+    OutboundTransfer transfer_;
+    OutboundContainer container_;
 };
 
 }

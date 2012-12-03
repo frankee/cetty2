@@ -14,6 +14,96 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace bootstrap { namespace asio { 
 
-}}}
+#include <cetty/bootstrap/asio/AsioClientBootstrap.h>
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioSocketChannel.h>
+
+namespace cetty {
+namespace bootstrap {
+namespace asio {
+
+    using namespace cetty::channel::asio;
+
+AsioClientBootstrap::AsioClientBootstrap(
+    const EventLoopPtr& eventLoop)
+    : eventLoop_(eventLoop),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    init();
+}
+
+AsioClientBootstrap::AsioClientBootstrap(
+    const EventLoopPoolPtr& eventLoopPool)
+    : ClientBootstrap(eventLoopPool),
+      socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    init();
+}
+
+AsioClientBootstrap::AsioClientBootstrap(int threadCnt)
+    : socketAddressFactory(NULL),
+      ipAddressFactory(NULL) {
+    if (threadCnt < 1) {
+        LOG_WARN << "client bootstrap thread count should no less than 1";
+        threadCnt = 1;
+    }
+
+    EventLoopPoolPtr pool = new AsioServicePool(threadCnt);
+    setEventLoopPool(pool);
+
+    init();
+}
+
+AsioClientBootstrap::~AsioClientBootstrap() {
+    deinit();
+}
+
+void AsioClientBootstrap::init() {
+    if (!SocketAddress::hasFactory()) {
+        const EventLoopPoolPtr& pool = eventLoopPool();
+        EventLoopPtr loop = pool ? pool->getNextLoop() : eventLoop_;
+
+        AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
+        BOOST_ASSERT(service && "AsioClientBootstrap only can init with AsioService");
+
+        socketAddressFactory =
+            new AsioTcpSocketAddressImplFactory(service->service());
+
+        SocketAddress::setFacotry(socketAddressFactory);
+    }
+
+    if (!IpAddress::hasFactory()) {
+        ipAddressFactory = new AsioIpAddressImplFactory();
+        IpAddress::setFactory(ipAddressFactory);
+    }
+}
+
+void AsioClientBootstrap::deinit() {
+    if (socketAddressFactory) {
+        SocketAddress::resetFactory();
+
+        delete socketAddressFactory;
+        socketAddressFactory = NULL;
+    }
+
+    if (ipAddressFactory) {
+        IpAddress::resetFactory();
+
+        delete ipAddressFactory;
+        ipAddressFactory = NULL;
+    }
+}
+
+ChannelPtr AsioClientBootstrap::newChannel() {
+    const EventLoopPoolPtr& pool = eventLoopPool();
+    const EventLoopPtr& eventLoop = pool ? pool->getNextLoop()
+                                    : eventLoop_;
+
+    return ChannelPtr(new AsioSocketChannel(eventLoop));
+}
+
+}
+}
+}

@@ -18,7 +18,7 @@
  */
 
 #include <deque>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/handler/codec/MessageToMessageCodec.h>
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -48,30 +48,76 @@ using namespace cetty::channel;
 *
 */
 
-template<typename RequestInT,
-         typename RequestOutT,
-         typename ResponseInT,
-         typename ResponseOutT>
-class ServiceFilter
-        : public ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT> {
+template<typename H,
+         typename RequestIn,
+         typename RequestOut,
+         typename ResponseIn,
+         typename ResponseOut>
+class ServiceAdaptor {
 public:
-    using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::inboundTransfer;
-    using ChannelMessageHandlerAdapter<RequestInT, RequestOutT, ResponseInT, ResponseOutT>::outboundTransfer;
+    typedef ServiceAdaptor<H, RequestIn, RequestOut, ResponseIn, ResponseOut> Self;
 
-    using ChannelInboundMessageHandler<RequestInT>::inboundQueue;
-    using ChannelOutboundMessageHandler<ResponseInT>::outboundQueue;
+    typedef ChannelMessageContainer<RequestIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<ResponseIn, MESSAGE_BLOCK> OutboundContainer;
+
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef ChannelMessageContainer<RequestOut, MESSAGE_BLOCK> NextInboundContainer;
+    typedef ChannelMessageContainer<ResponseOut, MESSAGE_BLOCK> NextOutboundContainer;
+
+    typedef ChannelMessageTransfer<RequestOut, NextInboundContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<ResponseOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+
+    typedef ChannelMessageHandlerContext<H,
+            RequestIn,
+            RequestOut,
+            ResponseIn,
+            ResponseOut,
+            InboundContainer,
+            NextInboundContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
+
+    typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestAdaptor;
+    typedef boost::function<ResponseOut(ChannelHandlerContext&,
+                                        RequestIn const&,
+                                        ResponseIn const&,
+                                        ChannelFuturePtr const&)> ResponseAdaptor;
 
 public:
-    virtual ~ServiceFilter() {}
+    ServiceAdaptor() {}
+    ServiceAdaptor(const RequestAdaptor& requestAdaptor,
+                  const ResponseAdaptor& responseAdaptor);
 
-protected:
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+    ~ServiceAdaptor() {}
+
+    void registerTo(Context& ctx) {
+        inboundTransfer_ = ctx.inboundTransfer();
+        inboundContainer_ = ctx.inboundContainer();
+
+        outboundTransfer_ = ctx.outboundTransfer();
+        outboundContainer_ = ctx.outboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&Self::messageUpdated,
+                                             this,
+                                             _1));
+
+        ctx.setFlushFunctor(boost::bind(&Self::flush,
+                                        this,
+                                        _1,
+                                        _2));
+    }
+
+private:
+    void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
+        InboundQueue& queue = inboundContainer_->getMessages();
 
-        while (!inboundQueue.empty()) {
-            RequestInT& req = inboundQueue.front();
+        while (!queue.empty()) {
+            RequestIn& req = queue.front();
             reqs.push_back(req);
-            RequestOutT oreq = filterRequest(ctx, req);
+            RequestOut oreq = filterRequest(ctx, req);
 
             if (!oreq) {
                 LOG_WARN << "serviceFilter filterRequest has an empty result, "
@@ -81,11 +127,11 @@ protected:
                 continue;
             }
 
-            if (inboundTransfer.unfoldAndAdd(oreq)) {
+            if (inboundTransfer_->unfoldAndAdd(oreq)) {
                 notify = true;
             }
 
-            inboundQueue.pop_front();
+            queue.pop_front();
         }
 
         if (notify) {
@@ -93,38 +139,43 @@ protected:
         }
     }
 
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future) {
-        while (!outboundQueue.empty()) {
-            ResponseInT& rep = outboundQueue.front();
-            ResponseOutT orep = filterResponse(ctx, reqs.front(), rep, future);
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future) {
+
+        OutboundQueue& queue = outboundContainer_->getMessages();
+
+        while (!queue.empty()) {
+
+            ResponseIn& rep = queue.front();
+            ResponseOut orep = filterResponse(ctx, reqs.front(), rep, future);
             reqs.pop_front();
 
             if (!orep) {
                 LOG_ERROR << "serviceFilter filterResponse has an empty result, "
                           "skip it, user handler should replace an error message if needed.";
 
-                outboundQueue.pop_front();
+                queue.pop_front();
                 continue;
             }
 
-            outboundTransfer.unfoldAndAdd(orep);
-            outboundQueue.pop_front();
+            outboundTransfer_->unfoldAndAdd(orep);
+            queue.pop_front();
         }
 
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(ChannelHandlerContext& ctx,
-                                      const RequestInT& req) = 0;
-
-    virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
-                                        const RequestInT& req,
-                                        const ResponseInT& rep,
-                                        const ChannelFuturePtr& future) = 0;
-
 private:
-    std::deque<RequestInT>reqs;
+    std::deque<RequestIn> reqs;
+
+    RequestAdaptor requestAdaptor_;
+    ResponseAdaptor responseAdaptor_;
+
+    InboundTransfer* inboundTransfer_;
+    OutboundTransfer* outboundTransfer_;
+
+    InboundContainer* inboundContainer_;
+    OutboundContainer* outboundContainer_;
 };
 
 }

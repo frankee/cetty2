@@ -49,14 +49,6 @@ HttpServiceFilter::HttpServiceFilter() {
     proto2http.setResponseMapper(responseMapper);
 }
 
-ChannelHandlerPtr HttpServiceFilter::clone() {
-    return new HttpServiceFilter(requestMapper, responseMapper);
-}
-
-std::string HttpServiceFilter::toString() const {
-    return "ProtobufHttpMessageFilter";
-}
-
 ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
         const HttpMessagePtr& req) {
     HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);

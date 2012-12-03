@@ -133,8 +133,17 @@ public:
      */
     void setConnectTimeout(int connectTimeoutMillis);
 
+    const SetOptionCallback& setOptionCallback() const {
+        return callback_;
+    }
+
+    void setSetOptionCallback(const SetOptionCallback& callback) {
+        callback_ = callback;
+    }
+
 private:
     int connectTimeoutMillis_; // 10 seconds
+    SetOptionCallback callback_;
 };
 
 inline

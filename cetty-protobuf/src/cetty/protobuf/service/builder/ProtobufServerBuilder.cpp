@@ -61,7 +61,7 @@ ProtobufServerBuilder& ProtobufServerBuilder::registerService(
 
 bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
-#if 0
+
     pipeline.addLast<LengthFieldBasedFrameDecoder::Self>("frameDecoder",
         LengthFieldBasedFrameDecoder::Ptr(
         new LengthFieldBasedFrameDecoder(
@@ -92,7 +92,6 @@ bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
         "messageHandler",
         ProtobufServiceMessageHandlerPtr(new ProtobufServiceMessageHandler()));
 
-#endif
     return true;
 }
 

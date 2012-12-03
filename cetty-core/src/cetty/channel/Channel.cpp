@@ -20,6 +20,7 @@
 
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/FailedChannelFuture.h>
 #include <cetty/channel/DefaultChannelFuture.h>
 #include <cetty/channel/ChannelFutureListener.h>
@@ -70,8 +71,10 @@ Channel::Channel(const ChannelPtr& parent,
     : id_(),
       parent_(parent),
       eventLoop_(eventLoop),
-      pipeline_(),
-      context_() {
+      pipeline_() {
+    if (!id_) {
+        id_ = allocateId();
+    }
 }
 
 Channel::Channel(int id,
@@ -80,32 +83,22 @@ Channel::Channel(int id,
     : id_(id),
       parent_(parent),
       eventLoop_(eventLoop),
-      pipeline_(),
-      context_() {
+      pipeline_() {
+    if (!id_) {
+        id_ = allocateId();
+    }
 }
 
 Channel::~Channel() {
-    LOG_DEBUG << "Channel dectr";
+    LOG_DEBUG << "Channel dctr";
 
     if (pipeline_) {
         delete pipeline_;
     }
 }
 
-void Channel::init() {
-}
-
-void Channel::open() {
+void Channel::initialize() {
     ChannelPtr self = shared_from_this();
-
-    if (!id_) {
-        id_ = allocateId();
-    }
-
-#if 0  // FIXME need concurrent hash map
-    closeFuture->addListener(
-        boost::bind(&Channel::idDeallocatorCallback, this, _1));
-#endif
 
     succeededFuture_ = new SucceededChannelFuture(self);
     closeFuture_ = new ChannelCloseFuture(self);
@@ -115,8 +108,8 @@ void Channel::open() {
         initializer_(self);
     }
 
-    //pipeline_->addFirst(new Context("bridge", self));
-    pipeline_->addFirst<ChannelPtr>("bridge", self);
+    doInitialize();
+
     pipeline_->fireChannelOpen();
 }
 
@@ -132,14 +125,6 @@ ChannelFuturePtr Channel::close() {
 
 const ChannelFuturePtr& Channel::close(const ChannelFuturePtr& future) {
     return pipeline_->close(future);
-
-    //if (pipeline_->attached()) {
-    //    return pipeline_->close(future);
-    //}
-    //else {
-    //    LOG_INFO << "close the channel, but the pipeline has detached.";
-    //    return closeFuture_;
-    //}
 }
 
 ChannelFuturePtr Channel::newFuture() {
@@ -150,50 +135,18 @@ ChannelFuturePtr Channel::newFailedFuture(const Exception& e) {
     return new FailedChannelFuture(shared_from_this(), e);
 }
 
-ChannelFuturePtr Channel::newSucceededFuture() {
-    return succeededFuture_;
-}
-
-const ChannelFuturePtr& Channel::closeFuture() {
-    return this->closeFuture_;
+ChannelFuturePtr Channel::newVoidFuture() {
+    return new VoidChannelFuture(shared_from_this());
 }
 
 bool Channel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture_)->setClosed();
 }
 
-void Channel::idDeallocatorCallback(ChannelFuture& future) {
-    //     std::map<int, ChannelPtr>::iterator itr
-    //         = Channel::allChannels.find(future.getChannel()->id());
-    //
-    //     if (itr != Channel::allChannels.end()) {
-    //         Channel::allChannels.erase(itr);
-    //     }
-}
-
 int Channel::allocateId() {
     boost::crc_32_type crc32;
     crc32.process_bytes((void const*)this, sizeof(this));
-    int id = crc32.checksum();
-
-#if 0 //FIXME need concurrent hash map
-
-    for (;;) {
-        // Loop until a unique ID is acquired.
-        // It should be found in one loop practically.
-        if (allChannels.insert(std::make_pair<int, ChannelPtr>(id, channel)).second) {
-            // Successfully acquired.
-            return id;
-        }
-        else {
-            // Taken by other channel at almost the same moment.
-            id += 1;
-        }
-    }
-
-#endif
-
-    return id;
+    return crc32.checksum();
 }
 
 int Channel::compareTo(const ChannelPtr& c) const {
@@ -242,27 +195,9 @@ std::string Channel::toString() const {
     return strVal_;
 }
 
-void Channel::registerTo(Context& context) {
-    context_ = &context;
-
-    context.setBindFunctor(boost::bind(&Channel::doBind,
-                                       this,
-                                       _1,
-                                       _2,
-                                       _3));
-
-    context.setDisconnectFunctor(boost::bind(&Channel::doDisconnect,
-                                 this,
-                                 _1,
-                                 _2));
-
-    context.setCloseFunctor(boost::bind(&Channel::doClose,
-                                        this,
-                                        _1,
-                                        _2));
-}
-
-void Channel::doBind(ChannelHandlerContext& ctx, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+void Channel::doBind(ChannelHandlerContext& ctx,
+                     const SocketAddress& localAddress,
+                     const ChannelFuturePtr& future) {
     if (!isOpen()) {
         return;
     }
@@ -320,15 +255,20 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
         if (wasActive && !isActive()) {
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             pipeline_->fireChannelInactive();
-
-            closeFuture_.reset();
-            succeededFuture_.reset();
         }
     }
     else {
         // Closed already.
         future->setSuccess();
     }
+}
+
+void Channel::closeIfClosed() {
+    if (isOpen()) {
+        return;
+    }
+
+    //close(voidFuture());
 }
 
 }

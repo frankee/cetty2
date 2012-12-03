@@ -72,6 +72,22 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
+class HttpRequestDecodeHandler {
+public:
+    typedef ChannelMessageHandlerContext<H,
+        ChannelBufferPtr,
+        HttpPackage,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferContainer,
+        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+        VoidMessage,
+        VoidMessage> Context;
+
+private:
+    ReplayingDecoder<HttpRequestDecoder, HttpPackage, Context> decoder_;
+};
+
 class HttpRequestDecoder : public HttpMessageDecoder {
 public:
     /**

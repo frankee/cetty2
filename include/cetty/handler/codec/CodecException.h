@@ -23,9 +23,6 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-using namespace cetty::util;
-using namespace cetty::channel;
-
 /**
  * An {@link Exception} which is thrown when a user calls an unsupported
  * operation on a {@link ChannelBuffer} in a {@link ReplayingDecoder}
@@ -36,7 +33,7 @@ using namespace cetty::channel;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-CETTY_DECLARE_EXCEPTION(CodecException, ChannelException)
+CETTY_DECLARE_EXCEPTION(CodecException, ::cetty::channel::ChannelException)
 
 }
 }

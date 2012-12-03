@@ -17,7 +17,6 @@
 #include <cetty/craft/builder/CraftServerBuilder.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/handler/codec/LengthFieldPrepender.h>

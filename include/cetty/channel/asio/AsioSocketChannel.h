@@ -31,6 +31,9 @@
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelMessageContainer.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
+
 #include <cetty/channel/asio/AsioServicePoolPtr.h>
 #include <cetty/channel/asio/AsioHandlerAllocator.h>
 #include <cetty/channel/asio/AsioSocketChannelConfig.h>
@@ -56,23 +59,31 @@ public:
 
     virtual ~AsioSocketChannel();
 
-    boost::asio::ip::tcp::socket& getSocket() {
+    boost::asio::ip::tcp::socket& tcpSocket() {
         return tcpSocket_;
     }
 
-    const AsioServicePtr& getService() {
+    const AsioServicePtr& ioService() {
         return ioService_;
     }
-
-    //virtual const SocketAddress& localAddress() const;
-    //virtual const SocketAddress& remoteAddress() const;
 
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
 public:
-    virtual void registerTo(Context& context) {
-        Channel::registerTo(context);
+    typedef ChannelMessageHandlerContext<
+        Channel,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferPtr,
+        VoidMessage,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        ChannelBufferContainer,
+        VoidMessageContainer> Context;
+
+    void registerTo(Context& context) {
+        Channel::registerFuntorTo(context);
 
         context.setConnectFunctor(boost::bind(
                                       &AsioSocketChannel::doConnect,
@@ -87,14 +98,26 @@ public:
                                     this,
                                     _1,
                                     _2));
+
+        context.setAfterAddCallback(boost::bind(
+            &AsioSocketChannel::afterAdd,
+            this,
+            _1));
     }
 
 private:
+    void afterAdd(ChannelHandlerContext& ctx) {
+        bridgeContainer_ =
+            ctx.outboundMessageContainer<ChannelBufferContainer>();
+    }
+
     virtual bool setClosed();
 
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
+
+    virtual void doInitialize();
 
     void doConnect(ChannelHandlerContext& ctx,
                    const SocketAddress& remoteAddress,
@@ -118,7 +141,7 @@ private:
             int connectTimeoutMillis = config().connectTimeout();
 
             if (connectTimeoutMillis > 0) {
-                eventLoop_->runAfter(connectTimeoutMillis, boost::bind(
+                eventLoop()->runAfter(connectTimeoutMillis, boost::bind(
                                          &AsioSocketChannel::handleConnectTimeout,
                                          this));
             }
@@ -215,6 +238,7 @@ private:
     boost::asio::ip::tcp::socket tcpSocket_;
 
     ChannelBufferPtr readBuffer_;
+    ChannelBufferContainer* bridgeContainer_;
     boost::scoped_ptr<AsioWriteOperationQueue> writeQueue_;
 
     AsioSocketChannelConfig socketConfig_;

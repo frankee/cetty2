@@ -24,14 +24,15 @@
 #include <string>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/smart_ptr/enable_shared_from_this2.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelConfig.h>
-#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelMessageHandlerContext.h>
+#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 
 #include <cetty/util/Exception.h>
 #include <cetty/util/ReferenceCounter.h>
@@ -134,7 +135,7 @@ class ChannelSink;
  *
  */
 
-class Channel : public boost::enable_shared_from_this2<Channel> {
+class Channel : public boost::enable_shared_from_this<Channel> {
 public:
     typedef boost::function<bool (const ChannelPtr&)> Initializer;
 
@@ -162,16 +163,12 @@ public:
     /**
      * Returns the configuration of this channel.
      */
-    ChannelConfig& config() {
-        return config_;
-    }
+    ChannelConfig& config();
 
     /**
      * Returns the const configuration reference of this channel.
      */
-    const ChannelConfig& config() const {
-        return config_;
-    }
+    const ChannelConfig& config() const;
 
     /**
      * Returns the {@link ChannelPipeline} which handles {@link ChannelEvent}s
@@ -198,9 +195,7 @@ public:
      * @remark Return an {@link SocketAddress NULL_ADDRESS}
      * if this channel is not bound.
      */
-    const SocketAddress& localAddress() const {
-        return localAddress_;
-    }
+    const SocketAddress& localAddress() const;
 
     /**
      * Returns the remote address where this channel is connected to.
@@ -214,9 +209,7 @@ public:
      *         the origination of the received message as this method will
      *         return {@link SocketAddress NULL_ADDRESS}.
      */
-    const SocketAddress& remoteAddress() const {
-        return remoteAddress_;
-    }
+    const SocketAddress& remoteAddress() const;
 
     ChannelFuturePtr newFuture();
     ChannelFuturePtr newFailedFuture(const Exception& e);
@@ -228,15 +221,19 @@ public:
      */
     ChannelFuturePtr newSucceededFuture();
 
+    ChannelFuturePtr newVoidFuture();
+
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
      * channel is closed.  This method always returns the same future instance.
      */
     const ChannelFuturePtr& closeFuture();
 
-    void setInitializer(const Initializer& initializer) {
-        initializer_ = initializer;
-    }
+    const Initializer& initializer() const;
+
+    void setInitializer(const Initializer& initializer);
+
+    virtual void initialize();
 
 public:
     ChannelFuturePtr bind(const SocketAddress& localAddress);
@@ -247,8 +244,7 @@ public:
                              const SocketAddress& localAddress);
 
     ChannelFuturePtr disconnect();
-
-    void open();
+    
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
@@ -296,18 +292,6 @@ public:
                                         const ChannelFuturePtr& future);
 
 public:
-    typedef ChannelMessageHandlerContext<ChannelPtr,
-            VoidMessage,
-            VoidMessage,
-            ChannelBufferPtr,
-            VoidMessage,
-            VoidMessageContainer,
-            VoidMessageContainer,
-            ChannelBufferContainer,
-            VoidMessageContainer> Context;
-
-    virtual void registerTo(Context& context);
-
     /**
      * Compares the {@link #getId() ID} of the two channels.
      */
@@ -363,6 +347,8 @@ protected:
     virtual void doPreClose() {} // NOOP by default
     virtual void doClose() = 0;
 
+    virtual void doInitialize() {}
+
     /**
      * Marks this channel as closed.  This method is intended to be called by
      * an internal component - please do not call it unless you know what you
@@ -373,18 +359,28 @@ protected:
      */
     virtual bool setClosed();
 
-    void closeIfClosed() {
-        if (isOpen()) {
-            return;
-        }
+    void closeIfClosed();
 
-        //close(voidFuture());
+    template<typename C>
+    void registerFuntorTo(C& context) {
+        context.setBindFunctor(boost::bind(&Channel::doBind,
+            this,
+            _1,
+            _2,
+            _3));
+
+        context.setDisconnectFunctor(boost::bind(&Channel::doDisconnect,
+            this,
+            _1,
+            _2));
+
+        context.setCloseFunctor(boost::bind(&Channel::doClose,
+            this,
+            _1,
+            _2));
     }
 
 private:
-    void init();
-
-    void idDeallocatorCallback(ChannelFuture& future);
     int  allocateId();
 
 private:
@@ -401,7 +397,7 @@ private:
 private:
     friend class ChannelCloseFuture;
 
-protected:
+private:
     int id_;
 
     ChannelPtr parent_;
@@ -416,8 +412,6 @@ protected:
 
     SocketAddress localAddress_;
     SocketAddress remoteAddress_;
-
-    Context* context_;
 
     /** Cache for the string representation of this channel */
     mutable std::string strVal_;
@@ -441,6 +435,46 @@ const ChannelPtr& Channel::parent() const {
 inline
 ChannelPipeline& Channel::pipeline() {
     return *pipeline_;
+}
+
+inline
+ChannelConfig& Channel::config() {
+    return config_;
+}
+
+inline
+const ChannelConfig& Channel::config() const {
+    return config_;
+}
+
+inline
+const SocketAddress& Channel::localAddress() const {
+    return localAddress_;
+}
+
+inline
+const SocketAddress& Channel::remoteAddress() const {
+    return remoteAddress_;
+}
+
+inline
+void Channel::setInitializer(const Channel::Initializer& initializer) {
+    initializer_ = initializer;
+}
+
+inline
+const Channel::Initializer& Channel::initializer() const {
+    return initializer_;
+}
+
+inline
+ChannelFuturePtr Channel::newSucceededFuture() {
+    return succeededFuture_;
+}
+
+inline
+const ChannelFuturePtr& Channel::closeFuture() {
+    return closeFuture_;
 }
 
 inline

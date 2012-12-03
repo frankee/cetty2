@@ -72,18 +72,18 @@ AsioServerSocketChannel::~AsioServerSocketChannel() {
 //     if (localAddress != SocketAddress::NULL_ADDRESS) {
 //         return localAddress;
 //     }
-// 
+//
 //     boost::system::error_code ec;
 //     boost::asio::ip::tcp::endpoint endpoint = acceptor_.local_endpoint(ec);
-// 
+//
 //     if (ec) {
 //         return SocketAddress::NULL_ADDRESS;
 //     }
-// 
+//
 //     localAddress = SocketAddress(
 //                        new AsioTcpSocketAddressImpl(ioService_->service(),
 //                                endpoint));
-// 
+//
 //     return localAddress;
 // }
 
@@ -151,7 +151,7 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
         if (!loop->start()) {
             LOG_ERROR << "start the boost asio service error, stop service pool and close channel.";
             loop->stop();
-            pipeline_->fireExceptionCaught(
+            pipeline().fireExceptionCaught(
                 ChannelException("failed to start the asio service in main thread."));
 
             return doClose();
@@ -166,14 +166,14 @@ void AsioServerSocketChannel::accept() {
     const AsioServicePtr& ioService = childServicePool_->getNextService();
 
     AsioSocketChannelPtr c(new AsioSocketChannel(shared_from_this(),
-                              ioService));
+                           ioService));
 
-    acceptor_.async_accept(c->getSocket(),
-                          makeCustomAllocHandler(acceptAllocator_,
-                                  boost::bind(&AsioServerSocketChannel::handleAccept,
-                                          this,
-                                          boost::asio::placeholders::error,
-                                          c)));
+    acceptor_.async_accept(c->tcpSocket(),
+                           makeCustomAllocHandler(acceptAllocator_,
+                                   boost::bind(&AsioServerSocketChannel::handleAccept,
+                                           this,
+                                           boost::asio::placeholders::error,
+                                           c)));
 }
 
 void AsioServerSocketChannel::handleAccept(const boost::system::error_code& error,
@@ -188,7 +188,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
         pipeline().fireMessageUpdated();
 
         LOG_INFO << "AsioSocketChannel firing the Channel Open Event.";
-        channel->open();
+        channel->initialize();
 
         childChannels_.insert(
             std::make_pair<int, ChannelPtr>(channel->id(), channel));
@@ -204,15 +204,15 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
 
         const AsioServicePtr& ioService = childServicePool_->getNextService();
         AsioSocketChannelPtr newChannel(new AsioSocketChannel(
-            shared_from_this(),
-            ioService));
+                                            shared_from_this(),
+                                            ioService));
 
-        acceptor_.async_accept(newChannel->getSocket(),
-                              makeCustomAllocHandler(acceptAllocator_,
-                                      boost::bind(&AsioServerSocketChannel::handleAccept,
-                                              this,
-                                              boost::asio::placeholders::error,
-                                              newChannel)));
+        acceptor_.async_accept(newChannel->tcpSocket(),
+                               makeCustomAllocHandler(acceptAllocator_,
+                                       boost::bind(&AsioServerSocketChannel::handleAccept,
+                                               this,
+                                               boost::asio::placeholders::error,
+                                               newChannel)));
     }
     else {
         LOG_ERROR << "Failed to accept a connection any more. ErrorCode:" << error.value();
@@ -257,14 +257,24 @@ bool AsioServerSocketChannel::isOpen() const {
 }
 
 void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
-    if (eventLoop_->inLoopThread()) {
+    if (eventLoop()->inLoopThread()) {
         childChannels_.erase(future.channel().lock()->id());
     }
     else {
-        eventLoop_->post(boost::bind(&AsioServerSocketChannel::handleChildClosed,
-                                    this,
-                                    boost::cref(future)));
+        eventLoop()->post(boost::bind(&AsioServerSocketChannel::handleChildClosed,
+                                      this,
+                                      boost::cref(future)));
     }
+}
+
+void AsioServerSocketChannel::doInitialize() {
+    Channel::config().setSetOptionCallback(boost::bind(
+            &AsioServerSocketChannelConfig::setOption,
+            &socketConfig_,
+            _1,
+            _2));
+
+    pipeline().addLast<ChannelPtr>("bridge", shared_from_this());
 }
 
 }

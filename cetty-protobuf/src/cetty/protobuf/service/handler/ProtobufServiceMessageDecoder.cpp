@@ -16,7 +16,6 @@
 
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 
-#include <cstdio>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/ChannelBufferUtil.h>

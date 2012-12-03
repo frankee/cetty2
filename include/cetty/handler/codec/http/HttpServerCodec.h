@@ -21,7 +21,8 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/CombinedChannelBufferMessageHandler.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
 #include <cetty/handler/codec/http/HttpRequestDecoder.h>
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 
@@ -44,8 +45,20 @@ namespace http {
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpResponseEncoder
  */
 
-class HttpServerCodec
-        : public cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> {
+class HttpServerCodec {
+public:
+    typedef ChannelMessageHandlerContext<HttpServerCodec,
+        ChannelBufferPtr,
+        HttpPackage,
+        HttpPackage,
+        ChannelBufferPtr,
+        ChannelBufferContainer,
+        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+        ChannelBufferContainer> Context;
+
+    typedef boost::shared_ptr<HttpServerCodec> HandlerPtr;
+
 public:
     /**
      * Creates a new instance with the default decoder options
@@ -53,23 +66,29 @@ public:
      * <tt>maxChunkSize (8192)</tt>).
      */
     HttpServerCodec()
-        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
-            new HttpRequestDecoder(4096, 8192, 8192),
-            new HttpResponseEncoder) {
+        :  decoderImpl_(4096, 8192, 8192),
+           decoder_(boost::bind(&HttpRequestDecoderImpl::decode, &decoderImpl_, _1, _2, _3)),
+           encoder_(boost::bind(&HttpResponseEncoderImpl::encode, &encoderImpl_, _1, _2)) {
     }
 
     /**
      * Creates a new instance with the specified decoder options.
      */
     HttpServerCodec(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
-            new HttpRequestDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize),
-            new HttpResponseEncoder) {
+        : decoderImpl_(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
     }
 
-    virtual std::string toString() const {
-        return "HttpServerCodec";
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
     }
+
+private:
+    HttpRequestDecoderImpl decoderImpl_;
+    HttpResponseEncoderImpl encoderImpl_;
+
+    ReplayingDecoder<HttpServerCodec, HttpPackage, Context> decoder_;
+    MessageToBufferEncoder<HttpServerCodec, HttpPackage, Context> encoder_;
 };
 
 }

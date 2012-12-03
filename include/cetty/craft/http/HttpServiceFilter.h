@@ -33,11 +33,17 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
-class HttpServiceFilter
-    : public cetty::service::ServiceFilter<HttpMessagePtr,
-      ProtobufServiceMessagePtr,
-      ProtobufServiceMessagePtr,
-          HttpPackage> {
+class HttpServiceFilter : private boost::noncopyable {
+public:
+    typedef boost::shared_ptr<HttpServiceFilter> HandlerPtr;
+
+    typedef cetty::service::ServiceAdaptor<HttpServiceFilter,
+        HttpMessagePtr,
+        ProtobufServiceMessagePtr,
+        ProtobufServiceMessagePtr,
+        HttpPackage> Filter;
+
+    typedef Filter::Context Context;
 
 public:
     HttpServiceFilter();
@@ -45,22 +51,30 @@ public:
     HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
                       const ServiceResponseMapperPtr& responseMap);
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+    void registerTo(Context& ctx) {
+        filter_.registerTo(ctx);
+
+        ctx.setExceptionCallback(boost::bind(&HttpServiceFilter::exceptionCaught,
+            this,
+            _1,
+            _2));
+    }
+
+    void exceptionCaught(ChannelHandlerContext& ctx,
                                  const ChannelException& cause);
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
-
-protected:
-    virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
+private:
+    ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
             const HttpMessagePtr& req);
 
-    virtual HttpPackage filterResponse(ChannelHandlerContext& ctx,
+    HttpPackage filterResponse(ChannelHandlerContext& ctx,
                                        const HttpMessagePtr& req,
                                        const ProtobufServiceMessagePtr& rep,
                                        const ChannelFuturePtr& future);
 
 private:
+    Filter filter_;
+
     ServiceRequestMapperPtr requestMapper;
     ServiceResponseMapperPtr responseMapper;
 

@@ -771,8 +771,6 @@ void ChannelHandlerContext::initialize(ChannelPipeline* pipeline) {
     if (!eventLoop_) {
         eventLoop_ = pipeline_->eventLoop();
     }
-
-    onInitialized();
 }
 
 }

@@ -88,13 +88,13 @@ public:
     void setSoLinger(int soLinger);
     void setTcpNoDelay(bool tcpNoDelay);
 
-    int  getWriteBufferHighWaterMark() const;
+    int getWriteBufferHighWaterMark() const;
     void setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
 
     /**
      * Gets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    int  getWriteBufferLowWaterMark() const;
+    int getWriteBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_SNDLOWAT</tt></a> option.
@@ -104,7 +104,7 @@ public:
     /**
      * Gets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    int  getReceiveBufferLowWaterMark() const;
+    int getReceiveBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_RCVLOWAT</tt></a> option.

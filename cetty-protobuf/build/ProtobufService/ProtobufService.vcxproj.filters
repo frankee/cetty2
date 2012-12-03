@@ -95,5 +95,8 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp">
       <Filter>protobuf</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp">
+      <Filter>protobuf\builder</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -41,56 +41,70 @@ namespace codec {
 using namespace cetty::buffer;
 using namespace cetty::channel;
 
-template<typename OutboundIn>
+template<typename H,
+         typename OutboundIn,
+         typename Context = ChannelMessageHandlerContext<H,
+         VoidMessage,
+         VoidMessage,
+         OutboundIn,
+         ChannelBufferPtr,
+         VoidMessageContainer,
+         VoidMessageContainer,
+         ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
+         ChannelBufferContainer> >
 class MessageToBufferEncoder : public boost::noncopyable {
 public:
-    typedef MessageToBufferEncoder<OutboundIn> Self;
-    typedef boost::shared_ptr<Self> Ptr;
+    typedef MessageToBufferEncoder<H, OutboundIn, Context> Self;
 
-    typedef ChannelMessageContainer<OutboundIn> OutboundInContainer;
-    typedef typename OutboundInContainer::MessageQueue MessageQueue;
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
-    typedef ChannelMessageHandlerContext<MessageToBufferEncoder<OutboundIn>,
-        VoidMessage,
-        VoidMessage,
-        OutboundIn,
-        ChannelBufferPtr,
-        VoidMessageContainer,
-        VoidMessageContainer,
-        OutboundInContainer,
-        ChannelBufferContainer> Context;
+    typedef boost::function<ChannelBufferPtr(ChannelHandlerContext&,
+            OutboundIn const&,
+            ChannelBufferPtr const&)> Encoder;
+
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef typename OutboundContainer::MessageQueue MessageQueue;
+
+    typedef ChannelMessageTransfer<OutboundIn,
+            ChannelBufferContainer,
+            TRANSFER_OUTBOUND> OutboundTransfer;
 
 public:
     MessageToBufferEncoder()
-        : hasOutBuffer_(false),
-        initBufferSize_(0) {
+        : nextBufferContainerAccumulated_(false) {
     }
 
-    MessageToBufferEncoder(int initBufferSize)
-        : hasOutBuffer_(true),
-          initBufferSize(initBufferSize <= 0 ? 8*1024 : initBufferSize) {
+    MessageToBufferEncoder(const Encoder& encoder)
+        : nextBufferContainerAccumulated_(false),
+          encoder_(encoder) {
     }
 
-    virtual ~MessageToBufferEncoder() {}
+    ~MessageToBufferEncoder() {}
 
-    virtual void registerTo(Context& ctx) {
-        context_ = &ctx;
+    void registerTo(Context& ctx) {
+        transfer_ = ctx.outboundTransfer();
+        container_ = ctx.outboundTransfer();
 
         ctx.setFlushFunctor(boost::bind(
-            &Self::flush,
-            this,
-            _1,
-            _2));
+                                &Self::flush,
+                                this,
+                                _1,
+                                _2));
+    }
+
+    void setEncoder(const Encoder& encoder) {
+        encoder_ = encoder;
     }
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
         ChannelBufferPtr out;
 
-        if (hasOutBuffer_) {
+        if (nextBufferContainerAccumulated_) {
             out = Unpooled::buffer(initBufferSize_);
         }
 
-        OutboundInContainer* container = context_->outboundContainer();
+        OutboundContainer* container = context_->outboundContainer();
         MessageQueue& outboundQueue = container->getMessages();
 
         while (!outboundQueue.empty()) {
@@ -109,7 +123,7 @@ public:
             //             }
 
             try {
-                if (hasOutBuffer_) {
+                if (nextBufferContainerAccumulated_) {
                     encode(ctx, msg, out);
                 }
                 else {
@@ -130,29 +144,17 @@ public:
             outboundQueue.pop_front();
         }
 
-        if (hasOutBuffer_) {
+        if (nextBufferContainerAccumulated_) {
             context_->outboundTransfer()->write(out, future);
         }
     }
 
-    /**
-     * Returns {@code true} if and only if the specified message can be encoded by this encoder.
-     *
-     * @param msg the message
-     */
-    virtual bool isEncodable(const OutboundIn& msg) {
-        return true;
-    }
-
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const OutboundIn& msg,
-                                    const ChannelBufferPtr& out) = 0;
-
 private:
-    bool hasOutBuffer_;
-    int  initBufferSize_;
+    bool nextBufferContainerAccumulated_;
 
-    Context* context_;
+    Encoder encoder_;
+    OutboundTransfer* transfer_;
+    OutboundContainer* container_;
 };
 
 }

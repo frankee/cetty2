@@ -21,6 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <string>
 #include <boost/any.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -192,7 +193,9 @@ public:
 public:
     virtual ~ChannelHandlerContext() {}
 
-    void initialize(ChannelPipeline* pipeline);
+    virtual void initialize(ChannelPipeline* pipeline);
+
+    virtual void onPipelineChanged() {}
 
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
@@ -236,10 +239,11 @@ public:
         return before_;
     }
 
-    virtual void setNext(ChannelHandlerContext* ctx) {
+    void setNext(ChannelHandlerContext* ctx) {
         next_ = ctx;
     }
-    virtual void setBefore(ChannelHandlerContext* ctx) {
+
+    void setBefore(ChannelHandlerContext* ctx) {
         before_ = ctx;
     }
 
@@ -267,35 +271,6 @@ public:
     virtual boost::any getInboundMessageContainer() = 0;
     virtual boost::any getOutboundMessageContainer() = 0;
     
-    virtual boost::any getInboundMessageTransfer() = 0;
-    virtual boost::any getOutboundMessageTransfer() = 0;
-
-    template<typename T>
-    T* inboundMessageTransfer() {
-        boost::any transfer = getInboundMessageTransfer();
-        if (!transfer.empty()) {
-            T** t = boost::any_cast<T*>(&transfer);
-            if (t) {
-                return *t;
-            }
-        }
-
-        return NULL;
-    }
-
-    template<typename T>
-    T* outboundMessageTransfer() {
-        boost::any transfer = getOutboundMessageTransfer();
-        if (!transfer.empty()) {
-            T** t = boost::any_cast<T*>(&transfer);
-            if (t) {
-                return *t;
-            }
-        }
-
-        return NULL;
-    }
-
     template<class T>
     T* inboundMessageContainer() {
         boost::any container = getInboundMessageContainer();
@@ -463,9 +438,6 @@ protected:
 
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
-
-protected:
-    virtual void onInitialized() {}
 
 private:
     void notifyHandlerException(const ChannelPipelineException& e);

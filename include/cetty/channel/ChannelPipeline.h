@@ -261,25 +261,25 @@ public:
 
     template<typename T>
     bool addFirst(const std::string& name,
-                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                  const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addFirst(
-                   new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                   new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
     bool addFirst(const std::string& name,
                   const EventLoopPtr& loop,
-                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                  const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addFirst(
-                   new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                   new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -297,25 +297,25 @@ public:
 
     template<typename T>
     bool addLast(const std::string& name,
-                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                 const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addLast(
-                   new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                   new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
     bool addLast(const std::string& name,
                  const EventLoopPtr& loop,
-                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                 const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addLast(
-                   new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                   new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -338,26 +338,26 @@ public:
     template<typename T>
     bool addBefore(const std::string& baseName,
                    const std::string& name,
-                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                   const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addBefore(baseName,
-                         new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                         new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
     bool addBefore(const std::string& baseName,
                    const std::string& name,
                    const EventLoopPtr& loop,
-                   typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                   const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         if (name.empty() || !handler) {
             return false;
         }
 
         return addBefore(baseName,
-                         new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                         new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -380,18 +380,18 @@ public:
     template<typename T>
     bool addAfter(const std::string& baseName,
                   const std::string& name,
-                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        bool addAfter(baseName,
-                      new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                  const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        return addAfter(baseName,
+                      new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
     bool addAfter(const std::string& baseName,
                   const std::string& name,
                   const EventLoopPtr& loop,
-                  typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        bool addAfter(baseName,
-                      new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                  const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        return addAfter(baseName,
+                      new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -445,18 +445,18 @@ public:
     template<typename T>
     bool replace(const std::string& baseName,
                  const std::string& name,
-                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                 const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         return replace(baseName,
-                       new ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                       new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
     bool replace(const std::string& baseName,
                  const std::string& name,
                  const EventLoopPtr& loop,
-                 typename const ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+                 const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         return replace(baseName,
-                       new ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                       new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**

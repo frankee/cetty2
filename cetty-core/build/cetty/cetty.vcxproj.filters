@@ -218,11 +218,137 @@
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioWriteOperationQueue.cpp">
       <Filter>channel\asio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\bootstrap\AbstractBootstrap.cpp">
-      <Filter>bootstrap</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\bootstrap\asio\AsioServerBootstrap.cpp">
       <Filter>bootstrap\asio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\NullChannel.cpp">
+      <Filter>channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\bootstrap\ClientBootstrap.cpp">
+      <Filter>bootstrap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\bootstrap\asio\AsioClientBootstrap.cpp">
+      <Filter>bootstrap\asio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\DelimiterBasedFrameDecoder.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoder.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp">
+      <Filter>handler\codec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\ClientCookieEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\Cookie.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieEncoderUtil.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\CookieHeaderNames.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpChunk.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpChunkAggregator.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpChunkTrailer.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpCodecUtil.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaderDateFormat.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaders.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessage.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMethod.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpPackage.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequest.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponse.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseStatus.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpTransferEncoding.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpVersion.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\QueryStringDecoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\QueryStringEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\codec\http\ServerCookieEncoder.cpp">
+      <Filter>handler\codec\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\logging\LoggingHandler.cpp">
+      <Filter>handler\logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleState.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleStateEvent.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\IdleStateHandler.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\ReadTimeoutException.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\ReadTimeoutHandler.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\TimeoutException.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutException.cpp">
+      <Filter>handler\timeout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutHandler.cpp">
+      <Filter>handler\timeout</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -430,18 +556,9 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelFuturePtr.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\AbstractEmbeddedChannel.h">
-      <Filter>channel\embedded</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h">
       <Filter>channel\embedded</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedMessageChannel.h">
-      <Filter>channel\embedded</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedSocketAddressImpl.h">
-      <Filter>channel\embedded</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
@@ -453,9 +570,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedBufferChannel.h">
-      <Filter>channel\embedded</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
@@ -555,9 +669,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandlerContext.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -632,6 +743,141 @@
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\channel\asio\AsioSocketAddressImpl.h">
       <Filter>channel\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedChannel.h">
+      <Filter>channel\embedded</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferCodec.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferDecoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToBufferEncoder.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\BufferToMessageCodec.h">
+      <Filter>handler\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\ClientCookieEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\Cookie.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieDecoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieEncoderUtil.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\CookieHeaderNames.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunk.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunkAggregator.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunkTrailer.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpClientCodec.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpCodecUtil.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaderDateFormat.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaders.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessage.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessageDecoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessageEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMethod.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequest.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestDecoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponse.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseDecoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseStatus.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpServerCodec.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpTransferEncoding.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpVersion.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\QueryStringDecoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\QueryStringEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\ServerCookieEncoder.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleState.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleStateEvent.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\IdleStateHandler.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\ReadTimeoutException.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\ReadTimeoutHandler.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\TimeoutException.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutException.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutHandler.h">
+      <Filter>handler\timeout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\logging\LoggingHandler.h">
+      <Filter>handler\logging</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

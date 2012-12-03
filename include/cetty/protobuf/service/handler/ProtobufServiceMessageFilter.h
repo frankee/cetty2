@@ -36,7 +36,10 @@ public:
     ProtobufServiceMessageFilter() {}
     virtual ~ProtobufServiceMessageFilter() {}
 
+    typedef boost::function<void (ChannelHandlerContext&, ProtobufServiceMessagePtr const&, bool)> FilterCallback;
+
 protected:
+
     virtual void filter(ChannelHandlerContext& ctx,
                         const ProtobufServiceMessagePtr& msg) = 0;
 

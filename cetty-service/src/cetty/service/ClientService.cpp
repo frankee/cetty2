@@ -25,22 +25,6 @@ namespace service {
 
 using namespace cetty::channel;
 
-ChannelConfig& ClientService::config() {
-    return this->config;
-}
-
-const ChannelConfig& ClientService::config() const {
-    return this->config;
-}
-
-const SocketAddress& ClientService::localAddress() const {
-    return SocketAddress::NULL_ADDRESS ;
-}
-
-const SocketAddress& ClientService::remoteAddress() const {
-    return SocketAddress::NULL_ADDRESS;
-}
-
 bool ClientService::isOpen() const {
     return true;
 }
@@ -61,21 +45,13 @@ void ClientService::doClose() {
     //TODO
 }
 
-ClientService::ClientService(const EventLoopPtr& eventLoop,
-                             const ChannelFactoryPtr& factory,
-                             const ChannelPipelinePtr& pipeline)
-    : AbstractChannel(eventLoop, ChannelPtr(), factory, pipeline) {
+ClientService::ClientService(const EventLoopPtr& eventLoop)
+    : Channel(ChannelPtr(), eventLoop) {
 
-    pipeline->attach(shared_from_this());
+    //pipeline->attach(shared_from_this());
 
-    LOG_INFO << "ClientService firing the Channel Create Event.";
-    pipeline->fireChannelOpen();
-}
-
-void ClientService::setPipeline(const ChannelPipelinePtr& pipeline) {
-    if (pipeline) {
-        pipeline->attach(shared_from_this());
-    }
+    //LOG_INFO << "ClientService firing the Channel Create Event.";
+    //pipeline->fireChannelOpen();
 }
 
 }

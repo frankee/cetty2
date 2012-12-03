@@ -24,6 +24,12 @@
     <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp">
       <Filter>service\builder</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp">
+      <Filter>service\builder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\ClientService.cpp">
+      <Filter>service</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">

@@ -23,7 +23,6 @@
 
 #include <deque>
 
-#include <cetty/channel/CombinedChannelBufferMessageHandler.h>
 #include <cetty/handler/codec/http/HttpRequestEncoder.h>
 #include <cetty/handler/codec/http/HttpResponseDecoder.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
@@ -57,8 +56,7 @@ using namespace cetty::util;
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpRequestEncoder
  */
 
-class HttpClientCodec
-        : public cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> {
+class HttpClientCodec {
 public:
     /**
      * Creates a new instance with the default decoder options

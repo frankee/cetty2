@@ -26,91 +26,52 @@
 namespace cetty {
 namespace channel {
 
+template<typename T>
 class ChannelInitializer {
 public:
-    template<typename T>
-    ChannelInitializer(typename const ChannelHandlerWrapper<T>::HandlerPtr& t) {
-        contexts_.push_back(
-            new typename ChannelHandlerWrapper<T>::Handler::Context("1", t));
+    typedef typename ChannelHandlerWrapper<T>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<T>::HandlerPtr HandlerPtr;
+    typedef typename ChannelHandlerWrapper<T>::Handler::Context Context;
+
+public:
+    ChannelInitializer()
+        : name_("auto1") {
     }
 
-    template<typename T1, typename T2>
-    ChannelInitializer(typename const ChannelHandlerWrapper<T1>::HandlerPtr& t1,
-                       typename const ChannelHandlerWrapper<T2>::HandlerPtr& t2) {
-        contexts_.push_back(
-            new typename ChannelHandlerWrapper<T1>::Handler::Context("1", t1));
-
-        contexts_.push_back(
-            new typename ChannelHandlerWrapper<T2>::Handler::Context("2", t2));
+    ChannelInitializer(const std::string& name)
+        : name_(name) {
     }
-
-    template<typename T1, typename T2, typename T3>
-    ChannelInitializer(typename const ChannelHandlerWrapper<T1>::HandlerPtr& t1,
-        typename const ChannelHandlerWrapper<T2>::HandlerPtr& t2,
-        typename const ChannelHandlerWrapper<T3>::HandlerPtr& t3) {
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T1>::Handler::Context("1", t1));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T2>::Handler::Context("2", t2));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T3>::Handler::Context("3", t3));
-    }
-
-    template<typename T1, typename T2, typename T3, typename T4>
-    ChannelInitializer(typename const ChannelHandlerWrapper<T1>::HandlerPtr& t1,
-        typename const ChannelHandlerWrapper<T2>::HandlerPtr& t2,
-        typename const ChannelHandlerWrapper<T3>::HandlerPtr& t3,
-        typename const ChannelHandlerWrapper<T4>::HandlerPtr& t4) {
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T1>::Handler::Context("1", t1));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T2>::Handler::Context("2", t2));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T3>::Handler::Context("3", t3));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T4>::Handler::Context("4", t4));
-    }
-
-    template<typename T1, typename T2, typename T3, typename T4, typename T5>
-    ChannelInitializer(typename const ChannelHandlerWrapper<T1>::HandlerPtr& t1,
-        typename const ChannelHandlerWrapper<T2>::HandlerPtr& t2,
-        typename const ChannelHandlerWrapper<T3>::HandlerPtr& t3,
-        typename const ChannelHandlerWrapper<T4>::HandlerPtr& t4,
-        typename const ChannelHandlerWrapper<T5>::HandlerPtr& t5) {
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T1>::Handler::Context("1", t1));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T2>::Handler::Context("2", t2));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T3>::Handler::Context("3", t3));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T4>::Handler::Context("4", t4));
-
-            contexts_.push_back(
-                new typename ChannelHandlerWrapper<T5>::Handler::Context("5", t5));
-    }
-
+    
     bool operator()(const ChannelPtr& channel) {
         ChannelPipeline& pipeline = channel->pipeline();
-
-        std::vector<ChannelHandlerContext*>::iterator itr = contexts_.begin();
-        for (; itr != contexts_.end(); ++itr) {
-            pipeline.addLast(*itr);
-        }
-
+        pipeline.addLast<HandlerPtr>(name, HandlerPtr(new Handler));
         return true;
     }
 
 private:
-    std::vector<ChannelHandlerContext*> contexts_;
+    std::string name_;
+};
+
+template<typename T1, typename T2>
+class ChannelInitializer {
+public:
+    typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
+    typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
+    typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
+
+    typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
+    typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
+    typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
+
+public:
+    ChannelInitializer() {}
+
+    bool operator()(const ChannelPtr& channel) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+        return true;
+    }
 };
 
 }

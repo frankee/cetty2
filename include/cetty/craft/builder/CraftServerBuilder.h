@@ -18,7 +18,6 @@
  */
 
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 
