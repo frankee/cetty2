@@ -60,6 +60,8 @@ public:
 template<>
 class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_INBOUND> {
 public:
+    ChannelMessageTransfer(ChannelHandlerContext& ctx) {}
+
     void resetNextContainer() {}
     void resetNextContainer(VoidMessageContainer*) {}
 
@@ -70,6 +72,8 @@ public:
 template<>
 class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_OUTBOUND> {
 public:
+    ChannelMessageTransfer(ChannelHandlerContext& ctx) {}
+
     void resetNextContainer() {}
     void resetNextContainer(VoidMessageContainer*) {}
 

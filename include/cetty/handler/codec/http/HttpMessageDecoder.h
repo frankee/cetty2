@@ -169,8 +169,7 @@ protected:
         int maxHeaderSize,
         int maxChunkSize);
 
-protected:
-    virtual HttpPackage decode(ChannelHandlerContext& ctx,
+    HttpPackage decode(ChannelHandlerContext& ctx,
         const ReplayingDecoderBufferPtr& buffer,
         int state);
 

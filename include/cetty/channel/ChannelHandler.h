@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLER_H)
-#define CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLER_H
+#if !defined(CETTY_CHANNEL_CHANNELHANDLER_H)
+#define CETTY_CHANNEL_CHANNELHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -22,29 +22,24 @@
 namespace cetty {
 namespace channel {
 
-template<typename H, typename OutboundIn, typename OutboundOut>
-class ChannelOutboundMessageHandler {
+template<typename T>
+class ChannelHandler {
 public:
-    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
-    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
-
-    typedef typename OutboundContainer::MessageQueue OutboundQueue;
-
-    typedef ChannelMessageHandlerContext<H,
+    typedef ChannelMessageHandlerContext<T,
             VoidMessage,
             VoidMessage,
-            OutboundIn,
-            OutboundIn,
+            VoidMessage,
+            VoidMessage,
             VoidMessageContainer,
             VoidMessageContainer,
-            OutboundContainer,
-            NextOutboundContainer> Context;
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELOUTBOUNDMESSAGEHANDLER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELHANDLER_H)
 
 // Local Variables:
 // mode: c++

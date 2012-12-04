@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_LOGGING_LOGGINGHANDLER_H)
 #define CETTY_HANDLER_LOGGING_LOGGINGHANDLER_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -21,7 +22,7 @@
  */
 
 #include <cetty/logging/LogLevel.h>
-#include <cetty/channel/AbstractChannelHandler.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace handler {
@@ -38,14 +39,25 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class LoggingHandler : public cetty::channel::AbstractChannelHandler {
+class LoggingHandler : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandlerContext<LoggingHandler,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+
 public:
     /**
      * Creates a new instance whose logger name is the fully qualified class
      * name of the instance with hex dump enabled.
      */
     LoggingHandler()
-        : level(LogLevel::DEBUG) {
+        : level_(LogLevel::DEBUG) {
     }
 
     /**
@@ -55,14 +67,14 @@ public:
      * @param level   the log level
      */
     LoggingHandler(const LogLevel& level)
-        : level(level) {
+        : level_(level) {
     }
 
     /**
      * Creates a new instance with the specified logger name.
      */
     LoggingHandler(const std::string& name)
-        : level(LogLevel::DEBUG) {
+        : level_(LogLevel::DEBUG) {
     }
 
     /**
@@ -71,52 +83,87 @@ public:
      * @param level   the log level
      */
     LoggingHandler(const std::string& name, const LogLevel& level)
-        : level(level) {
+        : level_(level) {
     }
 
     /**
      * Returns the {@link InternalLogLevel} that this handler uses to log
      * a {@link ChannelEvent}.
      */
-    const LogLevel& getLevel() {
-        return level;
+    const LogLevel& level() {
+        return level_;
     }
 
-    virtual void channelOpen(ChannelHandlerContext& ctx);
-
-    virtual void channelActive(ChannelHandlerContext& ctx);
-
-    virtual void channelInactive(ChannelHandlerContext& ctx);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
-
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const boost::any& evt);
-
-    virtual void bind(ChannelHandlerContext& ctx,
-                      const SocketAddress& localAddress,
-                      const ChannelFuturePtr& future);
-
-    virtual void connect(ChannelHandlerContext& ctx,
-                         const SocketAddress& remoteAddress,
-                         const SocketAddress& localAddress,
-                         const ChannelFuturePtr& future);
-
-    virtual void disconnect(ChannelHandlerContext& ctx,
-                            const ChannelFuturePtr& future);
-
-    virtual void close(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
-
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
-
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
+    void registerTo(Context& ctx) {
+        ctx.setChannelOpenCallback(boost::bind(&LoggingHandler::channelOpen,
+                                               this,
+                                               _1));
+        ctx.setChannelActiveCallback(boost::bind(&LoggingHandler::channelActive,
+                                     this,
+                                     _1));
+        ctx.setChannelInactiveCallback(boost::bind(&LoggingHandler::channelInactive,
+                                       this,
+                                       _1));
+        ctx.setExceptionCallback(boost::bind(&LoggingHandler::exceptionCaught,
+                                             this,
+                                             _1,
+                                             _2));
+        ctx.setUserEventCallback(boost::bind(&LoggingHandler::userEventTriggered,
+                                             this,
+                                             _1,
+                                             _2));
+        ctx.setBindFunctor(boost::bind(&LoggingHandler::bind,
+                                       this,
+                                       _1,
+                                       _2,
+                                       _3));
+        ctx.setConnectFunctor(boost::bind(&LoggingHandler::connect,
+                                          this,
+                                          _1,
+                                          _2,
+                                          _3,
+                                          _4));
+        ctx.setDisconnectFunctor(boost::bind(&LoggingHandler::disconnect,
+                                             this,
+                                             _1,
+                                             _2));
+        ctx.setCloseFunctor(boost::bind(&LoggingHandler::close,
+                                        this,
+                                        _1,
+                                        _2));
+    }
 
 private:
-    LogLevel level;
-    std::string name;
+    void channelOpen(ChannelHandlerContext& ctx);
+
+    void channelActive(ChannelHandlerContext& ctx);
+
+    void channelInactive(ChannelHandlerContext& ctx);
+
+    void exceptionCaught(ChannelHandlerContext& ctx,
+                         const ChannelException& cause);
+
+    void userEventTriggered(ChannelHandlerContext& ctx,
+                            const boost::any& evt);
+
+    void bind(ChannelHandlerContext& ctx,
+              const SocketAddress& localAddress,
+              const ChannelFuturePtr& future);
+
+    void connect(ChannelHandlerContext& ctx,
+                 const SocketAddress& remoteAddress,
+                 const SocketAddress& localAddress,
+                 const ChannelFuturePtr& future);
+
+    void disconnect(ChannelHandlerContext& ctx,
+                    const ChannelFuturePtr& future);
+
+    void close(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future);
+
+private:
+    LogLevel level_;
+    std::string name_;
 };
 
 }

@@ -57,8 +57,7 @@ class HttpPackageVisitor;
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpChunk oneway - - filters out
  */
 
-class HttpChunkAggregator
-        : public MessageToMessageDecoder<HttpPackage, HttpMessagePtr> {
+class HttpChunkAggregator {
 public:
     /**
      * Creates a new instance.
@@ -87,6 +86,8 @@ private:
 private:
     int maxContentLength;
     HttpMessagePtr currentMessage;
+
+    MessageToMessageDecoder<HttpChunkAggregator, HttpPackage, HttpMessagePtr> decoder_;
 };
 
 }

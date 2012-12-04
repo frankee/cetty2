@@ -20,6 +20,26 @@
 namespace cetty {
 namespace channel {
 
+template<typename H, typename InboundIn, typename InboundOut>
+class ChannelInboudMessageHandler {
+public:
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
+
+    typedef ChannelMessageTransfer<InboundIn,
+            InboundContainer,
+            TRANSFER_INBOUND> InboundTransfer;
+
+    typedef ChannelMessageHandlerContext<H,
+            InboundIn,
+            InboundOut,
+            VoidMessage,
+            VoidMessage,
+            InboundContainer,
+            NextInboundContainer,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+};
 
 }
 }

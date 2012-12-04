@@ -24,8 +24,8 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/ChannelHandler.h>
 #include <cetty/channel/ChannelFutureListener.h>
-#include <cetty/channel/AbstractChannelOutboundHandler.h>
 
 #include <cetty/handler/timeout/WriteTimeoutException.h>
 
@@ -78,10 +78,14 @@ using namespace cetty::channel;
  * @apiviz.has org.jboss.netty.handler.timeout.TimeoutException oneway - - raises
  */
 
-class WriteTimeoutHandler : public AbstractChannelOutboundHandler {
+class WriteTimeoutHandler : private boost::noncopyable {
 public:
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
+
+    typedef boost::function<void (ChannelHandlerContext&)> WriteTimeoutCallback;
+
+    typedef ChannelHandler<WriteTimeoutHandler>::Context Context;
 
 public:
     /**
@@ -108,19 +112,25 @@ public:
      */
     WriteTimeoutHandler(const Duration& timeout);
 
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+    void registerTo(Context& ctx) {
+        ctx.setFlushFunctor(boost::bind(&WriteTimeoutHandler::flush,
+                                        this,
+                                        _1,
+                                        _2));
+    }
 
-    virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const;
-
-protected:
-    virtual void writeTimedOut(ChannelHandlerContext& ctx);
+    void setWriteTimeoutCallback(const WriteTimeoutCallback& callback) {
+        timeoutCallback_ = callback;
+    }
 
 private:
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future);
+
     void handleWriteTimeout(ChannelHandlerContext& ctx,
                             const ChannelFuturePtr& future);
+
+    void onWriteTimedOut(ChannelHandlerContext& ctx);
 
     void cancelTimeout(ChannelFuture& future);
 
@@ -128,10 +138,12 @@ private:
     static const WriteTimeoutException EXCEPTION;
 
 private:
-    bool closed;
-    boost::int64_t timeoutMillis;
+    bool closed_;
+    boost::int64_t timeoutMillis_;
 
-    TimeoutPtr timeout;
+    TimeoutPtr timeout_;
+
+    WriteTimeoutCallback timeoutCallback_;
 };
 
 }

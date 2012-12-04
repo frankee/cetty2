@@ -201,14 +201,6 @@ void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
     currentMessage->setContent(Unpooled::wrappedBuffer(cumulation, input));
 }
 
-ChannelHandlerPtr HttpChunkAggregator::clone() {
-    return new HttpChunkAggregator(maxContentLength);
-}
-
-std::string HttpChunkAggregator::toString() const {
-    return "HttpChunkAggregator";
-}
-
 }
 }
 }

@@ -31,56 +31,47 @@ namespace timeout {
 const WriteTimeoutException WriteTimeoutHandler::EXCEPTION("WriteTimeout");
 
 WriteTimeoutHandler::WriteTimeoutHandler(int timeoutSeconds)
-    : timeoutMillis(timeoutSeconds * 1000) {
+    : timeoutMillis_(timeoutSeconds * 1000) {
     if (timeoutSeconds <= 0) {
-        timeoutMillis = 0;
+        timeoutMillis_ = 0;
     }
 }
 
 WriteTimeoutHandler::WriteTimeoutHandler(const Duration& timeout)
-    : timeoutMillis(timeout.total_milliseconds()) {
-    if (timeoutMillis <= 0) {
-        timeoutMillis = 0;
+    : timeoutMillis_(timeout.total_milliseconds()) {
+    if (timeoutMillis_ <= 0) {
+        timeoutMillis_ = 0;
     }
 }
 
 void WriteTimeoutHandler::flush(ChannelHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
-    if (timeoutMillis > 0) {
+                                const ChannelFuturePtr& future) {
+    if (timeoutMillis_ > 0) {
         // Schedule a timeout.
-        ctx.eventLoop()->runAfter(timeoutMillis, boost::bind(
-            &WriteTimeoutHandler::handleWriteTimeout,
-            this,
-            boost::ref(ctx),
-            boost::cref(future)));
+        ctx.eventLoop()->runAfter(timeoutMillis_, boost::bind(
+                                      &WriteTimeoutHandler::handleWriteTimeout,
+                                      this,
+                                      boost::ref(ctx),
+                                      boost::cref(future)));
 
         // Cancel the scheduled timeout if the flush future is complete.
         future->addListener(boost::bind(
-            &WriteTimeoutHandler::cancelTimeout,
-            this,
-            _1));
+                                &WriteTimeoutHandler::cancelTimeout,
+                                this,
+                                _1));
     }
 
-    AbstractChannelOutboundHandler::flush(ctx, future);
-}
-
-ChannelHandlerPtr WriteTimeoutHandler::clone() {
-    return new WriteTimeoutHandler(
-        boost::posix_time::milliseconds(timeoutMillis));
-}
-
-std::string WriteTimeoutHandler::toString() const {
-    return "WriterTimeoutHandler";
+    ctx.flush(future);
 }
 
 void WriteTimeoutHandler::handleWriteTimeout(ChannelHandlerContext& ctx,
-    const ChannelFuturePtr& future) {
+        const ChannelFuturePtr& future) {
 
     // Mark the future as failure
     if (future->setFailure(EXCEPTION)) {
         // If succeeded to mark as failure, notify the pipeline, too.
         try {
-            writeTimedOut(ctx);
+            onWriteTimedOut(ctx);
         }
         catch (const std::exception& t) {
             // TODO
@@ -107,11 +98,11 @@ void WriteTimeoutHandler::cancelTimeout(ChannelFuture& future) {
     }
 }
 
-void WriteTimeoutHandler::writeTimedOut(ChannelHandlerContext& ctx) {
-    if (!closed) {
+void WriteTimeoutHandler::onWriteTimedOut(ChannelHandlerContext& ctx) {
+    if (!closed_) {
         ctx.fireExceptionCaught(EXCEPTION);
         ctx.close();
-        closed = true;
+        closed_ = true;
     }
 }
 

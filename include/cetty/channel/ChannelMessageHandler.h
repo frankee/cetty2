@@ -33,26 +33,26 @@ public:
     typedef typename ChannelHandlerWrapper<H>::Handler Handler;
     typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
-    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundInContainer;
-    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> InboundOutContainer;
-    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundInContainer;
-    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> OutboundOutContainer;
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
 
-    typedef typename InboundInContainer::MessageQueue InboundQueue;
-    typedef typename OutboundInContainer::MessageQueue OutboudnQueue;
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+    typedef typename OutboundContainer::MessageQueue OutboudnQueue;
 
-    typedef ChannelMessageTransfer<InboundOut, InboundOutContainer, TRANSFER_INBOUND> InboundTransfer;
-    typedef ChannelMessageTransfer<OutboundOut, OutboundOutContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+    typedef ChannelMessageTransfer<InboundOut, NextInboundContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<OutboundOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;
 
-    typename ChannelMessageHandlerContext<H,
+    typedef ChannelMessageHandlerContext<H,
         InboundIn,
         InboundOut,
         OutboundIn,
         OutboundOut,
-        InboundInContainer,
-        InboundOutContainer,
-        OutboundInContainer,
-        OutboundOutContainer> Context;
+        InboundContainer,
+        NextInboundContainer,
+        OutboundContainer,
+        NextOutboundContainer> Context;
         
 };
 

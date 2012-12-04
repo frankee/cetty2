@@ -72,22 +72,6 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class HttpRequestDecodeHandler {
-public:
-    typedef ChannelMessageHandlerContext<H,
-        ChannelBufferPtr,
-        HttpPackage,
-        VoidMessage,
-        VoidMessage,
-        ChannelBufferContainer,
-        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
-        VoidMessage,
-        VoidMessage> Context;
-
-private:
-    ReplayingDecoder<HttpRequestDecoder, HttpPackage, Context> decoder_;
-};
-
 class HttpRequestDecoder : public HttpMessageDecoder {
 public:
     /**
@@ -105,9 +89,6 @@ public:
                        int maxChunkSize);
 
     virtual ~HttpRequestDecoder();
-
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
 
     // if has an exception, reply an error message.
     virtual void exceptionCaught(ChannelHandlerContext& ctx,

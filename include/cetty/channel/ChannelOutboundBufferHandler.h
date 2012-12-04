@@ -17,15 +17,16 @@
  * under the License.
  */
 
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename Handler>
-class ChannelOutboundBufferHandler : private boost::noncopyable {
+template<typename H>
+class ChannelOutboundBufferHandler {
 public:
-    typedef ChannelMessageHandlerContext<Handler,
+    typedef ChannelMessageHandlerContext<H,
             VoidMessage,
             VoidMessage,
             ChannelBufferPtr,
@@ -34,6 +35,8 @@ public:
             VoidMessageContainer,
             ChannelBufferContainer,
             ChannelBufferContainer> Context;
+
+
 };
 
 }

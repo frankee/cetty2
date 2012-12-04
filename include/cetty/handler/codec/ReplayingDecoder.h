@@ -422,7 +422,7 @@ protected:
     }
 
     void messageUpdated(ChannelHandlerContext& ctx) {
-        callDecode(ctx, getInboundChannelBuffer());
+        callDecode(ctx, container_->getMessages());
     }
 
     void channelInactive(ChannelHandlerContext& ctx) {
@@ -502,13 +502,11 @@ protected:
                 if (oldReaderIndex == in->readerIndex() && oldState == state_) {
                     throw IllegalStateException(
                         std::string("decode() method must consume at least one byte \
-                                    if it returned a decoded message (caused by: ") +
-                        typeid(*this).name() +
-                        std::string(")"));
+                                    if it returned a decoded message (caused by: RepalyingDecoder)");
                 }
 
                 // A successful decode
-                if (inboundTransfer.unfoldAndAdd(result)) {
+                if (transfer_->unfoldAndAdd(result)) {
                     decoded = true;
                 }
             }
@@ -582,7 +580,7 @@ private:
 
     void updateReplayable(const ChannelBufferPtr& input) {
         if (!replayable_) { // only first time will enter.
-            replayable_ = new ReplayingDecoderBuffer(cumulation);
+            replayable_ = new ReplayingDecoderBuffer(input);
         }
 
         // input buffer, which channel owns, changes.

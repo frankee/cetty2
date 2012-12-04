@@ -38,17 +38,6 @@ HttpRequestDecoder::HttpRequestDecoder()
 HttpRequestDecoder::~HttpRequestDecoder() {
 }
 
-ChannelHandlerPtr HttpRequestDecoder::clone() {
-    return ChannelHandlerPtr(
-               new HttpRequestDecoder(maxInitialLineLength,
-                                      maxHeaderSize,
-                                      maxChunkSize));
-}
-
-std::string HttpRequestDecoder::toString() const {
-    return "HttpRequestDecoder";
-}
-
 HttpMessagePtr HttpRequestDecoder::createMessage(const StringPiece& str1,
         const StringPiece& str2,
         const StringPiece& str3) {

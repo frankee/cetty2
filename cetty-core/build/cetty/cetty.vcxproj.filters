@@ -233,9 +233,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\DelimiterBasedFrameDecoder.cpp">
       <Filter>handler\codec</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoder.cpp">
-      <Filter>handler\codec</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp">
       <Filter>handler\codec</Filter>
     </ClCompile>
@@ -275,12 +272,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessage.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageDecoder.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageEncoder.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMethod.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
@@ -290,19 +281,7 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequest.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestDecoder.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestEncoder.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponse.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseDecoder.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseEncoder.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseStatus.cpp">
@@ -666,12 +645,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>channel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h">
-      <Filter>channel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h">
       <Filter>channel</Filter>
     </ClInclude>
@@ -878,6 +851,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\logging\LoggingHandler.h">
       <Filter>handler\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestDecodeHandler.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestEncodeHandler.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseDecodeHandler.h">
+      <Filter>handler\codec\http</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

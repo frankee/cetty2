@@ -150,16 +150,10 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaderDateFormat.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaders.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessageEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMethod.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpPackage.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequest.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpRequestEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponse.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseStatus.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpTransferEncoding.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpVersion.cpp" />
@@ -168,7 +162,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\ServerCookieEncoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\LengthFieldBasedFrameDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\LengthFieldPrepender.cpp" />
-    <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoder.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\ReplayingDecoderBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\TooLongFrameException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\codec\UnreplayableOperationException.cpp" />
@@ -217,6 +210,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioWriteOperationQueue.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerWrapper.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h" />
@@ -228,8 +222,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelBufferMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\CombinedChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\embedded\EmbeddedEventLoop.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPoolPtr.h" />
@@ -291,9 +283,12 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMethod.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpPackage.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequest.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestDecodeHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestEncodeHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponse.h" />
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseDecodeHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseEncoder.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseStatus.h" />
