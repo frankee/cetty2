@@ -18,7 +18,7 @@
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
-#include <cetty/channel/embedded/EmbeddedBufferChannel.h>
+#include <cetty/channel/embedded/EmbeddedChannel.h>
 #include <cetty/handler/codec/http/HttpServerCodec.h>
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
 
@@ -34,7 +34,7 @@ static ChannelBufferPtr prepareDataChunk(int size) {
 }
 
 TEST(HttpServerCodecTest, testMultiChannelBufferInput) {
-    EmbeddedBufferChannel<HttpMessagePtr> decoderEmbedder(
+    EmbeddedChannel<HttpMessagePtr> decoderEmbedder(
         new HttpRequestDecoder(),
         new HttpChunkAggregator(1048576));
 

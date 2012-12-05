@@ -33,30 +33,30 @@ using namespace cetty::util;
 
 HttpMessage::HttpMessage(const HttpVersion& version)
     : version(version),
-      content(Unpooled::EMPTY_BUFFER),
-      transferEncoding(HttpTransferEncoding::SINGLE) {
+      content_(Unpooled::EMPTY_BUFFER),
+      transferEncoding_(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 HttpMessage::HttpMessage()
-    : version(HttpVersion::HTTP_1_1),
-      content(Unpooled::EMPTY_BUFFER),
-      transferEncoding(HttpTransferEncoding::SINGLE) {
+    : version_(HttpVersion::HTTP_1_1),
+      content_(Unpooled::EMPTY_BUFFER),
+      transferEncoding_(HttpTransferEncoding::SINGLE) {
     httpHeader.setValidateNameFunctor(HttpCodecUtil::validateHeaderName);
 }
 
 void HttpMessage::setContent(const ChannelBufferPtr& content) {
     if (!content) {
-        this->content = Unpooled::EMPTY_BUFFER;
+        this->content_ = Unpooled::EMPTY_BUFFER;
         return;
     }
 
-    if (content->readable() && transferEncoding.isMultiple()) {
+    if (content->readable() && transferEncoding_.isMultiple()) {
         throw InvalidArgumentException(
             "non-empty content disallowed if this.chunked == true");
     }
 
-    this->content = content;
+    this->content_ = content;
 }
 
 std::string HttpMessage::toString() const {
@@ -66,8 +66,8 @@ std::string HttpMessage::toString() const {
     StringUtil::printf(&buf,
                           "HttpMessage (version: %d, keepAlive: %s,  transferEncoding: %s)",
                           getProtocolVersion().getText().c_str(),
-                          HttpHeaders::isKeepAlive(*this) ? "true" : "false",
-                          transferEncoding.toString().c_str());
+                          HttpHeaders::keepAlive(*this) ? "true" : "false",
+                          transferEncoding_.toString().c_str());
 
     ConstHeaderIterator end = getLastHeader();
 
@@ -83,11 +83,11 @@ void HttpMessage::setHeader(const std::string& name, int value) {
 }
 
 HttpTransferEncoding HttpMessage::getTransferEncoding() const {
-    return transferEncoding;
+    return transferEncoding_;
 }
 
 void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
-    this->transferEncoding = te;
+    this->transferEncoding_ = te;
     const std::string& transferEnocodingStr = HttpHeaders::Names::TRANSFER_ENCODING;
     const std::string& chunkedStr = HttpHeaders::Values::CHUNKED;
 
@@ -109,21 +109,21 @@ void HttpMessage::setTransferEncoding(HttpTransferEncoding te) {
 }
 
 void HttpMessage::addCookie(const Cookie& cookie) {
-    cookies.push_back(cookie);
+    cookies_.push_back(cookie);
 }
 
 void HttpMessage::addCookie(const std::string& name, const std::string& value) {
     Cookie cookie(name, value);
-    cookies.push_back(cookie);
+    cookies_.push_back(cookie);
 }
 
 const std::vector<Cookie>& HttpMessage::getCookies() const {
-    if (cookies.empty()) {
+    if (cookies_.empty()) {
         const std::string& header = getHeader(HttpHeaders::Names::COOKIE);
         if (!header.empty()) {
 
 
-            return cookies;
+            return cookies_;
         }
         
         NameValueCollection::ConstIterator lower = httpHeader.lowerBound(HttpHeaders::Names::SET_COOKIE);
@@ -137,7 +137,7 @@ const std::vector<Cookie>& HttpMessage::getCookies() const {
         }
     }
 
-    return cookies;
+    return cookies_;
 }
 
 }

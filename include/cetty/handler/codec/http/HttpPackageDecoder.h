@@ -23,11 +23,13 @@
 
 #include <vector>
 
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/handler/codec/ReplayingDecoderBuffer.h>
+
 #include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
-#include <cetty/handler/codec/ReplayingDecoderBuffer.h>
-#include <cetty/handler/codec/ReplayingDecoder.h>
+
 #include <cetty/util/StringPiece.h>
 
 namespace cetty {
@@ -119,8 +121,8 @@ using namespace cetty::util;
  * @apiviz.landmark
  */
 
-class HttpMessageDecoder {
-private:
+class HttpPackageDecoder {
+public:
     /**
      * The internal state of {@link HttpMessageDecoder}.
      * <em>Internal use only</em>.
@@ -146,10 +148,20 @@ private:
         READ_CHUNK_FOOTER
     };
 
-public:
-    virtual ~HttpMessageDecoder() {}
+    enum DecodingType {
+        REQUEST,
+        RESPONSE
+    };
 
-protected:
+    typedef boost::function<HttpPackage(StringPiece const&,
+                                        StringPiece const&,
+                                        StringPiece const&)> HttpPackageCreator;
+
+    typedef boost::function<bool (HttpResponsePtr const &)> ContentAlwaysEmpty;
+
+    typedef boost::function<void (int)> CheckPointInvoker;
+
+public:
     /**
      * Creates a new instance with the default
      * <tt>maxInitialLineLength (4096)</tt>, <tt>maxHeaderSize (8192)</tt>, and
@@ -160,30 +172,44 @@ protected:
      * if < (maxInitialLineLength + maxHeaderSize) may cause some memory allocation.
      *
      */
-    HttpMessageDecoder();
+    HttpPackageDecoder(DecodingType decodingType);
 
     /**
      * Creates a new instance with the specified parameters.
      */
-    HttpMessageDecoder(int maxInitialLineLength,
-        int maxHeaderSize,
-        int maxChunkSize);
+    HttpPackageDecoder(DecodingType decodingType,
+                       int maxInitialLineLength,
+                       int maxHeaderSize,
+                       int maxChunkSize);
+
+    ~HttpPackageDecoder() {}
 
     HttpPackage decode(ChannelHandlerContext& ctx,
-        const ReplayingDecoderBufferPtr& buffer,
-        int state);
+                       const ReplayingDecoderBufferPtr& buffer,
+                       int state);
 
-    virtual bool isContentAlwaysEmpty(const HttpMessagePtr& msg) const;
+    int initialState() const {
+        return SKIP_CONTROL_CHARS;
+    }
 
-protected:
-    virtual bool isDecodingRequest() const = 0;
+    void setCheckPointInvoker(const CheckPointInvoker& invoker) {
+        checkPointInvoker_ = invoker;
+    }
 
-    virtual HttpMessagePtr createMessage(const StringPiece& str1,
-                                         const StringPiece& str2,
-                                         const StringPiece& str3) = 0;
+    void setHttpPackageCreator(const HttpPackageCreator& creator) {
+       httpPackageCreator_ = creator;
+    }
+
+    bool isContentAlwaysEmpty(const HttpMessagePtr& msg) const;
+
+    // if has an exception, reply an error message.
+    void exceptionCaught(ChannelHandlerContext& ctx,
+        const ChannelException& cause) {
+
+    }
 
 private:
-    HttpMessagePtr reset();
+    HttpPackage reset();
 
     bool skipControlCharacters(const ReplayingDecoderBufferPtr& buffer) const;
     HttpPackage readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer);
@@ -217,18 +243,23 @@ protected:
     static const int MAX_HEADER_SIZE;
     static const int MAX_CHUNK_SIZE;
 
-protected:
-    int maxInitialLineLength;
-    int maxHeaderSize;
-    int maxChunkSize;
-
 private:
-    int  chunkSize;
-    int  headerSize;
-    int contentRead;
+    bool isDecodingRequest_;
 
-    HttpMessagePtr message;
-    ChannelBufferPtr content;
+    int maxInitialLineLength_;
+    int maxHeaderSize_;
+    int maxChunkSize_;
+
+    int chunkSize_;
+    int headerSize_;
+
+    int contentRead_;
+
+    HttpPackage message_;
+    ChannelBufferPtr content_;
+
+    CheckPointInvoker checkPointInvoker_;
+    HttpPackageCreator httpPackageCreator_;
 };
 
 }

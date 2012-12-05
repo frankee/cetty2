@@ -21,7 +21,10 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/handler/codec/http/HttpMessage.h>
+#include <vector>
+#include <cetty/handler/codec/http/Cookie.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
 
 namespace cetty {
@@ -46,7 +49,7 @@ namespace http {
  * @see CookieEncoder
  * @see CookieDecoder
  */
-class HttpResponse : public HttpMessage {
+class HttpResponse : public cetty::util::ReferenceCounter<HttpResponse, int> {
 public:
     HttpResponse();
 
@@ -59,25 +62,78 @@ public:
     HttpResponse(const HttpVersion& version, const HttpResponseStatus& status);
 
     /**
+    * Returns the protocol version of this message.
+    */
+    const HttpVersion& version() const {
+        return version_;
+    }
+
+    /**
+    * Sets the protocol version of this message.
+    */
+    void setVersion(const HttpVersion& version) {
+        version_ = version;
+    }
+
+    /**
     * Returns the status of this response.
     */
-    const HttpResponseStatus& getStatus() const {
-        return status;
+    const HttpResponseStatus& status() const {
+        return status_;
     }
 
     /**
     * Sets the status of this response.
     */
     void setStatus(const HttpResponseStatus& status) {
-        this->status = status;
+        status_ = status;
     }
 
-    virtual std::string toString() const;
+    HttpHeaders& headers() {
+        return headers_;
+    }
 
-    virtual void clear();
+    const HttpHeaders& headers() const {
+        return headers_;
+    }
+
+    /**
+    * Returns the content of this message.  If there is no content or
+    * {@link #isChunked()} returns <tt>true</tt>, an
+    * {@link ChannelBuffers#EMPTY_BUFFER} is returned.
+    */
+    const ChannelBufferPtr& content() const {
+        return content_;
+    }
+
+    /**
+    * Sets the content of this message.  If <tt>null</tt> is specified,
+    * the content of this message will be set to {@link ChannelBuffers#EMPTY_BUFFER}.
+    */
+    void setContent(const ChannelBufferPtr& content) {
+        if (!content) {
+            content_ = Unpooled::EMPTY_BUFFER;
+            return;
+        }
+
+        if (content->readable() && headers_.transferEncoding().isMultiple()) {
+            throw InvalidArgumentException(
+                "non-empty content disallowed if this.chunked == true");
+        }
+
+        content_ = content;
+    }
+
+    std::string toString() const;
+
+    void clear();
 
 private:
-    HttpResponseStatus status;
+    HttpVersion version_;
+    HttpResponseStatus status_;
+
+    HttpHeaders headers_;
+    ChannelBufferPtr content_;
 };
 
 }

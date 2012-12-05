@@ -101,26 +101,12 @@ public:
              new Encoder(this));
     }
 
-    virtual ChannelHandlerPtr clone() {
-        return new HttpClientCodec(maxInitialLineLength,
-                                   maxHeaderSize,
-                                   maxChunkSize);
-    }
-
-    virtual std::string toString() const { return "HttpClientCodec"; }
 
 private:
-    class Encoder : public HttpRequestEncoder {
+    class Encoder {
     public:
         Encoder(HttpClientCodec* clientCodec) : codec(clientCodec) {}
         virtual ~Encoder() {}
-
-        virtual ChannelHandlerPtr clone() {
-            return ChannelHandlerPtr(new Encoder(codec));
-        }
-        virtual std::string toString() const {
-            return "HttpClientCodec::Encoder";
-        }
 
     protected:
         virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
@@ -131,7 +117,7 @@ private:
                     = boost::dynamic_pointer_cast<HttpRequest>(msg.httpMessage());
 
                 if (request) {
-                    codec->queue.push_back(request->getMethod());
+                    codec->queue.push_back(request->method());
                 }
                 else {
 
@@ -144,7 +130,7 @@ private:
             if (codec->failOnMissingResponse) {
                 // check if the request is chunked if so do not increment
                 if (msg.isHttpMessage() /*HttpRequest*/
-                        && msg.httpMessage()->getTransferEncoding().isSingle()) {
+                        && msg.httpMessage()->transferEncoding().isSingle()) {
                     ++ codec->requestResponseCounter;
                 }
                 else if (msg.isHttpChunk() && msg.httpChunk()->isLast()) {
@@ -170,17 +156,6 @@ private:
               codec(clientCodec) {
         }
         virtual ~Decoder() {}
-
-        virtual ChannelHandlerPtr clone() {
-            return ChannelHandlerPtr(new Decoder(maxInitialLineLength,
-                                                 maxHeaderSize,
-                                                 maxChunkSize,
-                                                 codec));
-        }
-
-        virtual std::string toString() const {
-            return "HttpClientCodec::Decoder";
-        }
 
         virtual void channelInactive(ChannelHandlerContext& ctx) {
             HttpResponseDecoder::channelInactive(ctx);
@@ -220,7 +195,7 @@ private:
                 boost::dynamic_pointer_cast<HttpResponse>(msg);
             BOOST_ASSERT(response);
 
-            int statusCode = response->getStatus().getCode();
+            int statusCode = response->status().getCode();
 
             if (statusCode == 100) {
                 // 100-continue response should be excluded from paired comparison.
@@ -285,7 +260,7 @@ private:
             }
 
             // check if it's an HttpMessage and its transfer encoding is SINGLE.
-            if (msg.isHttpMessage() && msg.httpMessage()->getTransferEncoding().isSingle()) {
+            if (msg.isHttpMessage() && msg.httpMessage()->transferEncoding().isSingle()) {
                 -- codec->requestResponseCounter;
             }
             else if (msg.isHttpChunk() && msg.httpChunk()->isLast()) {

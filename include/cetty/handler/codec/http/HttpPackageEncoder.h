@@ -22,6 +22,7 @@
  */
 
 #include <string>
+#include <boost/function.hpp>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
 #include <cetty/handler/codec/http/HttpPackage.h>
@@ -39,7 +40,6 @@ using namespace cetty::handler::codec;
 
 class HttpHeader;
 class HttpMessage;
-class HttpPackageEncodeVisitor;
 
 /**
  * Encodes an {@link HttpMessage} or an {@link HttpChunk} into
@@ -62,28 +62,35 @@ class HttpPackageEncodeVisitor;
  * @apiviz.landmark
  */
 
-class HttpMessageEncoder : public MessageToBufferEncoder<HttpPackage> {
+class HttpPackageEncoder : private boost::noncopyable {
 public:
-    virtual ~HttpMessageEncoder();
+    typedef boost::function<void (HttpPackage const&, ChannelBufferPtr&)> InitialLineEncoder;
 
-protected:
+public:
     /**
      * Creates a new instance.
      */
-    HttpMessageEncoder();
+    HttpPackageEncoder();
+    ~HttpPackageEncoder();
 
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-        const HttpPackage& msg,
-        const ChannelBufferPtr& out);
+    ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                            const HttpPackage& msg,
+                            const ChannelBufferPtr& out);
 
-protected:
-    virtual void encodeInitialLine(ChannelBuffer& buf,
-                                   const HttpMessage& message) = 0;
+    void setInitialLineEncoder(const InitialLineEncoder& encoder) {
+        initialLineEncoder_ = encoder;
+    }
+
+    static bool encodeResponseInitialLine(const HttpPackage& package,
+                                          const ChannelBufferPtr& buf);
+
+    static bool encodeRequestInitialLine(const HttpPackage& package,
+                                         const ChannelBufferPtr& buf);
 
 private:
     void encodeHeaders(ChannelBuffer& buf,
-                        const HttpMessage::ConstHeaderIterator& begin,
-                        const HttpMessage::ConstHeaderIterator& end);
+                       const HttpMessage::ConstHeaderIterator& begin,
+                       const HttpMessage::ConstHeaderIterator& end);
 
     // header and value has been validated when added to the HttpHeader.
     void encodeHeader(ChannelBuffer& buf,
@@ -91,12 +98,8 @@ private:
                       const std::string& value);
 
 private:
-    friend class HttpPackageEncodeVisitor;
-
-private:
-    static ChannelBufferPtr LAST_CHUNK;
-
-    HttpTransferEncoding lastTE;
+    HttpTransferEncoding lastTE_;
+    InitialLineEncoder initialLineEncoder_;
 };
 
 

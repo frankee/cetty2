@@ -65,7 +65,7 @@ protected:
             HttpResponsePtr response =
                 boost::dynamic_pointer_cast<HttpResponse>(msg.httpMessage());
 
-            printf("STATUS: %s\n", response->getStatus().toString().c_str());
+            printf("STATUS: %s\n", response->status().toString().c_str());
             printf("VERSION: %s\n", response->getProtocolVersion().toString().c_str());
             printf("\n");
 
@@ -81,8 +81,8 @@ protected:
                 printf("\n");
             }
 
-            if (response->getStatus().getCode() == 200
-                && response->getTransferEncoding().isMultiple()) {
+            if (response->status().getCode() == 200
+                && response->transferEncoding().isMultiple()) {
                 readingChunks = true;
                 printf("CHUNKED CONTENT {\n");
             }

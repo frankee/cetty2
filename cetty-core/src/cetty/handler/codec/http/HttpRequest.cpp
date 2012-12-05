@@ -32,7 +32,7 @@ HttpRequest::HttpRequest(const HttpVersion& httpVersion,
                          const std::string& uri)
     : HttpMessage(httpVersion),
       method(method),
-      uriStr(uri),
+      uriStr_(uri),
       uri(uri) {
 }
 
@@ -41,7 +41,7 @@ HttpRequest::HttpRequest(const HttpVersion& httpVersion,
                          const StringPiece& uri)
     : HttpMessage(httpVersion),
       method(method),
-      uriStr(uri.data(), uri.size()),
+      uriStr_(uri.data(), uri.size()),
       uri(uri) {
 
 }
@@ -50,39 +50,39 @@ HttpRequest::~HttpRequest() {
 
 }
 
-const NameValueCollection& HttpRequest::getQueryParameters() const {
-    if (queryParams.empty()) {
-        QueryStringDecoder queryStringDecoder(uri);
-        queryStringDecoder.getParameters(&queryParams);
+const NameValueCollection& HttpRequest::queryParameters() const {
+    if (queryParams_.empty()) {
+        QueryStringDecoder queryStringDecoder(uri_);
+        queryStringDecoder.getParameters(&queryParams_);
     }
 
-    return queryParams;
+    return queryParams_;
 }
 
-const std::vector<std::string>& HttpRequest::getPathSegments() const {
-    if (pathSegments.empty()) {
-        uri.getPathSegments(pathSegments);
+const std::vector<std::string>& HttpRequest::pathSegments() const {
+    if (pathSegments_.empty()) {
+        uri_.getPathSegments(pathSegments_);
 
-        std::string& lastSegment = pathSegments.back();
+        std::string& lastSegment = pathSegments_.back();
         std::string::size_type pos = lastSegment.find('.');
 
         if (pos != lastSegment.npos) {
-            label = lastSegment.substr(pos + 1);
+            label_ = lastSegment.substr(pos + 1);
             lastSegment = lastSegment.substr(0, pos);
         }
     }
 
-    return pathSegments;
+    return pathSegments_;
 }
 
 void HttpRequest::clear() {
     HttpMessage::clear();
 
-    uri.clear();
-    uriStr.clear();
+    uri_.clear();
+    uriStr_.clear();
 
-    pathSegments.clear();
-    queryParams.clear();
+    pathSegments_.clear();
+    queryParams_.clear();
 }
 
 std::string HttpRequest::toString() const {
@@ -91,10 +91,10 @@ std::string HttpRequest::toString() const {
 
     StringUtil::printf(&buf,
                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
-                          getTransferEncoding().toString().c_str(),
-                          getMethod().toString().c_str(),
+                          transferEncoding().toString().c_str(),
+                          method().toString().c_str(),
                           getUriString().c_str(),
-                          getProtocolVersion().getText().c_str());
+                          version().getText().c_str());
 
     ConstHeaderIterator end = getLastHeader();
 
@@ -105,19 +105,19 @@ std::string HttpRequest::toString() const {
     return buf;
 }
 
-const std::string& HttpRequest::getLabel() const {
-    return label;
+const std::string& HttpRequest::label() const {
+    return label_;
 }
 
 void HttpRequest::setUri(const StringPiece& uri) {
     if (!uri.empty()) {
-        this->uriStr.assign(uri.data(), uri.size());
-        this->uri = this->uriStr;
+        this->uriStr_.assign(uri.data(), uri.size());
+        this->uri_ = this->uriStr_;
     }
 }
 
 void HttpRequest::setLabel(const std::string& label) {
-    this->label = label;
+    this->label_ = label;
 }
 
 }

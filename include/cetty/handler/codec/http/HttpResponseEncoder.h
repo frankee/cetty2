@@ -21,7 +21,8 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/handler/codec/http/HttpMessageEncoder.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
+#include <cetty/handler/codec/http/HttpPackageEncoder.h>
 
 namespace cetty {
 namespace handler {
@@ -38,19 +39,31 @@ namespace http {
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class HttpResponseEncoder : public HttpMessageEncoder {
-public:
-    HttpResponseEncoder() {}
-    virtual ~HttpResponseEncoder() {}
 
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new HttpResponseEncoder);
+class HttpResponseEncoder : private boost::noncopyable {
+public:
+    typedef boost::shared_ptr<HttpResponseEncoder> HandlerPtr;
+
+    typedef ChannelMessageHandlerContext<HttpResponseEncoder,
+            VoidMessage,
+            VoidMessage,
+            HttpPackage,
+            ChannelBufferPtr,
+            VoidMessage,
+            VoidMessage,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            ChannelBufferContainer> Context;
+
+public:
+    HttpResponseEncoder();
+
+    void registerTo(Context& ctx) {
+        encoder_.registerTo(ctx);
     }
 
-    virtual std::string toString() const { return "HttpResponseEncoder"; }
-
-protected:
-    virtual void encodeInitialLine(ChannelBuffer& buf, const HttpMessage& message);
+private:
+    HttpPackageEncoder responseEncoder_;
+    MessageToBufferEncoder<HttpResponseEncoder, HttpPackage, Context> encoder_;
 };
 
 }

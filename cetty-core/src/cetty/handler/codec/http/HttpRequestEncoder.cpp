@@ -16,36 +16,23 @@
 
 #include <cetty/handler/codec/http/HttpRequestEncoder.h>
 
-#include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/util/Exception.h>
-#include <cetty/handler/codec/http/HttpMethod.h>
-#include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpRequest.h>
-#include <cetty/handler/codec/http/HttpCodecUtil.h>
-
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
 
-using namespace cetty::buffer;
-using namespace cetty::util;
+HttpRequestEncoder::HttpRequestEncoder() {
+    requestEncoder_.setInitialLineEncoder(boost::bind(
+        HttpPackageEncoder::encodeRequestInitialLine,
+        _1,
+        _2));
 
-void HttpRequestEncoder::encodeInitialLine(ChannelBuffer& buf, const HttpMessage& message) {
-    const HttpRequest* request =
-        dynamic_cast<const HttpRequest*>(&message);
-
-    if (NULL == request) {
-        throw RuntimeException("message must be HttpRequest");
-    }
-
-    buf.writeBytes(request->getMethod().toString());
-    buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(request->getUriString());
-    buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(request->getProtocolVersion().toString());
-    buf.writeByte(HttpCodecUtil::CR);
-    buf.writeByte(HttpCodecUtil::LF);
+    encoder_.setEncoder(boost::bind(
+        &HttpPackageEncoder::encode,
+        &requestEncoder_,
+        _1,
+        _2,
+        _3));
 }
 
 }

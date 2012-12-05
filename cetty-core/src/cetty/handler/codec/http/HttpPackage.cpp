@@ -24,7 +24,8 @@ namespace http {
 
 class HttpPackageEmptyVisitor : public boost::static_visitor<bool> {
 public:
-    bool operator()(const HttpMessagePtr& value) const { return !!value; }
+    bool operator()(const HttpRequestPtr& value) const { return !!value; }
+    bool operator()(const HttpResponsePtr& value) const { return !!value; }
     bool operator()(const HttpChunkPtr& value) const { return !!value; }
     bool operator()(const HttpChunkTrailerPtr& value) const { return !!value; }
 
@@ -36,7 +37,6 @@ HttpPackage::operator bool() const {
     static HttpPackageEmptyVisitor visitor;
     return variant.apply_visitor(visitor);
 }
-
 
 }
 }

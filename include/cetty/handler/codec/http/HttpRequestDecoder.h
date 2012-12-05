@@ -21,11 +21,10 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpMethod.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
-#include <cetty/handler/codec/http/HttpMessageDecoder.h>
-
+#include <cetty/handler/codec/http/HttpRequestCreator.h>
+#include <cetty/handler/codec/http/HttpPackageDecoder.h>
 
 namespace cetty {
 namespace handler {
@@ -72,37 +71,57 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class HttpRequestDecoder : public HttpMessageDecoder {
+class HttpRequestDecoder : private boost::noncopyable {
+public:
+    typedef boost::shared_ptr<HttpRequestDecoder> HandlerPtr;
+
+    typedef ChannelMessageHandlerContext<HttpRequestDecoder,
+            ChannelBufferPtr,
+            HttpPackage,
+            VoidMessage,
+            VoidMessage,
+            ChannelBufferContainer,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            VoidMessage,
+            VoidMessage> Context;
+
 public:
     /**
      * Creates a new instance with the default
      * <tt>maxInitialLineLength (4096)</tt>, <tt>maxHeaderSize (8192)</tt>, and
      * <tt>maxChunkSize (8192)</tt>.
      */
-    HttpRequestDecoder();
+    HttpRequestDecoder()
+        : requestDecoder_(HttpPackageDecoder::REQUEST, 4096, 8192, 8192) {
+        init();
+    }
 
     /**
      * Creates a new instance with the specified parameters.
      */
     HttpRequestDecoder(int maxInitialLineLength,
                        int maxHeaderSize,
-                       int maxChunkSize);
+                       int maxChunkSize)
+        : requestDecoder_(HttpPackageDecoder::REQUEST,
+                          maxInitialLineLength,
+                          maxHeaderSize,
+                          maxChunkSize) {
+        init();
+    }
 
-    virtual ~HttpRequestDecoder();
-
-    // if has an exception, reply an error message.
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
-
-protected:
-    virtual HttpMessagePtr createMessage(const StringPiece& str1,
-                                         const StringPiece& str2,
-                                         const StringPiece& str3);
-
-    virtual bool isDecodingRequest() const;
+    void registerTo(Context& ctx);
 
 private:
-    HttpRequestPtr request;
+    void init();
+
+    // if has an exception, reply an error message.
+    void exceptionCaught(ChannelHandlerContext& ctx,
+                         const ChannelException& cause);
+
+private:
+    HttpRequestCreator requestCreator_;
+    HttpPackageDecoder requestDecoder_;
+    ReplayingDecoder<HttpRequestDecoder, HttpPackage, Context> decoder_;
 };
 
 }

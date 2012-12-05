@@ -28,7 +28,7 @@ namespace util {
 template<typename T, typename Count = boost::detail::atomic_count>
 class ReferenceCounter : private boost::noncopyable {
 public:
-    ReferenceCounter() : refCount(0) {}
+    ReferenceCounter() : refCount_(0) {}
     virtual ~ReferenceCounter() {}
 
 #if 0
@@ -47,8 +47,8 @@ public:
      * Increments the reference count.
      */
     inline void duplicate() const {
-        BOOST_ASSERT(refCount >= 0);
-        ++refCount;
+        BOOST_ASSERT(refCount_ >= 0);
+        ++refCount_;
     }
 
     /**
@@ -56,9 +56,9 @@ public:
      * reaches zero.
      */
     inline void release() const {
-        BOOST_ASSERT(refCount > 0);
+        BOOST_ASSERT(refCount_ > 0);
 
-        if (--refCount == 0) {
+        if (--refCount_ == 0) {
             boost::checked_delete(static_cast<T const*>(this));
         }
     }
@@ -72,7 +72,7 @@ public:
     }
 
     int refcount() const {
-        return refCount;
+        return refCount_;
     }
 
 protected:
@@ -97,7 +97,7 @@ private:
     /**
      * should be modifiable even from const intrusive_ptr objects
      */
-    mutable Count refCount;
+    mutable Count refCount_;
 };
 
 }

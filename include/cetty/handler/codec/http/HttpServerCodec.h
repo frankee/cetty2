@@ -23,8 +23,9 @@
 
 #include <cetty/handler/codec/ReplayingDecoder.h>
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
-#include <cetty/handler/codec/http/HttpRequestDecoder.h>
-#include <cetty/handler/codec/http/HttpResponseEncoder.h>
+#include <cetty/handler/codec/http/HttpRequestCreator.h>
+#include <cetty/handler/codec/http/HttpPackageDecoder.h>
+#include <cetty/handler/codec/http/HttpPackageEncoder.h>
 
 namespace cetty {
 namespace handler {
@@ -45,19 +46,19 @@ namespace http {
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpResponseEncoder
  */
 
-class HttpServerCodec {
+class HttpServerCodec : private boost::noncopyable {
 public:
-    typedef ChannelMessageHandlerContext<HttpServerCodec,
-        ChannelBufferPtr,
-        HttpPackage,
-        HttpPackage,
-        ChannelBufferPtr,
-        ChannelBufferContainer,
-        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
-        ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
-        ChannelBufferContainer> Context;
-
     typedef boost::shared_ptr<HttpServerCodec> HandlerPtr;
+
+    typedef ChannelMessageHandlerContext<HttpServerCodec,
+            ChannelBufferPtr,
+            HttpPackage,
+            HttpPackage,
+            ChannelBufferPtr,
+            ChannelBufferContainer,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            ChannelBufferContainer> Context;
 
 public:
     /**
@@ -66,16 +67,21 @@ public:
      * <tt>maxChunkSize (8192)</tt>).
      */
     HttpServerCodec()
-        :  decoderImpl_(4096, 8192, 8192),
-           decoder_(boost::bind(&HttpRequestDecoderImpl::decode, &decoderImpl_, _1, _2, _3)),
-           encoder_(boost::bind(&HttpResponseEncoderImpl::encode, &encoderImpl_, _1, _2)) {
+        :  requestDecoder_(HttpPackageDecoder::REQUEST, 4096, 8192, 8192) {
+        init();
     }
 
     /**
      * Creates a new instance with the specified decoder options.
      */
-    HttpServerCodec(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-        : decoderImpl_(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
+    HttpServerCodec(int maxInitialLineLength,
+                    int maxHeaderSize,
+                    int maxChunkSize)
+        : requestDecoder_(HttpPackageDecoder::REQUEST,
+                          maxInitialLineLength,
+                          maxHeaderSize,
+                          maxChunkSize) {
+        init();
     }
 
     void registerTo(Context& ctx) {
@@ -84,8 +90,40 @@ public:
     }
 
 private:
-    HttpRequestDecoderImpl decoderImpl_;
-    HttpResponseEncoderImpl encoderImpl_;
+    void init() {
+        decoder_.setInitialState(requestDecoder_.initialState());
+        decoder_.setDecoder(boost::bind(&HttpPackageDecoder::decode,
+                                        &requestDecoder_,
+                                        _1,
+                                        _2,
+                                        _3));
+
+        requestDecoder_.setCheckPointInvoker(decoder_.checkPointInvoker());
+        requestDecoder_.setHttpPackageCreator(boost::bind(
+                &HttpRequestCreator::create,
+                &requestCreator_,
+                _1,
+                _2,
+                _3));
+
+        responseEncoder_.setInitialLineEncoder(boost::bind(
+                HttpPackageEncoder::encodeResponseInitialLine,
+                _1,
+                _2));
+
+        encoder_.setEncoder(boost::bind(
+                                &HttpPackageEncoder::encode,
+                                &responseEncoder_,
+                                _1,
+                                _2,
+                                _3));
+    }
+
+private:
+    HttpRequestCreator requestCreator_;
+
+    HttpPackageDecoder requestDecoder_;
+    HttpPackageEncoder responseEncoder_;
 
     ReplayingDecoder<HttpServerCodec, HttpPackage, Context> decoder_;
     MessageToBufferEncoder<HttpServerCodec, HttpPackage, Context> encoder_;

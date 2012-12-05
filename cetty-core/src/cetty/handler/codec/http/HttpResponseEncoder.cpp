@@ -16,38 +16,23 @@
 
 #include <cetty/handler/codec/http/HttpResponseEncoder.h>
 
-#include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/util/Exception.h>
-#include <cetty/util/StringUtil.h>
-#include <cetty/handler/codec/http/HttpMethod.h>
-#include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/handler/codec/http/HttpResponseStatus.h>
-#include <cetty/handler/codec/http/HttpCodecUtil.h>
-
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
 
-using namespace cetty::buffer;
-using namespace cetty::util;
+HttpResponseEncoder::HttpResponseEncoder() {
+    responseEncoder_.setInitialLineEncoder(boost::bind(
+        HttpPackageEncoder::encodeResponseInitialLine,
+        _1,
+        _2));
 
-void HttpResponseEncoder::encodeInitialLine(ChannelBuffer& buf, const HttpMessage& message) {
-    const HttpResponse* response =
-        dynamic_cast<const HttpResponse*>(&message);
-
-    if (NULL == response) {
-        throw RuntimeException("message must be HttpResponse");
-    }
-
-    buf.writeBytes(response->getProtocolVersion().toString());
-    buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(StringUtil::numtostr(response->getStatus().getCode()));
-    buf.writeByte(HttpCodecUtil::SP);
-    buf.writeBytes(response->getStatus().getReasonPhrase());
-    buf.writeByte(HttpCodecUtil::CR);
-    buf.writeByte(HttpCodecUtil::LF);
+    encoder_.setEncoder(boost::bind(
+        &HttpPackageEncoder::encode,
+        &responseEncoder_,
+        _1,
+        _2,
+        _3));
 }
 
 }

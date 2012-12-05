@@ -171,7 +171,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         ServiceResponseMapper::setHttpHeaders(*tmpl, response);
 
-        const std::string& format = req->getLabel();
+        const std::string& format = req->label();
         ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(format);
 
         if (!formatter) {
@@ -203,7 +203,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         // for jsonp
         if (format == "json") {
-            std::string jquery = req->getQueryParameters().get("jsoncallback");
+            std::string jquery = req->queryParameters().get("jsoncallback");
 
             if (!jquery.empty()) {
                 jquery.append("(");
@@ -213,7 +213,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         }
 
         // Decide whether to close the connection or not.
-        bool keepAlive = HttpHeaders::isKeepAlive(*req);
+        bool keepAlive = HttpHeaders::keepAlive(*req);
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.

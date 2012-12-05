@@ -27,7 +27,7 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 HttpResponse::HttpResponse()
-    : status(HttpResponseStatus::NOT_FOUND) {
+    : status_(HttpResponseStatus::NOT_FOUND) {
 }
 
 HttpResponse::HttpResponse(const HttpVersion& version, const HttpResponseStatus& status)
@@ -36,7 +36,7 @@ HttpResponse::HttpResponse(const HttpVersion& version, const HttpResponseStatus&
 
 void HttpResponse::clear() {
     HttpMessage::clear();
-    status = HttpResponseStatus::NOT_FOUND;
+    status_ = HttpResponseStatus::NOT_FOUND;
 }
 
 std::string HttpResponse::toString() const {
@@ -45,9 +45,9 @@ std::string HttpResponse::toString() const {
 
     StringUtil::printf(&buf,
                           "HttpResponse (TransferEncoding: %s)\r\n%s %s",
-                          getTransferEncoding().toString().c_str(),
+                          transferEncoding().toString().c_str(),
                           getProtocolVersion().getText().c_str(),
-                          getStatus().toString().c_str());
+                          status().toString().c_str());
 
     ConstHeaderIterator end = getLastHeader();
 

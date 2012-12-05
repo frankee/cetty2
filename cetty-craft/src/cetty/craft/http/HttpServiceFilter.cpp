@@ -56,7 +56,7 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext
 
     if (!msg) {
         HttpResponsePtr response = new HttpResponse(
-            request->getProtocolVersion(),
+            request->version(),
             HttpResponseStatus::BAD_REQUEST);
 
         outboundTransfer.unfoldAndAdd(
@@ -78,11 +78,11 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
     if (!response) {
         LOG_WARN << "HttpServiceFilter filterResponse has an error.";
         response = HttpResponsePtr(new HttpResponse(
-                                       request->getProtocolVersion(),
+                                       request->version(),
                                        HttpResponseStatus::BAD_REQUEST));
     }
 
-    if (!HttpHeaders::isKeepAlive(*req)) {
+    if (!HttpHeaders::keepAlive(*req)) {
         LOG_DEBUG << "not keep alive mode, close the channel after writer completed.";
         future->addListener(ChannelFutureListener::CLOSE);
     }

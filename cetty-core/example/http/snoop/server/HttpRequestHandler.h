@@ -85,11 +85,11 @@ public:
             buf.append("===================================\r\n");
 
             buf.append("VERSION: ");
-            buf.append(request->getProtocolVersion().toString());
+            buf.append(request->version().toString());
             buf.append("\r\n");
 
             buf.append("HOSTNAME: ");
-            buf.append(HttpHeaders::getHost(*request, "unknown"));
+            buf.append(HttpHeaders::host(*request, "unknown"));
             buf.append("\r\n");
             
             buf.append("REQUEST_URI: ");
@@ -107,7 +107,7 @@ public:
             }
             buf.append("\r\n");
 
-            QueryStringDecoder queryStringDecoder(request->getUri());
+            QueryStringDecoder queryStringDecoder(request->uri());
             NameValueCollection params;
             queryStringDecoder.getParameters(&params);
 
@@ -123,11 +123,11 @@ public:
                 buf.append("\r\n");
             }
 
-            if (request->getTransferEncoding().isMultiple()) {
+            if (request->transferEncoding().isMultiple()) {
                 readingChunks = true;
             }
             else {
-                ChannelBufferPtr content = request->getContent();
+                ChannelBufferPtr content = request->content();
                 if (content->readable()) {
                     buf.append("CONTENT: ");
                     buf.append(content->toString());
@@ -181,7 +181,7 @@ public:
 private:
     void writeResponse(ChannelHandlerContext& ctx) {
         // Decide whether to close the connection or not.
-        bool keepAlive = HttpHeaders::isKeepAlive(*request);
+        bool keepAlive = HttpHeaders::keepAlive(*request);
 
         // Build the response object.
         HttpResponsePtr response = 
