@@ -17,7 +17,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/util/Exception.h>
 
@@ -122,26 +121,26 @@ bool HttpCodecUtil::validateHeaderValue(const std::string& value) {
     return true;
 }
 
-bool HttpCodecUtil::isTransferEncodingChunked(const HttpMessage& m) {
-    std::vector<std::string> chunked;
-    m.getHeaders(HttpHeaders::Names::TRANSFER_ENCODING, &chunked);
-
-    if (chunked.empty()) {
-        return false;
-    }
-
-    for (size_t i = 0; i < chunked.size(); ++i) {
-        if (boost::algorithm::iequals(HttpHeaders::Values::CHUNKED, chunked[i])) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool HttpCodecUtil::isContentLengthSet(const HttpMessage& m) {
-    return m.hasHeader(HttpHeaders::Names::CONTENT_LENGTH);
-}
+// bool HttpCodecUtil::isTransferEncodingChunked(const HttpMessage& m) {
+//     std::vector<std::string> chunked;
+//     m.getHeaders(HttpHeaders::Names::TRANSFER_ENCODING, &chunked);
+// 
+//     if (chunked.empty()) {
+//         return false;
+//     }
+// 
+//     for (size_t i = 0; i < chunked.size(); ++i) {
+//         if (boost::algorithm::iequals(HttpHeaders::Values::CHUNKED, chunked[i])) {
+//             return true;
+//         }
+//     }
+// 
+//     return false;
+// }
+// 
+// bool HttpCodecUtil::isContentLengthSet(const HttpMessage& m) {
+//     return m.hasHeader(HttpHeaders::Names::CONTENT_LENGTH);
+// }
 
 #if 0
 void HttpCodecUtil::splitElements(const std::string& s, std::vector<std::string>& elements, bool ignoreEmpty) {

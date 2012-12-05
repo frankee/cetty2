@@ -53,6 +53,8 @@ public:
 
     operator bool() const;
 
+    HttpHeaders& headers() const;
+
     bool isHttpRequest() const;
     bool isHttpResponse() const;
     bool isHttpChunk() const;

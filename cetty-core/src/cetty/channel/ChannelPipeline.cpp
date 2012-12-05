@@ -76,7 +76,7 @@ bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
 
     callBeforeAdd(context);
 
-    oldHead->setBefore(context);
+    oldHead->setPrev(context);
     head_ = context;
 
     context->setNext(oldHead);
@@ -116,7 +116,7 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
     oldTail->setNext(context);
     this->tail_ = context;
 
-    context->setBefore(oldTail);
+    context->setPrev(oldTail);
 
     contexts_[name] = context;
 
@@ -153,10 +153,10 @@ bool ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* 
     context->initialize(this);
     callBeforeAdd(context);
 
-    ctx->before()->setNext(context);
-    ctx->setBefore(context);
+    ctx->prev()->setNext(context);
+    ctx->setPrev(context);
 
-    context->setBefore(ctx->before());
+    context->setPrev(ctx->prev());
     context->setNext(ctx);
 
     contexts_[newName] = context;
@@ -193,10 +193,10 @@ bool ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* c
     context->initialize(this);
     callBeforeAdd(context);
 
-    ctx->next()->setBefore(context);
+    ctx->next()->setPrev(context);
     ctx->setNext(context);
 
-    context->setBefore(ctx);
+    context->setPrev(ctx);
     context->setNext(ctx->next());
 
     contexts_[newName] = context;
@@ -227,11 +227,11 @@ void ChannelPipeline::remove(const std::string& name) {
     else {
         callBeforeRemove(ctx);
 
-        ChannelHandlerContext* prev = ctx->before();
+        ChannelHandlerContext* prev = ctx->prev();
         ChannelHandlerContext* next = ctx->next();
 
         prev->setNext(next);
-        next->setBefore(prev);
+        next->setPrev(prev);
 
         contexts_.erase(ctx->name());
 
@@ -263,7 +263,7 @@ void ChannelPipeline::removeFirst() {
         contexts_.clear();
     }
     else {
-        oldHead->next()->setBefore(NULL);
+        oldHead->next()->setPrev(NULL);
         head_ = oldHead->next();
         contexts_.erase(oldHead->name());
     }
@@ -290,13 +290,13 @@ void ChannelPipeline::removeLast() {
 
     callBeforeRemove(oldTail);
 
-    if (!oldTail->before()) {
+    if (!oldTail->prev()) {
         this->head_ = this->tail_ = NULL;
         contexts_.clear();
     }
     else {
-        oldTail->before()->setNext(NULL);
-        this->tail_ = oldTail->before();
+        oldTail->prev()->setNext(NULL);
+        this->tail_ = oldTail->prev();
         contexts_.erase(oldTail->name());
     }
 
@@ -331,7 +331,7 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
     const std::string& oldName = ctx->name();
     const std::string& newName = context->name();
 
-    ChannelHandlerContext* prev = ctx->before();
+    ChannelHandlerContext* prev = ctx->prev();
     ChannelHandlerContext* next = ctx->next();
 
     context->initialize(this);
@@ -339,9 +339,9 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
     callBeforeAdd(context);
 
     prev->setNext(context);
-    next->setBefore(context);
+    next->setPrev(context);
 
-    context->setBefore(prev);
+    context->setPrev(prev);
     context->setNext(next);
 
     contexts_.erase(ctx->name());

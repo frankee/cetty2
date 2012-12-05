@@ -25,7 +25,8 @@
 #include <cetty/util/StringUtil.h>
 
 #include <cetty/handler/codec/TooLongFrameException.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
+#include <cetty/handler/codec/http/HttpRequest.h>
+#include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
@@ -40,17 +41,19 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 using namespace cetty::handler::codec;
 
-class HttpPackageVisitor : public boost::static_visitor<HttpMessagePtr> {
-public:
-    HttpPackageVisitor(HttpChunkAggregator& aggregator,
-                       ChannelHandlerContext& ctx)
-        : aggregator(aggregator), ctx(ctx) {
+HttpChunkAggregator::HttpChunkAggregator(int maxContentLength)
+    : maxContentLength_(maxContentLength) {
+    if (maxContentLength <= 0) {
+        throw InvalidArgumentException(
+            "maxContentLength must be a positive integer: " +
+            maxContentLength);
     }
+}
 
-    HttpMessagePtr operator()(const HttpMessagePtr& value) const {
-        HttpMessagePtr& currentMessage = aggregator.currentMessage;
-
-        BOOST_ASSERT(value);
+HttpPackage HttpChunkAggregator::decode(ChannelHandlerContext& ctx,
+                                        const HttpPackage& msg) {
+#if 0
+    if (msg.isHttpRequest() || msg.isHttpResponse()) {
 
         // Handle the 'Expect: 100-continue' header if necessary.
         // TODO: Respond with 413 Request Entity Too Large
@@ -62,12 +65,13 @@ public:
         }
 
         HttpTransferEncoding te = value->getTransferEncoding();
+
         if (te == HttpTransferEncoding::SINGLE) {
             currentMessage.reset();
             return value;
         }
         else if (te == HttpTransferEncoding::STREAMED
-            || te == HttpTransferEncoding::CHUNKED) {
+                 || te == HttpTransferEncoding::CHUNKED) {
             // initialize the cumulative buffer, and wait for incoming chunks.
             value->setTransferEncoding(HttpTransferEncoding::SINGLE);
             value->setContent(Unpooled::buffer());
@@ -81,9 +85,8 @@ public:
             return HttpMessagePtr();
         }
     }
-
-    HttpMessagePtr operator()(const HttpChunkPtr& value) const {
-        HttpMessagePtr& currentMessage = aggregator.currentMessage;
+    else if (msg.isHttpChunk()) {
+        HttpMessagePtr& currentMessage = aggregator.currentMessage_;
 
         // Sanity check
         if (!currentMessage) {
@@ -93,15 +96,15 @@ public:
         // Merge the received chunk into the content of the current message.
         ChannelBufferPtr content = currentMessage->getContent();
 
-        if (content->readableBytes() > aggregator.maxContentLength - value->getContent()->readableBytes()) {
+        if (content->readableBytes() > aggregator.maxContentLength_ - value->getContent()->readableBytes()) {
             // TODO: Respond with 413 Request Entity Too Large
             //   and discard the traffic or close the connection.
             //       No need to notify the upstream handlers - just log.
             //       If decoding a response, just throw an exception.
             std::string msg;
             StringUtil::printf(&msg,
-                "HTTP content length exceeded %d bytes.",
-                aggregator.maxContentLength);
+                               "HTTP content length exceeded %d bytes.",
+                               aggregator.maxContentLength_);
 
             LOG_ERROR << msg;
 
@@ -126,9 +129,8 @@ public:
             return HttpMessagePtr();
         }
     }
-
-    HttpMessagePtr operator()(const HttpChunkTrailerPtr& value) const {
-        HttpMessagePtr& currentMessage = aggregator.currentMessage;
+    else if (msg.isHttpChunkTrailer()) {
+        HttpMessagePtr& currentMessage = aggregator.currentMessage_;
 
         HttpChunkTrailer::ConstHeaderIterator itr = value->getFirstHeader();
         HttpChunkTrailer::ConstHeaderIterator end = value->getLastHeader();
@@ -144,39 +146,14 @@ public:
 
         return currentMessage;
     }
-
-    template<typename U>
-    ChannelBufferPtr operator()(const U& value) const {
-        // Neither HttpMessage or HttpChunk
-        throw IllegalStateException(
-            "Only HttpMessage and HttpChunk are accepted.");
-
-        return HttpMessagePtr();
-    }
-
-private:
-    HttpChunkAggregator& aggregator;
-    ChannelHandlerContext& ctx;
-};
-
-HttpChunkAggregator::HttpChunkAggregator(int maxContentLength)
-    : maxContentLength(maxContentLength) {
-    if (maxContentLength <= 0) {
-        throw InvalidArgumentException(
-            "maxContentLength must be a positive integer: " +
-            maxContentLength);
-    }
-}
-
-HttpMessagePtr HttpChunkAggregator::decode(ChannelHandlerContext& ctx,
-        const HttpPackage& msg) {
-    HttpPackageVisitor visitor(*this, ctx);
-    return msg.variant.apply_visitor(visitor);
+#endif
+    return msg;
 }
 
 void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
-    const ChannelBufferPtr& cumulation = currentMessage->getContent();
 #if 0
+    const ChannelBufferPtr& cumulation = currentMessage_->getContent();
+
 
     if (cumulation instanceof CompositeByteBuf) {
         // Make sure the resulting cumulation buffer has no more than 4 components.
@@ -197,8 +174,9 @@ void HttpChunkAggregator::appendToCumulation(const ChannelBufferPtr& input) {
         currentMessage.setContent(Unpooled.wrappedBuffer(cumulation, input));
     }
 
+
+    currentMessage_->setContent(Unpooled::wrappedBuffer(cumulation, input));
 #endif
-    currentMessage->setContent(Unpooled::wrappedBuffer(cumulation, input));
 }
 
 }

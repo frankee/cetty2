@@ -51,6 +51,11 @@ public:
 
     typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
 
+    typedef InboundInContainer InboundContainer;
+    typedef InboundOutContainer NextInboundContainer;
+    typedef OutboundInContainer OutboundContainer;
+    typedef OutboundOutContainer NextOutboundContainer;
+
     typedef ChannelMessageTransfer<InboundOut, InboundOutContainer, TRANSFER_INBOUND> InboundTransfer;
     typedef ChannelMessageTransfer<OutboundOut, OutboundOutContainer, TRANSFER_OUTBOUND> OutboundTransfer;
 

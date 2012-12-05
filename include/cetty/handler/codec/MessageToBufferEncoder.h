@@ -66,46 +66,61 @@ public:
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
     typedef typename OutboundContainer::MessageQueue MessageQueue;
 
-    typedef ChannelMessageTransfer<OutboundIn,
+    typename ChannelBufferContainer NextOutboundContainer;
+
+    typedef ChannelMessageTransfer<ChannelBufferPtr,
             ChannelBufferContainer,
             TRANSFER_OUTBOUND> OutboundTransfer;
 
 public:
-    MessageToBufferEncoder()
-        : nextBufferContainerAccumulated_(false) {
+    MessageToBufferEncoder() {
     }
 
     MessageToBufferEncoder(const Encoder& encoder)
-        : nextBufferContainerAccumulated_(false),
-          encoder_(encoder) {
+        : encoder_(encoder) {
     }
 
     ~MessageToBufferEncoder() {}
 
     void registerTo(Context& ctx) {
         transfer_ = ctx.outboundTransfer();
-        container_ = ctx.outboundTransfer();
+        container_ = ctx.outboundContainer();
 
         ctx.setFlushFunctor(boost::bind(
                                 &Self::flush,
                                 this,
                                 _1,
                                 _2));
+
+        ctx.setPipelineChangedCallback(boost::bind(
+            &Self::checkNextBufferAccumulated,
+            this,
+            _1));
+
+        ctx.setChannelActiveCallback(boost::bind(
+            &Self::checkNextBufferAccumulated,
+            this,
+            _1));
     }
 
     void setEncoder(const Encoder& encoder) {
         encoder_ = encoder;
     }
 
-    void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        ChannelBufferPtr out;
-
-        if (nextBufferContainerAccumulated_) {
-            out = Unpooled::buffer(initBufferSize_);
+private:
+    void checkNextBufferAccumulated(ChannelHandlerContext& ctx) {
+        NextOutboundContainer* nextContainer = transfer_->nextContainer();
+        if (nextContainer && nextContainer->accumulated()) {
+            nextOutboundBuffer_ = nextContainer->getMessages();
         }
+        else {
+            nextOutboundBuffer_.reset();
+        }
+    }
 
-        OutboundContainer* container = context_->outboundContainer();
-        MessageQueue& outboundQueue = container->getMessages();
+    void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+        bool notify = false;
+        MessageQueue& outboundQueue = container_->getMessages();
 
         while (!outboundQueue.empty()) {
             OutboundIn& msg = outboundQueue.front();
@@ -123,14 +138,17 @@ public:
             //             }
 
             try {
-                if (nextBufferContainerAccumulated_) {
-                    encode(ctx, msg, out);
+                if (nextOutboundBuffer_) {
+                    if (encoder_(ctx, msg, nextOutboundBuffer_)) {
+                        notify = true;
+                    }
                 }
                 else {
-                    ChannelBufferPtr encodedBuf = encode(ctx, msg, out);
+                    ChannelBufferPtr encodedBuf =
+                        encoder_(ctx, msg, nextOutboundBuffer_);
 
                     if (encodedBuf) {
-                        context_->outboundTransfer()->write(encodedBuf, future);
+                        transfer_->write(encodedBuf, future);
                     }
                 }
             }
@@ -144,17 +162,17 @@ public:
             outboundQueue.pop_front();
         }
 
-        if (nextBufferContainerAccumulated_) {
-            context_->outboundTransfer()->write(out, future);
+        if (notify) {
+            ctx.flush(future);
         }
     }
 
 private:
-    bool nextBufferContainerAccumulated_;
-
     Encoder encoder_;
     OutboundTransfer* transfer_;
     OutboundContainer* container_;
+
+    ChannelBufferPtr nextOutboundBuffer_;
 };
 
 }

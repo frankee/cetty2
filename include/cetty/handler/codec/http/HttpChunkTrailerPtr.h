@@ -1,5 +1,5 @@
-#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEPTR_H)
-#define CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEPTR_H
+#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPCHUNKTRAILERPTR_H)
+#define CETTY_HANDLER_CODEC_HTTP_HTTPCHUNKTRAILERPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -24,16 +24,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-class HttpMessage;
-class HttpRequest;
-class HttpResponse;
-class HttpChunk;
 class HttpChunkTrailer;
-
-typedef boost::intrusive_ptr<HttpMessage> HttpMessagePtr;
-typedef boost::intrusive_ptr<HttpRequest> HttpRequestPtr;
-typedef boost::intrusive_ptr<HttpResponse> HttpResponsePtr;
-typedef boost::intrusive_ptr<HttpChunk> HttpChunkPtr;
 typedef boost::intrusive_ptr<HttpChunkTrailer> HttpChunkTrailerPtr;
 
 }
@@ -41,7 +32,8 @@ typedef boost::intrusive_ptr<HttpChunkTrailer> HttpChunkTrailerPtr;
 }
 }
 
-#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPMESSAGEPTR_H)
+
+#endif //#if !defined(CETTY_HANDLER_CODEC_HTTP_HTTPCHUNKTRAILERPTR_H)
 
 // Local Variables:
 // mode: c++

@@ -38,7 +38,7 @@ public:
                        const StringPiece& str3) {
         if (response->refcount() == 1) {
             response->clear();
-            response->setProtocolVersion(HttpVersion::valueOf(str1));
+            response->setVersion(HttpVersion::valueOf(str1));
             response->setStatus(HttpResponseStatus(StringUtil::strto32(str2), str3));
         }
         else {

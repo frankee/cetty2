@@ -71,8 +71,11 @@ public:
     virtual bool isActive() const;
 
 public:
+    typedef boost::shared_ptr<AsioSocketChannel> SharedPtr;
+    typedef boost::weak_ptr<AsioSocketChannel> WeakPtr;
+
     typedef ChannelMessageHandlerContext<
-        Channel,
+        WeakPtr,
         VoidMessage,
         VoidMessage,
         ChannelBufferPtr,
@@ -83,7 +86,7 @@ public:
         VoidMessageContainer> Context;
 
     void registerTo(Context& context) {
-        Channel::registerFuntorTo(context);
+        Channel::registerTo(context);
 
         context.setConnectFunctor(boost::bind(
                                       &AsioSocketChannel::doConnect,

@@ -14,11 +14,9 @@
  * under the License.
  */
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <cetty/handler/codec/http/HttpHeaders.h>
+
 #include <cetty/handler/codec/http/HttpVersion.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
@@ -517,22 +515,22 @@ bool HttpHeaders::is100ContinueExpected() const {
 //     }
 
     // In most cases, there will be one or zero 'Expect' header.
-    std::string value = request->getHeader(Names::EXPECT);
+    const std::string& value = headerValue(Names::EXPECT);
 
     if (value.empty()) {
         return false;
     }
 
-    if (boost::algorithm::iequals(Values::CONTINUE, value)) {
+    if (StringUtil::iequals(Values::CONTINUE, value)) {
         return true;
     }
 
     // Multiple 'Expect' headers.  Search through them.
     std::vector<std::string> headers;
-    request->getHeaders(Names::EXPECT, &headers);
+    headerValues(Names::EXPECT, &headers);
 
     for (size_t i = 0; i < headers.size(); ++i) {
-        if (boost::algorithm::iequals(Values::CONTINUE, headers[i])) {
+        if (StringUtil::iequals(Values::CONTINUE, headers[i])) {
             return true;
         }
     }
@@ -574,24 +572,24 @@ HttpTransferEncoding HttpHeaders::transferEncoding() const {
 }
 
 void HttpHeaders::setTransferEncoding(HttpTransferEncoding te) {
-    this->transferEncoding_ = te;
+    transferEncoding_ = te;
     const std::string& transferEnocodingStr = HttpHeaders::Names::TRANSFER_ENCODING;
     const std::string& chunkedStr = HttpHeaders::Values::CHUNKED;
 
     if (te == HttpTransferEncoding::SINGLE) {
-        httpHeader.erase(transferEnocodingStr, chunkedStr);
+        headers_.erase(transferEnocodingStr, chunkedStr);
     }
     else if (te == HttpTransferEncoding::STREAMED) {
-        httpHeader.erase(transferEnocodingStr, chunkedStr);
-        setContent(Unpooled::EMPTY_BUFFER);
+        headers_.erase(transferEnocodingStr, chunkedStr);
+        //setContent(Unpooled::EMPTY_BUFFER);
     }
     else if (te == HttpTransferEncoding::CHUNKED) {
-        if (!httpHeader.has(transferEnocodingStr, chunkedStr)) {
+        if (!headers_.has(transferEnocodingStr, chunkedStr)) {
             addHeader(transferEnocodingStr, chunkedStr);
         }
 
         removeHeader(HttpHeaders::Names::CONTENT_LENGTH);
-        setContent(Unpooled::EMPTY_BUFFER);
+        //setContent(Unpooled::EMPTY_BUFFER);
     }
 }
 
@@ -614,9 +612,9 @@ const std::vector<Cookie>& HttpHeaders::cookies() const {
         NameValueCollection::ConstIterator lower =
             headers_.lowerBound(HttpHeaders::Names::SET_COOKIE);
 
-        if (lower != httpHeader.end()) {
+        if (lower != headers_.end()) {
             NameValueCollection::ConstIterator up =
-                httpHeader.upperBound(HttpHeaders::Names::SET_COOKIE);
+                headers_.upperBound(HttpHeaders::Names::SET_COOKIE);
 
             for (NameValueCollection::ConstIterator itr = lower; itr != up; ++itr) {
 

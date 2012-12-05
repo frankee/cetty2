@@ -93,8 +93,8 @@ void WriteTimeoutHandler::handleWriteTimeout(ChannelHandlerContext& ctx,
 }
 
 void WriteTimeoutHandler::cancelTimeout(ChannelFuture& future) {
-    if (timeout) {
-        timeout->cancel();
+    if (timeout_) {
+        timeout_->cancel();
     }
 }
 

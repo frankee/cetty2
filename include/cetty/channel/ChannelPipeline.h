@@ -241,7 +241,7 @@ public:
 
     ~ChannelPipeline();
 
-    const ChannelWeakPtr& channel() const;
+    ChannelPtr channel() const;
 
     const EventLoopPtr& eventLoop() const;
 
@@ -677,8 +677,8 @@ private:
 };
 
 inline
-const ChannelWeakPtr& ChannelPipeline::channel() const {
-    return channel_;
+ChannelPtr ChannelPipeline::channel() const {
+    return channel_.lock();
 }
 
 inline

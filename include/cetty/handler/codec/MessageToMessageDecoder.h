@@ -172,8 +172,8 @@ protected:
     Decoder decoder_;
     DecodableChecker checker_;
 
-    InboundTransfer transfer_;
-    InboundContainer constainer_;
+    InboundTransfer* transfer_;
+    InboundContainer* constainer_;
 };
 
 }

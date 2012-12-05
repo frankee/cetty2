@@ -48,8 +48,8 @@ public:
         VoidMessage,
         HttpPackage,
         ChannelBufferPtr,
-        VoidMessage,
-        VoidMessage,
+        VoidMessageContainer,
+        VoidMessageContainer,
         ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
         ChannelBufferContainer> Context;
 

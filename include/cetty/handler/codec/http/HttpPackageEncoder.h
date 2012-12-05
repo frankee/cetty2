@@ -24,10 +24,15 @@
 #include <string>
 #include <boost/function.hpp>
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/handler/codec/MessageToBufferEncoder.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpPackage.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpTransferEncoding.h>
+
+namespace cetty {
+namespace channel {
+class ChannelHandlerContext;
+}
+}
 
 namespace cetty {
 namespace handler {
@@ -39,7 +44,6 @@ using namespace cetty::buffer;
 using namespace cetty::handler::codec;
 
 class HttpHeader;
-class HttpMessage;
 
 /**
  * Encodes an {@link HttpMessage} or an {@link HttpChunk} into
@@ -89,8 +93,8 @@ public:
 
 private:
     void encodeHeaders(ChannelBuffer& buf,
-                       const HttpMessage::ConstHeaderIterator& begin,
-                       const HttpMessage::ConstHeaderIterator& end);
+                       const HttpHeaders::ConstHeaderIterator& begin,
+                       const HttpHeaders::ConstHeaderIterator& end);
 
     // header and value has been validated when added to the HttpHeader.
     void encodeHeader(ChannelBuffer& buf,

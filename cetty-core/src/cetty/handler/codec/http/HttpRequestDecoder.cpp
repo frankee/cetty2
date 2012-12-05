@@ -26,7 +26,7 @@ namespace http {
 void HttpRequestDecoder::registerTo(Context& ctx) {
     decoder_.registerTo(ctx);
     ctx.setExceptionCallback(boost::bind(
-                                 HttpRequestDecoder::exceptionCaught,
+                                 &HttpRequestDecoder::exceptionCaught,
                                  this,
                                  _1,
                                  _2));

@@ -23,7 +23,7 @@
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
+#include <cetty/handler/codec/http/HttpChunkPtr.h>
 
 namespace cetty {
 namespace handler {
@@ -86,10 +86,6 @@ public:
 
 
     virtual std::string toString() const;
-
-private:
-    HttpChunk(const HttpChunk&);
-    HttpChunk& operator=(const HttpChunk&);
 
 private:
     ChannelBufferPtr content;

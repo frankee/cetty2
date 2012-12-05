@@ -106,8 +106,8 @@ public:
             VoidMessage,
             ChannelBufferContainer,
             ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
-            VoidMessage,
-            VoidMessage> Context;
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
 
 public:
     /**

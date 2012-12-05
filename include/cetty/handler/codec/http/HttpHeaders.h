@@ -24,13 +24,16 @@
 #include <string>
 #include <vector>
 #include <cetty/util/NameValueCollection.h>
+#include <cetty/handler/codec/http/Cookie.h>
+#include <cetty/handler/codec/http/HttpVersion.h>
+#include <cetty/handler/codec/http/HttpTransferEncoding.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
 
-    using namespace cetty::util;
+using namespace cetty::util;
 
 /**
  * Provides the constants for the standard HTTP header names and values and
@@ -479,7 +482,7 @@ public:
      *         header
      */
     const std::string& headerValue(const std::string& name,
-        const std::string& defaultValue) const {
+                                   const std::string& defaultValue) const {
         return headers_.get(name, defaultValue);
     }
 
@@ -494,6 +497,7 @@ public:
      */
     int headerIntValue(const std::string& name) {
         const std::string& value = headers_.get(name);
+
         if (!value.empty()) {
             return StringUtil::strto32(value);
         }
@@ -512,6 +516,7 @@ public:
      */
     int headerIntValue(const std::string& name, int defaultValue) {
         const std::string& value = headers_.get(name);
+
         if (!value.empty() && StringUtil::isDigits(name)) {
             return StringUtil::strto32(value);
         }
@@ -576,7 +581,7 @@ public:
     void addHeader(const std::string& name, const std::string& value) {
         headers_.add(name, value);
     }
-    
+
     /**
     * Adds a new header with the specified name and int value.
     */
@@ -650,7 +655,7 @@ public:
      * </ul>
      */
     void setKeepAlive(bool keepAlive,
-        const HttpVersion& version = HttpVersion::HTTP_1_1);
+                      const HttpVersion& version = HttpVersion::HTTP_1_1);
 
     /**
      * Returns the length of the content.  Please note that this value is

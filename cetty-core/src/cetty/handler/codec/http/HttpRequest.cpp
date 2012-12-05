@@ -30,20 +30,19 @@ using namespace cetty::util;
 HttpRequest::HttpRequest(const HttpVersion& httpVersion,
                          const HttpMethod& method,
                          const std::string& uri)
-    : HttpMessage(httpVersion),
-      method(method),
+    : version_(httpVersion),
+      method_(method),
       uriStr_(uri),
-      uri(uri) {
+      uri_(uri) {
 }
 
 HttpRequest::HttpRequest(const HttpVersion& httpVersion,
                          const HttpMethod& method,
                          const StringPiece& uri)
-    : HttpMessage(httpVersion),
-      method(method),
+    : version_(httpVersion),
+      method_(method),
       uriStr_(uri.data(), uri.size()),
-      uri(uri) {
-
+      uri_(uri) {
 }
 
 HttpRequest::~HttpRequest() {
@@ -76,7 +75,7 @@ const std::vector<std::string>& HttpRequest::pathSegments() const {
 }
 
 void HttpRequest::clear() {
-    HttpMessage::clear();
+    headers_.clear();
 
     uri_.clear();
     uriStr_.clear();
@@ -88,19 +87,19 @@ void HttpRequest::clear() {
 std::string HttpRequest::toString() const {
     std::string buf;
     buf.reserve(2048);
-
-    StringUtil::printf(&buf,
-                          "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
-                          transferEncoding().toString().c_str(),
-                          method().toString().c_str(),
-                          getUriString().c_str(),
-                          version().getText().c_str());
-
-    ConstHeaderIterator end = getLastHeader();
-
-    for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
-    }
+// 
+//     StringUtil::printf(&buf,
+//                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
+//                           transferEncoding().toString().c_str(),
+//                           method().toString().c_str(),
+//                           getUriString().c_str(),
+//                           version().getText().c_str());
+// 
+//     ConstHeaderIterator end = getLastHeader();
+// 
+//     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
+//         StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+//     }
 
     return buf;
 }

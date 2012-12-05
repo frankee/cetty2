@@ -95,14 +95,14 @@ void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
 void ReadTimeoutHandler::destroy() {
     state_ = 2;
 
-    if (timeout) {
-        timeout->cancel();
-        timeout.reset();
+    if (timeout_) {
+        timeout_->cancel();
+        timeout_.reset();
     }
 }
 
 void ReadTimeoutHandler::handleReadTimeout(ChannelHandlerContext& ctx) {
-    if (timeout->isCancelled()) {
+    if (timeout_->isCancelled()) {
         return;
     }
 

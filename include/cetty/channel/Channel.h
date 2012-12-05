@@ -362,7 +362,7 @@ protected:
     void closeIfClosed();
 
     template<typename C>
-    void registerFuntorTo(C& context) {
+    void registerTo(C& context) {
         context.setBindFunctor(boost::bind(&Channel::doBind,
             this,
             _1,

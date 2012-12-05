@@ -52,6 +52,13 @@ struct ChannelHandlerWrapper<boost::weak_ptr<T> > {
     typedef boost::weak_ptr<T> StoredHandlerPtr;
 };
 
+template<typename T>
+struct ChannelHandlerWrapper<T* > {
+    typedef T Handler;
+    typedef T* HandlerPtr;
+    typedef T* StoredHandlerPtr;
+};
+
 }
 }
 

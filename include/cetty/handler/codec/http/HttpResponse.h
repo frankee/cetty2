@@ -22,15 +22,20 @@
  */
 
 #include <vector>
+#include <cetty/buffer/Unpooled.h>
+
 #include <cetty/handler/codec/http/Cookie.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
+#include <cetty/handler/codec/http/HttpResponsePtr.h>
 #include <cetty/handler/codec/http/HttpResponseStatus.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
+
+    using namespace cetty::buffer;
 
 /**
  * An HTTP response.
@@ -117,8 +122,9 @@ public:
         }
 
         if (content->readable() && headers_.transferEncoding().isMultiple()) {
-            throw InvalidArgumentException(
-                "non-empty content disallowed if this.chunked == true");
+            //TODO
+            //throw InvalidArgumentException(
+            //    "non-empty content disallowed if this.chunked == true");
         }
 
         content_ = content;

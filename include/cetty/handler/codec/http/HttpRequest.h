@@ -21,12 +21,16 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/buffer/ChannelBufferPtr.h>
+
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/HttpRequestPtr.h>
 #include <cetty/handler/codec/http/QueryStringDecoder.h>
 
 #include <cetty/util/URI.h>
+#include <cetty/util/ReferenceCounter.h>
 #include <cetty/util/NameValueCollection.h>
 
 namespace cetty {
@@ -40,6 +44,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
+using namespace cetty::buffer;
 using namespace cetty::util;
 
 /**
@@ -62,9 +67,9 @@ using namespace cetty::util;
  */
 class HttpRequest : public cetty::util::ReferenceCounter<HttpRequest, int> {
 public:
-    HttpRequest() 
-    : version_(HttpVersion::HTTP_1_1),
-    method_(HttpMethod::GET) {
+    HttpRequest()
+        : version_(HttpVersion::HTTP_1_1),
+          method_(HttpMethod::GET) {
     }
 
     /**
@@ -135,7 +140,7 @@ public:
     */
     void setContent(const ChannelBufferPtr& content);
 
-    
+
     /**
     * Returns the URI (or path) of this request.
     */
@@ -179,7 +184,7 @@ public:
 private:
     URI uri_;
     std::string uriStr_;
-    
+
     HttpMethod  method_;
     HttpVersion version_;
 

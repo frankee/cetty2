@@ -27,7 +27,6 @@
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 
 #include <cetty/handler/codec/http/HttpPackage.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 
 #include <cetty/util/StringPiece.h>
@@ -200,7 +199,7 @@ public:
        httpPackageCreator_ = creator;
     }
 
-    bool isContentAlwaysEmpty(const HttpMessagePtr& msg) const;
+    bool isContentAlwaysEmpty(const HttpPackage& msg) const;
 
     // if has an exception, reply an error message.
     void exceptionCaught(ChannelHandlerContext& ctx,

@@ -274,7 +274,10 @@ void AsioServerSocketChannel::doInitialize() {
             _1,
             _2));
 
-    pipeline().addLast<ChannelPtr>("bridge", shared_from_this());
+    SharedPtr serverCh = boost::dynamic_pointer_cast<AsioServerSocketChannel>(
+                             shared_from_this());
+
+    pipeline().addLast<WeakPtr>("bridge", serverCh);
 }
 
 }

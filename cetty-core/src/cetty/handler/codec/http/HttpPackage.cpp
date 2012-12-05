@@ -33,8 +33,27 @@ public:
     bool operator()(const T& t) const { return false; }
 };
 
+class HttpPackageHeadersVisitor : public boost::static_visitor<HttpHeaders&> {
+public:
+    HttpHeaders& operator()(const HttpRequestPtr& value) const { return value->headers(); }
+    HttpHeaders& operator()(const HttpResponsePtr& value) const { return value->headers(); }
+    HttpHeaders& operator()(const HttpChunkPtr& value) const { return empty_; }
+    HttpHeaders& operator()(const HttpChunkTrailerPtr& value) const { return value->headers(); }
+
+    template <typename T>
+    bool operator()(const T& t) const { return empty_; }
+
+private:
+    mutable HttpHeaders empty_;
+};
+
 HttpPackage::operator bool() const {
     static HttpPackageEmptyVisitor visitor;
+    return variant.apply_visitor(visitor);
+}
+
+HttpHeaders& HttpPackage::headers() const {
+    static HttpPackageHeadersVisitor visitor;
     return variant.apply_visitor(visitor);
 }
 

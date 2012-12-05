@@ -61,7 +61,7 @@ IdleStateHandler::IdleStateHandler(
 }
 
 void IdleStateHandler::beforeAdd(ChannelHandlerContext& ctx) {
-    if (ctx.pipeline().attached() && ctx.channel()->isActive()) {
+    if (ctx.channel()->isActive()) {
         // channelActvie() event has been fired already, which means this.channelActive() will
         // not be invoked. We have to initialize here instead.
         initialize(ctx);

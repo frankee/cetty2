@@ -269,9 +269,6 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpHeaders.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMessage.cpp">
-      <Filter>handler\codec\http</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpMethod.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
@@ -786,9 +783,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaders.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessage.h">
-      <Filter>handler\codec\http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
@@ -877,6 +871,18 @@
       <Filter>handler\codec\http</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponseCreator.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunkPtr.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpChunkTrailerPtr.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpRequestPtr.h">
+      <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponsePtr.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
   </ItemGroup>

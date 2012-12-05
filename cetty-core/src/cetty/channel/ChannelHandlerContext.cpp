@@ -30,7 +30,7 @@ namespace channel {
 ChannelHandlerContext::ChannelHandlerContext(const std::string& name)
     : name_(name),
       next_(),
-      before_(),
+      prev_(),
       pipeline_(),
       eventLoop_() {
 }
@@ -39,7 +39,7 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
         const EventLoopPtr& eventLoop)
     : name_(name),
       next_(),
-      before_(),
+      prev_(),
       pipeline_(),
       eventLoop_(eventLoop) {
 }
@@ -380,7 +380,7 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
 
 const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = before_;
+    ChannelHandlerContext* before = prev_;
 
     do {
         if (before->bindFunctor_) {
@@ -388,7 +388,7 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAd
             break;
         }
 
-        before = before->before_;
+        before = before->prev_;
     }
     while (before);
 
@@ -451,7 +451,7 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
 const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = before_;
+    ChannelHandlerContext* before = prev_;
 
     do {
         if (before->connectFunctor_) {
@@ -459,7 +459,7 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remo
             break;
         }
 
-        before = before->before_;
+        before = before->prev_;
     }
     while (before);
 
@@ -523,7 +523,7 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = before_;
+    ChannelHandlerContext* before = prev_;
 
     do {
         if (before->disconnectFunctor_) {
@@ -531,7 +531,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr
             break;
         }
 
-        before = before->before_;
+        before = before->prev_;
     }
     while (before);
 
@@ -592,7 +592,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = before_;
+    ChannelHandlerContext* before = prev_;
 
     do {
         if (before->closeFunctor_) {
@@ -600,7 +600,7 @@ const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& fut
             break;
         }
 
-        before = before->before_;
+        before = before->prev_;
     }
     while (before);
 
@@ -654,7 +654,7 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = before_;
+    ChannelHandlerContext* before = prev_;
 
     do {
         if (before->flushFunctor_) {
@@ -662,7 +662,7 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& fut
             break;
         }
 
-        before = before->before_;
+        before = before->prev_;
     }
     while (before);
 

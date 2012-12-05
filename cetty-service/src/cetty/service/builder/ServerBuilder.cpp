@@ -180,7 +180,6 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     bootstrap->setChildInitializer(pipeline);
-    //bootstrap->setPipeline(pipeline);
 
     ChannelFuturePtr future;
 

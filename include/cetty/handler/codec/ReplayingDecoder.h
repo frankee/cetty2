@@ -308,9 +308,10 @@ public:
     typedef C Context;
 
     typedef ChannelBufferContainer InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
 
-    typedef ChannelMessageTransfer<ChannelBufferPtr,
-            ChannelBufferContainer,
+    typedef ChannelMessageTransfer<InboundOut,
+            NextInboundContainer,
             TRANSFER_INBOUND> InboundTransfer;
 
     typedef boost::function<InboundOut(ChannelHandlerContext&,
@@ -540,7 +541,7 @@ protected:
                 if (oldReaderIndex == in->readerIndex() && oldState == state_) {
                     throw IllegalStateException(
                         std::string("decode() method must consume at least one byte \
-                                    if it returned a decoded message (caused by: RepalyingDecoder)");
+                                    if it returned a decoded message (caused by: RepalyingDecoder)"));
                 }
 
                     // A successful decode
@@ -605,7 +606,7 @@ protected:
     InboundOut decodeLast(ChannelHandlerContext& ctx,
                           const ReplayingDecoderBufferPtr& buffer,
                           int state) {
-        return decode(ctx, buffer, state);
+        return decoder_(ctx, buffer, state);
     }
 
 private:

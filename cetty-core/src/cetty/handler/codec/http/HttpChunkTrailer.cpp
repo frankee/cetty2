@@ -17,12 +17,12 @@
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
 
 #include <boost/assert.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpCodecUtil.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Exception.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace handler {
@@ -37,9 +37,9 @@ static bool validateHeaderName(const std::string& name) {
         return false;
     }
 
-    if (boost::algorithm::iequals(name, HttpHeaders::Names::CONTENT_LENGTH) ||
-            boost::algorithm::iequals(name, HttpHeaders::Names::TRANSFER_ENCODING) ||
-            boost::algorithm::iequals(name, HttpHeaders::Names::TRAILER)) {
+    if (StringUtil::iequals(name, HttpHeaders::Names::CONTENT_LENGTH) ||
+            StringUtil::iequals(name, HttpHeaders::Names::TRANSFER_ENCODING) ||
+            StringUtil::iequals(name, HttpHeaders::Names::TRAILER)) {
         return false;
         throw InvalidArgumentException(
             std::string("prohibited trailing header: ") + name);
@@ -50,7 +50,7 @@ static bool validateHeaderName(const std::string& name) {
 
 HttpChunkTrailer::HttpChunkTrailer()
     : HttpChunk(Unpooled::EMPTY_BUFFER) {
-    httpHeader.setValidateNameFunctor(validateHeaderName);
+    //httpHeader.setValidateNameFunctor(validateHeaderName);
 }
 
 HttpChunkTrailer::~HttpChunkTrailer() {

@@ -50,6 +50,8 @@ enum TransferDirection {
 template<typename T, typename U, int TransferType>
 class ChannelMessageTransfer {
 public:
+    U* nextContainer();
+
     void resetNextContainer();
     void resetNextContainer(U*);
 
@@ -61,6 +63,8 @@ template<>
 class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_INBOUND> {
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx) {}
+
+    VoidMessageContainer* nextContainer() { return NULL; }
 
     void resetNextContainer() {}
     void resetNextContainer(VoidMessageContainer*) {}
@@ -74,6 +78,8 @@ class ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_OUTBOUN
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx) {}
 
+    VoidMessageContainer* nextContainer() { return NULL; }
+    
     void resetNextContainer() {}
     void resetNextContainer(VoidMessageContainer*) {}
 
@@ -98,6 +104,10 @@ public:
 
     void resetNextContainer(MessageContainer* container) {
         container_ = container;
+    }
+
+    MessageContainer* nextContainer() {
+        return container_;
     }
 
     bool unfoldAndAdd(const T& msg) {
@@ -131,6 +141,10 @@ public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
         : ctx(ctx),
           container_() {
+    }
+
+    MessageContainer* nextContainer() {
+        return container_;
     }
 
     void resetNextContainer() {
@@ -173,6 +187,10 @@ public:
           container_() {
     }
 
+    ChannelBufferContainer* nextContainer() {
+        return container_;
+    }
+
     void resetNextContainer() {
         container_ = NULL;
     }
@@ -209,6 +227,10 @@ public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
         : ctx_(ctx),
           container_() {
+    }
+
+    ChannelBufferContainer* nextContainer() {
+        return container_;
     }
 
     void resetNextContainer() {

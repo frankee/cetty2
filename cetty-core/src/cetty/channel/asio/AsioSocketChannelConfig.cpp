@@ -278,7 +278,7 @@ int AsioSocketChannelConfig::getWriteBufferLowWaterMark() const {
             writeBufferLowWaterMark_ = DEFAULT_WRITE_BUFFER_LOW_WATERMARK;
             //throw ChannelException(e.what(), e.code().value());
 
-            LOG_ERROR_E(e) << "getWriteBufferLowWaterMark has error";
+            LOG_ERROR << "getWriteBufferLowWaterMark has error";
         }
     }
 
