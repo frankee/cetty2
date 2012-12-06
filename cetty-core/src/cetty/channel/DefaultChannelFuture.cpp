@@ -95,11 +95,7 @@ DefaultChannelFuture::~DefaultChannelFuture() {
     }
 }
 
-const ChannelWeakPtr& DefaultChannelFuture::channel() const {
-    return channel_;
-}
-
-ChannelPtr DefaultChannelFuture::sharedChannel() const {
+ChannelPtr DefaultChannelFuture::channel() const {
     return channel_.lock();
 }
 

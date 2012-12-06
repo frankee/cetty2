@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/buffer/Unpooled.h>
 
 #include <cetty/handler/codec/http/HttpMethod.h>
 #include <cetty/handler/codec/http/HttpVersion.h>
@@ -140,7 +140,6 @@ public:
     */
     void setContent(const ChannelBufferPtr& content);
 
-
     /**
     * Returns the URI (or path) of this request.
     */
@@ -176,6 +175,78 @@ public:
     void setLabel(const std::string& label);
 
     const std::string& label() const;
+
+    /**
+     * Returns <tt>true</tt> if and only if the specified message contains the
+     * <tt>"Expect: 100-continue"</tt> header.
+     */
+    bool is100ContinueExpected() const;
+
+    /**
+     * Sets the <tt>"Expect: 100-continue"</tt> header to the specified message.
+     * If there is any existing <tt>"Expect"</tt> header, they are replaced with
+     * the new one.
+     */
+    void set100ContinueExpected() {
+        set100ContinueExpected(true);
+    }
+
+    /**
+     * Sets or removes the <tt>"Expect: 100-continue"</tt> header to / from the
+     * specified message.  If the specified <tt>value</tt> is <tt>true</tt>,
+     * the <tt>"Expect: 100-continue"</tt> header is set and all other previous
+     * <tt>"Expect"</tt> headers are removed.  Otherwise, all <tt>"Expect"</tt>
+     * headers are removed completely.
+     */
+    void set100ContinueExpected(bool set);
+
+    const HttpTransferEncoding& transferEncoding() const {
+        return headers_.transferEncoding();
+    }
+
+    void setTransferEncoding(const HttpTransferEncoding& te) {
+        headers_.setTransferEncoding(te);
+
+        if (te.multiple()) {
+            setContent(Unpooled::EMPTY_BUFFER);
+        }
+    }
+
+    /**
+     * Returns the length of the content.  Please note that this value is
+     * not retrieved from {@link HttpMessage#getContent()} but from the
+     * <tt>"Content-Length"</tt> header, and thus they are independent from each
+     * other.
+     *
+     * @return the content length or <tt>defaultValue</tt> if this message does
+     *         not have the <tt>"Content-Length"</tt> header
+     */
+    int contentLength(int defaultValue) const {
+        int length = headers_.contentLength();
+
+        if (!length) {
+            // WebSockset messages have constant content-lengths.
+            if (HttpMethod::GET == method_ &&
+                headers_.containsHeader(HttpHeaders::Names::SEC_WEBSOCKET_KEY1) &&
+                headers_.containsHeader(HttpHeaders::Names::SEC_WEBSOCKET_KEY2)) {
+                    return 8;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    void setContentLength(int length) {
+        headers_.setContentLength(length);
+    }
+
+    bool keepAlive() const {
+        return headers_.keepAlive(version_);
+    }
+
+    void setKeepAlive(bool keepAlive) {
+        headers_.setKeepAlive(keepAlive, version_);
+    }
 
     std::string toString() const;
 

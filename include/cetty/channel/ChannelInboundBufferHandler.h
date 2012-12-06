@@ -34,6 +34,11 @@ public:
         VoidMessageContainer,
         VoidMessageContainer,
         ChannelBufferContainer> Context;
+
+    typedef ChannelBufferContainer InboundContainer;
+    typedef ChannelMessageTransfer<ChannelBufferPtr,
+        ChannelBufferContainer,
+        TRANSFER_OUTBOUND> OutboundTransfer;
 };
 
 }

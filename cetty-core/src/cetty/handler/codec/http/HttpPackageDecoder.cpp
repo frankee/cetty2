@@ -46,7 +46,7 @@ const int HttpPackageDecoder::MAX_CHUNK_SIZE  = 8192;
 
 HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType)
     : isDecodingRequest_(decodingType == REQUEST),
-maxInitialLineLength_(MAX_INITIAL_LINE_LENGTH),
+      maxInitialLineLength_(MAX_INITIAL_LINE_LENGTH),
       maxHeaderSize_(MAX_HEADER_SIZE),
       maxChunkSize_(MAX_CHUNK_SIZE),
       chunkSize_(0),
@@ -54,11 +54,11 @@ maxInitialLineLength_(MAX_INITIAL_LINE_LENGTH),
 }
 
 HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType,
-    int maxInitialLineLength,
+                                       int maxInitialLineLength,
                                        int maxHeaderSize,
                                        int maxChunkSize)
     : isDecodingRequest_(decodingType == REQUEST),
-        maxInitialLineLength_(maxInitialLineLength),
+      maxInitialLineLength_(maxInitialLineLength),
       maxHeaderSize_(maxHeaderSize),
       maxChunkSize_(maxChunkSize),
       chunkSize_(0),
@@ -79,14 +79,14 @@ HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType,
 HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
                                        const ReplayingDecoderBufferPtr& buffer,
                                        int state) {
-                                           const CheckPointInvoker& checkPoint = checkPointInvoker_;
-                                           HttpHeaders& headers = message_.headers();
+    const CheckPointInvoker& checkPoint = checkPointInvoker_;
+
     switch (state) {
     case SKIP_CONTROL_CHARS: {
         if (skipControlCharacters(buffer)) {
             checkPoint(READ_INITIAL);
         }
-        else { 
+        else {
             checkPoint(SKIP_CONTROL_CHARS); //do not care skipped control chars.
         }
 
@@ -109,14 +109,13 @@ HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
         }
 
         message_ = httpPackageCreator_(initialLine[0],
-                                initialLine[1],
-                                initialLine[2]);
+                                       initialLine[1],
+                                       initialLine[2]);
 
         checkPoint(READ_HEADER);
 
         // clear data, then step into the READ_HEADER state.
         headerSize_ = 0;
-        headers.clear();
         break;
     }
 
@@ -139,7 +138,7 @@ HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
             return message_;
         }
         else {
-            int contentLength = headers.contentLength(-1);
+            int contentLength = message_.contentLength(-1);
 
             if (contentLength == 0 || (contentLength == -1 && isDecodingRequest_)) {
                 content_ = Unpooled::EMPTY_BUFFER;
@@ -149,14 +148,14 @@ HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
             switch (nextState) {
             case READ_FIXED_LENGTH_CONTENT:
                 if (contentLength > maxChunkSize_
-                        || headers.is100ContinueExpected()) {
+                        || message_.is100ContinueExpected()) {
                     // Generate HttpMessage first.  HttpChunks will follow.
                     checkPoint(READ_FIXED_LENGTH_CONTENT_AS_CHUNKS);
-                    headers.setTransferEncoding(HttpTransferEncoding::STREAMED);
+                    message_.setTransferEncoding(HttpTransferEncoding::STREAMED);
 
                     // chunkSize will be decreased as the READ_FIXED_LENGTH_CONTENT_AS_CHUNKS
                     // state reads data chunk by chunk.
-                    chunkSize_ = headers.contentLength(-1);
+                    chunkSize_ = message_.contentLength(-1);
                     return message_;
                 }
 
@@ -164,10 +163,10 @@ HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
 
             case READ_VARIABLE_LENGTH_CONTENT:
                 if (buffer->readableBytes() > maxChunkSize_
-                        || headers.is100ContinueExpected()) {
+                        || message_.is100ContinueExpected()) {
                     // Generate HttpMessage first.  HttpChunks will follow.
                     checkPoint(READ_VARIABLE_LENGTH_CONTENT_AS_CHUNKS);
-                    headers.setTransferEncoding(HttpTransferEncoding::STREAMED);
+                    message_.setTransferEncoding(HttpTransferEncoding::STREAMED);
                     return message_;
                 }
 
@@ -193,8 +192,8 @@ HttpPackage HttpPackageDecoder::decode(ChannelHandlerContext& ctx,
 
         HttpChunkPtr chunk = new HttpChunk(buff);
 
-        if (headers.transferEncoding() != HttpTransferEncoding::STREAMED) {
-            headers.setTransferEncoding(HttpTransferEncoding::STREAMED);
+        if (message_.transferEncoding() != HttpTransferEncoding::STREAMED) {
+            message_.setTransferEncoding(HttpTransferEncoding::STREAMED);
 
             //return new Object[] {message, new DefaultHttpChunk(buffer.readBytes(toRead))};
         }
@@ -436,7 +435,7 @@ bool HttpPackageDecoder::isContentAlwaysEmpty(const HttpPackage& msg) const {
     HttpResponsePtr response = msg.httpResponse();
 
     if (response) {
-        int code = response->status().getCode();
+        int code = response->status().code();
 
         // Correctly handle return codes of 1xx.
         //
@@ -468,20 +467,16 @@ bool HttpPackageDecoder::isContentAlwaysEmpty(const HttpPackage& msg) const {
 
 HttpPackage HttpPackageDecoder::reset() {
     ChannelBufferPtr content = content_;
+    HttpPackage msg = message_;
 
-    if (isDecodingRequest_) {
-        HttpRequestPtr request = message_.httpRequest();
-        if (content) {
-            request->setContent(content);
-            content_.reset();
-        }
-        
-        message_ = HttpPackage();
+    msg.setContent(content);
 
-        checkPointInvoker_(SKIP_CONTROL_CHARS);
-        return request;
-    }
+    content_.reset();
+    message_ = HttpPackage();
+    
+    checkPointInvoker_(SKIP_CONTROL_CHARS);
 
+    return msg;
 }
 
 bool HttpPackageDecoder::skipControlCharacters(const ReplayingDecoderBufferPtr& buffer) const {
@@ -501,8 +496,7 @@ bool HttpPackageDecoder::skipControlCharacters(const ReplayingDecoderBufferPtr& 
 
 HttpPackage HttpPackageDecoder::readFixedLengthContent(const ReplayingDecoderBufferPtr& buffer) {
     //int length = HttpHeaders::contentLength(*message_, -1);
-    HttpHeaders& headers = message_.headers();
-    int length = headers.contentLength(-1);
+    int length = message_.contentLength(-1);
     BOOST_ASSERT(length <= MAX_INT32);
     int readLimit = buffer->readableBytes();
 
@@ -518,8 +512,8 @@ HttpPackage HttpPackageDecoder::readFixedLengthContent(const ReplayingDecoderBuf
     BOOST_ASSERT(false && "NOT implement in HttpMessageDecoder readFixedLengthContent.");
 
     if (length < contentRead_) {
-        if (headers.transferEncoding() != HttpTransferEncoding::STREAMED) {
-            headers.setTransferEncoding(HttpTransferEncoding::STREAMED);
+        if (message_.transferEncoding() != HttpTransferEncoding::STREAMED) {
+            message_.setTransferEncoding(HttpTransferEncoding::STREAMED);
             //return new Object[] {message, new DefaultHttpChunk(read(buffer, toRead))};
         }
         else {
@@ -570,14 +564,15 @@ int HttpPackageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
 
     headerSize_ = 0;
 
-    HttpHeaders& headers = message_.headers();
+    HttpHeaders* headers = message_.headers();
+    BOOST_ASSERT(headers);
 
     if (buffer->needMoreBytes()) { // need more data
         return READ_HEADER;
     }
 
     if (!line.empty()) {
-        headers.clear();
+        headers->clear();
 
         std::vector<StringPiece> header;
         std::string valueStr;
@@ -599,11 +594,11 @@ int HttpPackageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
                     nameStr.assign(name.data(), name.size());
 
                     if (!valueStr.empty()) {
-                        headers.addHeader(nameStr, valueStr);
+                        headers->addHeader(nameStr, valueStr);
                     }
                     else {
                         valueStr.assign(value.data(), value.size());
-                        headers.addHeader(nameStr, valueStr);
+                        headers->addHeader(nameStr, valueStr);
                     }
 
                     nameStr.clear();
@@ -629,30 +624,29 @@ int HttpPackageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
             nameStr.assign(name.data(), name.size());
 
             if (!valueStr.empty()) {
-                headers.addHeader(nameStr, valueStr);
+                headers->addHeader(nameStr, valueStr);
             }
             else {
                 valueStr.assign(value.data(), value.size());
-                headers.addHeader(nameStr, valueStr);
+                headers->addHeader(nameStr, valueStr);
             }
         }
-
     }
 
-//     if (isContentAlwaysEmpty(message_)) {
-//         headers.setTransferEncoding(HttpTransferEncoding::SINGLE);
-//         nextState = SKIP_CONTROL_CHARS;
-//     }
-//     else if (HttpCodecUtil::isTransferEncodingChunked(*message_)) {
-//         headers.setTransferEncoding(HttpTransferEncoding::CHUNKED);
-//         nextState = READ_CHUNK_SIZE;
-//     }
-//     else if (HttpHeaders::contentLength(*message_, -1) >= 0) {
-//         nextState = READ_FIXED_LENGTH_CONTENT;
-//     }
-//     else {
-//         nextState = READ_VARIABLE_LENGTH_CONTENT;
-//     }
+    //     if (isContentAlwaysEmpty(message_)) {
+    //         headers.setTransferEncoding(HttpTransferEncoding::SINGLE);
+    //         nextState = SKIP_CONTROL_CHARS;
+    //     }
+    //     else if (HttpCodecUtil::isTransferEncodingChunked(*message_)) {
+    //         headers.setTransferEncoding(HttpTransferEncoding::CHUNKED);
+    //         nextState = READ_CHUNK_SIZE;
+    //     }
+    //     else if (HttpHeaders::contentLength(*message_, -1) >= 0) {
+    //         nextState = READ_FIXED_LENGTH_CONTENT;
+    //     }
+    //     else {
+    //         nextState = READ_VARIABLE_LENGTH_CONTENT;
+    //     }
 
     return nextState;
 }
@@ -683,7 +677,7 @@ HttpPackageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
             if (!lastHeader.empty() && (firstChar == ' ' || firstChar == '\t')) {
 #if 0
                 const std::string& lastHeader = trailer->getLastHeader(
-                    lastHeader.c_str());
+                                                    lastHeader.c_str());
 
                 if (!lastHeader.empty()) {
                     std::string newString(lastHeader);
@@ -692,6 +686,7 @@ HttpPackageDecoder::readTrailingHeaders(const ReplayingDecoderBufferPtr& buffer)
                 else {
                     // Content-Length, Transfer-Encoding, or Trailer
                 }
+
 #endif
             }
             else {
@@ -729,6 +724,7 @@ StringPiece HttpPackageDecoder::readHeader(const ReplayingDecoderBufferPtr& buff
     const char* bytes = buffer->readableBytes(&bytesCnt);
 
     int headerSize = this->headerSize_;
+
     for (int i = 0, j = bytesCnt - 1; i < j; ++i, ++headerSize) {
         // Abort decoding if the header part is too large.
         if (headerSize >= maxHeaderSize_) {

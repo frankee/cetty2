@@ -114,44 +114,44 @@ public:
     /**
      * Returns the name of the protocol such as <tt>"HTTP"</tt> in <tt>"HTTP/1.0"</tt>.
      */
-    const std::string& getProtocolName() const {
-        return this->protocolName;
+    const std::string& protocolName() const {
+        return protocolName_;
     }
 
     /**
      * Returns the name of the protocol such as <tt>1</tt> in <tt>"HTTP/1.0"</tt>.
      */
-    int getMajorVersion() const {
-        return this->majorVersion;
+    int majorVersion() const {
+        return majorVersion_;
     }
 
     /**
      * Returns the name of the protocol such as <tt>0</tt> in <tt>"HTTP/1.0"</tt>.
      */
-    int getMinorVersion() const {
-        return this->minorVersion;
+    int minorVersion() const {
+        return minorVersion_;
     }
 
     /**
      * Returns the full protocol version text such as <tt>"HTTP/1.0"</tt>.
      */
-    const std::string& getText() const {
-        return this->text;
+    const std::string& text() const {
+        return text_;
     }
 
     /**
      * Returns <tt>true</tt> if and only if the connection is kept alive unless
      * the <tt>"Connection"</tt> header is set to <tt>"close"</tt> explicitly.
      */
-    bool isKeepAliveDefault() const {
-        return this->keepAliveDefault;
+    bool keepAliveDefault() const {
+        return keepAliveDefault_;
     }
 
     /**
      * Returns the full protocol version text such as <tt>"HTTP/1.0"</tt>.
      */
-    std::string toString() const {
-        return getText();
+    const std::string& toString() const {
+        return text_;
     }
 
     int hashCode() const;
@@ -169,11 +169,11 @@ private:
     bool verifyVersion(const std::string& version);
 
 private:
-    bool keepAliveDefault;
-    int majorVersion;
-    int minorVersion;
-    std::string protocolName;
-    std::string text;
+    bool keepAliveDefault_;
+    int majorVersion_;
+    int minorVersion_;
+    std::string protocolName_;
+    std::string text_;
 };
 
 }

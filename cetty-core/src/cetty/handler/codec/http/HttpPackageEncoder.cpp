@@ -51,25 +51,63 @@ HttpPackageEncoder::~HttpPackageEncoder() {
 ChannelBufferPtr HttpPackageEncoder::encode(ChannelHandlerContext& ctx,
         const HttpPackage& msg,
         const ChannelBufferPtr& out) {
-    if (msg.isHttpRequest() || msg.isHttpResponse()) {
-        HttpHeaders& headers = msg.headers();
-        HttpTransferEncoding te = headers.transferEncoding();
+    if (msg.isHttpRequest()) {
+        const HttpRequestPtr& request = msg.httpRequest();
+        HttpTransferEncoding te = request->transferEncoding();
         lastTE_ = te;
 
         // Calling setTransferEncoding() will sanitize the headers and the content.
         // For example, it will remove the cases such as 'Transfer-Encoding' and 'Content-Length'
         // coexist.  It also removes the content if the transferEncoding is not SINGLE.
-        headers.setTransferEncoding(te);
+        request->setTransferEncoding(te);
 
         // Encode the message.
         ChannelBufferPtr header = Unpooled::buffer();
 
         initialLineEncoder_(msg, header);
-        encodeHeaders(*header, headers.firstHeader(), headers.lastHeader());
+        encodeHeaders(*header,
+            request->headers().firstHeader(),
+            request->headers().lastHeader());
         header->writeByte(HttpCodecUtil::CR);
         header->writeByte(HttpCodecUtil::LF);
 
-        ChannelBufferPtr content /*= value->getContent()*/;
+        ChannelBufferPtr content = request->content();
+
+        if (!content->readable()) {
+            return header; // no content
+        }
+        else {
+            if (content->aheadWritableBytes() >= header->readableBytes()) {
+                content->writeBytesAhead(header);
+                return content;
+            }
+            else {
+                header->writeBytes(content);
+                return header;
+            }
+        }
+    }
+    else if (msg.isHttpResponse()) {
+        const HttpResponsePtr& response = msg.httpResponse(); 
+        HttpTransferEncoding te = response->transferEncoding();
+        lastTE_ = te;
+
+        // Calling setTransferEncoding() will sanitize the headers and the content.
+        // For example, it will remove the cases such as 'Transfer-Encoding' and 'Content-Length'
+        // coexist.  It also removes the content if the transferEncoding is not SINGLE.
+        response->setTransferEncoding(te);
+
+        // Encode the message.
+        ChannelBufferPtr header = Unpooled::buffer();
+
+        initialLineEncoder_(msg, header);
+        encodeHeaders(*header,
+            response->headers().firstHeader(),
+            response->headers().lastHeader());
+        header->writeByte(HttpCodecUtil::CR);
+        header->writeByte(HttpCodecUtil::LF);
+
+        ChannelBufferPtr content = response->content();
 
         if (!content->readable()) {
             return header; // no content
@@ -196,9 +234,9 @@ bool HttpPackageEncoder::encodeResponseInitialLine(const HttpPackage& package, c
 
     buf->writeBytes(response->version().toString());
     buf->writeByte(HttpCodecUtil::SP);
-    buf->writeBytes(StringUtil::numtostr(response->status().getCode()));
+    buf->writeBytes(StringUtil::numtostr(response->status().code()));
     buf->writeByte(HttpCodecUtil::SP);
-    buf->writeBytes(response->status().getReasonPhrase());
+    buf->writeBytes(response->status().reasonPhrase());
     buf->writeByte(HttpCodecUtil::CR);
     buf->writeByte(HttpCodecUtil::LF);
 

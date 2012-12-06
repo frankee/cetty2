@@ -22,11 +22,7 @@
 namespace cetty {
 namespace channel {
 
-const ChannelWeakPtr& VoidChannelFuture::channel() const {
-    return channel_;
-}
-
-ChannelPtr VoidChannelFuture::sharedChannel() const {
+ChannelPtr VoidChannelFuture::channel() const {
     return channel_.lock();
 }
 

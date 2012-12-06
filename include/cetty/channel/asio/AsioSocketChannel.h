@@ -71,11 +71,8 @@ public:
     virtual bool isActive() const;
 
 public:
-    typedef boost::shared_ptr<AsioSocketChannel> SharedPtr;
-    typedef boost::weak_ptr<AsioSocketChannel> WeakPtr;
-
     typedef ChannelMessageHandlerContext<
-        WeakPtr,
+        AsioSocketChannel*,
         VoidMessage,
         VoidMessage,
         ChannelBufferPtr,

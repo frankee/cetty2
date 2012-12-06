@@ -29,8 +29,7 @@ public:
 
     virtual ~VoidChannelFuture() {}
 
-    virtual const ChannelWeakPtr& channel() const;
-    virtual ChannelPtr sharedChannel() const;
+    virtual ChannelPtr channel() const;
 
     virtual bool isDone() const;
     virtual bool isCancelled() const;

@@ -5,17 +5,18 @@
 #include <boost/date_time.hpp>
 #include "EchoServerHandler.h"
 
-#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/asio/AsioServicePool.h>
 
 using namespace cetty::channel;
 using namespace cetty::channel::asio;
 
-using namespace cetty::bootstrap;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
@@ -27,10 +28,12 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
+    ChannelInitializer1<EchoServerHandler> initializer("echo");
+
     AsioServerBootstrap bootstrap(threadCount);
-    bootstrap.setChannelInitializer(
-        ChannelInitializer<EchoServerHandler>("echo", new EchoServerHandler))
-    .setOption(ChannelOption::CO_TCP_NODELAY, true)
+    bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1));
+
+    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
 

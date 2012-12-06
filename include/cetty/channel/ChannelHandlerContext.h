@@ -337,7 +337,7 @@ public:
                 return t;
             }
 
-            context = context->before_;
+            context = context->prev_;
         }
 
         return NULL;

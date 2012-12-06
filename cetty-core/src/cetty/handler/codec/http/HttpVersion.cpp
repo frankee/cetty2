@@ -65,9 +65,9 @@ HttpVersion HttpVersion::valueOf(const StringPiece& text) {
 
 
 HttpVersion::HttpVersion(const std::string& text, bool keepAliveDefault)
-    : keepAliveDefault(keepAliveDefault),
-      majorVersion(0),
-      minorVersion(0) {
+    : keepAliveDefault_(keepAliveDefault),
+      majorVersion_(0),
+      minorVersion_(0) {
     std::string version = boost::trim_copy(text);
     boost::to_upper(version);
 
@@ -78,32 +78,32 @@ HttpVersion::HttpVersion(const std::string& text, bool keepAliveDefault)
     std::string major;
     std::string minor;
 
-    if (!match(version, protocolName, major, minor)) {
+    if (!match(version, protocolName_, major, minor)) {
         throw InvalidArgumentException(std::string("invalid version format: ") + text);
     }
 
-    majorVersion = StringUtil::strto32(major);
-    minorVersion = StringUtil::strto32(minor);
-    this->text = protocolName + "/" + major + "." + minor;
+    majorVersion_ = StringUtil::strto32(major);
+    minorVersion_ = StringUtil::strto32(minor);
+    this->text_ = protocolName_ + "/" + major + "." + minor;
 }
 
 HttpVersion::HttpVersion(const std::string& protocolName,
                          int majorVersion,
                          int minorVersion,
                          bool keepAliveDefault)
-    : keepAliveDefault(keepAliveDefault),
-      majorVersion(majorVersion),
-      minorVersion(minorVersion),
-      protocolName(protocolName) {
+    : keepAliveDefault_(keepAliveDefault),
+      majorVersion_(majorVersion),
+      minorVersion_(minorVersion),
+      protocolName_(protocolName) {
 
-    this->protocolName = boost::trim_copy(protocolName);
-    boost::to_upper(this->protocolName);
+    this->protocolName_ = boost::trim_copy(protocolName);
+    boost::to_upper(this->protocolName_);
 
-    if (this->protocolName.empty()) {
+    if (this->protocolName_.empty()) {
         throw InvalidArgumentException("empty protocolName");
     }
 
-    if (!verifyProtocl(this->protocolName)) {
+    if (!verifyProtocl(this->protocolName_)) {
         throw InvalidArgumentException("invalid protocalName");
     }
 
@@ -115,7 +115,7 @@ HttpVersion::HttpVersion(const std::string& protocolName,
         throw InvalidArgumentException("negative minorVersion");
     }
 
-    StringUtil::printf(&text,
+    StringUtil::printf(&text_,
                           "%s/%d.%d",
                           protocolName.c_str(),
                           majorVersion,
@@ -123,30 +123,30 @@ HttpVersion::HttpVersion(const std::string& protocolName,
 }
 
 int HttpVersion::hashCode() const {
-    return (StringUtil::hashCode(getProtocolName()) * 31 + getMajorVersion()) * 31 +
-           getMinorVersion();
+    return (StringUtil::hashCode(protocolName()) * 31 + majorVersion()) * 31 +
+           minorVersion();
 }
 
 bool HttpVersion::equals(const HttpVersion& verion) const {
-    return getMinorVersion() == verion.getMinorVersion() &&
-           getMajorVersion() == verion.getMajorVersion() &&
-           getProtocolName() == verion.getProtocolName();
+    return minorVersion() == verion.minorVersion() &&
+           majorVersion() == verion.majorVersion() &&
+           protocolName() == verion.protocolName();
 }
 
 int HttpVersion::compareTo(const HttpVersion& version) const {
-    int v = protocolName.compare(version.protocolName);
+    int v = protocolName_.compare(version.protocolName_);
 
     if (v != 0) {
         return v;
     }
 
-    v = getMajorVersion() - version.getMajorVersion();
+    v = majorVersion() - version.majorVersion();
 
     if (v != 0) {
         return v;
     }
 
-    return getMinorVersion() - version.getMinorVersion();
+    return minorVersion() - version.minorVersion();
 }
 
 bool HttpVersion::match(const std::string& text, std::string& protocol, std::string& major, std::string& minor) {

@@ -258,7 +258,7 @@ bool AsioServerSocketChannel::isOpen() const {
 
 void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
     if (eventLoop()->inLoopThread()) {
-        childChannels_.erase(future.channel().lock()->id());
+        childChannels_.erase(future.channel()->id());
     }
     else {
         eventLoop()->post(boost::bind(&AsioServerSocketChannel::handleChildClosed,
@@ -274,10 +274,7 @@ void AsioServerSocketChannel::doInitialize() {
             _1,
             _2));
 
-    SharedPtr serverCh = boost::dynamic_pointer_cast<AsioServerSocketChannel>(
-                             shared_from_this());
-
-    pipeline().addLast<WeakPtr>("bridge", serverCh);
+    pipeline().addFirst<AsioServerSocketChannel*>("bridge", this);
 }
 
 }

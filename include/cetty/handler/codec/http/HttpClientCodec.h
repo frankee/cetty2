@@ -195,7 +195,7 @@ private:
                 boost::dynamic_pointer_cast<HttpResponse>(msg);
             BOOST_ASSERT(response);
 
-            int statusCode = response->status().getCode();
+            int statusCode = response->status().code();
 
             if (statusCode == 100) {
                 // 100-continue response should be excluded from paired comparison.

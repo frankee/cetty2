@@ -109,7 +109,7 @@ public:
 
 private:
     void checkNextBufferAccumulated(ChannelHandlerContext& ctx) {
-        NextOutboundContainer* nextContainer = transfer_->nextContainer();
+        ChannelBufferContainer* nextContainer = transfer_->nextContainer();
         if (nextContainer && nextContainer->accumulated()) {
             nextOutboundBuffer_ = nextContainer->getMessages();
         }

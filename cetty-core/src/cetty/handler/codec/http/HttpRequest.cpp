@@ -84,22 +84,64 @@ void HttpRequest::clear() {
     queryParams_.clear();
 }
 
+bool HttpRequest::is100ContinueExpected() const {
+    // Expect: 100-continue is for requests only.
+
+    //It works only on HTTP/1.1 or later.
+    if (version_.compareTo(HttpVersion::HTTP_1_1) < 0) {
+        return false;
+    }
+
+    // In most cases, there will be one or zero 'Expect' header.
+    const std::string& value = headers_.headerValue(HttpHeaders::Names::EXPECT);
+
+    if (value.empty()) {
+        return false;
+    }
+
+    if (StringUtil::iequals(HttpHeaders::Values::CONTINUE, value)) {
+        return true;
+    }
+
+    // Multiple 'Expect' headers.  Search through them.
+    std::vector<std::string> headers;
+    headers_.headerValues(HttpHeaders::Names::EXPECT, &headers);
+
+    for (size_t i = 0; i < headers.size(); ++i) {
+        if (StringUtil::iequals(HttpHeaders::Values::CONTINUE, headers[i])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void HttpRequest::set100ContinueExpected(bool set) {
+    if (set) {
+        headers_.setHeader(HttpHeaders::Names::EXPECT,
+                           HttpHeaders::Values::CONTINUE);
+    }
+    else {
+        headers_.removeHeader(HttpHeaders::Names::EXPECT);
+    }
+}
+
 std::string HttpRequest::toString() const {
     std::string buf;
     buf.reserve(2048);
-// 
-//     StringUtil::printf(&buf,
-//                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
-//                           transferEncoding().toString().c_str(),
-//                           method().toString().c_str(),
-//                           getUriString().c_str(),
-//                           version().getText().c_str());
-// 
-//     ConstHeaderIterator end = getLastHeader();
-// 
-//     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-//         StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
-//     }
+    //
+    //     StringUtil::printf(&buf,
+    //                           "HttpRequest (TransferEncode: %s)\r\n%s %s %s",
+    //                           transferEncoding().toString().c_str(),
+    //                           method().toString().c_str(),
+    //                           getUriString().c_str(),
+    //                           version().getText().c_str());
+    //
+    //     ConstHeaderIterator end = getLastHeader();
+    //
+    //     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
+    //         StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+    //     }
 
     return buf;
 }

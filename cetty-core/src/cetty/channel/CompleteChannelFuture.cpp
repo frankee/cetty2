@@ -105,11 +105,7 @@ bool CompleteChannelFuture::awaitUninterruptibly(int64_t timeoutMillis) {
     return true;
 }
 
-const ChannelWeakPtr& CompleteChannelFuture::channel() const {
-    return channel_;
-}
-
-ChannelPtr CompleteChannelFuture::sharedChannel() const {
+ChannelPtr CompleteChannelFuture::channel() const {
     return channel_.lock();
 }
 

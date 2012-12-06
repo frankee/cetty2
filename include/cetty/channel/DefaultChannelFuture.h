@@ -83,8 +83,7 @@ public:
 
     virtual ~DefaultChannelFuture();
 
-    virtual ChannelPtr sharedChannel() const;
-    virtual const ChannelWeakPtr& channel() const;
+    virtual ChannelPtr channel() const;
 
     virtual bool isDone() const;
     virtual bool isSuccess() const;

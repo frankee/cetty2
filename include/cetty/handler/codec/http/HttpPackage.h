@@ -53,7 +53,14 @@ public:
 
     operator bool() const;
 
-    HttpHeaders& headers() const;
+    int contentLength(int defaultValue) const;
+    bool is100ContinueExpected() const;
+    const HttpTransferEncoding& transferEncoding() const;
+
+    void setTransferEncoding(const HttpTransferEncoding& te);
+    void setContent(const ChannelBufferPtr& content);
+
+    HttpHeaders* headers();
 
     bool isHttpRequest() const;
     bool isHttpResponse() const;

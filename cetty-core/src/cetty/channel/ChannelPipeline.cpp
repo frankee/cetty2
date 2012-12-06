@@ -572,10 +572,10 @@ void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
 }
 
 void ChannelPipeline::fireMessageUpdated() {
-//     if (!firedChannelActive_) {
-//         fireMessageUpdatedOnActivation_ = true;
-//         return;
-//     }
+    //     if (!firedChannelActive_) {
+    //         fireMessageUpdatedOnActivation_ = true;
+    //         return;
+    //     }
 
     if (head_) {
         head_->fireMessageUpdated(*head_);
@@ -599,17 +599,23 @@ const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
 }
 
 ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress) {
-    return connect(remoteAddress, channel_.lock()->newFuture());
+    return connect(remoteAddress,
+                   SocketAddress::NULL_ADDRESS,
+                   channel_.lock()->newFuture());
 }
 
 ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress,
         const SocketAddress& localAddress) {
-    return connect(remoteAddress, localAddress, channel_.lock()->newFuture());
+    return connect(remoteAddress,
+                   localAddress,
+                   channel_.lock()->newFuture());
 }
 
 const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress,
         const ChannelFuturePtr& future) {
-    return connect(remoteAddress, SocketAddress::NULL_ADDRESS, future);
+    return connect(remoteAddress,
+                   SocketAddress::NULL_ADDRESS,
+                   future);
 }
 
 const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress,

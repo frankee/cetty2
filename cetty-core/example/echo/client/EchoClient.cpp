@@ -5,11 +5,9 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/smart_ptr/enable_shared_from_this2.hpp>
 
-#include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
-#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/bootstrap/asio/AsioClientBootstrap.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
+#include <cetty/channel/ChannelInitializer.h>
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
@@ -17,9 +15,8 @@
 #include "EchoClientHandler.h"
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
 
-using namespace cetty::bootstrap;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
@@ -54,16 +51,11 @@ int main(int argc, char* argv[]) {
     }
 
     // Configure the client.
-    ClientBootstrap bootstrap(new AsioClientSocketChannelFactory(ioThreadCount));
-
     AsioClientBootstrap bootstrap(ioThreadCount);
-    // Set up the pipeline factory.
-    bootstrap.setsss(ChannelInitializer(
-        new EchoClientHandler::context("", new EchoClientHandler())));
+    ChannelInitializer1<EchoClientHandler> initializer;
 
-    bootstrap.setPipeline(
-        ChannelPipelines::pipeline(
-            new EchoClientHandler(firstMessageSize)));
+    // Set up the pipeline factory.
+    bootstrap.setChannelInitializer(boost::bind<bool>(initializer, _1, firstMessageSize));
 
     // Start the connection attempt.
     std::vector<ChannelPtr> clientChannels;

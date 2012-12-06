@@ -81,7 +81,7 @@ protected:
                 printf("\n");
             }
 
-            if (response->status().getCode() == 200
+            if (response->status().code() == 200
                 && response->transferEncoding().isMultiple()) {
                 readingChunks = true;
                 printf("CHUNKED CONTENT {\n");

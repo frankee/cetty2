@@ -249,13 +249,13 @@ public:
      * Returns a channel where the I/O operation associated with this
      * future takes place.
      */
-    virtual const ChannelWeakPtr& channel() const = 0;
+    virtual ChannelPtr channel() const = 0;
 
     /**
      * Returns a channel where the I/O operation associated with this
      * future takes place.
      */
-    virtual ChannelPtr sharedChannel() const = 0;
+    //virtual ChannelPtr sharedChannel() const = 0;
 
     /**
      * Returns <tt>true</tt> if and only if this future is

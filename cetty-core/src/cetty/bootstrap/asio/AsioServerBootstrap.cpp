@@ -46,7 +46,7 @@ AsioServerBootstrap::AsioServerBootstrap(
 
     BOOST_ASSERT(parent && child && "ioServicePool SHOULD NOT BE NULL.");
 
-    ServerBootstrap::setEventLoopPool(parent, child);
+    ServerBootstrap::setEventLoopPools(parent, child);
 
     init();
 }

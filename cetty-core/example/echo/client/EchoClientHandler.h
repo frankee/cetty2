@@ -23,8 +23,8 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Exception.h>
@@ -44,26 +44,22 @@ using namespace cetty::util;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoClientHandler {
+class EchoClientHandler : private boost::noncopyable {
 public:
-    typedef ChannelMessageHandlerContext<EchoClientHandler,
-        ChannelBufferPtr,
-        VoidMessage,
-        VoidMessage,
-        ChannelBufferPtr,
-        ChannelBufferContainer,
-        VoidMessageContainer,
-        VoidMessageContainer,
-        ChannelBufferContainer> Context;
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::Context Context;
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::InboundContainer InboundContainer;
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::OutboundTransfer OutboundTransfer;
 
 public:
     EchoClientHandler(int firstMessageSize);
 
     void registerTo(Context& ctx) {
-        context_ = &ctx;
+        container_ = ctx.inboundContainer();
+        transfer_ = ctx.outboundTransfer();
+
         ctx.setChannelActiveCallback(boost::bind(&EchoClientHandler::channelActive, this, _1));
         ctx.setChannelMessageUpdatedCallback(boost::bind(&EchoClientHandler::messageUpdated, this, _1));
-        ctx.setExceptionCallback(boost::bind(&EchoClientHandler::exceptionCaught, this, _1, boost::cref(_2)));
+        ctx.setExceptionCallback(boost::bind(&EchoClientHandler::exceptionCaught, this, _1, _2));
     }
 
     void channelActive(ChannelHandlerContext& ctx);
@@ -80,8 +76,8 @@ private:
     int firstMessageSize;
     int transferredBytes;
 
-    Context* context_;
-    Context::OutboundTransfer* outboundTransfer_;
+    InboundContainer* container_;
+    OutboundTransfer* transfer_;
 
     ChannelBufferPtr firstMessage;
 };

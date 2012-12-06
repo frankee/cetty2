@@ -11,15 +11,14 @@
 
 void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
     // Send back the received message to the remote peer.
-    const ChannelBufferPtr& buffer =
-        context_->inboundInContainer()->getMessages();
+    const ChannelBufferPtr& buffer = container_->getMessages();
 
     if (buffer) {
         int readableBytes = buffer->readableBytes();
 
         ChannelBufferPtr tmp = buffer->readBytes();
 
-        outboundTransfer_->write(tmp, ctx.newSucceededFuture());
+        transfer_->write(tmp, ctx.newSucceededFuture());
 
         printf("received message at %s with %dBytes.\n",
                boost::posix_time::to_simple_string(boost::get_system_time()).c_str(),
@@ -30,11 +29,7 @@ void EchoClientHandler::messageUpdated(ChannelHandlerContext& ctx) {
 void EchoClientHandler::channelActive(ChannelHandlerContext& ctx) {
     // Send the first message.  Server will not send anything here
     // because the firstMessage's capacity is 0.
-    if (!outboundTransfer_) {
-        outboundTransfer_ = context_->outboundTransfer();
-    }
-    
-    outboundTransfer_->write(firstMessage, ctx.newSucceededFuture());
+    transfer_->write(firstMessage, ctx.newSucceededFuture());
 
     //outboundTransfer.write(firstMessage, ctx.channel()->newSucceededFuture());
     //ctx.getChannel()->write(firstMessage);

@@ -52,8 +52,8 @@ public:
     virtual ChannelFuturePtr awaitUninterruptibly();
     virtual bool awaitUninterruptibly(int64_t timeoutMillis);
 
-    virtual const ChannelWeakPtr& channel() const;
-    virtual ChannelPtr sharedChannel() const;
+    virtual ChannelPtr channel() const;
+    //virtual ChannelPtr sharedChannel() const;
 
     virtual bool isDone() const;
 

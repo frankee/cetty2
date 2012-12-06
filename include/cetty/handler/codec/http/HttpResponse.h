@@ -121,13 +121,65 @@ public:
             return;
         }
 
-        if (content->readable() && headers_.transferEncoding().isMultiple()) {
+        if (content->readable() && headers_.transferEncoding().multiple()) {
             //TODO
             //throw InvalidArgumentException(
             //    "non-empty content disallowed if this.chunked == true");
         }
 
         content_ = content;
+    }
+
+    const HttpTransferEncoding& transferEncoding() const {
+        return headers_.transferEncoding();
+    }
+
+    void setTransferEncoding(const HttpTransferEncoding& te) {
+        headers_.setTransferEncoding(te);
+
+        if (te.multiple()) {
+            setContent(Unpooled::EMPTY_BUFFER);
+        }
+    }
+
+    bool keepAlive() const {
+        return headers_.keepAlive(version_);
+    }
+
+    void setKeepAlive(bool keepAlive) {
+        headers_.setKeepAlive(keepAlive, version_);
+    }
+
+    int contentLength() {
+        return headers_.contentLength();
+    }
+
+    /**
+     * Returns the length of the content.  Please note that this value is
+     * not retrieved from {@link HttpMessage#getContent()} but from the
+     * <tt>"Content-Length"</tt> header, and thus they are independent from each
+     * other.
+     *
+     * @return the content length or <tt>defaultValue</tt> if this message does
+     *         not have the <tt>"Content-Length"</tt> header
+     */
+    int contentLength(int defaultValue) const {
+        int length = headers_.contentLength();
+
+        if (!length) {
+            // WebSockset messages have constant content-lengths.
+            if (status_.code() == 101 &&
+                headers_.containsHeader(HttpHeaders::Names::SEC_WEBSOCKET_ORIGIN) &&
+                headers_.containsHeader(HttpHeaders::Names::SEC_WEBSOCKET_LOCATION)) {
+                    return 16;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    void setContentLength(int length) {
+        headers_.setContentLength(length);
     }
 
     std::string toString() const;

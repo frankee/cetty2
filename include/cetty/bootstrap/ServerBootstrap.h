@@ -190,7 +190,7 @@ public:
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
      * {@link Channel}'s.
      */
-    ServerBootstrap& setEventLoopPool(const EventLoopPoolPtr& parent,
+    ServerBootstrap& setEventLoopPools(const EventLoopPoolPtr& parent,
                                       const EventLoopPoolPtr& child) {
         if (child) {
             childPool_ = child;
@@ -198,6 +198,8 @@ public:
         else {
             childPool_ = parent;
         }
+
+        AbstractBootstrap<ServerBootstrap>::setEventLoopPool(parent);
 
         return *this;
     }

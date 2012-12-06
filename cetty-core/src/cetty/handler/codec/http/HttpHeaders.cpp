@@ -425,7 +425,7 @@ bool HttpHeaders::keepAlive(const HttpVersion& version) const {
         return false;
     }
 
-    if (version.isKeepAliveDefault()) {
+    if (version.keepAliveDefault()) {
         return !StringUtil::iequals(Values::CLOSE, connection);
     }
     else {
@@ -434,7 +434,7 @@ bool HttpHeaders::keepAlive(const HttpVersion& version) const {
 }
 
 void HttpHeaders::setKeepAlive(bool keepAlive, const HttpVersion& version) {
-    if (version.isKeepAliveDefault()) {
+    if (version.keepAliveDefault()) {
         if (keepAlive) {
             removeHeader(Names::CONNECTION);
         }
@@ -452,42 +452,14 @@ void HttpHeaders::setKeepAlive(bool keepAlive, const HttpVersion& version) {
     }
 }
 
-int HttpHeaders::contentLength() {
-    return contentLength(0);
-}
-
-int HttpHeaders::contentLength(int defaultValue) {
+int HttpHeaders::contentLength() const {
     const std::string& contentLength = headerValue(Names::CONTENT_LENGTH);
 
     if (!contentLength.empty()) {
         return StringUtil::strto32(contentLength);
     }
 
-#if 0
-    // WebSockset messages have constant content-lengths.
-    const HttpRequest* request =
-        dynamic_cast<const HttpRequest*>(&message);
-
-    if (NULL != request) {
-        if (HttpMethod::GET == request->method() &&
-                request->containsHeader(Names::SEC_WEBSOCKET_KEY1) &&
-                request->containsHeader(Names::SEC_WEBSOCKET_KEY2)) {
-            return 8;
-        }
-    }
-
-    const HttpResponse* response =
-        dynamic_cast<const HttpResponse*>(&message);
-
-    if (NULL != response) {
-        if (response->status().getCode() == 101 &&
-                response->containsHeader(Names::SEC_WEBSOCKET_ORIGIN) &&
-                response->containsHeader(Names::SEC_WEBSOCKET_LOCATION)) {
-            return 16;
-        }
-    }
-#endif
-    return defaultValue;
+    return 0;
 }
 
 void HttpHeaders::setContentLength(int length) {
@@ -506,90 +478,23 @@ void HttpHeaders::setHost(const std::string& value) {
     setHeader(Names::HOST, value);
 }
 
-bool HttpHeaders::is100ContinueExpected() const {
-    // Expect: 100-continue is for requests only.
-    
-    // It works only on HTTP/1.1 or later.
-//     if (request->version().compareTo(HttpVersion::HTTP_1_1) < 0) {
-//         return false;
-//     }
-
-    // In most cases, there will be one or zero 'Expect' header.
-    const std::string& value = headerValue(Names::EXPECT);
-
-    if (value.empty()) {
-        return false;
-    }
-
-    if (StringUtil::iequals(Values::CONTINUE, value)) {
-        return true;
-    }
-
-    // Multiple 'Expect' headers.  Search through them.
-    std::vector<std::string> headers;
-    headerValues(Names::EXPECT, &headers);
-
-    for (size_t i = 0; i < headers.size(); ++i) {
-        if (StringUtil::iequals(Values::CONTINUE, headers[i])) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void HttpHeaders::set100ContinueExpected( bool set) {
-    if (set) {
-        setHeader(Names::EXPECT, Values::CONTINUE);
-    }
-    else {
-        removeHeader(Names::EXPECT);
-    }
-}
-
-std::string HttpHeaders::toString() const {
-    std::string buf;
-    buf.reserve(2048);
-
-//     StringUtil::printf(&buf,
-//         "HttpMessage (version: %d, keepAlive: %s,  transferEncoding: %s)",
-//         getProtocolVersion().getText().c_str(),
-//         HttpHeaders::keepAlive(*this) ? "true" : "false",
-//         transferEncoding_.toString().c_str());
-
-    ConstHeaderIterator itr = firstHeader();
-    ConstHeaderIterator end = lastHeader();
-
-    for (itr; itr != end; ++itr) {
-        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
-    }
-
-    return buf;
-}
-
-HttpTransferEncoding HttpHeaders::transferEncoding() const {
+const HttpTransferEncoding& HttpHeaders::transferEncoding() const {
     return transferEncoding_;
 }
 
-void HttpHeaders::setTransferEncoding(HttpTransferEncoding te) {
+void HttpHeaders::setTransferEncoding(const HttpTransferEncoding& te) {
     transferEncoding_ = te;
     const std::string& transferEnocodingStr = HttpHeaders::Names::TRANSFER_ENCODING;
     const std::string& chunkedStr = HttpHeaders::Values::CHUNKED;
 
-    if (te == HttpTransferEncoding::SINGLE) {
-        headers_.erase(transferEnocodingStr, chunkedStr);
-    }
-    else if (te == HttpTransferEncoding::STREAMED) {
-        headers_.erase(transferEnocodingStr, chunkedStr);
-        //setContent(Unpooled::EMPTY_BUFFER);
-    }
-    else if (te == HttpTransferEncoding::CHUNKED) {
+    if (te == HttpTransferEncoding::CHUNKED) {
         if (!headers_.has(transferEnocodingStr, chunkedStr)) {
             addHeader(transferEnocodingStr, chunkedStr);
         }
-
         removeHeader(HttpHeaders::Names::CONTENT_LENGTH);
-        //setContent(Unpooled::EMPTY_BUFFER);
+    }
+    else {
+        headers_.erase(transferEnocodingStr, chunkedStr);
     }
 }
 
@@ -623,6 +528,22 @@ const std::vector<Cookie>& HttpHeaders::cookies() const {
     }
 
     return cookies_;
+}
+
+void HttpHeaders::toString(std::string* str) const {
+
+    //     StringUtil::printf(&buf,
+    //         "HttpMessage (version: %d, keepAlive: %s,  transferEncoding: %s)",
+    //         getProtocolVersion().getText().c_str(),
+    //         HttpHeaders::keepAlive(*this) ? "true" : "false",
+    //         transferEncoding_.toString().c_str());
+
+    ConstHeaderIterator itr = firstHeader();
+    ConstHeaderIterator end = lastHeader();
+
+    for (itr; itr != end; ++itr) {
+        StringUtil::printf(str, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+    }
 }
 
 }

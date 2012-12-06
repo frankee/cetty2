@@ -484,7 +484,16 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
                 ctx.connectFunctor_(ctx, remoteAddress, localAddress, future);
             }
             else {
-                connect(localAddress, remoteAddress, future);
+                ChannelHandlerContext* prev = prev_;
+
+                do {
+                    if (prev->connectFunctor_) {
+                        prev->connectFunctor_(ctx, remoteAddress, localAddress, future);
+                    }
+
+                    prev = prev->prev_;
+                }
+                while (prev);
             }
         }
         catch (const Exception& e) {
@@ -591,6 +600,10 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
     return future;
 }
 
+const ChannelFuturePtr& ChannelHandlerContext::close() {
+    return close(newFuture());
+}
+
 const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& future) {
     ChannelHandlerContext* before = prev_;
 
@@ -651,6 +664,10 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
     }
 
     return future;
+}
+
+const ChannelFuturePtr& ChannelHandlerContext::flush() {
+    return flush(newFuture());
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& future) {

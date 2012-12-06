@@ -666,18 +666,7 @@ public:
      * @return the content length or <tt>0</tt> if this message does not have
      *         the <tt>"Content-Length"</tt> header
      */
-    int contentLength();
-
-    /**
-     * Returns the length of the content.  Please note that this value is
-     * not retrieved from {@link HttpMessage#getContent()} but from the
-     * <tt>"Content-Length"</tt> header, and thus they are independent from each
-     * other.
-     *
-     * @return the content length or <tt>defaultValue</tt> if this message does
-     *         not have the <tt>"Content-Length"</tt> header
-     */
-    int contentLength(int defaultValue);
+    int contentLength() const;
 
     /**
      * Sets the <tt>"Content-Length"</tt> header.
@@ -701,30 +690,6 @@ public:
     void setHost(const std::string& value);
 
     /**
-     * Returns <tt>true</tt> if and only if the specified message contains the
-     * <tt>"Expect: 100-continue"</tt> header.
-     */
-    bool is100ContinueExpected() const;
-
-    /**
-     * Sets the <tt>"Expect: 100-continue"</tt> header to the specified message.
-     * If there is any existing <tt>"Expect"</tt> header, they are replaced with
-     * the new one.
-     */
-    void set100ContinueExpected() {
-        set100ContinueExpected(true);
-    }
-
-    /**
-     * Sets or removes the <tt>"Expect: 100-continue"</tt> header to / from the
-     * specified message.  If the specified <tt>value</tt> is <tt>true</tt>,
-     * the <tt>"Expect: 100-continue"</tt> header is set and all other previous
-     * <tt>"Expect"</tt> headers are removed.  Otherwise, all <tt>"Expect"</tt>
-     * headers are removed completely.
-     */
-    void set100ContinueExpected(bool set);
-
-    /**
      * Returns the transfer encoding of this {@link HttpMessage}.
      * <ul>
      * <li>{@link HttpTransferEncoding#CHUNKED} - an HTTP message whose {@code "Transfer-Encoding"}
@@ -736,7 +701,7 @@ public:
      *     and {@link #getContent()} returns the full content.</li>
      * </ul>
      */
-    HttpTransferEncoding transferEncoding() const;
+    const HttpTransferEncoding& transferEncoding() const;
 
     /**
      * Sets the transfer encoding of this {@link HttpMessage}.
@@ -751,14 +716,14 @@ public:
      * </ul>
      * For more information about what {@link HttpTransferEncoding} means, see {@link #getTransferEncoding()}.
      */
-    void setTransferEncoding(HttpTransferEncoding te);
+    void setTransferEncoding(const HttpTransferEncoding& te);
 
     void addCookie(const Cookie& cookie);
     void addCookie(const std::string& name, const std::string& value);
 
     const std::vector<Cookie>& cookies() const;
 
-    std::string toString() const;
+    void toString(std::string* str) const;
 
 private:
     NameValueCollection headers_;

@@ -26,47 +26,61 @@
 namespace cetty {
 namespace channel {
 
-    template<typename T1, typename T2>
-    class ChannelInitializer {
-    public:
-        typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
-        typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
-        typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
+template<typename T1, typename T2>
+class ChannelInitializer {
+public:
+    typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
+    typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
+    typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
 
-        typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
-        typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
-        typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
+    typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
+    typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
+    typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
 
-    public:
-        ChannelInitializer() {}
+public:
+    ChannelInitializer() {}
 
-        bool operator()(const ChannelPtr& channel) {
-            ChannelPipeline& pipeline = channel->pipeline();
-            pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
-            pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
-            return true;
-        }
-    };
+    bool operator()(const ChannelPtr& channel) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+        return true;
+    }
+};
 
 template<typename T>
-class ChannelInitializer<T, void> {
+class ChannelInitializer1 {
 public:
     typedef typename ChannelHandlerWrapper<T>::Handler Handler;
     typedef typename ChannelHandlerWrapper<T>::HandlerPtr HandlerPtr;
     typedef typename ChannelHandlerWrapper<T>::Handler::Context Context;
 
 public:
-    ChannelInitializer()
+    ChannelInitializer1()
         : name_("auto1") {
     }
 
-    ChannelInitializer(const std::string& name)
+    ChannelInitializer1(const std::string& name)
         : name_(name) {
     }
-    
+
     bool operator()(const ChannelPtr& channel) {
         ChannelPipeline& pipeline = channel->pipeline();
-        pipeline.addLast<HandlerPtr>(name, HandlerPtr(new Handler));
+        pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler));
+        return true;
+    }
+
+    template<typename Arg1>
+    bool operator()(const ChannelPtr& channel, Arg1 arg1) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1)));
+        return true;
+    }
+
+    template<typename Arg1, typename Arg2>
+    bool operator()(const ChannelPtr& channel, Arg1 arg1, Arg2 arg2) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1, arg2)));
         return true;
     }
 

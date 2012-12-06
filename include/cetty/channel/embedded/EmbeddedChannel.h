@@ -46,7 +46,7 @@ public:
             InboundOutContainer,
             OutboundOutContainer> ThisChannel;
 
-    typedef ChannelMessageHandlerContext<Channel,
+    typedef ChannelMessageHandlerContext<ThisChannel*,
             InboundOut,
             VoidMessage,
             VoidMessage,
@@ -56,7 +56,7 @@ public:
             VoidMessageContainer,
             VoidMessageContainer> InboundOutContext;
 
-    typedef ChannelMessageHandlerContext<Channel,
+    typedef ChannelMessageHandlerContext<ThisChannel*,
             VoidMessage,
             VoidMessage,
             OutboundOut,
@@ -201,15 +201,15 @@ private:
     virtual void doInitialize() {
         ChannelPipeline& pipeline = Channel::pipeline();
 
-        pipeline.addLast<ChannelPtr>("inboundOut",
-                                     shared_from_this(),
+        pipeline.addLast<ThisChannel*>("inboundOut",
+                                     this,
                                      boost::bind(&EmbeddedChannel::registerInboundTo,
                                              this,
                                              _1,
                                              _2));
 
-        pipeline.addFirst<ChannelPtr>("outboutOut",
-                                      shared_from_this(),
+        pipeline.addFirst<ThisChannel*>("outboutOut",
+                                      this,
                                       boost::bind(&EmbeddedChannel::registerOutboundTo,
                                               this,
                                               _1,
@@ -222,7 +222,7 @@ private:
             lastException_ = new Exception(cause);
         }
         else {
-            LOG_WARN_E(cause) <<  "More than one exception was raised. "
+            LOG_WARN <<  "More than one exception was raised. "
                               "Will report only the first one and log others.";
         }
     }

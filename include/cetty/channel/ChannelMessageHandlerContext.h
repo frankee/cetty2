@@ -122,10 +122,6 @@ public:
         return &outboundTransfer_;
     }
 
-    const StoredHandlerPtr& handler() const {
-        return handler_;
-    }
-
     virtual boost::any getInboundMessageContainer() {
         return boost::any(&inboundContainer_);
     }
@@ -241,10 +237,6 @@ public:
 
     InboundTransfer* inboundTransfer() { return NULL; }
     OutboundTransfer* outboundTransfer() { return NULL; }
-
-    const StoredHandlerPtr& handler() const {
-        return handler_;
-    }
 
 private:
     StoredHandlerPtr handler_;
