@@ -26,28 +26,6 @@
 namespace cetty {
 namespace channel {
 
-template<typename T1, typename T2>
-class ChannelInitializer {
-public:
-    typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
-    typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
-    typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
-
-    typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
-    typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
-    typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
-
-public:
-    ChannelInitializer() {}
-
-    bool operator()(const ChannelPtr& channel) {
-        ChannelPipeline& pipeline = channel->pipeline();
-        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
-        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
-        return true;
-    }
-};
-
 template<typename T>
 class ChannelInitializer1 {
 public:
@@ -84,8 +62,85 @@ public:
         return true;
     }
 
+    template<typename Arg1, typename Arg2, typename Arg3>
+    bool operator()(const ChannelPtr& channel, Arg1 arg1, Arg2 arg2, Arg3 arg3) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1, arg2, arg3)));
+        return true;
+    }
+
 private:
     std::string name_;
+};
+
+template<typename T1, typename T2>
+class ChannelInitializer2 {
+public:
+    typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
+    typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
+    typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
+
+    typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
+    typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
+    typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
+
+    enum {
+        ARG_HANDLER1,
+        ARG_HANDLER2
+    };
+
+public:
+    ChannelInitializer2() {}
+
+    bool operator()(const ChannelPtr& channel) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+        return true;
+    }
+
+//     template<typename Arg, int WhichArg>
+//     bool initialize(const ChannelPtr& channel, Arg arg) {
+//         ChannelPipeline& pipeline = channel->pipeline();
+//         pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1, arg));
+//         pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+//         return true;
+//     }
+};
+
+// template<typename T1, typename T2> template<typename Arg> inline
+// bool ChannelInitializer2<T1, T2>::initialize<Arg, ChannelInitializer2::ARG_HANDLER2>(const ChannelPtr& channel, Arg arg) {
+//     ChannelPipeline& pipeline = channel->pipeline();
+//     pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
+//     pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2, arg));
+//     return true;
+// }
+
+template<typename T1, typename T2, typename T3>
+class ChannelInitializer3 {
+public:
+    typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
+    typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
+    typedef typename ChannelHandlerWrapper<T1>::Handler::Context Context1;
+
+    typedef typename ChannelHandlerWrapper<T2>::Handler Handler2;
+    typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
+    typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
+
+    typedef typename ChannelHandlerWrapper<T3>::Handler Handler3;
+    typedef typename ChannelHandlerWrapper<T3>::HandlerPtr Handler3Ptr;
+    typedef typename ChannelHandlerWrapper<T3>::Handler::Context Context3;
+
+public:
+    ChannelInitializer3() {}
+
+    bool operator()(const ChannelPtr& channel) {
+        ChannelPipeline& pipeline = channel->pipeline();
+        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+        pipeline.addLast<Handler3Ptr>("auto3", Handler3Ptr(new Handler3));
+        return true;
+    }
 };
 
 }

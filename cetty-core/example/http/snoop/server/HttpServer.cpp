@@ -19,16 +19,15 @@
  */
 
 #include <cetty/bootstrap/ServerBootstrap.h>
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 
+#include <cetty/channel/ChannelInitializer.h>
 #include <cetty/handler/codec/http/HttpServerCodec.h>
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
 #include "HttpRequestHandler.h"
 
-using namespace cetty::bootstrap;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
 using namespace cetty::handler::codec::http;
 
 /**
@@ -44,13 +43,14 @@ using namespace cetty::handler::codec::http;
 
 int main(int argc, const char* argv[]) {
     // Configure the server.
-    ServerBootstrap bootstrap(
-        ChannelFactoryPtr(new AsioServerSocketChannelFactory(0)));
+    AsioServerBootstrap bootstrap(0);
+
+    ChannelInitializer2<HttpServerCodec, HttpRequestHandler> initializer;
 
     bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096)
-    .setPipeline(ChannelPipelines::pipeline(new HttpServerCodec,
-                                            new HttpRequestHandler));
+    .setChildInitializer(boost::bind<bool>(initializer, _1));
+
     bootstrap.bind(8080);
 };
