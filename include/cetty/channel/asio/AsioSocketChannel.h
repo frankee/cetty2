@@ -113,8 +113,12 @@ private:
 
     void beginRead();
 
-    void handleRead(const boost::system::error_code& error, size_t bytes_transferred);
-    void handleWrite(const boost::system::error_code& error, size_t bytes_transferred);
+    void handleRead(const boost::system::error_code& error,
+        size_t bytes_transferred,
+        const ChannelPtr& channel);
+
+    void handleWrite(const boost::system::error_code& error,
+        size_t bytes_transferred);
 
     void handleConnect(const boost::system::error_code& error,
                        boost::asio::ip::tcp::resolver::iterator endpointIterator,

@@ -63,29 +63,37 @@ ChannelPtr CraftServerBuilder::buildHttp(int port) {
     return build(PROTOBUF_SERVICE_HTTP, port);
 }
 
-bool initializeChild(const ChannelPtr& channel) {
+bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
     //if (ssl) {
     //}
 
-    pipeline.addLast<HttpServerCodec::HandlerPtr>("decoder",
-        HttpServerCodec::HandlerPtr(new HttpServerCodec));
+    pipeline.addLast<HttpServerCodec::HandlerPtr>("httpCodec",
+            HttpServerCodec::HandlerPtr(new HttpServerCodec));
 
     // Remove the following line if you don't want automatic content compression.
     //pipeline.addLast("deflater", new HttpContentCompressor());
 
     pipeline.addLast<HttpServiceFilter::HandlerPtr>("protobufFilter",
-        HttpServiceFilter::HandlerPtr(new HttpServiceFilter));
+            HttpServiceFilter::HandlerPtr(
+                new HttpServiceFilter(requestMapper_, responseMapper_)));
 
     pipeline.addLast<ProtobufServiceMessageHandler::HandlerPtr>("messageHandler",
-        ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
+            ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
 
     return true;
 }
 
 void CraftServerBuilder::init() {
-    registerChildInitializer(PROTOBUF_SERVICE_HTTP, boost::bind(initializeChild, _1));
+    requestMapper_ = new ServiceRequestMapper();
+    responseMapper_ = new ServiceResponseMapper();
+
+    registerChildInitializer(PROTOBUF_SERVICE_HTTP,
+                             boost::bind(&CraftServerBuilder::initializeChildChannel,
+                                         this,
+                                         _1));
+
     //printf("has not set the configCenter, so can't inti the http service.\n");
 }
 

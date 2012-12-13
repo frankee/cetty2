@@ -365,7 +365,7 @@ public:
     }
 
     ReplayingDecoder(int initialState, bool unfold)
-        : unfold(unfold),
+        : unfold_(unfold),
           state_(initialState),
           checkedPoint_(-1),
           transfer_(),

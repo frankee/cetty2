@@ -74,9 +74,10 @@ public:
 
 int HttpPackage::contentLength(int defaultValue) const {
     static HttpPackageContentLengthVisitor visitor;
+    boost::variant<int> value(defaultValue);
     return boost::apply_visitor(visitor,
                                 variant,
-                                boost::variant<int>(defaultValue));
+                                value);
 }
 
 class HttpPackage100ContinueExpectedVisitor : public boost::static_visitor<bool> {
@@ -133,9 +134,10 @@ public:
 
 void HttpPackage::setTransferEncoding(const HttpTransferEncoding& te) {
     static HttpPackageSetTransferEncodingVisitor visitor;
+    boost::variant<HttpTransferEncoding> transferEncoding(te);
     boost::apply_visitor(visitor,
                          variant,
-                         boost::variant<HttpTransferEncoding>(te));
+                         transferEncoding);
 }
 
 class HttpPackageSetContentVisitor : public boost::static_visitor<> {
@@ -163,9 +165,10 @@ public:
 
 void HttpPackage::setContent(const ChannelBufferPtr& content) {
     static HttpPackageSetContentVisitor visitor;
+    boost::variant<ChannelBufferPtr> buffer(content);
     boost::apply_visitor(visitor,
                          variant,
-                         boost::variant<ChannelBufferPtr>(content));
+                         buffer);
 }
 
 }

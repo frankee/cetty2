@@ -359,7 +359,7 @@ public:
     const AfterAddCallback& afterAddCallback() const { return afterAddCallback_; }
     const BeforeRemoveCallback& beforeRemoveCallback() const { return beforeRemoveCallback_; }
     const AfterRemoveCallback& afterRemoveCallback() const { return afterRemoveCallback_; }
-    const PipelineChangedCallback& pipelineChangedCallback() const { pipelineChangedCallback_; }
+    const PipelineChangedCallback& pipelineChangedCallback() const { return pipelineChangedCallback_; }
     const ChannelExceptionCallback& exceptionCallback() const { return exceptionCallback_; }
     const UserEventCallback& userEventCallback() const { return userEventCallback_; }
     const ChannelOpenCallback& channelOpenCallback() const { return channelOpenCallback_; }

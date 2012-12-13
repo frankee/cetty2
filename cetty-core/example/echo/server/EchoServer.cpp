@@ -13,6 +13,9 @@
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/asio/AsioServicePool.h>
 
+#include <cetty/logging/LogLevel.h>
+#include <cetty/logging/Logger.h>
+
 using namespace cetty::channel;
 using namespace cetty::channel::asio;
 
@@ -20,6 +23,7 @@ using namespace cetty::bootstrap::asio;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
+using namespace cetty::logging;
 
 int main(int argc, char* argv[]) {
     int threadCount = 1;
@@ -29,6 +33,8 @@ int main(int argc, char* argv[]) {
     }
 
     ChannelInitializer1<EchoServerHandler> initializer("echo");
+
+    Logger::logLevel(LogLevel::FATAL);
 
     AsioServerBootstrap bootstrap(threadCount);
     bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1));

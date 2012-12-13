@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <vector>
 #include <boost/bind.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
@@ -133,7 +134,7 @@ private:
     }
 
     OutstandingCallPtr toInboundOut(const Response& inbound) {
-        std::map<int64_t, OutstandingCallPtr>::iterator itr =
+        typename std::map<int64_t, OutstandingCallPtr>::iterator itr =
             outStandingCalls_.find(inbound.id());
 
         if (itr != outStandingCalls_.end()) {
@@ -175,18 +176,18 @@ private:
             OutboundQueue& queue = outboundContainer->getMessages();
 
             while (!queue.empty()) {
-                OutboundIn& request = outboundQueue.front();
+                OutboundIn& request = queue.front();
 
-                ch->pipeline()->addOutboundMessage<OutboundOut>(
-                    detail::OutboundChanger<request, Response, OutboundOut>::toOutboundOut(request));
+                ch->pipeline().addOutboundMessage<OutboundOut>(
+                    detail::OutboundChanger<Request, Response, OutboundOut>::toOutboundOut(request));
 
-                if () {
+                if (ServiceMessageTraits<Request>::HAS_SERIAL_NUMBER) {
                     outStandingCalls_.insert(std::make_pair(request->id(), request));
                 }
 
                 notify = true;
 
-                outboundQueue.pop_front();
+                queue.pop_front();
             }
 
             if (notify) {
@@ -194,14 +195,14 @@ private:
             }
         }
         else {
-            BufferingCall bufferingCall;
-            bufferingCall.calls = outboundQueue;
-            bufferingCall.future = future;
-            bufferingCalls.push_back(bufferingCall);
+//             BufferingCall bufferingCall;
+//             bufferingCall.calls = outboundQueue;
+//             bufferingCall.future = future;
+//             bufferingCalls.push_back(bufferingCall);
 
-            outboundQueue.clear();
-            pool_.getChannel(boost::bind(
-                                 &Self::connectedCallback, this, _1, boost::ref(ctx)));
+//             outboundQueue.clear();
+//             pool_.getChannel(boost::bind(
+//                                  &Self::connectedCallback, this, _1, boost::ref(ctx)));
         }
     }
 

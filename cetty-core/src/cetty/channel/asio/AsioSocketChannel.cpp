@@ -102,7 +102,7 @@ AsioSocketChannel::AsioSocketChannel(int id,
 }
 
 AsioSocketChannel::~AsioSocketChannel() {
-    LOG_DEBUG << "AsioSocketChannel dector";
+    LOG_DEBUG << "AsioSocketChannel dctor";
 }
 
 #if 0
@@ -163,12 +163,13 @@ bool AsioSocketChannel::setClosed() {
     LOG_INFO << "closed the socket channel, finally calling FutureListener"
              " which to the ChannelCloseFuture.";
 
-    return true;
+    return opened_;
     //return Channel::setClosed();
 }
 
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
-                                   size_t bytes_transferred) {
+                                   size_t bytes_transferred,
+                                   const ChannelPtr& channel) {
     if (!error) {
         readBuffer_->offsetWriterIndex(bytes_transferred);
 
@@ -178,7 +179,10 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
-        close(newVoidFuture());
+        // FIXME
+        if (opened_) {
+            close(newVoidFuture());
+        }
 
         //         if (pipeline_ && pipeline_->attached()) {
         //             LOG_WARN << "handleRead Error : " << error.value()
@@ -383,7 +387,10 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
     }
 }
 
-void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx, const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
+    const SocketAddress& remoteAddress,
+    const SocketAddress& localAddress,
+    const ChannelFuturePtr& future) {
     if (!isOpen()) {
         return;
     }
@@ -417,7 +424,8 @@ void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx, const SocketAddres
 void AsioSocketChannel::beginRead() {
     int size;
     char* buf = readBuffer_->writableBytes(&size);
-    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : " << size;
+    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : "
+             << size;
 
     // auto increment the capacity.
     if (size < 128) {
@@ -433,7 +441,8 @@ void AsioSocketChannel::beginRead() {
         boost::bind(&AsioSocketChannel::handleRead,
                     this,
                     boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred));
+                    boost::asio::placeholders::bytes_transferred,
+                    shared_from_this()));
 }
 
 void AsioSocketChannel::doBind(const SocketAddress& localAddress) {

@@ -67,7 +67,7 @@ public:
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
     typedef typename OutboundContainer::MessageQueue OutboundQueue;
 
-    typename ChannelBufferContainer NextOutboundContainer;
+    typedef ChannelBufferContainer NextOutboundContainer;
 
     typedef ChannelMessageTransfer<ChannelBufferPtr,
             ChannelBufferContainer,

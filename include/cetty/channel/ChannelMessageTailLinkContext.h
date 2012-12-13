@@ -40,67 +40,86 @@ public:
     typedef InboundInContainer InboundContainer;
 
 public:
-    ChannelMessageTailLinkContext(const ChannelPtr& channel,
-                                 const std::string& name,
-                                 const HandlerPtr& handler)
+    ChannelMessageTailLinkContext(const std::string& name,
+                                  const ChannelPtr& channel,
+                                  const HandlerPtr& handler)
         : ChannelHandlerContext(name),
-          handler_(handler) {
+          channel_(channel),
+          pipeline_(&channel->pipeline()),
+          handler_(handler),
+          inboundContainer_() {
         if (handler) {
             handler->registerTo(*this);
         }
     }
 
     ChannelMessageTailLinkContext(const std::string& name,
-                                 const HandlerPtr& handler,
-                                 const RegisterCallback& registerCallback)
+                                  const ChannelPtr& channel,
+                                  const HandlerPtr& handler,
+                                  const RegisterCallback& registerCallback)
         : ChannelHandlerContext(name),
-          handler_(handler) {
+          channel_(channel),
+          pipeline_(&channel->pipeline()),
+          handler_(handler),
+          inboundContainer_() {
         if (handler && registerCallback) {
             registerCallback(handler, *this);
         }
     }
 
     ChannelMessageTailLinkContext(const std::string& name,
-                                 const EventLoopPtr& eventLoop,
-                                 const HandlerPtr& handler)
-        : ChannelHandlerContext(name, eventLoop) {
+                                  const ChannelPtr& channel,
+                                  const EventLoopPtr& eventLoop,
+                                  const HandlerPtr& handler)
+        : ChannelHandlerContext(name, eventLoop),
+          channel_(channel),
+          pipeline_(&channel->pipeline()),
+          handler_(handler),
+          inboundContainer_() {
         if (handler) {
             handler->registerTo(*this);
         }
     }
 
     ChannelMessageTailLinkContext(const std::string& name,
-                                 const HandlerPtr& handler,
-                                 const EventLoopPtr& eventLoop,
-                                 const RegisterCallback& registerCallback)
+                                  const ChannelPtr& channel,
+                                  const HandlerPtr& handler,
+                                  const EventLoopPtr& eventLoop,
+                                  const RegisterCallback& registerCallback)
         : ChannelHandlerContext(name, eventLoop),
-          handler_(handler) {
+          channel_(channel),
+          pipeline_(&channel->pipeline()),
+          handler_(handler),
+          inboundContainer_() {
         if (handler && registerCallback) {
             registerCallback(handler, *this);
         }
     }
 
     virtual boost::any getInboundMessageContainer() {
-        return boost::any(&inboundContainer_);
+        if (!channel_.expired()) {
+            if (!inboundContainer_) {
+                inboundContainer_ =
+                    pipeline_->inboundMessageContainer<InboundContainer>();
+            }
+
+            return boost::any(inboundContainer_);
+        }
+
+        return boost::any();
     }
 
     virtual boost::any getOutboundMessageContainer() {
         return boost::any();
     }
 
-    virtual void initialize(ChannelPipeline* pipeline) {
-        ChannelHandlerContext::initialize(pipeline);
-        inboundContainer_.setEventLoop(eventLoop());
-        outboundContainer_.setEventLoop(eventLoop());
-    }
-
-    virtual void onPipelineChanged() {
-        ChannelHandlerContext::onPipelineChanged();
-    }
-
 private:
     ChannelWeakPtr channel_;
+    ChannelPipeline* pipeline_;
+
     StoredHandlerPtr handler_;
+
+    InboundContainer* inboundContainer_;
 };
 
 }

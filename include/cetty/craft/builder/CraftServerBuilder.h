@@ -20,6 +20,7 @@
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
+#include <cetty/craft/http/ServiceMapperPtr.h>
 
 namespace cetty {
 namespace config {
@@ -33,6 +34,7 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
+using namespace cetty::craft::http;
 
 class CraftServerBuilder
     : public cetty::protobuf::service::builder::ProtobufServerBuilder {
@@ -46,6 +48,12 @@ public:
 
 private:
     void init();
+
+    bool initializeChildChannel(const ChannelPtr& channel);
+
+private:
+    ServiceRequestMapperPtr requestMapper_;
+    ServiceResponseMapperPtr responseMapper_;
 };
 
 }

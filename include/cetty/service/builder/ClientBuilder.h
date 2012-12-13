@@ -70,7 +70,7 @@ public:
             boost::bind(&Self::initilizeClientService, this, _1));
 
         channel->initialize();
-        channel->fireChannelActive();
+        channel->pipeline().fireChannelActive();
 
         return channel;
     }

@@ -78,7 +78,7 @@ public:
     ClientServiceRequestAdaptor(const ChannelWeakPtr& parent)
         : flushIndex_(0),
           parent_(parent),
-          pipeline_(parent->pipeline()),
+          pipeline_(parent.lock()->pipeline()),
           inboundTransfer_(),
           inboundContainer_(),
           outboundTransfer_(),
@@ -119,13 +119,11 @@ public:
     }
 
     static ChannelHandlerContext* newContext(const ChannelPtr& parent) {
-        return new Context("requestAdaptor",
-            RequestAdaptor::HandlerPtr(new RequestAdaptor(parent)));
+        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
     }
 
     static ChannelHandlerContext* newContext(const ChannelWeakPtr& parent) {
-        return new Context("requestAdaptor",
-            RequestAdaptor::HandlerPtr(new RequestAdaptor(parent)));
+        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
     }
 
 private:
@@ -141,7 +139,7 @@ private:
         while (!inboundQueue.empty()) {
             Response& response = inboundQueue.front();
 
-            const OutstandingCallPtr& out = outboundQueue.front();
+            const OutboundIn& out = outboundQueue.front();
 
             if (!parent_.expired()) {
                 inboundTransfer_->unfoldAndAdd(out);
@@ -206,7 +204,7 @@ public:
 
     ClientServiceRequestAdaptor(const ChannelWeakPtr& parent)
         : parent_(parent),
-          pipeline_(parent->pipeline()) {
+          pipeline_(parent.lock()->pipeline()) {
     }
 
     ~ClientServiceRequestAdaptor() {}
@@ -215,13 +213,11 @@ public:
     }
 
     static ChannelHandlerContext* newContext(const ChannelPtr& parent) {
-        return new Context("requestAdaptor",
-            RequestAdaptor::HandlerPtr(new RequestAdaptor(parent)));
+        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
     }
 
     static ChannelHandlerContext* newContext(const ChannelWeakPtr& parent) {
-        return new Context("requestAdaptor",
-            RequestAdaptor::HandlerPtr(new RequestAdaptor(parent)));
+        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
     }
 
 private:
