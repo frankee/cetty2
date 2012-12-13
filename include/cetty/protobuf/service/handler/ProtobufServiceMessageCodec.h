@@ -1,5 +1,5 @@
-#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H)
-#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H
+#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGECODEC_H)
+#define CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGECODEC_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,8 +17,7 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageDecoder.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
+#include <cetty/handler/codec/MessageToMessageCodec.h>
 #include <cetty/protobuf/service/handler/MessageCodec.h>
 
 namespace cetty {
@@ -29,33 +28,30 @@ namespace handler {
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 
-class ProtobufServiceMessageDecoder : private boost::noncopyable {
+class ProtobufServiceMessageCodec : private boost::noncopyable {
 public:
-    typedef MessageToMessageDecoder<ProtobufServiceMessageDecoder,
+    typedef MessageToMessageCodec<ProtobufServiceMessageCodec,
             ChannelBufferPtr,
-            ProtobufServiceMessagePtr> Decoder;
+            ProtobufServiceMessagePtr,
+            ProtobufServiceMessagePtr,
+            ChannelBufferPtr> Codec;
 
-    typedef Decoder::Context Context;
-    typedef Decoder::Handler Handler;
-    typedef Decoder::HandlerPtr HandlerPtr;
+    typedef Codec::Context Context;
+    typedef Codec::Handler Handler;
+    typedef Codec::HandlerPtr HandlerPtr;
 
 public:
-    ProtobufServiceMessageDecoder()
-        : decoder_(boost::bind(
-        MessageCodec::decode,
-        _1,
-        _2)) {
-    }
-
-    ~ProtobufServiceMessageDecoder() {
+    ProtobufServiceMessageCodec()
+        : codec_(boost::bind(MessageCodec::decode, _1, _2),
+        boost::bind(MessageCodec::encode, _1, _2)) {
     }
 
     void registerTo(Context& ctx) {
-        decoder_.registerTo(ctx);
+        codec_.registerTo(ctx);
     }
 
 private:
-    Decoder decoder_;
+    Codec codec_;
 };
 
 }
@@ -63,7 +59,8 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGEDECODER_H)
+
+#endif //#if !defined(CETTY_PROTOBUF_SERVICE_HANDLER_PROTOBUFSERVICEMESSAGECODEC_H)
 
 // Local Variables:
 // mode: c++

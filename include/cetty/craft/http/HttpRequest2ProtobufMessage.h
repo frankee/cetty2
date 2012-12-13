@@ -18,7 +18,7 @@
  */
 
 #include <string>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 #include <cetty/craft/http/ServiceMapperPtr.h>
 
@@ -35,6 +35,7 @@ namespace http {
 
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
+
 using google::protobuf::Message;
 using google::protobuf::FieldDescriptor;
 

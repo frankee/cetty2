@@ -53,9 +53,9 @@ template<typename H,
          typename RequestOut,
          typename ResponseIn,
          typename ResponseOut>
-class ServiceAdaptor {
+class ServiceFilter {
 public:
-    typedef ServiceAdaptor<H, RequestIn, RequestOut, ResponseIn, ResponseOut> Self;
+    typedef ServiceFilter<H, RequestIn, RequestOut, ResponseIn, ResponseOut> Self;
 
     typedef ChannelMessageContainer<RequestIn, MESSAGE_BLOCK> InboundContainer;
     typedef ChannelMessageContainer<ResponseIn, MESSAGE_BLOCK> OutboundContainer;
@@ -79,18 +79,31 @@ public:
             OutboundContainer,
             NextOutboundContainer> Context;
 
-    typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestAdaptor;
+    typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
                                         RequestIn const&,
                                         ResponseIn const&,
-                                        ChannelFuturePtr const&)> ResponseAdaptor;
+                                        ChannelFuturePtr const&)> ResponseFilter;
 
 public:
-    ServiceAdaptor() {}
-    ServiceAdaptor(const RequestAdaptor& requestAdaptor,
-                  const ResponseAdaptor& responseAdaptor);
+    ServiceFilter()
+        : inboundTransfer_(),
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
+    }
 
-    ~ServiceAdaptor() {}
+    ServiceFilter(const RequestFilter& requestFilter,
+                  const ResponseFilter& responseFilter)
+                  : requestFilter_(requestFilter),
+                  responseFilter_(responseFilter),
+                  inboundTransfer_(),
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
+    }
+
+    ~ServiceFilter() {}
 
     void registerTo(Context& ctx) {
         inboundTransfer_ = ctx.inboundTransfer();
@@ -109,6 +122,14 @@ public:
                                         _2));
     }
 
+    void setRequestFilter(const RequestFilter& filter) {
+        requestFilter_ = filter;
+    }
+
+    void setResponseFilter(const ResponseFilter& filter) {
+        responseFilter_ = filter;
+    }
+
 private:
     void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
@@ -117,13 +138,13 @@ private:
         while (!queue.empty()) {
             RequestIn& req = queue.front();
             reqs.push_back(req);
-            RequestOut oreq = filterRequest(ctx, req);
+            RequestOut oreq = requestFilter_(ctx, req);
 
             if (!oreq) {
                 LOG_WARN << "serviceFilter filterRequest has an empty result, "
                          "skip it, user handler should reply an error message if needed.";
 
-                inboundQueue.pop_front();
+                queue.pop_front();
                 continue;
             }
 
@@ -147,7 +168,7 @@ private:
         while (!queue.empty()) {
 
             ResponseIn& rep = queue.front();
-            ResponseOut orep = filterResponse(ctx, reqs.front(), rep, future);
+            ResponseOut orep = responseFilter_(ctx, reqs.front(), rep, future);
             reqs.pop_front();
 
             if (!orep) {
@@ -168,8 +189,8 @@ private:
 private:
     std::deque<RequestIn> reqs;
 
-    RequestAdaptor requestAdaptor_;
-    ResponseAdaptor responseAdaptor_;
+    RequestFilter requestFilter_;
+    ResponseFilter responseFilter_;
 
     InboundTransfer* inboundTransfer_;
     OutboundTransfer* outboundTransfer_;

@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_CLIENTSERVICEPTR_H)
-#define CETTY_SERVICE_CLIENTSERVICEPTR_H
+#if !defined(CETTY_SERVICE_SERVICEMESSAGETRAITS_H)
+#define CETTY_SERVICE_SERVICEMESSAGETRAITS_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,15 +17,20 @@
  * under the License.
  */
 
-#include <boost/shared_ptr.hpp>
-
 namespace cetty {
 namespace service {
 
+template<typename T>
+struct ServiceMessageTraits {
+    enum {
+        HAS_SERIAL_NUMBER = false
+    };
+};
+
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_CLIENTSERVICEPTR_H)
+#endif //#if !defined(CETTY_SERVICE_SERVICEMESSAGETRAITS_H)
 
 // Local Variables:
 // mode: c++

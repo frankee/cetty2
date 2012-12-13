@@ -46,7 +46,6 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class UserEvent;
 class ChannelPipelineException;
 
 /**
@@ -466,12 +465,20 @@ public:
      */
     ChannelHandlerContext* first() const;
 
+    ChannelHandlerContext* head() const {
+        return head_;
+    }
+
     /**
      * Returns the last {@link ChannelHandler} in this pipeline.
      *
      * @return the last handler.  <tt>NULL</tt> if this pipeline is empty.
      */
     ChannelHandlerContext* last() const;
+
+    ChannelHandlerContext* tail() const {
+        return tail_;
+    }
 
     /**
      * Returns the {@link ChannelHandler} with the specified name in this
@@ -481,6 +488,15 @@ public:
      *         <tt>NULL</tt> if there's no such handler in this pipeline.
      */
     ChannelHandlerContext* find(const std::string& name) const;
+
+    void setHead(ChannelHandlerContext* ctx);
+
+    template<typename T>
+    void setHead(const std::string& name,
+        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+            return setHead(
+                new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+    }
 
 public:
     void fireChannelOpen();
@@ -637,6 +653,7 @@ public:
     void notifyHandlerException(const Exception& e);
 
     ChannelFuturePtr newFuture();
+    const ChannelFuturePtr& voidFuture() const;
 
     /**
      * Returns the {@link std::string} representation of this pipeline.
@@ -650,13 +667,13 @@ protected:
     bool callAfterRemove(ChannelHandlerContext* ctx);
 
 private:
-    bool initWith(ChannelHandlerContext* ctx);
-
     bool duplicated(const std::string& name) {
         return contexts_.find(name) != contexts_.end();
     }
 
-    void onPipelineChanged();
+    void firePipelineChanged() {
+
+    }
 
 private:
     typedef std::map<std::string, ChannelHandlerContext*> ContextMap;
@@ -669,11 +686,10 @@ private:
 
     ChannelWeakPtr channel_;
     EventLoopPtr eventLoop_;
-
+    ChannelFuturePtr voidFuture_;
+    
     ChannelHandlerContext* head_;
     ChannelHandlerContext* tail_;
-
-    mutable boost::recursive_mutex mutex_;
 };
 
 inline
@@ -685,6 +701,12 @@ inline
 const EventLoopPtr& ChannelPipeline::eventLoop() const {
     return eventLoop_;
 }
+
+inline
+    const ChannelFuturePtr& ChannelPipeline::voidFuture() const {
+        return voidFuture_;
+}
+    
 
 }
 }

@@ -68,6 +68,12 @@ using namespace cetty::util;
 
 class LengthFieldPrepender : private boost::noncopyable {
 public:
+    typedef MessageToBufferEncoder<LengthFieldPrepender, ChannelBufferPtr> Encoder;
+
+    typedef Encoder::Context Context;
+    typedef Encoder::Handler Handler;
+    typedef Encoder::HandlerPtr HandlerPtr;
+
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 
 public:
@@ -123,6 +129,10 @@ public:
                          const std::string& header,
                          ChecksumFunction checksumFunction);
 
+    void registerTo(Context& ctx) {
+        encoder_.registerTo(ctx);
+    }
+
 private:
     void init();
     void validateParameters();
@@ -151,7 +161,7 @@ private:
     int  checksumCalcOffset_;
     ChecksumFunction checksumFunction_;
 
-    MessageToBufferEncoder<LengthFieldPrepender, ChannelBufferPtr> encoder_;
+    Encoder encoder_;
 };
 
 }

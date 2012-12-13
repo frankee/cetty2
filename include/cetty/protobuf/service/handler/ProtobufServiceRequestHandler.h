@@ -27,15 +27,20 @@ namespace service {
 
 using namespace cetty::protobuf::service;
 
-template<>
-int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::getId() const {
-    return request->getId(); //future->getResponse()->getId();
-}
-
-template<>
-void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(int64_t id) {
-    request->setId(id);
-}
+// template<>
+// int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::id() const {
+//     return request->id(); //future->getResponse()->getId();
+// }
+// 
+// template<>
+// void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(int64_t id) {
+//     request->setId(id);
+// }
+// 
+// template<>
+// void ClientService<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::doInitialize() {
+// 
+// }
 
 }
 }
@@ -51,7 +56,7 @@ using namespace cetty::protobuf::service;
 typedef OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceCall;
 typedef boost::intrusive_ptr<ProtobufServiceCall> ProtobufServiceCallPtr;
 
-typedef ServiceRequestHandler<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceRequestHandler;
+typedef ClientServiceRequestAdaptor<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceRequestHandler;
 
 }
 }

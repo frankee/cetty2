@@ -46,7 +46,6 @@ public:
 
 private:
     void init();
-    ChannelPipelinePtr createHttpServicePipeline();
 };
 
 }

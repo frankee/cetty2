@@ -62,7 +62,7 @@ void ProtobufServiceMessageHandler::messageUpdated(ChannelHandlerContext& ctx) {
 
 void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& msg) {
-    const ServiceMessage& rpc = msg->getServiceMessage();
+    const ServiceMessage& rpc = msg->serviceMessage();
 
     if (rpc.type() == cetty::protobuf::service::REQUEST) {
         const ProtobufServicePtr& service =
@@ -76,7 +76,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
 
         if (method) {
             service->CallMethod(method,
-                                msg->getPayload(),
+                                msg->payload(),
                                 service->GetResponsePrototype(method)->New(),
                                 //MessagePtr(),
                                 boost::bind(&ProtobufServiceMessageHandler::doneCallback,
@@ -106,8 +106,8 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
     ProtobufServiceMessagePtr message(
         new ProtobufServiceMessage(RESPONSE,
                                    id,
-                                   req->getService(),
-                                   req->getMethod(),
+                                   req->service(),
+                                   req->method(),
                                    response));
 
     context_->outboundTransfer()->write(message, ctx.newFuture());

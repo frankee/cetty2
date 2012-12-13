@@ -55,7 +55,8 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <boost/bind.hpp>
-#include <cetty/service/ClientServicePtr.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/service/ServiceFuture.h>
 #include <cetty/service/TypeCastServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
@@ -76,8 +77,8 @@ namespace cetty {
 namespace protobuf {
 namespace service {
 
+using namespace cetty::channel;
 using namespace cetty::service;
-
 
 // template<typename To, typename From>     // use like this: down_cast<T*>(foo);
 // inline To bare_point_down_cast(const From& f) {                   // so we only accept pointers
@@ -100,12 +101,12 @@ using namespace cetty::service;
 //
 class ProtobufClientServiceAdaptor {
 public:
-    ProtobufClientServiceAdaptor(const ClientServicePtr& service);
+    ProtobufClientServiceAdaptor(const ChannelPtr& channel);
     ~ProtobufClientServiceAdaptor();
 
     template<typename RepT>
     RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return static_cast<RepT>(from->getPayload());
+        return static_cast<RepT>(from->payload());
     }
 
     template<typename ReqT, typename RepT>
@@ -123,8 +124,8 @@ public:
                             _1))));
     }
 
-    const ClientServicePtr& getService() {
-        return service;
+    ChannelPtr channel() {
+        return channel_.lock();
     }
 
 private:
@@ -138,7 +139,7 @@ private:
                     const ProtobufServiceFuturePtr& future);
 
 private:
-    ClientServicePtr service;
+    ChannelWeakPtr channel_;
 };
 
 }

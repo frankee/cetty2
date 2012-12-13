@@ -19,6 +19,7 @@
 
 #include <deque>
 #include <cetty/Types.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
@@ -43,9 +44,6 @@ namespace service {
 namespace handler {
 using namespace cetty::channel;
 
-class ProtobufServiceMessageHandler;
-typedef boost::shared_ptr<ProtobufServiceMessageHandler> ProtobufServiceMessageHandlerPtr;
-
 class ProtobufServiceMessageHandler : private boost::noncopyable {
 public:
     typedef ChannelMessageContainer<ProtobufServiceMessagePtr,
@@ -62,6 +60,9 @@ public:
             VoidMessageContainer,
             VoidMessageContainer,
             InboundContainer> Context;
+
+    typedef Context::Handler Handler;
+    typedef Context::HandlerPtr HandlerPtr;
 
 public:
     ProtobufServiceMessageHandler() {}

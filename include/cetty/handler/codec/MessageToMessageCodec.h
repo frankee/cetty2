@@ -41,6 +41,9 @@ public:
             ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
             ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > Context;
 
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+
     typedef MessageToMessageDecoder<H, InboundIn, InboundOut, Context> MessageDecoder;
     typedef MessageToMessageEncoder<H, OutboundIn, OutboundOut, Context> MessageEncoder;
 
@@ -51,6 +54,9 @@ public:
     typedef typename MessageEncoder::OutboundContainer OutboundContainer;
 
 public:
+    MessageToMessageCodec() {
+    }
+
     MessageToMessageCodec(const Decoder& decoder, const Encoder& encoder)
         : decoder_(decoder),
           encoder_(encoder) {

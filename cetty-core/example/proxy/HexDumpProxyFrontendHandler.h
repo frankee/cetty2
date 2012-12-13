@@ -22,10 +22,8 @@
  */
 
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 
-
-class HexDumpProxyFrontendHandler : public ChannelInboundBufferHandlerAdapter<> {
+class HexDumpProxyFrontendHandler : private boost::noncopyable {
 public:
     HexDumpProxyFrontendHandler(const std::string& remoteHost,
                                 int remotePort)

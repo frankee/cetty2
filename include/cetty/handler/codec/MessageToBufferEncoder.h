@@ -43,7 +43,7 @@ using namespace cetty::channel;
 
 template<typename H,
          typename OutboundIn,
-         typename Context = ChannelMessageHandlerContext<H,
+         typename Ctx = ChannelMessageHandlerContext<H,
          VoidMessage,
          VoidMessage,
          OutboundIn,
@@ -54,6 +54,7 @@ template<typename H,
          ChannelBufferContainer> >
 class MessageToBufferEncoder : public boost::noncopyable {
 public:
+    typedef Ctx Context;
     typedef MessageToBufferEncoder<H, OutboundIn, Context> Self;
 
     typedef typename ChannelHandlerWrapper<H>::Handler Handler;
@@ -64,7 +65,7 @@ public:
             ChannelBufferPtr const&)> Encoder;
 
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
-    typedef typename OutboundContainer::MessageQueue MessageQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
 
     typename ChannelBufferContainer NextOutboundContainer;
 
@@ -93,14 +94,14 @@ public:
                                 _2));
 
         ctx.setPipelineChangedCallback(boost::bind(
-            &Self::checkNextBufferAccumulated,
-            this,
-            _1));
+                                           &Self::checkNextBufferAccumulated,
+                                           this,
+                                           _1));
 
         ctx.setChannelActiveCallback(boost::bind(
-            &Self::checkNextBufferAccumulated,
-            this,
-            _1));
+                                         &Self::checkNextBufferAccumulated,
+                                         this,
+                                         _1));
     }
 
     void setEncoder(const Encoder& encoder) {
@@ -110,6 +111,7 @@ public:
 private:
     void checkNextBufferAccumulated(ChannelHandlerContext& ctx) {
         ChannelBufferContainer* nextContainer = transfer_->nextContainer();
+
         if (nextContainer && nextContainer->accumulated()) {
             nextOutboundBuffer_ = nextContainer->getMessages();
         }
@@ -120,7 +122,7 @@ private:
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
         bool notify = false;
-        MessageQueue& outboundQueue = container_->getMessages();
+        OutboundQueue& outboundQueue = container_->getMessages();
 
         while (!outboundQueue.empty()) {
             OutboundIn& msg = outboundQueue.front();

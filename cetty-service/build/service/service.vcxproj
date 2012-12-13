@@ -95,10 +95,8 @@
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp" />
-    <ClCompile Include="..\..\src\cetty\service\ClientService.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h" />
@@ -106,12 +104,14 @@
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageTraits.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />

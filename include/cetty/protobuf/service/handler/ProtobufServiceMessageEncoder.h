@@ -20,37 +20,38 @@
 #include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/handler/codec/MessageToMessageEncoder.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-
-namespace google {
-namespace protobuf {
-class Message;
-}
-}
+#include <cetty/protobuf/service/handler/MessageCodec.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
-using namespace cetty::buffer;
 using namespace cetty::handler::codec;
-using namespace cetty::protobuf::service;
 
 class ProtobufServiceMessageEncoder {
 public:
-    ProtobufServiceMessageEncoder() {}
-    virtual ~ProtobufServiceMessageEncoder() {}
+    typedef MessageToMessageEncoder<ProtobufServiceMessageEncoder,
+        ProtobufServiceMessagePtr,
+        ChannelBufferPtr> Encoder;
 
-    static void encodeMessage(const ChannelBufferPtr& buffer,
-                              const ProtobufServiceMessagePtr& message);
+    typedef Encoder::Context Context;
+    typedef Encoder::Handler Handler;
+    typedef Encoder::HandlerPtr HandlerPtr;
 
-protected:
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-        const ProtobufServiceMessagePtr& msg);
+public:
+    ProtobufServiceMessageEncoder()
+        : encoder_(boost::bind(&MessageCodec::encode, _1, _2)) {
+    }
+
+    ~ProtobufServiceMessageEncoder() {}
+
+    void registerTo(Context& ctx) {
+        encoder_.registerTo(ctx);
+    }
 
 private:
-    static void encodeProtobufMessage(const ChannelBufferPtr& buffer,
-                                      const google::protobuf::Message& message);
+    Encoder encoder_;
 };
 
 }

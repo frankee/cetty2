@@ -61,7 +61,7 @@ GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
     const ProtobufServiceMessagePtr& rep,
     const ChannelFuturePtr& future) {
     std::string jobHandle = req->getParameters().front();
-    ChannelBufferPtr buffer = Unpooled::buffer(rep->getMessageSize() + 8);
+    ChannelBufferPtr buffer = Unpooled::buffer(rep->messageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
     ProtobufServiceMessageEncoder::encodeMessage(buffer, rep);

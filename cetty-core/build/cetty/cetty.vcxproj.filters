@@ -344,6 +344,9 @@
     <ClCompile Include="..\..\src\cetty\handler\codec\http\HttpResponseEncoder.cpp">
       <Filter>handler\codec\http</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\CurrentThread.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">
@@ -884,6 +887,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpResponsePtr.h">
       <Filter>handler\codec\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageFilter.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTailLinkContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHeadLinkContext.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\MetaProgramming.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

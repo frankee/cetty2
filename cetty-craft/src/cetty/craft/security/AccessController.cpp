@@ -33,8 +33,9 @@ using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 
 void AccessController::filter(ChannelHandlerContext& ctx,
-                              const ProtobufServiceMessagePtr& req) {
-    Message* request = req->getRequest();
+                              const ProtobufServiceMessagePtr& req,
+                              const FilterCallback& filterCallback) {
+    Message* request = req->request();
     const google::protobuf::Descriptor* descriptor = request->GetDescriptor();
 
     int fieldCnt = descriptor->field_count();
@@ -49,8 +50,8 @@ void AccessController::filter(ChannelHandlerContext& ctx,
             const Authority* authority =
                 internal::down_cast<Authority const*, Message const>(&msg);
 
-            const std::string& service = req->getService();
-            const std::string& method = req->getMethod();
+            const std::string& service = req->service();
+            const std::string& method = req->method();
 
             if (authority) {
                 std::string permission(service);
@@ -81,8 +82,8 @@ void AccessController::onAuthorized(bool permitted,
                                     ChannelHandlerContext& ctx,
                                     const ProtobufServiceMessagePtr& req) {
     if (permitted) {
-        inboundTransfer.unfoldAndAdd(req);
-        ctx.fireMessageUpdated();
+        //inboundTransfer.unfoldAndAdd(req);
+        //ctx.fireMessageUpdated();
     }
     else {
         //outboundTransfer.unfoldAndAdd();

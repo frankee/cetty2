@@ -109,7 +109,7 @@ public:
      *         <tt>NULL</tt> if succeeded or this future is not
      *         completed yet.
      */
-    const Exception* getCause() const;
+    const Exception* cause() const;
 
     // If true, indicates that the client canceled the RPC, so the server may
     // as well give up on replying to it.  The server should still call the
@@ -129,10 +129,10 @@ public:
      *         already marked as either a success or a failure.
      */
     virtual bool setSuccess() {
-		std::size_t j = callbacks.size();
+		std::size_t j = callbacks_.size();
 		for (std::size_t i = 0; i < j; ++i)
 		{
-			(callbacks[i])(*this, response);
+			(callbacks_[i])(*this, response_);
 		}
 
         //ConstCallbacksIterator itr;
@@ -165,14 +165,12 @@ public:
         return setFailure(cause);
     }
 
-
-    virtual void setResponse(const T& response) {
-        this->response = response;
+    virtual const T& response() const {
+        return this->response_;
     }
 
-
-    virtual const T& getResponse() const {
-        return this->response;
+    virtual void setResponse(const T& response) {
+        this->response_ = response;
     }
 
     // Asks that the given callback be called when the RPC is canceled.  The
@@ -194,7 +192,7 @@ public:
      * life circle, otherwise, the ChannelFutureListener should.
      */
     void addListener(const CompletedCallback& listener) {
-        callbacks.push_back(listener);
+        callbacks_.push_back(listener);
     }
 
     /**
@@ -237,13 +235,13 @@ public:
 protected:
     typedef boost::function0<void> StartCancelCallback;
     void setStartCancelCallback(const StartCancelCallback& callback) {
-        startCancelCallback = callback;
+        startCancelCallback_ = callback;
     }
 
 private:
-    T response;
-    StartCancelCallback startCancelCallback;
-    std::deque<CompletedCallback> callbacks;
+    T response_;
+    StartCancelCallback startCancelCallback_;
+    std::deque<CompletedCallback> callbacks_;
 };
 
 }

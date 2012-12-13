@@ -36,7 +36,6 @@
 
 #endif
 
-
 namespace cetty {
 namespace service {
 namespace builder {
@@ -133,19 +132,19 @@ static void createPidFile(const char* pidfile) {}
 #endif
 
 ServerBuilder::ServerBuilder() {
-    ConfigCenter::instance().configure(&config);
+    ConfigCenter::instance().configure(&config_);
     init();
 }
 
 ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
-    ConfigCenter::instance().configure(&config);
-    config.parentThreadCount = parentThreadCnt;
-    config.childThreadCount = childThreadCnt;
+    ConfigCenter::instance().configure(&config_);
+    config_.parentThreadCount = parentThreadCnt;
+    config_.childThreadCount = childThreadCnt;
     init();
 }
 
 ServerBuilder::ServerBuilder(const ServerBuilderConfig& config)
-    : config(config) {
+    : config_(config) {
     init();
 }
 
@@ -154,13 +153,13 @@ ServerBuilder::~ServerBuilder() {
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const Channel::Initializer& pipeline,
+                                const ChildInitializer& initializer,
                                 int port) {
-    return build(name, pipeline, std::string(), port);
+    return build(name, initializer, std::string(), port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const Channel::Initializer& pipeline,
+                                const ChildInitializer& initializer,
                                 const std::string& host,
                                 int port) {
     if (name.empty()) {
@@ -168,10 +167,10 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return ChannelPtr();
     }
 
-    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(
-        parentEventLoopPool, childEventLoopPool);
+    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(parentEventLoopPool_,
+            childEventLoopPool_);
 
-    bootstraps.insert(std::make_pair(name, bootstrap));
+    bootstraps_.insert(std::make_pair(name, bootstrap));
 
     //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
     //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
@@ -179,7 +178,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
     bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setChildInitializer(pipeline);
+    bootstrap->setChildInitializer(initializer);
 
     ChannelFuturePtr future;
 
@@ -191,7 +190,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (future->await()->isSuccess()) {
-        return future->sharedChannel();
+        return future->channel();
     }
     else {
         return ChannelPtr();
@@ -199,36 +198,38 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name, int port) {
-//     ChannelPipelinePtr pipeline = getPipeline(name);
-// 
-//     if (pipeline) {
-//         return build(name, pipeline, port);
-//     }
-// 
-//     return ChannelPtr();
+    ChildInitializers::const_iterator itr = childInitializers_.find(name);
 
-    return ChannelPtr();
+    if (itr == childInitializers_.end()) {
+        LOG_WARN << "has not found such server: "
+                 << name
+                 << " in builder registers, should registerChildInitializer first.";
+
+        return ChannelPtr();
+    }
+
+    return build(name, itr->second, port);
 }
 
 int ServerBuilder::init() {
-    if (config.deamonize) {
+    if (config_.deamonize) {
         daemonize();
     }
 
-    if (!parentEventLoopPool) {
-        parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
+    if (!parentEventLoopPool_) {
+        parentEventLoopPool_ = new AsioServicePool(config_.parentThreadCount);
     }
 
-    if (!childEventLoopPool) {
-        if (config.childThreadCount) {
-            childEventLoopPool = new AsioServicePool(config.childThreadCount);
+    if (!childEventLoopPool_) {
+        if (config_.childThreadCount) {
+            childEventLoopPool_ = new AsioServicePool(config_.childThreadCount);
         }
         else {
-            childEventLoopPool = parentEventLoopPool;
+            childEventLoopPool_ = parentEventLoopPool_;
         }
     }
 
-    Logger::logLevel(LogLevel::parseFrom(config.logLevel));
+    Logger::logLevel(LogLevel::parseFrom(config_.logLevel));
 
     return 0;
 }
@@ -240,14 +241,14 @@ void ServerBuilder::deinit() {
 void ServerBuilder::stop() {
     std::map<std::string, ServerBootstrap*>::iterator itr;
 
-    for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
+    for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
         itr->second->shutdown();
     }
 }
 
 void ServerBuilder::waitingForExit() {
-    if (config.deamonize) {
-        createPidFile(config.pidfile.c_str());
+    if (config_.deamonize) {
+        createPidFile(config_.pidfile.c_str());
     }
     else {
         printf("Server is running...\n");
@@ -268,46 +269,61 @@ void ServerBuilder::waitingForExit() {
 }
 
 void ServerBuilder::buildAll() {
-//     std::size_t j = config.servers.size();
-// 
-//     for (std::size_t i = 0; i < j; ++i) {
-//         const ServerBuilderConfig::Server& server = *config.servers[i];
-// 
-//         if (!server.pipeline.empty()) {
-//             ChannelPipelinePtr pipeline = getPipeline(server.pipeline);
-// 
-//             if (server.host.empty()) {
-//                 build(server.pipeline, pipeline, server.port);
-//             }
-//             else {
-//                 build(server.pipeline, pipeline, server.host, server.port);
-//             }
-//         }
-//         else {
-//             LOG_WARN << "has no pipeline config, will not start the server.";
-//         }
-//     }
+    std::size_t j = config_.servers.size();
+
+    for (std::size_t i = 0; i < j; ++i) {
+        const ServerBuilderConfig::Server& server = *config_.servers[i];
+        const std::string& name = server.name;
+
+        if (name.empty()) {
+            LOG_WARN << "has not config the server name, will not start the server.";
+            continue;
+        }
+
+        if (server.port == 0) {
+            LOG_WARN << "config the server: "
+                     << name
+                     << " , which port is 0, will skip it.";
+            continue;
+        }
+
+        ChildInitializers::const_iterator itr
+            = childInitializers_.find(server.name);
+
+        if (itr == childInitializers_.end()) {
+            LOG_WARN << "the server: "
+                     << name
+                     << "has not register to the builder, should register first.";
+            continue;
+        }
+
+        if (server.host.empty()) {
+            build(name, itr->second, server.port);
+        }
+        else {
+            build(name, itr->second, server.host, server.port);
+        }
+    }
 }
 
 void ServerBuilder::getBuiltServers(std::map<std::string, ChannelPtr>* names) {
 
 }
 
-// void ServerBuilder::registerPipeline(const std::string& name,
-//                                      const ChannelPipelinePtr& pipeline) {
-//     if (!name.empty()) {
-//         pipelines[name] = pipeline;
-//     }
-// }
+void ServerBuilder::registerChildInitializer(const std::string& name,
+        const ChildInitializer& initializer) {
+    if (!name.empty()) {
+        childInitializers_[name] = initializer;
+    }
+}
 
-// void ServerBuilder::unregisterPipeline(const std::string& name) {
-//     std::map<std::string, ChannelPipelinePtr>::iterator itr =
-//         pipelines.find(name);
-// 
-//     if (itr != pipelines.end()) {
-//         pipelines.erase(itr);
-//     }
-// }
+void ServerBuilder::unregisterChildInitializer(const std::string& name) {
+    ChildInitializers::iterator itr = childInitializers_.find(name);
+
+    if (itr != childInitializers_.end()) {
+        childInitializers_.erase(itr);
+    }
+}
 
 
 }

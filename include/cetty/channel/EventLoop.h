@@ -27,10 +27,13 @@
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 
+#include <cetty/util/CurrentThread.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
+
+using namespace cetty::util;
 
 class EventLoop : public cetty::util::ReferenceCounter<EventLoop, int> {
 public:
@@ -41,10 +44,10 @@ public:
 
     virtual ~EventLoop();
 
-    const boost::thread::id& getThreadId() const;
-    void setThreadId(const boost::thread::id& id);
+    const ThreadId& threadId() const;
+    void setThreadId(const ThreadId& id);
 
-    const EventLoopPoolPtr& getEventLoopPool() const;
+    const EventLoopPoolPtr& eventLoopPool() const;
 
     bool inLoopThread() const;
 
@@ -63,28 +66,28 @@ private:
     EventLoop& operator=(const EventLoop&);
 
 private:
-    boost::thread::id threadId;
-    EventLoopPoolPtr pool;
+    ThreadId threadId_;
+    EventLoopPoolPtr pool_;
 };
 
 inline
-const boost::thread::id& EventLoop::getThreadId() const {
-    return threadId;
+const ThreadId& EventLoop::threadId() const {
+    return threadId_;
 }
 
 inline
-void EventLoop::setThreadId(const boost::thread::id& id) {
-    threadId = id;
+void EventLoop::setThreadId(const ThreadId& id) {
+    threadId_ = id;
 }
 
 inline
 bool EventLoop::inLoopThread() const {
-    return threadId == boost::this_thread::get_id();
+    return threadId_ == CurrentThread::id();
 }
 
 inline
-const EventLoopPoolPtr& EventLoop::getEventLoopPool() const {
-    return pool;
+const EventLoopPoolPtr& EventLoop::eventLoopPool() const {
+    return pool_;
 }
 
 }

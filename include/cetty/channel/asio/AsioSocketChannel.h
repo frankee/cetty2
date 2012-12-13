@@ -52,25 +52,6 @@ class AsioServerSocketChannel;
 
 class AsioSocketChannel : public cetty::channel::Channel {
 public:
-    AsioSocketChannel(const EventLoopPtr& eventLoop);
-
-    AsioSocketChannel(const ChannelPtr& parent,
-                      const EventLoopPtr& eventLoop);
-
-    virtual ~AsioSocketChannel();
-
-    boost::asio::ip::tcp::socket& tcpSocket() {
-        return tcpSocket_;
-    }
-
-    const AsioServicePtr& ioService() {
-        return ioService_;
-    }
-
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
-
-public:
     typedef ChannelMessageHandlerContext<
         AsioSocketChannel*,
         VoidMessage,
@@ -82,35 +63,31 @@ public:
         ChannelBufferContainer,
         VoidMessageContainer> Context;
 
-    void registerTo(Context& context) {
-        Channel::registerTo(context);
+public:
+    AsioSocketChannel(const EventLoopPtr& eventLoop);
 
-        context.setConnectFunctor(boost::bind(
-                                      &AsioSocketChannel::doConnect,
-                                      this,
-                                      _1,
-                                      _2,
-                                      _3,
-                                      _4));
+    AsioSocketChannel(int id,
+        const EventLoopPtr& eventLoop);
 
-        context.setFlushFunctor(boost::bind(
-                                    &AsioSocketChannel::doFlush,
-                                    this,
-                                    _1,
-                                    _2));
+    AsioSocketChannel(const ChannelPtr& parent,
+                      const EventLoopPtr& eventLoop);
 
-        context.setAfterAddCallback(boost::bind(
-            &AsioSocketChannel::afterAdd,
-            this,
-            _1));
-    }
+    AsioSocketChannel(int id,
+        const ChannelPtr& parent,
+        const EventLoopPtr& eventLoop);
+
+    virtual ~AsioSocketChannel();
+
+    boost::asio::ip::tcp::socket& tcpSocket();
+
+    const AsioServicePtr& ioService();
+
+    virtual bool isOpen() const;
+    virtual bool isActive() const;
+
+    void registerTo(Context& context);
 
 private:
-    void afterAdd(ChannelHandlerContext& ctx) {
-        bridgeContainer_ =
-            ctx.outboundMessageContainer<ChannelBufferContainer>();
-    }
-
     virtual bool setClosed();
 
     virtual void doBind(const SocketAddress& localAddress);
@@ -122,80 +99,11 @@ private:
     void doConnect(ChannelHandlerContext& ctx,
                    const SocketAddress& remoteAddress,
                    const SocketAddress& localAddress,
-                   const ChannelFuturePtr& future) {
+                   const ChannelFuturePtr& future);
 
-        if (!isOpen()) {
-            return;
-        }
-
-        try {
-            //if (connectFuture != null) {
-            //    throw new IllegalStateException("connection attempt already made");
-            //}
-
-            //connectFuture = future;
-
-            doConnect(remoteAddress, localAddress, future);
-
-            // Schedule connect timeout.
-            int connectTimeoutMillis = config().connectTimeout();
-
-            if (connectTimeoutMillis > 0) {
-                eventLoop()->runAfter(connectTimeoutMillis, boost::bind(
-                                         &AsioSocketChannel::handleConnectTimeout,
-                                         this));
-            }
-
-        }
-        catch (const std::exception& t) {
-            //future.setFailure(t);
-            //pipeline().fireExceptionCaught(t);
-            closeIfClosed();
-        }
-    }
-
-    void handleConnectTimeout() {
-        //         if (connectTimeoutException == null) {
-        //             connectTimeoutException = new ConnectException("connection timed out");
-        //         }
-        //
-        //         ChannelFuture connectFuture = AbstractAioChannel.this.connectFuture;
-        //
-        //         if (connectFuture != null &&
-        //             connectFuture.setFailure(connectTimeoutException)) {
-        //                 pipeline().fireExceptionCaught(connectTimeoutException);
-        //                 close(voidFuture());
-        //         }
-    }
-
-    void handleConnectFailed() {
-        //         connectFuture.setFailure(t);
-        //         pipeline().fireExceptionCaught(t);
-        //         closeIfClosed();
-    }
-
-    void handleConnectSuccess() {
-        //         assert eventLoop().inEventLoop();
-        //         assert connectFuture != null;
-        //
-        //         try {
-        //             boolean wasActive = isActive();
-        //             connectFuture.setSuccess();
-        //
-        //             if (!wasActive && isActive()) {
-        //                 pipeline().fireChannelActive();
-        //             }
-        //         }
-        //         catch (Throwable t) {
-        //             connectFuture.setFailure(t);
-        //             pipeline().fireExceptionCaught(t);
-        //             closeIfClosed();
-        //         } finally {
-        //
-        //             connectTimeoutFuture.cancel(false);
-        //             connectFuture = null;
-        //         }
-    }
+    void handleConnectTimeout();
+    void handleConnectFailed();
+    void handleConnectSuccess();
 
     void doConnect(const SocketAddress& remoteAddress,
                    const SocketAddress& localAddress,
@@ -222,9 +130,6 @@ private:
                        const ChannelException& e);
 
 private:
-    void init();
-
-private:
     friend class AsioWriteOperationQueue;
     friend class AsioServerSocketChannel;
     friend class AsioSocketChannelSinkHandler;
@@ -246,6 +151,16 @@ private:
     AsioHandlerAllocator<int> readAllocator_;
     AsioHandlerAllocator<int> writeAllocator_;
 };
+
+inline
+boost::asio::ip::tcp::socket& AsioSocketChannel::tcpSocket() {
+    return tcpSocket_;
+}
+
+inline
+const AsioServicePtr& AsioSocketChannel::ioService() {
+    return ioService_;
+}
 
 }
 }

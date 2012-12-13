@@ -19,8 +19,10 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/DefaultChannelFuture.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/channel/ChannelPipelineException.h>
 #include <cetty/channel/ChannelHandlerLifeCycleException.h>
 
@@ -38,6 +40,25 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
+class DummyHandler : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandlerContext<DummyHandler,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+
+    typedef ChannelHandlerWrapper<DummyHandler>::Handler Handler;
+    typedef ChannelHandlerWrapper<DummyHandler>::HandlerPtr HandlerPtr;
+
+public:
+    void registerTo(Context& ctx) {}
+};
+
 ChannelPipeline::ChannelPipeline(const ChannelPtr& channel)
     : firedChannelActive_(false),
       fireMessageUpdatedOnActivation_(false),
@@ -45,11 +66,43 @@ ChannelPipeline::ChannelPipeline(const ChannelPtr& channel)
       eventLoop_(channel->eventLoop()),
       head_(),
       tail_() {
+
+    head_ = tail_ = new DummyHandler::Context("dummyHeader",
+            DummyHandler::HandlerPtr(new DummyHandler));
+
+    voidFuture_ = new VoidChannelFuture(channel_);
 }
 
 ChannelPipeline::~ChannelPipeline() {
-    LOG_DEBUG << "ChannelPipeline dectr";
+    LOG_DEBUG << "ChannelPipeline dctr";
+
     STLDeleteValues(&contexts_);
+
+    if (head_) {
+        delete head_;
+    }
+}
+
+void ChannelPipeline::setHead(ChannelHandlerContext* ctx) {
+    ChannelHandlerContext* newHead = ctx;
+
+    if (!newHead) {
+        newHead = new DummyHandler::Context("dummyHeader",
+            DummyHandler::HandlerPtr(new DummyHandler));
+    }
+
+    newHead->initialize(this);
+
+    if (head_) {
+        ChannelHandlerContext* headNext = head_->next();
+        delete head_;
+        head_ = ctx;
+        head_->setNext(headNext);
+        headNext->setPrev(head_);
+    }
+    else {
+        head_ = newHead;
+    }
 }
 
 bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
@@ -63,23 +116,20 @@ bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
         return false;
     }
 
-    if (contexts_.empty()) {
-        return initWith(context);
-    }
-
     if (duplicated(name)) {
         return false;
     }
 
-    ChannelHandlerContext* oldHead = head_;
     context->initialize(this);
-
     callBeforeAdd(context);
 
-    oldHead->setPrev(context);
-    head_ = context;
+    ChannelHandlerContext* nextCtx = head_->next();
 
-    context->setNext(oldHead);
+    if (nextCtx) {
+        nextCtx->setPrev(context);
+    }
+
+    head_->setNext(context);
 
     contexts_[name] = context;
 
@@ -99,24 +149,18 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
         return false;
     }
 
-    context->initialize(this);
-
-    if (contexts_.empty()) {
-        return initWith(context);
-    }
-
     if (duplicated(name)) {
         return false;
     }
 
-    ChannelHandlerContext* oldTail = this->tail_;
-
+    context->initialize(this);
     callBeforeAdd(context);
 
+    ChannelHandlerContext* oldTail = tail_;
     oldTail->setNext(context);
-    this->tail_ = context;
-
     context->setPrev(oldTail);
+
+    tail_ = context;
 
     contexts_[name] = context;
 
@@ -144,10 +188,6 @@ bool ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* 
 
     if (duplicated(newName)) {
         return false;
-    }
-
-    if (ctx == this->head_) {
-        return addFirst(context);
     }
 
     context->initialize(this);
@@ -186,10 +226,6 @@ bool ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* c
         return false;
     }
 
-    if (ctx == this->tail_) {
-        return addLast(context);
-    }
-
     context->initialize(this);
     callBeforeAdd(context);
 
@@ -214,91 +250,34 @@ void ChannelPipeline::remove(const std::string& name) {
         return;
     }
 
-    if (head_ == tail_) {
-        head_ = tail_ = NULL;
-        contexts_.clear();
-    }
-    else if (ctx == head_) {
-        return removeFirst();
-    }
-    else if (ctx == tail_) {
-        return removeLast();
-    }
-    else {
-        callBeforeRemove(ctx);
+    callBeforeRemove(ctx);
 
-        ChannelHandlerContext* prev = ctx->prev();
-        ChannelHandlerContext* next = ctx->next();
+    ChannelHandlerContext* prev = ctx->prev();
+    ChannelHandlerContext* next = ctx->next();
 
-        prev->setNext(next);
-        next->setPrev(prev);
+    prev->setNext(next);
+    next->setPrev(prev);
 
-        contexts_.erase(ctx->name());
+    contexts_.erase(ctx->name());
 
-        callAfterRemove(ctx);
-    }
+    callAfterRemove(ctx);
 
     delete ctx;
 }
 
 void ChannelPipeline::removeFirst() {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex_);
-
-    if (contexts_.empty()) {
-        LOG_WARN << "contexts is empty";
-        return;
+    if (head_->next()) {
+        remove(head_->next()->name());
     }
-
-    ChannelHandlerContext* oldHead = head_;
-
-    if (!oldHead) {
-        LOG_WARN << "head is null";
-        return;
-    }
-
-    callBeforeRemove(oldHead);
-
-    if (!oldHead->next()) {
-        head_ = tail_ = NULL;
-        contexts_.clear();
-    }
-    else {
-        oldHead->next()->setPrev(NULL);
-        head_ = oldHead->next();
-        contexts_.erase(oldHead->name());
-    }
-
-    callAfterRemove(oldHead);
-
-    delete oldHead;
 }
 
 void ChannelPipeline::removeLast() {
-    boost::lock_guard<boost::recursive_mutex> guard(mutex_);
-
-    if (contexts_.empty()) {
-        LOG_WARN << "contexts is empty";
-        return;
-    }
-
     ChannelHandlerContext* oldTail = tail_;
-
-    if (oldTail == NULL) {
-        LOG_WARN << "ChannelHandlerContext is null";
-        return;
-    }
-
     callBeforeRemove(oldTail);
 
-    if (!oldTail->prev()) {
-        this->head_ = this->tail_ = NULL;
-        contexts_.clear();
-    }
-    else {
-        oldTail->prev()->setNext(NULL);
-        this->tail_ = oldTail->prev();
-        contexts_.erase(oldTail->name());
-    }
+    oldTail->prev()->setNext(NULL);
+    tail_ = oldTail->prev();
+    contexts_.erase(oldTail->name());
 
     callAfterRemove(oldTail);
 
@@ -318,15 +297,10 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
         return false;
     }
 
-    if (ctx == head_) {
-        removeFirst();
-        return addFirst(context);
-    }
-    else if (ctx == tail_) {
+    if (ctx == tail_) {
         removeLast();
         return addLast(context);
     }
-
 
     const std::string& oldName = ctx->name();
     const std::string& newName = context->name();
@@ -511,24 +485,11 @@ bool ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     return false;
 }
 
-bool ChannelPipeline::initWith(ChannelHandlerContext* ctx) {
-    if (!ctx || ctx->name().empty()) {
-        return false;
-    }
-
-    ctx->initialize(this);
-    callBeforeAdd(ctx);
-
-    head_ = tail_ = ctx;
-    contexts_.clear();
-    contexts_[ctx->name()] = ctx;
-
-    callAfterAdd(ctx);
-    return true;
-}
-
 void ChannelPipeline::fireChannelOpen() {
-    if (head_) {
+    if (!head_->channelOpenCallback()) {
+        head_->fireChannelOpen();
+    }
+    else {
         head_->fireChannelOpen(*head_);
     }
 }
@@ -536,16 +497,17 @@ void ChannelPipeline::fireChannelOpen() {
 void ChannelPipeline::fireChannelActive() {
     firedChannelActive_ = true;
 
-    if (head_) {
+    if (!head_->channelActiveCallback()) {
+        head_->fireChannelActive();
+    }
+    else {
         head_->fireChannelActive(*head_);
     }
 
     if (fireMessageUpdatedOnActivation_) {
         fireMessageUpdatedOnActivation_ = false;
 
-        if (head_) {
-            head_->fireMessageUpdated(*head_);
-        }
+        head_->fireMessageUpdated(*head_);
     }
 }
 
@@ -554,19 +516,28 @@ void ChannelPipeline::fireChannelInactive() {
     // after deactivation, so it's safe not to revert the firedChannelActive flag here.
     // Also, all known transports never get re-activated.
     //firedChannelActive = false;
-    if (head_) {
+    if (!head_->channelInactiveCallback()) {
+        head_->fireChannelInactive();
+    }
+    else {
         head_->fireChannelInactive(*head_);
     }
 }
 
 void ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
-    if (head_) {
+    if (!head_->exceptionCallback()) {
+        head_->fireExceptionCaught(cause);
+    }
+    else {
         head_->fireExceptionCaught(*head_, cause);
     }
 }
 
 void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
-    if (head_) {
+    if (!head_->userEventCallback()) {
+        head_->fireUserEventTriggered(evt);
+    }
+    else {
         head_->fireUserEventTriggered(*head_, evt);
     }
 }
@@ -576,8 +547,10 @@ void ChannelPipeline::fireMessageUpdated() {
     //         fireMessageUpdatedOnActivation_ = true;
     //         return;
     //     }
-
-    if (head_) {
+    if (!head_->channelMessageUpdatedCallback()) {
+        head_->fireMessageUpdated();
+    }
+    else {
         head_->fireMessageUpdated(*head_);
     }
 }

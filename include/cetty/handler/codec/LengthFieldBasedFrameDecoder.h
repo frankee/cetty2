@@ -198,9 +198,14 @@ using namespace cetty::channel;
  * @see LengthFieldPrepender
  */
 class LengthFieldBasedFrameDecoder : private boost::noncopyable {
-
 public:
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
+
+    typedef BufferToMessageDecoder<LengthFieldBasedFrameDecoder, ChannelBufferPtr> Decoder;
+    
+    typedef Decoder::Context Context;
+    typedef Decoder::Handler Handler;
+    typedef Decoder::HandlerPtr HandlerPtr;
 
 public:
     /**
@@ -314,8 +319,11 @@ public:
 
     virtual ~LengthFieldBasedFrameDecoder() {}
 
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+    }
 
-protected:
+private:
     ChannelBufferPtr decode(ChannelHandlerContext& ctx,
                             const ChannelBufferPtr& in);
 
@@ -362,7 +370,7 @@ private:
     std::string header1_;
     std::string header2_;
 
-    BufferToMessageDecoder<LengthFieldBasedFrameDecoder, ChannelBufferPtr> decoder_;
+    Decoder decoder_;
 };
 
 }

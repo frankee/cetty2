@@ -47,7 +47,7 @@ using namespace cetty::channel;
 template<typename H,
          typename OutboundIn,
          typename OutboundOut,
-         typename Context = ChannelMessageHandlerContext<H,
+         typename C = ChannelMessageHandlerContext<H,
          VoidMessage,
          VoidMessage,
          OutboundIn,
@@ -58,10 +58,12 @@ template<typename H,
          ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > >
 class MessageToMessageEncoder :private boost::noncopyable {
 public:
+    typedef C Context;
+
     typedef MessageToMessageEncoder<H, OutboundIn, OutboundOut, Context> Self;
 
-    typedef ChannelHandlerWrapper<H>::Handler Handler;
-    typedef ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
     typedef typename OutboundContainer::MessageQueue OutboundMessageQueue;
@@ -116,13 +118,13 @@ public:
                     break;
                 }
 
-                if (!isEncodable(msg)) {
+                if (checker_ && !checker_(msg)) {
                     //ctx.nextOutboundMessageBuffer().add(msg);
                     outboundQueue.pop_front();
                     continue;
                 }
 
-                OutboundOut omsg = encode(ctx, msg);
+                OutboundOut omsg = encoder_(ctx, msg);
 
                 if (!omsg) {
                     // encode() might be waiting for more inbound messages to generate
@@ -155,8 +157,8 @@ private:
     Encoder encoder_;
     EncodableChecker checker_;
 
-    OutboundTransfer transfer_;
-    OutboundContainer container_;
+    OutboundTransfer* transfer_;
+    OutboundContainer* container_;
 };
 
 }

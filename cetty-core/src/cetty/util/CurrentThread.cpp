@@ -1,5 +1,3 @@
-#if !defined(CETTY_UTIL_PROCESS_H)
-#define CETTY_UTIL_PROCESS_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,44 +15,41 @@
  * under the License.
  */
 
-#include <cetty/Types.h>
-#include <boost/system/config.hpp>
+#include <cetty/util/CurrentThread.h>
+#include <boost/thread.hpp>
 
-#include <sys/types.h>
+#if defined(CETTY_OS_FAMILY_WINDOWS)
+#include <windows.h>
+#endif
 
 namespace cetty {
 namespace util {
 
-class Process {
-public:
+static boost::thread_specific_ptr<ThreadId> currentThreadId;
+
+const ThreadId& CurrentThread::id() {
+    ThreadId* id = currentThreadId.get();
+
+    if (!id) {
+        id = new ThreadId;
 #if defined(CETTY_OS_FAMILY_UNIX)
-    typedef pid_t PID;
+        *id = pthread_self();
 #elif defined(CETTY_OS_FAMILY_WINDOWS)
-    typedef unsigned long PID;
+        *id = ::GetCurrentThreadId();
 #endif
+        currentThreadId.reset(id);
+    }
 
-public:
-    /// Returns the process ID of the current process.
-    static PID id();
+    return *id;
+}
 
-    /// Returns the number of seconds spent by the
-    /// current process in user and kernel mode.
-    static void times(int64_t* userTime, int64_t* kernelTime);
+void CurrentThread::sleep(int64_t milliseconds) {
+    boost::this_thread::sleep(boost::posix_time::milliseconds(milliseconds));
+}
 
-    static void terminate(PID pid, bool force = false);
-
-private:
-    Process();
-    Process(const Process&);
-    Process& operator=(const Process&);
-};
+void CurrentThread::yield() {
+    boost::this_thread::yield();
+}
 
 }
 }
-
-
-#endif //#if !defined(CETTY_UTIL_PROCESS_H)
-
-// Local Variables:
-// mode: c++
-// End:

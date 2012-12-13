@@ -25,46 +25,46 @@ namespace service {
 using namespace cetty::protobuf::service;
 
 ProtobufServiceMessage::ProtobufServiceMessage()
-    : message(new ServiceMessage), payload() {
+    : message_(new ServiceMessage), payload_() {
 
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type)
-    : message(new ServiceMessage), payload() {
-    message->set_type(MessageType(type));
+    : message_(new ServiceMessage), payload_() {
+    message_->set_type(MessageType(type));
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type, int64_t id)
-    : message(new ServiceMessage), payload() {
-    message->set_type(MessageType(type));
-    message->set_id(id);
+    : message_(new ServiceMessage), payload_() {
+    message_->set_type(MessageType(type));
+    message_->set_id(id);
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         int64_t id,
         const MessagePtr& payload)
-    : message(new ServiceMessage), payload(payload) {
-    message->set_type(MessageType(type));
-    message->set_id(id);
+    : message_(new ServiceMessage), payload_(payload) {
+    message_->set_type(MessageType(type));
+    message_->set_id(id);
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method)
-    : message(new ServiceMessage), payload() {
-    message->set_type(MessageType(type));
-    message->set_service(service);
-    message->set_method(method);
+    : message_(new ServiceMessage), payload_() {
+    message_->set_type(MessageType(type));
+    message_->set_service(service);
+    message_->set_method(method);
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method,
         const MessagePtr& payload)
-    : message(new ServiceMessage), payload(payload) {
-    message->set_type(MessageType(type));
-    message->set_service(service);
-    message->set_method(method);
+    : message_(new ServiceMessage), payload_(payload) {
+    message_->set_type(MessageType(type));
+    message_->set_service(service);
+    message_->set_method(method);
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
@@ -72,96 +72,96 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method,
         const MessagePtr& payload)
-    : message(new ServiceMessage), payload(payload) {
-    message->set_type(static_cast<MessageType>(type));
-    message->set_id(id);
-    message->set_service(service);
-    message->set_method(method);
+    : message_(new ServiceMessage), payload_(payload) {
+    message_->set_type(static_cast<MessageType>(type));
+    message_->set_id(id);
+    message_->set_service(service);
+    message_->set_method(method);
 }
 
 ProtobufServiceMessage::~ProtobufServiceMessage() {
-    if (message) {
-        delete message;
+    if (message_) {
+        delete message_;
     }
 
-    if (payload) {
-        delete payload;
+    if (payload_) {
+        delete payload_;
     }
 }
 
 bool ProtobufServiceMessage::isRequest() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->type() == REQUEST;
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->type() == REQUEST;
 }
 
 bool ProtobufServiceMessage::isResponse() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->type() == RESPONSE;
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->type() == RESPONSE;
 }
 
 bool ProtobufServiceMessage::isError() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->type() == ERROR;
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->type() == ERROR;
 }
 
 void ProtobufServiceMessage::setType(int type) {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    message->set_type(MessageType(type));
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    message_->set_type(MessageType(type));
 }
 
-int ProtobufServiceMessage::getType() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return (int)message->type();
+int ProtobufServiceMessage::type() const {
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return (int)message_->type();
 }
 
-int64_t ProtobufServiceMessage::getId() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->id();
+int64_t ProtobufServiceMessage::id() const {
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->id();
 }
 
 void ProtobufServiceMessage::setId(int64_t id) {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->set_id(id);
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->set_id(id);
 }
 
-const std::string& ProtobufServiceMessage::getService() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->service();
+const std::string& ProtobufServiceMessage::service() const {
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->service();
 }
 
 std::string* ProtobufServiceMessage::mutableService() {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->mutable_service();
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->mutable_service();
 }
 
-const std::string& ProtobufServiceMessage::getMethod() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->method();
+const std::string& ProtobufServiceMessage::method() const {
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->method();
 }
 
 std::string* ProtobufServiceMessage::mutableMethod() {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return message->mutable_method();
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return message_->mutable_method();
 }
 
-const ServiceMessage& ProtobufServiceMessage::getServiceMessage() const {
-    BOOST_ASSERT(message && "message should not be NULL.");
-    return *message;
+const ServiceMessage& ProtobufServiceMessage::serviceMessage() const {
+    BOOST_ASSERT(message_ && "message should not be NULL.");
+    return *message_;
 }
 
 static MessagePtr EMPTY_MESSAGE= NULL;
 
-const MessagePtr& ProtobufServiceMessage::getResponse() const {
+const MessagePtr& ProtobufServiceMessage::response() const {
     if (isResponse()) {
-        return payload;
+        return payload_;
     }
 
     return EMPTY_MESSAGE;
 }
 
-const MessagePtr& ProtobufServiceMessage::getRequest() const {
+const MessagePtr& ProtobufServiceMessage::request() const {
     if (isRequest()) {
-        return payload;
+        return payload_;
     }
 
     return EMPTY_MESSAGE;
@@ -171,8 +171,8 @@ bool ProtobufServiceMessage::checkType(int type) {
     return MessageType_IsValid(type);
 }
 
-int ProtobufServiceMessage::getMessageSize() const {
-    return message->ByteSize() + (payload ? payload->ByteSize() + 8 : 0);
+int ProtobufServiceMessage::messageSize() const {
+    return message_->ByteSize() + (payload_ ? payload_->ByteSize() + 8 : 0);
 }
 
 }

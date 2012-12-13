@@ -88,6 +88,7 @@ private:
     typedef std::map<int, ChannelPtr> ChildChannels;
 
 private:
+    int lastChildId_;
     AsioServicePtr ioService_;
 
     boost::asio::ip::tcp::acceptor acceptor_;

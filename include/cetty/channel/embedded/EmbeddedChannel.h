@@ -208,7 +208,7 @@ private:
                                              _1,
                                              _2));
 
-        pipeline.addFirst<ThisChannel*>("outboutOut",
+        pipeline.setHead<ThisChannel*>("outboutOut",
                                       this,
                                       boost::bind(&EmbeddedChannel::registerOutboundTo,
                                               this,

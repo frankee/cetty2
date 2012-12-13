@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_CLIENTSERVICEPTR_H)
-#define CETTY_SERVICE_CLIENTSERVICEPTR_H
+#if !defined(CETTY_UTIL_CURRENTTHREAD_H)
+#define CETTY_UTIL_CURRENTTHREAD_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,15 +17,40 @@
  * under the License.
  */
 
-#include <boost/shared_ptr.hpp>
+#include <cetty/Types.h>
+
+#if defined(CETTY_OS_FAMILY_UNIX)
+#include <pthread.h>
+#endif
 
 namespace cetty {
-namespace service {
+namespace util {
+
+#if defined(CETTY_OS_FAMILY_UNIX)
+    typedef pthread_t ThreadId;
+#elif defined(CETTY_OS_FAMILY_WINDOWS)
+    typedef unsigned long ThreadId;
+#endif
+
+class CurrentThread {
+public:
+    /// Suspends the current thread for the specified
+    /// amount of time.
+    static void sleep(int64_t milliseconds);
+    
+    /// Yields cpu to other threads.
+    static void yield();
+    
+    /// Returns the native thread ID for the current thread.    
+    static const ThreadId& id();
+
+};
 
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_CLIENTSERVICEPTR_H)
+
+#endif //#if !defined(CETTY_UTIL_CURRENTTHREAD_H)
 
 // Local Variables:
 // mode: c++

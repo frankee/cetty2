@@ -74,7 +74,6 @@ ServiceGenerator::~ServiceGenerator() {}
 void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
     protoHasService = true;
 
-    fprintf(stderr, "GenerateDeclarations\n");
     // Forward-declare the stub type.
     printer->Print(vars_,
                    "class $classname$_Stub;\n"
@@ -166,11 +165,11 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Indent();
 
     printer->Print(vars_,
-                   "$classname$_Stub(const ::cetty::service::ClientServicePtr& service);\n"
+                   "$classname$_Stub(const ::cetty::channel::ChannelPtr& channel);\n"
                    "~$classname$_Stub();\n"
                    "\n"
-                   "inline const ::cetty::service::ClientServicePtr& channel() {\n"
-                   "    return channel_.getService();\n"
+                   "inline ::cetty::channel::ChannelPtr channel() {\n"
+                   "    return channel_.channel();\n"
                    "}\n"
                    "\n"
                    "// implements $classname$ ------------------------------------------\n"
@@ -252,8 +251,8 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-                   "$classname$_Stub::$classname$_Stub(const cetty::service::ClientServicePtr& service)\n"
-                   "  : channel_(service), owns_channel_(false) {\n"
+                   "$classname$_Stub::$classname$_Stub(const cetty::channel::ChannelPtr& channel)\n"
+                   "  : channel_(channel), owns_channel_(false) {\n"
                    "    static int init = 0;\n"
                    "    if (!init) {\n"
                    "        ::cetty::protobuf::service::ProtobufServiceRegister& serviceRegister =\n"

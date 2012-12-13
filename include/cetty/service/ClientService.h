@@ -24,37 +24,52 @@
 
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ClientServicePtr.h>
-//#include <cetty/service/ServiceRequestHandler.h>
+#include <cetty/service/ClientServiceDispatcher.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
 
+template<typename Request, typename Response>
 class ClientService : public cetty::channel::Channel {
 public:
-    ClientService(const EventLoopPtr& eventLoop);
+    typedef ClientService<Request, Response> Self;
+
+    typedef ClientServiceDispatcher<Self,
+            Request,
+            Response> Dispatcher;
+
+public:
+    ClientService(const EventLoopPtr& eventLoop,
+                  const Initializer& initializer,
+                  const Connections& connections)
+        : eventLoop_(eventLoop),
+          initializer_(initializer),
+          connections_(connections) {
+    }
 
     virtual ~ClientService() {}
 
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
+    virtual bool isOpen() const { return true; }
+    virtual bool isActive() const { return true; }
 
-protected:
-    virtual void doBind(const SocketAddress& localAddress);
-    virtual void doDisconnect();
-    virtual void doClose();
+private:
+    void doBind(const SocketAddress& localAddress) {}
+    void doDisconnect() {}
+    void doClose() {}
 
-    template<typename ReqT, typename RepT>
-    void writeRequest(const ReqT& request,
-        const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
-            boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
-                new OutstandingCall<ReqT, RepT>(request, future));
-            channel->writeMessage(outstanding);
+    void doInitialize() {
+        pipeline().setHead<Dispatcher::HandlerPtr>("dispatcher",
+                Dispatcher::HandlerPtr(new Dispatcher(eventLoop_,
+                                       connections_,
+                                       initializer_)));
     }
 
-protected:
+private:
     EventLoopPtr eventLoop_;
+    Initializer initializer_;
+    Connections connections_;
 };
 
 template<typename ReqT, typename RepT>

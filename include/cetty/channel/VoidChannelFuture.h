@@ -26,6 +26,8 @@ class VoidChannelFuture : public ChannelFuture {
 public:
     VoidChannelFuture(const ChannelPtr& channel)
         : channel_(channel) {}
+    VoidChannelFuture(const ChannelWeakPtr& channel)
+        : channel_(channel) {}
 
     virtual ~VoidChannelFuture() {}
 

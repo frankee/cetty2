@@ -27,7 +27,7 @@ namespace handler {
 
 using namespace cetty::buffer;
 
-class ProtobufMessageCodec {
+class ProtobufCodec {
 public:
     enum WireType {
         WIRETYPE_VARINT           = 0,
@@ -66,8 +66,8 @@ public:
     static void encodeVarint(const ChannelBufferPtr& buffer, int val);
 
 private:
-    ProtobufMessageCodec() {}
-    ~ProtobufMessageCodec() {}
+    ProtobufCodec() {}
+    ~ProtobufCodec() {}
 
 private:
     static const int TAG_TYPE_BITS = 3;

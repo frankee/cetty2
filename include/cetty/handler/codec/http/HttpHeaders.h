@@ -456,7 +456,7 @@ public:
 
 public:
     HttpHeaders()
-        : transferEncoding_(HttpTransferEncoding::STREAMED) {}
+        : transferEncoding_(HttpTransferEncoding::SINGLE) {}
 
     bool hasHeader(const std::string& name) const {
         return headers_.has(name);

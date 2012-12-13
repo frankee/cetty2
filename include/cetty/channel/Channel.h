@@ -137,7 +137,7 @@ class ChannelSink;
 
 class Channel : public boost::enable_shared_from_this<Channel> {
 public:
-    typedef boost::function<bool (const ChannelPtr&)> Initializer;
+    typedef boost::function<bool (ChannelPtr const&)> Initializer;
 
 public:
     virtual ~Channel();
@@ -233,7 +233,7 @@ public:
 
     void setInitializer(const Initializer& initializer);
 
-    virtual void initialize();
+    void initialize();
 
 public:
     ChannelFuturePtr bind(const SocketAddress& localAddress);

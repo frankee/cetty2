@@ -3,6 +3,8 @@
 
 #include <cetty/logging/Logger.h>
 
+#undef LOG_ERROR
+
 #define LOG(level) \
     ::cetty::logging::Logger(__FILE__, __LINE__, level).stream()
 

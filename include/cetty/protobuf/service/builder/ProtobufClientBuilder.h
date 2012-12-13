@@ -21,6 +21,24 @@
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
 namespace cetty {
+namespace service {
+
+using namespace cetty::protobuf::service;
+
+// template<>
+// int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::id() const {
+//     return request->id(); //future->getResponse()->getId();
+// }
+// 
+// template<>
+// void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(int64_t id) {
+//     request->setId(id);
+// }
+
+}
+}
+
+namespace cetty {
 namespace protobuf {
 namespace service {
 namespace builder {
@@ -43,7 +61,6 @@ private:
     void init();
 
 private:
-    ChannelPipelinePtr pipeline;
 };
 
 }

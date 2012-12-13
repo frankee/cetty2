@@ -50,9 +50,9 @@ std::string GearmanProtobufClientFilter::toString() const {
 GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
     ChannelHandlerContext& ctx,
     const ProtobufServiceMessagePtr& req) {
-    const std::string& method = req->getMethod();
+    const std::string& method = req->method();
     ChannelBufferPtr buffer
-        = Unpooled::buffer(req->getMessageSize() + 8);
+        = Unpooled::buffer(req->messageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
     ProtobufServiceMessageEncoder::encodeMessage(buffer, req);

@@ -14,7 +14,10 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
+#include <cetty/protobuf/service/handler/MessageCodec.h>
+
+#include <boost/assert.hpp>
+#include <google/protobuf/message.h>
 
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/buffer/ChannelBuffer.h>
@@ -22,22 +25,18 @@
 #include <cetty/protobuf/service/service.pb.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
-#include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
+#include <cetty/protobuf/service/handler/ProtobufCodec.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
-using namespace cetty::buffer;
-using namespace cetty::channel;
-using namespace cetty::protobuf::service;
-
-int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
-        const ProtobufServiceMessagePtr& message) {
+int MessageCodec::decodePayload(const ChannelBufferPtr& buffer,
+                                const ProtobufServiceMessagePtr& message) {
     const google::protobuf::Message* prototype = NULL;
 
-    const ServiceMessage& serviceMessage = message->getServiceMessage();
+    const ServiceMessage& serviceMessage = message->serviceMessage();
 
     if (serviceMessage.type() == REQUEST) {
         prototype = ProtobufServiceRegister::instance().getRequestPrototype(
@@ -60,8 +59,8 @@ int ProtobufServiceMessageDecoder::decodePayload(const ChannelBufferPtr& buffer,
 }
 
 //if successful then return 0,if type is wrong return -1;
-int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
-        const ProtobufServiceMessagePtr& message) {
+int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
+                         const ProtobufServiceMessagePtr& message) {
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
     bool flag = false;
 
@@ -76,11 +75,11 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
         int64_t id = 0;
         int64_t error = 0;
 
-        if (ProtobufMessageCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
+        if (ProtobufCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
                 //involved varint
             case 1:
-                type = ProtobufMessageCodec::decodeVarint(buffer);
+                type = ProtobufCodec::decodeVarint(buffer);
 
                 if (type != REQUEST && type != RESPONSE && type != ERROR) {
                     return -1;
@@ -90,7 +89,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
                 break;
 
             case 2:
-                id = ProtobufMessageCodec::decodeFixed64(buffer);
+                id = ProtobufCodec::decodeFixed64(buffer);
                 id = ChannelBufferUtil::swapLong(id);
                 serviceMessage->set_id(id);
                 break;
@@ -104,7 +103,7 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
                 break;
 
             case 5:
-                error = ProtobufMessageCodec::decodeVarint(buffer);
+                error = ProtobufCodec::decodeVarint(buffer);
                 serviceMessage->set_error((ErrorCode)error);
                 break;
 
@@ -127,25 +126,76 @@ int ProtobufServiceMessageDecoder::decode(const ChannelBufferPtr& buffer,
     return 0;
 }
 
-ProtobufServiceMessagePtr ProtobufServiceMessageDecoder::decode(ChannelHandlerContext& ctx,
+ProtobufServiceMessagePtr MessageCodec::decode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& msg) {
 
     if (msg) {
         ProtobufServiceMessagePtr message(new ProtobufServiceMessage);
 
-        if (!decode(msg, message)) {
+        if (!decodeMessage(msg, message)) {
             return message;
         }
         else {
             // error here
-            printf("ProtobufServiceMessageDecoder::decode failed because of type wrong");
+            printf("MessageCodec::decode failed because of type wrong");
         }
     }
 
     return ProtobufServiceMessagePtr();
 }
 
+ChannelBufferPtr MessageCodec::encode(ChannelHandlerContext& ctx,
+                                      const ProtobufServiceMessagePtr& msg) {
+    if (msg) {
+        int msgSize = msg->messageSize();
+        ChannelBufferPtr buffer = Unpooled::buffer(msgSize + 32, 4);
+        buffer->writeBytes("RPC0");
+        encodeMessage(msg, buffer);
+
+        return buffer;
+    }
+    else {
+        return ChannelBufferPtr();
+    }
+}
+
+void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
+                                 const ChannelBufferPtr& buffer) {
+
+    const ServiceMessage& serviceMessage = message->serviceMessage();
+    BOOST_ASSERT(!serviceMessage.has_request()
+                 && !serviceMessage.has_response()
+                 && "Can not contain the response or request payload in service message");
+
+    encodeProtobuf(serviceMessage, buffer);
+
+    if (serviceMessage.type() == REQUEST) {
+        int payloadSize = message->payload()->GetCachedSize();
+        ProtobufCodec::encodeTag(buffer, 8, ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufCodec::encodeVarint(buffer, payloadSize);
+
+        encodeProtobuf(*message->payload(), buffer);
+    }
+    else if (serviceMessage.type() == RESPONSE) {
+        int payloadSize = message->payload()->GetCachedSize();
+        ProtobufCodec::encodeTag(buffer, 9, ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufCodec::encodeVarint(buffer, payloadSize);
+
+        encodeProtobuf(*message->payload(), buffer);
+    }
+}
+
+void MessageCodec::encodeProtobuf(const google::protobuf::Message& message,
+    const ChannelBufferPtr& buffer) {
+        int length;
+        char* bytes = buffer->writableBytes(&length);
+        int messageSize = message.GetCachedSize();
+        message.SerializeWithCachedSizesToArray((google::protobuf::uint8*)bytes);
+        buffer->offsetWriterIndex(messageSize);
+}
+
 }
 }
 }
 }
+

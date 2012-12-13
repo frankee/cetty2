@@ -23,8 +23,7 @@
 #include <cetty/handler/codec/LengthFieldPrepender.h>
 #include <cetty/protobuf/service/ProtobufUtil.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageCodec.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 
 namespace cetty {
@@ -45,7 +44,8 @@ ProtobufServerBuilder::ProtobufServerBuilder()
     init();
 }
 
-ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt)
+ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt,
+        int childThreadCnt)
     : ServerBuilder(parentThreadCnt, childThreadCnt) {
     init();
 }
@@ -62,50 +62,45 @@ ProtobufServerBuilder& ProtobufServerBuilder::registerService(
 bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
-    pipeline.addLast<LengthFieldBasedFrameDecoder::Self>("frameDecoder",
-        LengthFieldBasedFrameDecoder::Ptr(
-        new LengthFieldBasedFrameDecoder(
-        16 * 1024 * 1024,
-        0,
-        4,
-        0,
-        4,
-        4,
-        ProtobufUtil::adler32Checksum)));
+    pipeline.addLast<LengthFieldBasedFrameDecoder::Handler>(
+        "frameDecoder",
+        LengthFieldBasedFrameDecoder::HandlerPtr(new LengthFieldBasedFrameDecoder(
+                    16 * 1024 * 1024,
+                    0,
+                    4,
+                    0,
+                    4,
+                    4,
+                    ProtobufUtil::adler32Checksum)));
 
-    pipeline.addLast<LengthFieldPrepender::Self>("frameEncoder",
-        LengthFieldPrepender::Ptr(new LengthFieldPrepender(
-        4,
-        4,
-        ProtobufUtil::adler32Checksum)));
+    pipeline.addLast<LengthFieldPrepender::Handler>(
+        "frameEncoder",
+        LengthFieldPrepender::HandlerPtr(new LengthFieldPrepender(
+                4,
+                4,
+                ProtobufUtil::adler32Checksum)));
 
-    //pipeline->addLast("protoCodec", new ProtobufServiceCodec);
-    pipeline.addLast<ProtobufServiceMessageDecoder::Self>(
-        "protobufDecoder",
-        ProtobufServiceMessageDecoder::Ptr(new ProtobufServiceMessageDecoder()));
-
-    pipeline.addLast<ProtobufServiceMessageEncoder::Self>(
-        "protobufEncoder",
-        ProtobufServiceMessageEncoder::Ptr(new ProtobufServiceMessageEncoder()));
+    pipeline.addLast<ProtobufServiceMessageCodec::Handler>(
+        "protobufCodec",
+        ProtobufServiceMessageCodec::HandlerPtr(new ProtobufServiceMessageCodec));
 
     pipeline.addLast<ProtobufServiceMessageHandler>(
         "messageHandler",
-        ProtobufServiceMessageHandlerPtr(new ProtobufServiceMessageHandler()));
+        ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
 
     return true;
 }
 
 ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
     return build(PROTOBUF_SERVICE_RPC,
-        boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1),
-        port);
+                 boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1),
+                 port);
 }
 
 void ProtobufServerBuilder::init() {
-    //registerPipeline(PROTOBUF_SERVICE_RPC, createProtobufServicePipeline());
+    registerChildInitializer(PROTOBUF_SERVICE_RPC,
+                             boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1));
 }
-
-
 
 }
 }

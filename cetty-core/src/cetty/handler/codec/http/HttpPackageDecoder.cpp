@@ -557,7 +557,7 @@ ChannelBufferPtr read(const ChannelPtr& buffer, int len) {
 #endif
 
 int HttpPackageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
-    int nextState;
+    int nextState = SKIP_CONTROL_CHARS;
     StringPiece line = readHeader(buffer);
     StringPiece name;
     StringPiece value;

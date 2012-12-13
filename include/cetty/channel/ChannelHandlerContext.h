@@ -161,10 +161,10 @@ public:
     typedef boost::function<void (ChannelHandlerContext&)> PipelineChangedCallback;
 
     typedef boost::function<void (ChannelHandlerContext&,
-                                  const ChannelException&)> ExceptionCallback;
+        const boost::any&)> UserEventCallback;
 
     typedef boost::function<void (ChannelHandlerContext&,
-                                  const boost::any&)> UserEventCallback;
+                                  const ChannelException&)> ChannelExceptionCallback;
 
     typedef boost::function<void (ChannelHandlerContext&)> ChannelOpenCallback;
 
@@ -262,6 +262,7 @@ public:
     }
 
     ChannelFuturePtr newFuture();
+    ChannelFuturePtr newVoidFuture();
     ChannelFuturePtr newSucceededFuture();
     ChannelFuturePtr newFailedFuture(const ChannelException& cause);
 
@@ -270,18 +271,20 @@ public:
 public:
     virtual boost::any getInboundMessageContainer() = 0;
     virtual boost::any getOutboundMessageContainer() = 0;
-    
+
     template<class T>
     T* inboundMessageContainer() {
         boost::any container = getInboundMessageContainer();
+
         if (!container.empty()) {
-             T** t = boost::any_cast<T*>(&container);
-             if (t) {
-                 return *t;
-             }
+            T** t = boost::any_cast<T*>(&container);
+
+            if (t) {
+                return *t;
+            }
         }
 
-       return NULL;
+        return NULL;
     }
 
     template<class T>
@@ -289,14 +292,17 @@ public:
         if (next_) {
             return nextInboundMessageContainer<T>(next_);
         }
+
         return NULL;
     }
 
     template<class T>
     T* nextInboundMessageContainer(ChannelHandlerContext* ctx) {
         ChannelHandlerContext* context = ctx;
+
         while (context) {
             T* t = context->inboundMessageContainer<T>();
+
             if (t) {
                 return t;
             }
@@ -310,8 +316,10 @@ public:
     template<class T>
     T* outboundMessageContainer() {
         boost::any container = getOutboundMessageContainer();
+
         if (!container.empty()) {
             T** t = boost::any_cast<T*>(&container);
+
             if (t) {
                 return *t;
             }
@@ -325,14 +333,17 @@ public:
         if (prev_) {
             return nextOutboundMessageContainer<T>(prev_);
         }
+
         return NULL;
     }
 
     template<class T>
     T* nextOutboundMessageContainer(ChannelHandlerContext* ctx) {
         ChannelHandlerContext* context = ctx;
+
         while (context) {
             T* t = context->outboundMessageContainer<T>();
+
             if (t) {
                 return t;
             }
@@ -349,7 +360,7 @@ public:
     const BeforeRemoveCallback& beforeRemoveCallback() const { return beforeRemoveCallback_; }
     const AfterRemoveCallback& afterRemoveCallback() const { return afterRemoveCallback_; }
     const PipelineChangedCallback& pipelineChangedCallback() const { pipelineChangedCallback_; }
-    const ExceptionCallback& exceptionCallback() const { return exceptionCallback_; }
+    const ChannelExceptionCallback& exceptionCallback() const { return exceptionCallback_; }
     const UserEventCallback& userEventCallback() const { return userEventCallback_; }
     const ChannelOpenCallback& channelOpenCallback() const { return channelOpenCallback_; }
     const ChannelActiveCallback& channelActiveCallback() const { return channelActiveCallback_; }
@@ -366,8 +377,8 @@ public:
     void setBeforeRemoveCallback(const BeforeRemoveCallback& beforeRemove) { beforeRemoveCallback_ = beforeRemove; }
     void setAfterRemoveCallback(const AfterRemoveCallback& afterRemove) { afterRemoveCallback_ = afterRemove; }
     void setPipelineChangedCallback(const PipelineChangedCallback& pipelineChanged) { pipelineChangedCallback_ = pipelineChanged; }
-    
-    void setExceptionCallback(const ExceptionCallback& exception) { exceptionCallback_ = exception; }
+
+    void setExceptionCallback(const ChannelExceptionCallback& exception) { exceptionCallback_ = exception; }
     void setUserEventCallback(const UserEventCallback& userEvent) { userEventCallback_ = userEvent; }
 
     void setChannelOpenCallback(const ChannelOpenCallback& channelOpen) { channelOpenCallback_ = channelOpen; }
@@ -411,6 +422,7 @@ public:
     void fireAfterRemove() { if (afterRemoveCallback_) { afterRemoveCallback_(*this); } }
     void firePipelineChanged() {
         onPipelineChanged();
+
         if (pipelineChangedCallback_) { pipelineChangedCallback_(*this); }
     }
 
@@ -445,13 +457,46 @@ protected:
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
 
-    virtual void onPipelineChanged() {}
+    virtual void onPipelineChanged() {
+        resetEventTransferContexts();
+    }
 
 private:
     void notifyHandlerException(const ChannelPipelineException& e);
 
     void clearOutboundChannelBuffer(ChannelHandlerContext& ctx);
     void clearInboundChannelBuffer(ChannelHandlerContext& ctx);
+
+    void resetEventTransferContexts() {
+        hasNextUserEventHandler_ = true;
+        hasNextMessageUpdatedHandler_ = true;
+
+        hasNextChannelOpenHandler_ = true;
+        hasNextChannelActiveHandler_ = true;
+        hasNextChannelInactiveHandler_ = true;
+        hasNextChannelExceptionHandler_ = true;
+
+        hasPrevBindHandler_ = true;
+        hasPrevConnectHandler_ = true;
+        hasPrevDisconnectHandler_ = true;
+        hasPrevCloseHandler_ = true;
+
+        hasPrevFlushHandler_ = true;
+
+        nextUserEventHandler_ = NULL;
+        nextMessageUpdatedHandler_ = NULL;
+
+        nextChannelOpenHandler_ = NULL;
+        nextChannelActiveHandler_ = NULL;
+        nextChannelInactiveHandler_ = NULL;
+        nextChannelExceptionHandler_ = NULL;
+
+        prevBindHandler_ = NULL;
+        prevConnectHandler_ = NULL;
+        prevDisconnectHandler_ = NULL;
+        prevCloseHandler_ = NULL;
+        prevFlushHandler_ = NULL;
+    }
 
 private:
     BeforeAddCallback beforeAddCallback_;
@@ -461,7 +506,7 @@ private:
 
     PipelineChangedCallback pipelineChangedCallback_;
 
-    ExceptionCallback exceptionCallback_;
+    ChannelExceptionCallback exceptionCallback_;
     UserEventCallback userEventCallback_;
 
     ChannelOpenCallback channelOpenCallback_;
@@ -480,6 +525,35 @@ private:
 
     ChannelHandlerContext* next_;
     ChannelHandlerContext* prev_;
+
+    bool hasNextUserEventHandler_;
+    bool hasNextMessageUpdatedHandler_;
+
+    bool hasNextChannelOpenHandler_;
+    bool hasNextChannelActiveHandler_;
+    bool hasNextChannelInactiveHandler_;
+    bool hasNextChannelExceptionHandler_;
+
+    bool hasPrevBindHandler_;
+    bool hasPrevConnectHandler_;
+    bool hasPrevDisconnectHandler_;
+    bool hasPrevCloseHandler_;
+    bool hasPrevFlushHandler_;
+
+    ChannelHandlerContext* nextUserEventHandler_;
+    ChannelHandlerContext* nextMessageUpdatedHandler_;
+
+    ChannelHandlerContext* nextChannelOpenHandler_;
+    ChannelHandlerContext* nextChannelActiveHandler_;
+    ChannelHandlerContext* nextChannelInactiveHandler_;
+    ChannelHandlerContext* nextChannelExceptionHandler_;
+
+    ChannelHandlerContext* prevBindHandler_;
+    ChannelHandlerContext* prevConnectHandler_;
+    ChannelHandlerContext* prevDisconnectHandler_;
+    ChannelHandlerContext* prevCloseHandler_;
+
+    ChannelHandlerContext* prevFlushHandler_;
 
     ChannelWeakPtr channel_;
     ChannelPipeline* pipeline_;

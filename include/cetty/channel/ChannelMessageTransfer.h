@@ -94,9 +94,11 @@ public:
 
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
-        : ctx(ctx),
+        : ctx_(ctx),
           container_() {
     }
+
+    ChannelMessageTransfer(ChannelPipeline& pipeline) {}
 
     void resetNextContainer() {
         container_ = NULL;
@@ -139,7 +141,7 @@ public:
 
 public:
     ChannelMessageTransfer(ChannelHandlerContext& ctx)
-        : ctx(ctx),
+        : ctx_(ctx),
           container_() {
     }
 

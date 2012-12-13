@@ -57,11 +57,12 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
       readBuffer_(Unpooled::buffer(1024 * 16)),
       bridgeContainer_(),
       socketConfig_(tcpSocket_) {
-    init();
+    writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
 
 AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
     : Channel(ChannelPtr(), eventLoop),
+      opened_(false),
       isWriting_(false),
       highWaterMarkCounter_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
@@ -69,7 +70,35 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
       readBuffer_(Unpooled::buffer(1024 * 16)),
       bridgeContainer_(),
       socketConfig_(tcpSocket_) {
-    init();
+    writeQueue_.reset(new AsioWriteOperationQueue(*this));
+}
+
+AsioSocketChannel::AsioSocketChannel(int id, const EventLoopPtr& eventLoop)
+    : Channel(id, ChannelPtr(), eventLoop),
+      opened_(false),
+      isWriting_(false),
+      highWaterMarkCounter_(0),
+      ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
+      readBuffer_(Unpooled::buffer(1024 * 16)),
+      bridgeContainer_(),
+      socketConfig_(tcpSocket_) {
+    writeQueue_.reset(new AsioWriteOperationQueue(*this));
+}
+
+AsioSocketChannel::AsioSocketChannel(int id,
+                                     const ChannelPtr& parent,
+                                     const EventLoopPtr& eventLoop)
+    : Channel(id, parent, eventLoop),
+      opened_(false),
+      isWriting_(false),
+      highWaterMarkCounter_(0),
+      ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
+      tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
+      readBuffer_(Unpooled::buffer(1024 * 16)),
+      bridgeContainer_(),
+      socketConfig_(tcpSocket_) {
+    writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
 
 AsioSocketChannel::~AsioSocketChannel() {
@@ -134,7 +163,8 @@ bool AsioSocketChannel::setClosed() {
     LOG_INFO << "closed the socket channel, finally calling FutureListener"
              " which to the ChannelCloseFuture.";
 
-    return Channel::setClosed();
+    return true;
+    //return Channel::setClosed();
 }
 
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
@@ -148,7 +178,7 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
-        close();
+        close(newVoidFuture());
 
         //         if (pipeline_ && pipeline_->attached()) {
         //             LOG_WARN << "handleRead Error : " << error.value()
@@ -330,7 +360,7 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
     //                                _2,
     //                                connectFuture));
 
-    const EventLoopPoolPtr& pool = eventLoop()->getEventLoopPool();
+    const EventLoopPoolPtr& pool = eventLoop()->eventLoopPool();
 
     if (pool && pool->isMainThread()) {
         LOG_INFO << "the asio service pool starting to run in main thread.";
@@ -350,6 +380,37 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
             //TODO: should terminate the program
             std::terminate();
         }
+    }
+}
+
+void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx, const SocketAddress& remoteAddress, const SocketAddress& localAddress, const ChannelFuturePtr& future) {
+    if (!isOpen()) {
+        return;
+    }
+
+    try {
+        //if (connectFuture != null) {
+        //    throw new IllegalStateException("connection attempt already made");
+        //}
+
+        //connectFuture = future;
+
+        doConnect(remoteAddress, localAddress, future);
+
+        // Schedule connect timeout.
+        int connectTimeoutMillis = config().connectTimeout();
+
+        //         if (connectTimeoutMillis > 0) {
+        //             eventLoop()->runAfter(connectTimeoutMillis, boost::bind(
+        //                 &AsioSocketChannel::handleConnectTimeout,
+        //                 this));
+        //         }
+
+    }
+    catch (const std::exception& t) {
+        //future.setFailure(t);
+        //pipeline().fireExceptionCaught(t);
+        closeIfClosed();
     }
 }
 
@@ -467,16 +528,6 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     }
 }
 
-void AsioSocketChannel::init() {
-    writeQueue_.reset(new AsioWriteOperationQueue(*this));
-
-
-    //     pipeline->setSinkHandler(new AsioSocketChannelSinkHandler);
-    //     pipeline->attach(shared_from_this());
-    //
-    //     opened_ = true;
-}
-
 void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
                                       const ChannelException& e) {
     connectFuture->setFailure(e);
@@ -493,7 +544,72 @@ void AsioSocketChannel::doInitialize() {
             _2));
 
     // no need use weak_ptr here
-    pipeline().addFirst<AsioSocketChannel*>("bridge", this);
+    pipeline().setHead<AsioSocketChannel*>("bridge", this);
+
+    opened_ = true;
+}
+
+void AsioSocketChannel::registerTo(Context& context) {
+    Channel::registerTo(context);
+
+    bridgeContainer_ = context.outboundContainer();
+
+    context.setConnectFunctor(boost::bind(
+                                  &AsioSocketChannel::doConnect,
+                                  this,
+                                  _1,
+                                  _2,
+                                  _3,
+                                  _4));
+
+    context.setFlushFunctor(boost::bind(
+                                &AsioSocketChannel::doFlush,
+                                this,
+                                _1,
+                                _2));
+}
+
+void AsioSocketChannel::handleConnectTimeout() {
+    //         if (connectTimeoutException == null) {
+    //             connectTimeoutException = new ConnectException("connection timed out");
+    //         }
+    //
+    //         ChannelFuture connectFuture = AbstractAioChannel.this.connectFuture;
+    //
+    //         if (connectFuture != null &&
+    //             connectFuture.setFailure(connectTimeoutException)) {
+    //                 pipeline().fireExceptionCaught(connectTimeoutException);
+    //                 close(voidFuture());
+    //         }
+}
+
+void AsioSocketChannel::handleConnectFailed() {
+    //         connectFuture.setFailure(t);
+    //         pipeline().fireExceptionCaught(t);
+    //         closeIfClosed();
+}
+
+void AsioSocketChannel::handleConnectSuccess() {
+    //         assert eventLoop().inEventLoop();
+    //         assert connectFuture != null;
+    //
+    //         try {
+    //             boolean wasActive = isActive();
+    //             connectFuture.setSuccess();
+    //
+    //             if (!wasActive && isActive()) {
+    //                 pipeline().fireChannelActive();
+    //             }
+    //         }
+    //         catch (Throwable t) {
+    //             connectFuture.setFailure(t);
+    //             pipeline().fireExceptionCaught(t);
+    //             closeIfClosed();
+    //         } finally {
+    //
+    //             connectTimeoutFuture.cancel(false);
+    //             connectFuture = null;
+    //         }
 }
 
 }

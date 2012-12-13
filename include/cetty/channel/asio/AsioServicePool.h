@@ -87,7 +87,9 @@ private:
 
 private:
     // The next io_service to use for a connection.
-    int nextServiceIndex;
+    int nextServiceIndex_;
+
+    boost::mutex mutext_;
 };
 
 }

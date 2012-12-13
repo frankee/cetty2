@@ -42,17 +42,17 @@ namespace codec {
 using namespace cetty::channel;
 
 template<typename H,
-    typename InboundIn,
-    typename InboundOut,
-    typename C = ChannelMessageHandlerContext<H,
-    InboundIn,
-    InboundOut,
-    VoidMessage,
-    VoidMessage,
-    ChannelMessageContainer<InboundIn, MESSAGE_BLOCK>,
-    ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
-    VoidMessageContainer,
-    VoidMessageContainer> >
+         typename InboundIn,
+         typename InboundOut,
+         typename C = ChannelMessageHandlerContext<H,
+         InboundIn,
+         InboundOut,
+         VoidMessage,
+         VoidMessage,
+         ChannelMessageContainer<InboundIn, MESSAGE_BLOCK>,
+         ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+         VoidMessageContainer,
+         VoidMessageContainer> >
 class MessageToMessageDecoder : private boost::noncopyable {
 public:
     typedef MessageToMessageDecoder<H, InboundIn, InboundOut, C> Self;
@@ -62,31 +62,33 @@ public:
     typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+
     typedef ChannelMessageTransfer<InboundOut,
-    ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
-    TRANSFER_INBOUND> InboundTransfer;
+            ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+            TRANSFER_INBOUND> InboundTransfer;
 
     typedef boost::function<bool (InboundIn const&)> DecodableChecker;
-    typedef boost::function<InboundOut (ChannelHandlerContext&, InboundIn const&)> Decoder;
+    typedef boost::function<InboundOut(ChannelHandlerContext&, InboundIn const&)> Decoder;
 
 public:
     MessageToMessageDecoder()
         : transfer_(),
-        constainer_() {
+          constainer_() {
     }
 
     MessageToMessageDecoder(const Decoder& decoder)
         : decoder_(decoder),
-    transfer_(),
-    constainer_() {
+          transfer_(),
+          constainer_() {
     }
 
     MessageToMessageDecoder(const Decoder& decoder,
                             const DecodableChecker& checker)
-                            : decoder_(decoder),
-    checker_(checker),
-    transfer_(),
-    constainer_() {
+        : decoder_(decoder),
+          checker_(checker),
+          transfer_(),
+          constainer_() {
     }
 
     ~MessageToMessageDecoder() {}
@@ -106,16 +108,15 @@ public:
         constainer_ = ctx.inboundContainer();
 
         ctx.setChannelMessageUpdatedCallback(boost::bind(
-            &Self::messageUpdated,
-            this,
-            _1));
+                &Self::messageUpdated,
+                this,
+                _1));
     }
 
     void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
 
-        typename InboundContainer::MessageQueue& inboundQueue =
-            context_->inboundContainer()->getMessages();
+        InboundQueue& inboundQueue = constainer_->getMessages();
 
         while (!inboundQueue.empty()) {
             try {
@@ -125,16 +126,16 @@ public:
                     break;
                 }
 
-//                 if (!isDecodable(msg)) {
-//                     if (skipInboundTransfer.unfoldAndAdd(msg)) {
-//                         notify = true;
-//                     }
-// 
-//                     inboundQueue.pop_front();
-//                     continue;
-//                 }
+                //                 if (!isDecodable(msg)) {
+                //                     if (skipInboundTransfer.unfoldAndAdd(msg)) {
+                //                         notify = true;
+                //                     }
+                //
+                //                     inboundQueue.pop_front();
+                //                     continue;
+                //                 }
 
-                InboundOut omsg = decode(ctx, msg);
+                InboundOut omsg = decoder_(ctx, msg);
 
                 if (!omsg) {
                     // Decoder consumed a message but returned null.
@@ -143,7 +144,7 @@ public:
                     continue;
                 }
 
-                if (context_->inboundTransfer()->unfoldAndAdd(omsg)) {
+                if (transfer_->unfoldAndAdd(omsg)) {
                     notify = true;
                 }
 

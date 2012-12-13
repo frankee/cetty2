@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/handler/ProtobufMessageCodec.h>
+#include <cetty/protobuf/service/handler/ProtobufCodec.h>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/protobuf/service/service.pb.h>
@@ -27,7 +27,7 @@ namespace handler {
 using namespace cetty::buffer;
 using namespace cetty::protobuf::service::handler;
 
-bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer,
+bool ProtobufCodec::decodeField(const ChannelBufferPtr& buffer,
                                        int* wireType,
                                        int* fieldNumber,
                                        int* fieldLength) {
@@ -46,15 +46,15 @@ bool ProtobufMessageCodec::decodeField(const ChannelBufferPtr& buffer,
     return true;
 }
 
-int64_t ProtobufMessageCodec::decodeFixed64(const ChannelBufferPtr& buffer) {
+int64_t ProtobufCodec::decodeFixed64(const ChannelBufferPtr& buffer) {
     return buffer->readLong();
 }
 
-int ProtobufMessageCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
+int ProtobufCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
     return buffer->readInt();
 }
 
-int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
+int ProtobufCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     int temp = 0;
     int ret = 0;
     int i = 0;
@@ -81,24 +81,24 @@ int ProtobufMessageCodec::decodeVarint(const ChannelBufferPtr& buffer) {
     return ret;
 }
 
-void  ProtobufMessageCodec::encodeFixed64(const ChannelBufferPtr& buffer,
+void  ProtobufCodec::encodeFixed64(const ChannelBufferPtr& buffer,
         int64_t data) {
     buffer->writeLong(data);
 }
 
-void  ProtobufMessageCodec::encodeFixed32(const ChannelBufferPtr& buffer,
+void  ProtobufCodec::encodeFixed32(const ChannelBufferPtr& buffer,
         int data) {
     buffer->writeInt(data);
 }
 
-void ProtobufMessageCodec::encodeTag(const ChannelBufferPtr& buffer,
+void ProtobufCodec::encodeTag(const ChannelBufferPtr& buffer,
                                      int fieldNum,
                                      int type) {
     int tag = (fieldNum << 3) | type;
-    ProtobufMessageCodec::encodeVarint(buffer, tag);
+    ProtobufCodec::encodeVarint(buffer, tag);
 }
 
-void ProtobufMessageCodec::encodeVarint(const ChannelBufferPtr& buffer,
+void ProtobufCodec::encodeVarint(const ChannelBufferPtr& buffer,
                                         int val) {
     uint8_t buf[10];
     int varintSize = 0;

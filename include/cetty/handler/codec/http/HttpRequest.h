@@ -138,7 +138,20 @@ public:
     * Sets the content of this message.  If <tt>null</tt> is specified,
     * the content of this message will be set to {@link ChannelBuffers#EMPTY_BUFFER}.
     */
-    void setContent(const ChannelBufferPtr& content);
+    void setContent(const ChannelBufferPtr& content) {
+        if (!content) {
+            content_ = Unpooled::EMPTY_BUFFER;
+            return;
+        }
+
+        if (content->readable() && headers_.transferEncoding().multiple()) {
+            //TODO
+            //throw InvalidArgumentException(
+            //    "non-empty content disallowed if this.chunked == true");
+        }
+
+        content_ = content;
+    }
 
     /**
     * Returns the URI (or path) of this request.

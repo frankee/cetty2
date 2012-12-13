@@ -31,6 +31,28 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name)
     : name_(name),
       next_(),
       prev_(),
+      hasNextUserEventHandler_(true),
+      hasNextMessageUpdatedHandler_(true),
+      hasNextChannelOpenHandler_(true),
+      hasNextChannelActiveHandler_(true),
+      hasNextChannelInactiveHandler_(true),
+      hasNextChannelExceptionHandler_(true),
+      hasPrevBindHandler_(true),
+      hasPrevConnectHandler_(true),
+      hasPrevDisconnectHandler_(true),
+      hasPrevCloseHandler_(true),
+      hasPrevFlushHandler_(true),
+      nextUserEventHandler_(),
+      nextMessageUpdatedHandler_(),
+      nextChannelOpenHandler_(),
+      nextChannelActiveHandler_(),
+      nextChannelInactiveHandler_(),
+      nextChannelExceptionHandler_(),
+      prevBindHandler_(),
+      prevConnectHandler_(),
+      prevDisconnectHandler_(),
+      prevCloseHandler_(),
+      prevFlushHandler_(),
       pipeline_(),
       eventLoop_() {
 }
@@ -40,22 +62,53 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
     : name_(name),
       next_(),
       prev_(),
+      hasNextUserEventHandler_(true),
+      hasNextMessageUpdatedHandler_(true),
+      hasNextChannelOpenHandler_(true),
+      hasNextChannelActiveHandler_(true),
+      hasNextChannelInactiveHandler_(true),
+      hasNextChannelExceptionHandler_(true),
+      hasPrevBindHandler_(true),
+      hasPrevConnectHandler_(true),
+      hasPrevDisconnectHandler_(true),
+      hasPrevCloseHandler_(true),
+      hasPrevFlushHandler_(true),
+      nextUserEventHandler_(),
+      nextMessageUpdatedHandler_(),
+      nextChannelOpenHandler_(),
+      nextChannelActiveHandler_(),
+      nextChannelInactiveHandler_(),
+      nextChannelExceptionHandler_(),
+      prevBindHandler_(),
+      prevConnectHandler_(),
+      prevDisconnectHandler_(),
+      prevCloseHandler_(),
+      prevFlushHandler_(),
       pipeline_(),
       eventLoop_(eventLoop) {
 }
 
 void ChannelHandlerContext::fireChannelOpen() {
-    ChannelHandlerContext* next = next_;
+    if (nextChannelOpenHandler_) {
+        fireChannelOpen(*nextChannelOpenHandler_);
+        return;
+    }
 
-    do {
-        if (next->channelOpenCallback_) {
-            fireChannelOpen(*next);
-            break;
+    if (hasNextChannelOpenHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelOpenCallback_) {
+                nextChannelOpenHandler_ = next;
+                fireChannelOpen(*next);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
+        hasNextChannelOpenHandler_ = (next != NULL);
     }
-    while (next);
 }
 
 void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
@@ -65,7 +118,14 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
                 ctx.channelOpenCallback_(ctx);
             }
             else {
-                fireChannelOpen();
+                ChannelHandlerContext* next = ctx.nextChannelOpenHandler_;
+
+                if (next) {
+                    next->channelOpenCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelOpen();
+                }
             }
         }
         catch (const Exception& e) {
@@ -99,17 +159,26 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelInactive() {
-    ChannelHandlerContext* next = next_;
+    if (nextChannelInactiveHandler_) {
+        fireChannelInactive(*nextChannelInactiveHandler_);
+        return;
+    }
 
-    do {
-        if (next->channelInactiveCallback_) {
-            fireChannelInactive(*next);
-            break;
+    if (hasNextChannelInactiveHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelInactiveCallback_) {
+                nextChannelInactiveHandler_ = next;
+                fireChannelInactive(*next);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
+        hasNextChannelInactiveHandler_ = (next != NULL);
     }
-    while (next);
 }
 
 void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
@@ -119,7 +188,14 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
                 ctx.channelInactiveCallback_(ctx);
             }
             else {
-                fireChannelInactive();
+                ChannelHandlerContext* next = ctx.nextChannelInactiveHandler_;
+
+                if (next) {
+                    next->channelInactiveCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelInactive();
+                }
             }
         }
         catch (const Exception& e) {
@@ -153,17 +229,26 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelActive() {
-    ChannelHandlerContext* next = next_;
+    if (nextChannelActiveHandler_) {
+        fireChannelActive(*nextChannelActiveHandler_);
+        return;
+    }
 
-    do {
-        if (next->channelActiveCallback_) {
-            fireChannelActive(*next);
-            break;
+    if (hasNextChannelActiveHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelActiveCallback_) {
+                nextChannelActiveHandler_ = next;
+                fireChannelActive(*next);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
+        hasNextChannelActiveHandler_ = (next != NULL);
     }
-    while (next);
 }
 
 void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
@@ -173,7 +258,14 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
                 ctx.channelActiveCallback_(ctx);
             }
             else {
-                fireChannelActive();
+                ChannelHandlerContext* next = ctx.nextChannelActiveHandler_;
+
+                if (next) {
+                    next->channelActiveCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelActive();
+                }
             }
         }
         catch (const Exception& e) {
@@ -207,22 +299,31 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
-    ChannelHandlerContext* next = next_;
+    if (nextChannelExceptionHandler_) {
+        fireExceptionCaught(*nextChannelExceptionHandler_, cause);
+        return;
+    }
 
-    do {
-        if (next->exceptionCallback_) {
-            fireExceptionCaught(*next, cause);
-            break;
+    if (hasNextChannelExceptionHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->exceptionCallback_) {
+                nextChannelExceptionHandler_ = next;
+                fireExceptionCaught(*next, cause);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
-    }
-    while (next);
+        if (!next) {
+            hasNextChannelActiveHandler_ = false;
 
-    if (!next) {
-        LOG_WARN << "An exceptionCaught() event was fired, and it reached at the end of the "
-                 "pipeline.  It usually means the last inbound handler in the pipeline did not "
-                 "handle the exception.";
+            LOG_WARN << "An exceptionCaught() event was fired, and it reached at the end of the "
+                     "pipeline.  It usually means the last inbound handler in the pipeline did not "
+                     "handle the exception.";
+        }
     }
 }
 
@@ -234,7 +335,14 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
                 ctx.exceptionCallback_(ctx, cause);
             }
             else {
-                fireExceptionCaught(cause);
+                ChannelHandlerContext* next = ctx.nextChannelExceptionHandler_;
+
+                if (next) {
+                    next->exceptionCallback_(*next, cause);
+                }
+                else {
+                    ctx.fireExceptionCaught(cause);
+                }
             }
         }
         catch (const Exception& e) {
@@ -267,17 +375,32 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
-    ChannelHandlerContext* next = next_;
+    if (nextUserEventHandler_) {
+        fireUserEventTriggered(*nextUserEventHandler_, evt);
+        return;
+    }
 
-    do {
-        if (next->userEventCallback_) {
-            fireUserEventTriggered(*next, evt);
-            break;
+    if (hasNextUserEventHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->userEventCallback_) {
+                nextUserEventHandler_ = next;
+                fireUserEventTriggered(*next, evt);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
+        if (!next) {
+            hasNextUserEventHandler_ = false;
+
+            LOG_WARN << "An user event was fired, and it reached at the end of the "
+                     "pipeline.  It usually means the last inbound handler in the pipeline did not "
+                     "handle the user event.";
+        }
     }
-    while (next);
 }
 
 void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
@@ -288,7 +411,14 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
                 ctx.userEventCallback_(ctx, evt);
             }
             else {
-                fireUserEventTriggered(evt);
+                ChannelHandlerContext* next = ctx.nextUserEventHandler_;
+
+                if (next) {
+                    next->userEventCallback_(*next, evt);
+                }
+                else {
+                    ctx.fireUserEventTriggered(evt);
+                }
             }
         }
         catch (const Exception& e) {
@@ -323,17 +453,26 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
 }
 
 void ChannelHandlerContext::fireMessageUpdated() {
-    ChannelHandlerContext* next = next_;
+    if (nextMessageUpdatedHandler_) {
+        fireMessageUpdated(*nextMessageUpdatedHandler_);
+        return;
+    }
 
-    do {
-        if (next->channelMessageUpdatedCallback_) {
-            fireMessageUpdated(*next);
-            break;
+    if (hasNextMessageUpdatedHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelMessageUpdatedCallback_) {
+                nextMessageUpdatedHandler_ = next;
+                fireMessageUpdated(*next);
+                break;
+            }
+
+            next = next->next_;
         }
 
-        next = next->next_;
+        hasNextMessageUpdatedHandler_ = (next != NULL);
     }
-    while (next);
 }
 
 void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
@@ -343,7 +482,14 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
                 ctx.channelMessageUpdatedCallback_(ctx);
             }
             else {
-                fireMessageUpdated();
+                ChannelHandlerContext* next = ctx.nextMessageUpdatedHandler_;
+
+                if (next) {
+                    next->channelMessageUpdatedCallback_(*next);
+                }
+                else {
+                    ctx.fireMessageUpdated();
+                }
             }
         }
         catch (const Exception& e) {
@@ -380,19 +526,29 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
 
 const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = prev_;
 
-    do {
-        if (before->bindFunctor_) {
-            return bind(*before, localAddress, future);
-            break;
+    if (prevBindHandler_) {
+        return bind(*prevBindHandler_, localAddress, future);
+    }
+
+    if (hasPrevBindHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->bindFunctor_) {
+                prevBindHandler_ = prev;
+                return bind(*prev, localAddress, future);
+            }
+
+            prev = prev->prev_;
         }
 
-        before = before->prev_;
+        if (!prev) {
+            hasPrevBindHandler_ = false;
+            LOG_ERROR << "has no handler to handle to bind";
+        }
     }
-    while (before);
 
-    LOG_ERROR << "has no handler to handle to bind";
     future->setFailure(ChannelPipelineException("has no handler to handle to bind"));
     return future;
 }
@@ -411,7 +567,14 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
                 ctx.bindFunctor_(ctx, localAddress, future);
             }
             else {
-                bind(localAddress, future);
+                ChannelHandlerContext* prev = ctx.prevBindHandler_;
+
+                if (prev) {
+                    prev->bindFunctor_(*prev, localAddress, future);
+                }
+                else {
+                    ctx.bind(localAddress, future);
+                }
             }
         }
         catch (const Exception& e) {
@@ -451,19 +614,28 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
 const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = prev_;
+    if (prevConnectHandler_) {
+        return connect(*prevConnectHandler_, remoteAddress, localAddress, future);
+    }
 
-    do {
-        if (before->connectFunctor_) {
-            return connect(*before, remoteAddress, localAddress, future);
-            break;
+    if (hasPrevConnectHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->connectFunctor_) {
+                prevConnectHandler_ = prev;
+                return connect(*prev, remoteAddress, localAddress, future);
+            }
+
+            prev = prev->prev_;
         }
 
-        before = before->prev_;
+        if (!prev) {
+            hasPrevConnectHandler_ = false;
+            LOG_ERROR << "has no handler to handle to connect";
+        }
     }
-    while (before);
 
-    LOG_ERROR << "has no handler to handle to connect";
     future->setFailure(ChannelPipelineException("has no handler to handle to connect"));
     return future;
 }
@@ -484,16 +656,14 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
                 ctx.connectFunctor_(ctx, remoteAddress, localAddress, future);
             }
             else {
-                ChannelHandlerContext* prev = prev_;
+                ChannelHandlerContext* prev = ctx.prevConnectHandler_;
 
-                do {
-                    if (prev->connectFunctor_) {
-                        prev->connectFunctor_(ctx, remoteAddress, localAddress, future);
-                    }
-
-                    prev = prev->prev_;
+                if (prev) {
+                    prev->connectFunctor_(*prev, remoteAddress, localAddress, future);
                 }
-                while (prev);
+                else {
+                    ctx.connect(remoteAddress, localAddress, future);
+                }
             }
         }
         catch (const Exception& e) {
@@ -532,20 +702,31 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = prev_;
+    if (prevDisconnectHandler_) {
+        return disconnect(*prevDisconnectHandler_, future);
+    }
 
-    do {
-        if (before->disconnectFunctor_) {
-            return disconnect(*before, future);
-            break;
+    if (hasPrevDisconnectHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->disconnectFunctor_) {
+                prevDisconnectHandler_ = prev;
+                return disconnect(*prev, future);
+            }
+
+            prev = prev->prev_;
         }
 
-        before = before->prev_;
+        if (!prev) {
+            hasPrevDisconnectHandler_ = false;
+            LOG_ERROR << "has no handler to handle to disconnect";
+        }
     }
-    while (before);
 
-    LOG_ERROR << "has no handler to handle to disconnect";
-    future->setFailure(ChannelPipelineException("has no handler to handle to disconnect"));
+    future->setFailure(ChannelPipelineException(
+                           "has no handler to handle to disconnect"));
+
     return future;
 }
 
@@ -565,7 +746,14 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
                 ctx.disconnectFunctor_(ctx, future);
             }
             else {
-                disconnect(future);
+                ChannelHandlerContext* prev = ctx.prevDisconnectHandler_;
+
+                if (prev) {
+                    prev->disconnectFunctor_(*prev,future);
+                }
+                else {
+                    ctx.disconnect(future);
+                }
             }
         }
         catch (const Exception& e) {
@@ -605,19 +793,28 @@ const ChannelFuturePtr& ChannelHandlerContext::close() {
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = prev_;
+    if (prevCloseHandler_) {
+        return close(*prevCloseHandler_, future);
+    }
 
-    do {
-        if (before->closeFunctor_) {
-            return close(*before, future);
-            break;
+    if (hasPrevCloseHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->closeFunctor_) {
+                prevCloseHandler_ = prev;
+                return close(*prev, future);
+            }
+
+            prev = prev->prev_;
         }
 
-        before = before->prev_;
+        if (!prev) {
+            hasPrevCloseHandler_ = false;
+            LOG_ERROR << "has no handler to handle to close";
+        }
     }
-    while (before);
 
-    LOG_ERROR << "has no handler to handle to close";
     future->setFailure(ChannelPipelineException("has no handler to handle to close"));
     return future;
 }
@@ -630,7 +827,14 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
                 ctx.closeFunctor_(ctx, future);
             }
             else {
-                close(future);
+                ChannelHandlerContext* prev = ctx.prevCloseHandler_;
+
+                if (prev) {
+                    prev->closeFunctor_(*prev, future);
+                }
+                else {
+                    ctx.close(future);
+                }
             }
         }
         catch (const Exception& e) {
@@ -671,19 +875,28 @@ const ChannelFuturePtr& ChannelHandlerContext::flush() {
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& future) {
-    ChannelHandlerContext* before = prev_;
+    if (prevFlushHandler_) {
+        return flush(*prevFlushHandler_, future);
+    }
 
-    do {
-        if (before->flushFunctor_) {
-            return flush(*before, future);
-            break;
+    if (hasPrevFlushHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->flushFunctor_) {
+                prevFlushHandler_ = prev;
+                return flush(*prev, future);
+            }
+
+            prev = prev->prev_;
         }
 
-        before = before->prev_;
+        if (!prev) {
+            hasPrevFlushHandler_ = false;
+            LOG_ERROR << "has no handler to handle to flush";
+        }
     }
-    while (before);
 
-    LOG_ERROR << "has no handler to handle to flush";
     future->setFailure(ChannelPipelineException("has no handler to handle to flush"));
     return future;
 }
@@ -696,7 +909,14 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
                 ctx.flushFunctor_(ctx, future);
             }
             else {
-                flush(future);
+                ChannelHandlerContext* prev = ctx.prevFlushHandler_;
+
+                if (prev) {
+                    prev->flushFunctor_(*prev, future);
+                }
+                else {
+                    ctx.flush(future);
+                }
             }
         }
         catch (const Exception& e) {
@@ -738,6 +958,10 @@ ChannelFuturePtr ChannelHandlerContext::newFuture() {
     if (!channel_.expired()) {
         return new DefaultChannelFuture(channel_, false);
     }
+}
+
+ChannelFuturePtr ChannelHandlerContext::newVoidFuture() {
+    return pipeline_->voidFuture();
 }
 
 ChannelFuturePtr ChannelHandlerContext::newSucceededFuture() {

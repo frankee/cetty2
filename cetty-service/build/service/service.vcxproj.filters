@@ -4,9 +4,6 @@
     <Filter Include="service">
       <UniqueIdentifier>{393eaf8f-a722-4a93-bb42-034b3379b32d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="service\asio">
-      <UniqueIdentifier>{8be64c74-cb4b-471e-8124-3d507f913639}</UniqueIdentifier>
-    </Filter>
     <Filter Include="service\builder">
       <UniqueIdentifier>{9e2401ff-a6d0-4918-a2ea-e39e928829f9}</UniqueIdentifier>
     </Filter>
@@ -26,9 +23,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp">
       <Filter>service\builder</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\service\ClientService.cpp">
-      <Filter>service</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,9 +44,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\asio\AsioClientServiceFactory.h">
-      <Filter>service\asio</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h">
       <Filter>service\builder</Filter>
     </ClInclude>
@@ -60,9 +51,6 @@
       <Filter>service\builder</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h">
-      <Filter>service</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceMessageHandler.h">
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h">
@@ -74,9 +62,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h">
       <Filter>service\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ClientServicePtr.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h">
       <Filter>service</Filter>
     </ClInclude>
@@ -84,6 +69,18 @@
       <Filter>service</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h">
+      <Filter>service\pool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageTraits.h">
       <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>

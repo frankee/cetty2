@@ -45,7 +45,7 @@ using namespace cetty::channel;
 
 template<typename H,
          typename InboundOut,
-         typename Context = ChannelMessageHandlerContext<H,
+         typename Ctx = ChannelMessageHandlerContext<H,
          ChannelBufferPtr,
          InboundOut,
          VoidMessage,
@@ -56,6 +56,7 @@ template<typename H,
          VoidMessageContainer> >
 class BufferToMessageDecoder : private boost::noncopyable {
 public:
+    typedef Ctx Context;
     typedef BufferToMessageDecoder<H, InboundOut, Context> Self;
 
     typedef boost::function<InboundOut(ChannelHandlerContext&, const ChannelBufferPtr&)> Decoder;
@@ -221,7 +222,7 @@ protected:
 protected:
     Decoder decoder_;
 
-    InboundTransfer* tansfer_;
+    InboundTransfer* transfer_;
     InboundContainer* container_;
 };
 

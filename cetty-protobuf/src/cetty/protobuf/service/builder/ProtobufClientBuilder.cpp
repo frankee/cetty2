@@ -17,7 +17,6 @@
 
 #include <cetty/protobuf/service/builder/ProtobufClientBuilder.h>
 
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/handler/codec/LengthFieldPrepender.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 
@@ -58,8 +57,7 @@ ProtobufClientBuilder::ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPo
 }
 
 void ProtobufClientBuilder::init() {
-    pipeline = ChannelPipelines::pipeline();
-
+#if 0
     pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
                           16 * 1024 * 1024,
                           0,
@@ -80,6 +78,7 @@ void ProtobufClientBuilder::init() {
     //pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
 
     ClientBuilderType::setPipeline(pipeline);
+#endif
 }
 
 }

@@ -19,7 +19,7 @@
 
 #include <map>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
+#include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/craft/http/ServiceMapperPtr.h>
 #include <cetty/craft/http/ServiceResponseMapperConfig.h>
 

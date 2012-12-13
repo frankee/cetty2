@@ -35,45 +35,62 @@ using namespace cetty::protobuf::service;
 
 HttpServiceFilter::HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
                                      const ServiceResponseMapperPtr& responseMapper)
-    : requestMapper(requestMapper),
-      responseMapper(responseMapper),
-      http2proto(requestMapper),
-      proto2http(responseMapper) {
+    : requestMapper_(requestMapper),
+      responseMapper_(responseMapper),
+      http2proto_(requestMapper),
+      proto2http_(responseMapper) {
+    filter_.setRequestFilter(boost::bind(&HttpServiceFilter::filterRequest,
+                                         this,
+                                         _1,
+                                         _2));
+    filter_.setResponseFilter(boost::bind(&HttpServiceFilter::filterResponse,
+                                          this,
+                                          _1,
+                                          _2,
+                                          _3,
+                                          _4));
 }
 
 HttpServiceFilter::HttpServiceFilter() {
-    requestMapper = new ServiceRequestMapper();
-    responseMapper = new ServiceResponseMapper();
+    requestMapper_ = new ServiceRequestMapper();
+    responseMapper_ = new ServiceResponseMapper();
 
-    http2proto.setRequestMapper(requestMapper);
-    proto2http.setResponseMapper(responseMapper);
+    http2proto_.setRequestMapper(requestMapper_);
+    proto2http_.setResponseMapper(responseMapper_);
+
+    filter_.setRequestFilter(boost::bind(&HttpServiceFilter::filterRequest,
+        this,
+        _1,
+        _2));
+    filter_.setResponseFilter(boost::bind(&HttpServiceFilter::filterResponse,
+        this,
+        _1,
+        _2,
+        _3,
+        _4));
 }
 
 ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
-        const HttpMessagePtr& req) {
-    HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);
-    ProtobufServiceMessagePtr msg = http2proto.getProtobufMessage(request);
+        const HttpPackage& req) {
+    HttpRequestPtr request = req.httpRequest();
+    ProtobufServiceMessagePtr msg = http2proto_.getProtobufMessage(request);
 
     if (!msg) {
         HttpResponsePtr response = new HttpResponse(
             request->version(),
             HttpResponseStatus::BAD_REQUEST);
-
-        outboundTransfer.unfoldAndAdd(
-            boost::static_pointer_cast<HttpMessage>(response));
-        ctx.flush();
     }
 
     return msg;
 }
 
 HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
-        const HttpMessagePtr& req,
+        const HttpPackage& req,
         const ProtobufServiceMessagePtr& rep,
         const ChannelFuturePtr& future) {
-    HttpRequestPtr request = boost::static_pointer_cast<HttpRequest>(req);
+    HttpRequestPtr request = req.httpRequest();
 
-    HttpResponsePtr response = proto2http.getHttpResponse(request, rep);
+    HttpResponsePtr response = proto2http_.getHttpResponse(request, rep);
 
     if (!response) {
         LOG_WARN << "HttpServiceFilter filterResponse has an error.";
@@ -82,17 +99,16 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
                                        HttpResponseStatus::BAD_REQUEST));
     }
 
-    if (!HttpHeaders::keepAlive(*req)) {
+    if (!request->keepAlive()) {
         LOG_DEBUG << "not keep alive mode, close the channel after writer completed.";
         future->addListener(ChannelFutureListener::CLOSE);
     }
 
-    return boost::static_pointer_cast<HttpMessage>(response);
+    return response;
 }
 
 void HttpServiceFilter::exceptionCaught(ChannelHandlerContext& ctx,
                                         const ChannelException& cause) {
-    ctx.fireExceptionCaught(ctx, cause);
 }
 
 }

@@ -256,6 +256,8 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             pipeline_->fireChannelInactive();
         }
+
+        Channel::setClosed();
     }
     else {
         // Closed already.

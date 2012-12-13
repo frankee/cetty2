@@ -35,6 +35,7 @@ AsioServerSocketChannel::AsioServerSocketChannel(
     const EventLoopPtr& eventLoop,
     const EventLoopPoolPtr& childEventLoopPool)
     : Channel(ChannelPtr(), eventLoop),
+      lastChildId_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       acceptor_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       childServicePool_(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)),
@@ -143,7 +144,7 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
     accept();
 
     // start the event loop pool if in main thread mode.
-    const EventLoopPoolPtr& loop = ioService_->getEventLoopPool();
+    const EventLoopPoolPtr& loop = ioService_->eventLoopPool();
 
     if (loop && loop->isMainThread()) {
         LOG_INFO << "the asio service pool starting to run in main thread.";
@@ -165,7 +166,8 @@ void AsioServerSocketChannel::doBind(const SocketAddress& localAddress) {
 void AsioServerSocketChannel::accept() {
     const AsioServicePtr& ioService = childServicePool_->getNextService();
 
-    AsioSocketChannelPtr c(new AsioSocketChannel(shared_from_this(),
+    AsioSocketChannelPtr c(new AsioSocketChannel(++lastChildId_,
+                           shared_from_this(),
                            ioService));
 
     acceptor_.async_accept(c->tcpSocket(),
@@ -181,9 +183,9 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
     BOOST_ASSERT(channel);
 
     if (!error) {
+        ChannelPtr acceptedChannel = boost::static_pointer_cast<Channel>(channel);
         // create the socket add it to the buffer and fire the event
-        pipeline().addInboundChannelMessage<ChannelPtr>(
-            boost::static_pointer_cast<Channel>(channel));
+        pipeline().addInboundChannelMessage<ChannelPtr>(acceptedChannel);
 
         pipeline().fireMessageUpdated();
 
@@ -191,19 +193,21 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
         channel->initialize();
 
         childChannels_.insert(
-            std::make_pair<int, ChannelPtr>(channel->id(), channel));
+            std::make_pair<int, ChannelPtr>(acceptedChannel->id(),
+                                            acceptedChannel));
 
-        //channel->getCloseFuture()->addListener(boost::bind(
-        //    &AsioServerSocketChannel::handleChildClosed,
-        //    this,
-        //    _1),
-        //    100);
+        acceptedChannel->closeFuture()->addListener(boost::bind(
+            &AsioServerSocketChannel::handleChildClosed,
+            this,
+            _1),
+            100);
 
         channel->pipeline().fireChannelActive();
         channel->beginRead();
 
         const AsioServicePtr& ioService = childServicePool_->getNextService();
         AsioSocketChannelPtr newChannel(new AsioSocketChannel(
+                                            ++lastChildId_,
                                             shared_from_this(),
                                             ioService));
 
@@ -274,7 +278,7 @@ void AsioServerSocketChannel::doInitialize() {
             _1,
             _2));
 
-    pipeline().addFirst<AsioServerSocketChannel*>("bridge", this);
+    pipeline().setHead<AsioServerSocketChannel*>("bridge", this);
 }
 
 }
