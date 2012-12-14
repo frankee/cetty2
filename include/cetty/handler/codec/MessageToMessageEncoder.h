@@ -56,7 +56,7 @@ template<typename H,
          VoidMessageContainer,
          ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
          ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > >
-class MessageToMessageEncoder :private boost::noncopyable {
+class MessageToMessageEncoder : private boost::noncopyable {
 public:
     typedef C Context;
 
@@ -94,7 +94,7 @@ public:
 
     ~MessageToMessageEncoder() {}
 
-    virtual void registerTo(Context& ctx) {
+    void registerTo(Context& ctx) {
         transfer_ = ctx.outboundTransfer();
         container_ = ctx.outboundContainer();
 
