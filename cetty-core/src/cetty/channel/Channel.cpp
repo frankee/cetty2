@@ -32,38 +32,6 @@
 namespace cetty {
 namespace channel {
 
-class ChannelCloseFuture : public DefaultChannelFuture {
-public:
-    ChannelCloseFuture(const ChannelPtr& channel)
-        : DefaultChannelFuture(channel, false) {
-    }
-    ~ChannelCloseFuture() {}
-
-    virtual bool setSuccess() {
-        // User is not supposed to call this method - ignore silently.
-        return false;
-    }
-
-    virtual bool setFailure(const Exception& cause) {
-        // User is not supposed to call this method - ignore silently.
-        return false;
-    }
-
-    bool setClosed() {
-        ChannelPtr ch = channel();
-        if (!ch) {
-            try {
-                ch->doPreClose();
-            }
-            catch (const Exception& e) {
-                LOG_WARN << "doPreClose() raised an exception: " << e.getDisplayText();
-            }
-        }
-
-        return DefaultChannelFuture::setSuccess();
-    }
-};
-
 Channel::Channel(const ChannelPtr& parent,
                  const EventLoopPtr& eventLoop)
     : id_(),
@@ -94,12 +62,17 @@ Channel::~Channel() {
 void Channel::initialize() {
     ChannelPtr self = shared_from_this();
 
-    succeededFuture_ = new SucceededChannelFuture(self);
-    closeFuture_ = new ChannelCloseFuture(self);
-    pipeline_ = new ChannelPipeline(self);
+    if (!succeededFuture_) {
+        pipeline_ = new ChannelPipeline(self);
+        succeededFuture_ = new SucceededChannelFuture(self);
+        closeFuture_ = new DefaultChannelFuture(self, false);
 
-    if (initializer_) {
-        initializer_(self);
+        if (initializer_) {
+            initializer_(self);
+        }
+    }
+    else {
+        closeFuture_.reset(new DefaultChannelFuture(self, false));
     }
 
     doInitialize();
@@ -131,10 +104,6 @@ ChannelFuturePtr Channel::newFailedFuture(const Exception& e) {
 
 ChannelFuturePtr Channel::newVoidFuture() {
     return new VoidChannelFuture(shared_from_this());
-}
-
-bool Channel::setClosed() {
-    return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture_)->setClosed();
 }
 
 void Channel::allocateId() {
@@ -232,8 +201,9 @@ void Channel::doDisconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& f
 void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
     bool wasActive = isActive();
 
-    if (setClosed()) {
+    if (isOpen()) {
         try {
+            doPreClose();
             doClose();
             future->setSuccess();
         }
@@ -251,8 +221,6 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
             //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
             pipeline_->fireChannelInactive();
         }
-
-        Channel::setClosed();
     }
     else {
         // Closed already.

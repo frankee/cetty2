@@ -349,16 +349,6 @@ protected:
 
     virtual void doInitialize() {}
 
-    /**
-     * Marks this channel as closed.  This method is intended to be called by
-     * an internal component - please do not call it unless you know what you
-     * are doing.
-     *
-     * @return <tt>true</tt> if and only if this channel was not marked as
-     *                      closed yet
-     */
-    virtual bool setClosed();
-
     void closeIfClosed();
 
     template<typename C>
@@ -393,9 +383,6 @@ private:
 
     void doClose(ChannelHandlerContext& ctx,
                  const ChannelFuturePtr& future);
-
-private:
-    friend class ChannelCloseFuture;
 
 private:
     int id_;

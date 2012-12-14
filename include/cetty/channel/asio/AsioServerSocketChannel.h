@@ -21,6 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <deque>
 #include <boost/asio.hpp>
 
 #include <cetty/channel/IpAddress.h>
@@ -69,8 +70,6 @@ public:
     }
 
 protected:
-    virtual bool setClosed();
-
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
@@ -85,9 +84,11 @@ private:
     void handleChildClosed(const ChannelFuture& future);
 
 private:
-    typedef std::map<int, ChannelPtr> ChildChannels;
+    typedef std::map<int, AsioSocketChannelPtr> ChildChannels;
+    typedef std::deque<AsioSocketChannelPtr> ReusableChildChannels;
 
 private:
+    bool initialized_;
     int lastChildId_;
     AsioServicePtr ioService_;
 
@@ -97,6 +98,8 @@ private:
 
     AsioServicePoolPtr childServicePool_;
     ChildChannels childChannels_;
+
+    ReusableChildChannels reusableChildChannels_;
 
     IpAddress::Family ipFamily;
     mutable SocketAddress localAddress;

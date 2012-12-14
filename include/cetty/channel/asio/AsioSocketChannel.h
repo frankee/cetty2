@@ -53,28 +53,28 @@ class AsioServerSocketChannel;
 class AsioSocketChannel : public cetty::channel::Channel {
 public:
     typedef ChannelMessageHandlerContext<
-        AsioSocketChannel*,
-        VoidMessage,
-        VoidMessage,
-        ChannelBufferPtr,
-        VoidMessage,
-        VoidMessageContainer,
-        VoidMessageContainer,
-        ChannelBufferContainer,
-        VoidMessageContainer> Context;
+    AsioSocketChannel*,
+    VoidMessage,
+    VoidMessage,
+    ChannelBufferPtr,
+    VoidMessage,
+    VoidMessageContainer,
+    VoidMessageContainer,
+    ChannelBufferContainer,
+    VoidMessageContainer> Context;
 
 public:
     AsioSocketChannel(const EventLoopPtr& eventLoop);
 
     AsioSocketChannel(int id,
-        const EventLoopPtr& eventLoop);
+                      const EventLoopPtr& eventLoop);
 
     AsioSocketChannel(const ChannelPtr& parent,
                       const EventLoopPtr& eventLoop);
 
     AsioSocketChannel(int id,
-        const ChannelPtr& parent,
-        const EventLoopPtr& eventLoop);
+                      const ChannelPtr& parent,
+                      const EventLoopPtr& eventLoop);
 
     virtual ~AsioSocketChannel();
 
@@ -88,8 +88,6 @@ public:
     void registerTo(Context& context);
 
 private:
-    virtual bool setClosed();
-
     virtual void doBind(const SocketAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
@@ -114,11 +112,10 @@ private:
     void beginRead();
 
     void handleRead(const boost::system::error_code& error,
-        size_t bytes_transferred,
-        const ChannelPtr& channel);
+                    size_t bytes_transferred);
 
     void handleWrite(const boost::system::error_code& error,
-        size_t bytes_transferred);
+                     size_t bytes_transferred);
 
     void handleConnect(const boost::system::error_code& error,
                        boost::asio::ip::tcp::resolver::iterator endpointIterator,
@@ -140,7 +137,9 @@ private:
 
 private:
     bool opened_;
+    bool isReading_;
     bool isWriting_;
+    bool initialized_;
     int  highWaterMarkCounter_;
 
     AsioServicePtr  ioService_;

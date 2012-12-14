@@ -50,7 +50,9 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
                                      const EventLoopPtr& eventLoop)
     : Channel(parent, eventLoop),
       opened_(false),
+      isReading_(false),
       isWriting_(false),
+      initialized_(false),
       highWaterMarkCounter_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
@@ -63,7 +65,9 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
 AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
     : Channel(ChannelPtr(), eventLoop),
       opened_(false),
+      isReading_(false),
       isWriting_(false),
+      initialized_(false),
       highWaterMarkCounter_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
@@ -76,7 +80,9 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
 AsioSocketChannel::AsioSocketChannel(int id, const EventLoopPtr& eventLoop)
     : Channel(id, ChannelPtr(), eventLoop),
       opened_(false),
+      isReading_(false),
       isWriting_(false),
+      initialized_(false),
       highWaterMarkCounter_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
@@ -91,7 +97,9 @@ AsioSocketChannel::AsioSocketChannel(int id,
                                      const EventLoopPtr& eventLoop)
     : Channel(id, parent, eventLoop),
       opened_(false),
+      isReading_(false),
       isWriting_(false),
+      initialized_(false),
       highWaterMarkCounter_(0),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
@@ -157,19 +165,8 @@ bool AsioSocketChannel::isOpen() const {
     return opened_;
 }
 
-bool AsioSocketChannel::setClosed() {
-    cleanUpWriteBuffer();
-
-    LOG_INFO << "closed the socket channel, finally calling FutureListener"
-             " which to the ChannelCloseFuture.";
-
-    return opened_;
-    //return Channel::setClosed();
-}
-
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
-                                   size_t bytes_transferred,
-                                   const ChannelPtr& channel) {
+                                   size_t bytes_transferred) {
     if (!error) {
         readBuffer_->offsetWriterIndex(bytes_transferred);
 
@@ -179,10 +176,13 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
-        // FIXME
+        isReading_ = false;
+
         if (opened_) {
             close(newVoidFuture());
         }
+
+        closeFuture()->setSuccess();
     }
 }
 
@@ -209,7 +209,7 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
             LOG_ERROR << msg;
         }
 
-        close();
+        close(newVoidFuture());
     }
 }
 
@@ -423,14 +423,15 @@ void AsioSocketChannel::beginRead() {
 
         buf = readBuffer_->writableBytes(&size);
     }
-
+    
     tcpSocket_.async_read_some(
         boost::asio::buffer(buf, size),
         boost::bind(&AsioSocketChannel::handleRead,
                     this,
                     boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred,
-                    shared_from_this()));
+                    boost::asio::placeholders::bytes_transferred));
+
+    isReading_ = true;
 }
 
 void AsioSocketChannel::doBind(const SocketAddress& localAddress) {
@@ -449,6 +450,8 @@ void AsioSocketChannel::doClose() {
 
     opened_ = false;
 
+    cleanUpWriteBuffer();
+
     boost::system::error_code error;
 
     if (isActive()) {
@@ -466,6 +469,10 @@ void AsioSocketChannel::doClose() {
     if (error) {
         LOG_ERROR << "failed to close the tcp socket."
                   << error.value() << ":" << error.message();
+    }
+
+    if (!isReading_) {
+        closeFuture()->setSuccess();
     }
 }
 
@@ -534,14 +541,18 @@ void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
 }
 
 void AsioSocketChannel::doInitialize() {
-    Channel::config().setSetOptionCallback(boost::bind(
+    if (!initialized_) {
+        Channel::config().setSetOptionCallback(boost::bind(
             &AsioSocketChannelConfig::setOption,
             &socketConfig_,
             _1,
             _2));
 
-    // no need use weak_ptr here
-    pipeline().setHead<AsioSocketChannel*>("bridge", this);
+        // no need use weak_ptr here
+        pipeline().setHead<AsioSocketChannel*>("bridge", this);
+
+        initialized_ = true;
+    }
 
     opened_ = true;
 }
