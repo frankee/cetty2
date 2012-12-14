@@ -381,7 +381,7 @@ protected:
     }
 
 private:
-    int  allocateId();
+    void allocateId();
 
 private:
     void doBind(ChannelHandlerContext& ctx,

@@ -182,6 +182,7 @@
     <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\Adler32.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Base64.cpp" />
     <ClCompile Include="..\..\src\cetty\util\CurrentThread.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
@@ -339,6 +340,7 @@
     <ClInclude Include="..\..\..\include\cetty\Platform.h" />
     <ClInclude Include="..\..\..\include\cetty\PlatformWin32.h" />
     <ClInclude Include="..\..\..\include\cetty\Types.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\Adler32.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Base64.h" />
     <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h" />
     <ClInclude Include="..\..\..\include\cetty\util\MetaProgramming.h" />

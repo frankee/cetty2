@@ -24,6 +24,15 @@
     <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp">
       <Filter>service\builder</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\CachingConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\service\pool\WatermarkConnectionPool.cpp">
+      <Filter>service\pool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">

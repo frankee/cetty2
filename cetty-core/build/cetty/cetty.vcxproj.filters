@@ -347,6 +347,9 @@
     <ClCompile Include="..\..\src\cetty\util\CurrentThread.cpp">
       <Filter>util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\Adler32.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">
@@ -901,6 +904,9 @@
       <Filter>util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\Adler32.h">
       <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>

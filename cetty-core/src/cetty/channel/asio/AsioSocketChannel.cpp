@@ -183,18 +183,6 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         if (opened_) {
             close(newVoidFuture());
         }
-
-        //         if (pipeline_ && pipeline_->attached()) {
-        //             LOG_WARN << "handleRead Error : " << error.value()
-        //                      << " msg: \"" << error.message()
-        //                      << "\" then close the channel.";
-        //
-        //         }
-        //         else {
-        //             LOG_WARN << "handleRead Error : " << error.value()
-        //                      << " msg: \"" << error.message()
-        //                      << "\" closed by self, do nothing.";
-        //         }
     }
 }
 

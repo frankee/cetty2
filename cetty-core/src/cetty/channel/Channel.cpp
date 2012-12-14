@@ -15,7 +15,6 @@
  */
 #include <cetty/channel/Channel.h>
 
-#include <boost/crc.hpp>
 #include <boost/bind.hpp>
 
 #include <cetty/channel/SocketAddress.h>
@@ -26,6 +25,7 @@
 #include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/channel/SucceededChannelFuture.h>
 
+#include <cetty/util/Adler32.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 
@@ -50,9 +50,10 @@ public:
     }
 
     bool setClosed() {
-        if (channel) {
+        ChannelPtr ch = channel();
+        if (!ch) {
             try {
-                channel->doPreClose();
+                ch->doPreClose();
             }
             catch (const Exception& e) {
                 LOG_WARN << "doPreClose() raised an exception: " << e.getDisplayText();
@@ -61,9 +62,6 @@ public:
 
         return DefaultChannelFuture::setSuccess();
     }
-
-private:
-    ChannelPtr channel;
 };
 
 Channel::Channel(const ChannelPtr& parent,
@@ -72,9 +70,7 @@ Channel::Channel(const ChannelPtr& parent,
       parent_(parent),
       eventLoop_(eventLoop),
       pipeline_() {
-    if (!id_) {
-        id_ = allocateId();
-    }
+    allocateId();
 }
 
 Channel::Channel(int id,
@@ -84,9 +80,7 @@ Channel::Channel(int id,
       parent_(parent),
       eventLoop_(eventLoop),
       pipeline_() {
-    if (!id_) {
-        id_ = allocateId();
-    }
+    allocateId();
 }
 
 Channel::~Channel() {
@@ -143,10 +137,11 @@ bool Channel::setClosed() {
     return boost::static_pointer_cast<ChannelCloseFuture>(closeFuture_)->setClosed();
 }
 
-int Channel::allocateId() {
-    boost::crc_32_type crc32;
-    crc32.process_bytes((void const*)this, sizeof(this));
-    return crc32.checksum();
+void Channel::allocateId() {
+    if (!id_) {
+        id_ = Adler32::adler32(reinterpret_cast<char const*>(this),
+                               sizeof(this));
+    }
 }
 
 int Channel::compareTo(const ChannelPtr& c) const {
