@@ -15,14 +15,12 @@ static void ngx_tcp_proxy_init_session(ngx_tcp_session_t *s);
 static void ngx_tcp_proxy_init_upstream(ngx_tcp_session_t *s, void *conf);
 static void ngx_tcp_upstream_init_proxy_handler(ngx_tcp_session_t *s, 
     ngx_tcp_upstream_t *u);
-static char *ngx_tcp_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd,
-		void *conf);
+static char *ngx_tcp_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd,	void *conf);
 static void ngx_tcp_proxy_handler(ngx_event_t *ev);
 static void ngx_tcp_proxy_peer_handler(ngx_event_t *ev);
 
 static void *ngx_tcp_proxy_create_srv_conf(ngx_conf_t *cf);
-static char *ngx_tcp_proxy_merge_srv_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+static char *ngx_tcp_proxy_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child);
 
 static void *ngx_tcp_proxy_create_loc_conf(ngx_conf_t *cf);
 
@@ -30,7 +28,7 @@ static ngx_tcp_upstream_t *ngx_tcp_proxy_get_session_upstream(ngx_tcp_session_t 
 static ngx_tcp_upstream_t *ngx_tcp_procy_get_server_upstream(ngx_tcp_session_t *s);
 static ngx_tcp_upstream_t *ngx_tcp_proxy_get_upstream(ngx_tcp_session_t *s);
 
-static ngx_uint_t ngx_tcp_check_has_active_upstream(ngx_tcp_session_t *s);
+// static ngx_uint_t ngx_tcp_check_has_active_upstream(ngx_tcp_session_t *s);
 
 static ngx_tcp_protocol_t  ngx_tcp_generic_protocol = {
 
@@ -316,12 +314,7 @@ ngx_tcp_proxy_handler(ngx_event_t *ev)
     if(c->read->eof) {
     	ngx_log_error(NGX_LOG_DEBUG, c->log, 0, "proxied session done");
 
-    	// todo copy buffer
-    	// ...
-
-
     	flag = 1;
-        /* todo send data in all backends' send buffer
 
         upstream = s->upstreams.elts;
         for(i = 0; i < s->upstreams.nelts; ++i) {
@@ -332,32 +325,28 @@ ngx_tcp_proxy_handler(ngx_event_t *ev)
         	pc = upstream[i].peer.connection;
             pb = pc->buffer;
             size = pb->last - pb->pos;
-            if(size && pc->write->ready) {
-            	n = pc->send(pc, pb->pos, size);
+            if(size > 0) {
+            	if(pc->write->ready) {
+            	    n = pc->send(pc, pb->pos, size);
+            	    if(n == size) {
+            		    continue;
+            	    }
 
-            	err = ngx_socket_errno;
-            	if (n == NGX_ERROR) {
-            	    ngx_tcp_finalize_session(s);
-            	    return;
+            	    if(n == NGX_ERROR) {
+            	    	ngx_tcp_finalize_session(s);
+            	    }
             	}
 
-            	if (n > 0) {
-            	    pb->pos += n;
-            	    if (pb->pos == pb->last) {
-            	        pb->pos = pb->start;
-            	        pb->last = pb->start;
-
-            	        continue;
-            	    }
-                    flag = 0;
-                }
+            	flag = 0;
             }
         }
 
-        */
-
     	if(flag) {
     		ngx_tcp_finalize_session(s);
+    	}
+
+    	if(c->read->timer_set) {
+    		ngx_del_timer(c->read);
     	}
 
         return;
@@ -442,8 +431,10 @@ ngx_tcp_upstream_init_proxy_handler(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
     c->read->handler = ngx_tcp_proxy_peer_handler;
     c->write->handler = ngx_tcp_proxy_handler;
 
-    // ngx_add_timer(c->read, plcf->upstream.read_timeout);
-    // ngx_add_timer(c->write, plcf->upstream.send_timeout);
+    /**
+     * ngx_add_timer(c->read, plcf->upstream.read_timeout);
+     * ngx_add_timer(c->write, plcf->upstream.send_timeout);
+     */
 
 #if (NGX_TCP_SSL)
 
@@ -789,32 +780,18 @@ ngx_tcp_proxy_peer_handler(ngx_event_t *ev){
 
     if(do_read) {
     	if(pc->read->eof) {
-
-    		/* backend has colsed connection */
-
             us = s->upstreams.elts;
             for(i = 0; i < s->upstreams.nelts; ++i) {
             	if(us[i].peer.connection == pc) {
             		us[i].unused = 1;
+            		ngx_tcp_upstream_finalize_session(s, &us[i], NGX_DONE);
             	}
             }
-
-            // todo clear upstream info
-            // ...
-
-
-            // todo copy cache
-            // ...
-
-    		ngx_log_error(NGX_LOG_DEBUG, c->log, 0, "proxied session done");
-
-    		if(!ngx_tcp_check_has_active_upstream(s)) {
-    		    ngx_tcp_finalize_session(s);
-    		}
     	}
     }
 }
 
+/*
 static ngx_uint_t
 ngx_tcp_check_has_active_upstream(ngx_tcp_session_t *s) {
 	ngx_tcp_upstream_t              *us;
@@ -829,3 +806,4 @@ ngx_tcp_check_has_active_upstream(ngx_tcp_session_t *s) {
 
 	return 0;
 }
+*/
