@@ -68,8 +68,8 @@ using namespace cetty::util;
 class HttpRequest : public cetty::util::ReferenceCounter<HttpRequest, int> {
 public:
     HttpRequest()
-        : version_(HttpVersion::HTTP_1_1),
-          method_(HttpMethod::GET) {
+        : method_(HttpMethod::GET),
+          version_(HttpVersion::HTTP_1_1) {
     }
 
     /**
@@ -269,7 +269,7 @@ private:
     URI uri_;
     std::string uriStr_;
 
-    HttpMethod  method_;
+    HttpMethod method_;
     HttpVersion version_;
 
     HttpHeaders headers_;
