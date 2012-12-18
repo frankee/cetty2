@@ -30,9 +30,13 @@ class ServiceRequestMapperConfig : public cetty::config::ConfigObject {
 public:
     class Template : public cetty::config::ConfigObject {
     public:
-        std::string uri;
         std::string method;
-        std::string cookie;
+        std::string path;
+
+        std::vector<KeyValuePair*> pathParams;
+        std::vector<KeyValuePair*> queryParams;
+        std::vector<KeyValuePair*> headerParams;
+        std::vector<KeyValuePair*> cookieParams;
 
         Template();
 

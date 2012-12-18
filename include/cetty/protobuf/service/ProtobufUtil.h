@@ -52,13 +52,13 @@ public:
 public:
     static ChecksumFunction adler32Checksum;
 
-    static FieldValue getMessageField(const std::string& name,
-                                      const Message& message);
+    static FieldValue getMessageFieldValue(const Message& message,
+                                           const std::string& name);
 
     static void logHandler(google::protobuf::LogLevel level,
-        const char* filename,
-        int line,
-        const std::string& message);
+                           const char* filename,
+                           int line,
+                           const std::string& message);
 
 private:
     ProtobufUtil();

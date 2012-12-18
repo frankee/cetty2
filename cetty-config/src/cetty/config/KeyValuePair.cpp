@@ -20,17 +20,13 @@
 namespace cetty {
 namespace config {
 
-const std::string KeyValuePair::NAME("KeyValuePair");
-
 CETTY_CONFIG_ADD_DESCRIPTOR(KeyValuePair,
-                            new ConfigDescriptor(
-                                2,
-                                CETTY_CONFIG_FIELD(KeyValuePair, key, STRING),
-                                CETTY_CONFIG_FIELD(KeyValuePair, value, STRING)),
-                            new KeyValuePair);
+                            2,
+                            CETTY_CONFIG_FIELD(KeyValuePair, key, STRING),
+                            CETTY_CONFIG_FIELD(KeyValuePair, value, STRING));
 
 KeyValuePair::KeyValuePair()
-    : ConfigObject(NAME) {
+    : ConfigObject("cetty.config.KeyValuePair") {
 }
 
 }

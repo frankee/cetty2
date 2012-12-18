@@ -39,5 +39,5 @@ cetty-doto
 		 
 
 
-1，channel删除的时机选择，自己close channel后，onread接收到错误消息后关闭
-2，重复利用accept channel，需要重新open
+(OK)1，channel删除的时机选择，自己close channel后，onread接收到错误消息后关闭
+(OK)2，重复利用accept channel，需要重新open

@@ -22,15 +22,22 @@
 namespace cetty {
 namespace config {
 
-#define CETTY_CONFIG_ADD_DESCRIPTOR(name, descriptor, object) \
-    class DescriptorRegister##name {\
+class ConfigObject;
+
+#define CETTY_CONFIG_ADD_DESCRIPTOR(Object, fieldCnt, field, ...) \
+    class DescriptorRegister##Object {\
     public:\
-        DescriptorRegister##name() {\
-            ConfigObject::addDescriptor(#name, descriptor, object);\
+        DescriptorRegister##Object() {\
+            ConfigObject::addDescriptor(\
+                                        new ConfigObjectDescriptor(\
+                                                new Object,\
+                                                fieldCnt,\
+                                                field,\
+                                                ##__VA_ARGS__));\
         }\
     };\
-    static DescriptorRegister##name descriptorRegister##name;\
-     
+    static DescriptorRegister##Object descriptorRegister##Object;
+
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ConfigFieldDescriptor(\
@@ -68,8 +75,8 @@ namespace config {
                               #CLASS,\
                               true\
                              )\
-
      
+
 class ConfigFieldDescriptor {
 public:
     // Specifies the C++ data type used to represent the field.  There is a
@@ -93,28 +100,73 @@ public:
     const char* name;
     const char* className;
 
-    ConfigFieldDescriptor(int offset, int type, const char* name, const char* className, bool repeated = false)
-        : repeated(repeated), offset(offset), type(type), name(name), className(className) {}
+    ConfigFieldDescriptor(int offset,
+                          int type,
+                          const char* name,
+                          const char* className,
+                          bool repeated = false)
+        : repeated(repeated),
+          offset(offset),
+          type(type),
+          name(name),
+          className(className) {
+    }
 };
 
-class ConfigDescriptor {
+typedef ConfigFieldDescriptor const* ConstConfigFieldDescriptorPtr;
+
+class ConfigObjectDescriptor : private boost::noncopyable {
 public:
-    typedef const ConfigFieldDescriptor* ConstConfigFieldDescriptorPtr;
-    typedef std::vector<ConstConfigFieldDescriptorPtr>::const_iterator ConstIterator;
+    typedef std::vector<ConstConfigFieldDescriptorPtr> FieldDescriptors;
+    typedef FieldDescriptors::const_iterator ConstIterator;
 
 public:
-    ConfigDescriptor(int count, ConstConfigFieldDescriptorPtr descriptor, ...);
-    ~ConfigDescriptor();
+    ConfigObjectDescriptor(ConfigObject* defaultInstance,
+                           int count,
+                           ConstConfigFieldDescriptorPtr descriptor, ...);
+
+    ~ConfigObjectDescriptor();
 
 public:
+    const std::string& name() const;
+
+    const ConfigObject* defaultInstance() const;
+
     ConstIterator begin() const;
     ConstIterator end() const;
 
-    int fieldCnt() const { return (int)fields.size(); }
+    int fieldCnt() const;
+    ConstConfigFieldDescriptorPtr field(int index) const;
 
 private:
-    std::vector<ConstConfigFieldDescriptorPtr> fields;
+    FieldDescriptors fields_;
+    ConfigObject* defaultInstance_;
 };
+
+inline
+const ConfigObject* ConfigObjectDescriptor::defaultInstance() const {
+    return defaultInstance_;
+}
+
+inline
+ConfigObjectDescriptor::ConstIterator ConfigObjectDescriptor::begin() const {
+    return fields_.begin();
+}
+
+inline
+ConfigObjectDescriptor::ConstIterator ConfigObjectDescriptor::end() const {
+    return fields_.end();
+}
+
+inline
+int ConfigObjectDescriptor::fieldCnt() const {
+    return static_cast<int>(fields_.size());
+}
+
+inline
+ConstConfigFieldDescriptorPtr ConfigObjectDescriptor::field(int index) const {
+    return fields_[index];
+}
 
 }
 }

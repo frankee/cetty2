@@ -31,8 +31,8 @@ namespace service {
 using namespace google::protobuf;
 using namespace cetty::logging;
 
-ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
-        const Message& message) {
+ProtobufUtil::FieldValue ProtobufUtil::getMessageFieldValue(const Message& message,
+    const std::string& name) {
 
     std::string fieldName;
     std::string subFieldName;
@@ -138,7 +138,7 @@ ProtobufUtil::FieldValue ProtobufUtil::getMessageField(const std::string& name,
             }
         }
         else {
-            return getMessageField(subFieldName, reflection->GetMessage(message, field));
+            return getMessageFieldValue(reflection->GetMessage(message, field), subFieldName);
         }
     }
 

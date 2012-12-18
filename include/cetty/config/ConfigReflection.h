@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <cetty/Types.h>
 #include <cetty/config/ConfigDescriptor.h>
@@ -29,103 +30,99 @@ namespace config {
 class ConfigObject;
 class ConfigFieldDescriptor;
 
-class ConfigReflection : public boost::noncopyable {
+class ConfigReflection : private boost::noncopyable {
 public:
     ConfigReflection();
 
-    void ListFields(const ConfigObject& object,
+    void listFields(const ConfigObject& object,
                     std::vector<const ConfigFieldDescriptor*>* output) const;
 
-    int getInt(const ConfigObject& object,
-               const ConfigFieldDescriptor* field) const {
-        return getField<int>(object, field);
-    }
+    boost::optional<int> getInt(const ConfigObject& object,
+                                const ConfigFieldDescriptor* field) const;
 
-    int64_t getInt64(const ConfigObject& object,
-                     const ConfigFieldDescriptor* field) const {
-        return getField<int64_t>(object, field);
-    }
+    boost::optional<int64_t> getInt64(const ConfigObject& object,
+                                      const ConfigFieldDescriptor* field) const;
 
-    double getDouble(const ConfigObject& object,
-                     const ConfigFieldDescriptor* field) const {
-        return getField<double>(object, field);
-    }
+    boost::optional<double> getDouble(const ConfigObject& object,
+                                      const ConfigFieldDescriptor* field) const;
 
-    bool getBool(const ConfigObject& object,
-                 const ConfigFieldDescriptor* field) const {
-        return getField<bool>(object, field);
-    }
+    boost::optional<bool> getBool(const ConfigObject& object,
+                                  const ConfigFieldDescriptor* field) const;
 
     std::string getString(const ConfigObject& object,
-                          const ConfigFieldDescriptor* field) const {
-        return getField<std::string>(object, field);
-    }
+                          const ConfigFieldDescriptor* field) const;
 
     void setInt32(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  int value) const {
-        setField<int>(object, field, value);
-    }
+                  int value) const;
+
     void setInt64(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  int64_t value) const {
-        setField<int64_t>(object, field, value);
-    }
+                  int64_t value) const;
+
     void setDouble(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
-                   double value) const {
-        setField<double>(object, field, value);
-    }
+                   double value) const;
+
     void setBool(ConfigObject* object,
                  const ConfigFieldDescriptor* field,
-                 bool value) const {
-        setField<bool>(object, field, value);
-    }
+                 bool value) const;
+
     void setString(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
-                   const std::string& value) const {
-        setField<std::string>(object, field, value);
-    }
+                   const std::string& value) const;
 
-    ConfigObject* mutableConfigObject(ConfigObject* object,
-                                      const ConfigFieldDescriptor* field) const {
-        return *mutableRaw<ConfigObject*>(object, field);
-    }
+    ConfigObject* mutableObject(ConfigObject* object,
+                                const ConfigFieldDescriptor* field) const;
 
     void addInt32(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  int value) const {
-        addField<int>(object, field, value);
-    }
+                  int value) const;
+
+    void addInt32(ConfigObject* object,
+                  const ConfigFieldDescriptor* field,
+                  const std::vector<int>& value) const;
+
     void addInt64(ConfigObject* object,
                   const ConfigFieldDescriptor* field,
-                  int64_t value) const {
-        addField<int64_t>(object, field, value);
-    }
+                  int64_t value) const;
+
+    void addInt64(ConfigObject* object,
+                  const ConfigFieldDescriptor* field,
+                  const std::vector<int64_t>& value) const;
+
     void addDouble(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
-                   double value) const {
-        addField<double>(object, field, value);
-    }
+                   double value) const;
+
+    void addDouble(ConfigObject* object,
+                   const ConfigFieldDescriptor* field,
+                   const std::vector<double>& value) const;
+
     void addBool(ConfigObject* object,
                  const ConfigFieldDescriptor* field,
-                 bool value) const {
-        addField<bool>(object, field, value);
-    }
+                 bool value) const;
+
+    void addBool(ConfigObject* object,
+                 const ConfigFieldDescriptor* field,
+                 const std::vector<bool>& value) const;
+
     void addString(ConfigObject* object,
                    const ConfigFieldDescriptor* field,
-                   const std::string& value) const {
-        addField<std::string>(object, field, value);
-    }
+                   const std::string& value) const;
 
-    ConfigObject* addConfigObject(ConfigObject* object,
-                                  const ConfigFieldDescriptor* field) const;
+    void addString(ConfigObject* object,
+                   const ConfigFieldDescriptor* field,
+                   const std::vector<std::string>& value) const;
+
+    ConfigObject* addObject(ConfigObject* object,
+                            const ConfigFieldDescriptor* field) const;
 
 private:
     template <typename Type>
-    inline const Type& getField(const ConfigObject& message,
+    inline const Type& getField(const ConfigObject& object,
                                 const ConfigFieldDescriptor* field) const {
-        return getRaw<Type>(message, field);
+        return getRaw<Type>(object, field);
     }
 
     template <typename Type>
@@ -156,7 +153,155 @@ private:
                          const Type& value) const {
         mutableRaw<std::vector<Type> >(object, field)->push_back(value);
     }
+
+    template<typename Type>
+    inline void addFields(ConfigObject* object,
+                          const ConfigFieldDescriptor* field,
+                          const std::vector<Type>& value) const {
+        mutableRaw<std::vector<Type> >(object, field)->append(value);
+    }
 };
+
+inline
+boost::optional<int> ConfigReflection::getInt(const ConfigObject& object,
+        const ConfigFieldDescriptor* field) const {
+    return getField<boost::optional<int> >(object, field);
+}
+
+inline
+boost::optional<int64_t> ConfigReflection::getInt64(const ConfigObject& object,
+        const ConfigFieldDescriptor* field) const {
+    return getField<boost::optional<int64_t> >(object, field);
+}
+
+inline
+boost::optional<double> ConfigReflection::getDouble(const ConfigObject& object,
+        const ConfigFieldDescriptor* field) const {
+    return getField<boost::optional<double> >(object, field);
+}
+
+inline
+boost::optional<bool> ConfigReflection::getBool(const ConfigObject& object,
+        const ConfigFieldDescriptor* field) const {
+    return getField<boost::optional<bool> >(object, field);
+}
+
+inline
+std::string ConfigReflection::getString(const ConfigObject& object,
+                                        const ConfigFieldDescriptor* field) const {
+    return getField<std::string>(object, field);
+}
+
+inline
+void ConfigReflection::setInt32(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                int value) const {
+    setField<boost::optional<int> >(object, field, value);
+}
+
+inline
+void ConfigReflection::setInt64(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                int64_t value) const {
+    setField<boost::optional<int64_t> >(object, field, value);
+}
+
+inline
+void ConfigReflection::setDouble(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 double value) const {
+    setField<boost::optional<double> >(object, field, value);
+}
+
+inline
+void ConfigReflection::setBool(ConfigObject* object,
+                               const ConfigFieldDescriptor* field,
+                               bool value) const {
+    setField<boost::optional<bool> >(object, field, value);
+}
+
+inline
+void ConfigReflection::setString(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 const std::string& value) const {
+    setField<std::string>(object, field, value);
+}
+
+inline
+ConfigObject* ConfigReflection::mutableObject(ConfigObject* object,
+        const ConfigFieldDescriptor* field) const {
+    return *mutableRaw<ConfigObject*>(object, field);
+}
+
+inline
+void ConfigReflection::addInt32(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                int value) const {
+    addField<int>(object, field, value);
+}
+
+inline
+void ConfigReflection::addInt32(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                const std::vector<int>& value) const {
+    addFields<int>(object, field, value);
+}
+
+inline
+void ConfigReflection::addInt64(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                int64_t value) const {
+    addField<int64_t>(object, field, value);
+}
+
+inline
+void ConfigReflection::addInt64(ConfigObject* object,
+                                const ConfigFieldDescriptor* field,
+                                const std::vector<int64_t>& value) const {
+    addFields<int64_t>(object, field, value);
+}
+
+inline
+void ConfigReflection::addDouble(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 double value) const {
+    addField<double>(object, field, value);
+}
+
+inline
+void ConfigReflection::addDouble(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 const std::vector<double>& value) const {
+    addFields<double>(object, field, value);
+}
+
+inline
+void ConfigReflection::addBool(ConfigObject* object,
+                               const ConfigFieldDescriptor* field,
+                               bool value) const {
+    addField<bool>(object, field, value);
+}
+
+inline
+void ConfigReflection::addBool(ConfigObject* object,
+                               const ConfigFieldDescriptor* field,
+                               const std::vector<bool>& value) const {
+    addFields<bool>(object, field, value);
+}
+
+inline
+void ConfigReflection::addString(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 const std::string& value) const {
+    addField<std::string>(object, field, value);
+}
+
+inline
+void ConfigReflection::addString(ConfigObject* object,
+                                 const ConfigFieldDescriptor* field,
+                                 const std::vector<std::string>& value) const {
+    addFields<std::string>(object, field, value);
+}
 
 }
 }

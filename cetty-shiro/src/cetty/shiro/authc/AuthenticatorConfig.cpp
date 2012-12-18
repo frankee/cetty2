@@ -15,7 +15,7 @@ namespace shiro {
 namespace authc {
 
 CETTY_CONFIG_ADD_DESCRIPTOR(AuthenticatorConfig,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 1,
                                 CETTY_CONFIG_FIELD(AuthenticatorConfig, credentialsMatcher, STRING)
                                 ),

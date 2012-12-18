@@ -35,9 +35,9 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         return false;
     }
 
-    const ConfigDescriptor* descriptor = object->getDescriptor();
+    const ConfigObjectDescriptor* descriptor = object->getDescriptor();
 
-    ConfigDescriptor::ConstIterator itr = descriptor->begin();
+    ConfigObjectDescriptor::ConstIterator itr = descriptor->begin();
 
     for (; itr != descriptor->end(); ++itr) {
         const ConfigFieldDescriptor* field = *itr;
@@ -68,7 +68,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
                     return false;
                 }
             }
-            else if (object->getName() == KeyValuePair::NAME) {
+            else if (object->name() == KeyValuePair::NAME) {
                 KeyValuePair* kv = dynamic_cast<KeyValuePair*>(object);
                 if (kv) {
                     kv->key = node.begin()->first.Scalar();
@@ -125,7 +125,7 @@ int parseField(const ConfigFieldDescriptor* field,
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                ConfigObject* obj = reflection->addConfigObject(object, field);
+                ConfigObject* obj = reflection->addObject(object, field);
 
                 // items:
                 //   - objectName :
@@ -164,7 +164,7 @@ int parseField(const ConfigFieldDescriptor* field,
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-            ConfigObject* obj = reflection->mutableConfigObject(object, field);
+            ConfigObject* obj = reflection->mutableObject(object, field);
             return parseConfigObject(node, obj);
             break;
         }

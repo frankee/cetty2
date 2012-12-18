@@ -16,7 +16,7 @@ using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(
     ZurgSlaveConfig,
-    new ConfigDescriptor(
+    new ConfigObjectDescriptor(
         9,
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, name, STRING),
         CETTY_CONFIG_FIELD(ZurgSlaveConfig, prefix, STRING),

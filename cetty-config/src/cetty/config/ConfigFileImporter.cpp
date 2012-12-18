@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/config/ConfigIncludeFileFinder.h>
+#include <cetty/config/ConfigFileImporter.h>
 
 #include <boost/algorithm/string.hpp>
 #include <cetty/util/StringUtil.h>
@@ -53,10 +53,10 @@ public:
     bool parse(const std::string& str);
 };
 
-ConfigIncludeFileFinder::ConfigIncludeFileFinder() {
+ConfigFileImporter::ConfigFileImporter() {
 }
 
-int ConfigIncludeFileFinder::find(const std::string& file,
+int ConfigFileImporter::find(const std::string& file,
                                   std::vector<std::string>* files) {
     if (files == NULL) {
         LOG_ERROR << "the files is null!";
@@ -184,7 +184,7 @@ bool IncludeLine::parse(const std::string& str) {
     return true;
 }
 
-int ConfigIncludeFileFinder::getFileIncludes(const std::string& file,
+int ConfigFileImporter::getFileIncludes(const std::string& file,
         std::vector<IncludeLine>* includes) {
     BOOST_ASSERT(includes && "the includes is null!");
 
@@ -220,7 +220,7 @@ int ConfigIncludeFileFinder::getFileIncludes(const std::string& file,
     return includes->size();
 }
 
-void ConfigIncludeFileFinder::findFile(const boost::filesystem::path& filePath,
+void ConfigFileImporter::findFile(const boost::filesystem::path& filePath,
                                        const FileNameMatchPattern& pattern,
                                        std::vector<std::string>* files) {
     boost::filesystem::directory_iterator end;

@@ -74,6 +74,10 @@ public:
                         const std::string& uri,
                         const std::string& cookie);
 
+    ~HttpRequestTemplate() {
+        trie.freeData();
+    }
+
     bool validated() const;
 
     bool match(const HttpMethod& method, const std::vector<std::string>& pathSegments) const {
@@ -100,7 +104,7 @@ private:
     // parsed data.
     std::string service;
     std::string method;
-    SimpleTrie trie;
+    SimpleTrie<Parameter> trie;
 };
 
 }

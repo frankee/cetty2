@@ -1,0 +1,35 @@
+package cetty.config
+
+import "google/protobuf/descriptor.proto"
+
+message ConfigFileOptions {
+	optional string config_file_name = 1;
+	optional string source_file_name = 2;
+}
+
+message ConfigMessageOptions {
+	optional string encoded = 1;
+}
+
+message ConfigFieldOptions {
+	optional string default = 1;
+	optional string note    = 2,
+	
+	optional bool commented = 3;
+	
+	optional bool         cmdline = 5;
+	optional string cmdline_long  = 6;
+	optional string cmdline_short = 7;
+}
+
+extend google.protobuf.FieldOptions {
+  optional ConfigFieldOptions config = 50001;
+}
+
+extend google.protobuf.MessageOptions {
+  optional ConfigMessageOptions config = 50001;
+}
+
+extend google.protobuf.FileOptions {
+  optional ConfigFileOptions config = 50001;
+}

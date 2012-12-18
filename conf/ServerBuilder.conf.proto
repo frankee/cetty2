@@ -1,6 +1,0 @@
-package cetty.service.builder
-
-message ServerBuilder {
-	optional bool daemonize = 1 [default = true];
-	optional string pidfile = 2 ;
-}

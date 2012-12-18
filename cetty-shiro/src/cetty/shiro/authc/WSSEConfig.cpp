@@ -17,7 +17,7 @@ namespace authc {
 using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(WSSEConfig,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 7,
                                 CETTY_CONFIG_FIELD(WSSEConfig, backend, STRING),
                                 CETTY_CONFIG_FIELD(WSSEConfig, connectionString, STRING),

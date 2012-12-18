@@ -24,6 +24,7 @@
 namespace cetty {
 namespace util {
 
+template<typename T>
 class SimpleTrieNode {
 private:
     static const int MAX_CHAR_COUNT = 30;
@@ -34,7 +35,7 @@ public:
     int prefixes;
     // . - _ ?
     SimpleTrieNode* references[MAX_CHAR_COUNT];
-    void* data;
+    T* data;
 
     SimpleTrieNode() : words(0), prefixes(0), data(NULL) {
         std::memset(references, 0, sizeof(references));
@@ -57,7 +58,7 @@ public:
         }
 
         if (data) {
-            delete (char*)data;
+            delete data;
             data = NULL;
         }
     }
@@ -79,15 +80,20 @@ public:
     }
 };
 
+template<typename T>
 class SimpleTrie {
 public:
-    SimpleTrie();
+    typedef SimpleTrieNode<T> Node;
 
-    void addKey(const std::string& key, void* value);
+public:
+    SimpleTrie() {}
+
+    void  freeData() { root.freeData(); }
+
+    void addKey(const std::string& key, T* value);
     void addKey(const std::string& key);
 
-    void* getValue(const std::string& key) const;
-    void  freeValue() { root.freeData(); }
+    T* getValue(const std::string& key) const;
 
     // count the prefix and include the key.
     int count(const std::string& prefix) const;
@@ -97,14 +103,127 @@ public:
     int countKey(const std::string& key) const;
 
 private:
-    void addKey(SimpleTrieNode& n, std::string* key, void* data);
-    int countPrefix(const SimpleTrieNode& n, std::string* prefix, bool includeKey) const;
+    void addKey(Node& n, std::string* key, T* data);
+    int countPrefix(const Node& n, std::string* prefix, bool includeKey) const;
 
-    const SimpleTrieNode* getLeafNode(const SimpleTrieNode& n, std::string* word) const;
+    const Node* getLeafNode(const Node& n, std::string* word) const;
 
 private:
-    SimpleTrieNode root;
+    Node root;
 };
+
+template<typename T>
+void SimpleTrie<T>::addKey(Node& n, std::string* word, T* data) {
+    BOOST_ASSERT(word);
+
+    if (word->empty()) {
+        n.words += 1;
+        n.data = data;
+        return;
+    }
+
+    n.prefixes += 1;
+    char first = (*word)[0];
+    int index = Node::getIndex(first);
+
+    if (!n.hasReferenceTo(first)) {
+        n.references[index] = new Node();
+    }
+
+    word->erase(0, 1);
+    addKey(*n.references[index], word, data);
+}
+
+template<typename T> inline
+const SimpleTrieNode<T>* SimpleTrie<T>::getLeafNode(const Node& n,
+        std::string* word) const {
+    BOOST_ASSERT(word);
+
+    if (word->empty()) {
+        return &n;
+    }
+
+    char first = (*word)[0];
+    int index = Node::getIndex(first);
+
+    if (n.references[index] == NULL) {
+        return NULL;
+    }
+    else {
+        word->erase(0, 1);
+        return getLeafNode(*n.references[index], word);
+    }
+}
+
+template<typename T> inline
+int SimpleTrie<T>::countPrefix(const Node& n, std::string* word, bool includeKey) const {
+    BOOST_ASSERT(word);
+
+    if (word->empty()) {
+        if (includeKey) {
+            return n.prefixes + n.words;
+        }
+
+        return n.prefixes;
+    }
+
+    char first = (*word)[0];
+    int index = Node::getIndex(first);
+
+    if (n.references[index] == NULL) {
+        return 0;
+    }
+    else {
+        word->erase(0, 1);
+        return countPrefix(*n.references[index], word, includeKey);
+    }
+}
+
+template<typename T> inline
+void SimpleTrie<T>::addKey(const std::string& word) {
+    std::string lower(word);
+    StringUtil::toLower(&lower);
+    addKey(root, &lower, NULL);
+}
+
+template<typename T> inline
+void SimpleTrie<T>::addKey(const std::string& word, T* data) {
+    std::string lower(word);
+    StringUtil::toLower(&lower);
+    addKey(root, &lower, data);
+}
+
+template<typename T> inline
+int SimpleTrie<T>::countPrefix(const std::string& prefix) const {
+    std::string lower(prefix);
+    StringUtil::toLower(&lower);
+    return countPrefix(root, &lower, false);
+}
+
+template<typename T> inline
+int SimpleTrie<T>::count(const std::string& prefix) const {
+    std::string lower(prefix);
+    StringUtil::toLower(&lower);
+    return countPrefix(root, &lower, true);
+}
+
+template<typename T> inline
+int SimpleTrie<T>::countKey(const std::string& word) const {
+    std::string lower(word);
+    StringUtil::toLower(&lower);
+
+    const Node* node = getLeafNode(root, &lower);
+    return node ? node->words : 0;
+}
+
+template<typename T> inline
+T* SimpleTrie<T>::getValue(const std::string& key) const {
+    std::string lower(key);
+    StringUtil::toLower(&lower);
+
+    const Node* node = getLeafNode(root, &lower);
+    return node ? node->data : 0;
+}
 
 }
 }

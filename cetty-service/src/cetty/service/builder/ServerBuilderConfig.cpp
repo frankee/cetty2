@@ -24,7 +24,7 @@ namespace builder {
 using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Server,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 3,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, port, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, host, STRING),
@@ -32,19 +32,19 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Server,
                             new ServerBuilderConfig::Server);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Limit,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 1,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Limit, maxConcurrentRequests, INT32)),
                             new ServerBuilderConfig::Limit);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Timeout,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 1,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Timeout, hostConnectionMaxIdleTime, INT32)),
                             new ServerBuilderConfig::Timeout);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 10,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, deamonize, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig, pidfile, STRING),

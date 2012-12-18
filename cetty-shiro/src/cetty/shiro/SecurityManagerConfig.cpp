@@ -16,7 +16,7 @@ namespace shiro {
 using namespace cetty::config;
 
 CETTY_CONFIG_ADD_DESCRIPTOR(SecurityManagerConfig,
-                            (new ConfigDescriptor(
+                            (new ConfigObjectDescriptor(
                                 1, // param count
                                 CETTY_CONFIG_FIELD(SecurityManagerConfig, realm, STRING)
                             )),

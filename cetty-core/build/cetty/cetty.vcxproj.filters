@@ -110,9 +110,6 @@
     <ClCompile Include="..\..\src\cetty\channel\FailedChannelFuture.cpp">
       <Filter>channel</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\util\SimpleTrie.cpp">
-      <Filter>util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipeline.cpp">
       <Filter>channel</Filter>
     </ClCompile>

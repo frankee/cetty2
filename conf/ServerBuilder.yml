@@ -14,8 +14,8 @@ cetty.service.builder.ServerBuilder:
       # If you want you can bind a single interface, if the bind option is not
       # specified all the interfaces will listen for incoming connections.
       # bind: 127.0.0.1
-      # Setting the pipeline name to the server.
-      pipeline: name
+      # Setting the name to the server.
+      name: name
     - port: 1920
       pipeline: rpc
 

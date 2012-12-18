@@ -22,28 +22,23 @@ namespace cetty {
 namespace craft {
 namespace http {
 
-CETTY_CONFIG_ADD_DESCRIPTOR(ServiceRequestMapperConfig_Template,
-                            new ConfigDescriptor(
-                                3,
-                                CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, uri, STRING),
-                                CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, method, STRING),
-                                CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, cookie, STRING)),
-                            new ServiceRequestMapperConfig::Template);
+CETTY_CONFIG_ADD_DESCRIPTOR(ServiceRequestMapperConfig::Template,
+                            3,
+                            CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, uri, STRING),
+                            CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, method, STRING),
+                            CETTY_CONFIG_FIELD(ServiceRequestMapperConfig::Template, cookie, STRING));
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServiceRequestMapperConfig,
-                            new ConfigDescriptor(
-                                1,
-                                CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServiceRequestMapperConfig, templates, Template)),
-                            new ServiceRequestMapperConfig);
+                            1,
+                            CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServiceRequestMapperConfig, templates, Template));
 
 
 ServiceRequestMapperConfig::Template::Template()
-    : ConfigObject("ServiceRequestMapperConfig_Template") {
-
+    : ConfigObject("cetty.craft.http.ServiceRequestMapperConfig.Template") {
 }
 
 ServiceRequestMapperConfig::ServiceRequestMapperConfig()
-    : ConfigObject("ServiceRequestMapperConfig") {
+    : ConfigObject("cetty.craft.http.ServiceRequestMapperConfig") {
 }
 
 }

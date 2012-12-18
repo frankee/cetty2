@@ -16,6 +16,7 @@
 
 #include <cetty/config/ConfigReflection.h>
 #include <cetty/config/ConfigObject.h>
+
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -24,13 +25,13 @@ namespace config {
 ConfigReflection::ConfigReflection() {
 }
 
-ConfigObject* ConfigReflection::addConfigObject(ConfigObject* object,
+ConfigObject* ConfigReflection::addObject(ConfigObject* object,
         const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
     // We must allocate a new object.
-    std::string className(object->getName());
+    std::string className(object->name());
     className += "_";
     className += field->className;
 

@@ -39,6 +39,10 @@ message ServiceMessage {
 message Empty {
 }
 
+extend google.protobuf.FieldOptions {
+  optional bool encoded = 1111;  
+}
+
 extend google.protobuf.MethodOptions {
   optional bool idempotent = 1111;
   optional bool  no_return = 1112;

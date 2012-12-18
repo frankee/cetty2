@@ -17,68 +17,71 @@
 #include <cetty/config/ConfigCenter.h>
 
 #include <fstream>
-#include <boost/program_options.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/config/ConfigObject.h>
-#include <cetty/config/ConfigIncludeFileFinder.h>
+#include <cetty/config/ConfigFileImporter.h>
 
 namespace cetty {
 namespace config {
 
 using namespace boost::program_options;
-using namespace cetty::logging;
 
-ConfigCenter* ConfigCenter::center = NULL;
+ConfigCenter* ConfigCenter::center_ = NULL;
 
 ConfigCenter& ConfigCenter::instance() {
-    if (NULL == center) {
-        center = new ConfigCenter;
+    if (NULL == center_) {
+        center_ = new ConfigCenter;
     }
 
-    return *center;
+    return *center_;
 }
 
 ConfigCenter::ConfigCenter()
-    : argc(0), argv(NULL), finder(new ConfigIncludeFileFinder()) {
+    : argc_(0),
+      argv_(NULL),
+      importer_(new ConfigFileImporter()),
+      description_("Allowed options") {
 }
 
 ConfigCenter::~ConfigCenter() {
-    if (finder) {
-        delete finder;
+    if (importer_) {
+        delete importer_;
     }
+
+    cmdlineTrie_.freeData();
 }
 
 bool ConfigCenter::load(int argc, char* argv[]) {
-    this->argc = argc;
-    this->argv = argv;
+    argc_ = argc;
+    argv_ = argv;
 
-    options_description desc("Allowed options");
-    desc.add_options()
+    description_.add_options()
     ("help", "produce this help message")
     ("conf", value<std::string>(), "the main configure file");
 
-    variables_map vm;
-    store(parse_command_line(argc, argv, desc), vm);
-    notify(vm);
+    store(parse_command_line(argc, argv, description_), vm_);
+    notify(vm_);
 
-    if (vm.count("help")) {
-        std::cout << desc << "\n";
+    if (vm_.count("help")) {
+        std::cout << description_ << "\n";
         return false;
     }
 
-    const variable_value& option = vm["conf"];
+    const variable_value& option = vm_["conf"];
 
     if (option.empty()) {
         std::string program = argv[0];
         std::string::size_type slashPos = program.find_last_of('/');
+
         if (slashPos == program.npos) {
             slashPos = program.find_last_of('\\');
         }
 
         std::string::size_type dotPos = program.find_last_of('.');
+
         if (dotPos != program.npos) {
             // dot is not in the path, make sure dot is file name suffix.
             if (!(slashPos != program.npos && dotPos < slashPos)) {
@@ -88,6 +91,16 @@ bool ConfigCenter::load(int argc, char* argv[]) {
 
         program += ".conf";
         LOG_INFO << "no command line parameter, using default " << program;
+
+        std::string candidatePath("./");
+
+        std::vector<std::string> candidateFiles;
+        candidateFiles.push_back(std::string("./") + program);
+
+        // /usr/local/bin  /usr/local/etc(or conf)
+        // /opt/your_folder/bin  /opt/your_folder/etc(or conf)
+        candidateFiles.push_back(std::string("../etc/") + program);
+        candidateFiles.push_back(std::string("../conf/") + program);
 
         return loadFromFile(program);
     }
@@ -101,13 +114,13 @@ bool ConfigCenter::load(const char* str) {
     }
 
     try {
-        root = YAML::Load(str);
+        root_ = YAML::Load(str);
     }
     catch (const std::exception& e) {
         LOG_ERROR << "parse the yaml configure file error:" << e.what();
     }
 
-    if (!root) {
+    if (!root_) {
         return false;
     }
 
@@ -119,13 +132,13 @@ bool ConfigCenter::load(const std::string& str) {
 }
 
 bool ConfigCenter::loadFromFile(const std::string& file) {
-    std::vector<std::string> files;
     std::string content;
 
-    if (finder->find(file, &files) > 0) {
-        if (getFileContent(files, &content)) {
-            return load(content.c_str());
-        }
+    if (!importer_->fileContent(file, &content)) {
+        return load(content.c_str());
+    }
+    else {
+
     }
 
     return true;
@@ -136,31 +149,41 @@ bool ConfigCenter::configure(ConfigObject* object) const {
         return false;
     }
 
-    return configure(object->getName(), object);
+    return configure(object->name(), object);
 }
 
 bool parseConfigObject(const YAML::Node& node, ConfigObject* object);
+bool parseConfigObject(const variables_map& vm,
+                       const ConfigCenter::CmdlineTrie& cmdline,
+                       ConfigObject* object);
 
 bool ConfigCenter::configure(const std::string& name,
-                            ConfigObject* object) const {
+                             ConfigObject* object) const {
     if (!object) {
         return false;
     }
 
-    YAML::Node node = root[name];
+    YAML::Node node = root_[name];
+    int result = false;
 
     if (node) {
-        return parseConfigObject(node, object);
+        result = parseConfigObject(node, object);
     }
 
-    return false;
+    if (cmdlineTrie_.countPrefix(name) > 0) {
+        result = parseConfigObject(vm_, cmdlineTrie_, object);
+    }
+
+    return result;
 }
 
 bool ConfigCenter::getFileContent(const std::vector<std::string>& files, std::string* content) {
     std::vector<std::string>::const_iterator itr = files.begin();
+
     for (; itr != files.end(); ++itr) {
         getFileContent(*itr, content);
     }
+
     return !content->empty();
 }
 
@@ -208,11 +231,13 @@ bool ConfigCenter::configureFromString(const char* str, ConfigObject* object) {
     return parseConfigObject(root, object);
 }
 
-bool ConfigCenter::configureFromString(const std::string& str, ConfigObject* object) {
+bool ConfigCenter::configureFromString(const std::string& str,
+                                       ConfigObject* object) {
     return configureFromString(str.c_str(), object);
 }
 
-bool ConfigCenter::configureFromFile(const std::string& file, ConfigObject* object) {
+bool ConfigCenter::configureFromFile(const std::string& file,
+                                     ConfigObject* object) {
     if (file.empty() || !object) {
         return false;
     }

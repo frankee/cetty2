@@ -193,7 +193,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         }
         else {
             ProtobufUtil::FieldValue field
-                = ProtobufUtil::getMessageField(tmpl->content, *paylod);
+                = ProtobufUtil::getMessageFieldValue(*paylod, tmpl->content);
             f.setFieldName(tmpl->content);
 
             content = field.apply_visitor(f);

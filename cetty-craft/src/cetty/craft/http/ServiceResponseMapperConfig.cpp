@@ -22,7 +22,7 @@ namespace craft {
 namespace http {
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig_Template,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 4,
                                 CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template, service, STRING),
                                 CETTY_CONFIG_FIELD(ServiceResponseMapperConfig::Template, method, STRING),
@@ -31,7 +31,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig_Template,
                             new ServiceResponseMapperConfig::Template);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServiceResponseMapperConfig,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 1,
                                 CETTY_CONFIG_REPEATED_OBJECT_FIELD(ServiceResponseMapperConfig, templates, Template)),
                             new ServiceResponseMapperConfig);

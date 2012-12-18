@@ -1,12 +1,12 @@
 package cetty.craft;
 
-option java_package = "cetty.craft";
+option java_package = "io.cetty.craft";
 option java_outer_classname = "CraftProto";
 
 enum Lang {
-    zh_CN = 0;
-    zh_TW = 1;
-	en_US = 2;
+	en_US = 0;
+    zh_CN = 1;
+    zh_TW = 2;
 }
 
 message KeyValue {
@@ -45,4 +45,49 @@ message Authority {
 
 message ErrorResponse {
 	optional Status status = 1;
+}
+
+message CraftFieldOptions {
+    optional string  path_param = 1;
+	optional string query_param = 2;
+	optional string header_param = 3;
+	optional string cookie_param = 4;
+	
+	optional string default = 5;
+	
+	optional bool ignore_sign = 10;
+	optional string pattern = 11;
+	optional int32 decimal_min = 12;
+	optional int32 decimal_max = 13;
+	
+}
+
+message CraftMessageOptions {
+	optional string query_param = 2;
+}
+
+message CraftMethodOptions {
+	optional string method = 1;
+	optional string   path = 2;
+	optional string  query = 3;
+	optional string header = 4;
+	optional string cookie = 5;
+	
+	optional int32  timeout = 10;
+}
+
+message CraftServiceOptions {
+	optional string   path = 1;
+}
+
+extend google.protobuf.FieldOptions {
+  optional CraftFieldOptions craft = 50001;
+}
+
+extend google.protobuf.MethodOptions {
+  optional CraftMethodOptions craft = 50001;
+}
+
+extend google.protobuf.ServiceOptions {
+  optional CraftServiceOptions craft = 50001;
 }

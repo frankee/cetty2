@@ -19,14 +19,21 @@
 
 #include <string>
 #include <yaml-cpp/node/node.h>
+#include <boost/program_options.hpp>
+#include <cetty/util/SimpleTrie.h>
 
 namespace cetty {
 namespace config {
 
 class ConfigObject;
-class ConfigIncludeFileFinder;
+class ConfigFileImporter;
+
+using namespace cetty::util;
 
 class ConfigCenter {
+public:
+    typedef SimpleTrie<std::string> CmdlineTrie;
+
 public:
     static ConfigCenter& instance();
 
@@ -43,24 +50,33 @@ public:
     bool configure(ConfigObject* object) const;
     bool configure(const std::string& name, ConfigObject* object) const;
 
+    bool addCmdlineName(const std::string& fieldName,
+                        const std::string& cmdline);
+
+    void addOptions(const boost::program_options::options_description& desc);
+
 public:
     static bool configureFromString(const char* str, ConfigObject* object);
     static bool configureFromString(const std::string& str, ConfigObject* object);
     static bool configureFromFile(const std::string& file, ConfigObject* object);
-	
+
 private:
     bool getFileContent(const std::vector<std::string>& files, std::string* content);
-	bool getFileContent(const std::string& file, std::string* content);
+    bool getFileContent(const std::string& file, std::string* content);
 
 private:
-    static ConfigCenter* center;
+    static ConfigCenter* center_;
 
 private:
-    int argc;
-    char** argv;
+    int argc_;
+    char** argv_;
 
-    YAML::Node root;
-    ConfigIncludeFileFinder* finder;
+    YAML::Node root_;
+    ConfigFileImporter* importer_;
+
+    CmdlineTrie cmdlineTrie_;
+    boost::program_options::variables_map vm_;
+    boost::program_options::options_description description_;
 };
 
 }

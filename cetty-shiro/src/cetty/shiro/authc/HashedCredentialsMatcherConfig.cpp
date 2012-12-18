@@ -14,7 +14,7 @@ namespace shiro {
 namespace authc {
 
 CETTY_CONFIG_ADD_DESCRIPTOR(HashedCredentialsMatcherConfig,
-                            new ConfigDescriptor(
+                            new ConfigObjectDescriptor(
                                 4,
                                 CETTY_CONFIG_FIELD(HashedCredentialsMatcherConfig, hashSalted, BOOL),
                                 CETTY_CONFIG_FIELD(HashedCredentialsMatcherConfig, storedCredentialsHexEncoded, BOOL),

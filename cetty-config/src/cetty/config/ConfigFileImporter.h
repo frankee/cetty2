@@ -27,18 +27,22 @@ namespace config {
 class FileNameMatchPattern;
 class IncludeLine;
 
-class ConfigIncludeFileFinder {
+class ConfigFileImporter {
 public:
-    ConfigIncludeFileFinder();
+    ConfigFileImporter();
 
-    int find(const std::string& file, std::vector<std::string>* files);
+    int fileContent(const std::string& file, std::string* content);
 
 private:
+    int find(const std::string& file, std::vector<std::string>* files);
+
     void findFile(const boost::filesystem::path& filePath,
                   const FileNameMatchPattern& pattern,
                   std::vector<std::string>* files);
 
     int getFileIncludes(const std::string& file, std::vector<IncludeLine>* includes);
+
+
 };
 
 }

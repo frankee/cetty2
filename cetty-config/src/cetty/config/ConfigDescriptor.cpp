@@ -18,11 +18,18 @@
 
 #include <cstdarg>
 #include <cstdlib>
+#include <boost/assert.hpp>
+#include <cetty/config/ConfigObject.h>
 
 namespace cetty {
 namespace config {
-    
-ConfigDescriptor::ConfigDescriptor(int count, ConstConfigFieldDescriptorPtr descriptor, ...) {
+
+ConfigObjectDescriptor::ConfigObjectDescriptor(ConfigObject* defaultInstance,
+        int count,
+        ConstConfigFieldDescriptorPtr descriptor,
+        ...) {
+    BOOST_ASSERT(defaultInstance_ && descriptor);
+
     va_list valist;
 
     if (!descriptor) {
@@ -31,38 +38,41 @@ ConfigDescriptor::ConfigDescriptor(int count, ConstConfigFieldDescriptorPtr desc
 
     va_start(valist, descriptor);
 
-    fields.push_back(descriptor);
+    fields_.push_back(descriptor);
+
     for (int i = 1; i < count; ++i) {
         ConstConfigFieldDescriptorPtr field
             = va_arg(valist, ConstConfigFieldDescriptorPtr);
-        
+
         if (!field) {
             break;
         }
 
-        fields.push_back(field);
+        fields_.push_back(field);
     }
 
     va_end(valist);
 }
 
-ConfigDescriptor::~ConfigDescriptor() {
-    std::size_t j = fields.size();
+ConfigObjectDescriptor::~ConfigObjectDescriptor() {
+    std::size_t j = fields_.size();
+
     for (std::size_t i = 0; i < j; ++i) {
-        ConstConfigFieldDescriptorPtr& field = fields[i];
+        ConstConfigFieldDescriptorPtr& field = fields_[i];
+
         if (field) {
             delete field;
             field = NULL;
         }
     }
+
+    if (defaultInstance_) {
+        delete defaultInstance_;
+    }
 }
 
-ConfigDescriptor::ConstIterator ConfigDescriptor::begin() const {
-    return fields.begin();
-}
-
-ConfigDescriptor::ConstIterator ConfigDescriptor::end() const {
-    return fields.end();
+const std::string& ConfigObjectDescriptor::name() const {
+    return defaultInstance_->name();
 }
 
 }
