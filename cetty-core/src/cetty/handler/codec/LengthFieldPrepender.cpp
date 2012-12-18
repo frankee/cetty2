@@ -43,7 +43,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength)
       lengthAdjustment_(0),
       checksumFieldLength_(0),
       checksumCalcOffset_(0) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -55,7 +55,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       checksumFieldLength_(checksumFieldLength),
       checksumCalcOffset_(lengthFieldLength),
       checksumFunction_(checksum) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -67,7 +67,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       header_(header),
       checksumFieldLength_(0),
       checksumCalcOffset_(0) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -78,7 +78,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       header_(header),
       checksumFieldLength_(0),
       checksumCalcOffset_(0) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -91,7 +91,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       header_(header),
       checksumFieldLength_(0),
       checksumCalcOffset_(0) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -105,7 +105,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       checksumFieldLength_(checksumFieldLength),
       checksumCalcOffset_(lengthFieldOffset_ + lengthFieldLength),
       checksumFunction_(checksumFunction_) {
-    validateParameters();
+    init();
 }
 
 LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
@@ -121,7 +121,7 @@ LengthFieldPrepender::LengthFieldPrepender(int lengthFieldLength,
       checksumFieldLength_(checksumFieldLength),
       checksumCalcOffset_(lengthFieldOffset + lengthFieldLength),
       checksumFunction_(checksumFunction) {
-    validateParameters();
+    init();
 }
 
 ChannelBufferPtr LengthFieldPrepender::encode(ChannelHandlerContext& ctx,

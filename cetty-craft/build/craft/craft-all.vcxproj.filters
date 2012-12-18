@@ -344,9 +344,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h">
       <Filter>core\buffer</Filter>
     </ClInclude>
@@ -473,29 +470,11 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\png\ProtobufPngFormatter.h">
       <Filter>protobuf\serialization\png</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h">
-      <Filter>protobuf\service\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h">
-      <Filter>protobuf\service\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h">
-      <Filter>protobuf\service\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h">
-      <Filter>protobuf\service\handler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h">
-      <Filter>protobuf\service\handler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h">
       <Filter>protobuf\service\builder</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h">
       <Filter>protobuf\service\builder</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageFilter.h">
-      <Filter>protobuf\service\handler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h">
       <Filter>service</Filter>
@@ -613,6 +592,33 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h">
       <Filter>core\channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\MessageCodec.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufCodec.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceInboundFilter.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageCodec.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h">
+      <Filter>protobuf\service\handler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h">
+      <Filter>core\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -760,18 +766,6 @@
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp">
       <Filter>protobuf\service\builder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp">
-      <Filter>protobuf\service\handler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp">
-      <Filter>protobuf\service\handler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp">
-      <Filter>protobuf\service\handler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp">
-      <Filter>protobuf\service\handler</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\serialization\json\ProtobufJsonFormatter.cpp">
       <Filter>protobuf\serialization\json</Filter>
     </ClCompile>
@@ -850,9 +844,6 @@
     <ClCompile Include="..\..\..\cetty-redis\src\cetty\redis\protocol\commands\Transactions.cpp">
       <Filter>redis\protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\AbstractBootstrap.cpp">
-      <Filter>core\bootstrap</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\asio\AsioServerBootstrap.cpp">
       <Filter>core\bootstrap\asio</Filter>
     </ClCompile>
@@ -891,6 +882,33 @@
     </ClCompile>
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelConfig.cpp">
       <Filter>core\channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\ClientBootstrap.cpp">
+      <Filter>core\bootstrap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\asio\AsioClientBootstrap.cpp">
+      <Filter>core\bootstrap\asio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\MessageCodec.cpp">
+      <Filter>protobuf\service\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufCodec.cpp">
+      <Filter>protobuf\service\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp">
+      <Filter>protobuf\service\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\util\CurrentThread.cpp">
+      <Filter>core\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\VoidChannelFuture.cpp">
+      <Filter>core\channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\NullChannel.cpp">
+      <Filter>core\channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\util\Adler32.cpp">
+      <Filter>core\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
