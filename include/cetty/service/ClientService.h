@@ -36,17 +36,23 @@ class ClientService : public cetty::channel::Channel {
 public:
     typedef ClientService<Request, Response> Self;
 
-    typedef ClientServiceDispatcher<Self,
+    typedef ClientServiceDispatcher<Self*,
             Request,
             Response> Dispatcher;
+
+    typedef typename Dispatcher::Context Context;
+    typedef typename Dispatcher::Context::Handler Handler;
+    typedef typename Dispatcher::Context::HandlerPtr HandlerPtr;
 
 public:
     ClientService(const EventLoopPtr& eventLoop,
                   const Initializer& initializer,
                   const Connections& connections)
-        : eventLoop_(eventLoop),
+        : Channel(ChannelPtr(), eventLoop),
+          eventLoop_(eventLoop),
           initializer_(initializer),
-          connections_(connections) {
+          connections_(connections),
+          dispatcher_(eventLoop, connections, initializer) {
     }
 
     virtual ~ClientService() {}
@@ -54,31 +60,34 @@ public:
     virtual bool isOpen() const { return true; }
     virtual bool isActive() const { return true; }
 
+    void registerTo(Context& ctx) {
+        dispatcher_.registerTo(ctx);
+    }
+
 private:
     void doBind(const SocketAddress& localAddress) {}
     void doDisconnect() {}
     void doClose() {}
 
     void doInitialize() {
-        pipeline().setHead<Dispatcher::HandlerPtr>("dispatcher",
-                Dispatcher::HandlerPtr(new Dispatcher(eventLoop_,
-                                       connections_,
-                                       initializer_)));
+        pipeline().setHead<HandlerPtr>("dispatcher", this);
     }
 
 private:
     EventLoopPtr eventLoop_;
     Initializer initializer_;
     Connections connections_;
+
+    Dispatcher dispatcher_;
 };
 
-template<typename ReqT, typename RepT>
+template<typename Request, typename Response>
 void callMethod(const ChannelPtr& channel,
-                const ReqT& request,
-                const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+                const Request& request,
+                const boost::intrusive_ptr<ServiceFuture<Response> >& future) {
     if (channel) {
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
-            new OutstandingCall<ReqT, RepT>(request, future));
+        boost::intrusive_ptr<OutstandingCall<Request, Response> > outstanding(
+            new OutstandingCall<Request, Response>(request, future));
         channel->writeMessage(outstanding);
     }
 }

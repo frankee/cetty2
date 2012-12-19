@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_SERVICEMESSAGETRAITS_H)
-#define CETTY_SERVICE_SERVICEMESSAGETRAITS_H
+#if !defined(CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H)
+#define CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -21,7 +21,7 @@ namespace cetty {
 namespace service {
 
 template<typename T>
-struct ServiceMessageTraits {
+struct ServiceMessageWrapper {
     enum {
         HAS_SERIAL_NUMBER = false
     };
@@ -30,7 +30,7 @@ struct ServiceMessageTraits {
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_SERVICEMESSAGETRAITS_H)
+#endif //#if !defined(CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H)
 
 // Local Variables:
 // mode: c++

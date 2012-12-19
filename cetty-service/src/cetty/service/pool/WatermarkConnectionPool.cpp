@@ -45,7 +45,7 @@ WatermarkConnectionPool::~WatermarkConnectionPool() {
 
 void WatermarkConnectionPool::start() {
     ChannelFuturePtr future =
-        bootstrap.connect(connections[0].host, connections[0].port);
+        bootstrap_.connect(connections_[0].host, connections_[0].port);
 
     future->addListener(boost::bind(
                             &ConnectionPool::connectedCallback, this, _1));

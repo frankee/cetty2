@@ -114,8 +114,8 @@
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageTraits.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageWrapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceRequestBridge.h" />
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />

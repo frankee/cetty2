@@ -41,9 +41,6 @@ public:
 
 private:
     void init();
-
-private:
-    ChannelPipelinePtr pipeline;
 };
 
 }

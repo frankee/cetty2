@@ -97,8 +97,14 @@ void ChannelPipeline::setHead(ChannelHandlerContext* ctx) {
         ChannelHandlerContext* headNext = head_->next();
         delete head_;
         head_ = ctx;
-        head_->setNext(headNext);
-        headNext->setPrev(head_);
+
+        if (headNext) {
+            head_->setNext(headNext);
+            headNext->setPrev(head_);
+        }
+        else {
+            tail_ = head_;
+        }
     }
     else {
         head_ = newHead;

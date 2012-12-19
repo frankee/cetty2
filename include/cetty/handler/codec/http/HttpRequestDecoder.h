@@ -73,17 +73,11 @@ using namespace cetty::util;
 
 class HttpRequestDecoder : private boost::noncopyable {
 public:
-    typedef boost::shared_ptr<HttpRequestDecoder> HandlerPtr;
+    typedef ReplayingDecoder<HttpRequestDecoder, HttpPackage> Decoder;
 
-    typedef ChannelMessageHandlerContext<HttpRequestDecoder,
-            ChannelBufferPtr,
-            HttpPackage,
-            VoidMessage,
-            VoidMessage,
-            ChannelBufferContainer,
-            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
-            VoidMessageContainer,
-            VoidMessageContainer> Context;
+    typedef Decoder::Context Context;
+    typedef Decoder::Handler Handler;
+    typedef Decoder::HandlerPtr HandlerPtr;
 
 public:
     /**
@@ -121,7 +115,7 @@ private:
 private:
     HttpRequestCreator requestCreator_;
     HttpPackageDecoder requestDecoder_;
-    ReplayingDecoder<HttpRequestDecoder, HttpPackage, Context> decoder_;
+    Decoder decoder_;
 };
 
 }

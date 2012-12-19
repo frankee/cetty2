@@ -56,8 +56,6 @@ using namespace cetty::protobuf::service;
 typedef OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceCall;
 typedef boost::intrusive_ptr<ProtobufServiceCall> ProtobufServiceCallPtr;
 
-typedef ClientServiceRequestAdaptor<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr> ProtobufServiceRequestHandler;
-
 }
 }
 }

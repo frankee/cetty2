@@ -44,9 +44,6 @@
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h">
       <Filter>service</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h">
-      <Filter>service</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h">
       <Filter>service</Filter>
     </ClInclude>
@@ -89,7 +86,10 @@
     <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h">
       <Filter>service\pool</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageTraits.h">
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceRequestBridge.h">
+      <Filter>service</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageWrapper.h">
       <Filter>service</Filter>
     </ClInclude>
   </ItemGroup>

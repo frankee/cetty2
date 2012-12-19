@@ -34,11 +34,11 @@ using namespace cetty::service;
 
 class ClientBuilderConfig;
 
-template<typename ReqT, typename RepT = ReqT>
+template<typename Request, typename Response = Request>
 class ClientBuilder {
 public:
-    typedef ClientBuilder<ReqT, RepT> Self;
-    typedef ClientService<ReqT, RepT> ClientServiceChannel;
+    typedef ClientBuilder<Request, Response> Self;
+    typedef ClientService<Request, Response> ClientServiceChannel;
 
 public:
     ClientBuilder()

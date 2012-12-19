@@ -306,6 +306,8 @@ public:
     typedef ReplayingDecoder<H, InboundOut, C> Self;
 
     typedef C Context;
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
 
     typedef ChannelBufferContainer InboundContainer;
     typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;

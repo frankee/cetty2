@@ -57,6 +57,10 @@ public:
         return response_;
     }
 
+    const ServiceFuturePtr& future() const {
+        return future_;
+    }
+
     void setResponse(const Response& response) {
         response_ = response;
         if (future_) {
