@@ -118,6 +118,8 @@ ngx_tcp_init_connection(ngx_connection_t *c)
         return;
     }
 
+    ngx_memzero(s, sizeof(ngx_tcp_session_t));
+
     if (addr_conf->default_ctx) {
         s->main_conf = addr_conf->default_ctx->main_conf;
         s->srv_conf = addr_conf->default_ctx->srv_conf;

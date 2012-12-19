@@ -182,6 +182,9 @@ ngx_int_t ngx_tcp_upstream_check_broken_connection(ngx_tcp_session_t *s);
 void ngx_tcp_upstream_next(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u,
      ngx_uint_t ft_type);
 
+void ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
+    ngx_tcp_upstream_t *u, ngx_int_t rc);
+
 #define ngx_tcp_conf_upstream_srv_conf(uscf, module)                         \
     uscf->srv_conf[module.ctx_index]
 

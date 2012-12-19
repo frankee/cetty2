@@ -38,6 +38,7 @@ typedef struct ngx_tcp_session_s {
     off_t                   bytes_write;
 
     unsigned                quit:1;
+    unsigned                upstream_cleanup:1;
     ngx_str_t              *addr_text;
     ngx_str_t               host;
 

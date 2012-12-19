@@ -620,7 +620,6 @@ failed:
     return NGX_BUSY;
 }
 
-
 static ngx_uint_t
 ngx_tcp_upstream_get_peer(ngx_tcp_upstream_rr_peers_t *peers)
 {

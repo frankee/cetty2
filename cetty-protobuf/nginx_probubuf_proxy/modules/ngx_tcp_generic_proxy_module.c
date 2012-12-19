@@ -185,7 +185,6 @@ ngx_tcp_proxy_handler(ngx_event_t *ev)
 
     if(ev->timedout) {
     	if(do_read) {
-    		fprintf(stdout, "client timedout\n");
     		c->log->action = "proxying";
     		ngx_log_error(NGX_LOG_INFO, c->log, NGX_ETIMEDOUT,
     				      "proxy timed out");
@@ -281,6 +280,15 @@ ngx_tcp_proxy_handler(ngx_event_t *ev)
 			    	}
 
 			    	pc = upstream->peer.connection;
+
+			    	if(pc == NULL) {
+			    		ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+			    				"can't connect to peer");
+			    		ngx_tcp_finalize_session(s);
+
+			    		return;
+			    	}
+
 			    	pb = pc->buffer;
 
 			    	size = b->last - b->pos;
@@ -673,12 +681,6 @@ ngx_tcp_proxy_peer_handler(ngx_event_t *ev){
 		pc = ev->data;
 		item = pc->data2;
 		pb = item->buffer;
-	}
-
-	if(do_read) {
-		fprintf(stdout, "peer read\n");
-	} else {
-		fprintf(stdout, "client write\n");
 	}
 
 	c = s->connection;

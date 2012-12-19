@@ -240,7 +240,6 @@ typedef struct {
     char                       *(*merge_srv_conf)(ngx_conf_t *cf, void *prev,
                                       void *conf);
 
-    // todo chenhl
     void                       *(*create_loc_conf)(ngx_conf_t *cf);
     char                       *(*merge_loc_conf)(ngx_conf_t *cf, void *prev,
                                           void *conf);
@@ -257,8 +256,6 @@ typedef struct {
 
 #define NGX_TCP_MAIN_CONF_OFFSET  offsetof(ngx_tcp_conf_ctx_t, main_conf)
 #define NGX_TCP_SRV_CONF_OFFSET   offsetof(ngx_tcp_conf_ctx_t, srv_conf)
-
-// todo chenhl
 #define NGX_TCP_LOC_CONF_OFFSET   offsetof(ngx_tcp_conf_ctx_t, loc_conf)
 
 
@@ -275,8 +272,6 @@ typedef struct {
     ((ngx_tcp_conf_ctx_t *) cf->ctx)->main_conf[module.ctx_index]
 #define ngx_tcp_conf_get_module_srv_conf(cf, module)                        \
     ((ngx_tcp_conf_ctx_t *) cf->ctx)->srv_conf[module.ctx_index]
-
-//todo chenhl
 #define ngx_tcp_conf_get_module_loc_conf(cf, module)                        \
 	((ngx_tcp_conf_ctx_t *) cf->ctx)->loc_conf[module.ctx_index]
 

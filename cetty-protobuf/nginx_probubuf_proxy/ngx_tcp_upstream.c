@@ -11,8 +11,6 @@ static void ngx_tcp_upstream_handler(ngx_event_t *ev);
 static void ngx_tcp_upstream_connect(ngx_tcp_session_t *s,
     ngx_tcp_upstream_t *u);
 // static void ngx_tcp_upstream_resolve_handler(ngx_resolver_ctx_t *ctx);
-static void ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
-    ngx_tcp_upstream_t *u, ngx_int_t rc);
 
 static char *ngx_tcp_upstream(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy);
 static char *ngx_tcp_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd,
@@ -175,11 +173,22 @@ ngx_tcp_upstream_init(ngx_tcp_session_t *s)
 
     u = s->upstream;
 
-    cln = ngx_tcp_cleanup_add(s, 0);
+    if(!s->upstream_cleanup) {
+		cln = ngx_tcp_cleanup_add(s, 0);
+		if(cln == NULL) {
+			ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+						  "add cleanup for session failed");
 
-    cln->handler = ngx_tcp_upstream_cleanup;
-    cln->data = s;
-    u->cleanup = &cln->handler;
+			ngx_tcp_finalize_session(s);
+			return;
+		}
+
+		s->upstream_cleanup = 1;
+		cln->handler = ngx_tcp_upstream_cleanup;
+		cln->data = s;
+
+		 // u->cleanup = &cln->handler;
+    }
 
     if (u->resolved == NULL) {
 
@@ -344,7 +353,7 @@ ngx_tcp_upstream_connect(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
                       "upstream servers are busy or encounter error!");
 
         /* TODO: check this function */
-        ngx_tcp_upstream_finalize_session(s, u, 0);
+        ngx_tcp_finalize_session(s);
 
         return;
     }
@@ -366,7 +375,7 @@ ngx_tcp_upstream_connect(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
     ngx_tcp_reading_item_t *item = ngx_pcalloc(c->pool,
         sizeof(ngx_tcp_reading_item_t));
     if(item == NULL){
-    	ngx_tcp_upstream_finalize_session(s, u, 0);
+    	ngx_tcp_finalize_session(s);
         return;
     }
 
@@ -374,7 +383,7 @@ ngx_tcp_upstream_connect(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
 
     item->buffer = ngx_create_temp_buf(c->pool, plcf->buffer_size);
     if(item->buffer == NULL){
-    	ngx_tcp_upstream_finalize_session(s, u, 0);
+    	ngx_tcp_finalize_session(s);
         return;
     }
     item->nexpected = MESSAGE_HEAD_SIZE;
@@ -385,7 +394,7 @@ ngx_tcp_upstream_connect(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
 
     c->buffer = ngx_create_temp_buf(c->pool, plcf->buffer_size);
     if (c->buffer == NULL) {
-    	ngx_tcp_upstream_finalize_session(s, u, 0);
+    	ngx_tcp_finalize_session(s);
         return;
     }
 
@@ -400,7 +409,7 @@ ngx_tcp_upstream_connect(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
         {
             ngx_connection_error(c, ngx_socket_errno,
                                  "setsockopt(TCP_NODELAY) failed");
-            ngx_tcp_upstream_finalize_session(s, u, 0);
+            ngx_tcp_finalize_session(s);
             return;
         }
 
@@ -425,21 +434,33 @@ ngx_tcp_upstream_handler(ngx_event_t *ev)
 {
     ngx_connection_t     *c;
     ngx_tcp_session_t    *s;
-    ngx_tcp_upstream_t   *u;
+    ngx_tcp_upstream_t   *u = NULL, *us;
+    ngx_uint_t            i;
 
     c = ev->data;
     s = c->data;
 
-    u = s->upstream;
-    c = s->connection;
+    us = s->upstreams.elts;
+    for(i = 0; i < s->upstreams.nelts; ++i) {
+    	if(!us[i].unused && us[i].peer.connection == c) {
+    		u = &us[i];
+    		break;
+    	}
+    }
+
+    if(u == NULL) {
+    	ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+    			      "get upstream error");
+
+    	ngx_tcp_finalize_session(s);
+    	return;
+    }
 
     if (ev->write) {
         if (u->write_event_handler) {
             u->write_event_handler(s, u);
         }
-
     } else {
-
         if (u->read_event_handler) {
             u->read_event_handler(s, u);
         }
@@ -500,12 +521,12 @@ ngx_tcp_upstream_next(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u,
     }
 
     if (s->connection->error) {
-        ngx_tcp_upstream_finalize_session(s, u, 0);
+        ngx_tcp_finalize_session(s);
         return;
     }
 
     if (u->peer.tries == 0) {
-        ngx_tcp_upstream_finalize_session(s, u, 0);
+        ngx_tcp_finalize_session(s);
         return;
     }
 
@@ -558,7 +579,7 @@ ngx_tcp_upstream_cleanup(void *data)
 }
 
 
-static void
+void
 ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
     ngx_tcp_upstream_t *u, ngx_int_t rc) 
 {
@@ -567,10 +588,12 @@ ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
     ngx_log_debug1(NGX_LOG_DEBUG_TCP, s->connection->log, 0,
                    "finalize tcp upstream session: %i", rc);
 
+    /*
     if (u->cleanup) {
         *u->cleanup = NULL;
         u->cleanup = NULL;
     }
+    */
 
     if (u->state && u->state->response_sec) {
         tp = ngx_timeofday();
@@ -597,7 +620,9 @@ ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
     }
 
     u->peer.connection = NULL;
+    u->unused = 1;
 
+    /*
     if (rc == NGX_DECLINED || rc == NGX_DONE) {
         return;
     }
@@ -605,6 +630,7 @@ ngx_tcp_upstream_finalize_session(ngx_tcp_session_t *s,
     s->connection->log->action = "sending to client";
 
     ngx_tcp_finalize_session(s);
+    */
 }
 
 
