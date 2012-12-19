@@ -18,6 +18,7 @@
  */
 
 #include <cetty/Types.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelMessageTailLinkContext.h>
 #include <cetty/service/OutstandingCall.h>
@@ -200,25 +201,33 @@ public:
 public:
     ClientServiceRequestBridge(const ChannelPtr& parent)
         : parent_(parent),
-          pipeline_(parent->pipeline()) {
+          pipeline_(&(parent->pipeline())) {
     }
 
     ClientServiceRequestBridge(const ChannelWeakPtr& parent)
         : parent_(parent),
-          pipeline_(parent.lock()->pipeline()) {
+          pipeline_(&(parent.lock()->pipeline())) {
     }
 
     ~ClientServiceRequestBridge() {}
 
     void registerTo(Context& ctx) {
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &Self::messageUpdated,
+                this,
+                _1));
     }
 
     static ChannelHandlerContext* newContext(const ChannelPtr& parent) {
-        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
+        return new Context("requestAdaptor",
+                           parent,
+                           HandlerPtr(new Self(parent)));
     }
 
     static ChannelHandlerContext* newContext(const ChannelWeakPtr& parent) {
-        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
+        return new Context("requestAdaptor",
+                           parent,
+                           HandlerPtr(new Self(parent)));
     }
 
 private:

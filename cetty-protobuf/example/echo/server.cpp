@@ -18,7 +18,7 @@ public:
     EchoServiceImpl() {}
     virtual ~EchoServiceImpl() {}
 
-    virtual void Echo(const ConstEchoRequestPtr& request,
+    virtual void echo(const ConstEchoRequestPtr& request,
                       const EchoResponsePtr& response,
                       const DoneCallback& done) {
         EchoResponsePtr rep(response);

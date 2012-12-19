@@ -54,6 +54,19 @@ public:
     }
 
     ChannelMessageTailLinkContext(const std::string& name,
+                                  const ChannelWeakPtr& channel,
+                                  const HandlerPtr& handler)
+        : ChannelHandlerContext(name),
+          channel_(channel),
+          pipeline_(&channel.lock()->pipeline()),
+          handler_(handler),
+          inboundContainer_() {
+        if (handler) {
+            handler->registerTo(*this);
+        }
+    }
+
+    ChannelMessageTailLinkContext(const std::string& name,
                                   const ChannelPtr& channel,
                                   const HandlerPtr& handler,
                                   const RegisterCallback& registerCallback)

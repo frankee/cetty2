@@ -11,8 +11,8 @@ using namespace cetty::protobuf::service::builder;
 
 class EchoClient {
 public:
-    EchoClient(const ClientServicePtr& s) : stub(s), count(0) {
-        future = new echo::EchoServiceFuture();
+    EchoClient(const ChannelPtr& s) : stub(s), count(0) {
+        future = new echo::echoServiceFuture();
         future->addListener(boost::bind(&EchoClient::replied, this, _1, _2));
     }
     virtual ~EchoClient() {}
@@ -21,10 +21,10 @@ public:
         echo::EchoRequest* request = new echo::EchoRequest;
         request->set_payload("0123456789ABCDEF");
 
-        stub.Echo(request, future);
+        stub.echo(request, future);
     }
 
-    void replied(const echo::EchoServiceFuture& f, const echo::EchoResponsePtr& resp) {
+    void replied(const echo::echoServiceFuture& f, const echo::EchoResponsePtr& resp) {
         ++count;
         if (count < 10000) {
             sendRequest();
@@ -34,17 +34,17 @@ public:
 	echo::EchoService_Stub* getStub() { return &stub; }
 
 private:
-    echo::EchoServiceFuturePtr future;
+    echo::echoServiceFuturePtr future;
     echo::EchoService_Stub stub;
 
     int count;
 };
 
 int main(int argc, char* argv[]) {
-    ProtobufClientBuilder builder;
+    ProtobufClientBuilder builder(1);
     builder.addConnection("127.0.0.1", 1980);
 
-    ClientServicePtr service = builder.build();
+    ChannelPtr service = builder.build();
     EchoClient client(service);
     client.sendRequest();
 

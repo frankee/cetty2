@@ -36,9 +36,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h">
       <Filter>protobuf\handler</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h">
-      <Filter>protobuf\handler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceMessagePtr.h">
       <Filter>protobuf</Filter>
     </ClInclude>

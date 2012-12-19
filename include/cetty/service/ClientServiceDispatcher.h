@@ -112,7 +112,8 @@ public:
     }
 
 private:
-    void toOutboundOut(const OutstandingCallPtr& outbound, OutstandingCallPtr* out) {
+    void toOutboundOut(const OutstandingCallPtr& outbound,
+                       OutstandingCallPtr* out) {
         *out = outbound;
     }
 
@@ -138,8 +139,9 @@ private:
             return false;
         }
 
-        channel->pipeline().addLast<RequestBridge::HandlerPtr>("requestAdaptor",
-                RequestBridge::HandlerPtr(new RequestBridge(channel_)));
+        channel->pipeline().addLast(RequestBridge::newContext(channel_));
+        //channel->pipeline().addLast<RequestBridge::HandlerPtr>("requestAdaptor",
+        //        RequestBridge::HandlerPtr(new RequestBridge(channel_)));
 
         return true;
     }
@@ -148,13 +150,28 @@ private:
         channel_ = ctx.channel();
     }
 
+    void setSuccess(Response& msg) {
+        std::map<int64_t, OutstandingCallPtr>::iterator itr =
+            outStandingCalls_.find(msg->id());
+
+        if (itr != outStandingCalls_.end()) {
+            itr->second->future()->setSuccess(msg);
+            outStandingCalls_.erase(itr);
+        }
+    }
+
+    void setSuccess(OutstandingCallPtr& msg) {
+        msg->future()->setSuccess();
+    }
+
     void messageUpdated(ChannelHandlerContext& ctx) {
-        OutboundQueue& queue = inboundContainer_->getMessages();
+        InboundQueue& queue = inboundContainer_->getMessages();
 
         while (!queue.empty()) {
-            OutstandingCallPtr msg = queue.front();
+            InboundIn& msg = queue.front();
+            setSuccess(msg);
+
             //inboundTransfer.unfoldAndAdd(msg);
-            msg->future()->setSuccess();
             queue.pop_front();
         }
 

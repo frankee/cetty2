@@ -30,7 +30,7 @@ using namespace cetty::bootstrap::asio;
 
 ConnectionPool::ConnectionPool(const Connections& connections)
     : connections_(connections),
-      bootstrap_(0),
+      bootstrap_(1),
       connecting_(false) {
 }
 

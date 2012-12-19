@@ -538,12 +538,28 @@ public:
         return NULL;
     }
 
+    template<class T>
+    T* inboundMessageContainer() {
+        if (head_) {
+            return head_->nextInboundMessageContainer<T>(head_);
+        }
+        return NULL;
+    }
+
     template<class T, int MessageT>
     ChannelMessageContainer<T, MessageT>* outboundMessageContainer() {
         if (tail_) {
             return tail_->nextOutboundMessageContainer<ChannelMessageContainer<T, MessageT> >(tail_);
         }
 
+        return NULL;
+    }
+
+    template<class T>
+    T* outboundMessageContainer() {
+        if (tail_) {
+            return tail_->nextOutboundMessageContainer<T>(tail_);
+        }
         return NULL;
     }
 

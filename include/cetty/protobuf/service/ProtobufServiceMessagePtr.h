@@ -18,6 +18,7 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
+#include <cetty/service/ServiceMessageWrapper.h>
 
 namespace cetty {
 namespace protobuf {
@@ -29,6 +30,22 @@ typedef boost::intrusive_ptr<ProtobufServiceMessage> ProtobufServiceMessagePtr;
 }
 }
 }
+
+namespace cetty {
+namespace service {
+
+using namespace cetty::protobuf::service;
+
+template<>
+struct ServiceMessageWrapper<ProtobufServiceMessagePtr> {
+    enum {
+        HAS_SERIAL_NUMBER = true
+    };
+};
+
+}
+}
+
 
 #endif //#if !defined(CETTY_PROTOBUF_SERVICE_PROTOBUFSERVICEMESSAGEPTR_H)
 
