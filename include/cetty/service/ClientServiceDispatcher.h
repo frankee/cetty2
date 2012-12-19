@@ -88,7 +88,8 @@ public:
     ClientServiceDispatcher(const EventLoopPtr& eventLoop,
                             const Connections& connections,
                             const Channel::Initializer& initializer)
-        : eventLoop_(eventLoop),
+        : id_(0),
+          eventLoop_(eventLoop),
           pool_(connections),
           initializer_(initializer) {
         pool_.setChannelInitializer(boost::bind(&Self::initializeClientChannel,
@@ -187,13 +188,15 @@ private:
         if (ch) {
             while (!queue.empty()) {
                 OutboundIn& request = queue.front();
+
                 OutboundOut out;
                 toOutboundOut(request, &out);
+                out->setId(id_++);
 
                 ch->pipeline().addOutboundChannelMessage<OutboundOut>(out);
 
                 if (ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER) {
-                    outStandingCalls_.insert(std::make_pair(request->id(), request));
+                    outStandingCalls_.insert(std::make_pair(out->id(), request));
                 }
 
                 notify = true;
@@ -232,11 +235,12 @@ private:
 
                 OutboundOut out;
                 toOutboundOut(request, &out);
+                out->setId(id_++);
 
                 channel->pipeline().addOutboundChannelMessage<OutboundOut>(out);
 
                 if (ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER) {
-                    outStandingCalls_.insert(std::make_pair(request->id(), request));
+                    outStandingCalls_.insert(std::make_pair(out->id(), request));
                 }
 
                 notify = true;
@@ -259,6 +263,7 @@ private:
     };
 
 private:
+    int64_t id_;
     ChannelWeakPtr channel_;
     EventLoopPtr eventLoop_;
     Channel::Initializer initializer_;
