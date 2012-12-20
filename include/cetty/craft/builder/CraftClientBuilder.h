@@ -24,15 +24,29 @@ namespace craft {
 namespace builder {
 
 using namespace cetty::channel;
+using namespace cetty::protobuf::service::builder;
 
-class CraftClientBuilder
-        : public cetty::protobuf::service::builder::ProtobufClientBuilder {
+class CraftClientBuilder : private boost::noncopyable {
 public:
     CraftClientBuilder();
     CraftClientBuilder(int threadCnt);
     CraftClientBuilder(const EventLoopPtr& eventLoop);
     CraftClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
+    void setServiceInitializer(const Channel::Initializer& initializer) {
+        builder_.setServiceInitializer(initializer);
+    }
+
+    void addConnection(const std::string& host, int port, int limit = 1) {
+        builder_.addConnection(host, port, limit);
+    }
+
+    ChannelPtr build() {
+        builder_.build();
+    }
+
+private:
+    ProtobufClientBuilder builder_;
 };
 
 }

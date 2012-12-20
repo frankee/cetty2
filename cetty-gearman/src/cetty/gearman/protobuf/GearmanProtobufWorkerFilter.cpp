@@ -51,7 +51,7 @@ ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterRequest(
     ChannelHandlerContext& ctx,
     const GearmanMessagePtr& req) {
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-    ProtobufServiceMessageDecoder::decode(req->getData(), protoMsg);
+    ProtobufServiceMessageDecoder::decode(req->data(), protoMsg);
     return protoMsg;
 }
 
@@ -60,7 +60,7 @@ GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
     const GearmanMessagePtr& req,
     const ProtobufServiceMessagePtr& rep,
     const ChannelFuturePtr& future) {
-    std::string jobHandle = req->getParameters().front();
+    std::string jobHandle = req->parameters().front();
     ChannelBufferPtr buffer = Unpooled::buffer(rep->messageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage

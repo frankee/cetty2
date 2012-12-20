@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <boost/noncopyable.hpp>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/ChannelPipeline.h>
@@ -35,10 +36,10 @@ using namespace cetty::service;
 class ClientBuilderConfig;
 
 template<typename Request, typename Response = Request>
-class ClientBuilder {
+class ClientBuilder : private boost::noncopyable {
 public:
     typedef ClientBuilder<Request, Response> Self;
-    typedef ClientService<Request, Response> ClientServiceChannel;
+    typedef ClientService<Request, Response> ServiceChannel;
 
 public:
     ClientBuilder()
@@ -56,7 +57,11 @@ public:
 
     virtual ~ClientBuilder() {}
 
-    void setChannelInitializer(const Channel::Initializer& initializer) {
+    void setServiceInitializer(const Channel::Initializer& initializer) {
+        serviceInitializer_ = initializer;
+    }
+
+    void setClientInitializer(const Channel::Initializer& initializer) {
         clientInitializer_ = initializer;
     }
 
@@ -66,18 +71,15 @@ public:
 
     ChannelPtr build() {
         ChannelPtr channel = newChannel();
-        channel->setInitializer(
-            boost::bind(&Self::initilizeClientService, this, _1));
+
+        if (serviceInitializer_) {
+            channel->setInitializer(serviceInitializer_);
+        }
 
         channel->initialize();
         channel->pipeline().fireChannelActive();
 
         return channel;
-    }
-
-private:
-    bool initilizeClientService(const ChannelPtr& ch) {
-        return true;
     }
 
 private:
@@ -88,9 +90,9 @@ private:
             loop = eventLoopPool_->getNextLoop();
         }
 
-        return ChannelPtr(new ClientServiceChannel(loop,
-                          clientInitializer_,
-                          connections_));
+        return ChannelPtr(new ServiceChannel(loop,
+                                             clientInitializer_,
+                                             connections_));
     }
 
 private:
@@ -100,6 +102,7 @@ private:
     EventLoopPoolPtr eventLoopPool_;
 
     Channel::Initializer clientInitializer_;
+    Channel::Initializer serviceInitializer_;
 };
 
 }

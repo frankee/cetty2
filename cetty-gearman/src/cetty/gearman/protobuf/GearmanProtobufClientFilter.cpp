@@ -65,7 +65,7 @@ ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterResponse(
     const GearmanMessagePtr& rep) {
     //decode from GearmanMessage
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-    ProtobufServiceMessageDecoder::decode(rep->getData(),protoMsg);
+    ProtobufServiceMessageDecoder::decode(rep->data(),protoMsg);
     return protoMsg;
 }
 

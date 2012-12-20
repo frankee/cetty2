@@ -33,26 +33,104 @@ namespace service {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::service;
 using namespace cetty::config;
+using namespace cetty::service;
+using namespace cetty::service::builder;
 using namespace cetty::protobuf::service;
 
-class ProtobufServerBuilder : public cetty::service::builder::ServerBuilder {
+class ProtobufServerBuilder : private boost::noncopyable {
+public:
+    typedef ServerBuilder::ChildInitializer ChildInitializer;
+
 public:
     ProtobufServerBuilder();
-    ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt);
+    ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt = 0);
 
-    virtual ~ProtobufServerBuilder();
+    ~ProtobufServerBuilder();
 
     ProtobufServerBuilder& registerService(const ProtobufServicePtr& service);
 
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     int port);
+
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port);
+
     ChannelPtr buildRpc(int port);
+
+    ProtobufServerBuilder& buildAll();
+
+    ProtobufServerBuilder& waitingForExit();
+
+    const ServerBuilderConfig& config() const;
+    const EventLoopPoolPtr& parentPool() const;
+    const EventLoopPoolPtr& childPool() const;
+
+    ServerBuilder& serverBuilder();
+    const ServerBuilder& serverBuilder() const;
 
 private:
     void init();
-
     bool initializeChannel(const ChannelPtr& channel);
+
+private:
+    ServerBuilder builder_;
 };
+
+inline
+ChannelPtr ProtobufServerBuilder::build(const std::string& name,
+                                        const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                        int port) {
+    return builder_.build(name, childInitializer, port);
+}
+
+inline
+ChannelPtr ProtobufServerBuilder::build(const std::string& name,
+                                        const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                        const std::string& host,
+                                        int port) {
+    return builder_.build(name, childInitializer, host, port);
+}
+
+inline
+ProtobufServerBuilder& ProtobufServerBuilder::buildAll() {
+    builder_.buildAll();
+    return *this;
+}
+
+inline
+ProtobufServerBuilder& ProtobufServerBuilder::waitingForExit() {
+    builder_.waitingForExit();
+    return *this;
+}
+
+inline
+const ServerBuilderConfig& ProtobufServerBuilder::config() const {
+    return builder_.config();
+}
+
+inline
+const EventLoopPoolPtr& ProtobufServerBuilder::parentPool() const {
+    return builder_.parentPool();
+}
+
+inline
+const EventLoopPoolPtr& ProtobufServerBuilder::childPool() const {
+    return builder_.childPool();
+}
+
+inline
+ServerBuilder& ProtobufServerBuilder::serverBuilder() {
+    return builder_;
+}
+
+inline
+const ServerBuilder& ProtobufServerBuilder::serverBuilder() const {
+    return builder_;
+}
 
 }
 }

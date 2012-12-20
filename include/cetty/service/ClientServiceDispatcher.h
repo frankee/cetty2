@@ -37,8 +37,9 @@
 namespace cetty {
 namespace service {
 
-using namespace cetty::bootstrap;
+using namespace cetty::util;
 using namespace cetty::channel;
+using namespace cetty::bootstrap;
 using namespace cetty::service::pool;
 
 template<typename H,
@@ -48,8 +49,10 @@ class ClientServiceDispatcher : private boost::noncopyable {
 public:
     typedef ClientServiceDispatcher<H, Request, Response> Self;
 
-    typedef boost::intrusive_ptr<OutstandingCall<Request, Response> > OutstandingCallPtr;
-    typedef typename cetty::util::IF<ServiceMessageWrapper<Response>::HAS_SERIAL_NUMBER,
+    typedef OutstandingCall<Request, Response> Call;
+    typedef boost::intrusive_ptr<Call> OutstandingCallPtr;
+
+    typedef typename IF<ServiceMessageWrapper<Response>::HAS_SERIAL_NUMBER,
             Response,
             OutstandingCallPtr>::Result InboundIn;
 
@@ -57,7 +60,7 @@ public:
 
     typedef OutstandingCallPtr OutboundIn;
 
-    typedef typename cetty::util::IF<ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER,
+    typedef typename IF<ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER,
             Request,
             OutstandingCallPtr>::Result OutboundOut;
 
@@ -82,7 +85,10 @@ public:
     typedef typename Context::Handler Handler;
     typedef typename Context::HandlerPtr HandlerPtr;
 
-    typedef ClientServiceRequestBridge<Request, Response, InboundIn, OutboundOut> RequestBridge;
+    typedef ClientServiceRequestBridge<Request,
+            Response,
+            InboundIn,
+            OutboundOut> RequestBridge;
 
 public:
     ClientServiceDispatcher(const EventLoopPtr& eventLoop,
@@ -141,9 +147,6 @@ private:
         }
 
         channel->pipeline().addLast(RequestBridge::newContext(channel_));
-        //channel->pipeline().addLast<RequestBridge::HandlerPtr>("requestAdaptor",
-        //        RequestBridge::HandlerPtr(new RequestBridge(channel_)));
-
         return true;
     }
 

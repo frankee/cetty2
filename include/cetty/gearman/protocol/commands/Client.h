@@ -28,8 +28,8 @@ namespace commands {
 using namespace cetty::buffer;
 
 // client
-static GearmanMessagePtr clientSubmitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-static GearmanMessagePtr clientSubmitJobHighMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+static GearmanMessagePtr submitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+static GearmanMessagePtr submitJobHighMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
 static GearmanMessagePtr submitJobLowMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
 
 //client submit-bg

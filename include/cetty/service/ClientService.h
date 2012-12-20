@@ -38,11 +38,11 @@ public:
 
     typedef ClientServiceDispatcher<Self*,
             Request,
-            Response> Dispatcher;
+            Response> ClientDispatcher;
 
-    typedef typename Dispatcher::Context Context;
-    typedef typename Dispatcher::Context::Handler Handler;
-    typedef typename Dispatcher::Context::HandlerPtr HandlerPtr;
+    typedef typename ClientDispatcher::Context Context;
+    typedef typename ClientDispatcher::Context::Handler Handler;
+    typedef typename ClientDispatcher::Context::HandlerPtr HandlerPtr;
 
 public:
     ClientService(const EventLoopPtr& eventLoop,
@@ -50,8 +50,6 @@ public:
                   const Connections& connections)
         : Channel(ChannelPtr(), eventLoop),
           eventLoop_(eventLoop),
-          initializer_(initializer),
-          connections_(connections),
           dispatcher_(eventLoop, connections, initializer) {
     }
 
@@ -75,10 +73,7 @@ private:
 
 private:
     EventLoopPtr eventLoop_;
-    Initializer initializer_;
-    Connections connections_;
-
-    Dispatcher dispatcher_;
+    ClientDispatcher dispatcher_;
 };
 
 template<typename Request, typename Response>

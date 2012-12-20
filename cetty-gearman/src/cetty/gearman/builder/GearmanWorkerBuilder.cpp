@@ -17,7 +17,6 @@
 #include <cetty/gearman/builder/GearmanWorkerBuilder.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanWorker.h>
@@ -30,7 +29,6 @@ namespace gearman {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
 using namespace cetty::handler::codec;
 using namespace cetty::gearman::protocol;
 
@@ -39,7 +37,7 @@ GearmanWorkerBuilder::GearmanWorkerBuilder()
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
-    : ServerBuilder(threadCnt), pipeline() {
+    : ServerBuilder(threadCnt) {
 }
 
 GearmanWorkerBuilder::~GearmanWorkerBuilder() {
@@ -51,7 +49,7 @@ void GearmanWorkerBuilder::addConnection(const std::string& host, int port) {
 }
 
 const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
-    const EventLoopPoolPtr& pool = getChildPool();
+    const EventLoopPoolPtr& pool = childPool();
 
     if (pool) {
         AsioServicePool::Iterator itr = pool->begin();

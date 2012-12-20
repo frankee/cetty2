@@ -909,5 +909,14 @@
     <ClInclude Include="..\..\..\include\cetty\util\Adler32.h">
       <Filter>util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOptions.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrapPtr.h">
+      <Filter>bootstrap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrapPtr.h">
+      <Filter>bootstrap</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

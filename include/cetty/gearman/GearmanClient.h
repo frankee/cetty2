@@ -37,7 +37,7 @@ public:
     };
 
 public:
-    GearmanClient(const ClientServicePtr& service) {}
+    GearmanClient(const ChannelPtr& service) {}
     virtual ~GearmanClient() {}
 
     GearmanServiceFuturePtr submitJob(const std::string& functionName,
@@ -62,7 +62,7 @@ public:
                                       const std::string& value);
 
 private:
-    ClientServicePtr service;
+    ChannelPtr service;
 };
 
 }

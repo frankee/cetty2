@@ -35,7 +35,7 @@ public:
 
     void replied(const GearmanServiceFuture& f, const GearmanMessagePtr& resp) {
         std::string ret;
-        resp->getData()->readBytes(&ret);
+        resp->data()->readBytes(&ret);
         std::cout<<"the msg is  "<<ret<<std::endl;
         ++count;
         if (count < 10000) {

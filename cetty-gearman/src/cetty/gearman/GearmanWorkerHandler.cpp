@@ -71,7 +71,7 @@ void GearmanWorkerHandler::registerWorker(const std::string& functionName,
 
 void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
                                      ChannelHandlerContext& ctx) {
-    const std::vector<std::string>& parameters = gearmanMessage->getParameters();
+    const std::vector<std::string>& parameters = gearmanMessage->parameters();
     const std::string& functionName = parameters[1];
     CallbackMap::iterator itr = workerFunctors.find(functionName);
 
@@ -82,7 +82,7 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
             GearmanMessagePtr message = callback(gearmanMessage);
 
             DLOG_DEBUG << "handler: " << parameters.front()
-                       << "result: " << ChannelBufferUtil::hexDump(message->getData());
+                       << "result: " << ChannelBufferUtil::hexDump(message->data());
 
             if (outboundTransfer.unfoldAndAdd(message)) {
                 ctx.flush();
@@ -128,7 +128,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
     std::vector<std::string> params;
 
     if (msg) {
-        switch (msg->getType()) {
+        switch (msg->type()) {
         case GearmanMessage::NOOP:
             LOG_INFO << "the NOOP is received, wake up to do job";
             grabJob(ctx);
@@ -151,7 +151,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
 
             DLOG_DEBUG << "JOB_ASSIGN, job-handler: " << params[0]
                        << "function name: " << params[1]
-                       << "arg data: " << ChannelBufferUtil::hexDump(msg->getData());
+                       << "arg data: " << ChannelBufferUtil::hexDump(msg->data());
 
             handleJob(msg, ctx);
             grabIdleCount = 0;
@@ -165,7 +165,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
             DLOG_DEBUG << "JOB_ASSIGN_UNIQ, job-handler: " << params[0]
                        << "function name: " << params[1]
                        << "unique ID: " << params[2]
-                       << "arg data: " << ChannelBufferUtil::hexDump(msg->getData());
+                       << "arg data: " << ChannelBufferUtil::hexDump(msg->data());
 
             grabIdleCount = 0;
             handleJob(msg, ctx);
@@ -174,7 +174,7 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx,
         case GearmanMessage::ECHO_RES:
             LOG_INFO << "the ECHO_RES is ok";
 
-            DLOG_DEBUG << "ECHO_RES, data: " << ChannelBufferUtil::hexDump(msg->getData());
+            DLOG_DEBUG << "ECHO_RES, data: " << ChannelBufferUtil::hexDump(msg->data());
             break;
 
         case GearmanMessage::ERROR:
@@ -200,7 +200,7 @@ void GearmanWorkerHandler::flush(ChannelHandlerContext& ctx,
     while (!outboundQueue.empty()) {
         const GearmanMessagePtr& message = outboundQueue.front();
 
-        switch (message->getType()) {
+        switch (message->type()) {
         case GearmanMessage::WORK_COMPLETE:
             outboundTransfer.unfoldAndAdd(message);
             break;

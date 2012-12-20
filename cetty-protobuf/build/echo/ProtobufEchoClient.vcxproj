@@ -107,7 +107,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\example\echo\client.cpp" />
+    <ClCompile Include="..\..\example\echo\ProtobufEchoClient.cpp" />
     <ClCompile Include="..\..\example\echo\echo.pb.cc" />
   </ItemGroup>
   <ItemGroup>

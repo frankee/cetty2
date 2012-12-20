@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_PROTOCOL_COMMANDS_COMMON_H)
-#define CETTY_GEARMAN_PROTOCOL_COMMANDS_COMMON_H
+#if !defined(CETTY_BOOTSTRAP_SERVERBOOTSTRAPPTR_H)
+#define CETTY_BOOTSTRAP_SERVERBOOTSTRAPPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,22 +17,18 @@
  * under the License.
  */
 
-#include <cetty/gearman/protocol/GearmanMessagePtr.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
-namespace gearman {
-namespace protocol {
-namespace commands {
+namespace bootstrap {
 
-static GearmanMessagePtr createEchoReqMessage(const ChannelBufferPtr& payload);
+class ServerBootstrap;
+typedef boost::intrusive_ptr<ServerBootstrap> ServerBootstrapPtr;
 
 }
 }
-}
-}
 
-
-#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_COMMANDS_COMMON_H)
+#endif //#if !defined(CETTY_BOOTSTRAP_SERVERBOOTSTRAPPTR_H)
 
 // Local Variables:
 // mode: c++

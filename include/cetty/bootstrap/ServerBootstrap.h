@@ -29,6 +29,7 @@
 #include <cetty/channel/ChannelHandlerWrapper.h>
 
 #include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/ServerBootstrapPtr.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -161,27 +162,9 @@ public:
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ServerBootstrap()
-        : parentHandler_() {
-    }
-
-    ServerBootstrap(const EventLoopPoolPtr& pool)
-        : AbstractBootstrap<ServerBootstrap>(pool),
-          parentHandler_() {
-        setChildEventLoopPool(pool);
-    }
-
-    ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child)
-        : AbstractBootstrap<ServerBootstrap>(parent),
-          parentHandler_() {
-        if (child) {
-            setChildEventLoopPool(child);
-            LOG_WARN << "set null EventLoopPool to child, using parent.";
-        }
-        else {
-            setChildEventLoopPool(parent);
-        }
-    }
+    ServerBootstrap();
+    ServerBootstrap(const EventLoopPoolPtr& pool);
+    ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child);
 
     virtual ~ServerBootstrap() {}
 
@@ -191,31 +174,11 @@ public:
      * {@link Channel}'s.
      */
     ServerBootstrap& setEventLoopPools(const EventLoopPoolPtr& parent,
-                                      const EventLoopPoolPtr& child) {
-        if (child) {
-            childPool_ = child;
-        }
-        else {
-            childPool_ = parent;
-        }
+                                       const EventLoopPoolPtr& child);
 
-        AbstractBootstrap<ServerBootstrap>::setEventLoopPool(parent);
+    ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool);
 
-        return *this;
-    }
-
-    ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool) {
-        childPool_ = pool;
-        return *this;
-    }
-
-    const EventLoopPoolPtr& parentPool() const {
-        return AbstractBootstrap<ServerBootstrap>::eventLoopPool();
-    }
-
-    const EventLoopPoolPtr& childPool() const {
-        return childPool_;
-    }
+    const EventLoopPoolPtr& childPool() const;
 
     template<typename T>
     ServerBootstrap& setParentHandler(
@@ -230,6 +193,9 @@ public:
         return *this;
     }
 
+    const ChannelOptions& childOptions() const;
+
+    ServerBootstrap& setChildOptions(const ChannelOptions& options);
     /**
      * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they get created
      * (after the acceptor accepted the {@link Channel}). Use a value of <code>null</code> to remove a previous set
@@ -238,23 +204,14 @@ public:
     ServerBootstrap& setChildOption(const ChannelOption& option,
                                     const ChannelOption::Variant& value);
 
-    const ChannelOption::Options& childOptions() const;
-
-    const Channel::Initializer& childInitializer() const {
-        return childInitializer_;
-    }
+    const Channel::Initializer& childInitializer() const;
 
     /**
      * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
      */
-    ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer) {
-        childInitializer_ = initializer;
-        return *this;
-    }
+    ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer);
 
-    ChannelFuturePtr bind() {
-        return bind(localAddress());
-    }
+    ChannelFuturePtr bind();
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -286,9 +243,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    ChannelFuturePtr bind(const std::string& ip, int port) {
-        return bind(SocketAddress(ip, port));
-    }
+    ChannelFuturePtr bind(const std::string& ip, int port);
 
     /**
      * Creates a new channel which is bound to the specified local address.
@@ -301,6 +256,8 @@ public:
 
     virtual void shutdown();
 
+    const std::vector<ChannelPtr>& serverChannels() const;
+
 protected:
     virtual ChannelPtr newChannel() = 0;
 
@@ -309,7 +266,7 @@ private:
 
 private:
     EventLoopPoolPtr childPool_;
-    ChannelOption::Options childOptions_;
+    ChannelOptions childOptions_;
     Channel::Initializer childInitializer_;
 
     ChannelHandlerContext* parentHandler_;
@@ -317,8 +274,35 @@ private:
 };
 
 inline
-const ChannelOption::Options& ServerBootstrap::childOptions() const {
+const ChannelOptions& ServerBootstrap::childOptions() const {
     return childOptions_;
+}
+
+inline
+const EventLoopPoolPtr& ServerBootstrap::childPool() const {
+    return childPool_;
+}
+
+inline
+const Channel::Initializer& ServerBootstrap::childInitializer() const {
+    return childInitializer_;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setChildEventLoopPool(const EventLoopPoolPtr& pool) {
+    childPool_ = pool;
+    return *this;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setChildInitializer(const Channel::Initializer& initializer) {
+    childInitializer_ = initializer;
+    return *this;
+}
+
+inline
+const std::vector<ChannelPtr>& ServerBootstrap::serverChannels() const {
+    return serverChannels_;
 }
 
 }

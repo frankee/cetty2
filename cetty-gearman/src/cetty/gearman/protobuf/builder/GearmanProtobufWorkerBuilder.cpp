@@ -19,7 +19,6 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>

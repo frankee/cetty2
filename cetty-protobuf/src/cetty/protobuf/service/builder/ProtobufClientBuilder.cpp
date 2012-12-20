@@ -35,27 +35,27 @@ using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service::handler;
 
 ProtobufClientBuilder::ProtobufClientBuilder()
-    : ClientBuilderType() {
+    : builder_() {
     init();
 }
 
 ProtobufClientBuilder::ProtobufClientBuilder(int threadCnt)
-    : ClientBuilderType(threadCnt) {
+    : builder_(threadCnt) {
     init();
 }
 
 ProtobufClientBuilder::ProtobufClientBuilder(const EventLoopPtr& eventLoop)
-    : ClientBuilderType(eventLoop) {
+    : builder_(eventLoop) {
     init();
 }
 
 ProtobufClientBuilder::ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : ClientBuilderType(eventLoopPool) {
+    : builder_(eventLoopPool) {
     init();
 }
 
 void ProtobufClientBuilder::init() {
-    setChannelInitializer(
+    builder_.setClientInitializer(
         boost::bind(&ProtobufClientBuilder::initializeChannel, this, _1));
 }
 

@@ -89,10 +89,10 @@ public:
 
             child->setInitializer(bootstrap_.childInitializer());
 
-            const ChannelOption::Options& childOptions =
+            const ChannelOptions& childOptions =
                 bootstrap_.childOptions();
 
-            ChannelOption::Options::const_iterator itr = childOptions.begin();
+            ChannelOptions::ConstIterator itr = childOptions.begin();
 
             for (; itr != childOptions.end(); ++itr) {
                 if (!child->config().setOption(itr->first, itr->second)) {
@@ -117,7 +117,7 @@ bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
     pipeline.addLast<Acceptor>("acceptor",
-        Acceptor::Ptr(new Acceptor(*this)));
+                               Acceptor::Ptr(new Acceptor(*this)));
 
     if (parentHandler_) {
         pipeline.addLast(parentHandler_);
@@ -133,7 +133,7 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     if (!channel) {
         LOG_ERROR << "Server channel factory failed to create a new channel.";
         return NullChannel::instance()->newFailedFuture(
-            ChannelException("Failed to create a new channel."));
+                   ChannelException("Failed to create a new channel."));
     }
 
     channel->setInitializer(boost::bind(
@@ -154,32 +154,74 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     return future;
 }
 
+cetty::channel::ChannelFuturePtr ServerBootstrap::bind() {
+    return bind(localAddress());
+}
+
+cetty::channel::ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
+    return bind(SocketAddress(ip, port));
+}
+
+ServerBootstrap& ServerBootstrap::setChildOptions(const ChannelOptions& options) {
+    childOptions_ = options;
+    return *this;
+}
+
 ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
         const ChannelOption::Variant& value) {
-    if (value.empty()) {
-        childOptions_.erase(option);
-        LOG_WARN << "setOption, the key ("
-                 << option.name()
-                 << ") is empty value, remove from the options.";
-    }
-    else {
-        LOG_INFO << "set Option, the key is " << option.name();
-        childOptions_.insert(std::make_pair(option, value));
-    }
-
+    childOptions_.setOption(option, value);
     return *this;
 }
 
 void ServerBootstrap::shutdown() {
-    AbstractBootstrap<ServerBootstrap>::shutdown();
+    EventLoopPoolPtr serverPool = eventLoopPool();
+
+    if (serverPool) {
+        serverPool->stop();
+        serverPool->waitForStop();
+    }
 
     childPool_->stop();
     childPool_->waitForStop();
 
     serverChannels_.clear();
+
     if (parentHandler_) {
         delete parentHandler_;
     }
+}
+
+ServerBootstrap::ServerBootstrap() : parentHandler_() {
+
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool) : AbstractBootstrap<ServerBootstrap>(pool),
+    parentHandler_() {
+        setChildEventLoopPool(pool);
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) : AbstractBootstrap<ServerBootstrap>(parent),
+    parentHandler_() {
+        if (child) {
+            setChildEventLoopPool(child);
+            LOG_WARN << "set null EventLoopPool to child, using parent.";
+        }
+        else {
+            setChildEventLoopPool(parent);
+        }
+}
+
+ServerBootstrap& ServerBootstrap::setEventLoopPools(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) {
+    if (child) {
+        childPool_ = child;
+    }
+    else {
+        childPool_ = parent;
+    }
+
+    AbstractBootstrap<ServerBootstrap>::setEventLoopPool(parent);
+
+    return *this;
 }
 
 }

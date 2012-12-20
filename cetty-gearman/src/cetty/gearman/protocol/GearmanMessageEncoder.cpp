@@ -58,26 +58,26 @@ ChannelBufferPtr GearmanMessageEncoder::encode(ChannelHandlerContext& ctx,
     int messageLength = 0;
 
     if (msg->hasData()) {
-        const ChannelBufferPtr& data = msg->getData();
+        const ChannelBufferPtr& data = msg->data();
         bodyLenth += data->readableBytes();
         messageLength = bodyLenth + parametersLength;
 
         if (data->aheadWritableBytes() >= parametersLength + headerLength) {
             if (parametersLength) {
-                writeParametersAhead(data, msg->getParameters(), true);
+                writeParametersAhead(data, msg->parameters(), true);
             }
 
-            writeHeaderAhead(data, msg->getType(), messageLength);
+            writeHeaderAhead(data, msg->type(), messageLength);
             DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(data);
             return data;
         }
         else {
             ChannelBufferPtr buffer = Unpooled::buffer(messageLength + headerLength);
 
-            writeHeader(buffer, msg->getType(), messageLength);
+            writeHeader(buffer, msg->type(), messageLength);
 
             if (parametersLength) {
-                writeParameters(buffer, msg->getParameters(), true);
+                writeParameters(buffer, msg->parameters(), true);
             }
 
             buffer->writeBytes(data);
@@ -86,7 +86,7 @@ ChannelBufferPtr GearmanMessageEncoder::encode(ChannelHandlerContext& ctx,
         }
     }
     else {
-        if (msg->getParameters().size() != 0) {
+        if (msg->parameters().size() != 0) {
             messageLength =  parametersLength - 1;
         }
         else {
@@ -94,10 +94,10 @@ ChannelBufferPtr GearmanMessageEncoder::encode(ChannelHandlerContext& ctx,
         }
 
         ChannelBufferPtr buffer = Unpooled::buffer(messageLength+headerLength);
-        writeHeader(buffer, msg->getType(), messageLength);
+        writeHeader(buffer, msg->type(), messageLength);
 
         if ((parametersLength - 1) > 0) {
-            writeParameters(buffer, msg->getParameters(), false);
+            writeParameters(buffer, msg->parameters(), false);
         }
 
         DLOG_DEBUG << "the send data is " << ChannelBufferUtil::hexDump(buffer);
@@ -111,7 +111,7 @@ ChannelBufferPtr GearmanMessageEncoder::encode(ChannelHandlerContext& ctx,
 int GearmanMessageEncoder::caculateParametersLength(const GearmanMessagePtr& msg) {
     int length = 0;
 
-    const std::vector<std::string>& parameters = msg->getParameters();
+    const std::vector<std::string>& parameters = msg->parameters();
 
     for (int i = 0, j = parameters.size(); i < j; ++i) {
         length += parameters[i].size();

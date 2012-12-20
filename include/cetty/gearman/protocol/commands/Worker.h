@@ -16,9 +16,36 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace gearman { namespace protocol { namespace commands { 
 
-}}}}
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
+
+namespace cetty {
+namespace gearman {
+namespace protocol {
+namespace commands {
+
+// worker  request
+static GearmanMessagePtr createCandoMessage(const std::string& functionName);
+static GearmanMessagePtr createCandoTimeoutMessage(const std::string& functionName, int timeout);
+static GearmanMessagePtr createCantdoMessage(const std::string& functionName);
+static GearmanMessagePtr createResetAbilitiesMessage();
+static GearmanMessagePtr createPreSleepMessage();
+static GearmanMessagePtr createGrabJobMessage();
+static GearmanMessagePtr createGrabJobUniqMessage();
+static GearmanMessagePtr createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator);
+static GearmanMessagePtr createWorkCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+static GearmanMessagePtr createWorkFailMessage(const std::string& jobHandle);
+static GearmanMessagePtr createWorkWarningMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+static GearmanMessagePtr createWorkExceptionMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+static GearmanMessagePtr createWorkDataMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+
+static GearmanMessagePtr createSetClientIdMessage(const std::string& clientId);
+static GearmanMessagePtr createAllYoursMessage();
+
+}
+}
+}
+}
 
 
 #endif //#if !defined(CETTY_GEARMAN_PROTOCOL_COMMANDS_WORKER_H)

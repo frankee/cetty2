@@ -49,9 +49,9 @@ void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx,
 void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx,
     const GearmanMessagePtr& msg) {
     std::string  data;
-    const std::vector<std::string>& params = msg->getParameters();
+    const std::vector<std::string>& params = msg->parameters();
 
-    switch (msg->getType()) {
+    switch (msg->type()) {
     case GearmanMessage::JOB_CREATED:
         DLOG_DEBUG << "JOB_SUBMIT, job-handler:" << params.front();
         break;
@@ -67,7 +67,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx,
     case GearmanMessage::WORK_COMPLETE:
         DLOG_DEBUG << "WORK_COMPLETE, "
             << "job-handler:" << params[0] << ", "
-            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->data());
 
         if (inboundTransfer.unfoldAndAdd(msg)) {
             ctx.fireMessageUpdated();
@@ -77,7 +77,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx,
     case GearmanMessage::WORK_WARNING:
         DLOG_DEBUG << "WORK_WARNING, "
             << "job-handler:" << params[0] << ", "
-            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->data());
 
         break;
 
@@ -92,7 +92,7 @@ void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx,
     case GearmanMessage::WORK_DATA:
         DLOG_DEBUG << "WORK_DATA, "
             << "job-handler:" << params[0] << ", "
-            << "work dump data:" << ChannelBufferUtil::hexDump(msg->getData());
+            << "work dump data:" << ChannelBufferUtil::hexDump(msg->data());
 
         break;
 

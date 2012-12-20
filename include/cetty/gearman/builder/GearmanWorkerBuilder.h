@@ -33,9 +33,10 @@ using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman::protocol;
 
-class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
+class GearmanWorkerBuilder : private boost::noncopyable {
 public:
-    typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> WorkerFunctor;
+    typedef boost::function1<GearmanMessagePtr,
+        const GearmanMessagePtr&> WorkerFunctor;
 
 public:
     GearmanWorkerBuilder();
@@ -46,13 +47,7 @@ public:
 
     void registerWorker(const std::string& functionName, const WorkerFunctor& worker);
 
-    void setWorkerPipeline(const ChannelPipelinePtr& pipeline);
-    const ChannelPipelinePtr& getWorkerPipeline();
-
     const std::vector<GearmanWorkerPtr>& buildWorkers();
-
-protected:
-    virtual ChannelPipelinePtr getDefaultPipeline();
 
 private:
     void buildWorker(const EventLoopPtr& eventLoop);
@@ -61,7 +56,7 @@ private:
     std::vector<Connection> connections;
     std::vector<GearmanWorkerPtr> workers;
 
-    ChannelPipelinePtr pipeline;
+    
 };
 
 }

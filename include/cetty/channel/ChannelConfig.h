@@ -23,7 +23,7 @@
 
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
-#include <cetty/channel/ChannelOption.h>
+#include <cetty/channel/ChannelOptions.h>
 
 namespace cetty {
 namespace channel {
@@ -87,7 +87,7 @@ public:
      *
      * @throws InvalidArgumentException if there is invalid value.
      */
-    void setOptions(const ChannelOption::Options& options);
+    void setOptions(const ChannelOptions& options);
 
     /**
      * Sets a configuration property with the specified name and value.

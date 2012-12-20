@@ -1,3 +1,6 @@
+#if !defined(CETTY_BOOTSTRAP_CLIENTBOOTSTRAPPTR_H)
+#define CETTY_BOOTSTRAP_CLIENTBOOTSTRAPPTR_H
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,12 +17,20 @@
  * under the License.
  */
 
-#include <cetty/service/builder/ClientBuilder.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
-namespace service {
-namespace builder {
+namespace bootstrap {
+
+class ClientBootstrap;
+typedef boost::intrusive_ptr<ClientBootstrap> ClientBootstrapPtr;
 
 }
 }
-}
+
+
+#endif //#if !defined(CETTY_BOOTSTRAP_CLIENTBOOTSTRAPPTR_H)
+
+// Local Variables:
+// mode: c++
+// End:

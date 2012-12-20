@@ -44,8 +44,7 @@ int main(int argc, char* argv[]) {
     builder.registerService(new echo::EchoServiceImpl);
     builder.buildRpc(1980);
 
-    //builder.buildAll();
-    builder.waitingForExit();
+    builder.waitingForExit().shutdown();
 
     return 0;
 }

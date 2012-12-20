@@ -19,7 +19,6 @@
 
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanClientHandler.h>
 #include <cetty/gearman/protocol/GearmanMessageDecoder.h>
@@ -72,7 +71,6 @@ void GearmanProtobufClientBuilder::init() {
     pipeline->addLast("gearmanClient", new GearmanClientHandler());
     pipeline->addLast("gearmanFilter", new GearmanProtobufClientFilter());
 
-    ClientBuilderType::setPipeline(pipeline);
 }
 
 }
