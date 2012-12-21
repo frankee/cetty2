@@ -79,6 +79,9 @@ public:
             OutboundContainer,
             NextOutboundContainer> Context;
 
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
+
     typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
                                         RequestIn const&,

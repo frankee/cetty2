@@ -63,12 +63,6 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessage.h">
       <Filter>gearman\protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageDecoder.h">
-      <Filter>gearman\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageEncoder.h">
-      <Filter>gearman\protocol</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessagePtr.h">
       <Filter>gearman\protocol</Filter>
     </ClInclude>
@@ -80,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\gearman\GearmanServiceFuture.h">
       <Filter>gearman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageCodec.h">
+      <Filter>gearman\protocol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,14 +119,11 @@
     <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessage.cpp">
       <Filter>gearman\protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageDecoder.cpp">
-      <Filter>gearman\protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageEncoder.cpp">
-      <Filter>gearman\protocol</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\gearman\GearmanClient.cpp">
       <Filter>gearman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageCodec.cpp">
+      <Filter>gearman\protocol</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -21,8 +21,7 @@
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanWorker.h>
 #include <cetty/gearman/GearmanWorkerHandler.h>
-#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
-#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
+#include <cetty/gearman/protocol/GearmanMessageCodec.h>
 
 namespace cetty {
 namespace gearman {
@@ -32,81 +31,68 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec;
 using namespace cetty::gearman::protocol;
 
-GearmanWorkerBuilder::GearmanWorkerBuilder()
-    : ServerBuilder() {
+GearmanWorkerBuilder::GearmanWorkerBuilder() {
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
-    : ServerBuilder(threadCnt) {
+    : pool_(new AsioServicePool(threadCnt)) {
 }
 
-GearmanWorkerBuilder::~GearmanWorkerBuilder() {
+GearmanWorkerBuilder& GearmanWorkerBuilder::buildWorkers() {
+    if (pool_) {
+        AsioServicePool::Iterator itr = pool_->begin();
 
-}
-
-void GearmanWorkerBuilder::addConnection(const std::string& host, int port) {
-    connections.push_back(Connection(host, port, 1));
-}
-
-const std::vector<GearmanWorkerPtr>& GearmanWorkerBuilder::buildWorkers() {
-    const EventLoopPoolPtr& pool = childPool();
-
-    if (pool) {
-        AsioServicePool::Iterator itr = pool->begin();
-
-        for (; itr != pool->end(); ++itr) {
+        for (; itr != pool_->end(); ++itr) {
             buildWorker(*itr);
         }
     }
 
-    return workers;
+    return *this;
 }
 
 void GearmanWorkerBuilder::buildWorker(const EventLoopPtr& eventLoop) {
-    if (!pipeline) {
-        pipeline = getDefaultPipeline();
-    }
-
     //to connect to remote at this point
     GearmanWorkerPtr worker =
-        new GearmanWorker(eventLoop, pipeline, connections);
+        new GearmanWorker(eventLoop,
+                          boost::bind(&GearmanWorkerBuilder::initializeChannel,
+                                      this,
+                                      _1),
+                          connections_);
 
-    workers.push_back(worker);
+    workers_.push_back(worker);
 }
 
-void GearmanWorkerBuilder::setWorkerPipeline(const ChannelPipelinePtr& pipeline) {
-    if (pipeline && this->pipeline != pipeline) {
-        this->pipeline = pipeline;
+GearmanWorkerBuilder& GearmanWorkerBuilder::registerWorker(const std::string& functionName,
+        const WorkFunctor& worker) {
+    workFunctors_[functionName] = worker;
+    return *this;
+}
+
+bool GearmanWorkerBuilder::initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
+            LengthFieldBasedFrameDecoder::HandlerPtr(
+                new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
+
+    pipeline.addLast<GearmanMessageCodec::HandlerPtr>("gearmanCodec",
+            GearmanMessageCodec::HandlerPtr(new GearmanMessageCodec));
+
+    GearmanWorkerHandler::HandlerPtr worker(new GearmanWorkerHandler);
+    WorkFunctors::const_iterator itr = workFunctors_.begin();
+
+    for (; itr != workFunctors_.end(); ++itr) {
+        worker->registerWorker(itr->first, itr->second);
     }
-}
 
-const ChannelPipelinePtr& GearmanWorkerBuilder::getWorkerPipeline() {
-    return this->pipeline;
-}
+    pipeline.addLast<GearmanWorkerHandler::HandlerPtr>("gearmanWorker",
+            worker);
 
-ChannelPipelinePtr GearmanWorkerBuilder::getDefaultPipeline() {
-    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
-
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
-    pipeline->addLast("gearmanDecoder", new GearmanMessageDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanMessageEncoder());
-    pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
-    return pipeline;
-}
-
-void GearmanWorkerBuilder::registerWorker(const std::string& functionName,
-        const WorkerFunctor& worker) {
-    if (!pipeline) {
-        pipeline = getDefaultPipeline();
+    if (additionalInitializer_) {
+        return additionalInitializer_(channel);
     }
 
-    ChannelHandlerPtr handler = pipeline->get("gearmanWorker");
-    GearmanWorkerHandlerPtr workerHandler =
-        boost::dynamic_pointer_cast<GearmanWorkerHandler>(handler);
-
-    if (workerHandler) {
-        workerHandler->registerWorker(functionName, worker);
-    }
+    return true;
 }
 
 }

@@ -17,27 +17,22 @@
 #include <cetty/gearman/GearmanWorker.h>
 
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/asio/AsioServicePool.h>
-#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 namespace cetty {
 namespace gearman {
 
 using namespace cetty::bootstrap;
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
 using namespace cetty::service;
 using namespace cetty::service::pool;
 
 GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
-                             const ChannelPipelinePtr& pipeline,
+                             const Channel::Initializer& initializer,
                              const Connections& connections)
     : connectionPool(connections,
                      (int)connections.size(),
                      (int)connections.size()) {
-    connectionPool.getBootstrap().setPipeline(pipeline);
-    connectionPool.getBootstrap().setFactory(
-        new AsioClientSocketChannelFactory(eventLoop));
+    connectionPool.setChannelInitializer(initializer);
     connectionPool.start();
 }
 

@@ -63,7 +63,7 @@ public:
 
     ProtobufServerBuilder& buildAll();
 
-    ProtobufServerBuilder& waitingForExit();
+    void waitingForExit();
 
     const ServerBuilderConfig& config() const;
     const EventLoopPoolPtr& parentPool() const;
@@ -102,9 +102,8 @@ ProtobufServerBuilder& ProtobufServerBuilder::buildAll() {
 }
 
 inline
-ProtobufServerBuilder& ProtobufServerBuilder::waitingForExit() {
+void ProtobufServerBuilder::waitingForExit() {
     builder_.waitingForExit();
-    return *this;
 }
 
 inline

@@ -63,7 +63,7 @@ public:
 
     CraftServerBuilder& buildAll();
 
-    CraftServerBuilder& waitingForExit();
+    void waitingForExit();
 
     const ServerBuilderConfig& config() const;
     const EventLoopPoolPtr& parentPool() const;
@@ -111,9 +111,8 @@ CraftServerBuilder& CraftServerBuilder::buildAll() {
 }
 
 inline
-CraftServerBuilder& CraftServerBuilder::waitingForExit() {
+void CraftServerBuilder::waitingForExit() {
     builder_.waitingForExit();
-    return *this;
 }
 
 inline

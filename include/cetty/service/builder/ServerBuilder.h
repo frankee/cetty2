@@ -87,7 +87,7 @@ public:
 
     ServerBuilder& buildAll();
 
-    ServerBuilder& waitingForExit();
+    void waitingForExit();
 
     const ServerBuilderConfig& config() const;
     const EventLoopPoolPtr& parentPool() const;

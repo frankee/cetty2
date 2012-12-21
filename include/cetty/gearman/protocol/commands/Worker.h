@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -24,23 +25,32 @@ namespace gearman {
 namespace protocol {
 namespace commands {
 
-// worker  request
-static GearmanMessagePtr createCandoMessage(const std::string& functionName);
-static GearmanMessagePtr createCandoTimeoutMessage(const std::string& functionName, int timeout);
-static GearmanMessagePtr createCantdoMessage(const std::string& functionName);
-static GearmanMessagePtr createResetAbilitiesMessage();
-static GearmanMessagePtr createPreSleepMessage();
-static GearmanMessagePtr createGrabJobMessage();
-static GearmanMessagePtr createGrabJobUniqMessage();
-static GearmanMessagePtr createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator);
-static GearmanMessagePtr createWorkCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-static GearmanMessagePtr createWorkFailMessage(const std::string& jobHandle);
-static GearmanMessagePtr createWorkWarningMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-static GearmanMessagePtr createWorkExceptionMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
-static GearmanMessagePtr createWorkDataMessage(const std::string& jobHandle, const ChannelBufferPtr& payload);
+using namespace cetty::buffer;
 
-static GearmanMessagePtr createSetClientIdMessage(const std::string& clientId);
-static GearmanMessagePtr createAllYoursMessage();
+// worker  request
+GearmanMessagePtr candoMessage(const std::string& functionName);
+
+GearmanMessagePtr candoTimeoutMessage(const std::string& functionName, int timeout);
+GearmanMessagePtr cantdoMessage(const std::string& functionName);
+GearmanMessagePtr resetAbilitiesMessage();
+GearmanMessagePtr preSleepMessage();
+GearmanMessagePtr grabJobMessage();
+GearmanMessagePtr grabJobUniqMessage();
+GearmanMessagePtr workStautsMessage(const std::string& jobHandle,
+                                    int numerator,
+                                    int denominator);
+GearmanMessagePtr workCompleteMessage(const std::string& jobHandle,
+                                      const ChannelBufferPtr& payload);
+GearmanMessagePtr workFailMessage(const std::string& jobHandle);
+GearmanMessagePtr workWarningMessage(const std::string& jobHandle,
+                                     const ChannelBufferPtr& payload);
+GearmanMessagePtr workExceptionMessage(const std::string& jobHandle,
+                                       const ChannelBufferPtr& payload);
+GearmanMessagePtr workDataMessage(const std::string& jobHandle,
+                                  const ChannelBufferPtr& payload);
+
+GearmanMessagePtr setClientIdMessage(const std::string& clientId);
+GearmanMessagePtr allYoursMessage();
 
 }
 }

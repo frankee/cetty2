@@ -39,7 +39,7 @@ public:
     typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
 
     typedef typename InboundContainer::MessageQueue InboundQueue;
-    typedef typename OutboundContainer::MessageQueue OutboudnQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
 
     typedef ChannelMessageTransfer<InboundOut, NextInboundContainer, TRANSFER_INBOUND> InboundTransfer;
     typedef ChannelMessageTransfer<OutboundOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;

@@ -27,16 +27,16 @@ namespace pool {
 
 WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections)
     : ConnectionPool(connections),
-      lowWatermark(1),
-      highWatermark(0xffff) {
+      lowWatermark_(1),
+      highWatermark_(0xffff) {
 }
 
 WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
         int lowWatermark,
         int highWatermark)
     : ConnectionPool(connections),
-      lowWatermark(lowWatermark),
-      highWatermark(highWatermark) {
+      lowWatermark_(lowWatermark),
+      highWatermark_(highWatermark) {
 }
 
 WatermarkConnectionPool::~WatermarkConnectionPool() {

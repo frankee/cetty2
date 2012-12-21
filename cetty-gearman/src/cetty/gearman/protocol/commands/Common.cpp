@@ -16,9 +16,18 @@
  */
 
 #include <cetty/gearman/protocol/commands/Common.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
-namespace cetty { namespace gearman { namespace protocol { namespace commands { 
-    GearmanMessagePtr GearmanMessage::createEchoReqMessage(const ChannelBufferPtr& payload) {
-        return GearmanMessagePtr(new GearmanMessage(GearmanMessage::ECHO_REQ,payload));
-    }
-}}}}
+namespace cetty {
+namespace gearman {
+namespace protocol {
+namespace commands {
+
+GearmanMessagePtr echoReqMessage(const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::ECHO_REQ, payload);
+}
+
+}
+}
+}
+}

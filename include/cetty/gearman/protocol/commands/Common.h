@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -24,7 +25,9 @@ namespace gearman {
 namespace protocol {
 namespace commands {
 
-static GearmanMessagePtr createEchoReqMessage(const ChannelBufferPtr& payload);
+using namespace cetty::buffer;
+
+GearmanMessagePtr echoReqMessage(const ChannelBufferPtr& payload);
 
 }
 }

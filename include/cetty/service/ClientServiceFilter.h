@@ -18,7 +18,9 @@
  */
 
 #include <deque>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace service {
@@ -48,11 +50,11 @@ using namespace cetty::channel;
 */
 
 template<typename H,
-    typename RequestIn,
+         typename RequestIn,
          typename RequestOut,
          typename ResponseIn,
          typename ResponseOut>
-class ClientServiceFilter {
+class ClientServiceFilter : private boost::noncopyable {
 public:
     typedef ClientServiceFilter<H, RequestIn, RequestOut, ResponseIn, ResponseOut> Self;
 
@@ -69,36 +71,39 @@ public:
     typedef ChannelMessageTransfer<RequestOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;
 
     typedef ChannelMessageHandlerContext<H,
-        ResponseIn,
-        ResponseOut,
-        RequestIn,
-        RequestOut,
-        InboundContainer,
-        NextInboundContainer,
-        OutboundContainer,
-        NextOutboundContainer> Context;
+            ResponseIn,
+            ResponseOut,
+            RequestIn,
+            RequestOut,
+            InboundContainer,
+            NextInboundContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
+
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
 
     typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
-        RequestIn const&,
-        ResponseIn const&)> ResponseFilter;
+                                        RequestIn const&,
+                                        ResponseIn const&)> ResponseFilter;
 
 public:
     ClientServiceFilter()
         : inboundTransfer_(),
-        outboundTransfer_(),
-        inboundContainer_(),
-        outboundContainer_() {
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
     }
 
     ClientServiceFilter(const RequestFilter& requestFilter,
-        const ResponseFilter& responseFilter)
+                        const ResponseFilter& responseFilter)
         : requestFilter_(requestFilter),
-        responseFilter_(responseFilter),
-        inboundTransfer_(),
-        outboundTransfer_(),
-        inboundContainer_(),
-        outboundContainer_() {
+          responseFilter_(responseFilter),
+          inboundTransfer_(),
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
     }
 
     ~ClientServiceFilter() {}
@@ -111,13 +116,13 @@ public:
         outboundContainer_ = ctx.outboundContainer();
 
         ctx.setChannelMessageUpdatedCallback(boost::bind(&Self::messageUpdated,
-            this,
-            _1));
+                                             this,
+                                             _1));
 
         ctx.setFlushFunctor(boost::bind(&Self::flush,
-            this,
-            _1,
-            _2));
+                                        this,
+                                        _1,
+                                        _2));
     }
 
     void setRequestFilter(const RequestFilter& filter) {
@@ -131,13 +136,14 @@ public:
 private:
     void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
+        InboundQueue& inboundQueue = inboundContainer_->getMessages();
 
         while (!inboundQueue.empty()) {
             ResponseIn& msg = inboundQueue.front();
             ResponseOut omsg = responseFilter_(ctx, reqs_.front(), msg);
             reqs_.pop_front();
 
-            if (inboundTransfer.unfoldAndAdd(omsg)) {
+            if (inboundTransfer_->unfoldAndAdd(omsg)) {
                 notify = true;
             }
 
@@ -150,14 +156,16 @@ private:
     }
 
     void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future) {
+               const ChannelFuturePtr& future) {
+        OutboundQueue& outboundQueue = outboundContainer_->getMessages();
+
         while (!outboundQueue.empty()) {
             RequestIn& req = outboundQueue.front();
 
             reqs_.push_back(req);
             RequestOut oreq = requestFilter_(ctx, req);
 
-            outboundTransfer.unfoldAndAdd(oreq);
+            outboundTransfer_->unfoldAndAdd(oreq);
 
             outboundQueue.pop_front();
         }

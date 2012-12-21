@@ -82,6 +82,14 @@ public:
         return channel;
     }
 
+    const EventLoopPtr& eventLoop() const {
+        return eventLoop_;
+    }
+
+    const EventLoopPoolPtr& eventLoopPool() const {
+        return eventLoopPool_;
+    }
+
 private:
     ChannelPtr newChannel() {
         EventLoopPtr loop = eventLoop_;

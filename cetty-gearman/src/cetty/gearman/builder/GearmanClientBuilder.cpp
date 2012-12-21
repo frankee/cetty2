@@ -18,9 +18,9 @@
 
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
+#include <cetty/gearman/GearmanClient.h>
 #include <cetty/gearman/GearmanClientHandler.h>
-#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
-#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
+#include <cetty/gearman/protocol/GearmanMessageCodec.h>
 
 namespace cetty {
 namespace gearman {
@@ -28,6 +28,7 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
+using namespace cetty::service::builder;
 using namespace cetty::gearman;
 
 GearmanClientBuilder::GearmanClientBuilder()
@@ -53,15 +54,29 @@ GearmanClientBuilder::GearmanClientBuilder(const EventLoopPtr& eventLoop)
 bool initializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
-    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
+    pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
+        LengthFieldBasedFrameDecoder::HandlerPtr(
+        new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
 
-    pipeline.addLast("gearmanDecoder", new GearmanMessageDecoder());
-    pipeline.addLast("gearmanEncoder", new GearmanMessageEncoder());
-    pipeline.addLast("gearmanClient", new GearmanClientHandler());
+    pipeline.addLast<GearmanMessageCodec::HandlerPtr>("gearmanCodec",
+        GearmanMessageCodec::HandlerPtr(new GearmanMessageCodec));
+
+    pipeline.addLast<GearmanClientHandler::HandlerPtr>("gearmanClient",
+        GearmanClientHandler::HandlerPtr(new GearmanClientHandler));
+
+    return true;
 }
 
 void GearmanClientBuilder::init() {
-    builder_.setChannelInitializer(boost::bind(initializeChannel, _1));
+    builder_.setClientInitializer(boost::bind(&initializeChannel, _1));
+}
+
+cetty::gearman::GearmanClientPtr GearmanClientBuilder::build() {
+    return new GearmanClient(builder_.build());
+}
+
+void GearmanClientBuilder::addConnection(const std::string& host, int port) {
+    builder_.addConnection(host, port, 1);
 }
 
 }

@@ -21,9 +21,10 @@
 
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/gearman/protocol/GearmanMessage.h>
+#include <cetty/gearman/protocol/commands/Worker.h>
+
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
+#include <cetty/protobuf/service/handler/MessageCodec.h>
 
 namespace cetty {
 namespace gearman {
@@ -34,24 +35,30 @@ using namespace cetty::gearman::protocol;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
-GearmanProtobufWorkerFilter::GearmanProtobufWorkerFilter() {}
+GearmanProtobufWorkerFilter::GearmanProtobufWorkerFilter() {
+    filter_.setRequestFilter(boost::bind(
+        &GearmanProtobufWorkerFilter::filterRequest,
+        this,
+        _1,
+        _2));
 
-GearmanProtobufWorkerFilter::~GearmanProtobufWorkerFilter() {}
-
-
-ChannelHandlerPtr GearmanProtobufWorkerFilter::clone() {
-    return GearmanProtobufWorkerFilterPtr(new GearmanProtobufWorkerFilter);
+    filter_.setResponseFilter(boost::bind(
+        &GearmanProtobufWorkerFilter::filterResponse,
+        this,
+        _1,
+        _2,
+        _3,
+        _4));
 }
 
-std::string GearmanProtobufWorkerFilter::toString() const {
-    return "GearmanProtobufWorkerFilter";
+GearmanProtobufWorkerFilter::~GearmanProtobufWorkerFilter() {
 }
 
 ProtobufServiceMessagePtr GearmanProtobufWorkerFilter::filterRequest(
     ChannelHandlerContext& ctx,
     const GearmanMessagePtr& req) {
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-    ProtobufServiceMessageDecoder::decode(req->data(), protoMsg);
+    MessageCodec::decodeMessage(req->data(), protoMsg);
     return protoMsg;
 }
 
@@ -64,8 +71,8 @@ GearmanMessagePtr GearmanProtobufWorkerFilter::filterResponse(
     ChannelBufferPtr buffer = Unpooled::buffer(rep->messageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
-    ProtobufServiceMessageEncoder::encodeMessage(buffer, rep);
-    return GearmanMessage::createWorkCompleteMessage(jobHandle, buffer);
+    MessageCodec::encodeMessage(rep, buffer);
+    return commands::workCompleteMessage(jobHandle, buffer);
 }
 
 }

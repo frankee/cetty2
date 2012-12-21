@@ -337,7 +337,7 @@ void ServerBuilder::shutdown() {
     }
 }
 
-ServerBuilder& ServerBuilder::waitingForExit() {
+void ServerBuilder::waitingForExit() {
     if (config_.deamonize) {
         createPidFile(config_.pidfile.c_str());
 
@@ -367,8 +367,6 @@ ServerBuilder& ServerBuilder::waitingForExit() {
         }
         while (true);
     }
-
-    return *this;
 }
 
 ServerBuilder& ServerBuilder::buildAll() {

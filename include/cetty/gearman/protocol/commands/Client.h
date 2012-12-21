@@ -28,17 +28,34 @@ namespace commands {
 using namespace cetty::buffer;
 
 // client
-static GearmanMessagePtr submitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-static GearmanMessagePtr submitJobHighMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-static GearmanMessagePtr submitJobLowMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+GearmanMessagePtr submitJobMessage(const std::string& functionName,
+                                   const std::string& uniqueId,
+                                   const ChannelBufferPtr& payload);
+
+GearmanMessagePtr submitJobHighMessage(const std::string& functionName,
+                                       const std::string& uniqueId,
+                                       const ChannelBufferPtr& payload);
+
+GearmanMessagePtr submitJobLowMessage(const std::string& functionName,
+                                      const std::string& uniqueId,
+                                      const ChannelBufferPtr& payload);
 
 //client submit-bg
-static GearmanMessagePtr submitJobBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-static GearmanMessagePtr submitJobHighBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
-static GearmanMessagePtr submitJobLowBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload);
+GearmanMessagePtr submitJobBGMessage(const std::string& functionName,
+                                     const std::string& uniqueId,
+                                     const ChannelBufferPtr& payload);
 
-static GearmanMessagePtr getStatusMessage(const std::string& jobHandle);
-static GearmanMessagePtr setOptionMessage(const std::string& option);
+GearmanMessagePtr submitJobHighBGMessage(const std::string& functionName,
+        const std::string& uniqueId,
+        const ChannelBufferPtr& payload);
+
+GearmanMessagePtr submitJobLowBGMessage(const std::string& functionName,
+                                        const std::string& uniqueId,
+                                        const ChannelBufferPtr& payload);
+
+GearmanMessagePtr getStatusMessage(const std::string& jobHandle);
+
+GearmanMessagePtr setOptionMessage(const std::string& option);
 
 }
 }

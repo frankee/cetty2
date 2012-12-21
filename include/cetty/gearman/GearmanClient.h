@@ -20,7 +20,6 @@
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/gearman/GearmanServiceFuture.h>
-#include <cetty/gearman/GearmanClientRequestHandler.h>
 
 namespace cetty {
 namespace gearman {

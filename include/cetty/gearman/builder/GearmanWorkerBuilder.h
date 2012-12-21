@@ -19,9 +19,8 @@
 #include <vector>
 #include <boost/function.hpp>
 
-#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/service/Connection.h>
-#include <cetty/service/builder/ServerBuilder.h>
+#include <cetty/service/builder/ClientBuilder.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
@@ -36,27 +35,43 @@ using namespace cetty::gearman::protocol;
 class GearmanWorkerBuilder : private boost::noncopyable {
 public:
     typedef boost::function1<GearmanMessagePtr,
-        const GearmanMessagePtr&> WorkerFunctor;
+        const GearmanMessagePtr&> WorkFunctor;
 
 public:
     GearmanWorkerBuilder();
     GearmanWorkerBuilder(int threadCnt);
-    virtual ~GearmanWorkerBuilder();
 
-    void addConnection(const std::string& host, int port);
+    GearmanWorkerBuilder& addConnection(const std::string& host, int port) {
+        connections_.push_back(Connection(host, port, 1));
+        return *this;
+    }
 
-    void registerWorker(const std::string& functionName, const WorkerFunctor& worker);
+    GearmanWorkerBuilder& registerWorker(const std::string& functionName,
+        const WorkFunctor& worker);
 
-    const std::vector<GearmanWorkerPtr>& buildWorkers();
+    void setAdditionalInitializer(const Channel::Initializer& initializer) {
+        additionalInitializer_ = initializer;
+    }
+
+    GearmanWorkerBuilder& buildWorkers();
+
+    void waitingForExit();
 
 private:
     void buildWorker(const EventLoopPtr& eventLoop);
+    bool initializeChannel(const ChannelPtr& channel);
 
 private:
-    std::vector<Connection> connections;
-    std::vector<GearmanWorkerPtr> workers;
+    typedef std::map<std::string, WorkFunctor> WorkFunctors;
 
-    
+private:
+    EventLoopPtr loop_;
+    EventLoopPoolPtr pool_;
+    WorkFunctors workFunctors_;
+    Channel::Initializer additionalInitializer_;
+
+    std::vector<Connection> connections_;
+    std::vector<GearmanWorkerPtr> workers_;
 };
 
 }
