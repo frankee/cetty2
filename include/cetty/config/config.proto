@@ -13,23 +13,23 @@ message ConfigMessageOptions {
 
 message ConfigFieldOptions {
 	optional string default = 1;
-	optional string note    = 2,
+	optional string    note = 2,
 	
 	optional bool commented = 3;
 	
 	optional bool         cmdline = 5;
-	optional string cmdline_long  = 6;
+	optional string  cmdline_long = 6;
 	optional string cmdline_short = 7;
 }
 
 extend google.protobuf.FieldOptions {
-  optional ConfigFieldOptions config = 50001;
+  optional ConfigFieldOptions config = 60001;
 }
 
 extend google.protobuf.MessageOptions {
-  optional ConfigMessageOptions config = 50001;
+  optional ConfigMessageOptions config = 60001;
 }
 
 extend google.protobuf.FileOptions {
-  optional ConfigFileOptions config = 50001;
+  optional ConfigFileOptions config = 60001;
 }

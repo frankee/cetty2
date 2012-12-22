@@ -21,6 +21,7 @@ namespace cetty {
 namespace config {
 
 CETTY_CONFIG_ADD_DESCRIPTOR(KeyValuePair,
+                            KeyValuePair,
                             2,
                             CETTY_CONFIG_FIELD(KeyValuePair, key, STRING),
                             CETTY_CONFIG_FIELD(KeyValuePair, value, STRING));

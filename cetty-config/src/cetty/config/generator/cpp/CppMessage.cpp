@@ -51,11 +51,11 @@ namespace config {
 namespace generator {
 namespace cpp {
 
-    std::string simpleI2A(int i) {
-        char buf[64] = {0};
-        sprintf(buf, "%d", i);
-        return std::string(buf);
-    }
+std::string simpleI2A(int i) {
+    char buf[64] = {0};
+    sprintf(buf, "%d", i);
+    return std::string(buf);
+}
 
 namespace {
 
@@ -132,6 +132,18 @@ GenerateForwardDeclaration(io::Printer* printer) {
                    "classname", classname_);
 }
 
+bool MessageGenerator::isNestType(const Descriptor* descriptor, const FieldDescriptor* fieldDescriptor) {
+    if (descriptor->nested_type_count() > 0) {
+        for (int i = 0; i < descriptor->nested_type_count(); i++) {
+            if (descriptor->nested_type(i)->full_name() ==  fieldDescriptor->message_type()->full_name()) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void MessageGenerator::
 GenerateClassDefinition(io::Printer* printer) {
     for (int i = 0; i < descriptor_->nested_type_count(); i++) {
@@ -156,50 +168,23 @@ GenerateClassDefinition(io::Printer* printer) {
 
     printer->Print(vars,
                    "class $dllexport$$classname$ : public $superclass$ {\n"
-                   " public:\n");
-    printer->Indent();
-
-    printer->Print(vars,
-                   "$classname$();\n"
-                   "virtual ~$classname$();\n"
-                   "\n"
-                   "$classname$(const $classname$& from);\n"
-                   "\n"
-                   "inline $classname$& operator=(const $classname$& from) {\n"
-                   "  CopyFrom(from);\n"
-                   "  return *this;\n"
-                   "}\n"
-                   "\n");
-
-    printer->Print(vars,
-                   "static const $classname$& default_instance();\n"
-                   "\n");
-
-
-    printer->Print(vars,
-                   "void Swap($classname$* other);\n"
-                   "\n"
-                   "// implements Message ----------------------------------------------\n"
-                   "\n"
-                   "$classname$* create() const;\n");
-
-    printer->Print(
-        "// nested types ----------------------------------------------------\n"
-        "\n");
-
-    // Import all nested message classes into this class's scope with typedefs.
-    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-        const Descriptor* nested_type = descriptor_->nested_type(i);
-        printer->Print("typedef $nested_full_name$ $nested_name$;\n",
-                       "nested_name", nested_type->name(),
-                       "nested_full_name", ClassName(nested_type, false));
-    }
+                   "public:\n");
+    Indent(printer);
 
     if (descriptor_->nested_type_count() > 0) {
-        printer->Print("\n");
-    }
+        // Import all nested message classes into this class's scope with typedefs.
+        for (int i = 0; i < descriptor_->nested_type_count(); i++) {
+            const Descriptor* nested_type = descriptor_->nested_type(i);
+            printer->Print("typedef $nested_full_name$ $nested_name$;\n",
+                           "nested_name", nested_type->name(),
+                           "nested_full_name", ClassName(nested_type, false));
+        }
 
-    printer->Print("\n");
+        printer->Print("\n");
+        Outdent(printer);
+        printer->Print("public:\n");
+        Indent(printer);
+    }
 
     // Field members:
 
@@ -207,28 +192,43 @@ GenerateClassDefinition(io::Printer* printer) {
 
     for (int i = 0; i < descriptor_->field_count(); i++) {
         const FieldDescriptor* field = descriptor_->field(i);
+
         if (field->is_repeated()) {
             switch (field->cpp_type()) {
             case FieldDescriptor::CPPTYPE_INT32:
                 printer->Print("std::vector<int> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_INT64:
                 printer->Print("std::vector<int64_t> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_BOOL:
                 printer->Print("std::vector<bool> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_DOUBLE:
                 printer->Print("std::vector<double> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_STRING:
                 printer->Print("std::vector<std::string> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_MESSAGE:
-                printer->Print("std::vector<$class_name$*> $field_name$;\n",
-                    "class_name", ClassName(field->containing_type(), true),
-                    "field_name", field->camelcase_name());
+                if (isNestType(descriptor_, field)) {
+                    printer->Print("std::vector<$class_name$*> $field_name$;\n",
+                                   "class_name", field->message_type()->name(),
+                                   "field_name", field->camelcase_name());
+                }
+                else {
+                    printer->Print("std::vector<$class_name$*> $field_name$;\n",
+                                   "class_name", ClassName(field->message_type(), true),
+                                   "field_name", field->camelcase_name());
+                }
+
                 break;
+
             default:
                 break;
             }
@@ -236,96 +236,187 @@ GenerateClassDefinition(io::Printer* printer) {
         else {
             switch (field->cpp_type()) {
             case FieldDescriptor::CPPTYPE_INT32:
-                printer->Print("int $field_name$;\n", "field_name", field->camelcase_name());
+                printer->Print("boost::optional<int> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_INT64:
-                printer->Print("int64_t $field_name$;\n", "field_name", field->camelcase_name());
+                printer->Print("boost::optional<int64_t> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_BOOL:
-                printer->Print("bool $field_name$;\n", "field_name", field->camelcase_name());
+                printer->Print("boost::optional<bool> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_DOUBLE:
-                printer->Print("double $field_name$;\n", "field_name", field->camelcase_name());
+                printer->Print("boost::optional<double> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_STRING:
                 printer->Print("std::string $field_name$;\n", "field_name", field->camelcase_name());
                 break;
+
             case FieldDescriptor::CPPTYPE_MESSAGE:
-                printer->Print("$class_name$* $field_name$;\n",
-                    "class_name", ClassName(field->containing_type(), true),
-                    "field_name", field->camelcase_name());
+                if (isNestType(descriptor_, field)) {
+                    printer->Print("$class_name$* $field_name$;\n",
+                                   "class_name", field->message_type()->name(),
+                                   "field_name", field->camelcase_name());
+                }
+                else {
+                    printer->Print("$class_name$* $field_name$;\n",
+                                   "class_name", ClassName(field->message_type(), true),
+                                   "field_name", field->camelcase_name());
+                }
+
                 break;
+
             default:
                 break;
             }
         }
     }
 
-    printer->Outdent();
+    printer->Print("\n");
+    Outdent(printer);
+    printer->Print("public:\n");
+    Indent(printer);
+
+    printer->Print(vars,
+                   "$classname$();\n"
+                   "virtual ~$classname$() {}\n"
+                   "\n"
+                   "$classname$(const $classname$& from);\n"
+                   "\n"
+                   "$classname$& operator=(const $classname$& from) {\n"
+                   "    clear();\n"
+                   "    copyFrom(from);\n"
+                   "    return *this;\n"
+                   "}\n"
+                   "\n");
+
+    printer->Print(vars,
+                   "virtual $classname$* create() const {\n"
+                   "    return new $classname$;\n"
+                   "}\n");
+
+    printer->Print("\n");
+
+    Outdent(printer);
     printer->Print(vars, "};");
 }
 
 void MessageGenerator::
-GenerateDescriptorInitializer(io::Printer* printer, int index) {
-    // TODO(kenton):  Passing the index to this method is redundant; just use
-    //   descriptor_->index() instead.
-    map<string, string> vars;
-    vars["classname"] = classname_;
-    vars["index"] = simpleI2A(index);
-
-    // Obtain the descriptor from the parent's descriptor.
-    if (descriptor_->containing_type() == NULL) {
-        printer->Print(vars,
-                       "$classname$_descriptor_ = file->message_type($index$);\n");
-    }
-    else {
-        vars["parent"] = ClassName(descriptor_->containing_type(), false);
-        printer->Print(vars,
-                       "$classname$_descriptor_ = "
-                       "$parent$_descriptor_->nested_type($index$);\n");
-    }
-
-
-    // Construct the reflection object.
-    printer->Print(vars,
-                   "$classname$_reflection_ =\n"
-                   "  new ::google::protobuf::internal::GeneratedMessageReflection(\n"
-                   "    $classname$_descriptor_,\n"
-                   "    $classname$::default_instance_,\n"
-                   "    $classname$_offsets_,\n"
-                   "    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET($classname$, _has_bits_[0]),\n"
-                   "    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET("
-                   "$classname$, _unknown_fields_),\n");
-
-    if (descriptor_->extension_range_count() > 0) {
-        printer->Print(vars,
-                       "    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET("
-                       "$classname$, _extensions_),\n");
-    }
-    else {
-        // No extensions.
-        printer->Print(vars,
-                       "    -1,\n");
-    }
-
-    printer->Print(vars,
-                   "    ::google::protobuf::DescriptorPool::generated_pool(),\n"
-                   "    ::google::protobuf::MessageFactory::generated_factory(),\n"
-                   "    sizeof($classname$));\n");
-
-    // Handle nested types.
-    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-        nested_generators_[i]->GenerateDescriptorInitializer(printer, i);
-    }
-}
-
-void MessageGenerator::
 GenerateTypeRegistrations(io::Printer* printer) {
+    char fieldCnt[128] = {0};
+    sprintf(fieldCnt, "%d", descriptor_->field_count());
     // Register this message type with the message factory.
     printer->Print(
-        "::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(\n"
-        "  $classname$_descriptor_, &$classname$::default_instance());\n",
-        "classname", classname_);
+        "CETTY_CONFIG_ADD_DESCRIPTOR($classname$,\n"
+        "                            $count$,\n",
+        "classname", classname_,
+        "count", simpleI2A(descriptor_->field_count()));
+
+    for (int i = 0; i < descriptor_->field_count(); i++) {
+        const FieldDescriptor* field = descriptor_->field(i);
+        if (field->is_repeated()) {
+            switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_INT32:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, INT32)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_INT64:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, INT64)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_BOOL:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, BOOL)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_DOUBLE:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, DOUBLE)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_STRING:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, STRING)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                printer->Print(
+                    "                            CETTY_CONFIG_REPEATED_OBJECT_FIELD($classname$, $field_name$, $field_class$)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name(),
+                    "field_class", field->message_type()->full_name());
+                break;
+            }
+        }
+        else {
+            switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_INT32:
+                printer->Print(
+                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, INT32)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_INT64:
+                printer->Print(
+                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, INT64)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_BOOL:
+                printer->Print(
+                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, BOOL)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_DOUBLE:
+                printer->Print(
+                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, DOUBLE)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_STRING:
+                printer->Print(
+                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, STRING)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name());
+                break;
+
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                printer->Print(
+                    "                            CETTY_CONFIG_OBJECT_FIELD($classname$, $field_name$, $field_class$)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name(),
+                    "field_class", field->message_type()->full_name());
+                break;
+            }
+        }
+
+        if (i == descriptor_->field_count() - 1) {
+            printer->PrintRaw(");\n\n");
+        }
+        else {
+            printer->PrintRaw(",\n");
+        }
+    }
 
     // Handle nested types.
     for (int i = 0; i < descriptor_->nested_type_count(); i++) {
@@ -334,66 +425,16 @@ GenerateTypeRegistrations(io::Printer* printer) {
 }
 
 void MessageGenerator::
-GenerateDefaultInstanceAllocator(io::Printer* printer) {
-    // Construct the default instance.  We can't call InitAsDefaultInstance() yet
-    // because we need to make sure all default instances that this one might
-    // depend on are constructed first.
-    printer->Print(
-        "$classname$::default_instance_ = new $classname$();\n",
-        "classname", classname_);
-
-    // Handle nested types.
-    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-        nested_generators_[i]->GenerateDefaultInstanceAllocator(printer);
-    }
-}
-
-void MessageGenerator::
-GenerateDefaultInstanceInitializer(io::Printer* printer) {
-    printer->Print(
-        "$classname$::default_instance_->InitAsDefaultInstance();\n",
-        "classname", classname_);
-
-    // Handle nested types.
-    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-        nested_generators_[i]->GenerateDefaultInstanceInitializer(printer);
-    }
-}
-
-void MessageGenerator::
-GenerateShutdownCode(io::Printer* printer) {
-    printer->Print(
-        "delete $classname$::default_instance_;\n",
-        "classname", classname_);
-
-    if (HasDescriptorMethods(descriptor_->file())) {
-        printer->Print(
-            "delete $classname$_reflection_;\n",
-            "classname", classname_);
-    }
-
-    // Handle nested types.
-    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
-        nested_generators_[i]->GenerateShutdownCode(printer);
-    }
-}
-
-
-void MessageGenerator::
 GenerateStructors(io::Printer* printer) {
     // Generate the default constructor.
     printer->Print(
         "$classname$::$classname$()\n"
-        "  : ::cetty::config::ConfigObject() {\n"
-        "  SharedCtor();\n"
+        "  : ::cetty::config::ConfigObject(\"$class_full_name$\") {\n"
         "}\n",
-        "classname", classname_);
+        "classname", classname_,
+        "class_full_name", descriptor_->full_name());
 
-    printer->Print(
-        "\n"
-        "void $classname$::InitAsDefaultInstance() {\n",
-        "classname", classname_);
-
+#if 0
     // The default instance needs all of its embedded message pointers
     // cross-linked to other default instances.  We can't do this initialization
     // in the constructor because some other default instances may not have been
@@ -416,54 +457,50 @@ GenerateStructors(io::Printer* printer) {
         "}\n"
         "\n");
 
+#endif
+
     // Generate the copy constructor.
     printer->Print(
         "$classname$::$classname$(const $classname$& from)\n"
-        "  : $superclass$() {\n"
-        "  SharedCtor();\n"
-        "  MergeFrom(from);\n"
+        "  : ::cetty::config::ConfigObject(\"$class_full_name$\") {\n"
+        "    copyFrom(from);\n"
         "}\n"
         "\n",
         "classname", classname_,
-        "superclass", "cetty::config::ConfigObject");
+        "class_full_name", descriptor_->full_name());
 
-    // Generate the destructor.
-    printer->Print(
-        "$classname$::~$classname$() {\n"
-        "  SharedDtor();\n"
-        "}\n"
-        "\n",
-        "classname", classname_);
-
-    // Only generate this member if it's not disabled.
-    if (HasDescriptorMethods(descriptor_->file()) &&
-            !descriptor_->options().no_standard_descriptor_accessor()) {
-        printer->Print(
-            "const ::google::protobuf::Descriptor* $classname$::descriptor() {\n"
-            "  protobuf_AssignDescriptorsOnce();\n"
-            "  return $classname$_descriptor_;\n"
-            "}\n"
-            "\n",
-            "classname", classname_,
-            "adddescriptorsname",
-            GlobalAddDescriptorsName(descriptor_->file()->name()));
+    // Handle nested types.
+    for (int i = 0; i < descriptor_->nested_type_count(); i++) {
+        nested_generators_[i]->GenerateStructors(printer);
     }
+}
 
-    printer->Print(
-        "const $classname$& $classname$::default_instance() {\n"
-        "  if (default_instance_ == NULL) $adddescriptorsname$();"
-        "  return *default_instance_;\n"
-        "}\n"
-        "\n"
-        "$classname$* $classname$::default_instance_ = NULL;\n"
-        "\n"
-        "$classname$* $classname$::New() const {\n"
-        "  return new $classname$;\n"
-        "}\n",
-        "classname", classname_,
-        "adddescriptorsname",
-        GlobalAddDescriptorsName(descriptor_->file()->name()));
+void MessageGenerator::Indent(io::Printer* printer) {
+    printer->Indent();
+    printer->Indent();
+}
 
+void MessageGenerator::Outdent(io::Printer* printer) {
+    printer->Outdent();
+    printer->Outdent();
+}
+
+void MessageGenerator::GenerateCommandLines(io::Printer* printer) {
+#if 0
+    class KeyValuePairCmdline {
+    public:
+        KeyValuePairCmdline() {
+            options_description options("ServerBuiderConfig");
+            op.add_options()
+                ("deamon, d", value<bool>, "xxxxx");
+
+            ConfigCenter::instance().addOptions(options);
+            ConfigCenter::instance().addCmdlineName("", "");
+        }
+    };
+
+    static KeyValuePairCmdline keyValuePairCmdline;
+#endif
 }
 
 }

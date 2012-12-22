@@ -106,6 +106,7 @@
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h" />
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflectionImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\config\KeyValuePair.h" />
     <ClInclude Include="..\..\src\cetty\config\ConfigFileImporter.h" />
   </ItemGroup>

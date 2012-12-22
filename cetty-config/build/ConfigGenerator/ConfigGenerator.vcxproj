@@ -108,7 +108,7 @@
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
-    <ClCompile Include="..\..\src\cetty\config\generator\YamlGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppFile.h" />
@@ -116,7 +116,7 @@
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppMessage.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />
-    <ClInclude Include="..\..\src\cetty\config\generator\YamlGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

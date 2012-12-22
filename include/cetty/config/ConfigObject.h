@@ -27,117 +27,80 @@ namespace config {
 
 class ConfigObject {
 public:
-    ConfigObject() {}
-    ConfigObject(const std::string& name)
-        : name_(name) {}
+    ConfigObject(const std::string& name);
+    virtual ~ConfigObject();
 
-    virtual ~ConfigObject() {}
+    const ConfigReflection* reflection() const;
+    const ConfigObjectDescriptor* descriptor() const;
 
-    virtual const ConfigReflection* getReflection() const;
-    virtual const ConfigObjectDescriptor* getDescriptor() const;
+    const std::string& name() const;
+    void setName(const std::string& name);
+
+    const std::string& className() const;
 
     virtual ConfigObject* create() const = 0;
-
-    const std::string& name() const { return name_; }
-    void setName(const std::string& name) { name_ = name; }
 
     virtual void clear();
     virtual void copyFrom(const ConfigObject& from);
 
-    void listFields(std::vector<const ConfigFieldDescriptor*>* output) const {
-        reflection_->listFields(*this, output);
-    }
+    // reflections
 
-    int getInt(const ConfigFieldDescriptor* field) const {
-        return reflection_->getInt(*this, field);
-    }
+    void listFields(std::vector<const ConfigFieldDescriptor*>* output) const;
 
-    int64_t getInt64(const ConfigFieldDescriptor* field) const {
-        return reflection_->getInt64(*this, field);
-    }
+    bool hasInt(const ConfigFieldDescriptor* field) const;
 
-    double getDouble(const ConfigFieldDescriptor* field) const {
-        return reflection_->getDouble(*this, field);
-    }
+    int getInt(const ConfigFieldDescriptor* field) const;
 
-    bool getBool(const ConfigFieldDescriptor* field) const {
-        return reflection_->getBool(*this, field);
-    }
+    bool hasInt64(const ConfigFieldDescriptor* field) const;
 
-    std::string getString(const ConfigFieldDescriptor* field) const {
-        return reflection_->getString(*this, field);
-    }
+    int64_t getInt64(const ConfigFieldDescriptor* field) const;
+
+    bool hasDouble(const ConfigFieldDescriptor* field) const;
+
+    double getDouble(const ConfigFieldDescriptor* field) const;
+
+    bool hasBool(const ConfigFieldDescriptor* field) const;
+
+    bool getBool(const ConfigFieldDescriptor* field) const;
+
+    std::string getString(const ConfigFieldDescriptor* field) const;
 
     void setInt32(const ConfigFieldDescriptor* field,
-                  int value) {
-        reflection_->setInt32(this, field, value);
-    }
+                  int value);
 
     void setInt64(const ConfigFieldDescriptor* field,
-                  int64_t value) {
-        reflection_->setInt64(this, field, value);
-    }
+                  int64_t value);
     void setDouble(const ConfigFieldDescriptor* field,
-                   double value) {
-        reflection_->setDouble(this, field, value);
-    }
+                   double value);
     void setBool(const ConfigFieldDescriptor* field,
-                 bool value) {
-        reflection_->setBool(this, field, value);
-    }
+                 bool value);
     void setString(const ConfigFieldDescriptor* field,
-                   const std::string& value) {
-        reflection_->setString(this, field, value);
-    }
+                   const std::string& value);
 
-    ConfigObject* mutableObject(const ConfigFieldDescriptor* field) {
-        reflection_->mutableObject(this, field);
-    }
+    ConfigObject* mutableObject(const ConfigFieldDescriptor* field);
 
     void addInt32(const ConfigFieldDescriptor* field,
-                  int value) {
-        reflection_->addInt32(this, field, value);
-    }
+                  int value);
     void addInt32(const ConfigFieldDescriptor* field,
-        const std::vector<int>& value) {
-            reflection_->addInt32(this, field, value);
-    }
+                  const std::vector<int>& value);
     void addInt64(const ConfigFieldDescriptor* field,
-                  int64_t value) {
-        reflection_->addInt64(this, field, value);
-    }
+                  int64_t value);
     void addInt64(const ConfigFieldDescriptor* field,
-        const std::vector<int64_t>& value) {
-            reflection_->addInt64(this, field, value);
-    }
+                  const std::vector<int64_t>& value);
     void addDouble(const ConfigFieldDescriptor* field,
-                   double value) {
-        reflection_->addDouble(this, field, value);
-    }
+                   double value);
     void addDouble(const ConfigFieldDescriptor* field,
-        const std::vector<double>& value) {
-            reflection_->addDouble(this, field, value);
-    }
+                   const std::vector<double>& value);
     void addBool(const ConfigFieldDescriptor* field,
-                 bool value) {
-        reflection_->addBool(this, field, value);
-    }
+                 bool value);
     void addBool(const ConfigFieldDescriptor* field,
-        const std::vector<bool>& value) {
-            reflection_->addBool(this, field, value);
-    }
+                 const std::vector<bool>& value);
     void addString(const ConfigFieldDescriptor* field,
-                   const std::string& value) {
-        reflection_->addString(this, field, value);
-    }
+                   const std::string& value);
     void addString(const ConfigFieldDescriptor* field,
-        const std::vector<std::string>& value) {
-            reflection_->addString(this, field, value);
-    }
+                   const std::vector<std::string>& value);
 
-    ConfigObject* addObject(const ConfigFieldDescriptor* field) {
-        return reflection_->addObject(this, field);
-    }
+    ConfigObject* addObject(const ConfigFieldDescriptor* field);
 
 public:
     static void addDescriptor(ConfigObjectDescriptor* descriptor);
@@ -146,6 +109,7 @@ public:
 
 private:
     std::string name_;
+    std::string className_;
 
 private:
     typedef std::map<std::string, ConfigObjectDescriptor*> ObjectDescriptorMap;
@@ -156,6 +120,21 @@ private:
     static ObjectDescriptorMap* objects_;
     static ConfigReflection* reflection_;
 };
+
+inline
+const std::string& ConfigObject::className() const {
+    return className_;
+}
+
+inline
+const std::string& ConfigObject::name() const {
+    return name_;
+}
+
+inline
+void ConfigObject::setName(const std::string& name) {
+    name_ = name;
+}
 
 }
 }

@@ -50,5 +50,8 @@
     <ClInclude Include="..\..\src\cetty\config\ConfigFileImporter.h">
       <Filter>config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflectionImpl.h">
+      <Filter>config</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

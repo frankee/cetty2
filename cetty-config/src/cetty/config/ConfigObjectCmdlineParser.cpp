@@ -99,12 +99,12 @@ bool parseConfigObject(const variables_map& vm,
         return false;
     }
 
-    const ConfigObjectDescriptor* descriptor = object->getDescriptor();
+    const ConfigObjectDescriptor* descriptor = object->descriptor();
     ConfigObjectDescriptor::ConstIterator itr = descriptor->begin();
 
-    if (cmdline.countPrefix(descriptor->name()) == 0) {
+    if (cmdline.countPrefix(descriptor->className()) == 0) {
         LOG_INFO << "there is no filed set with cmdline in "
-                 << descriptor->name();
+                 << descriptor->className();
 
         return true;
     }

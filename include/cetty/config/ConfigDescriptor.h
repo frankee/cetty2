@@ -18,6 +18,7 @@
  */
 
 #include <vector>
+#include <boost/noncopyable.hpp>
 
 namespace cetty {
 namespace config {
@@ -128,7 +129,7 @@ public:
     ~ConfigObjectDescriptor();
 
 public:
-    const std::string& name() const;
+    const std::string& className() const;
 
     const ConfigObject* defaultInstance() const;
 

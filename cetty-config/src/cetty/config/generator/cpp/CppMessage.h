@@ -42,6 +42,7 @@ namespace google {
 namespace protobuf {
 
 class Descriptor;
+class FieldDescriptor;
 
 namespace io {
 class Printer;             // printer.h
@@ -74,44 +75,22 @@ public:
     // Generate definitions for this class and all its nested types.
     void GenerateClassDefinition(io::Printer* printer);
 
-    // Generate definitions of inline methods (placed at the end of the header
-    // file).
-    void GenerateInlineMethods(io::Printer* printer);
-
     // Source file stuff.
-
-    // Generate code which declares all the global descriptor pointers which
-    // will be initialized by the methods below.
-    void GenerateDescriptorDeclarations(io::Printer* printer);
-
-    // Generate code that initializes the global variable storing the message's
-    // descriptor.
-    void GenerateDescriptorInitializer(io::Printer* printer, int index);
-
-    // Generate code that calls MessageFactory::InternalRegisterGeneratedMessage()
-    // for all types.
-    void GenerateTypeRegistrations(io::Printer* printer);
-
-    // Generates code that allocates the message's default instance.
-    void GenerateDefaultInstanceAllocator(io::Printer* printer);
-
-    // Generates code that initializes the message's default instance.  This
-    // is separate from allocating because all default instances must be
-    // allocated before any can be initialized.
-    void GenerateDefaultInstanceInitializer(io::Printer* printer);
-
-    // Generates code that should be run when ShutdownProtobufLibrary() is called,
-    // to delete all dynamically-allocated objects.
-    void GenerateShutdownCode(io::Printer* printer);
-
-private:
-    // Generate the field offsets array.
-    void GenerateOffsets(io::Printer* printer);
-
     // Generate constructors and destructor.
     void GenerateStructors(io::Printer* printer);
 
+    void GenerateTypeRegistrations(io::Printer* printer);
 
+    void GenerateCommandLines(io::Printer* printer);
+
+private:
+    void Indent(io::Printer* printer);
+
+    void Outdent(io::Printer* printer);
+
+    bool isNestType(const Descriptor* descriptor, const FieldDescriptor* fieldDescriptor);
+
+private:
     const Descriptor* descriptor_;
     string classname_;
     string dllexport_decl_;

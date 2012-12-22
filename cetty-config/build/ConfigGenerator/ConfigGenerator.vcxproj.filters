@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="cpp">
       <UniqueIdentifier>{7e6796dd-7787-4d6b-8f7a-a3b8e7000b16}</UniqueIdentifier>
     </Filter>
@@ -17,12 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\YamlGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppGenerator.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -38,11 +24,12 @@
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc">
       <Filter>cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.cpp">
+      <Filter>yaml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\config\generator\YamlGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppGenerator.h">
       <Filter>cpp</Filter>
     </ClInclude>
@@ -57,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h">
       <Filter>cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.h">
+      <Filter>yaml</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

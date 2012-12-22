@@ -20,6 +20,7 @@
 #include <google/protobuf/io/printer.h>
 
 #include <cetty/config/generator/cpp/CppGenerator.h>
+#include <cetty/config/generator/yaml/YamlGenerator.h>
 
 using namespace std;
 
@@ -29,9 +30,13 @@ int main(int argc, char* argv[]) {
     google::protobuf::compiler::CommandLineInterface cli;
 
     // Proto2 C++
-    cetty::config::generator::cpp::CppGenerator generator;
-    cli.RegisterGenerator("--cpp_out", &generator,
-        "Generate C++ header and source.");
+    cetty::config::generator::cpp::CppGenerator cppGenerator;
+    cli.RegisterGenerator("--cpp_out", &cppGenerator,
+                          "Generate C++ header and source.");
+
+    cetty::config::generator::yaml::YamlGenerator yamlGenerator;
+    cli.RegisterGenerator("--yaml_out", &yamlGenerator,
+                          "Generate yaml configure file.");
 
     return cli.Run(argc, argv);
 }

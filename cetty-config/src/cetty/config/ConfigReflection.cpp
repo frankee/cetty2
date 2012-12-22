@@ -31,9 +31,9 @@ ConfigObject* ConfigReflection::addObject(ConfigObject* object,
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
     // We must allocate a new object.
-    std::string className(object->name());
-    className += "_";
-    className += field->className;
+    std::string className(object->className());
+    //className += "_";
+    //className += field->className;
 
     const ConfigObject* prototype = ConfigObject::getDefaultObject(className);
 

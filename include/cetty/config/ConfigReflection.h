@@ -118,6 +118,52 @@ public:
     ConfigObject* addObject(ConfigObject* object,
                             const ConfigFieldDescriptor* field) const;
 
+    template<typename T>
+    void copyField(const ConfigObject& from,
+                   const ConfigFieldDescriptor* field,
+                   ConfigObject* to) const {
+        const boost::optional<T>& value =
+            getField<boost::optional<T> >(from, field);
+
+        if (value) {
+            setField(to, field, value);
+        }
+    }
+
+    template<typename T>
+    void copyRepeatedField(const ConfigObject& from,
+                           const ConfigFieldDescriptor* field,
+                           ConfigObject* to) const {
+        const std::vector<T>& value =
+            getField<std::vector<T> >(from, field);
+
+        if (!value.empty()) {
+            std::vector<T>* toValue = mutableRaw<std::vector<T> >(to, field);
+            toValue->assign(value.begin(), value.end());
+        }
+    }
+
+    template<typename T>
+    void clearField(ConfigObject* object,
+                    const ConfigFieldDescriptor* field) const {
+        boost::optional<T>* raw =
+            mutableRaw<boost::optional<T> >(object, field);
+
+        if (raw) {
+            raw->swap(boost::optional<T>());
+        }
+    }
+
+    template<typename T>
+    void clearRepeatedField(ConfigObject* object,
+                            const ConfigFieldDescriptor* field) const {
+        std::vector<T>* raw = mutableRaw<std::vector<T> >(object, field);
+
+        if (raw) {
+            raw->clear();
+        }
+    }
+
 private:
     template <typename Type>
     inline const Type& getField(const ConfigObject& object,
@@ -158,7 +204,12 @@ private:
     inline void addFields(ConfigObject* object,
                           const ConfigFieldDescriptor* field,
                           const std::vector<Type>& value) const {
-        mutableRaw<std::vector<Type> >(object, field)->append(value);
+        std::vector<Type>* to =
+            mutableRaw<std::vector<Type> >(object, field);
+
+        if (to) {
+            to->insert(to->end(), value.begin(), value.end());
+        }
     }
 };
 

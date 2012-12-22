@@ -70,9 +70,9 @@ bool CppGenerator::Generate(const FileDescriptor* file,
             return false;
         }
     }
-    +
-    string basename = StripProto(file->name());
-    basename.append(".conf");
+    
+    std::string basename = StripProto(file->name());
+    basename.append(".cnf");
 
     FileGenerator fileGenerator(file, dllexport_decl);
 
@@ -87,7 +87,7 @@ bool CppGenerator::Generate(const FileDescriptor* file,
     // Generate cc file.
     {
         scoped_ptr<io::ZeroCopyOutputStream> output(
-            generatorContext->Open(basename + ".cc"));
+            generatorContext->Open(basename + ".cpp"));
         io::Printer printer(output.get(), '$');
         fileGenerator.GenerateSource(&printer);
     }

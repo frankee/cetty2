@@ -1,5 +1,5 @@
-#if !defined(CETTY_CONFIG_KEYVALUEPAIR_H)
-#define CETTY_CONFIG_KEYVALUEPAIR_H
+#if !defined(CETTY_CONFIG_GENERATOR_YAML_YAMLGENERATOR_H)
+#define CETTY_CONFIG_GENERATOR_YAML_YAMLGENERATOR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,35 +17,34 @@
  * under the License.
  */
 
-#include <cetty/config/ConfigObject.h>
+#include <google/protobuf/compiler/code_generator.h>
 
 namespace cetty {
 namespace config {
+namespace generator {
+namespace yaml {
 
-class KeyValuePair : public ConfigObject {
+using namespace google::protobuf;
+using namespace google::protobuf::compiler;
+
+class YamlGenerator : public google::protobuf::compiler::CodeGenerator {
 public:
-    static const std::string NAME;
+    YamlGenerator() {}
+    virtual ~YamlGenerator() {}
 
-public:
-    std::string key;
-    std::string value;
-
-    KeyValuePair();
-    KeyValuePair(const KeyValuePair& keyValuePair) {
-        copyFrom(keyValuePair);
-    }
-
-    KeyValuePair& operator=(const KeyValuePair& keyValuePair) {
-        copyFrom(keyValuePair);
-    }
-
-    virtual ConfigObject* create() const { return new KeyValuePair; }
+    virtual bool Generate(const FileDescriptor* file,
+                          const string& parameter,
+                          GeneratorContext* generatorContext,
+                          string* error) const;
 };
 
 }
 }
+}
+}
 
-#endif //#if !defined(CETTY_CONFIG_KEYVALUEPAIR_H)
+
+#endif //#if !defined(CETTY_CONFIG_GENERATOR_YAML_YAMLGENERATOR_H)
 
 // Local Variables:
 // mode: c++

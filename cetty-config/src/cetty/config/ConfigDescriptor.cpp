@@ -71,8 +71,8 @@ ConfigObjectDescriptor::~ConfigObjectDescriptor() {
     }
 }
 
-const std::string& ConfigObjectDescriptor::name() const {
-    return defaultInstance_->name();
+const std::string& ConfigObjectDescriptor::className() const {
+    return defaultInstance_->className();
 }
 
 }

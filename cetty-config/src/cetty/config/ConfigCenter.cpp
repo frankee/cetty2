@@ -44,6 +44,10 @@ ConfigCenter::ConfigCenter()
       argv_(NULL),
       importer_(new ConfigFileImporter()),
       description_("Allowed options") {
+
+    description_.add_options()
+    ("help", "produce this help message")
+    ("conf", value<std::string>(), "the main configure file");
 }
 
 ConfigCenter::~ConfigCenter() {
@@ -57,10 +61,6 @@ ConfigCenter::~ConfigCenter() {
 bool ConfigCenter::load(int argc, char* argv[]) {
     argc_ = argc;
     argv_ = argv;
-
-    description_.add_options()
-    ("help", "produce this help message")
-    ("conf", value<std::string>(), "the main configure file");
 
     store(parse_command_line(argc, argv, description_), vm_);
     notify(vm_);
@@ -92,8 +92,6 @@ bool ConfigCenter::load(int argc, char* argv[]) {
         program += ".conf";
         LOG_INFO << "no command line parameter, using default " << program;
 
-        std::string candidatePath("./");
-
         std::vector<std::string> candidateFiles;
         candidateFiles.push_back(std::string("./") + program);
 
@@ -102,7 +100,14 @@ bool ConfigCenter::load(int argc, char* argv[]) {
         candidateFiles.push_back(std::string("../etc/") + program);
         candidateFiles.push_back(std::string("../conf/") + program);
 
-        return loadFromFile(program);
+        for (std::size_t i = 0; i < candidateFiles.size(); ++i) {
+            if (boost::filesystem::exists(
+                        boost::filesystem::path(candidateFiles[i]))) {
+                return loadFromFile(candidateFiles[i]);
+            }
+        }
+
+        return false;
     }
 
     return loadFromFile(option.as<std::string>());
@@ -149,7 +154,7 @@ bool ConfigCenter::configure(ConfigObject* object) const {
         return false;
     }
 
-    return configure(object->name(), object);
+    return configure(object->descriptor()->className(), object);
 }
 
 bool parseConfigObject(const YAML::Node& node, ConfigObject* object);
@@ -164,7 +169,7 @@ bool ConfigCenter::configure(const std::string& name,
     }
 
     YAML::Node node = root_[name];
-    int result = false;
+    bool result = false;
 
     if (node) {
         result = parseConfigObject(node, object);

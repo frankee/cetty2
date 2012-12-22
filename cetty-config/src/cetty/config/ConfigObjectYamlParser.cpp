@@ -35,7 +35,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
         return false;
     }
 
-    const ConfigObjectDescriptor* descriptor = object->getDescriptor();
+    const ConfigObjectDescriptor* descriptor = object->descriptor();
 
     ConfigObjectDescriptor::ConstIterator itr = descriptor->begin();
 
@@ -101,31 +101,29 @@ int parseField(const ConfigFieldDescriptor* field,
                const YAML::Node& node,
                ConfigObject* object) {
 
-    const ConfigReflection* reflection = object->getReflection();
-
     if (field->repeated) {
         YAML::Node::const_iterator itr = node.begin();
 
         for (; itr != node.end(); ++itr) {
             switch (field->type) {
             case ConfigFieldDescriptor::CPPTYPE_INT32:
-                reflection->addInt32(object, field, itr->as<int>());
+                object->addInt32(field, itr->as<int>());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection->addInt64(object, field, itr->as<int64_t>());
+                object->addInt64(field, itr->as<int64_t>());
                 break;
 
             case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                reflection->addDouble(object, field, itr->as<double>());
+                object->addDouble(field, itr->as<double>());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_STRING:
-                reflection->addString(object, field, itr->Scalar());
+                object->addString(field, itr->Scalar());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                ConfigObject* obj = reflection->addObject(object, field);
+                ConfigObject* obj = object->addObject(field);
 
                 // items:
                 //   - objectName :
@@ -148,23 +146,23 @@ int parseField(const ConfigFieldDescriptor* field,
     else {
         switch (field->type) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
-            reflection->setInt32(object, field, node.as<int>());
+            object->setInt32(field, node.as<int>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT64:
-            reflection->setInt64(object, field, node.as<int64_t>());
+            object->setInt64(field, node.as<int64_t>());
             break;
 
         case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-            reflection->setDouble(object, field, node.as<double>());
+            object->setDouble(field, node.as<double>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_STRING:
-            reflection->setString(object, field, node.Scalar());
+            object->setString(field, node.Scalar());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-            ConfigObject* obj = reflection->mutableObject(object, field);
+            ConfigObject* obj = object->mutableObject(field);
             return parseConfigObject(node, obj);
             break;
         }
