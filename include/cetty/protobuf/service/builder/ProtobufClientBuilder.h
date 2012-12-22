@@ -17,26 +17,8 @@
  * under the License.
  */
 
+#include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/service/builder/ClientBuilder.h>
-#include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-
-namespace cetty {
-namespace service {
-
-using namespace cetty::protobuf::service;
-
-// template<>
-// int64_t OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::id() const {
-//     return request->id(); //future->getResponse()->getId();
-// }
-// 
-// template<>
-// void OutstandingCall<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>::setId(int64_t id) {
-//     request->setId(id);
-// }
-
-}
-}
 
 namespace cetty {
 namespace protobuf {
@@ -46,8 +28,7 @@ namespace builder {
 using namespace cetty::channel;
 using namespace cetty::service::builder;
 
-class ProtobufClientBuilder
-        : public cetty::service::builder::ClientBuilder<ProtobufServiceMessagePtr> {
+class ProtobufClientBuilder : private boost::noncopyable {
 public:
     typedef ClientBuilder<ProtobufServiceMessagePtr> ClientBuilderType;
 
@@ -57,10 +38,24 @@ public:
     ProtobufClientBuilder(const EventLoopPtr& eventLoop);
     ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
-private:
-    void init();
+    void setServiceInitializer(const Channel::Initializer& initializer) {
+        builder_.setServiceInitializer(initializer);
+    }
+
+    void addConnection(const std::string& host, int port, int limit = 1) {
+        builder_.addConnection(host, port, limit);
+    }
+
+    ChannelPtr build() {
+        builder_.build();
+    }
 
 private:
+    void init();
+    bool initializeChannel(const ChannelPtr& channel);
+
+private:
+    ClientBuilderType builder_;
 };
 
 }

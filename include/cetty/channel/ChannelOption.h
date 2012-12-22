@@ -74,6 +74,8 @@ public:
 
     const std::string& name() const;
 
+    static ChannelOption parseFrom(const std::string& name);
+
 public:
     static const ChannelOption CONNECT_TIMEOUT_MILLIS;
 

@@ -93,7 +93,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\service\builder\ClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\service\pool\CachingConnectionPool.cpp" />
     <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp" />
@@ -114,8 +113,8 @@
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\http\HttpMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\OutstandingCall.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageTraits.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\ServiceRequestHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ServiceMessageWrapper.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\ClientServiceRequestBridge.h" />
     <ClInclude Include="..\..\..\include\cetty\service\TypeCastServiceFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Service.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ServiceFuture.h" />

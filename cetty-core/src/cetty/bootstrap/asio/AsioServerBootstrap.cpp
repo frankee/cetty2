@@ -75,7 +75,7 @@ AsioServerBootstrap::~AsioServerBootstrap() {
 }
 
 ChannelPtr AsioServerBootstrap::newChannel() {
-    const EventLoopPoolPtr& parent = parentPool();
+    const EventLoopPoolPtr& parent = eventLoopPool();
     if (parent) {
         return ChannelPtr(
                    new AsioServerSocketChannel(parent->getNextLoop(),
@@ -89,7 +89,7 @@ ChannelPtr AsioServerBootstrap::newChannel() {
 
 void AsioServerBootstrap::init() {
     if (!SocketAddress::hasFactory()) {
-        EventLoopPtr loop = parentPool()->getNextLoop();
+        EventLoopPtr loop = eventLoopPool()->getNextLoop();
         AsioServicePtr service = boost::dynamic_pointer_cast<AsioService>(loop);
         BOOST_ASSERT(service && "AsioClientSocketChannelFactory only can init with AsioService");
 

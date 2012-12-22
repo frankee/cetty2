@@ -28,8 +28,7 @@
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Common.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\commands\Worker.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessage.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessageCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\gearman\protocol\GearmanMessagePtr.h" />
   </ItemGroup>
   <ItemGroup>
@@ -47,8 +46,7 @@
     <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Common.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protocol\commands\Worker.cpp" />
     <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessage.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageEncoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\gearman\protocol\GearmanMessageCodec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}</ProjectGuid>

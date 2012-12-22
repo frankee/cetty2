@@ -1,5 +1,5 @@
-#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H)
-#define CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H
+#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANCODEC_H)
+#define CETTY_GEARMAN_PROTOCOL_GEARMANCODEC_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageEncoder.h>
+#include <cetty/handler/codec/MessageToMessageCodec.h>
 #include <cetty/gearman/protocol/GearmanMessage.h>
 
 namespace cetty {
@@ -27,18 +27,34 @@ namespace protocol {
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 
-class GearmanMessageEncoder : public MessageToMessageEncoder<GearmanMessagePtr, ChannelBufferPtr> {
+class GearmanMessageCodec : private boost::noncopyable {
 public:
-    GearmanMessageEncoder();
-    virtual ~GearmanMessageEncoder();
+    typedef MessageToMessageCodec<GearmanMessageCodec,
+            ChannelBufferPtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            ChannelBufferPtr> Codec;
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+    typedef Codec::Context Context;
 
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const GearmanMessagePtr& msg);
+    typedef Codec::Handler Handler;
+    typedef Codec::HandlerPtr HandlerPtr;
+
+public:
+    GearmanMessageCodec();
+    ~GearmanMessageCodec();
+
+    void registerTo(Context& ctx) {
+        codec_.registerTo(ctx);
+    }
 
 private:
+    GearmanMessagePtr decode(ChannelHandlerContext& ctx,
+                             const ChannelBufferPtr& msg);
+
+    ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                            const GearmanMessagePtr& msg);
+
     int caculateParametersLength(const GearmanMessagePtr& msg);
 
     void writeHeader(const ChannelBufferPtr& buffer, int type, int length);
@@ -49,13 +65,16 @@ private:
     void writeParametersAhead(const ChannelBufferPtr& buffer,
                               const std::vector<std::string>& parameters,
                               bool withZeroPad);
+
+private:
+    Codec codec_;
 };
 
 }
 }
 }
 
-#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANENCODER_H)
+#endif //#if !defined(CETTY_GEARMAN_PROTOCOL_GEARMANCODEC_H)
 
 // Local Variables:
 // mode: c++

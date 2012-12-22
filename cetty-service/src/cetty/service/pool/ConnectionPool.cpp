@@ -29,8 +29,9 @@ using namespace cetty::service;
 using namespace cetty::bootstrap::asio;
 
 ConnectionPool::ConnectionPool(const Connections& connections)
-    : connections(connections), bootstrap(0), connecting(false) {
-
+    : connections_(connections),
+      bootstrap_(1),
+      connecting_(false) {
 }
 
 ConnectionPool::~ConnectionPool() {
@@ -38,49 +39,56 @@ ConnectionPool::~ConnectionPool() {
 }
 
 ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
-    if (channels.empty()) {
-        if (!connecting) {
+    if (channels_.empty()) {
+        if (!connecting_) {
             ChannelFuturePtr future =
-                bootstrap.connect(connections[0].host, connections[0].port);
-            callbacks.push_back(callback);
+                bootstrap_.connect(connections_[0].host, connections_[0].port);
+            callbacks_.push_back(callback);
 
-            connecting = true;
+            connecting_ = true;
 
             future->addListener(boost::bind(
-                &ConnectionPool::connectedCallback, this, _1));
+                                    &ConnectionPool::connectedCallback, this, _1));
         }
 
         return ChannelPtr();
     }
     else {
-        return channels.begin()->second->channel;
+        return channels_.begin()->second->channel;
     }
 }
 
 cetty::channel::ChannelPtr ConnectionPool::getChannel() {
-    if (!channels.empty()) {
-        return channels.begin()->second->channel;
+    if (!channels_.empty()) {
+        return channels_.begin()->second->channel;
     }
+
     return ChannelPtr();
 }
 
 void ConnectionPool::connectedCallback(const ChannelFuture& future) {
-    connecting = false;
+    connecting_ = false;
 
     ChannelConnection* conn = new ChannelConnection;
     ChannelPtr channel = future.channel();
-    
+
     conn->channel = channel;
     int id = channel->id();
-    channels.insert(id, conn);
+    channels_.insert(id, conn);
 
-    while (!callbacks.empty()) {
-        const ConnectedCallback& call = callbacks.front();
+    while (!callbacks_.empty()) {
+        const ConnectedCallback& call = callbacks_.front();
+
         if (call) {
             call(channel);
         }
-        callbacks.pop_front();
+
+        callbacks_.pop_front();
     }
+}
+
+void ConnectionPool::setChannelInitializer(const Channel::Initializer& initializer) {
+    bootstrap_.setChannelInitializer(initializer);
 }
 
 }

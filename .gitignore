@@ -1,6 +1,8 @@
 
 *.user
 *.pdb
+*.vsp
+*.psess
 *.ilk
 *.log
 *.idb
@@ -32,4 +34,10 @@ Debug/
 Release/
 ipch/
 CMakeFiles/
-builder/
+builder/bin
+builder/cetty-*
+builder/CMakeFiles
+builder/lib
+builder/*.cmake
+builder/CMakeCache.txt
+builder/Makefile

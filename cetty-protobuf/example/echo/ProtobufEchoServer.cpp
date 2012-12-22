@@ -1,9 +1,15 @@
 #include <cetty/config/ConfigCenter.h>
-#include <cetty/craft/builder/CraftServerBuilder.h>
+#include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 #include "echo.pb.h"
 
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
+
+using namespace cetty::channel;
+
+
 using namespace cetty::config;
-using namespace cetty::craft::builder;
+using namespace cetty::protobuf::service::builder;
 
 namespace echo {
 
@@ -20,12 +26,7 @@ public:
             rep = new EchoResponse;
         }
 
-        for (int i = 0; i < 100; ++i) {
-            rep->mutable_payload()->append(request->payload());
-        }
-        
-        //boost::this_thread::sleep(boost::posix_time::microseconds(100));
-
+        rep->set_payload(request->payload());
         if (done) {
             done(rep);
         }
@@ -34,14 +35,16 @@ public:
 
 }
 
+//class Test : public boost::enable_shared_from_this2
+
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
-
-    CraftServerBuilder builder;
+    
+    ProtobufServerBuilder builder;
     builder.registerService(new echo::EchoServiceImpl);
-    builder.buildAll();
+    builder.buildRpc(1980);
 
-    builder.waitingForExit();
+    builder.waitingForExit().shutdown();
 
     return 0;
 }

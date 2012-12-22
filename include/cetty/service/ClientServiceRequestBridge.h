@@ -1,5 +1,5 @@
-#if !defined(CETTY_SERVICE_SERVICEREQUESTHANDLER_H)
-#define CETTY_SERVICE_SERVICEREQUESTHANDLER_H
+#if !defined(CETTY_SERVICE_CLIENTSERVICEREQUESTBRIDGE_H)
+#define CETTY_SERVICE_CLIENTSERVICEREQUESTBRIDGE_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -18,6 +18,7 @@
  */
 
 #include <cetty/Types.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/VoidMessage.h>
 #include <cetty/channel/ChannelMessageTailLinkContext.h>
 #include <cetty/service/OutstandingCall.h>
@@ -31,9 +32,9 @@ template<typename Request,
          typename Response,
          typename InboundOut = boost::intrusive_ptr<OutstandingCall<Request, Response> >,
          typename OutboundIn = boost::intrusive_ptr<OutstandingCall<Request, Response> > >
-class ClientServiceRequestAdaptor : private boost::noncopyable {
+class ClientServiceRequestBridge : private boost::noncopyable {
 public:
-    typedef ClientServiceRequestAdaptor<Request, Response> Self;
+    typedef ClientServiceRequestBridge<Request, Response> Self;
 
     typedef ChannelMessageContainer<Response, MESSAGE_BLOCK> InboundContainer;
     typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
@@ -65,27 +66,27 @@ public:
     typedef typename Context::HandlerPtr HandlerPtr;
 
 public:
-    ClientServiceRequestAdaptor(const ChannelPtr& parent)
+    ClientServiceRequestBridge(const ChannelPtr& parent)
         : flushIndex_(0),
           parent_(parent),
-          pipeline_(parent->pipeline()),
+          pipeline_(&(parent->pipeline())),
           inboundTransfer_(),
           inboundContainer_(),
           outboundTransfer_(),
           outboundContainer_() {
     }
 
-    ClientServiceRequestAdaptor(const ChannelWeakPtr& parent)
+    ClientServiceRequestBridge(const ChannelWeakPtr& parent)
         : flushIndex_(0),
           parent_(parent),
-          pipeline_(parent.lock()->pipeline()),
+          pipeline_(&(parent.lock()->pipeline())),
           inboundTransfer_(),
           inboundContainer_(),
           outboundTransfer_(),
           outboundContainer_() {
     }
 
-    ~ClientServiceRequestAdaptor() {}
+    ~ClientServiceRequestBridge() {}
 
     void registerTo(Context& ctx) {
         inboundTransfer_ = ctx.inboundTransfer();
@@ -140,6 +141,7 @@ private:
             Response& response = inboundQueue.front();
 
             const OutboundIn& out = outboundQueue.front();
+            out->setResponse(response);
 
             if (!parent_.expired()) {
                 inboundTransfer_->unfoldAndAdd(out);
@@ -183,9 +185,9 @@ private:
 
 template<typename Request,
          typename Response>
-class ClientServiceRequestAdaptor<Request, Response, Request, Response> : private boost::noncopyable {
+class ClientServiceRequestBridge<Request, Response, Request, Response> : private boost::noncopyable {
 public:
-    typedef ClientServiceRequestAdaptor<Request, Response, Request, Response> Self;
+    typedef ClientServiceRequestBridge<Request, Response, Request, Response> Self;
     typedef Response InboundIn;
     typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
 
@@ -197,27 +199,35 @@ public:
     typedef typename Context::HandlerPtr HandlerPtr;
 
 public:
-    ClientServiceRequestAdaptor(const ChannelPtr& parent)
+    ClientServiceRequestBridge(const ChannelPtr& parent)
         : parent_(parent),
-          pipeline_(parent->pipeline()) {
+          pipeline_(&(parent->pipeline())) {
     }
 
-    ClientServiceRequestAdaptor(const ChannelWeakPtr& parent)
+    ClientServiceRequestBridge(const ChannelWeakPtr& parent)
         : parent_(parent),
-          pipeline_(parent.lock()->pipeline()) {
+          pipeline_(&(parent.lock()->pipeline())) {
     }
 
-    ~ClientServiceRequestAdaptor() {}
+    ~ClientServiceRequestBridge() {}
 
     void registerTo(Context& ctx) {
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &Self::messageUpdated,
+                this,
+                _1));
     }
 
     static ChannelHandlerContext* newContext(const ChannelPtr& parent) {
-        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
+        return new Context("requestAdaptor",
+                           parent,
+                           HandlerPtr(new Self(parent)));
     }
 
     static ChannelHandlerContext* newContext(const ChannelWeakPtr& parent) {
-        return new Context("requestAdaptor", HandlerPtr(new Self(parent)));
+        return new Context("requestAdaptor",
+                           parent,
+                           HandlerPtr(new Self(parent)));
     }
 
 private:
@@ -235,7 +245,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_SERVICE_SERVICEREQUESTHANDLER_H)
+#endif //#if !defined(CETTY_SERVICE_CLIENTSERVICEREQUESTBRIDGE_H)
 
 // Local Variables:
 // mode: c++

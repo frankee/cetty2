@@ -19,14 +19,13 @@
 #include <google/protobuf/descriptor.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/protobuf/service/ProtobufService.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
+#include <cetty/gearman/GearmanWorker.h>
 #include <cetty/gearman/GearmanWorkerHandler.h>
-#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
-#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
+#include <cetty/gearman/protocol/GearmanMessageCodec.h>
 #include <cetty/gearman/protobuf/GearmanProtobufWorkerFilter.h>
 
 #include <cetty/logging/LoggerHelper.h>
@@ -42,29 +41,24 @@ using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service::handler;
 using namespace cetty::gearman::protocol;
 
+bool intializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<GearmanProtobufWorkerFilter::HandlerPtr>("gearmanProtobufFilter",
+        GearmanProtobufWorkerFilter::HandlerPtr(new GearmanProtobufWorkerFilter));
+
+    pipeline.addLast<ProtobufServiceMessageHandler::HandlerPtr>("protobufMessageHandler",
+        ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
+
+    return true;
+}
+
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder() {
 }
 
-
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(int threadCnt)
-    : GearmanWorkerBuilder(threadCnt) {
-}
-
-GearmanProtobufWorkerBuilder::~GearmanProtobufWorkerBuilder() {}
-
-
-ChannelPipelinePtr GearmanProtobufWorkerBuilder::getDefaultPipeline() {
-    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
-
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
-
-    pipeline->addLast("gearmanDecoder", new GearmanMessageDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanMessageEncoder());
-    pipeline->addLast("gearmanWorker", new GearmanWorkerHandler());
-    pipeline->addLast("gearmanProtobufFilter", new GearmanProtobufWorkerFilter());
-    pipeline->addLast("protobufMessageHandler", new ProtobufServiceMessageHandler());
-
-    return pipeline;
+    : builder_(threadCnt) {
+        builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
 }
 
 GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
@@ -85,14 +79,14 @@ GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
     int methodCnt = descriptor->method_count();
 
     std::string functionName;
-    WorkerFunctor nullWorker;
+    WorkFunctor nullWorker;
 
     for (int i = 0; i < methodCnt; ++i) {
         //functionName = serviceName;
         const MethodDescriptor* method = descriptor->method(i);
         functionName = method->name();
         //register the worker function
-        registerWorker(functionName, nullWorker);
+        builder_.registerWorker(functionName, nullWorker);
     }
 
     return *this;

@@ -56,7 +56,7 @@ template<typename H,
          VoidMessageContainer,
          ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
          ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > >
-class MessageToMessageEncoder :private boost::noncopyable {
+class MessageToMessageEncoder : private boost::noncopyable {
 public:
     typedef C Context;
 
@@ -66,7 +66,7 @@ public:
     typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
     typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
-    typedef typename OutboundContainer::MessageQueue OutboundMessageQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
 
     typedef ChannelMessageTransfer<OutboundOut,
             ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK>,
@@ -78,6 +78,9 @@ public:
     typedef boost::function<bool (OutboundIn const&)> EncodableChecker;
 
 public:
+    MessageToMessageEncoder() {
+    }
+
     MessageToMessageEncoder(const Encoder& encoder)
         : encoder_(encoder),
           transfer_(),
@@ -94,7 +97,7 @@ public:
 
     ~MessageToMessageEncoder() {}
 
-    virtual void registerTo(Context& ctx) {
+    void registerTo(Context& ctx) {
         transfer_ = ctx.outboundTransfer();
         container_ = ctx.outboundContainer();
 
@@ -105,10 +108,19 @@ public:
                                 _2));
     }
 
+    void setEncoder(const Encoder& encoder) {
+        encoder_ = encoder;
+    }
+
+    void setEncodableChecker(const EncodableChecker& checker) {
+        checker_ = checker;
+    }
+
+private:
     void flush(ChannelHandlerContext& ctx,
                const ChannelFuturePtr& future) {
 
-        OutboundMessageQueue& outboundQueue = container_->getMessages();
+        OutboundQueue& outboundQueue = container_->getMessages();
 
         while (!outboundQueue.empty()) {
             try {

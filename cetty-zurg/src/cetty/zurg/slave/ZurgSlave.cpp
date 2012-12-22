@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
     CraftServerBuilder builder;
     builder.registerService(
-        new SlaveServiceImpl(builder.getParentPool()->getNextLoop()));
+        new SlaveServiceImpl(builder.parentPool()->getNextLoop()));
 
     //builder.buildHttp(8080);
     builder.buildAll();

@@ -24,7 +24,7 @@ namespace cetty {
 namespace bootstrap {
 namespace asio {
 
-    using namespace cetty::channel::asio;
+using namespace cetty::channel::asio;
 
 AsioClientBootstrap::AsioClientBootstrap(
     const EventLoopPtr& eventLoop)

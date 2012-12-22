@@ -24,8 +24,8 @@ namespace channel {
 
 using namespace cetty::util;
 
-void ChannelConfig::setOptions(const ChannelOption::Options& options) {
-    ChannelOption::Options::const_iterator itr = options.begin();
+void ChannelConfig::setOptions(const ChannelOptions& options) {
+    ChannelOptions::ConstIterator itr = options.begin();
 
     while (itr != options.end()) {
         if (callback_ && callback_(itr->first, itr->second)) {

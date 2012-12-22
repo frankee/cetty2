@@ -27,21 +27,37 @@ namespace protocol {
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
 
-class RedisCommandEncoder : public MessageToBufferEncoder<RedisCommandPtr> {
+class RedisCommandEncoder : private boost::noncopyable {
 public:
-    RedisCommandEncoder() {}
-    virtual ~RedisCommandEncoder() {}
+    typedef MessageToBufferEncoder<RedisCommandEncoder, RedisCommandPtr> Encoder;
+    typedef Encoder::Context Context;
+    typedef Encoder::Handler Handler;
+    typedef Encoder::HandlerPtr HandlerPtr;
 
 public:
-    virtual ChannelHandlerPtr clone() { return new RedisCommandEncoder; }
-    virtual std::string toString() const { return "RedisCommandEncoder"; }
+    RedisCommandEncoder() {
+        encoder_.setEncoder(boost::bind(&RedisCommandEncoder::encode,
+                                        this,
+                                        _1,
+                                        _2,
+                                        _3));
+    }
 
-protected:
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const RedisCommandPtr& msg,
-                                    const ChannelBufferPtr& out) {
+    ~RedisCommandEncoder() {}
+
+    void registerTo(Context& ctx) {
+        encoder_.registerTo(ctx);
+    }
+
+private:
+    ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+                            const RedisCommandPtr& msg,
+                            const ChannelBufferPtr& out) {
         return msg->getBuffer();
     }
+
+private:
+    Encoder encoder_;
 };
 
 }

@@ -41,19 +41,18 @@ public:
     static ChannelBufferPtr encode(ChannelHandlerContext& ctx,
                                    const ProtobufServiceMessagePtr& msg);
 
-private:
     static int decodeMessage(const ChannelBufferPtr& buffer,
-                             const ProtobufServiceMessagePtr& message);
-
-    static int decodePayload(const ChannelBufferPtr& buffer,
                              const ProtobufServiceMessagePtr& message);
 
     static void encodeMessage(const ProtobufServiceMessagePtr& message,
                               const ChannelBufferPtr& buffer);
 
+private:
+    static int decodePayload(const ChannelBufferPtr& buffer,
+                             const ProtobufServiceMessagePtr& message);
+
     static void encodeProtobuf(const google::protobuf::Message& message,
                                const ChannelBufferPtr& buffer);
-
 private:
     MessageCodec();
 };

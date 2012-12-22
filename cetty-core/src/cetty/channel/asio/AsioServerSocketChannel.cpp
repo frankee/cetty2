@@ -267,7 +267,7 @@ bool AsioServerSocketChannel::isOpen() const {
 
 void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
     if (eventLoop()->inLoopThread()) {
-        ChildChannels::const_iterator itr =
+        ChildChannels::iterator itr =
             childChannels_.find(future.channel()->id());
 
 #if !defined(NDEBUG)

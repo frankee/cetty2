@@ -32,6 +32,14 @@ namespace bootstrap {
 
 using namespace cetty::channel;
 
+ClientBootstrap::ClientBootstrap() {
+
+}
+
+ClientBootstrap::ClientBootstrap(const EventLoopPoolPtr& pool)
+    : AbstractBootstrap<ClientBootstrap>(pool) {
+}
+
 ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress) {
     return connect(remoteAddress, SocketAddress::NULL_ADDRESS);
 }
@@ -70,6 +78,14 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
 
     // Connect.
     return ch->connect(remote);
+}
+
+void ClientBootstrap::shutdown() {
+    EventLoopPoolPtr pool = eventLoopPool();
+    if (pool) {
+        pool->stop();
+        pool->waitForStop();
+    }
 }
 
 }

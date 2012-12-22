@@ -20,11 +20,12 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/noncopyable.hpp>
-#include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelOption.h>
-#include <cetty/channel/EventLoopPool.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/util/ReferenceCounter.h>
+
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/EventLoopPool.h>
+#include <cetty/channel/ChannelOptions.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -48,7 +49,7 @@ using namespace cetty::channel;
  */
 
 template<typename T>
-class AbstractBootstrap : private boost::noncopyable {
+class AbstractBootstrap : public cetty::util::ReferenceCounter<T> {
 public:
     virtual ~AbstractBootstrap() {}
 
@@ -66,6 +67,7 @@ public:
 
     T& setLocalAddress(const SocketAddress& localAddress);
 
+
     const EventLoopPoolPtr& eventLoopPool() const;
 
     T& setEventLoopPool(const EventLoopPoolPtr& pool);
@@ -75,14 +77,14 @@ public:
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    ChannelOption::Options& options();
+    ChannelOptions& options();
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    const ChannelOption::Options& options() const;
+    const ChannelOptions& options() const;
 
     /**
      * Returns the value of the option with the specified key.  To retrieve
@@ -101,7 +103,7 @@ public:
      * {@link Channel}s.  To set the options of a child {@link Channel}, prefixed
      * <tt>"child."</tt> to the option name (e.g. <tt>"child.keepAlive"</tt>).
      */
-    T& setOptions(const ChannelOption::Options& options);
+    T& setOptions(const ChannelOptions& options);
 
     /**
      * Sets an option with the specified key and value.  If there's already
@@ -115,19 +117,14 @@ public:
      * @param value  the option value
      */
     T& setOption(const ChannelOption& option,
-                                         const ChannelOption::Variant& value);
+                 const ChannelOption::Variant& value);
 
     /**
      * Shutdown the {@link AbstractBootstrap} and the {@link EventLoopGroup} which is
      * used by it. Only call this if you don't share the {@link EventLoopGroup}
      * between different {@link AbstractBootstrap}'s.
      */
-    virtual void shutdown() {
-        if (eventLoopPool_) {
-            eventLoopPool_->stop();
-            eventLoopPool_->waitForStop();
-        }
-    }
+    virtual void shutdown() = 0;
 
 protected:
     /**
@@ -136,7 +133,7 @@ protected:
      * I/O operation is requested.
      */
     AbstractBootstrap() {}
-    
+
     AbstractBootstrap(const EventLoopPoolPtr& pool)
         : eventLoopPool_(pool) {
     }
@@ -147,9 +144,9 @@ private:
     }
 
 private:
+    ChannelOptions options_;
     SocketAddress localAddress_;
     EventLoopPoolPtr eventLoopPool_;
-    ChannelOption::Options options_;
 };
 
 template<typename T> inline
@@ -187,18 +184,18 @@ T& AbstractBootstrap<T>::setEventLoopPool(const EventLoopPoolPtr& pool) {
 }
 
 template<typename T> inline
-ChannelOption::Options& AbstractBootstrap<T>::options() {
+ChannelOptions& AbstractBootstrap<T>::options() {
     return options_;
 }
 
 template<typename T> inline
-const ChannelOption::Options& AbstractBootstrap<T>::options() const {
+const ChannelOptions& AbstractBootstrap<T>::options() const {
     return options_;
 }
 
 template<typename T> inline
 ChannelOption::Variant AbstractBootstrap<T>::getOption(const ChannelOption& option) const {
-    ChannelOption::Options::const_iterator itr = options.find(option);
+    ChannelOptions::const_iterator itr = options.find(option);
 
     if (itr == options.end()) {
         LOG_WARN << "can not get the option of " << option.name();
@@ -209,27 +206,17 @@ ChannelOption::Variant AbstractBootstrap<T>::getOption(const ChannelOption& opti
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setOptions(const ChannelOption::Options& options) {
+T& AbstractBootstrap<T>::setOptions(const ChannelOptions& options) {
     LOG_INFO << "set options using map, will reset the original options.";
-    this->options = options;
+    options_ = options;
 
     return castThis();
 }
 
 template<typename T> inline
 T& AbstractBootstrap<T>::setOption(const ChannelOption& option,
-        const ChannelOption::Variant& value) {
-    if (value.empty()) {
-        options_.erase(option);
-        LOG_WARN << "setOption, the key ("
-                 << option.name()
-                 << ") is empty value, remove from the options.";
-    }
-    else {
-        LOG_DEBUG << "set Option, the key is " << option.name();
-        options_.insert(std::make_pair(option, value));
-    }
-
+                                   const ChannelOption::Variant& value) {
+    options_.setOption(option, value);
     return castThis();
 }
 

@@ -27,6 +27,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuturePtr.h>
 #include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/ClientBootstrapPtr.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -126,23 +127,17 @@ public:
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ClientBootstrap() {}
-    ClientBootstrap(const EventLoopPoolPtr& pool)
-        : AbstractBootstrap<ClientBootstrap>(pool) {
-    }
+    ClientBootstrap();
+    ClientBootstrap(const EventLoopPoolPtr& pool);
 
     virtual ~ClientBootstrap() {}
 
-
+    const SocketAddress& remoteAddress() const;
     ClientBootstrap& setRemoteAddress(const SocketAddress& address);
-
     ClientBootstrap& setRemoteAddress(const std::string& host, int port);
 
-    const SocketAddress& remoteAddress() const;
-
-    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer);
-
     const Channel::Initializer& channelInitializer() const;
+    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer);
 
     ChannelFuturePtr connect();
 
@@ -202,6 +197,8 @@ public:
      *            failed to create a new {@link ChannelPipeline}
      */
     ChannelFuturePtr connect(const SocketAddress& remote, const SocketAddress& local);
+
+    virtual void shutdown();
 
 protected:
     virtual ChannelPtr newChannel() = 0;

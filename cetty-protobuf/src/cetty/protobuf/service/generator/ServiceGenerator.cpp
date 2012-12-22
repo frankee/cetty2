@@ -90,7 +90,13 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                                              ClassName(method->input_type(), false)));
         output_types.push_back(std::make_pair(ClassName(method->output_type(), true),
                                               ClassName(method->output_type(), false)));
-        method_names.push_back(method->name());
+        
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        method_names.push_back(methodName);
     }
 
     for (int i = 0; i < j; ++i) {

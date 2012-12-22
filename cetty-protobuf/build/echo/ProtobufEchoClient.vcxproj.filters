@@ -14,7 +14,7 @@
     <ClCompile Include="..\..\example\echo\echo.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\example\echo\client.cpp">
+    <ClCompile Include="..\..\example\echo\ProtobufEchoClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

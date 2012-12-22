@@ -20,9 +20,10 @@
 
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/gearman/protocol/GearmanMessage.h>
+#include <cetty/gearman/protocol/commands/Client.h>
+
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
+#include <cetty/protobuf/service/handler/MessageCodec.h>
 
 namespace cetty {
 namespace gearman {
@@ -34,18 +35,21 @@ using namespace cetty::gearman::protobuf;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
-GearmanProtobufClientFilter::GearmanProtobufClientFilter() {}
+GearmanProtobufClientFilter::GearmanProtobufClientFilter() {
+    filter_.setRequestFilter(boost::bind(&GearmanProtobufClientFilter::filterRequest,
+                                         this,
+                                         _1,
+                                         _2));
+    filter_.setResponseFilter(boost::bind(&GearmanProtobufClientFilter::filterResponse,
+                                          this,
+                                          _1,
+                                          _2,
+                                          _3));
+
+}
 
 GearmanProtobufClientFilter::~GearmanProtobufClientFilter() {}
 
-
-ChannelHandlerPtr GearmanProtobufClientFilter::clone() {
-    return GearmanProtobufClientFilterPtr(new GearmanProtobufClientFilter);
-}
-
-std::string GearmanProtobufClientFilter::toString() const {
-    return "GearmanProtobufClientFilter";
-}
 
 GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
     ChannelHandlerContext& ctx,
@@ -55,17 +59,18 @@ GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
         = Unpooled::buffer(req->messageSize() + 8);
 
     //encode the protobufServiceMessage and set it to GearmanMessage
-    ProtobufServiceMessageEncoder::encodeMessage(buffer, req);
-    return GearmanMessage::createsubmitJobMessage(method, "12345", buffer);
+    MessageCodec::encodeMessage(req, buffer);
+    return commands::submitJobMessage(method, "12345", buffer);
 }
 
 ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterResponse(
     ChannelHandlerContext& ctx,
     const ProtobufServiceMessagePtr& req,
     const GearmanMessagePtr& rep) {
+
     //decode from GearmanMessage
     ProtobufServiceMessagePtr protoMsg(new ProtobufServiceMessage);
-    ProtobufServiceMessageDecoder::decode(rep->getData(),protoMsg);
+    MessageCodec::decodeMessage(rep->data(), protoMsg);
     return protoMsg;
 }
 

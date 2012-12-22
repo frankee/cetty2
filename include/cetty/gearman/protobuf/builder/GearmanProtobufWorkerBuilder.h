@@ -28,18 +28,21 @@ namespace builder {
 using namespace cetty::gearman::builder;
 using namespace cetty::protobuf::service;
 
-class GearmanProtobufWorkerBuilder : public GearmanWorkerBuilder {
+class GearmanProtobufWorkerBuilder : private boost::noncopyable {
+public:
+    typedef GearmanWorkerBuilder::WorkFunctor WorkFunctor;
+
 public:
     GearmanProtobufWorkerBuilder();
     GearmanProtobufWorkerBuilder(int threadCnt);
-    virtual ~GearmanProtobufWorkerBuilder();
     
+    GearmanProtobufWorkerBuilder& addConnection(const std::string& host, int port);
     GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);
-    
 
-protected:
-    virtual ChannelPipelinePtr getDefaultPipeline();
+    const std::vector<GearmanWorkerPtr>& buildWorkers();
 
+private:
+    GearmanWorkerBuilder builder_;
 };
 
 }

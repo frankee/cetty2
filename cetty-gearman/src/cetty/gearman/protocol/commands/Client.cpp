@@ -16,7 +16,77 @@
  */
 
 #include <cetty/gearman/protocol/commands/Client.h>
+#include <cetty/gearman/protocol/GearmanMessage.h>
 
-namespace cetty { namespace gearman { namespace protocol { namespace commands { 
+namespace cetty {
+namespace gearman {
+namespace protocol {
+namespace commands {
 
-}}}}
+// client
+GearmanMessagePtr submitJobMessage(const std::string& functionName,
+                                   const std::string& uniqueId,
+                                   const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr submitJobHighMessage(const std::string& functionName,
+                                       const std::string& uniqueId,
+                                       const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB_HIGH,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr submitJobLowMessage(const std::string& functionName,
+                                      const std::string& uniqueId,
+                                      const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB_LOW,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr submitJobBGMessage(const std::string& functionName,
+                                     const std::string& uniqueId,
+                                     const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB_BG,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr submitJobHighBGMessage(const std::string& functionName,
+        const std::string& uniqueId,
+        const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB_HIGH_BG,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr submitJobLowBGMessage(const std::string& functionName,
+                                        const std::string& uniqueId,
+                                        const ChannelBufferPtr& payload) {
+    return new GearmanMessage(GearmanMessage::SUBMIT_JOB_LOW_BG,
+                              functionName,
+                              uniqueId,
+                              payload);
+}
+
+GearmanMessagePtr getStatusMessage(const std::string& jobHandle) {
+    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::GET_STATUS,jobHandle));
+}
+
+GearmanMessagePtr optionReqMessage(const std::string& option) {
+    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::OPTION_REQ));
+}
+
+}
+}
+}
+}

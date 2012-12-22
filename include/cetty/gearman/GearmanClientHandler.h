@@ -20,7 +20,7 @@
 #include <deque>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -29,31 +29,49 @@ namespace gearman {
 using namespace cetty::channel;
 using namespace cetty::gearman::protocol;
 
-class GearmanClientHandler
-        : public ChannelMessageHandlerAdapter<GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr, GearmanMessagePtr> {
+class GearmanClientHandler : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandler<GearmanClientHandler,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr> MessageHandler;
+
+    typedef MessageHandler::Context Context;
+
+    typedef MessageHandler::InboundContainer InboundContainer;
+    typedef MessageHandler::OutboundContainer OutboundContainer;
+
+    typedef MessageHandler::InboundQueue InboundQueue;
+    typedef MessageHandler::OutboundQueue OutboundQueue;
+
+    typedef MessageHandler::InboundTransfer InboundTransfer;
+    typedef MessageHandler::OutboundTransfer OutboundTransfer;
+
+    typedef MessageHandler::Handler Handler;
+    typedef MessageHandler::HandlerPtr HandlerPtr;
 
 public:
     GearmanClientHandler();
-    virtual ~GearmanClientHandler();
+    ~GearmanClientHandler();
 
-    virtual void channelActive(ChannelHandlerContext& ctx);
+    void registerTo(Context& ctx);
 
-    virtual ChannelHandlerPtr clone();
+private:
+    void messageReceived(ChannelHandlerContext& ctx);
 
-    virtual std::string toString() const;
-
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const GearmanMessagePtr& msg);
-
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future);
 
 private:
     void submitJob(ChannelHandlerContext& ctx, const GearmanMessagePtr& msg);
 
 private:
-    ChannelPtr channel;
-    std::deque<GearmanMessagePtr> msgs;
+    InboundTransfer* inboundTransfer_;
+    InboundContainer* inboundContainer_;
+
+    OutboundTransfer* outboundTransfer_;
+    OutboundContainer* outboundContainer_;
 };
 
 }

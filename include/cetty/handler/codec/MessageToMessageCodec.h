@@ -50,8 +50,17 @@ public:
     typedef typename MessageDecoder::Decoder Decoder;
     typedef typename MessageEncoder::Encoder Encoder;
 
+    typedef typename MessageDecoder::DecodableChecker DecodableChecker;
+    typedef typename MessageEncoder::EncodableChecker EncodableChecker;
+
     typedef typename MessageDecoder::InboundContainer InboundContainer;
     typedef typename MessageEncoder::OutboundContainer OutboundContainer;
+
+    typedef typename MessageDecoder::InboundQueue InboundQueue;
+    typedef typename MessageEncoder::OutboundQueue OutboundQueue;
+
+    typedef typename MessageDecoder::InboundTransfer InboundTransfer;
+    typedef typename MessageEncoder::OutboundTransfer OutboundTransfer;
 
 public:
     MessageToMessageCodec() {
@@ -68,6 +77,12 @@ public:
 
     void setEncoder(const Encoder& encoder) {
         encoder_.setEncoder(encoder);
+    }
+
+    void setChecker(const DecodableChecker& decodableChecker,
+                    const EncodableChecker& encodableChecker) {
+        decoder_.setDecodableChecker(decodableChecker);
+        encoder_.setEncodableChecker(encodableChecker);
     }
 
     void registerTo(Context& ctx) {

@@ -1,3 +1,6 @@
+#if !defined(CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H)
+#define CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,12 +17,21 @@
  * under the License.
  */
 
-#include <cetty/service/builder/ClientBuilder.h>
-
 namespace cetty {
 namespace service {
-namespace builder {
+
+template<typename T>
+struct ServiceMessageWrapper {
+    enum {
+        HAS_SERIAL_NUMBER = false
+    };
+};
 
 }
 }
-}
+
+#endif //#if !defined(CETTY_SERVICE_SERVICEMESSAGEWRAPPER_H)
+
+// Local Variables:
+// mode: c++
+// End:

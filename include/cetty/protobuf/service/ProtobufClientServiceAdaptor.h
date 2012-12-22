@@ -104,22 +104,22 @@ public:
     ProtobufClientServiceAdaptor(const ChannelPtr& channel);
     ~ProtobufClientServiceAdaptor();
 
-    template<typename RepT>
-    RepT downPointerCast(const ProtobufServiceMessagePtr& from) {
-        return static_cast<RepT>(from->payload());
+    template<typename Response>
+    Response downPointerCast(const ProtobufServiceMessagePtr& from) {
+        return static_cast<Response>(from->payload());
     }
 
-    template<typename ReqT, typename RepT>
+    template<typename Request, typename Response>
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-                    const ReqT& request,
-                    const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+                    const Request& request,
+                    const boost::intrusive_ptr<ServiceFuture<Response> >& future) {
         doCallMethod(
             method,
             request,
             ProtobufServiceFuturePtr(
-                new TypeCastServiceFuture<ProtobufServiceMessagePtr, RepT>(future,
+                new TypeCastServiceFuture<ProtobufServiceMessagePtr, Response>(future,
                         boost::bind(
-                            &ProtobufClientServiceAdaptor::downPointerCast<RepT>,
+                            &ProtobufClientServiceAdaptor::downPointerCast<Response>,
                             this,
                             _1))));
     }

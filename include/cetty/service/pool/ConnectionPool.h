@@ -36,12 +36,13 @@ using namespace cetty::bootstrap::asio;
 using namespace cetty::channel;
 using namespace cetty::service;
 
-class ConnectionPool {
+class ConnectionPool : private boost::noncopyable {
 public:
     typedef boost::function1<void, const ChannelPtr&> ConnectedCallback;
 
 public:
     ConnectionPool(const Connections& connections);
+
     virtual ~ConnectionPool();
 
 public:
@@ -49,8 +50,10 @@ public:
     ChannelPtr getChannel(const ConnectedCallback& callback);
 
     AsioClientBootstrap& getBootstrap() {
-        return this->bootstrap;
+        return this->bootstrap_;
     }
+
+    void setChannelInitializer(const Channel::Initializer& initializer);
 
     void close() {}
 
@@ -66,20 +69,15 @@ protected:
         boost::posix_time::ptime lastActive;
     };
 
-private:
-    ConnectionPool(const ConnectionPool&);
-    ConnectionPool& operator=(const ConnectionPool&);
-
 protected:
-    std::vector<Connection> connections;
-    AsioClientBootstrap bootstrap;
+    std::vector<Connection> connections_;
+    AsioClientBootstrap bootstrap_;
 
 private:
-    bool connecting;
-
-    std::deque<ConnectedCallback> callbacks;
+    bool connecting_;
+    std::deque<ConnectedCallback> callbacks_;
     
-    boost::ptr_map<int, ChannelConnection> channels;
+    boost::ptr_map<int, ChannelConnection> channels_;
 };
 
 }

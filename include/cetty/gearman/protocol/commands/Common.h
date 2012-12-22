@@ -16,9 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-namespace cetty { namespace gearman { namespace protocol { namespace commands { 
 
-}}}}
+#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/gearman/protocol/GearmanMessagePtr.h>
+
+namespace cetty {
+namespace gearman {
+namespace protocol {
+namespace commands {
+
+using namespace cetty::buffer;
+
+GearmanMessagePtr echoReqMessage(const ChannelBufferPtr& payload);
+
+}
+}
+}
+}
 
 
 #endif //#if !defined(CETTY_GEARMAN_PROTOCOL_COMMANDS_COMMON_H)

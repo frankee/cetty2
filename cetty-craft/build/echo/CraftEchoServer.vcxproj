@@ -108,7 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\example\echo\echo.pb.cc" />
-    <ClCompile Include="..\..\example\echo\server.cpp" />
+    <ClCompile Include="..\..\example\echo\CraftEchoServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\example\echo\echo.pb.h" />

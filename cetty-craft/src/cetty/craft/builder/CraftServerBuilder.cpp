@@ -47,12 +47,12 @@ using namespace cetty::craft::http;
 static const std::string PROTOBUF_SERVICE_HTTP("http");
 
 CraftServerBuilder::CraftServerBuilder()
-    : ProtobufServerBuilder() {
+    : builder_() {
     init();
 }
 
 CraftServerBuilder::CraftServerBuilder(int parentThreadCnt, int childThreadCnt)
-    : ProtobufServerBuilder(parentThreadCnt, childThreadCnt) {
+    : builder_(parentThreadCnt, childThreadCnt) {
     init();
 }
 
@@ -60,7 +60,7 @@ CraftServerBuilder::~CraftServerBuilder() {
 }
 
 ChannelPtr CraftServerBuilder::buildHttp(int port) {
-    return build(PROTOBUF_SERVICE_HTTP, port);
+    return builder_.serverBuilder().build(PROTOBUF_SERVICE_HTTP, port);
 }
 
 bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
@@ -89,15 +89,11 @@ void CraftServerBuilder::init() {
     requestMapper_ = new ServiceRequestMapper();
     responseMapper_ = new ServiceResponseMapper();
 
-    registerChildInitializer(PROTOBUF_SERVICE_HTTP,
-                             boost::bind(&CraftServerBuilder::initializeChildChannel,
-                                         this,
-                                         _1));
-
-    //printf("has not set the configCenter, so can't inti the http service.\n");
+    builder_.serverBuilder().registerServer(PROTOBUF_SERVICE_HTTP,
+                                            boost::bind(&CraftServerBuilder::initializeChildChannel,
+                                                    this,
+                                                    _1));
 }
-
-
 
 }
 }

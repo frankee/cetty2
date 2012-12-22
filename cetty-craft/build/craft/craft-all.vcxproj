@@ -92,7 +92,16 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\asio\AsioClientBootstrap.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\ClientBootstrap.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\ChannelConfig.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\NullChannel.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\channel\VoidChannelFuture.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\util\Adler32.cpp" />
+    <ClCompile Include="..\..\..\cetty-core\src\cetty\util\CurrentThread.cpp" />
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\MessageCodec.cpp" />
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufCodec.cpp" />
+    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\craft.pb.cc" />
     <ClInclude Include="..\..\..\cetty-config\src\cetty\config\ConfigIncludeFileFinder.h" />
     <ClInclude Include="..\..\..\cetty-core\src\cetty\channel\asio\AsioIpAddressImpl.h" />
@@ -172,8 +181,17 @@
     <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h" />
     <ClInclude Include="..\..\..\include\cetty\Platform.h" />
     <ClInclude Include="..\..\..\include\cetty\PlatformWin32.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\MessageCodec.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufCodec.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceInboundFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageCodec.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\Types.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Base64.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Process.h" />
@@ -210,12 +228,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\serialization\ProtobufParser.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageFilter.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
@@ -231,7 +243,6 @@
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigObjectYamlParser.cpp" />
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigReflection.cpp" />
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\KeyValuePair.cpp" />
-    <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\AbstractBootstrap.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\asio\AsioServerBootstrap.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\bootstrap\ServerBootstrap.cpp" />
     <ClCompile Include="..\..\..\cetty-core\src\cetty\buffer\ByteOrder.cpp" />
@@ -295,10 +306,6 @@
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\serialization\ProtobufFormatter.cpp" />
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\serialization\ProtobufParser.cpp" />
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp" />
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
-    <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
     <ClCompile Include="..\..\..\cetty-protobuf\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />

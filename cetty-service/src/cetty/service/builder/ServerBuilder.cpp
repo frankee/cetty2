@@ -143,43 +143,152 @@ ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
     init();
 }
 
-ServerBuilder::ServerBuilder(const ServerBuilderConfig& config)
-    : config_(config) {
-    init();
+ServerBuilder::~ServerBuilder() {
 }
 
-ServerBuilder::~ServerBuilder() {
-    deinit();
+ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+        const ChildInitializer& childInitializer) {
+    ChannelOptions empty;
+    return registerServer(name,
+                          empty,
+                          empty,
+                          childInitializer);
+}
+
+ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer) {
+    if (name.empty()) {
+        LOG_WARN << "name is empty, can not register the server.";
+        return *this;
+    }
+
+    if (!childInitializer) {
+        LOG_WARN << "childInitializer is empty, can not register the server.";
+        return *this;
+    }
+
+    ServerBootstrapPtr bootstrap = new AsioServerBootstrap(
+        parentEventLoopPool_,
+        childEventLoopPool_);
+
+    bootstrap->setChildInitializer(childInitializer);
+
+    if (!options.empty()) {
+        bootstrap->setOptions(options);
+    }
+
+    if (!childOptions.empty()) {
+        bootstrap->setChildOptions(childOptions);
+    }
+
+    bootstraps_.insert(std::make_pair(name, bootstrap));
+
+    return *this;
+}
+
+ServerBuilder& ServerBuilder::setOptions(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions) {
+    ServerBootstraps::const_iterator itr = bootstraps_.find(name);
+
+    if (itr != bootstraps_.end()) {
+        itr->second->setOptions(options);
+        itr->second->setChildOptions(childOptions);
+    }
+    else {
+        LOG_WARN << "can not find the server: "
+                 << name
+                 << ", do nothing.";
+    }
+
+    return *this;
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        int port) {
+    return build(name, std::string(), port);
+}
+
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                const std::string& host,
+                                int port) {
+    ServerBootstraps::const_iterator itr = bootstraps_.find(name);
+
+    if (itr == bootstraps_.end()) {
+        LOG_WARN << "has not found such server: "
+                 << name
+                 << " in builder registers, should registerServer first.";
+
+        return ChannelPtr();
+    }
+
+    return build(itr->second, host, port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 int port) {
-    return build(name, initializer, std::string(), port);
+    return build(name, ChannelOptions(), ChannelOptions(), initializer, std::string(), port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 const std::string& host,
                                 int port) {
+    return build(name, ChannelOptions(), ChannelOptions(), initializer, host, port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer,
+        int port) {
+    return build(name, options, childOptions, childInitializer, std::string(), port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer,
+        const std::string& host,
+        int port) {
     if (name.empty()) {
         printf("parameter error, empty name or invalid address.");
         return ChannelPtr();
     }
 
-    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(parentEventLoopPool_,
-            childEventLoopPool_);
+    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(
+        parentEventLoopPool_,
+        childEventLoopPool_);
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-    //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
-    //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-    bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setChildInitializer(initializer);
 
+    if (childOptions.empty()) {
+        //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+    }
+
+    if (options.empty()) {
+        //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+        //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+        bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    }
+
+    if (childInitializer) {
+        bootstrap->setChildInitializer(childInitializer);
+    }
+    else {
+        LOG_WARN << "childInitializer is empty, channel will not work fine.";
+    }
+
+    return build(bootstrap, host, port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap, const std::string& host, int port) {
     ChannelFuturePtr future;
 
     if (host.empty()) {
@@ -195,20 +304,6 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     else {
         return ChannelPtr();
     }
-}
-
-ChannelPtr ServerBuilder::build(const std::string& name, int port) {
-    ChildInitializers::const_iterator itr = childInitializers_.find(name);
-
-    if (itr == childInitializers_.end()) {
-        LOG_WARN << "has not found such server: "
-                 << name
-                 << " in builder registers, should registerChildInitializer first.";
-
-        return ChannelPtr();
-    }
-
-    return build(name, itr->second, port);
 }
 
 int ServerBuilder::init() {
@@ -234,12 +329,8 @@ int ServerBuilder::init() {
     return 0;
 }
 
-void ServerBuilder::deinit() {
-
-}
-
-void ServerBuilder::stop() {
-    std::map<std::string, ServerBootstrap*>::iterator itr;
+void ServerBuilder::shutdown() {
+    ServerBootstraps::iterator itr;
 
     for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
         itr->second->shutdown();
@@ -249,6 +340,16 @@ void ServerBuilder::stop() {
 void ServerBuilder::waitingForExit() {
     if (config_.deamonize) {
         createPidFile(config_.pidfile.c_str());
+
+        ServerBootstraps::iterator itr;
+        for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
+            const std::vector<ChannelPtr> channels =
+                itr->second->serverChannels();
+
+            for (std::size_t i = 0; i < channels.size(); ++i) {
+                channels[i]->closeFuture()->awaitUninterruptibly();
+            }
+        }
     }
     else {
         printf("Server is running...\n");
@@ -260,7 +361,7 @@ void ServerBuilder::waitingForExit() {
             input = getchar();
 
             if (input == 'q') {
-                stop();
+                shutdown();
                 break;
             }
         }
@@ -268,7 +369,7 @@ void ServerBuilder::waitingForExit() {
     }
 }
 
-void ServerBuilder::buildAll() {
+ServerBuilder& ServerBuilder::buildAll() {
     std::size_t j = config_.servers.size();
 
     for (std::size_t i = 0; i < j; ++i) {
@@ -287,44 +388,23 @@ void ServerBuilder::buildAll() {
             continue;
         }
 
-        ChildInitializers::const_iterator itr
-            = childInitializers_.find(server.name);
+        ServerBootstraps::const_iterator itr
+            = bootstraps_.find(server.name);
 
-        if (itr == childInitializers_.end()) {
+        if (itr == bootstraps_.end()) {
             LOG_WARN << "the server: "
                      << name
                      << "has not register to the builder, should register first.";
             continue;
         }
 
-        if (server.host.empty()) {
-            build(name, itr->second, server.port);
-        }
-        else {
-            build(name, itr->second, server.host, server.port);
-        }
+        //TODO setting the options
+
+        build(itr->second, server.host, server.port);
     }
+
+    return *this;
 }
-
-void ServerBuilder::getBuiltServers(std::map<std::string, ChannelPtr>* names) {
-
-}
-
-void ServerBuilder::registerChildInitializer(const std::string& name,
-        const ChildInitializer& initializer) {
-    if (!name.empty()) {
-        childInitializers_[name] = initializer;
-    }
-}
-
-void ServerBuilder::unregisterChildInitializer(const std::string& name) {
-    ChildInitializers::iterator itr = childInitializers_.find(name);
-
-    if (itr != childInitializers_.end()) {
-        childInitializers_.erase(itr);
-    }
-}
-
 
 }
 }

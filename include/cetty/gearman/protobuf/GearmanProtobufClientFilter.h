@@ -29,30 +29,36 @@ using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 using namespace cetty::gearman::protocol;
 
-class GearmanProtobufClientFilter
-    : public cetty::service::ClientServiceAdaptor<
-    ProtobufServiceMessagePtr,
-    GearmanMessagePtr,
-    GearmanMessagePtr,
-    ProtobufServiceMessagePtr> {
+class GearmanProtobufClientFilter : private boost::noncopyable {
+public:
+    typedef ClientServiceFilter<GearmanProtobufClientFilter,
+            ProtobufServiceMessagePtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            ProtobufServiceMessagePtr> Filter;
+
+    typedef Filter::Context Context;
+    typedef Filter::Handler Handler;
+    typedef Filter::HandlerPtr HandlerPtr;
+
 public:
     GearmanProtobufClientFilter();
-    virtual ~GearmanProtobufClientFilter();
+    ~GearmanProtobufClientFilter();
 
-public:
-    typedef boost::intrusive_ptr<GearmanProtobufClientFilter> GearmanProtobufClientFilterPtr;
+    void registerTo(Context& ctx) {
+        filter_.registerTo(ctx);
+    }
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+private:
+    GearmanMessagePtr filterRequest(ChannelHandlerContext& ctx,
+                                    const ProtobufServiceMessagePtr& req);
 
-protected:
-    virtual GearmanMessagePtr filterRequest(ChannelHandlerContext& ctx,
-        const ProtobufServiceMessagePtr& req);
+    ProtobufServiceMessagePtr filterResponse(ChannelHandlerContext& ctx,
+            const ProtobufServiceMessagePtr& req,
+            const GearmanMessagePtr& rep);
 
-    virtual ProtobufServiceMessagePtr filterResponse(ChannelHandlerContext& ctx,
-        const ProtobufServiceMessagePtr& req,
-        const GearmanMessagePtr& rep);
-
+private:
+    Filter filter_;
 };
 
 }

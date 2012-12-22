@@ -20,7 +20,6 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceInboundFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufCodec.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />

@@ -16,12 +16,11 @@
 
 #include <cetty/gearman/builder/GearmanClientBuilder.h>
 
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
+#include <cetty/gearman/GearmanClient.h>
 #include <cetty/gearman/GearmanClientHandler.h>
-#include <cetty/gearman/protocol/GearmanMessageDecoder.h>
-#include <cetty/gearman/protocol/GearmanMessageEncoder.h>
+#include <cetty/gearman/protocol/GearmanMessageCodec.h>
 
 namespace cetty {
 namespace gearman {
@@ -29,38 +28,55 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
+using namespace cetty::service::builder;
 using namespace cetty::gearman;
 
 GearmanClientBuilder::GearmanClientBuilder()
-    : ClientBuilderType() {
+    : builder_() {
     init();
 }
 
 GearmanClientBuilder::GearmanClientBuilder(int threadCnt)
-    : ClientBuilderType(threadCnt) {
+    : builder_(threadCnt) {
     init();
 }
 
 GearmanClientBuilder::GearmanClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : ClientBuilderType(eventLoopPool) {
+    : builder_(eventLoopPool) {
     init();
 }
 
 GearmanClientBuilder::GearmanClientBuilder(const EventLoopPtr& eventLoop)
-    :  ClientBuilderType(eventLoop) {
+    :  builder_(eventLoop) {
     init();
 }
 
+bool initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
+        LengthFieldBasedFrameDecoder::HandlerPtr(
+        new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
+
+    pipeline.addLast<GearmanMessageCodec::HandlerPtr>("gearmanCodec",
+        GearmanMessageCodec::HandlerPtr(new GearmanMessageCodec));
+
+    pipeline.addLast<GearmanClientHandler::HandlerPtr>("gearmanClient",
+        GearmanClientHandler::HandlerPtr(new GearmanClientHandler));
+
+    return true;
+}
+
 void GearmanClientBuilder::init() {
-    pipeline = ChannelPipelines::pipeline();
+    builder_.setClientInitializer(boost::bind(&initializeChannel, _1));
+}
 
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4));
+cetty::gearman::GearmanClientPtr GearmanClientBuilder::build() {
+    return new GearmanClient(builder_.build());
+}
 
-    pipeline->addLast("gearmanDecoder", new GearmanMessageDecoder());
-    pipeline->addLast("gearmanEncoder", new GearmanMessageEncoder());
-    pipeline->addLast("gearmanClient", new GearmanClientHandler());
-
-    ClientBuilderType::setPipeline(pipeline);
+void GearmanClientBuilder::addConnection(const std::string& host, int port) {
+    builder_.addConnection(host, port, 1);
 }
 
 }

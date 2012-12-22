@@ -197,6 +197,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioClientBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioServerBootstrap.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrapPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrapPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
@@ -228,6 +230,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHeadLinkContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTailLinkContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTransfer.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelOptions.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h" />

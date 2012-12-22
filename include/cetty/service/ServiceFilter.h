@@ -79,6 +79,9 @@ public:
             OutboundContainer,
             NextOutboundContainer> Context;
 
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
+
     typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
                                         RequestIn const&,
@@ -137,7 +140,7 @@ private:
 
         while (!queue.empty()) {
             RequestIn& req = queue.front();
-            reqs.push_back(req);
+            reqs_.push_back(req);
             RequestOut oreq = requestFilter_(ctx, req);
 
             if (!oreq) {
@@ -168,8 +171,8 @@ private:
         while (!queue.empty()) {
 
             ResponseIn& rep = queue.front();
-            ResponseOut orep = responseFilter_(ctx, reqs.front(), rep, future);
-            reqs.pop_front();
+            ResponseOut orep = responseFilter_(ctx, reqs_.front(), rep, future);
+            reqs_.pop_front();
 
             if (!orep) {
                 LOG_ERROR << "serviceFilter filterResponse has an empty result, "
@@ -187,7 +190,7 @@ private:
     }
 
 private:
-    std::deque<RequestIn> reqs;
+    std::deque<RequestIn> reqs_;
 
     RequestFilter requestFilter_;
     ResponseFilter responseFilter_;

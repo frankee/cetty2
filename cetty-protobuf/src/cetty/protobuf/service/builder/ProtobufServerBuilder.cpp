@@ -40,13 +40,13 @@ using namespace cetty::protobuf::service::handler;
 static const std::string PROTOBUF_SERVICE_RPC("rpc");
 
 ProtobufServerBuilder::ProtobufServerBuilder()
-    : ServerBuilder() {
+    : builder_() {
     init();
 }
 
 ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt,
         int childThreadCnt)
-    : ServerBuilder(parentThreadCnt, childThreadCnt) {
+    : builder_(parentThreadCnt, childThreadCnt) {
     init();
 }
 
@@ -92,14 +92,14 @@ bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
 }
 
 ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
-    return build(PROTOBUF_SERVICE_RPC,
-                 boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1),
-                 port);
+    return builder_.build(PROTOBUF_SERVICE_RPC, port);
 }
 
 void ProtobufServerBuilder::init() {
-    registerChildInitializer(PROTOBUF_SERVICE_RPC,
-                             boost::bind(&ProtobufServerBuilder::initializeChannel, this, _1));
+    builder_.registerServer(PROTOBUF_SERVICE_RPC,
+                   boost::bind(&ProtobufServerBuilder::initializeChannel,
+                               this,
+                               _1));
 }
 
 }

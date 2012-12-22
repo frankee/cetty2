@@ -33,7 +33,7 @@ using namespace cetty::channel::asio;
 
 class AsioClientBootstrap : public ClientBootstrap {
 public:
-        /**
+    /**
      * Creates a new instance.  Calling this constructor is same with calling
      * {@link #NioClientSocketChannelFactory(Executor, Executor, int)} with 2 *
      * the number of available processors in the machine.  The number of
@@ -47,7 +47,6 @@ public:
      *        the maximum number of I/O worker threads
      */
     AsioClientBootstrap(int threadCnt);
-
     AsioClientBootstrap(const EventLoopPtr& eventLoop);
     AsioClientBootstrap(const EventLoopPoolPtr& eventLoopPool);
 
