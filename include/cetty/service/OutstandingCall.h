@@ -36,9 +36,9 @@ public:
 
 public:
     OutstandingCall(const Request& request, const ServiceFuturePtr& future)
-        : request_(request),
-         future_(future),
-         timeStamp_() {
+        : timeStamp_(),
+          request_(request),
+          future_(future) {
     }
 
     int64_t id() const {

@@ -195,7 +195,7 @@ const ChannelOptions& AbstractBootstrap<T>::options() const {
 
 template<typename T> inline
 ChannelOption::Variant AbstractBootstrap<T>::getOption(const ChannelOption& option) const {
-    ChannelOptions::const_iterator itr = options.find(option);
+    ChannelOptions::ConstIterator itr = options.find(option);
 
     if (itr == options.end()) {
         LOG_WARN << "can not get the option of " << option.name();

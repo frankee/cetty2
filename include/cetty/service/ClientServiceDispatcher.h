@@ -96,8 +96,8 @@ public:
                             const Channel::Initializer& initializer)
         : id_(0),
           eventLoop_(eventLoop),
-          pool_(connections),
-          initializer_(initializer) {
+          initializer_(initializer),
+          pool_(connections) {
         pool_.setChannelInitializer(boost::bind(&Self::initializeClientChannel,
                                                 this,
                                                 _1));
@@ -155,7 +155,7 @@ private:
     }
 
     void setSuccess(Response& msg) {
-        std::map<int64_t, OutstandingCallPtr>::iterator itr =
+        typename std::map<int64_t, OutstandingCallPtr>::iterator itr =
             outStandingCalls_.find(msg->id());
 
         if (itr != outStandingCalls_.end()) {
