@@ -24,72 +24,28 @@ namespace channel {
 
 class NullChannel : public Channel {
 public:
-    NullChannel();
+    NullChannel()
+        : Channel(ChannelPtr(), EventLoopPtr()) {
+    }
+
     virtual ~NullChannel() {}
-
-    virtual int getId() const;
-
-    virtual const ChannelPtr& getParent() const;
-
-    virtual const EventLoopPtr& getEventLoop() const;
-
-    virtual const ChannelFactoryPtr&  getFactory() const;
-    virtual const ChannelPipelinePtr& getPipeline() const;
-
-    virtual ChannelConfig& getConfig();
-    virtual const ChannelConfig& getConfig() const;
-
-    virtual const SocketAddress& getLocalAddress() const;
-    virtual const SocketAddress& getRemoteAddress() const;
-
-    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
-
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
-
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                                     const SocketAddress& localAddress);
-
-    virtual ChannelFuturePtr disconnect();
-    virtual ChannelFuturePtr close();
-    virtual ChannelFuturePtr flush();
-
-    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
-                                         const ChannelFuturePtr& future);
-
-    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const ChannelFuturePtr& future);
-
-    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const SocketAddress& localAddress,
-                                            const ChannelFuturePtr& future);
-    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
-    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
-
-    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
     virtual bool isOpen() const;
     virtual bool isActive() const;
 
-    virtual ChannelFuturePtr newFuture();
-    virtual ChannelFuturePtr newFailedFuture(const Exception& e);
-    virtual ChannelFuturePtr newSucceededFuture();
-    virtual const ChannelFuturePtr& getCloseFuture();
-
     virtual std::string toString() const;
-
-    virtual int compareTo(const ChannelPtr& c) const;
 
 public:
     static const ChannelPtr& instance();
 
+protected:
+    virtual void doBind(const SocketAddress& localAddress) {}
+    virtual void doDisconnect() {}
+    virtual void doClose() {}
+
 private:
     static ChannelPtr nullChannel;
     static ChannelFuturePtr failedFuture;
-
-private:
-    EventLoopPtr eventLoop;
-
-    ChannelPtr fatherChannel;
 };
 
 }

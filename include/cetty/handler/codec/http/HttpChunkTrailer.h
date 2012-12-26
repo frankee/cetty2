@@ -22,15 +22,13 @@
  */
 
 #include <cetty/handler/codec/http/HttpChunk.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
-#include <cetty/util/NameValueCollection.h>
+#include <cetty/handler/codec/http/HttpHeaders.h>
+#include <cetty/handler/codec/http/HttpChunkTrailerPtr.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
-
-using namespace cetty::util;
 
 /**
  * The last {@link HttpChunk} which has trailing headers.
@@ -42,106 +40,15 @@ using namespace cetty::util;
 
 class HttpChunkTrailer : public HttpChunk {
 public:
-    typedef NameValueCollection::ConstIterator ConstHeaderIterator;
-
-public:
     HttpChunkTrailer();
     virtual ~HttpChunkTrailer();
 
-    const std::string& getHeader(const std::string& name) const {
-        return httpHeader.get(name);
+    HttpHeaders& headers() {
+        return headers_;
     }
 
-    const std::string& getLastHeader(const std::string& name) const {
-        return httpHeader.getLast(name);
-    }
-
-    /**
-    * Get the header values with the specified header name.
-    *
-    * @param name the specified header name
-    * @param header the {@link StringList} of header values.
-    *               An empty list if there is no such header.
-    *
-    */
-    void getHeaders(const std::string& name, std::vector<std::string>* headers) const {
-        if (headers) {
-            httpHeader.get(name, headers);
-        }
-    }
-
-    /**
-    * Get the all header names and values that this message contains.
-    *
-    * @param nameValues The {@link NameValueList} of the header name-value pairs.
-    *                   An empty list if there is no header in this message.
-    */
-    ConstHeaderIterator getFirstHeader() const {
-        return httpHeader.begin();
-    }
-
-    ConstHeaderIterator getLastHeader() const {
-        return httpHeader.end();
-    }
-
-    /**
-    * Returns <tt>true</tt> if and only if there is a header with the specified
-    * header name.
-    */
-    bool containsHeader(const std::string& name) const {
-        return httpHeader.has(name);
-    }
-
-    /**
-    * Get the {@link StringList} of all header names that this message contains.
-    */
-    void getHeaderNames(std::vector<std::string>* names) const {
-        httpHeader.getNames(names);
-    }
-
-    /**
-    * Adds a new header with the specified name and string value.
-    */
-    void addHeader(const std::string& name, const std::string& value) {
-        httpHeader.add(name, value);
-    }
-
-    /**
-    * Adds a new header with the specified name and int value.
-    */
-    void setHeader(const std::string& name, const std::string& value) {
-        httpHeader.set(name, value);
-    }
-
-    /**
-    * Sets a new header with the specified name and values.  If there is an
-    * existing header with the same name, the existing header is removed.
-    */
-    void setHeader(const std::string& name, const std::vector<std::string>& values) {
-        httpHeader.set(name, values.begin(), values.end());
-    }
-
-    /**
-    * Removes the header with the specified name.
-    */
-    void removeHeader(const std::string& name) {
-        httpHeader.erase(name);
-    }
-
-    /**
-    * Removes the header with the specified name and value.
-    * If only one value with the name, then move the name item completely,
-    * otherwise only remove the value.
-    */
-    void removeHeader(const std::string& name, const std::string& value) {
-        httpHeader.erase(name, value);
-    }
-
-    /**
-    * Removes all headers from this message.
-    */
-    void clearHeaders() {
-        httpHeader.clear();
+    const HttpHeaders& headers() const {
+        return headers_;
     }
 
     /**
@@ -157,7 +64,7 @@ public:
     virtual std::string toString() const;
 
 private:
-    NameValueCollection httpHeader;
+    HttpHeaders headers_;
 };
 
 }

@@ -17,106 +17,194 @@
  * under the License.
  */
 
+#include <map>
 #include <vector>
 #include <boost/bind.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
 
+#include <cetty/util/MetaProgramming.h>
+
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 #include <cetty/service/Connection.h>
+#include <cetty/service/OutstandingCall.h>
+#include <cetty/service/ServiceMessageWrapper.h>
+#include <cetty/service/ClientServiceRequestBridge.h>
 #include <cetty/service/pool/ConnectionPool.h>
 
 namespace cetty {
 namespace service {
 
-using namespace cetty::bootstrap;
+using namespace cetty::util;
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::bootstrap;
 using namespace cetty::service::pool;
 
-template<typename ReqT, typename RepT>
-class ClientServiceDispatcher
-    : public cetty::channel::ChannelMessageHandlerAdapter<
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > > {
-protected:
-    using ChannelMessageHandlerAdapter<
-    boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-          boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundTransfer;
+template<typename H,
+         typename Request,
+         typename Response>
+class ClientServiceDispatcher : private boost::noncopyable {
+public:
+    typedef ClientServiceDispatcher<H, Request, Response> Self;
 
-    using ChannelMessageHandlerAdapter<
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> >,
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundTransfer;
+    typedef OutstandingCall<Request, Response> Call;
+    typedef boost::intrusive_ptr<Call> OutstandingCallPtr;
 
-    using ChannelInboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::inboundQueue;
-    using ChannelOutboundMessageHandler<boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > >::outboundQueue;
+    typedef typename IF<ServiceMessageWrapper<Response>::HAS_SERIAL_NUMBER,
+            Response,
+            OutstandingCallPtr>::Result InboundIn;
+
+    typedef OutstandingCallPtr InboundOut;
+
+    typedef OutstandingCallPtr OutboundIn;
+
+    typedef typename IF<ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER,
+            Request,
+            OutstandingCallPtr>::Result OutboundOut;
+
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
+
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef ChannelMessageHandlerContext<H,
+            InboundIn,
+            InboundOut,
+            OutboundIn,
+            OutboundOut,
+            InboundContainer,
+            NextInboundContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
+
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
+
+    typedef ClientServiceRequestBridge<Request,
+            Response,
+            InboundIn,
+            OutboundOut> RequestBridge;
 
 public:
-    typedef OutstandingCall<ReqT, RepT> OutstandingCallType;
-    typedef ServiceRequestHandler<ReqT, RepT> ServiceRequestHandlerType;
-    typedef ClientServiceDispatcher<ReqT, RepT> ClientServiceDispatcherType;
-
-    typedef boost::intrusive_ptr<OutstandingCallType> OutstandingCallPtr;
-
-public:
-    ClientServiceDispatcher(const Connections& connections,
-                            const ChannelPipelinePtr& pipeline,
-                            const EventLoopPtr& eventLoop)
-        : eventLoop(eventLoop),
-          defaultPipeline(pipeline),
-          connections(connections),
-          pool(connections) {
+    ClientServiceDispatcher(const EventLoopPtr& eventLoop,
+                            const Connections& connections,
+                            const Channel::Initializer& initializer)
+        : id_(0),
+          eventLoop_(eventLoop),
+          initializer_(initializer),
+          pool_(connections) {
+        pool_.setChannelInitializer(boost::bind(&Self::initializeClientChannel,
+                                                this,
+                                                _1));
     }
 
-public:
-    virtual void channelActive(ChannelHandlerContext& ctx) {
-        ChannelPtr ch = ctx.getChannel();
-        ChannelPipelinePtr pipeline = ChannelPipelines::pipeline(defaultPipeline);
-        pipeline->addLast("requestHandler", new ServiceRequestHandlerType(ch));
+    void registerTo(Context& ctx) {
+        inboundContainer_ = ctx.inboundContainer();
+        outboundContainer_ = ctx.outboundContainer();
 
-        pool.getBootstrap().setPipeline(pipeline);
-        pool.getBootstrap().setFactory(new AsioClientSocketChannelFactory(eventLoop));
+        ctx.setChannelActiveCallback(boost::bind(&Self::channelActive,
+                                     this,
+                                     _1));
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&Self::messageUpdated,
+                                             this,
+                                             _1));
+
+        ctx.setFlushFunctor(boost::bind(&Self::flush, this, _1, _2));
     }
-    
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        while (!inboundQueue.empty()) {
-            OutstandingCallPtr msg = inboundQueue.front();
-            inboundTransfer.unfoldAndAdd(msg);
-            inboundQueue.pop_front();
+
+private:
+    void toOutboundOut(const OutstandingCallPtr& outbound,
+                       OutstandingCallPtr* out) {
+        *out = outbound;
+    }
+
+    void toOutboundOut(const OutstandingCallPtr& outbound, Request* out) {
+        *out = outbound->request();
+    }
+
+    OutstandingCallPtr toInboundOut(const OutstandingCallPtr& inbound) {
+        return inbound;
+    }
+
+    OutstandingCallPtr toInboundOut(const Response& inbound) {
+        typename std::map<int64_t, OutstandingCallPtr>::iterator itr =
+            outStandingCalls_.find(inbound.id());
+
+        if (itr != outStandingCalls_.end()) {
+            return itr->second;
+        }
+    }
+
+    bool initializeClientChannel(const ChannelPtr& channel) {
+        if (initializer_ && !initializer_(channel)) {
+            return false;
+        }
+
+        channel->pipeline().addLast(RequestBridge::newContext(channel_));
+        return true;
+    }
+
+    void channelActive(ChannelHandlerContext& ctx) {
+        channel_ = ctx.channel();
+    }
+
+    void setSuccess(Response& msg) {
+        typename std::map<int64_t, OutstandingCallPtr>::iterator itr =
+            outStandingCalls_.find(msg->id());
+
+        if (itr != outStandingCalls_.end()) {
+            itr->second->future()->setSuccess(msg);
+            outStandingCalls_.erase(itr);
+        }
+    }
+
+    void setSuccess(OutstandingCallPtr& msg) {
+        msg->future()->setSuccess();
+    }
+
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        InboundQueue& queue = inboundContainer_->getMessages();
+
+        while (!queue.empty()) {
+            InboundIn& msg = queue.front();
+            setSuccess(msg);
+
+            //inboundTransfer.unfoldAndAdd(msg);
+            queue.pop_front();
         }
 
         ctx.fireMessageUpdated();
     }
 
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future) {
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future) {
         bool notify = false;
-        ChannelPtr ch = pool.getChannel();
+        ChannelPtr ch = pool_.getChannel();
+        OutboundQueue& queue = outboundContainer_->getMessages();
 
         if (ch) {
-            while (!outboundQueue.empty()) {
-                OutstandingCallPtr& request = outboundQueue.front();
+            while (!queue.empty()) {
+                OutboundIn& request = queue.front();
 
-                ch->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
-                //outboundTransfer.unfoldAndAdd(request);
+                OutboundOut out;
+                toOutboundOut(request, &out);
+                out->setId(id_++);
 
-                outStandingCalls.insert(std::make_pair(request->getId(), request));
+                ch->pipeline().addOutboundChannelMessage<OutboundOut>(out);
+
+                if (ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER) {
+                    outStandingCalls_.insert(std::make_pair(out->id(), request));
+                }
+
                 notify = true;
 
-                outboundQueue.pop_front();
+                queue.pop_front();
             }
 
             if (notify) {
@@ -125,64 +213,71 @@ public:
         }
         else {
             BufferingCall bufferingCall;
-            bufferingCall.calls = outboundQueue;
+            bufferingCall.calls = queue;
             bufferingCall.future = future;
-            bufferingCalls.push_back(bufferingCall);
-            
-            outboundQueue.clear();
-            pool.getChannel(boost::bind(
-                &ClientServiceDispatcherType::connectedCallback, this, _1, boost::ref(ctx)));
+            bufferingCalls_.push_back(bufferingCall);
+
+            queue.clear();
+            pool_.getChannel(boost::bind(
+                                 &Self::connectedCallback,
+                                 this,
+                                 _1,
+                                 boost::ref(ctx)));
         }
     }
 
     void connectedCallback(const ChannelPtr& channel, ChannelHandlerContext& ctx) {
         BOOST_ASSERT(channel);
+        bool notify = false;
 
-        while (!bufferingCalls.empty()) {
-            BufferingCall& call = bufferingCalls.front();
+        while (!bufferingCalls_.empty()) {
+            BufferingCall& call = bufferingCalls_.front();
 
             while (!call.calls.empty()) {
-                OutstandingCallPtr& request = call.calls.front();
+                OutboundIn& request = call.calls.front();
 
-                channel->getPipeline()->addOutboundMessage<OutstandingCallPtr>(request);
-                //outboundTransfer.unfoldAndAdd(request);
-                
-                outStandingCalls.insert(std::make_pair(request->getId(), request));
+                OutboundOut out;
+                toOutboundOut(request, &out);
+                out->setId(id_++);
 
+                channel->pipeline().addOutboundChannelMessage<OutboundOut>(out);
+
+                if (ServiceMessageWrapper<Request>::HAS_SERIAL_NUMBER) {
+                    outStandingCalls_.insert(std::make_pair(out->id(), request));
+                }
+
+                notify = true;
                 call.calls.pop_front();
             }
 
-            channel->flush(call.future);
+            if (notify) {
+                channel->flush(call.future);
+            }
 
-            //ctx.flush(call.future);
-            bufferingCalls.pop_front();
+            notify = false;
+            bufferingCalls_.pop_front();
         }
     }
 
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(
-                   new ClientServiceDispatcherType(connections,
-                           defaultPipeline,
-                           eventLoop));
-    }
-
-    virtual std::string toString() const { return "ClientServiceDispatcherType"; }
-
 private:
     struct BufferingCall {
-        std::deque<OutstandingCallPtr> calls;
+        OutboundQueue calls;
         ChannelFuturePtr future;
     };
 
 private:
-    EventLoopPtr eventLoop;
-    ChannelPipelinePtr defaultPipeline;
+    int64_t id_;
+    ChannelWeakPtr channel_;
+    EventLoopPtr eventLoop_;
+    Channel::Initializer initializer_;
 
-    Connections connections;
-    ConnectionPool pool;
+    ConnectionPool pool_;
 
-    std::deque<BufferingCall> bufferingCalls;
-    std::map<int64_t, OutstandingCallPtr> outStandingCalls;
+    InboundContainer* inboundContainer_;
+    OutboundContainer* outboundContainer_;
+
+    std::deque<BufferingCall> bufferingCalls_;
+    std::map<int64_t, OutstandingCallPtr> outStandingCalls_;
 };
 
 }

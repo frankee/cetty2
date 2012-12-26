@@ -18,31 +18,64 @@
  */
 
 #include <boost/intrusive_ptr.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
+
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/service/ServiceFuture.h>
 
 namespace cetty {
 namespace service {
 
-template<typename ReqT, typename RepT>
-class OutstandingCall : public cetty::util::ReferenceCounter<OutstandingCall<ReqT, RepT>, int> {
+using namespace boost::posix_time;
+
+template<typename Request, typename Response>
+class OutstandingCall
+    : public cetty::util::ReferenceCounter<OutstandingCall<Request, Response> > {
 public:
-    typedef boost::intrusive_ptr<ServiceFuture<RepT> > ServiceFuturePtr;
+    typedef boost::intrusive_ptr<ServiceFuture<Response> > ServiceFuturePtr;
 
 public:
-    void setId(int64_t id) { this->id = id; }
-    int64_t getId() const { return id; }
+    OutstandingCall(const Request& request, const ServiceFuturePtr& future)
+        : timeStamp_(),
+          request_(request),
+          future_(future) {
+    }
 
-public:
-    ReqT request;
-    ServiceFuturePtr future;
+    int64_t id() const {
+        return id_;
+    }
 
-public:
-    OutstandingCall(const ReqT& request, const ServiceFuturePtr& future)
-        : request(request), future(future) {}
+    void setId(int64_t id) {
+        id_ = id;
+    }
+
+    const Request& request() const {
+        return request_;
+    }
+
+    const Response& response() const {
+        return response_;
+    }
+
+    const ServiceFuturePtr& future() const {
+        return future_;
+    }
+
+    void setResponse(const Response& response) {
+        response_ = response;
+        if (future_) {
+            future_->setResponse(response);
+        }
+    }
 
 private:
-    int64_t id;
+    int hash_;
+    int64_t id_;
+    int64_t timeout_;
+    ptime timeStamp_;
+    Request request_;
+    Response response_;
+    ServiceFuturePtr future_;
 };
 
 }

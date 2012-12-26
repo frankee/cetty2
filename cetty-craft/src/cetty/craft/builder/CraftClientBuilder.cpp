@@ -23,19 +23,19 @@ namespace builder {
 using namespace cetty::protobuf::service::builder;
 
 CraftClientBuilder::CraftClientBuilder()
-    : ProtobufClientBuilder() {
+    : builder_() {
 }
 
 CraftClientBuilder::CraftClientBuilder(int threadCnt)
-    : ProtobufClientBuilder(threadCnt) {
+    : builder_(threadCnt) {
 }
 
 CraftClientBuilder::CraftClientBuilder(const EventLoopPtr& eventLoop)
-    : ProtobufClientBuilder(eventLoop) {
+    : builder_(eventLoop) {
 }
 
 CraftClientBuilder::CraftClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : ProtobufClientBuilder(eventLoopPool) {
+    : builder_(eventLoopPool) {
 }
 
 }

@@ -25,7 +25,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/AbstractChannelInboundHandler.h>
+#include <cetty/channel/ChannelHandler.h>
 #include <cetty/handler/timeout/ReadTimeoutException.h>
 
 
@@ -79,13 +79,14 @@ using namespace cetty::util;
  * @apiviz.uses org.jboss.netty.util.HashedWheelTimer
  * @apiviz.has org.jboss.netty.handler.timeout.TimeoutException oneway - - raises
  */
-class ReadTimeoutHandler : public AbstractChannelInboundHandler {
+class ReadTimeoutHandler {
 public:
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
 
-private:
-    typedef boost::function0<void> TimeoutCallback;
+    typedef boost::function<void (ChannelHandlerContext&)> ReadTimeoutCallback;
+
+    typedef ChannelHandler<ReadTimeoutHandler>::Context Context;
 
 public:
     /**
@@ -111,28 +112,21 @@ public:
      */
     ReadTimeoutHandler(const Duration& timeout);
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
+    void registerTo(Context& ctx);
 
-    virtual void afterAdd(ChannelHandlerContext& ctx);
+    void setReadTimeoutCallback(const ReadTimeoutCallback& callback) {
+        readTimeoutCallback_ = callback;
+    }
 
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-
-    virtual void afterRemove(ChannelHandlerContext& ctx);
-
-    virtual void channelOpen(ChannelHandlerContext& ctx);
-
-    virtual void channelActive(ChannelHandlerContext& ctx);
-
-    virtual void channelInactive(ChannelHandlerContext& ctx);
-
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
-
-    virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const;
+private:
+    void beforeAdd(ChannelHandlerContext& ctx);
+    void beforeRemove(ChannelHandlerContext& ctx);
+    void channelActive(ChannelHandlerContext& ctx);
+    void channelInactive(ChannelHandlerContext& ctx);
+    void messageUpdated(ChannelHandlerContext& ctx);
 
 protected:
-    virtual void readTimedOut(ChannelHandlerContext& ctx);
+    void readTimedOut(ChannelHandlerContext& ctx);
 
 private:
     void initialize(ChannelHandlerContext& ctx);
@@ -144,14 +138,19 @@ private:
     static const ReadTimeoutException EXCEPTION;
 
 private:
-    int state; // 0 - none, 1 - Initialized, 2 - Destroyed;
-    bool closed;
+    typedef boost::function0<void> TimerCallback;
 
-    int64_t timeoutMillis;
-    Time lastReadTime;
+private:
+    bool closed_;
+    int state_; // 0 - none, 1 - Initialized, 2 - Destroyed;
+    
+    int64_t timeoutMillis_;
+    Time lastReadTime_;
 
-    TimeoutPtr timeout;
-    TimeoutCallback timeoutCallback;
+    TimeoutPtr timeout_;
+    TimerCallback timerCallback_;
+
+    ReadTimeoutCallback readTimeoutCallback_;
 };
 
 }

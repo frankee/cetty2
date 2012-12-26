@@ -22,14 +22,14 @@ namespace cetty {
 namespace channel {
 
 EventLoop::EventLoop(const EventLoopPoolPtr& pool)
-    : pool(pool) {
+    : pool_(pool) {
 }
 
 EventLoop::~EventLoop() {
 }
 
 void EventLoop::stop() {
-    pool.reset();
+    pool_.reset();
 }
 
 }

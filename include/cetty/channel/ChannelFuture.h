@@ -25,9 +25,10 @@
 #include <boost/noncopyable.hpp>
 
 #include <cetty/Types.h>
-#include <cetty/util/ReferenceCounter.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuturePtr.h>
+
+#include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace util {
@@ -217,9 +218,7 @@ using namespace cetty::util;
  *
  */
 
-class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture>,
-    private boost::noncopyable {
-
+class ChannelFuture : public cetty::util::ReferenceCounter<ChannelFuture> {
 public:
     /**
      * Listens to the result of a {@link ChannelFuture}.  The result of the
@@ -250,7 +249,13 @@ public:
      * Returns a channel where the I/O operation associated with this
      * future takes place.
      */
-    virtual const ChannelPtr& getChannel() const = 0;
+    virtual ChannelPtr channel() const = 0;
+
+    /**
+     * Returns a channel where the I/O operation associated with this
+     * future takes place.
+     */
+    //virtual ChannelPtr sharedChannel() const = 0;
 
     /**
      * Returns <tt>true</tt> if and only if this future is
@@ -279,7 +284,7 @@ public:
      *         <tt>NULL</tt> if succeeded or this future is not
      *         completed yet.
      */
-    virtual const Exception* getCause() const = 0;
+    virtual const Exception* failedCause() const = 0;
 
     /**
      * Cancels the I/O operation associated with this future

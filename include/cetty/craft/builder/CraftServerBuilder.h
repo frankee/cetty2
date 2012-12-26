@@ -18,9 +18,9 @@
  */
 
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
+#include <cetty/craft/http/ServiceMapperPtr.h>
 
 namespace cetty {
 namespace config {
@@ -34,21 +34,111 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::service::builder;
+using namespace cetty::craft::http;
 
-class CraftServerBuilder
-    : public cetty::protobuf::service::builder::ProtobufServerBuilder {
+class CraftServerBuilder : private boost::noncopyable {
+public:
+    typedef ServerBuilder::ChildInitializer ChildInitializer;
+
 public:
     CraftServerBuilder();
-    CraftServerBuilder(int parentThreadCnt, int childThreadCnt);
+    CraftServerBuilder(int parentThreadCnt, int childThreadCnt = 0);
 
-    virtual ~CraftServerBuilder();
+    ~CraftServerBuilder();
 
+    CraftServerBuilder& registerService(const ProtobufServicePtr& service);
+
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     int port);
+
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port);
+
+    ChannelPtr buildRpc(int port);
     ChannelPtr buildHttp(int port);
+
+    CraftServerBuilder& buildAll();
+
+    void waitingForExit();
+
+    const ServerBuilderConfig& config() const;
+    const EventLoopPoolPtr& parentPool() const;
+    const EventLoopPoolPtr& childPool() const;
+
+    ServerBuilder& serverBuilder();
+    const ServerBuilder& serverBuilder() const;
 
 private:
     void init();
-    ChannelPipelinePtr createHttpServicePipeline();
+    bool initializeChildChannel(const ChannelPtr& channel);
+
+private:
+    ProtobufServerBuilder builder_;
+
+    ServiceRequestMapperPtr requestMapper_;
+    ServiceResponseMapperPtr responseMapper_;
 };
+
+inline
+CraftServerBuilder& CraftServerBuilder::registerService(const ProtobufServicePtr& service) {
+    builder_.registerService(service);
+    return *this;
+}
+
+inline
+ChannelPtr CraftServerBuilder::build(const std::string& name,
+                                     const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                     int port) {
+    return builder_.build(name, childInitializer, port);
+}
+
+inline
+ChannelPtr CraftServerBuilder::build(const std::string& name,
+                                     const CraftServerBuilder::ChildInitializer& childInitializer,
+                                     const std::string& host,
+                                     int port) {
+    return builder_.build(name, childInitializer, host, port);
+}
+
+inline
+CraftServerBuilder& CraftServerBuilder::buildAll() {
+    builder_.buildAll();
+    return *this;
+}
+
+inline
+void CraftServerBuilder::waitingForExit() {
+    builder_.waitingForExit();
+}
+
+inline
+const ServerBuilderConfig& CraftServerBuilder::config() const {
+    return builder_.config();
+}
+
+inline
+const EventLoopPoolPtr& CraftServerBuilder::parentPool() const {
+    return builder_.parentPool();
+}
+
+inline
+const EventLoopPoolPtr& CraftServerBuilder::childPool() const {
+    return builder_.childPool();
+}
+
+inline
+ServerBuilder& CraftServerBuilder::serverBuilder() {
+    return builder_.serverBuilder();
+}
+
+inline
+const ServerBuilder& CraftServerBuilder::serverBuilder() const {
+    return builder_.serverBuilder();
+}
 
 }
 }

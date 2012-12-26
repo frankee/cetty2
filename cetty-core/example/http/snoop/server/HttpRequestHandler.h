@@ -25,10 +25,9 @@
 
 #include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelInboundMessageHandler.h>
 
 #include <cetty/handler/codec/http/HttpPackage.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpChunk.h>
@@ -52,28 +51,33 @@ using namespace cetty::handler::codec::http;
  *
  * @version $Rev: 2288 $, $Date: 2010-05-27 21:40:50 +0900 (Thu, 27 May 2010) $
  */
-class HttpRequestHandler
-    : public ChannelInboundMessageHandlerAdapter<HttpPackage, VoidChannelMessage, HttpPackage> {
+class HttpRequestHandler : private boost::noncopyable {
+public:
+    typedef ChannelInboundMessageHandler<HttpRequestHandler,
+        HttpPackage,
+        HttpPackage> Handler;
+
+    typedef Handler::Context Context;
+    typedef Handler::InboundContainer InboundContainer;
+    typedef Handler::OutboundTransfer OutboundTransfer;
+
 public:
     HttpRequestHandler() : readingChunks(false) {}
-    virtual ~HttpRequestHandler() {}
+    ~HttpRequestHandler() {}
 
-    virtual std::string toString() const { return "HttpRequestHandler"; }
+    void registerTo(Context& ctx) {
 
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new HttpRequestHandler());
     }
     
-    virtual void messageReceived(ChannelHandlerContext& ctx,
+    void messageReceived(ChannelHandlerContext& ctx,
         const HttpPackage& msg) {
         if (!readingChunks) {
-            if (!msg.isHttpMessage()) {
+            if (!msg.httpRequest()) {
 
             }
 
             request.reset();
-            request =
-                boost::dynamic_pointer_cast<HttpRequest>(msg.httpMessage());
+            request = msg.httpRequest();
 
             if (!request) {
                 // TODO
@@ -85,11 +89,11 @@ public:
             buf.append("===================================\r\n");
 
             buf.append("VERSION: ");
-            buf.append(request->getProtocolVersion().toString());
+            buf.append(request->version().toString());
             buf.append("\r\n");
 
             buf.append("HOSTNAME: ");
-            buf.append(HttpHeaders::getHost(*request, "unknown"));
+            buf.append(request->headers().host("unknown"));
             buf.append("\r\n");
             
             buf.append("REQUEST_URI: ");
@@ -107,7 +111,7 @@ public:
             }
             buf.append("\r\n");
 
-            QueryStringDecoder queryStringDecoder(request->getUri());
+            QueryStringDecoder queryStringDecoder(request->uri());
             NameValueCollection params;
             queryStringDecoder.getParameters(&params);
 
@@ -123,11 +127,11 @@ public:
                 buf.append("\r\n");
             }
 
-            if (request->getTransferEncoding().isMultiple()) {
+            if (request->transferEncoding().multiple()) {
                 readingChunks = true;
             }
             else {
-                ChannelBufferPtr content = request->getContent();
+                ChannelBufferPtr content = request->content();
                 if (content->readable()) {
                     buf.append("CONTENT: ");
                     buf.append(content->toString());
@@ -151,12 +155,12 @@ public:
                 buf.append("END OF CONTENT\r\n");
 
                 std::vector<std::string> names;
-                trailer->getHeaderNames(&names);
+                trailer->headerNames(&names);
                 if (!names.empty()) {
                     buf.append("\r\n");
                     std::vector<std::string> values;
                     for (size_t i = 0; i < names.size(); ++i) {
-                        trailer->getHeaders(names[i], &values);
+                        trailer->headerValues(names[i], &values);
                         for (size_t j = 0; j < values.size(); ++j) {
                             buf.append("TRAILING HEADER: ");
                             buf.append(names[i]);
@@ -173,7 +177,7 @@ public:
         }
     }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+    void exceptionCaught(ChannelHandlerContext& ctx,
         const ChannelException& e) {
         ctx.close();
     }
@@ -181,7 +185,7 @@ public:
 private:
     void writeResponse(ChannelHandlerContext& ctx) {
         // Decide whether to close the connection or not.
-        bool keepAlive = HttpHeaders::isKeepAlive(*request);
+        bool keepAlive = request->keepAlive();
 
         // Build the response object.
         HttpResponsePtr response = 
@@ -193,7 +197,7 @@ private:
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
             response->setHeader(HttpHeaders::Names::CONTENT_LENGTH,
-                                response->getContent()->readableBytes());
+                                response->content()->readableBytes());
         }
 
         // Encode the cookie.
@@ -212,21 +216,24 @@ private:
 //         }
 
         // Write the response.
-        ChannelFuturePtr future = ctx.getChannel()->newFuture();
+        ChannelFuturePtr future = ctx.channel()->newFuture();
 
         // Close the non-keep-alive connection after the write operation is done.
         if (!keepAlive) {
             future->addListener(ChannelFutureListener::CLOSE);
         }
 
-        outboundTransfer.write(response, future);
+        transfer_->write(response, future);
     }
 
 private:
+    bool readingChunks;
+
+    InboundContainer* container_;
+    OutboundTransfer* transfer_;
+
     HttpRequestPtr request;
 
-    bool readingChunks;
-    
     /** Buffer that stores the response content */
     std::string buf;
 };

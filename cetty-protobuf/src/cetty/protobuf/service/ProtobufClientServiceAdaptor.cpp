@@ -40,8 +40,8 @@ using namespace cetty::util;
 // need not be of any specific class as long as their descriptors are
 // method->input_type() and method->output_type().
 
-ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ClientServicePtr& service)
-    : service(service) {
+ProtobufClientServiceAdaptor::ProtobufClientServiceAdaptor(const ChannelPtr& channel)
+    : channel_(channel) {
 }
 
 ProtobufClientServiceAdaptor::~ProtobufClientServiceAdaptor() {
@@ -52,7 +52,7 @@ void ProtobufClientServiceAdaptor::doCallMethod(
     const ConstMessagePtr& request,
     const ProtobufServiceFuturePtr& future) {
 
-    if (!service) {
+    if (channel_.expired()) {
         if (future) {
             future->setFailure(Exception(""));
         }
@@ -66,7 +66,7 @@ void ProtobufClientServiceAdaptor::doCallMethod(
                                    method->name(),
                                    (MessagePtr)request));
 
-    cetty::service::callMethod(service, message, future);
+    callMethod<ProtobufServiceMessagePtr, ProtobufServiceMessagePtr>(channel_.lock(), message, future);
 }
 
 }

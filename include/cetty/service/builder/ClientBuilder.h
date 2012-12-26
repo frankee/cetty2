@@ -17,130 +17,100 @@
  * under the License.
  */
 
-
+#include <boost/noncopyable.hpp>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/ChannelFactory.h>
-
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/service/ClientService.h>
 #include <cetty/service/ClientServiceDispatcher.h>
-#include <cetty/service/ClientServiceMessageHandler.h>
-#include <cetty/service/asio/AsioClientServiceFactory.h>
 
 namespace cetty {
 namespace service {
 namespace builder {
 
 using namespace cetty::channel;
+using namespace cetty::channel::asio;
 using namespace cetty::service;
-using namespace cetty::service::asio;
 
 class ClientBuilderConfig;
 
-template<typename ReqT, typename RepT = ReqT>
-class ClientBuilder {
+template<typename Request, typename Response = Request>
+class ClientBuilder : private boost::noncopyable {
 public:
-    typedef cetty::service::ClientServiceDispatcher<ReqT, RepT> DispatcherType;
-    typedef cetty::service::ClientServiceMessageHandler<ReqT, RepT> MessageHandlerType;
+    typedef ClientBuilder<Request, Response> Self;
+    typedef ClientService<Request, Response> ServiceChannel;
 
 public:
     ClientBuilder()
-        : serviceInited(false),
-          eventLoopPool(new AsioServicePool(1)) {
-        bootstrap.init(eventLoopPool, this);
+        : eventLoopPool_(new AsioServicePool(1)) {
     }
     ClientBuilder(int threadCnt)
-        : serviceInited(false),
-          eventLoopPool(new AsioServicePool(threadCnt)) {
-        bootstrap.init(eventLoopPool, this);
+        : eventLoopPool_(new AsioServicePool(threadCnt)) {
     }
     ClientBuilder(const EventLoopPtr& eventLoop)
-        : serviceInited(false),
-          eventLoop(eventLoop) {
-        bootstrap.init(eventLoop, this);
+        : eventLoop_(eventLoop) {
     }
     ClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-        : serviceInited(false),
-          eventLoopPool(eventLoopPool) {
-        bootstrap.init(eventLoopPool, this);
+        : eventLoopPool_(eventLoopPool) {
     }
-
-    ClientBuilder(const ClientBuilderConfig& conf);
-    ClientBuilder(const ClientBuilderConfig& conf, const EventLoopPtr& eventLoop);
-    ClientBuilder(const ClientBuilderConfig& conf, const EventLoopPoolPtr& eventLoopPool);
-
 
     virtual ~ClientBuilder() {}
 
-    void setPipeline(const ChannelPipelinePtr& pipeline) {
-        clientPipeline = pipeline;
+    void setServiceInitializer(const Channel::Initializer& initializer) {
+        serviceInitializer_ = initializer;
+    }
+
+    void setClientInitializer(const Channel::Initializer& initializer) {
+        clientInitializer_ = initializer;
     }
 
     void addConnection(const std::string& host, int port, int limit = 1) {
-        connections.push_back(Connection(host, port, limit));
+        connections_.push_back(Connection(host, port, limit));
     }
 
-    ClientServicePtr build() {
-        ChannelPtr channel = bootstrap.newChannel();
-        channel->getPipeline()->fireChannelActive();
-        return boost::dynamic_pointer_cast<ClientService>(channel);
+    ChannelPtr build() {
+        ChannelPtr channel = newChannel();
+
+        if (serviceInitializer_) {
+            channel->setInitializer(serviceInitializer_);
+        }
+
+        channel->initialize();
+        channel->pipeline().fireChannelActive();
+
+        return channel;
+    }
+
+    const EventLoopPtr& eventLoop() const {
+        return eventLoop_;
+    }
+
+    const EventLoopPoolPtr& eventLoopPool() const {
+        return eventLoopPool_;
     }
 
 private:
-    ChannelPipelinePtr getPipeline(const EventLoopPtr& eventLoop) {
-        // construct the pipeline
-        ChannelHandlerPtr dispatcher(
-            new DispatcherType(connections, clientPipeline, eventLoop));
+    ChannelPtr newChannel() {
+        EventLoopPtr loop = eventLoop_;
 
-        ChannelHandlerPtr messageHandler(new MessageHandlerType);
+        if (!loop) {
+            loop = eventLoopPool_->getNextLoop();
+        }
 
-        ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
-        pipeline->addLast("message", messageHandler);
-
-        pipeline->setSinkHandler(dispatcher);
-
-        return pipeline;
+        return ChannelPtr(new ServiceChannel(loop,
+                                             clientInitializer_,
+                                             connections_));
     }
 
 private:
-    class ClientServiceBootstrap {
-    public:
-        ClientServiceBootstrap() : clientBuilder() {}
+    Connections connections_;
 
-        void init(const EventLoopPtr& eventLoop,
-                  ClientBuilder* builder) {
-            factory = new AsioClientServiceFactory(eventLoop);
-            clientBuilder = builder;
-        }
+    EventLoopPtr eventLoop_;
+    EventLoopPoolPtr eventLoopPool_;
 
-        void init(const EventLoopPoolPtr& eventLoopPool,
-                  ClientBuilder* builder) {
-            factory = new AsioClientServiceFactory(eventLoopPool);
-            clientBuilder = builder;
-        }
-
-        ChannelPtr newChannel() {
-            const EventLoopPtr& eventLoop = factory->getEventLoop();
-            return factory->newChannel(clientBuilder->getPipeline(eventLoop), eventLoop);
-        }
-
-    private:
-        ClientBuilder* clientBuilder;
-        AsioClientServiceFactoryPtr factory;
-    };
-
-private:
-    bool serviceInited;
-    std::vector<Connection> connections;
-
-    EventLoopPtr eventLoop;
-    EventLoopPoolPtr eventLoopPool;
-
-    ChannelPipelinePtr clientPipeline;
-
-    ClientServiceBootstrap bootstrap;
+    Channel::Initializer clientInitializer_;
+    Channel::Initializer serviceInitializer_;
 };
 
 }

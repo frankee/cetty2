@@ -70,7 +70,7 @@ namespace codec {
  * @apiviz.uses org.jboss.netty.handler.codec.frame.Delimiters - - useful
  */
 
-class DelimiterBasedFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
+class DelimiterBasedFrameDecoder : private boost::noncopyable {
 public:
     /**
      * Creates a new instance.
@@ -122,43 +122,38 @@ public:
                                bool stripDelimiter,
                                const std::vector<ChannelBufferPtr>& delimiters);
 
-    virtual ~DelimiterBasedFrameDecoder() {}
-
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new DelimiterBasedFrameDecoder(maxFrameLength,
-                                 stripDelimiter,
-                                 delimiters));
-    }
-
-    virtual std::string toString() const { return "FixedLengthFrameDecoder"; }
-
-protected:
-    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& in);
+    ~DelimiterBasedFrameDecoder() {}
 
 private:
+    ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+                            const ChannelBufferPtr& in);
+
     void fail(ChannelHandlerContext& ctx, long frameLength);
-    void initdelimiters(const std::vector<ChannelBufferPtr>& delimiters);
+
 
     /**
      * Returns the number of bytes between the readerIndex of the haystack and
      * the first needle found in the haystack.  -1 is returned if no needle is
      * found in the haystack.
      */
-    static int indexOf(const ChannelBufferPtr& haystack, const ChannelBufferPtr& needle);
+    int indexOf(const ChannelBufferPtr& haystack, const ChannelBufferPtr& needle);
 
-    static void validateDelimiter(const ChannelBufferPtr& delimiter);
-    static void validateMaxFrameLength(int maxFrameLength);
+    void init();
+    void validateMaxFrameLength();
+    void validateDelimiter(const ChannelBufferPtr& delimiter);
+    void initDelimiters(const std::vector<ChannelBufferPtr>& delimiters);
 
 private:
-    std::vector<ChannelBufferPtr> delimiters;
-    int maxFrameLength;
-    bool stripDelimiter;
+    bool stripDelimiter_;
+    bool discardingTooLongFrame_;
 
-    bool discardingTooLongFrame;
-    int tooLongFrameLength;
+    int maxFrameLength_;
+    int tooLongFrameLength_;
+
+    std::vector<ChannelBufferPtr> delimiters_;
+
+    BufferToMessageDecoder<DelimiterBasedFrameDecoder, ChannelBufferPtr> decoder_;
 };
-
 
 }
 }

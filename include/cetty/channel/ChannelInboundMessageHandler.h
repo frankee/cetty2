@@ -17,37 +17,31 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandlerFwd.h>
-#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
-
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT> inline
-ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
-                                     pipeline,
-                                     shared_from_this(),
-                                     prev,
-                                     next);
-}
+template<typename H,
+    typename InboundIn,
+    typename OutboundOut>
+class ChannelInboudMessageHandler {
+public:
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
 
-template<typename InboundInT> inline
-ChannelHandlerContext* ChannelInboundMessageHandler<InboundInT>::createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelInboundMessageHandlerContext<InboundInT>(name,
-                                     eventLoop,
-                                     pipeline,
-                                     shared_from_this(),
-                                     prev,
-                                     next);
-}
+    typedef ChannelMessageTransfer<OutboundOut,
+            NextOutboundContainer,
+            TRANSFER_OUTBOUND> OutboundTransfer;
+
+    typedef ChannelMessageHandlerContext<H,
+            InboundIn,
+            VoidMessage,
+            VoidMessage,
+            OutboundOut,
+            InboundContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            NextOutboundContainer> Context;
+};
 
 }
 }

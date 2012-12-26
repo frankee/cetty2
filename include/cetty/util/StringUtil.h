@@ -46,6 +46,15 @@ public:
         return ('0' <= ch && ch <= '9');
     }
 
+    static inline bool isDigits(const std::string& str) {
+        for (std::size_t i = 0, j = str.size(); i < j; ++i) {
+            if (str[i] < '0' || str[i] > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     static inline bool isHex(int ch) {
         return (ch >= '0' && ch <= '9')
                || (ch >= 'a' && ch <= 'f')

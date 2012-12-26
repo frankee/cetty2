@@ -19,9 +19,8 @@
 #include <vector>
 #include <boost/function.hpp>
 
-#include <cetty/channel/ChannelPipelinePtr.h>
 #include <cetty/service/Connection.h>
-#include <cetty/service/builder/ServerBuilder.h>
+#include <cetty/service/builder/ClientBuilder.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
@@ -33,35 +32,46 @@ using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman::protocol;
 
-class GearmanWorkerBuilder : public cetty::service::builder::ServerBuilder {
+class GearmanWorkerBuilder : private boost::noncopyable {
 public:
-    typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> WorkerFunctor;
+    typedef boost::function1<GearmanMessagePtr,
+        const GearmanMessagePtr&> WorkFunctor;
 
 public:
     GearmanWorkerBuilder();
     GearmanWorkerBuilder(int threadCnt);
-    virtual ~GearmanWorkerBuilder();
 
-    void addConnection(const std::string& host, int port);
+    GearmanWorkerBuilder& addConnection(const std::string& host, int port) {
+        connections_.push_back(Connection(host, port, 1));
+        return *this;
+    }
 
-    void registerWorker(const std::string& functionName, const WorkerFunctor& worker);
+    GearmanWorkerBuilder& registerWorker(const std::string& functionName,
+        const WorkFunctor& worker);
 
-    void setWorkerPipeline(const ChannelPipelinePtr& pipeline);
-    const ChannelPipelinePtr& getWorkerPipeline();
+    void setAdditionalInitializer(const Channel::Initializer& initializer) {
+        additionalInitializer_ = initializer;
+    }
 
-    const std::vector<GearmanWorkerPtr>& buildWorkers();
+    GearmanWorkerBuilder& buildWorkers();
 
-protected:
-    virtual ChannelPipelinePtr getDefaultPipeline();
+    void waitingForExit();
 
 private:
     void buildWorker(const EventLoopPtr& eventLoop);
+    bool initializeChannel(const ChannelPtr& channel);
 
 private:
-    std::vector<Connection> connections;
-    std::vector<GearmanWorkerPtr> workers;
+    typedef std::map<std::string, WorkFunctor> WorkFunctors;
 
-    ChannelPipelinePtr pipeline;
+private:
+    EventLoopPtr loop_;
+    EventLoopPoolPtr pool_;
+    WorkFunctors workFunctors_;
+    Channel::Initializer additionalInitializer_;
+
+    std::vector<Connection> connections_;
+    std::vector<GearmanWorkerPtr> workers_;
 };
 
 }

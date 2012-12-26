@@ -31,8 +31,6 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/buffer/ChannelBufferPtr.h>
 
 namespace cetty {
@@ -49,34 +47,106 @@ namespace codec {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-class BufferToBufferDecoder : public cetty::channel::ChannelInboundBufferHandler {
+
+template<typename H,
+    typename Context = ChannelMessageHandlerContext<H,
+    ChannelBufferPtr,
+    ChannelBufferPtr,
+    VoidMessage,
+    VoidMessage,
+    ChannelBufferContainer,
+    ChannelBufferContainer,
+    VoidMessageContainer,
+    VoidMessageContainer> >
+class BufferToBufferDecoder : boost::noncopyable {
 public:
-    typedef ChannelInboundBufferHandlerContext BufferContext;
+    typedef boost::function<ChannelBufferPtr (ChannelHandlerContext&, const ChannelBufferPtr&)> Decoder;
+
 
 public:
-    BufferToBufferDecoder();
-    virtual ~BufferToBufferDecoder();
+    BufferToBufferDecoder(const Decoder& decoder);
+    ~BufferToBufferDecoder();
 
-    virtual void channelInactive(ChannelHandlerContext& ctx);
+    void registerTo(Context& ctx) {
+
+    }
+
+    void channelInactive(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& in = getInboundChannelBuffer();
+        ChannelBufferPtr out;
+
+        if (!in->readable()) {
+            out = callDecode(ctx, in);
+        }
+
+#if 0 //FIXME
+        int oldOutSize = out.readableBytes();
+
+        try {
+            decodeLast(ctx, in, out);
+        }
+        catch (const CodecException& e) {
+            ctx.fireExceptionCaught(e);
+        }
+        catch (const std::exception& e) {
+            ctx.fireExceptionCaught(DecoderException(e.what()));
+        }
+
+        if (out.readableBytes() > oldOutSize) {
+            in->discardReadBytes();
+            ctx.fireMessageUpdated();
+        }
+#endif
+
+        ctx.fireChannelInactive();
+    }
 
     ChannelBufferPtr decodeLast(ChannelHandlerContext& ctx,
                                 const ChannelBufferPtr& in) {
         return decode(ctx, in);
     }
 
-    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& in) = 0;
-
 protected:
     virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const ChannelBufferPtr& in);
+                                 const ChannelBufferPtr& in) {
+                                     ChannelBufferPtr out = callDecode(ctx, in);
+                                     inboundTransfer.unfoldAndAdd(out);
+    }
 
 private:
     ChannelBufferPtr callDecode(ChannelHandlerContext& ctx,
-                                const ChannelBufferPtr& in);
+                                const ChannelBufferPtr& in) {
+                                    //int oldOutSize = out.readableBytes();
+                                    ChannelBufferPtr out;
 
-protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> inboundTransfer;
+                                    while (in->readable()) {
+                                        int oldInSize = in->readableBytes();
+
+                                        try {
+                                            out = decode(ctx, in);
+                                        }
+                                        catch (const CodecException& e) {
+                                            ctx.fireExceptionCaught(e);
+                                        }
+                                        catch (const std::exception& e) {
+                                            ctx.fireExceptionCaught(DecoderException(e.what()));
+                                        }
+
+                                        if (oldInSize == in->readableBytes()) {
+                                            break;
+                                        }
+                                    }
+
+                                    //if (out.readableBytes() > oldOutSize) {
+                                    //    in->discardReadBytes();
+                                    //    ctx.fireMessageUpdated();
+                                    //}
+
+                                    return out;
+    }
+
+private:
+    Decoder decoder_;
 };
 
 }

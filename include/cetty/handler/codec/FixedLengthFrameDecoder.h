@@ -57,42 +57,42 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class FixedLengthFrameDecoder : public BufferToMessageDecoder<ChannelBufferPtr> {
+class FixedLengthFrameDecoder : public  {
 public:
     /**
      * Creates a new instance.
      *
      * @param frameLength  the length of the frame
      */
-    FixedLengthFrameDecoder(int frameLength) : frameLength(frameLength) {
+    FixedLengthFrameDecoder(int frameLength)
+        : frameLength_(frameLength) {
         if (frameLength <= 0) {
             throw InvalidArgumentException(
                 StringUtil::printf(
                     "frameLength must be a positive integer: %d",
                     frameLength));
         }
-    }
 
-    virtual ~FixedLengthFrameDecoder() {}
-
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
+        decoder_.setDecoder(boost::bind(&FixedLengthFrameDecoder::decode,
+                                        this,
+                                        _1,
+                                        _2));
     }
-    virtual std::string toString() const { return "FixedLengthFrameDecoder"; }
 
 protected:
-    virtual ChannelBufferPtr decode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& in) {
-        if (!in && in->readableBytes() < frameLength) {
+    ChannelBufferPtr decode(ChannelHandlerContext& ctx,
+                            const ChannelBufferPtr& in) {
+        if (!in && in->readableBytes() < frameLength_) {
             return Unpooled::EMPTY_BUFFER;
         }
         else {
-            return in->readSlice(frameLength);
+            return in->readSlice(frameLength_);
         }
     }
 
 private:
-    int frameLength;
+    int frameLength_;
+    BufferToMessageDecoder<FixedLengthFrameDecoder, ChannelBufferPtr> decoder_;
 };
 
 }

@@ -59,7 +59,7 @@ void HttpRequest2ProtobufMessage::setRequestMapper(
 
 ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
     const HttpRequestPtr& request) {
-    HttpRequestTemplate* tmpl = templates->match(request->getMethod(), request->getPathSegments());
+    HttpRequestTemplate* tmpl = templates->match(request->method(), request->pathSegments());
     fieldNameScope.clear();
 
     if (tmpl) {
@@ -83,15 +83,15 @@ ProtobufServiceMessagePtr HttpRequest2ProtobufMessage::getProtobufMessage(
                 // deprecated
                 const HttpRequestTemplate::Parameter* p = tmpl->getParameter("format");
                 if (p) {
-                    const std::vector<std::string>& segments = request->getPathSegments();
+                    const std::vector<std::string>& segments = request->pathSegments();
                     request->setLabel(segments[p->index]);
                 }
 
-                if (request->getQueryParameters().has("req")) {
+                if (request->queryParameters().has("req")) {
                     ProtobufParser* jsonParser = ProtobufParser::getParser("json");
 
                     if (jsonParser) {
-                        const std::string& reqStr = request->getQueryParameters().get("req");
+                        const std::string& reqStr = request->queryParameters().get("req");
 
                         if (req && !jsonParser->parse(reqStr, req)) {
                             ProtobufServiceMessagePtr message(
@@ -185,13 +185,13 @@ static bool getValue(const HttpRequestPtr& request,
 
     if (parameter.isInPath()) {
         const std::vector<std::string>& pathSegments
-            = request->getPathSegments();
+            = request->pathSegments();
 
         values->push_back(pathSegments[parameter.index]);
         return true;
     }
     else if (parameter.isInQuery()) {
-        const NameValueCollection& nameValues = request->getQueryParameters();
+        const NameValueCollection& nameValues = request->queryParameters();
         return nameValues.get(parameter.name, values) > 0;
     }
     else if (parameter.isInCookie()) {

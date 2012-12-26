@@ -324,12 +324,12 @@ else ()
 endif()
 
 ADD_SUBDIRECTORY(cetty-service)
-ADD_SUBDIRECTORY(cetty-redis)
-ADD_SUBDIRECTORY(cetty-shiro)
+#ADD_SUBDIRECTORY(cetty-redis)
+#ADD_SUBDIRECTORY(cetty-shiro)
 
 ADD_SUBDIRECTORY(cetty-protobuf)
-ADD_SUBDIRECTORY(cetty-gearman)
+#ADD_SUBDIRECTORY(cetty-gearman)
 
 ADD_SUBDIRECTORY(cetty-craft)
 
-ADD_SUBDIRECTORY(cetty-zurg)
+#ADD_SUBDIRECTORY(cetty-zurg)

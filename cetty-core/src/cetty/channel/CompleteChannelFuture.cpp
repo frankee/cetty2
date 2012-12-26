@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+#include <cetty/channel/CompleteChannelFuture.h>
 
 #include <boost/thread/thread.hpp>
 
-#include <cetty/channel/CompleteChannelFuture.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/util/Exception.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -24,11 +24,14 @@
 namespace cetty {
 namespace channel {
 
-using namespace ::cetty::util;
-using namespace ::cetty::logging;
+using namespace cetty::util;
 
 CompleteChannelFuture::CompleteChannelFuture(const ChannelPtr& channel)
-    : channel(channel) {
+    : channel_(channel) {
+}
+
+CompleteChannelFuture::CompleteChannelFuture(const ChannelWeakPtr& channel)
+    : channel_(channel) {
 }
 
 ChannelFuturePtr CompleteChannelFuture::addListener(
@@ -102,8 +105,8 @@ bool CompleteChannelFuture::awaitUninterruptibly(int64_t timeoutMillis) {
     return true;
 }
 
-const ChannelPtr& CompleteChannelFuture::getChannel() const {
-    return this->channel;
+ChannelPtr CompleteChannelFuture::channel() const {
+    return channel_.lock();
 }
 
 bool CompleteChannelFuture::isDone() const {

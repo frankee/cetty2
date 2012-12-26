@@ -33,7 +33,7 @@ public:
     public:
         int port;
         std::string host;
-        std::string pipeline;
+        std::string name;
 
     public:
         Server();

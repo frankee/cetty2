@@ -21,14 +21,14 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/handler/codec/http/HttpMessageDecoder.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/handler/codec/http/HttpPackageDecoder.h>
+#include <cetty/handler/codec/http/HttpResponseCreator.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
-
 
 /**
  * Decodes {@link ChannelBuffer}s into {@link HttpResponse}s and
@@ -96,36 +96,54 @@ namespace http {
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class HttpResponseDecoder : public HttpMessageDecoder {
+
+class HttpResponseDecoder : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandlerContext<HttpResponseDecoder,
+            ChannelBufferPtr,
+            HttpPackage,
+            VoidMessage,
+            VoidMessage,
+            ChannelBufferContainer,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+
 public:
     /**
      * Creates a new instance with the default
      * <tt>maxInitialLineLength (4096)</tt>, <tt>maxHeaderSize (8192)</tt>, and
      * <tt>maxChunkSize (8192)</tt>.
      */
-    HttpResponseDecoder();
+    HttpResponseDecoder()
+        : responseDecoder_(HttpPackageDecoder::RESPONSE, 4096, 8192, 8192) {
+        init();
+    }
 
     /**
      * Creates a new instance with the specified parameters.
      */
     HttpResponseDecoder(int maxInitialLineLength,
-        int maxHeaderSize,
-        int maxChunkSize);
+                        int maxHeaderSize,
+                        int maxChunkSize)
+        : responseDecoder_(HttpPackageDecoder::RESPONSE,
+                           maxInitialLineLength,
+                           maxHeaderSize,
+                           maxChunkSize) {
+        init();
+    }
 
-    virtual ~HttpResponseDecoder();
+    ~HttpResponseDecoder();
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
-
-protected:
-    virtual HttpMessagePtr createMessage(const StringPiece& str1,
-        const StringPiece& str2,
-        const StringPiece& str3);
-
-    virtual bool isDecodingRequest() const;
+    void registerTo(Context& ctx);
 
 private:
-    HttpResponsePtr response;
+    void init();
+
+private:
+    HttpResponseCreator responseCreator_;
+    HttpPackageDecoder  responseDecoder_;
+    ReplayingDecoder<HttpResponseDecoder, HttpPackage, Context> decoder_;
 };
 
 }

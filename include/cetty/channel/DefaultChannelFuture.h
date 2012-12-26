@@ -77,14 +77,19 @@ public:
         bool cancellable,
         bool threadUnsafe = false);
 
+    DefaultChannelFuture(const ChannelWeakPtr& channel,
+        bool cancellable,
+        bool threadUnsafe = false);
+
     virtual ~DefaultChannelFuture();
 
-    virtual const ChannelPtr& getChannel() const;
+    virtual ChannelPtr channel() const;
 
     virtual bool isDone() const;
     virtual bool isSuccess() const;
-    virtual const Exception* getCause() const;
     virtual bool isCancelled() const;
+
+    virtual const Exception* failedCause() const;
 
     virtual ChannelFuturePtr addListener(const CompletedCallback& listener, int priority = 0);
     virtual ChannelFuturePtr addProgressListener(const ProgressedCallback& listener);
@@ -159,24 +164,24 @@ private:
     typedef std::deque<ProgressedCallback> ProgressedCallbackQueue;
 
 private:
-    bool cancellable;
-    bool done;
+    bool cancellable_;
+    bool done_;
 
-    bool threadUnsafe;
+    bool threadUnsafe_;
 
-    ChannelPtr channel;
+    ChannelWeakPtr channel_;
 
-    PriorityCallback firstListener;
+    PriorityCallback firstListener_;
 
-    PriorityCallbackQueue* completedListeners;
-    ProgressedCallbackQueue* progressListeners;
+    PriorityCallbackQueue* completedListeners_;
+    ProgressedCallbackQueue* progressListeners_;
 
-    Exception* cause;
+    Exception* cause_;
 
-    mutable boost::mutex* mutex;
-    boost::condition_variable* cond;
+    mutable boost::mutex* mutex_;
+    boost::condition_variable* cond_;
 
-    int waiters;
+    int waiters_;
 };
 
 }

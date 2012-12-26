@@ -18,7 +18,9 @@
  */
 
 #include <deque>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace service {
@@ -47,32 +49,101 @@ using namespace cetty::channel;
 *
 */
 
-template<typename RequestInT,
-         typename RequestOutT,
-         typename ResponseInT,
-         typename ResponseOutT>
-class ClientServiceFilter
-    : public ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT> {
+template<typename H,
+         typename RequestIn,
+         typename RequestOut,
+         typename ResponseIn,
+         typename ResponseOut>
+class ClientServiceFilter : private boost::noncopyable {
+public:
+    typedef ClientServiceFilter<H, RequestIn, RequestOut, ResponseIn, ResponseOut> Self;
 
-        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::inboundTransfer;
-        using ChannelMessageHandlerAdapter<ResponseInT, ResponseOutT, RequestInT, RequestOutT>::outboundTransfer;
+    typedef ChannelMessageContainer<ResponseIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<RequestIn, MESSAGE_BLOCK> OutboundContainer;
 
-        using ChannelInboundMessageHandler<ResponseInT>::inboundQueue;
-        using ChannelOutboundMessageHandler<RequestInT>::outboundQueue;
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef ChannelMessageContainer<ResponseOut, MESSAGE_BLOCK> NextInboundContainer;
+    typedef ChannelMessageContainer<RequestOut, MESSAGE_BLOCK> NextOutboundContainer;
+
+    typedef ChannelMessageTransfer<ResponseOut, NextInboundContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<RequestOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+
+    typedef ChannelMessageHandlerContext<H,
+            ResponseIn,
+            ResponseOut,
+            RequestIn,
+            RequestOut,
+            InboundContainer,
+            NextInboundContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
+
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
+
+    typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
+    typedef boost::function<ResponseOut(ChannelHandlerContext&,
+                                        RequestIn const&,
+                                        ResponseIn const&)> ResponseFilter;
 
 public:
-    virtual ~ClientServiceFilter() {}
+    ClientServiceFilter()
+        : inboundTransfer_(),
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
+    }
 
-protected:
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+    ClientServiceFilter(const RequestFilter& requestFilter,
+                        const ResponseFilter& responseFilter)
+        : requestFilter_(requestFilter),
+          responseFilter_(responseFilter),
+          inboundTransfer_(),
+          outboundTransfer_(),
+          inboundContainer_(),
+          outboundContainer_() {
+    }
+
+    ~ClientServiceFilter() {}
+
+    void registerTo(Context& ctx) {
+        inboundTransfer_ = ctx.inboundTransfer();
+        inboundContainer_ = ctx.inboundContainer();
+
+        outboundTransfer_ = ctx.outboundTransfer();
+        outboundContainer_ = ctx.outboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&Self::messageUpdated,
+                                             this,
+                                             _1));
+
+        ctx.setFlushFunctor(boost::bind(&Self::flush,
+                                        this,
+                                        _1,
+                                        _2));
+    }
+
+    void setRequestFilter(const RequestFilter& filter) {
+        requestFilter_ = filter;
+    }
+
+    void setResponseFilter(const ResponseFilter& filter) {
+        responseFilter_ = filter;
+    }
+
+private:
+    void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
+        InboundQueue& inboundQueue = inboundContainer_->getMessages();
 
         while (!inboundQueue.empty()) {
-            ResponseInT& msg = inboundQueue.front();
-            ResponseOutT omsg = filterResponse(ctx, reqs.front(), msg);
-            reqs.pop_front();
+            ResponseIn& msg = inboundQueue.front();
+            ResponseOut omsg = responseFilter_(ctx, reqs_.front(), msg);
+            reqs_.pop_front();
 
-            if (inboundTransfer.unfoldAndAdd(omsg)) {
+            if (inboundTransfer_->unfoldAndAdd(omsg)) {
                 notify = true;
             }
 
@@ -84,15 +155,17 @@ protected:
         }
     }
 
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future) {
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future) {
+        OutboundQueue& outboundQueue = outboundContainer_->getMessages();
+
         while (!outboundQueue.empty()) {
-            RequestInT& req = outboundQueue.front();
+            RequestIn& req = outboundQueue.front();
 
-            reqs.push_back(req);
-            RequestOutT oreq = filterRequest(ctx, req);
+            reqs_.push_back(req);
+            RequestOut oreq = requestFilter_(ctx, req);
 
-            outboundTransfer.unfoldAndAdd(oreq);
+            outboundTransfer_->unfoldAndAdd(oreq);
 
             outboundQueue.pop_front();
         }
@@ -100,15 +173,17 @@ protected:
         ctx.flush(future);
     }
 
-    virtual RequestOutT filterRequest(ChannelHandlerContext& ctx,
-                                      const RequestInT& req) = 0;
-
-    virtual ResponseOutT filterResponse(ChannelHandlerContext& ctx,
-                                        const RequestInT& req,
-                                        const ResponseInT& rep) = 0;
-
 private:
-    std::deque<RequestInT> reqs;
+    std::deque<RequestIn> reqs_;
+
+    RequestFilter requestFilter_;
+    ResponseFilter responseFilter_;
+
+    InboundTransfer* inboundTransfer_;
+    OutboundTransfer* outboundTransfer_;
+
+    InboundContainer* inboundContainer_;
+    OutboundContainer* outboundContainer_;
 };
 
 }

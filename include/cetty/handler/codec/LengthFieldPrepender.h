@@ -66,8 +66,14 @@ using namespace cetty::util;
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
 
-class LengthFieldPrepender : public MessageToBufferEncoder<ChannelBufferPtr> {
+class LengthFieldPrepender : private boost::noncopyable {
 public:
+    typedef MessageToBufferEncoder<LengthFieldPrepender, ChannelBufferPtr> Encoder;
+
+    typedef Encoder::Context Context;
+    typedef Encoder::Handler Handler;
+    typedef Encoder::HandlerPtr HandlerPtr;
+
     typedef boost::function2<uint32_t, const uint8_t*, int> ChecksumFunction;
 
 public:
@@ -123,21 +129,17 @@ public:
                          const std::string& header,
                          ChecksumFunction checksumFunction);
 
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
+    void registerTo(Context& ctx) {
+        encoder_.registerTo(ctx);
     }
 
-    virtual std::string toString() const { return "LengthFieldPrepender"; }
-
-protected:
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& msg,
-                                    const ChannelBufferPtr& out);
-
-
-
 private:
+    void init();
     void validateParameters();
+
+    ChannelBufferPtr encode(ChannelHandlerContext& ctx,
+        const ChannelBufferPtr& msg,
+        const ChannelBufferPtr& out);
 
     void writeHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
     void preWriteHeader(const ChannelBufferPtr& msg, int contentLength, int headerPos);
@@ -149,15 +151,17 @@ private:
                                          uint32_t cs);
 
 private:
-    int  lengthFieldLength;
-    int  lengthFieldOffset;
-    int  lengthAdjustment;
+    int  lengthFieldLength_;
+    int  lengthFieldOffset_;
+    int  lengthAdjustment_;
 
-    std::string header;
+    std::string header_;
 
-    int  checksumFieldLength;
-    int  checksumCalcOffset;
-    ChecksumFunction checksumFunction;
+    int  checksumFieldLength_;
+    int  checksumCalcOffset_;
+    ChecksumFunction checksumFunction_;
+
+    Encoder encoder_;
 };
 
 }

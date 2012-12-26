@@ -28,7 +28,7 @@ CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Server,
                                 3,
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, port, INT32),
                                 CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, host, STRING),
-                                CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, pipeline, STRING)),
+                                CETTY_CONFIG_FIELD(ServerBuilderConfig::Server, name, STRING)),
                             new ServerBuilderConfig::Server);
 
 CETTY_CONFIG_ADD_DESCRIPTOR(ServerBuilderConfig_Limit,

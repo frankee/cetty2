@@ -19,80 +19,114 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelInboundHandler.h>
-#include <cetty/channel/ChannelOutboundHandler.h>
+#include <cetty/channel/DefaultChannelFuture.h>
 #include <cetty/channel/ChannelPipelineException.h>
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelOutboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelOutboundBufferHandlerContext.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
 
-ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        const ChannelHandlerPtr& handler,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next)
-    : canHandleInbound(false),
-      canHandleOutbound(false),
-      hasInboundBufferHandler(false),
-      hasInboundMessageHandler(false),
-      hasOutboundBufferHandler(false),
-      hasOutboundMessageHandler(false),
-      handler(handler),
-      next(next),
-      prev(prev),
-      nextInboundContext(NULL),
-      nextOutboundContext(NULL),
-      name(name),
-      pipeline(pipeline),
-      eventloop() {
-    init(handler);
+ChannelHandlerContext::ChannelHandlerContext(const std::string& name)
+    : name_(name),
+      next_(),
+      prev_(),
+      hasNextUserEventHandler_(true),
+      hasNextMessageUpdatedHandler_(true),
+      hasNextChannelOpenHandler_(true),
+      hasNextChannelActiveHandler_(true),
+      hasNextChannelInactiveHandler_(true),
+      hasNextChannelExceptionHandler_(true),
+      hasPrevBindHandler_(true),
+      hasPrevConnectHandler_(true),
+      hasPrevDisconnectHandler_(true),
+      hasPrevCloseHandler_(true),
+      hasPrevFlushHandler_(true),
+      nextUserEventHandler_(),
+      nextMessageUpdatedHandler_(),
+      nextChannelOpenHandler_(),
+      nextChannelActiveHandler_(),
+      nextChannelInactiveHandler_(),
+      nextChannelExceptionHandler_(),
+      prevBindHandler_(),
+      prevConnectHandler_(),
+      prevDisconnectHandler_(),
+      prevCloseHandler_(),
+      prevFlushHandler_(),
+      pipeline_(),
+      eventLoop_() {
 }
 
 ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        const ChannelHandlerPtr& handler,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next)
-    : canHandleInbound(false),
-      canHandleOutbound(false),
-      hasInboundBufferHandler(false),
-      hasInboundMessageHandler(false),
-      hasOutboundBufferHandler(false),
-      hasOutboundMessageHandler(false),
-      handler(handler),
-      next(next),
-      prev(prev),
-      nextInboundContext(NULL),
-      nextOutboundContext(NULL),
-      name(name),
-      pipeline(pipeline),
-      eventloop(eventloop) {
-    init(handler);
-}
-
-const ChannelPtr& ChannelHandlerContext::getChannel() const {
-    return pipeline.getChannel();
+        const EventLoopPtr& eventLoop)
+    : name_(name),
+      next_(),
+      prev_(),
+      hasNextUserEventHandler_(true),
+      hasNextMessageUpdatedHandler_(true),
+      hasNextChannelOpenHandler_(true),
+      hasNextChannelActiveHandler_(true),
+      hasNextChannelInactiveHandler_(true),
+      hasNextChannelExceptionHandler_(true),
+      hasPrevBindHandler_(true),
+      hasPrevConnectHandler_(true),
+      hasPrevDisconnectHandler_(true),
+      hasPrevCloseHandler_(true),
+      hasPrevFlushHandler_(true),
+      nextUserEventHandler_(),
+      nextMessageUpdatedHandler_(),
+      nextChannelOpenHandler_(),
+      nextChannelActiveHandler_(),
+      nextChannelInactiveHandler_(),
+      nextChannelExceptionHandler_(),
+      prevBindHandler_(),
+      prevConnectHandler_(),
+      prevDisconnectHandler_(),
+      prevCloseHandler_(),
+      prevFlushHandler_(),
+      pipeline_(),
+      eventLoop_(eventLoop) {
 }
 
 void ChannelHandlerContext::fireChannelOpen() {
-    ChannelHandlerContext* next = nextInboundContext;
+    if (nextChannelOpenHandler_) {
+        fireChannelOpen(*nextChannelOpenHandler_);
+        return;
+    }
 
-    if (next) {
-        fireChannelOpen(*next);
+    if (hasNextChannelOpenHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelOpenCallback_) {
+                nextChannelOpenHandler_ = next;
+                fireChannelOpen(*next);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        hasNextChannelOpenHandler_ = (next != NULL);
     }
 }
 
 void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.inboundHandler->channelOpen(ctx);
+            if (ctx.channelOpenCallback_) {
+                ctx.channelOpenCallback_(ctx);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextChannelOpenHandler_;
+
+                if (next) {
+                    next->channelOpenCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelOpen();
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -117,7 +151,7 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireChannelOpen,
                         this,
                         boost::ref(ctx)));
@@ -125,17 +159,44 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelInactive() {
-    ChannelHandlerContext* next = nextInboundContext;
+    if (nextChannelInactiveHandler_) {
+        fireChannelInactive(*nextChannelInactiveHandler_);
+        return;
+    }
 
-    if (next) {
-        fireChannelInactive(*next);
+    if (hasNextChannelInactiveHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelInactiveCallback_) {
+                nextChannelInactiveHandler_ = next;
+                fireChannelInactive(*next);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        hasNextChannelInactiveHandler_ = (next != NULL);
     }
 }
 
 void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.inboundHandler->channelInactive(ctx);
+            if (ctx.channelInactiveCallback_) {
+                ctx.channelInactiveCallback_(ctx);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextChannelInactiveHandler_;
+
+                if (next) {
+                    next->channelInactiveCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelInactive();
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -160,7 +221,7 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireChannelInactive,
                         this,
                         boost::ref(ctx)));
@@ -168,17 +229,44 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelActive() {
-    ChannelHandlerContext* next = nextInboundContext;
+    if (nextChannelActiveHandler_) {
+        fireChannelActive(*nextChannelActiveHandler_);
+        return;
+    }
 
-    if (next) {
-        fireChannelActive(*next);
+    if (hasNextChannelActiveHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelActiveCallback_) {
+                nextChannelActiveHandler_ = next;
+                fireChannelActive(*next);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        hasNextChannelActiveHandler_ = (next != NULL);
     }
 }
 
 void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.inboundHandler->channelActive(ctx);
+            if (ctx.channelActiveCallback_) {
+                ctx.channelActiveCallback_(ctx);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextChannelActiveHandler_;
+
+                if (next) {
+                    next->channelActiveCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelActive();
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -203,7 +291,7 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireChannelActive,
                         this,
                         boost::ref(ctx)));
@@ -211,23 +299,51 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
-    ChannelHandlerContext* next = this->next;
-
-    if (next) {
-        fireExceptionCaught(*next, cause);
+    if (nextChannelExceptionHandler_) {
+        fireExceptionCaught(*nextChannelExceptionHandler_, cause);
+        return;
     }
-    else {
-        LOG_WARN_E(cause) << "An exceptionCaught() event was fired, and it reached at the end of the "
-                          "pipeline.  It usually means the last inbound handler in the pipeline did not "
-                          "handle the exception.";
+
+    if (hasNextChannelExceptionHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->exceptionCallback_) {
+                nextChannelExceptionHandler_ = next;
+                fireExceptionCaught(*next, cause);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        if (!next) {
+            hasNextChannelActiveHandler_ = false;
+
+            LOG_WARN << "An exceptionCaught() event was fired, and it reached at the end of the "
+                     "pipeline.  It usually means the last inbound handler in the pipeline did not "
+                     "handle the exception.";
+        }
     }
 }
 
 void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
         const ChannelException& cause) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.handler->exceptionCaught(ctx, cause);
+            if (ctx.exceptionCallback_) {
+                ctx.exceptionCallback_(ctx, cause);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextChannelExceptionHandler_;
+
+                if (next) {
+                    next->exceptionCallback_(*next, cause);
+                }
+                else {
+                    ctx.fireExceptionCaught(cause);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -248,9 +364,9 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
         }
     }
     else {
-        LOG_INFO << "fireExceptionCaught not in the same thread, will using eventloop->post.";
+        LOG_INFO << "fireExceptionCaught not in the same thread, will using eventLoop->post.";
 
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireExceptionCaught,
                         this,
                         boost::ref(ctx),
@@ -259,17 +375,51 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
-    ChannelHandlerContext* next = this->next;
+    if (nextUserEventHandler_) {
+        fireUserEventTriggered(*nextUserEventHandler_, evt);
+        return;
+    }
 
-    if (next) {
-        fireUserEventTriggered(*next, evt);
+    if (hasNextUserEventHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->userEventCallback_) {
+                nextUserEventHandler_ = next;
+                fireUserEventTriggered(*next, evt);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        if (!next) {
+            hasNextUserEventHandler_ = false;
+
+            LOG_WARN << "An user event was fired, and it reached at the end of the "
+                     "pipeline.  It usually means the last inbound handler in the pipeline did not "
+                     "handle the user event.";
+        }
     }
 }
 
-void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, const boost::any& evt) {
-    if (ctx.eventloop->inLoopThread()) {
+void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
+        const boost::any& evt) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.handler->userEventTriggered(ctx, evt);
+            if (ctx.userEventCallback_) {
+                ctx.userEventCallback_(ctx, evt);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextUserEventHandler_;
+
+                if (next) {
+                    next->userEventCallback_(*next, evt);
+                }
+                else {
+                    ctx.fireUserEventTriggered(evt);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -294,7 +444,7 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, c
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireUserEventTriggered,
                         this,
                         boost::ref(ctx),
@@ -303,17 +453,44 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx, c
 }
 
 void ChannelHandlerContext::fireMessageUpdated() {
-    ChannelHandlerContext* next = nextInboundContext;
+    if (nextMessageUpdatedHandler_) {
+        fireMessageUpdated(*nextMessageUpdatedHandler_);
+        return;
+    }
 
-    if (next) {
-        fireMessageUpdated(*next);
+    if (hasNextMessageUpdatedHandler_) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelMessageUpdatedCallback_) {
+                nextMessageUpdatedHandler_ = next;
+                fireMessageUpdated(*next);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        hasNextMessageUpdatedHandler_ = (next != NULL);
     }
 }
 
 void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.inboundHandler->messageUpdated(ctx);
+            if (ctx.channelMessageUpdatedCallback_) {
+                ctx.channelMessageUpdatedCallback_(ctx);
+            }
+            else {
+                ChannelHandlerContext* next = ctx.nextMessageUpdatedHandler_;
+
+                if (next) {
+                    next->channelMessageUpdatedCallback_(*next);
+                }
+                else {
+                    ctx.fireMessageUpdated();
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -340,23 +517,39 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::fireMessageUpdated,
                         this,
                         boost::ref(ctx)));
     }
 }
 
-ChannelFuturePtr ChannelHandlerContext::bind(const SocketAddress& localAddress) {
-    return bind(localAddress, getChannel()->newFuture());
-}
-
 const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    if (nextOutboundContext) {
-        return bind(*nextOutboundContext, localAddress, future);
+
+    if (prevBindHandler_) {
+        return bind(*prevBindHandler_, localAddress, future);
     }
 
+    if (hasPrevBindHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->bindFunctor_) {
+                prevBindHandler_ = prev;
+                return bind(*prev, localAddress, future);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPrevBindHandler_ = false;
+            LOG_ERROR << "has no handler to handle to bind";
+        }
+    }
+
+    future->setFailure(ChannelPipelineException("has no handler to handle to bind"));
     return future;
 }
 
@@ -368,9 +561,21 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
         return future;
     }
 
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.outboundHandler->bind(ctx, localAddress, future);
+            if (ctx.bindFunctor_) {
+                ctx.bindFunctor_(ctx, localAddress, future);
+            }
+            else {
+                ChannelHandlerContext* prev = ctx.prevBindHandler_;
+
+                if (prev) {
+                    prev->bindFunctor_(*prev, localAddress, future);
+                }
+                else {
+                    ctx.bind(localAddress, future);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -395,7 +600,7 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::bind,
                         this,
                         boost::ref(ctx),
@@ -406,31 +611,33 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
     return future;
 }
 
-ChannelFuturePtr ChannelHandlerContext::connect(const SocketAddress& remoteAddress) {
-    return connect(remoteAddress, getChannel()->newFuture());
-}
-
-ChannelFuturePtr ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress) {
-    return connect(remoteAddress, localAddress, getChannel()->newFuture());
-}
-
-const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
-        const ChannelFuturePtr& future) {
-    return connect(remoteAddress, SocketAddress::NULL_ADDRESS, future);
-}
-
 const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
         const SocketAddress& localAddress,
         const ChannelFuturePtr& future) {
-    if (nextOutboundContext) {
-        return connect(*nextOutboundContext, remoteAddress, localAddress, future);
+    if (prevConnectHandler_) {
+        return connect(*prevConnectHandler_, remoteAddress, localAddress, future);
     }
-    else {
-        LOG_ERROR << "has no handler to handle to connect";
-        future->setFailure(ChannelPipelineException("has no handler to handle to connect"));
-        return future;
+
+    if (hasPrevConnectHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->connectFunctor_) {
+                prevConnectHandler_ = prev;
+                return connect(*prev, remoteAddress, localAddress, future);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPrevConnectHandler_ = false;
+            LOG_ERROR << "has no handler to handle to connect";
+        }
     }
+
+    future->setFailure(ChannelPipelineException("has no handler to handle to connect"));
+    return future;
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ctx,
@@ -443,9 +650,21 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
         return future;
     }
 
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.outboundHandler->connect(ctx, remoteAddress, localAddress, future);
+            if (ctx.connectFunctor_) {
+                ctx.connectFunctor_(ctx, remoteAddress, localAddress, future);
+            }
+            else {
+                ChannelHandlerContext* prev = ctx.prevConnectHandler_;
+
+                if (prev) {
+                    prev->connectFunctor_(*prev, remoteAddress, localAddress, future);
+                }
+                else {
+                    ctx.connect(remoteAddress, localAddress, future);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -470,7 +689,7 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::connect,
                         this,
                         boost::ref(ctx),
@@ -482,19 +701,33 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
     return future;
 }
 
-cetty::channel::ChannelFuturePtr ChannelHandlerContext::disconnect() {
-    return disconnect(getChannel()->newFuture());
-}
-
 const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr& future) {
-    if (nextOutboundContext) {
-        return disconnect(*nextOutboundContext, future);
+    if (prevDisconnectHandler_) {
+        return disconnect(*prevDisconnectHandler_, future);
     }
-    else {
-        LOG_ERROR << "has no handler to handle to disconnect";
-        future->setFailure(ChannelPipelineException("has no handler to handle to disconnect"));
-        return future;
+
+    if (hasPrevDisconnectHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->disconnectFunctor_) {
+                prevDisconnectHandler_ = prev;
+                return disconnect(*prev, future);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPrevDisconnectHandler_ = false;
+            LOG_ERROR << "has no handler to handle to disconnect";
+        }
     }
+
+    future->setFailure(ChannelPipelineException(
+                           "has no handler to handle to disconnect"));
+
+    return future;
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext& ctx,
@@ -507,9 +740,21 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
     //    return close(ctx, future);
     //}
 
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.outboundHandler->disconnect(ctx, future);
+            if (ctx.disconnectFunctor_) {
+                ctx.disconnectFunctor_(ctx, future);
+            }
+            else {
+                ChannelHandlerContext* prev = ctx.prevDisconnectHandler_;
+
+                if (prev) {
+                    prev->disconnectFunctor_(*prev,future);
+                }
+                else {
+                    ctx.disconnect(future);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -533,7 +778,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::disconnect,
                         this,
                         boost::ref(ctx),
@@ -543,26 +788,54 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
     return future;
 }
 
-cetty::channel::ChannelFuturePtr ChannelHandlerContext::close() {
-    return close(getChannel()->newFuture());
+const ChannelFuturePtr& ChannelHandlerContext::close() {
+    return close(newFuture());
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& future) {
-    if (nextOutboundContext) {
-        return close(*nextOutboundContext, future);
+    if (prevCloseHandler_) {
+        return close(*prevCloseHandler_, future);
     }
-    else {
-        LOG_ERROR << "has no handler to handle to close";
-        future->setFailure(ChannelPipelineException("has no handler to handle to close"));
-        return future;
+
+    if (hasPrevCloseHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->closeFunctor_) {
+                prevCloseHandler_ = prev;
+                return close(*prev, future);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPrevCloseHandler_ = false;
+            LOG_ERROR << "has no handler to handle to close";
+        }
     }
+
+    future->setFailure(ChannelPipelineException("has no handler to handle to close"));
+    return future;
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.outboundHandler->close(ctx, future);
+            if (ctx.closeFunctor_) {
+                ctx.closeFunctor_(ctx, future);
+            }
+            else {
+                ChannelHandlerContext* prev = ctx.prevCloseHandler_;
+
+                if (prev) {
+                    prev->closeFunctor_(*prev, future);
+                }
+                else {
+                    ctx.close(future);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -587,7 +860,7 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
         }
     }
     else {
-        ctx.eventloop->post(
+        ctx.eventLoop_->post(
             boost::bind(&ChannelHandlerContext::close,
                         this,
                         boost::ref(ctx),
@@ -597,26 +870,54 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
     return future;
 }
 
-cetty::channel::ChannelFuturePtr ChannelHandlerContext::flush() {
-    return flush(getChannel()->newFuture());
+const ChannelFuturePtr& ChannelHandlerContext::flush() {
+    return flush(newFuture());
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& future) {
-    if (nextOutboundContext) {
-        return flush(*nextOutboundContext, future);
+    if (prevFlushHandler_) {
+        return flush(*prevFlushHandler_, future);
     }
-    else {
-        LOG_ERROR << "has no handler to handle to flush";
-        future->setFailure(ChannelPipelineException("has no handler to handle to flush"));
-        return future;
+
+    if (hasPrevFlushHandler_) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->flushFunctor_) {
+                prevFlushHandler_ = prev;
+                return flush(*prev, future);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPrevFlushHandler_ = false;
+            LOG_ERROR << "has no handler to handle to flush";
+        }
     }
+
+    future->setFailure(ChannelPipelineException("has no handler to handle to flush"));
+    return future;
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
-    if (ctx.eventloop->inLoopThread()) {
+    if (ctx.eventLoop_->inLoopThread()) {
         try {
-            ctx.outboundHandler->flush(ctx, future);
+            if (ctx.flushFunctor_) {
+                ctx.flushFunctor_(ctx, future);
+            }
+            else {
+                ChannelHandlerContext* prev = ctx.prevFlushHandler_;
+
+                if (prev) {
+                    prev->flushFunctor_(*prev, future);
+                }
+                else {
+                    ctx.flush(future);
+                }
+            }
         }
         catch (const Exception& e) {
             LOG_ERROR << "An exception (" << e.getDisplayText()
@@ -643,25 +944,34 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
         }
     }
     else {
-        eventloop->post(boost::bind(&ChannelHandlerContext::flush,
-                                    this,
-                                    boost::ref(ctx),
-                                    future));
+        ctx.eventLoop_->post(
+            boost::bind(&ChannelHandlerContext::flush,
+                        this,
+                        boost::ref(ctx),
+                        future));
     }
 
     return future;
 }
 
 ChannelFuturePtr ChannelHandlerContext::newFuture() {
-    return getChannel()->newFuture();
+    if (!channel_.expired()) {
+        return new DefaultChannelFuture(channel_, false);
+    }
+}
+
+ChannelFuturePtr ChannelHandlerContext::newVoidFuture() {
+    return pipeline_->voidFuture();
 }
 
 ChannelFuturePtr ChannelHandlerContext::newSucceededFuture() {
-    return getChannel()->newSucceededFuture();
+    if (!channel_.expired()) {
+        return channel_.lock()->newSucceededFuture();
+    }
 }
 
 ChannelFuturePtr ChannelHandlerContext::newFailedFuture(const ChannelException& cause) {
-    return getChannel()->newFailedFuture(cause);
+    return channel_.lock()->newFailedFuture(cause);
 }
 
 void ChannelHandlerContext::notifyHandlerException(const ChannelPipelineException& e) {
@@ -669,156 +979,12 @@ void ChannelHandlerContext::notifyHandlerException(const ChannelPipelineExceptio
     //pipeline.notifyHandlerException(e);
 }
 
-void ChannelHandlerContext::init(const ChannelHandlerPtr& handler) {
-    inboundHandler = boost::dynamic_pointer_cast<ChannelInboundHandler>(handler);
-
-    if (inboundHandler) {
-        this->canHandleInbound = true;
-    }
-
-    outboundHandler = boost::dynamic_pointer_cast<ChannelOutboundHandler>(handler);
-
-    if (outboundHandler) {
-        this->canHandleOutbound = true;
-    }
-
-    if (!canHandleInbound && !canHandleOutbound) {
-        throw InvalidArgumentException(
-            "handler must be either ChannelUpstreamHandler or ChannelDownstreamHandler.");
-    }
-}
-
-void ChannelHandlerContext::attach() {
-    if (!eventloop) {
-        this->eventloop = pipeline.getEventLoop();
-    }
-}
-
-void ChannelHandlerContext::detach() {
-    if (eventloop == pipeline.getEventLoop()) {
-        eventloop.reset();
-    }
-}
-
-ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHandlerContext(
-    ChannelHandlerContext* ctx) {
-    ChannelHandlerContext* next = ctx;
-
-    if (!next) {
-        return (ChannelInboundBufferHandlerContext*)NULL;
-    }
-
-    if (next->hasInboundBufferHandler) {
-        return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
-    }
-
-    next = next->nextInboundContext;
-
-    while (true) {
-        if (!next) {
-            return (ChannelInboundBufferHandlerContext*)NULL;
-        }
-
-        if (next->hasInboundBufferHandler) {
-            return dynamic_cast<ChannelInboundBufferHandlerContext*>(next);
-        }
-
-        next = next->nextInboundContext;
-    }
-}
-
-ChannelInboundBufferHandlerContext* ChannelHandlerContext::nextInboundBufferHandlerContext() {
-    return nextInboundBufferHandlerContext(nextInboundContext);
-}
-
-ChannelOutboundBufferHandlerContext* ChannelHandlerContext::nextOutboundBufferHandlerContext(
-    ChannelHandlerContext* ctx) {
-    ChannelHandlerContext* next = ctx;
-
-    if (!next) {
-        return (ChannelOutboundBufferHandlerContext*)NULL;
-    }
-
-    if (next->hasOutboundBufferHandler) {
-        return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
-    }
-
-    next = next->nextOutboundContext;
-
-    while (true) {
-        if (!next) {
-            return (ChannelOutboundBufferHandlerContext*)NULL;
-        }
-
-        if (next->hasOutboundBufferHandler) {
-            return dynamic_cast<ChannelOutboundBufferHandlerContext*>(next);
-        }
-
-        next = next->nextOutboundContext;
-    }
-}
-
-ChannelOutboundBufferHandlerContext* ChannelHandlerContext::nextOutboundBufferHandlerContext() {
-    if (!canHandleOutbound) {
-        ChannelHandlerContext* preCtx = prev;
-
-        while (preCtx) {
-            if (preCtx->canHandleOutbound) {
-                return nextOutboundBufferHandlerContext(preCtx);
-            }
-
-            preCtx = preCtx->prev;
-        }
-
-        return NULL;
-    }
-
-    return nextOutboundBufferHandlerContext(nextOutboundContext);
-}
-
-ChannelHandlerContext* ChannelHandlerContext::getNextOutboundContext() {
-    if (nextOutboundContext) {
-        return nextOutboundContext;
-    }
-
-    ChannelHandlerContext* preCtx = prev;
-
-    while (preCtx) {
-        if (preCtx->canHandleOutbound) {
-            return preCtx;
-        }
-
-        preCtx = preCtx->prev;
-    }
-
-    return NULL;
-}
-
-ChannelHandlerContext* ChannelHandlerContext::getNextInboundContext() {
-    if (nextInboundContext) {
-        return nextInboundContext;
-    }
-
-    ChannelHandlerContext* nextCtx = next;
-
-    while (nextCtx) {
-        if (nextCtx->canHandleInbound) {
-            return nextCtx;
-        }
-
-        nextCtx = nextCtx->next;
-    }
-
-    return NULL;
-}
-
 void ChannelHandlerContext::clearOutboundChannelBuffer(ChannelHandlerContext& ctx) {
-    boost::intrusive_ptr<ChannelOutboundBufferHandler>
-    outboundBufferHandler =
-        boost::dynamic_pointer_cast<ChannelOutboundBufferHandler>(ctx.outboundHandler);
+    ChannelBufferContainer* container =
+        outboundMessageContainer<ChannelBufferContainer>();
 
-    if (outboundBufferHandler) {
-        const ChannelBufferPtr& buf = outboundBufferHandler->getOutboundChannelBuffer();
+    if (container) {
+        const ChannelBufferPtr& buf = container->getMessages();
 
         if (!buf->readable()) {
             buf->discardReadBytes();
@@ -827,16 +993,24 @@ void ChannelHandlerContext::clearOutboundChannelBuffer(ChannelHandlerContext& ct
 }
 
 void ChannelHandlerContext::clearInboundChannelBuffer(ChannelHandlerContext& ctx) {
-    boost::intrusive_ptr<ChannelInboundBufferHandler>
-    inboundBufferHandler =
-        boost::dynamic_pointer_cast<ChannelInboundBufferHandler>(ctx.inboundHandler);
+    ChannelBufferContainer* container =
+        inboundMessageContainer<ChannelBufferContainer>();
 
-    if (inboundBufferHandler) {
-        const ChannelBufferPtr& buf = inboundBufferHandler->getInboundChannelBuffer();
+    if (container) {
+        const ChannelBufferPtr& buf = container->getMessages();
 
         if (!buf->readable()) {
             buf->discardReadBytes();
         }
+    }
+}
+
+void ChannelHandlerContext::initialize(ChannelPipeline* pipeline) {
+    pipeline_ = pipeline;
+    channel_ = pipeline_->channel();
+
+    if (!eventLoop_) {
+        eventLoop_ = pipeline_->eventLoop();
     }
 }
 

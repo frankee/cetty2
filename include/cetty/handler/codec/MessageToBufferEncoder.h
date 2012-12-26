@@ -30,9 +30,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
 #include <cetty/buffer/Unpooled.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/EncoderException.h>
 
 namespace cetty {
@@ -42,34 +41,91 @@ namespace codec {
 using namespace cetty::buffer;
 using namespace cetty::channel;
 
-template<typename OutboundInT>
-class MessageToBufferEncoder
-    : public ChannelOutboundMessageHandler<OutboundInT> {
-protected:
-    using ChannelOutboundMessageHandler<OutboundInT>::outboundQueue;
+template<typename H,
+         typename OutboundIn,
+         typename Ctx = ChannelMessageHandlerContext<H,
+         VoidMessage,
+         VoidMessage,
+         OutboundIn,
+         ChannelBufferPtr,
+         VoidMessageContainer,
+         VoidMessageContainer,
+         ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
+         ChannelBufferContainer> >
+class MessageToBufferEncoder : public boost::noncopyable {
+public:
+    typedef Ctx Context;
+    typedef MessageToBufferEncoder<H, OutboundIn, Context> Self;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+
+    typedef boost::function<ChannelBufferPtr(ChannelHandlerContext&,
+            OutboundIn const&,
+            ChannelBufferPtr const&)> Encoder;
+
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef ChannelBufferContainer NextOutboundContainer;
+
+    typedef ChannelMessageTransfer<ChannelBufferPtr,
+            ChannelBufferContainer,
+            TRANSFER_OUTBOUND> OutboundTransfer;
 
 public:
-    MessageToBufferEncoder() : hasOutBuffer(false), initBufferSize(0) {}
-    MessageToBufferEncoder(int initBufferSize)
-        : hasOutBuffer(true),
-          initBufferSize(initBufferSize <= 0 ? 8*1024 : initBufferSize) {
+    MessageToBufferEncoder() {
     }
 
-    virtual ~MessageToBufferEncoder() {}
+    MessageToBufferEncoder(const Encoder& encoder)
+        : encoder_(encoder) {
+    }
 
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        outboundTransfer.setContext(ctx);
+    ~MessageToBufferEncoder() {}
+
+    void registerTo(Context& ctx) {
+        transfer_ = ctx.outboundTransfer();
+        container_ = ctx.outboundContainer();
+
+        ctx.setFlushFunctor(boost::bind(
+                                &Self::flush,
+                                this,
+                                _1,
+                                _2));
+
+        ctx.setPipelineChangedCallback(boost::bind(
+                                           &Self::checkNextBufferAccumulated,
+                                           this,
+                                           _1));
+
+        ctx.setChannelActiveCallback(boost::bind(
+                                         &Self::checkNextBufferAccumulated,
+                                         this,
+                                         _1));
+    }
+
+    void setEncoder(const Encoder& encoder) {
+        encoder_ = encoder;
+    }
+
+private:
+    void checkNextBufferAccumulated(ChannelHandlerContext& ctx) {
+        ChannelBufferContainer* nextContainer = transfer_->nextContainer();
+
+        if (nextContainer && nextContainer->accumulated()) {
+            nextOutboundBuffer_ = nextContainer->getMessages();
+        }
+        else {
+            nextOutboundBuffer_.reset();
+        }
     }
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
-        ChannelBufferPtr out;
-
-        if (hasOutBuffer) {
-            out = Unpooled::buffer(initBufferSize);
-        }
+        bool notify = false;
+        OutboundQueue& outboundQueue = container_->getMessages();
 
         while (!outboundQueue.empty()) {
-            OutboundInT& msg = outboundQueue.front();
+            OutboundIn& msg = outboundQueue.front();
 
             if (!msg) {
                 break;
@@ -84,14 +140,17 @@ public:
             //             }
 
             try {
-                if (hasOutBuffer) {
-                    encode(ctx, msg, out);
+                if (nextOutboundBuffer_) {
+                    if (encoder_(ctx, msg, nextOutboundBuffer_)) {
+                        notify = true;
+                    }
                 }
                 else {
-                    ChannelBufferPtr encodedBuf = encode(ctx, msg, out);
+                    ChannelBufferPtr encodedBuf =
+                        encoder_(ctx, msg, nextOutboundBuffer_);
 
                     if (encodedBuf) {
-                        outboundTransfer.write(encodedBuf, future);
+                        transfer_->write(encodedBuf, future);
                     }
                 }
             }
@@ -105,30 +164,17 @@ public:
             outboundQueue.pop_front();
         }
 
-        if (hasOutBuffer) {
-            outboundTransfer.write(out, future);
+        if (notify) {
+            ctx.flush(future);
         }
     }
 
-    /**
-     * Returns {@code true} if and only if the specified message can be encoded by this encoder.
-     *
-     * @param msg the message
-     */
-    virtual bool isEncodable(const OutboundInT& msg) {
-        return true;
-    }
-
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const OutboundInT& msg,
-                                    const ChannelBufferPtr& out) = 0;
-
-protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, ChannelOutboundBufferHandlerContext> outboundTransfer;
-
 private:
-    bool hasOutBuffer;
-    int  initBufferSize;
+    Encoder encoder_;
+    OutboundTransfer* transfer_;
+    OutboundContainer* container_;
+
+    ChannelBufferPtr nextOutboundBuffer_;
 };
 
 }

@@ -17,37 +17,29 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelOutboundMessageHandlerFwd.h>
-#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename OutboundInT> inline
-ChannelHandlerContext* ChannelOutboundMessageHandler<OutboundInT>::createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelOutboundMessageHandlerContext<OutboundInT>(name,
-            pipeline,
-            shared_from_this(),
-            prev,
-            next);
-}
+template<typename H, typename OutboundIn, typename OutboundOut>
+class ChannelOutboundMessageHandler {
+public:
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
 
-template<typename OutboundInT> inline
-ChannelHandlerContext* ChannelOutboundMessageHandler<OutboundInT>::createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next) {
-    return new ChannelOutboundMessageHandlerContext<OutboundInT>(name,
-            eventLoop,
-            pipeline,
-            shared_from_this(),
-            prev,
-            next);
-}
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef ChannelMessageHandlerContext<H,
+            VoidMessage,
+            VoidMessage,
+            OutboundIn,
+            OutboundIn,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
+};
 
 }
 }

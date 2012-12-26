@@ -58,8 +58,13 @@ public:
     typedef std::map<ChannelOption, Variant> Options;
 
 public:
-    ChannelOption(const std::string& name, const boost::static_visitor<bool>* checker);
+    ChannelOption(const std::string& name,
+                  const boost::static_visitor<bool>* checker)
+        : name_(name), checker_(checker) {
+    }
+
     ChannelOption(const ChannelOption& option);
+
     ChannelOption& operator=(const ChannelOption& option);
 
     bool operator<(const ChannelOption& option) const;
@@ -67,7 +72,9 @@ public:
 
     bool validate(const Variant& value) const;
 
-    const std::string& getName() const { return name; } 
+    const std::string& name() const;
+
+    static ChannelOption parseFrom(const std::string& name);
 
 public:
     static const ChannelOption CONNECT_TIMEOUT_MILLIS;
@@ -106,9 +113,37 @@ public:
     static const ValueChecker<std::vector<int> > INT_VECTOR_VALUE_CHECKER;
 
 private:
-    std::string name;
-    const boost::static_visitor<bool>* checker;
+    std::string name_;
+    const boost::static_visitor<bool>* checker_;
 };
+
+inline
+ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
+    name_ = option.name_;
+    checker_ = option.checker_;
+    return *this;
+}
+
+inline
+ChannelOption::ChannelOption(const ChannelOption& option)
+    : name_(option.name_),
+      checker_(option.checker_) {
+}
+
+inline
+bool ChannelOption::operator<(const ChannelOption& option) const {
+    return name_ < option.name_;
+}
+
+inline
+bool ChannelOption::operator==(const ChannelOption& option) const {
+    return name_ == option.name_;
+}
+
+inline
+const std::string& ChannelOption::name() const {
+    return name_;
+}
 
 }
 }

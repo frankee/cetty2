@@ -17,66 +17,43 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/ChannelOutboundMessageHandler.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT, typename OutboundInT>
-class ChannelMessageHandler
-    : public ChannelInboundMessageHandler<InboundInT>,
-      public ChannelOutboundMessageHandler<OutboundInT> {
+template<typename H,
+    typename InboundIn,
+    typename InboundOut,
+    typename OutboundIn,
+    typename OutboundOut>
+class ChannelMessageHandler {
 public:
-    virtual ~ChannelMessageHandler() {}
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx) {
-        // NOOP
-    }
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
+    typedef ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK> OutboundContainer;
+    typedef ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> NextOutboundContainer;
 
-    }
-    virtual void beforeRemove(ChannelHandlerContext& ctx) {
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+    typedef typename OutboundContainer::MessageQueue OutboundQueue;
 
-    }
-    virtual void afterRemove(ChannelHandlerContext& ctx) {
+    typedef ChannelMessageTransfer<InboundOut, NextInboundContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<OutboundOut, NextOutboundContainer, TRANSFER_OUTBOUND> OutboundTransfer;
 
-    }
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause) {
-
-    }
-
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const boost::any& evt) {
-
-    }
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
-                pipeline,
-                ChannelHandler::shared_from_this(),
-                prev,
-                next);
-    }
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            const EventLoopPtr& eventLoop,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next) {
-        return new ChannelMessageHandlerContext<InboundInT, OutboundInT>(name,
-                eventLoop,
-                pipeline,
-                ChannelHandler::shared_from_this(),
-                prev,
-                next);
-    }
+    typedef ChannelMessageHandlerContext<H,
+        InboundIn,
+        InboundOut,
+        OutboundIn,
+        OutboundOut,
+        InboundContainer,
+        NextInboundContainer,
+        OutboundContainer,
+        NextOutboundContainer> Context;
+        
 };
 
 }

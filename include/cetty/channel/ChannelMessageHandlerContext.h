@@ -17,44 +17,229 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandlerContext.h>
-#include <cetty/channel/ChannelOutboundMessageHandlerContext.h>
+#include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
+#include <cetty/channel/ChannelMessageTransfer.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename InboundInT, typename OutboundInT>
-class ChannelMessageHandlerContext
-    : public ChannelInboundMessageHandlerContext<InboundInT>,
-      public ChannelOutboundMessageHandlerContext<OutboundInT> {
+template<typename H,
+         typename InboundIn,
+         typename InboundOut,
+         typename OutboundIn,
+         typename OutboundOut,
+         typename InboundInContainer,
+         typename InboundOutContainer,
+         typename OutboundInContainer,
+         typename OutboundOutContainer>
+class ChannelMessageHandlerContext : public ChannelHandlerContext {
+public:
+    typedef ChannelMessageHandlerContext<H,
+            InboundIn,
+            InboundOut,
+            OutboundIn,
+            OutboundOut,
+            InboundInContainer,
+            InboundOutContainer,
+            OutboundInContainer,
+            OutboundOutContainer> Context;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+    typedef typename ChannelHandlerWrapper<H>::StoredHandlerPtr StoredHandlerPtr;
+
+    typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
+
+    typedef InboundInContainer InboundContainer;
+    typedef InboundOutContainer NextInboundContainer;
+    typedef OutboundInContainer OutboundContainer;
+    typedef OutboundOutContainer NextOutboundContainer;
+
+    typedef ChannelMessageTransfer<InboundOut, InboundOutContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<OutboundOut, OutboundOutContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+
 public:
     ChannelMessageHandlerContext(const std::string& name,
-                                 ChannelPipeline& pipeline,
-                                 const ChannelHandlerPtr& handler,
-                                 ChannelHandlerContext* prev,
-                                 ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, pipeline, handler, prev, next),
-          ChannelInboundMessageHandlerContext<InboundInT>(name, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, pipeline, handler, prev, next) {
-        ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
-        ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
+                                 const HandlerPtr& handler)
+        : ChannelHandlerContext(name),
+          handler_(handler),
+          inboundTransfer_(*this),
+          outboundTransfer_(*this) {
+        if (handler) {
+            handler->registerTo(*this);
+        }
+    }
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler,
+                                 const RegisterCallback& registerCallback)
+        : ChannelHandlerContext(name),
+          handler_(handler),
+          inboundTransfer_(*this),
+          outboundTransfer_(*this) {
+        if (handler && registerCallback) {
+            registerCallback(handler, *this);
+        }
     }
 
     ChannelMessageHandlerContext(const std::string& name,
                                  const EventLoopPtr& eventLoop,
-                                 ChannelPipeline& pipeline,
-                                 const ChannelHandlerPtr& handler,
-                                 ChannelHandlerContext* prev,
-                                 ChannelHandlerContext* next)
-        : ChannelHandlerContext(name, eventLoop, pipeline, handler, prev, next),
-          ChannelInboundMessageHandlerContext<InboundInT>(name, eventLoop, pipeline, handler, prev, next),
-          ChannelOutboundMessageHandlerContext<OutboundInT>(name, eventLoop, pipeline, handler, prev, next) {
-        ChannelInboundMessageHandlerContext<InboundInT>::hasInboundMessageHandler = true;
-        ChannelOutboundMessageHandlerContext<OutboundInT>::hasOutboundMessageHandler = true;
+                                 const HandlerPtr& handler)
+        : ChannelHandlerContext(name, eventLoop),
+          inboundTransfer_(*this),
+          outboundTransfer_(*this) {
+        if (handler) {
+            handler->registerTo(*this);
+        }
     }
 
-    virtual ~ChannelMessageHandlerContext() {}
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler,
+                                 const EventLoopPtr& eventLoop,
+                                 const RegisterCallback& registerCallback)
+        : ChannelHandlerContext(name, eventLoop),
+          handler_(handler),
+          inboundTransfer_(*this),
+          outboundTransfer_(*this) {
+        if (handler && registerCallback) {
+            registerCallback(handler, *this);
+        }
+    }
 
+    InboundInContainer* inboundContainer() {
+        return &inboundContainer_;
+    }
+
+    OutboundInContainer* outboundContainer() {
+        return &outboundContainer_;
+    }
+
+    InboundTransfer* inboundTransfer() {
+        return &inboundTransfer_;
+    }
+    OutboundTransfer* outboundTransfer() {
+        return &outboundTransfer_;
+    }
+
+    virtual boost::any getInboundMessageContainer() {
+        return boost::any(&inboundContainer_);
+    }
+
+    virtual boost::any getOutboundMessageContainer() {
+        return boost::any(&outboundContainer_);
+    }
+
+    virtual void initialize(ChannelPipeline* pipeline) {
+        ChannelHandlerContext::initialize(pipeline);
+        inboundContainer_.setEventLoop(eventLoop());
+        outboundContainer_.setEventLoop(eventLoop());
+    }
+
+    virtual void onPipelineChanged() {
+        ChannelHandlerContext::onPipelineChanged();
+
+        outboundTransfer_.resetNextContainer();
+        inboundTransfer_.resetNextContainer();
+    }
+
+private:
+    StoredHandlerPtr handler_;
+
+    InboundInContainer inboundContainer_;
+    OutboundInContainer outboundContainer_;
+
+    InboundTransfer inboundTransfer_;
+    OutboundTransfer outboundTransfer_;
+};
+
+template<typename H>
+class ChannelMessageHandlerContext<H,
+    VoidMessage,
+    VoidMessage,
+    VoidMessage,
+    VoidMessage,
+    VoidMessageContainer,
+    VoidMessageContainer,
+    VoidMessageContainer,
+        VoidMessageContainer> : public ChannelHandlerContext {
+public:
+    typedef ChannelMessageHandlerContext<H,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+    typedef typename ChannelHandlerWrapper<H>::StoredHandlerPtr StoredHandlerPtr;
+
+    typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
+
+    typedef ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_INBOUND> InboundTransfer;
+    typedef ChannelMessageTransfer<VoidMessage, VoidMessageContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+
+public:
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler)
+        : ChannelHandlerContext(name),
+          handler_(handler) {
+        if (handler) {
+            handler->registerTo(*this);
+        }
+    }
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler,
+                                 const RegisterCallback& registerCallback)
+        : ChannelHandlerContext(name),
+          handler_(handler) {
+        if (handler && registerCallback) {
+            registerCallback(handler, *this);
+        }
+    }
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const EventLoopPtr& eventLoop,
+                                 const HandlerPtr& handler)
+        : ChannelHandlerContext(name, eventLoop),
+          handler_(handler) {
+        if (handler) {
+            handler->registerTo(*this);
+        }
+    }
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler,
+                                 const EventLoopPtr& eventLoop,
+                                 const RegisterCallback& registerCallback)
+        : ChannelHandlerContext(name, eventLoop),
+          handler_(handler) {
+        if (handler && registerCallback) {
+            registerCallback(handler, *this);
+        }
+    }
+
+    virtual boost::any getInboundMessageContainer() {
+        return boost::any();
+    }
+
+    virtual boost::any getOutboundMessageContainer() {
+        return boost::any();
+    }
+
+    VoidMessageContainer* inboundContainer() { return NULL; }
+    VoidMessageContainer* outboundContainer() { return NULL; }
+
+    InboundTransfer* inboundTransfer() { return NULL; }
+    OutboundTransfer* outboundTransfer() { return NULL; }
+
+private:
+    StoredHandlerPtr handler_;
 };
 
 }

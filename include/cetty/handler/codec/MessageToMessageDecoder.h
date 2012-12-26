@@ -32,8 +32,7 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/DecoderException.h>
 
 namespace cetty {
@@ -42,41 +41,101 @@ namespace codec {
 
 using namespace cetty::channel;
 
-template<typename InboundInT, typename InboundOutT>
-class MessageToMessageDecoder : public ChannelInboundMessageHandler<InboundInT> {
-protected:
-    using ChannelInboundMessageHandler<InboundInT>::inboundQueue;
+template<typename H,
+         typename InboundIn,
+         typename InboundOut,
+         typename C = ChannelMessageHandlerContext<H,
+         InboundIn,
+         InboundOut,
+         VoidMessage,
+         VoidMessage,
+         ChannelMessageContainer<InboundIn, MESSAGE_BLOCK>,
+         ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+         VoidMessageContainer,
+         VoidMessageContainer> >
+class MessageToMessageDecoder : private boost::noncopyable {
+public:
+    typedef MessageToMessageDecoder<H, InboundIn, InboundOut, C> Self;
+    typedef C Context;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+
+    typedef ChannelMessageContainer<InboundIn, MESSAGE_BLOCK> InboundContainer;
+    typedef typename InboundContainer::MessageQueue InboundQueue;
+
+    typedef ChannelMessageTransfer<InboundOut,
+            ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+            TRANSFER_INBOUND> InboundTransfer;
+
+    typedef boost::function<bool (InboundIn const&)> DecodableChecker;
+    typedef boost::function<InboundOut(ChannelHandlerContext&, InboundIn const&)> Decoder;
 
 public:
-    MessageToMessageDecoder() {}
-    virtual ~MessageToMessageDecoder() {}
-
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        inboundTransfer.setContext(ctx);
-        skipInboundTransfer.setContext(ctx);
+    MessageToMessageDecoder()
+        : transfer_(),
+          constainer_() {
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+    MessageToMessageDecoder(const Decoder& decoder)
+        : decoder_(decoder),
+          transfer_(),
+          constainer_() {
+    }
+
+    MessageToMessageDecoder(const Decoder& decoder,
+                            const DecodableChecker& checker)
+        : decoder_(decoder),
+          checker_(checker),
+          transfer_(),
+          constainer_() {
+    }
+
+    ~MessageToMessageDecoder() {}
+
+    void setDecoder(const Decoder& decoder) {
+        decoder_ = decoder;
+    }
+
+    void setDecodableChecker(const DecodableChecker& checker) {
+        checker_ = checker;
+    }
+
+    void registerTo(Context& ctx) {
+        BOOST_ASSERT(decoder_);
+
+        transfer_ = ctx.inboundTransfer();
+        constainer_ = ctx.inboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &Self::messageUpdated,
+                this,
+                _1));
+    }
+
+    void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;
+
+        InboundQueue& inboundQueue = constainer_->getMessages();
 
         while (!inboundQueue.empty()) {
             try {
-                InboundInT& msg = inboundQueue.front();
+                InboundIn& msg = inboundQueue.front();
 
                 if (!msg) {
                     break;
                 }
 
-                if (!isDecodable(msg)) {
-                    if (skipInboundTransfer.unfoldAndAdd(msg)) {
-                        notify = true;
-                    }
+                //                 if (!isDecodable(msg)) {
+                //                     if (skipInboundTransfer.unfoldAndAdd(msg)) {
+                //                         notify = true;
+                //                     }
+                //
+                //                     inboundQueue.pop_front();
+                //                     continue;
+                //                 }
 
-                    inboundQueue.pop_front();
-                    continue;
-                }
-
-                InboundOutT omsg = decode(ctx, msg);
+                InboundOut omsg = decoder_(ctx, msg);
 
                 if (!omsg) {
                     // Decoder consumed a message but returned null.
@@ -85,7 +144,7 @@ public:
                     continue;
                 }
 
-                if (inboundTransfer.unfoldAndAdd(omsg)) {
+                if (transfer_->unfoldAndAdd(omsg)) {
                     notify = true;
                 }
 
@@ -109,19 +168,13 @@ public:
      *
      * @param msg the message
      */
-    bool isDecodable(const InboundInT& msg) {
-        return true;
-    }
-
-    virtual InboundOutT decode(ChannelHandlerContext& ctx,
-                               const InboundInT& msg) = 0;
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT,
-                                   ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
+    Decoder decoder_;
+    DecodableChecker checker_;
 
-    ChannelPipelineMessageTransfer<InboundInT,
-                                   ChannelInboundMessageHandlerContext<InboundInT> > skipInboundTransfer;
+    InboundTransfer* transfer_;
+    InboundContainer* constainer_;
 };
 
 }

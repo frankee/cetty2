@@ -42,15 +42,27 @@ using namespace cetty::service;
 using namespace cetty::protobuf::service;
 using namespace google::protobuf;
 
-ProtobufServiceMessageHandler::ProtobufServiceMessageHandler() {
-}
+void ProtobufServiceMessageHandler::messageUpdated(ChannelHandlerContext& ctx) {
+    bool notify = false;
 
-ProtobufServiceMessageHandler::~ProtobufServiceMessageHandler() {
+    InboundQueue& inboundQueue =
+        context_->inboundContainer()->getMessages();
+
+    while (!inboundQueue.empty()) {
+        ProtobufServiceMessagePtr& msg = inboundQueue.front();
+
+        if (!msg) {
+            break;
+        }
+
+        messageReceived(ctx, msg);
+        inboundQueue.pop_front();
+    }
 }
 
 void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& msg) {
-    const ServiceMessage& rpc = msg->getServiceMessage();
+    const ServiceMessage& rpc = msg->serviceMessage();
 
     if (rpc.type() == cetty::protobuf::service::REQUEST) {
         const ProtobufServicePtr& service =
@@ -64,7 +76,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
 
         if (method) {
             service->CallMethod(method,
-                                msg->getPayload(),
+                                msg->payload(),
                                 service->GetResponsePrototype(method)->New(),
                                 //MessagePtr(),
                                 boost::bind(&ProtobufServiceMessageHandler::doneCallback,
@@ -93,20 +105,12 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
 
     ProtobufServiceMessagePtr message(
         new ProtobufServiceMessage(RESPONSE,
-                                      id,
-                                      req->getService(),
-                                      req->getMethod(),
-                                      response));
+                                   id,
+                                   req->service(),
+                                   req->method(),
+                                   response));
 
-    outboundTransfer.write(message, ctx.getChannel()->newFuture());
-}
-
-cetty::channel::ChannelHandlerPtr ProtobufServiceMessageHandler::clone() {
-    return ChannelHandlerPtr(new ProtobufServiceMessageHandler());
-}
-
-std::string ProtobufServiceMessageHandler::toString() const {
-    return "ProtobufServiceMessageHandler";
+    context_->outboundTransfer()->write(message, ctx.newFuture());
 }
 
 }

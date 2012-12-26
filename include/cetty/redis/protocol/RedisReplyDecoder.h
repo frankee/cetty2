@@ -30,7 +30,15 @@ using namespace cetty::channel;
 using namespace cetty::util;
 using namespace cetty::handler::codec;
 
-class RedisReplyMessageDecoder : public ReplayingDecoder<RedisReplyPtr> {
+class RedisReplyMessageDecoder : private boost::noncopyable {
+public:
+    typedef ReplayingDecoder<RedisReplyMessageDecoder, RedisReplyPtr> Decoder;
+    typedef Decoder::Context Context;
+    typedef Decoder::Handler Handler;
+    typedef Decoder::HandlerPtr HandlerPtr;
+
+    typedef Decoder::CheckPointInvoker CheckPointInvoker;
+
 public:
     enum State {
         READ_INITIAL,
@@ -40,30 +48,45 @@ public:
 
 public:
     RedisReplyMessageDecoder()
-        : ReplayingDecoder<RedisReplyPtr>(READ_INITIAL, true),
-          maxBulkSize(1024*1024),
-          bulkSize(0),
-          multiBulkSize(0) {}
+        : maxBulkSize_(1024*1024),
+          bulkSize_(0),
+          multiBulkSize_(0) {
+        init();
+    }
+
     RedisReplyMessageDecoder(int maxBulkSize)
-        : ReplayingDecoder<RedisReplyPtr>(READ_INITIAL, true),
-          maxBulkSize(maxBulkSize),
-          bulkSize(0),
-          multiBulkSize(0) {}
+        : maxBulkSize_(maxBulkSize),
+          bulkSize_(0),
+          multiBulkSize_(0) {
+        init();
+    }
 
-    virtual ~RedisReplyMessageDecoder() {}
+    ~RedisReplyMessageDecoder() {}
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const { return "RedisReplyMessageDecoder"; }
 
-protected:
-    virtual RedisReplyPtr decode(ChannelHandlerContext& ctx,
-                                        const ReplayingDecoderBufferPtr& buffer,
-                                        int state);
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+    }
 
 private:
+    void init() {
+        checkPoint_ = decoder_.checkPointInvoker();
+
+        decoder_.setInitialState(READ_INITIAL);
+        decoder_.setDecoder(boost::bind(&RedisReplyMessageDecoder::decode,
+                                        this,
+                                        _1,
+                                        _2,
+                                        _3));
+    }
+
+    RedisReplyPtr decode(ChannelHandlerContext& ctx,
+                         const ReplayingDecoderBufferPtr& buffer,
+                         int state);
+
     RedisReplyPtr readMultiBukls(const ReplayingDecoderBufferPtr& buffer,
-                                        const StringPiece& bytes,
-                                        std::vector<StringPiece>* bulks);
+                                 const StringPiece& bytes,
+                                 std::vector<StringPiece>* bulks);
 
     bool readMultiBulkElement(const ReplayingDecoderBufferPtr& buffer,
                               const StringPiece& bytes,
@@ -81,11 +104,14 @@ private:
     RedisReplyPtr reset();
 
 private:
-    int maxBulkSize;
+    int maxBulkSize_;
 
-    int bulkSize;
-    int multiBulkSize;
-    RedisReplyPtr reply;
+    int bulkSize_;
+    int multiBulkSize_;
+    RedisReplyPtr reply_;
+
+    Decoder decoder_;
+    CheckPointInvoker checkPoint_;
 };
 
 }

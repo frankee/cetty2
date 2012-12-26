@@ -24,33 +24,38 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-class BufferToBufferCodec
-    : public BufferToBufferDecoder,
-      public BufferToBufferEncoder {
+template<typename H>
+class BufferToBufferCodec : private boost::noncopyable {
 public:
-    virtual~ BufferToBufferCodec() {}
+    typedef BufferToBufferDecoder::Decoder Decoder;
+    typedef BufferToBufferEncoder::Encoder Encoder;
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx);
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx);
+    typedef ChannelMessageHandlerContext<H,
+            ChannelBufferPtr,
+            ChannelBufferPtr,
+            ChannelBufferPtr,
+            ChannelBufferPtr,
+            ChannelBufferContainer,
+            ChannelBufferContainer,
+            ChannelBufferContainer,
+            ChannelBufferContainer> Context;
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-        const ChannelException& cause);
+public:
+    BufferToBufferCodec(const Decoder& decoder, const Encoder& encoder)
+        : decoder_(decoder),
+          encoder_(encoder) {
+    }
 
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-        const boost::any& evt);
+    ~ BufferToBufferCodec() {}
 
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
+    }
 
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+private:
+    BufferToBufferDecoder<H, Context> decoder_;
+    BufferToBufferEncoder<H, Context> encoder_;
 };
 
 }

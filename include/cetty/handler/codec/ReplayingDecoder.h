@@ -24,17 +24,9 @@
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
+#include <cetty/handler/codec/BufferToMessageDecoder.h>
 #include <cetty/handler/codec/ReplayingDecoderBuffer.h>
 #include <cetty/handler/codec/DecoderException.h>
-
-namespace cetty {
-namespace channel {
-class Channel;
-class SocketAddress;
-}
-}
 
 namespace cetty {
 namespace handler {
@@ -298,50 +290,122 @@ using namespace cetty::buffer;
  * @apiviz.has org.jboss.netty.handler.codec.replay.UnreplayableOperationException oneway - - throws
  */
 
-template<typename InboundOutT>
-class ReplayingDecoder
-    : public ChannelInboundBufferHandler {
+template<typename H,
+         typename InboundOut,
+         typename C = ChannelMessageHandlerContext<H,
+         ChannelBufferPtr,
+         InboundOut,
+         VoidMessage,
+         VoidMessage,
+         ChannelBufferContainer,
+         ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+         VoidMessageContainer,
+         VoidMessageContainer> >
+class ReplayingDecoder : private boost::noncopyable {
+public:
+    typedef ReplayingDecoder<H, InboundOut, C> Self;
+
+    typedef C Context;
+    typedef typename Context::Handler Handler;
+    typedef typename Context::HandlerPtr HandlerPtr;
+
+    typedef ChannelBufferContainer InboundContainer;
+    typedef ChannelMessageContainer<InboundOut, MESSAGE_BLOCK> NextInboundContainer;
+
+    typedef ChannelMessageTransfer<InboundOut,
+            NextInboundContainer,
+            TRANSFER_INBOUND> InboundTransfer;
+
+    typedef boost::function<InboundOut(ChannelHandlerContext&,
+                                       ReplayingDecoderBufferPtr const&,
+                                       int)> Decoder;
+
+    typedef boost::function<void (int)> CheckPointInvoker;
 
 public:
-    typedef ChannelInboundBufferHandlerContext Context;
-    typedef ChannelInboundMessageHandlerContext<InboundOutT> NextInboundContext;
-
-public:
-    virtual ~ReplayingDecoder() {}
-
-protected:
     /**
      * Creates a new instance with no initial state (i.e: <tt>null</tt>).
      */
     ReplayingDecoder()
-        : unfold(false), state(-1), checkedPoint(-1) {
+        : unfold_(false),
+          state_(-1),
+          checkedPoint_(-1),
+          transfer_(),
+          container_() {
+        checkPointIvoker_ = boost::bind(&Self::checkpoint, this, _1);
+    }
+
+    ReplayingDecoder(const Decoder& decoder)
+        : unfold_(false),
+          state_(-1),
+          checkedPoint_(-1),
+          decoder_(decoder),
+          transfer_(),
+          container_() {
+        checkPointIvoker_ = boost::bind(&Self::checkpoint, this, _1);
     }
 
     ReplayingDecoder(bool unfold)
-        : unfold(unfold), state(-1), checkedPoint(-1) {
+        : unfold_(unfold),
+          state_(-1),
+          checkedPoint_(-1),
+          transfer_(),
+          container_() {
+        checkPointIvoker_ = boost::bind(&Self::checkpoint, this, _1);
     }
 
     /**
      * Creates a new instance with the specified initial state.
      */
     ReplayingDecoder(int initialState)
-        : unfold(false), state(initialState), checkedPoint(-1) {
+        : unfold_(false),
+          state_(initialState),
+          checkedPoint_(-1),
+          transfer_(),
+          container_() {
+        checkPointIvoker_ = boost::bind(&Self::checkpoint, this, _1);
     }
 
     ReplayingDecoder(int initialState, bool unfold)
-        : unfold(unfold), state(initialState), checkedPoint(-1) {
+        : unfold_(unfold),
+          state_(initialState),
+          checkedPoint_(-1),
+          transfer_(),
+          container_() {
+        checkPointIvoker_ = boost::bind(&Self::checkpoint, this, _1);
     }
 
-    /**
-     * Stores the internal cumulative buffer's reader position.
-     */
-    void checkpoint() {
-        if (cumulation) {
-            checkedPoint = cumulation->readerIndex();
-        }
-        else {
-            checkedPoint = -1; // buffer not available (already cleaned up)
-        }
+    ~ReplayingDecoder() {}
+
+    void setDecoder(const Decoder& decoder) {
+        decoder_ = decoder;
+    }
+
+    void setUnfold(bool unfold) {
+        unfold_ = unfold;
+    }
+
+    void setInitialState(int state) {
+        state_ = state;
+    }
+
+    const CheckPointInvoker checkPointInvoker() const {
+        return checkPointIvoker_;
+    }
+
+    void registerTo(Context& ctx) {
+        transfer_ = ctx.inboundTransfer();
+        container_ = ctx.inboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &ReplayingDecoder::messageUpdated,
+                this,
+                _1));
+
+        ctx.setChannelInactiveCallback(boost::bind(
+                                           &ReplayingDecoder::channelInactive,
+                                           this,
+                                           _1));
     }
 
     /**
@@ -349,7 +413,13 @@ protected:
      * the current decoder state.
      */
     void checkpoint(int state) {
-        checkpoint();
+        if (replayable_) {
+            checkedPoint_ = replayable_->readerIndex();
+        }
+        else {
+            checkedPoint_ = -1; // buffer not available (already cleaned up)
+        }
+
         setState(state);
     }
 
@@ -358,7 +428,7 @@ protected:
      * @return the current state of this decoder
      */
     int getState() const {
-        return state;
+        return state_;
     }
 
     /**
@@ -366,8 +436,8 @@ protected:
      * @return the old state of this decoder
      */
     int setState(int newState) {
-        int oldState = state;
-        state = newState;
+        int oldState = state_;
+        state_ = newState;
         return oldState;
     }
 
@@ -387,31 +457,26 @@ protected:
      * Use it only when you must use it at your own risk.
      */
     const ChannelBufferPtr& internalBuffer() const {
-        if (!cumulation) {
-            return Unpooled::EMPTY_BUFFER;
+        if (replayable_) {
+            return replayable_->unwrap();
         }
 
-        return cumulation;
+        return Unpooled::EMPTY_BUFFER;
     }
 
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        inboundTransfer.setContext(ctx);
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        callDecode(ctx, container_->getMessages());
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        callDecode(ctx, getInboundChannelBuffer());
-    }
-
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
-        if (!replayable) {
+    void channelInactive(ChannelHandlerContext& ctx) {
+        if (!replayable_) {
             LOG_WARN << "ReplayingDecoder has not received any data, then close.";
             return;
         }
 
-        replayable->terminate();
+        replayable_->terminate();
 
-        ChannelBufferPtr in = this->cumulation;
-        this->cumulation.reset();
+        ChannelBufferPtr in = replayable_->unwrap();
 
         if (!in) {
             return;
@@ -422,9 +487,8 @@ protected:
         }
 
         try {
-            if (inboundTransfer.unfoldAndAdd(
-                    decodeLast(ctx, replayable, state))) {
-                fireInboundBufferUpdated(ctx, in);
+            if (transfer_->unfoldAndAdd(decodeLast(ctx, replayable_, state_))) {
+                fireMessageUpdated(ctx, in);
             }
         }
         catch (const CodecException& e) {
@@ -443,18 +507,18 @@ protected:
         bool decoded = false;
 
         while (in->readable()) {
-            int oldReaderIndex = checkedPoint = in->readerIndex();
-            InboundOutT result;
-            int oldState = state;
+            int oldReaderIndex = checkedPoint_ = in->readerIndex();
+            InboundOut result;
+            int oldState = state_;
 
             try {
-                result = decode(ctx, replayable, state);
+                result = decoder_(ctx, replayable_, state_);
 
                 if (!result) {
-                    if (replayable->needMoreBytes()) {
+                    if (replayable_->needMoreBytes()) {
                         // Return to the checkpoint (or oldPosition) and retry.
-                        if (checkedPoint >= 0) {
-                            cumulation->readerIndex(checkedPoint);
+                        if (checkedPoint_ >= 0) {
+                            replayable_->readerIndex(checkedPoint_);
                         }
                         else {
                             // Called by cleanup() - no need to maintain the readerIndex
@@ -465,7 +529,7 @@ protected:
                         // Let us wait for the next notification.
                         break;
                     }
-                    else if (oldReaderIndex == in->readerIndex() && oldState == state) {
+                    else if (oldReaderIndex == in->readerIndex() && oldState == state_) {
                         throw IllegalStateException(
                             "null cannot be returned if no data is consumed and state didn't change.");
                     }
@@ -476,23 +540,21 @@ protected:
                     }
                 }
 
-                if (oldReaderIndex == in->readerIndex() && oldState == state) {
+                if (oldReaderIndex == in->readerIndex() && oldState == state_) {
                     throw IllegalStateException(
                         std::string("decode() method must consume at least one byte \
-                                    if it returned a decoded message (caused by: ") +
-                        typeid(*this).name() +
-                        std::string(")"));
+                                    if it returned a decoded message (caused by: RepalyingDecoder)"));
                 }
 
-                // A successful decode
-                if (inboundTransfer.unfoldAndAdd(result)) {
+                    // A successful decode
+                if (transfer_->unfoldAndAdd(result)) {
                     decoded = true;
                 }
             }
             catch (const CodecException& e) {
                 if (decoded) {
                     decoded = false;
-                    fireInboundBufferUpdated(ctx, in);
+                    fireMessageUpdated(ctx, in);
                 }
 
                 ctx.fireExceptionCaught(e);
@@ -500,7 +562,7 @@ protected:
             catch (const std::exception& e) {
                 if (decoded) {
                     decoded = false;
-                    fireInboundBufferUpdated(ctx, in);
+                    fireMessageUpdated(ctx, in);
                 }
 
                 ctx.fireExceptionCaught(DecoderException(e.what()));
@@ -508,7 +570,7 @@ protected:
         }
 
         if (decoded) {
-            fireInboundBufferUpdated(ctx, in);
+            fireMessageUpdated(ctx, in);
         }
     }
 
@@ -525,9 +587,9 @@ protected:
      *
      * @return the decoded frame
      */
-    virtual InboundOutT decode(ChannelHandlerContext& ctx,
-                               const ReplayingDecoderBufferPtr& buffer,
-                               int state) = 0;
+    //     virtual InboundOut decode(ChannelHandlerContext& ctx,
+    //                               const ReplayingDecoderBufferPtr& buffer,
+    //                               int state) = 0;
 
     /**
      * Decodes the received data so far into a frame when the channel is
@@ -543,46 +605,46 @@ protected:
      *
      * @return the decoded frame
      */
-    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
-                                   const ReplayingDecoderBufferPtr& buffer,
-                                   int state) {
-        return decode(ctx, buffer, state);
+    InboundOut decodeLast(ChannelHandlerContext& ctx,
+                          const ReplayingDecoderBufferPtr& buffer,
+                          int state) {
+        return decoder_(ctx, buffer, state);
     }
 
 private:
-    void fireInboundBufferUpdated(ChannelHandlerContext& ctx,
-                                  const ChannelBufferPtr& in) {
-        checkedPoint -= in->readerIndex();
+    void fireMessageUpdated(ChannelHandlerContext& ctx,
+    const ChannelBufferPtr& in) {
+        checkedPoint_ -= in->readerIndex();
         in->discardReadBytes();
         ctx.fireMessageUpdated();
     }
 
     void updateReplayable(const ChannelBufferPtr& input) {
-        if (!cumulation) { // only first time will enter.
-            cumulation = input;
-            replayable = new ReplayingDecoderBuffer(cumulation);
+        if (!replayable_) { // only first time will enter.
+            replayable_ = new ReplayingDecoderBuffer(input);
         }
 
         // input buffer, which channel owns, changes.
-        if (cumulation.get() != input.get()) {
-            cumulation = input;
-            replayable = new ReplayingDecoderBuffer(input);
+        if (replayable_->unwrap().get() != input.get()) {
+            replayable_ = new ReplayingDecoderBuffer(input);
         }
         else {
-            replayable->needMoreBytes(false);
+            replayable_->needMoreBytes(false);
         }
     }
 
-protected:
-    ChannelPipelineMessageTransfer<InboundOutT, NextInboundContext> inboundTransfer;
-
 private:
-    bool unfold;
-    int  state;
-    int  checkedPoint;
+    bool unfold_;
+    int  state_;
+    int  checkedPoint_;
 
-    ChannelBufferPtr cumulation;
-    ReplayingDecoderBufferPtr replayable;
+    Decoder decoder_;
+    InboundTransfer* transfer_;
+    InboundContainer* container_;
+
+    CheckPointInvoker checkPointIvoker_;
+
+    ReplayingDecoderBufferPtr replayable_;
 };
 
 }

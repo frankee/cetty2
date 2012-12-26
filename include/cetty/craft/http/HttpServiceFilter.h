@@ -19,9 +19,9 @@
 
 #include <cetty/service/ServiceFilter.h>
 #include <cetty/handler/codec/http/HttpPackage.h>
-#include <cetty/handler/codec/http/HttpMessagePtr.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
+#include <cetty/craft/http/ServiceMapperPtr.h>
 #include <cetty/craft/http/HttpRequest2ProtobufMessage.h>
 #include <cetty/craft/http/ProtobufMessage2HttpResponse.h>
 
@@ -33,11 +33,18 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
-class HttpServiceFilter
-    : public cetty::service::ServiceFilter<HttpMessagePtr,
-      ProtobufServiceMessagePtr,
-      ProtobufServiceMessagePtr,
-          HttpPackage> {
+class HttpServiceFilter : private boost::noncopyable {
+public:
+    typedef cetty::service::ServiceFilter<HttpServiceFilter,
+            HttpPackage,
+            ProtobufServiceMessagePtr,
+            ProtobufServiceMessagePtr,
+            HttpPackage> Filter;
+
+    typedef Filter::Context Context;
+
+    typedef Filter::Context::Handler Handler;
+    typedef Filter::Context::HandlerPtr HandlerPtr;
 
 public:
     HttpServiceFilter();
@@ -45,27 +52,35 @@ public:
     HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
                       const ServiceResponseMapperPtr& responseMap);
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
+    void registerTo(Context& ctx) {
+        filter_.registerTo(ctx);
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+        ctx.setExceptionCallback(boost::bind(&HttpServiceFilter::exceptionCaught,
+                                             this,
+                                             _1,
+                                             _2));
+    }
 
-protected:
-    virtual ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
-            const HttpMessagePtr& req);
-
-    virtual HttpPackage filterResponse(ChannelHandlerContext& ctx,
-                                       const HttpMessagePtr& req,
-                                       const ProtobufServiceMessagePtr& rep,
-                                       const ChannelFuturePtr& future);
+    void exceptionCaught(ChannelHandlerContext& ctx,
+                         const ChannelException& cause);
 
 private:
-    ServiceRequestMapperPtr requestMapper;
-    ServiceResponseMapperPtr responseMapper;
+    ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
+                                            const HttpPackage& req);
 
-    HttpRequest2ProtobufMessage http2proto;
-    ProtobufMessage2HttpResponse proto2http;
+    HttpPackage filterResponse(ChannelHandlerContext& ctx,
+                               const HttpPackage& req,
+                               const ProtobufServiceMessagePtr& rep,
+                               const ChannelFuturePtr& future);
+
+private:
+    Filter filter_;
+
+    ServiceRequestMapperPtr requestMapper_;
+    ServiceResponseMapperPtr responseMapper_;
+
+    HttpRequest2ProtobufMessage http2proto_;
+    ProtobufMessage2HttpResponse proto2http_;
 };
 
 }

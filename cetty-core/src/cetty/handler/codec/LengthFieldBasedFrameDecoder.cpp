@@ -30,44 +30,43 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::util;
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int lengthFieldOffset,
         int lengthFieldLength)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(0),
-      initialBytesToStrip(0),
-      checksumFieldLength(0),
-      checksumCalcOffset(0) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(0),
+      initialBytesToStrip_(0),
+      checksumFieldLength_(0),
+      checksumCalcOffset_(0) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int lengthFieldOffset,
         int lengthFieldLength,
         const std::string& header1)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(0),
-      initialBytesToStrip(0),
-      checksumFieldLength(0),
-      checksumCalcOffset(0),
-      header1(header1) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(0),
+      initialBytesToStrip_(0),
+      checksumFieldLength_(0),
+      checksumCalcOffset_(0),
+      header1_(header1) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -75,18 +74,18 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int lengthFieldLength,
         int lengthAdjustment,
         int initialBytesToStrip)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(0),
-      checksumCalcOffset(0) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(0),
+      checksumCalcOffset_(0) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -96,20 +95,20 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int initialBytesToStrip,
         const std::string& header1,
         const std::string& header2)
-    :discardingTooLongFrame(false),
-     maxFrameLength(maxFrameLength),
-     tooLongFrameLength(0),
-     bytesToDiscard(0),
-     lengthFieldOffset(lengthFieldOffset),
-     lengthFieldLength(lengthFieldLength),
-     lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-     lengthAdjustment(lengthAdjustment),
-     initialBytesToStrip(initialBytesToStrip),
-     checksumFieldLength(0),
-     checksumCalcOffset(0),
-     header1(header1),
-     header2(header2) {
-    validateParameters();
+    :discardingTooLongFrame_(false),
+     maxFrameLength_(maxFrameLength),
+     tooLongFrameLength_(0),
+     bytesToDiscard_(0),
+     lengthFieldOffset_(lengthFieldOffset),
+     lengthFieldLength_(lengthFieldLength),
+     lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+     lengthAdjustment_(lengthAdjustment),
+     initialBytesToStrip_(initialBytesToStrip),
+     checksumFieldLength_(0),
+     checksumCalcOffset_(0),
+     header1_(header1),
+     header2_(header2) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -119,19 +118,19 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int initialBytesToStrip,
         int checksumFieldLength,
         const ChecksumFunction& checksumFunction)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
-      checksumFunction(checksumFunction) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(lengthFieldOffset + lengthFieldLength),
+      checksumFunction_(checksumFunction) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -142,20 +141,20 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int checksumFieldLength,
         const ChecksumFunction& checksumFunction,
         const std::string& header1)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
-      checksumFunction(checksumFunction),
-      header1(header1) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(lengthFieldOffset + lengthFieldLength),
+      checksumFunction_(checksumFunction),
+      header1_(header1) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -167,21 +166,21 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         const ChecksumFunction& checksumFunction,
         const std::string& header1,
         const std::string& header2)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(lengthFieldOffset + lengthFieldLength),
-      checksumFunction(checksumFunction),
-      header1(header1),
-      header2(header2) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(lengthFieldOffset + lengthFieldLength),
+      checksumFunction_(checksumFunction),
+      header1_(header1),
+      header2_(header2) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -192,19 +191,19 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int checksumFieldLength,
         int checksumCalcOffset,
         const ChecksumFunction& checksumFunction)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(checksumCalcOffset),
-      checksumFunction(checksumFunction) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(checksumCalcOffset),
+      checksumFunction_(checksumFunction) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -216,20 +215,20 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         int checksumCalcOffset,
         const ChecksumFunction& checksumFunction,
         const std::string& header1)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(checksumCalcOffset),
-      checksumFunction(checksumFunction),
-      header1(header1) {
-    validateParameters();
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(checksumCalcOffset),
+      checksumFunction_(checksumFunction),
+      header1_(header1) {
+    init();
 }
 
 LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
@@ -242,61 +241,39 @@ LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(int maxFrameLength,
         const ChecksumFunction& checksumFunction,
         const std::string& header1,
         const std::string& header2)
-    : discardingTooLongFrame(false),
-      maxFrameLength(maxFrameLength),
-      tooLongFrameLength(0),
-      bytesToDiscard(0),
-      lengthFieldOffset(lengthFieldOffset),
-      lengthFieldLength(lengthFieldLength),
-      lengthFieldEndOffset(lengthFieldOffset + lengthFieldLength),
-      lengthAdjustment(lengthAdjustment),
-      initialBytesToStrip(initialBytesToStrip),
-      checksumFieldLength(checksumFieldLength),
-      checksumCalcOffset(checksumCalcOffset),
-      checksumFunction(checksumFunction),
-      header1(header1),
-      header2(header2) {
-    validateParameters();
-}
-
-LengthFieldBasedFrameDecoder::LengthFieldBasedFrameDecoder(
-    const LengthFieldBasedFrameDecoder& decoder)
-    : discardingTooLongFrame(decoder.discardingTooLongFrame),
-    maxFrameLength(decoder.maxFrameLength),
-    tooLongFrameLength(0),
-    bytesToDiscard(0),
-    lengthFieldOffset(decoder.lengthFieldOffset),
-    lengthFieldLength(decoder.lengthFieldLength),
-    lengthFieldEndOffset(decoder.lengthFieldEndOffset),
-    lengthAdjustment(decoder.lengthAdjustment),
-    header1(decoder.header1),
-    header2(decoder.header2),
-    initialBytesToStrip(decoder.initialBytesToStrip),
-    checksumFieldLength(decoder.checksumFieldLength),
-    checksumCalcOffset(decoder.checksumCalcOffset),
-    checksumFunction(decoder.checksumFunction) {
-}
-
-ChannelHandlerPtr LengthFieldBasedFrameDecoder::clone() {
-    return ChannelHandlerPtr(new LengthFieldBasedFrameDecoder(*this));
+    : discardingTooLongFrame_(false),
+      maxFrameLength_(maxFrameLength),
+      tooLongFrameLength_(0),
+      bytesToDiscard_(0),
+      lengthFieldOffset_(lengthFieldOffset),
+      lengthFieldLength_(lengthFieldLength),
+      lengthFieldEndOffset_(lengthFieldOffset + lengthFieldLength),
+      lengthAdjustment_(lengthAdjustment),
+      initialBytesToStrip_(initialBytesToStrip),
+      checksumFieldLength_(checksumFieldLength),
+      checksumCalcOffset_(checksumCalcOffset),
+      checksumFunction_(checksumFunction),
+      header1_(header1),
+      header2_(header2) {
+    init();
 }
 
 ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx,
         const ChannelBufferPtr& in) {
-    if (discardingTooLongFrame) {
-        int bytesToDiscard = this->bytesToDiscard;
+    if (discardingTooLongFrame_) {
+        int bytesToDiscard = this->bytesToDiscard_;
         int localBytesToDiscard = std::min(bytesToDiscard, in->readableBytes());
         in->skipBytes(localBytesToDiscard);
         bytesToDiscard -= localBytesToDiscard;
-        this->bytesToDiscard = bytesToDiscard;
+        this->bytesToDiscard_ = bytesToDiscard;
 
         if (bytesToDiscard == 0) {
             // Reset to the initial state and tell the handlers that
             // the frame was too large.
             // TODO Let user choose when the exception should be raised - early or late?
             //      If early, fail() should be called when discardingTooLongFrame is set to true.
-            int tooLongFrameLength = this->tooLongFrameLength;
-            this->tooLongFrameLength = 0;
+            int tooLongFrameLength = this->tooLongFrameLength_;
+            this->tooLongFrameLength_ = 0;
             fail(ctx, tooLongFrameLength);
         }
         else {
@@ -306,15 +283,15 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
         return ChannelBufferPtr();
     }
 
-    if (in->readableBytes() < lengthFieldEndOffset) {
+    if (in->readableBytes() < lengthFieldEndOffset_) {
         return ChannelBufferPtr();
     }
 
-    int actualLengthFieldOffset = in->readerIndex() + lengthFieldOffset;
+    int actualLengthFieldOffset = in->readerIndex() + lengthFieldOffset_;
 
     int frameLength;
 
-    switch (lengthFieldLength) {
+    switch (lengthFieldLength_) {
     case 1:
         frameLength = in->getUnsignedByte(actualLengthFieldOffset);
         break;
@@ -336,27 +313,27 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     }
 
     if (frameLength < 0) {
-        in->skipBytes(lengthFieldEndOffset);
+        in->skipBytes(lengthFieldEndOffset_);
         throw CorruptedFrameException(
             StringUtil::printf("negative pre-adjustment length field: %d", frameLength));
     }
 
-    frameLength += lengthAdjustment + lengthFieldEndOffset;
+    frameLength += lengthAdjustment_ + lengthFieldEndOffset_;
 
-    if (frameLength < lengthFieldEndOffset) {
-        in->skipBytes(lengthFieldEndOffset);
+    if (frameLength < lengthFieldEndOffset_) {
+        in->skipBytes(lengthFieldEndOffset_);
         throw CorruptedFrameException(
             StringUtil::printf(
                 "Adjusted frame length (%d)  is less than lengthFieldEndOffset: %d",
                 frameLength,
-                lengthFieldEndOffset));
+                lengthFieldEndOffset_));
     }
 
-    if (frameLength > maxFrameLength) {
+    if (frameLength > maxFrameLength_) {
         // Enter the discard mode and discard everything received so far.
-        discardingTooLongFrame = true;
-        tooLongFrameLength = frameLength;
-        bytesToDiscard = frameLength - in->readableBytes();
+        discardingTooLongFrame_ = true;
+        tooLongFrameLength_ = frameLength;
+        bytesToDiscard_ = frameLength - in->readableBytes();
         in->skipBytes(in->readableBytes());
         return ChannelBufferPtr();
     }
@@ -368,22 +345,22 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
         return ChannelBufferPtr();
     }
 
-    if (initialBytesToStrip > frameLengthInt) {
+    if (initialBytesToStrip_ > frameLengthInt) {
         in->skipBytes(frameLengthInt);
         std::string msg;
         StringUtil::printf(&msg,
                            "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
-                           frameLength, initialBytesToStrip);
+                           frameLength, initialBytesToStrip_);
         throw CorruptedFrameException(msg);
     }
 
-    in->skipBytes(initialBytesToStrip);
+    in->skipBytes(initialBytesToStrip_);
 
     // extract frame
     int readerIndex = in->readerIndex();
-    int actualFrameLength = frameLengthInt - initialBytesToStrip - checksumFieldLength;
+    int actualFrameLength = frameLengthInt - initialBytesToStrip_ - checksumFieldLength_;
     ChannelBufferPtr frame = extractFrame(in, readerIndex, actualFrameLength);
-    in->readerIndex(readerIndex + actualFrameLength + checksumFieldLength);
+    in->readerIndex(readerIndex + actualFrameLength + checksumFieldLength_);
     return frame;
 }
 
@@ -403,12 +380,12 @@ void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx,
     if (frameLength > 0) {
         StringUtil::printf(&msg,
                            "Adjusted frame length exceeds %d: % - discarded.",
-                           maxFrameLength, frameLength);
+                           maxFrameLength_, frameLength);
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
     else {
         StringUtil::printf("Adjusted frame length exceeds %d - discarded.",
-                           maxFrameLength);
+                           maxFrameLength_);
         ctx.fireExceptionCaught(TooLongFrameException(msg));
     }
 }
@@ -416,81 +393,86 @@ void LengthFieldBasedFrameDecoder::fail(ChannelHandlerContext& ctx,
 void LengthFieldBasedFrameDecoder::validateParameters() {
     std::string msg;
 
-    if (maxFrameLength <= 0) {
+    if (maxFrameLength_ <= 0) {
         StringUtil::printf(&msg,
                            "maxFrameLength must be a positive integer: %d",
-                           maxFrameLength);
+                           maxFrameLength_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (lengthFieldOffset < 0) {
+    if (lengthFieldOffset_ < 0) {
         StringUtil::printf(&msg,
                            "lengthFieldOffset must be a non-negative integer: %d",
-                           lengthFieldOffset);
+                           lengthFieldOffset_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (initialBytesToStrip < 0) {
+    if (initialBytesToStrip_ < 0) {
         StringUtil::printf(&msg,
                            "initialBytesToStrip must be a non-negative integer: %d",
-                           initialBytesToStrip);
+                           initialBytesToStrip_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (checksumFieldLength < 0) {
+    if (checksumFieldLength_ < 0) {
         StringUtil::printf(&msg,
                            "checksumFieldLength must be a non-negative integer: %d",
-                           checksumFieldLength);
+                           checksumFieldLength_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (checksumCalcOffset < 0) {
+    if (checksumCalcOffset_ < 0) {
         StringUtil::printf(&msg,
                            "checksumFieldOffset must be a non-negative integer:  %d",
-                           checksumCalcOffset);
+                           checksumCalcOffset_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (checksumFieldLength > 0 && !checksumFunction) {
+    if (checksumFieldLength_ > 0 && !checksumFunction_) {
         msg = "you set the checksumField but no checksum function set.";
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (lengthFieldLength != 1 && lengthFieldLength != 2 &&
-            lengthFieldLength != 4 && lengthFieldLength != 8) {
+    if (lengthFieldLength_ != 1 && lengthFieldLength_ != 2 &&
+            lengthFieldLength_ != 4 && lengthFieldLength_ != 8) {
         StringUtil::printf(&msg,
                            "lengthFieldLength must be either 1, 2, 4, or 8:  %d",
-                           lengthFieldLength);
+                           lengthFieldLength_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 
-    if (lengthFieldOffset > maxFrameLength - lengthFieldLength) {
+    if (lengthFieldOffset_ > maxFrameLength_ - lengthFieldLength_) {
         StringUtil::printf(&msg,
                            "maxFrameLength (%d) must be equal to or greater "
                            "than lengthFieldOffset (%d) + lengthFieldLength (%d).",
-                           maxFrameLength, lengthFieldOffset, lengthFieldLength);
+                           maxFrameLength_, lengthFieldOffset_, lengthFieldLength_);
 
         LOG_ERROR << msg;
         throw InvalidArgumentException(msg);
     }
 }
 
-std::string LengthFieldBasedFrameDecoder::toString() const {
-    return "LengthFieldBasedFrameDecoder";
+void LengthFieldBasedFrameDecoder::init() {
+    validateParameters();
+
+    decoder_.setDecoder(boost::bind(&LengthFieldBasedFrameDecoder::decode,
+                                    this,
+                                    _1,
+                                    _2));
 }
 
 }

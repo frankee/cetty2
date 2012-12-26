@@ -25,6 +25,7 @@
 
 #include <cetty/logging/LoggerHelper.h>
 
+#include <cetty/service/ClientService.h>
 #include <cetty/redis/protocol/RedisReply.h>
 #include <cetty/redis/protocol/RedisCommand.h>
 #include <cetty/redis/protocol/commands/Keys.h>
@@ -107,7 +108,7 @@ void RedisClient::multiBulkCallBack(const RedisServiceFuture& future,
 
 void RedisClient::request(const RedisCommandPtr& command,
                           const RedisServiceFuturePtr& future) {
-    callMethod(clientService, command, future);
+    cetty::service::callMethod(channel_, command, future);
 }
 
 void RedisClient::set(const std::string& key, const StringPiece& value) {

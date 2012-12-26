@@ -20,9 +20,8 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelConfig.h>
+#include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 using namespace cetty::channel;
@@ -36,36 +35,58 @@ using namespace cetty::buffer;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoServerHandler : public ChannelInboundBufferHandlerAdapter<> {
+class EchoServerHandler : private boost::noncopyable {
 public:
-    EchoServerHandler() : transferredBytes(0) {
-    }
-    virtual ~EchoServerHandler() {}
+    typedef ChannelInboudBufferHandler<EchoServerHandler>::Context Context;
 
-    long getTransferredBytes() const {
-        return transferredBytes;
+    typedef ChannelInboudBufferHandler<EchoServerHandler>::OutboundTransfer OutboundTransfer;
+    typedef ChannelInboudBufferHandler<EchoServerHandler>::InboundContainer InboundContainer;
+
+public:
+    EchoServerHandler()
+        : transferredBytes_(0),
+          transfer_(),
+          container_() {
     }
 
-    virtual void channelActive(ChannelHandlerContext& ctx) {
-        voidFuture = ctx.getChannel()->newSucceededFuture();
+    ~EchoServerHandler() {}
+
+    void registerTo(Context& ctx) {
+        transfer_ = ctx.outboundTransfer();
+        container_ = ctx.inboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(
+            boost::bind(&EchoServerHandler::messageUpdated,
+            this,
+            _1));
+
+        ctx.setChannelActiveCallback(
+            boost::bind(&EchoServerHandler::channelActive,
+            this,
+            _1));
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
-        const ChannelBufferPtr& buffer = getInboundChannelBuffer();
+    int getTransferredBytes() const {
+        return transferredBytes_;
+    }
+
+    void channelActive(ChannelHandlerContext& ctx) {
+        voidFuture = new VoidChannelFuture(ctx.channel());
+    }
+
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& buffer = container_->getMessages();
+
         if (buffer) {
-            outboundTransfer.write(buffer->readBytes(), voidFuture);
+            transfer_->write(buffer->readBytes(), voidFuture);
         }
     }
 
-    virtual ChannelHandlerPtr clone() {
-        return ChannelHandlerPtr(new EchoServerHandler);
-    }
-
-    virtual std::string toString() const {
-        return "EchoServerHandler";
-    }
-
 private:
+    int transferredBytes_;
+
+    OutboundTransfer* transfer_;
+    InboundContainer* container_;
+
     ChannelFuturePtr voidFuture;
-    int transferredBytes;
 };

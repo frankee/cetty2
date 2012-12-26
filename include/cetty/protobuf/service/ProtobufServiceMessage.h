@@ -52,34 +52,34 @@ public:
     bool isError() const;
 
     void setType(int type);
-    int getType() const;
+    int type() const;
 
-    int64_t getId() const;
+    int64_t id() const;
     void setId(int64_t id);
 
-    const std::string& getService() const;
+    const std::string& service() const;
     std::string* mutableService();
 
-    const std::string& getMethod() const;
+    const std::string& method() const;
     std::string* mutableMethod();
 
-    const ServiceMessage& getServiceMessage() const;
+    const ServiceMessage& serviceMessage() const;
     ServiceMessage* mutableServiceMessage() {
-        return message;
+        return message_;
     }
 
-    const MessagePtr& getPayload() const {
-        return payload;
+    const MessagePtr& payload() const {
+        return payload_;
     }
 
     void setPayload(const MessagePtr& message) {
-        this->payload = message;
+        this->payload_ = message;
     }
 
-    const MessagePtr& getResponse() const;
-    const MessagePtr& getRequest() const;
+    const MessagePtr& response() const;
+    const MessagePtr& request() const;
 
-    int getMessageSize() const;
+    int messageSize() const;
 
 private:
     bool checkType(int type);
@@ -89,8 +89,8 @@ private:
     ProtobufServiceMessage& operator=(const ProtobufServiceMessage&);
 
 private:
-    ServiceMessage* message;
-    MessagePtr payload;
+    ServiceMessage* message_;
+    MessagePtr payload_;
 };
 
 }

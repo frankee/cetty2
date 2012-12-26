@@ -21,18 +21,17 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <boost/bind.hpp>
+#include <string>
 #include <boost/any.hpp>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelInboundHandler.h>
-#include <cetty/channel/ChannelOutboundHandler.h>
-#include <cetty/channel/ChannelHandlerPtr.h>
-#include <cetty/channel/ChannelInboundInvoker.h>
-#include <cetty/channel/ChannelOutboundInvoker.h>
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelException.h>
+#include <cetty/channel/ChannelMessageContainer.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 namespace cetty {
@@ -42,8 +41,6 @@ using namespace cetty::buffer;
 
 class ChannelPipeline;
 class ChannelPipelineException;
-class ChannelInboundBufferHandlerContext;
-class ChannelOutboundBufferHandlerContext;
 
 /**
  * Enables a {@link ChannelHandler} to interact with its {@link ChannelPipeline}
@@ -151,176 +148,290 @@ class ChannelOutboundBufferHandlerContext;
  *
  */
 
-class ChannelHandlerContext
-        : public ChannelOutboundInvoker, public ChannelInboundInvoker {
-private:
-    friend class ChannelPipeline;
+class ChannelHandlerContext : private boost::noncopyable {
+public:
+    typedef boost::function<void (ChannelHandlerContext&)> BeforeAddCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> AfterAddCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> BeforeRemoveCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> AfterRemoveCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> PipelineChangedCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+        const boost::any&)> UserEventCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const ChannelException&)> ChannelExceptionCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> ChannelOpenCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> ChannelActiveCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> ChannelInactiveCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&)> ChannelMessageUpdatedCallback;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const SocketAddress&,
+                                  const ChannelFuturePtr&)> BindFunctor;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const SocketAddress&,
+                                  const SocketAddress&,
+                                  const ChannelFuturePtr&)> ConnectFunctor;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const ChannelFuturePtr&)> DisconnectFunctor;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const ChannelFuturePtr&)> CloseFunctor;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+                                  const ChannelFuturePtr&)> FlushFunctor;
 
 public:
-    ChannelHandlerContext(const std::string& name,
-                          ChannelPipeline& pipeline,
-                          const ChannelHandlerPtr& handler,
-                          ChannelHandlerContext* prev,
-                          ChannelHandlerContext* next);
-
-    ChannelHandlerContext(const std::string& name,
-                          const EventLoopPtr& eventLoop,
-                          ChannelPipeline& pipeline,
-                          const ChannelHandlerPtr& handler,
-                          ChannelHandlerContext* prev,
-                          ChannelHandlerContext* next);
-
     virtual ~ChannelHandlerContext() {}
+
+    virtual void initialize(ChannelPipeline* pipeline);
 
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
      * This method is a shortcut to <tt>getPipeline().getChannel()</tt>.
      * @return ChannelPtr which is NULL, when pipeline has detach the channel.
      */
-    const ChannelPtr& getChannel() const;
+    ChannelPtr channel() const;
 
     /**
      * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
      * belongs to.
      */
-    const ChannelPipeline& getPipeline() const;
+    ChannelPipeline& pipeline();
 
     /**
      * Returns the {@link ChannelPipeline} that the {@link ChannelHandler}
      * belongs to.
      */
-    ChannelPipeline& getPipeline();
+    const ChannelPipeline& pipeline() const;
 
     /**
      * Returns the {@link EventLoop} that the {@link ChannelHandler}
      * belongs to.
      */
-    const EventLoopPtr& getEventLoop() const;
+    const EventLoopPtr& eventLoop() const {
+        return eventLoop_;
+    }
 
     /**
      * Returns the name of the {@link ChannelHandler} in the
      * {@link ChannelPipeline}.
      */
-    const std::string& getName() const;
+    const std::string& name() const {
+        return name_;
+    }
 
-    /**
-     * Returns the {@link ChannelHandler} that this context object is
-     * serving.
-     */
-    const ChannelHandlerPtr& getHandler() const;
+    ChannelHandlerContext* next() const {
+        return next_;
+    }
+    ChannelHandlerContext* prev() const {
+        return prev_;
+    }
 
-    /**
-     * Returns the {@link ChannelInboundHandler} that this context object is
-     * actually serving. If the context object serving is not ChannelInboundHandler,
-     * then return an empty ChannelInboundHandlerPtr.
-     */
-    const ChannelInboundHandlerPtr& getInboundHandler() const;
+    void setNext(ChannelHandlerContext* ctx) {
+        next_ = ctx;
+    }
 
-    /**
-     * Returns the {@link ChannelOutboundHandler} that this context object is
-     * actually serving. If the context object serving is not ChannelOutboundHandler,
-     * then return an empty ChannelOutboundHandlerPtr.
-     */
-    const ChannelOutboundHandlerPtr& getOutboundHandler() const;
+    void setPrev(ChannelHandlerContext* ctx) {
+        prev_ = ctx;
+    }
 
     /**
      * Returns the next outbound context of this context object, excluding this context.
      */
-    ChannelHandlerContext* getNextOutboundContext();
+    ChannelHandlerContext* nextOutboundContext() const {
+        return prev();
+    }
 
     /**
      * Returns the next inbound context of this context object, excluding this context.
      */
-    ChannelHandlerContext* getNextInboundContext();
+    ChannelHandlerContext* nextInboundContext() const {
+        return next();
+    }
 
-    /**
-     * Returns the next inbound context, which actually serve {@link ChannelInboundBufferHandler},
-     * of this context object, excluding this context.
-     */
-    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext();
+    ChannelFuturePtr newFuture();
+    ChannelFuturePtr newVoidFuture();
+    ChannelFuturePtr newSucceededFuture();
+    ChannelFuturePtr newFailedFuture(const ChannelException& cause);
 
-    /**
-     * Returns the next inbound context from ctx, which actually serve {@link ChannelInboundBufferHandler},
-     * of this context object, including the input ctx.
-     *
-     * @param ctx
-     */
-    ChannelInboundBufferHandlerContext* nextInboundBufferHandlerContext(ChannelHandlerContext* ctx);
+    std::string toString() const { return name_; }
 
-    /**
-     * Returns the next outbound context, which actually serve {@link ChannelOutboundBufferHandler},
-     * of this context object, excluding this context.
-     */
-    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext();
+public:
+    virtual boost::any getInboundMessageContainer() = 0;
+    virtual boost::any getOutboundMessageContainer() = 0;
 
-    /**
-     * Returns the next outbound context from ctx, which actually serve {@link ChannelOutboundBufferHandler},
-     * of this context object, including the input ctx.
-     *
-     * @param ctx
-     */
-    ChannelOutboundBufferHandlerContext* nextOutboundBufferHandlerContext(ChannelHandlerContext* ctx);
+    template<class T>
+    T* inboundMessageContainer() {
+        boost::any container = getInboundMessageContainer();
 
-    template<typename T>
-    T* nextInboundMessageHandlerContext();
+        if (!container.empty()) {
+            T** t = boost::any_cast<T*>(&container);
 
-    template<typename T>
-    T* nextInboundMessageHandlerContext(ChannelHandlerContext* ctx);
+            if (t) {
+                return *t;
+            }
+        }
 
-    template<typename T>
-    T* nextOutboundMessageHandlerContext();
+        return NULL;
+    }
 
-    template<typename T>
-    T* nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx);
+    template<class T>
+    T* nextInboundMessageContainer() {
+        if (next_) {
+            return nextInboundMessageContainer<T>(next_);
+        }
 
-    /**
-     * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
-     * instance of {@link ChannelInboundHandler}.
-     */
-    bool canHandleInboundMessage() const;
+        return NULL;
+    }
 
-    /**
-     * Returns <tt>true</tt> if and only if the {@link ChannelHandler} is an
-     * instance of {@link ChannelOutboundHandler}.
-     */
-    bool canHandleOutboundMessage() const;
+    template<class T>
+    T* nextInboundMessageContainer(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext* context = ctx;
 
-    virtual void fireChannelOpen();
-    virtual void fireChannelActive();
-    virtual void fireChannelInactive();
-    virtual void fireExceptionCaught(const ChannelException& cause);
-    virtual void fireUserEventTriggered(const boost::any& evt);
-    virtual void fireMessageUpdated();
+        while (context) {
+            T* t = context->inboundMessageContainer<T>();
 
-    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
+            if (t) {
+                return t;
+            }
 
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress);
+            context = context->next_;
+        }
 
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                                     const SocketAddress& localAddress);
+        return NULL;
+    }
 
-    virtual ChannelFuturePtr disconnect();
+    template<class T>
+    T* outboundMessageContainer() {
+        boost::any container = getOutboundMessageContainer();
 
-    virtual ChannelFuturePtr close();
+        if (!container.empty()) {
+            T** t = boost::any_cast<T*>(&container);
 
-    virtual ChannelFuturePtr flush();
+            if (t) {
+                return *t;
+            }
+        }
 
-    virtual const ChannelFuturePtr& bind(const SocketAddress& localAddress,
-                                         const ChannelFuturePtr& future);
+        return NULL;
+    }
 
-    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const ChannelFuturePtr& future);
+    template<class T>
+    T* nextOutboundMessageContainer() {
+        if (prev_) {
+            return nextOutboundMessageContainer<T>(prev_);
+        }
 
-    virtual const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                            const SocketAddress& localAddress,
-                                            const ChannelFuturePtr& future);
+        return NULL;
+    }
 
-    virtual const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+    template<class T>
+    T* nextOutboundMessageContainer(ChannelHandlerContext* ctx) {
+        ChannelHandlerContext* context = ctx;
 
-    virtual const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+        while (context) {
+            T* t = context->outboundMessageContainer<T>();
 
-    virtual const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
+            if (t) {
+                return t;
+            }
 
+            context = context->prev_;
+        }
+
+        return NULL;
+    }
+
+public:
+    const BeforeAddCallback& beforeAddCallback() const { return beforeAddCallback_; }
+    const AfterAddCallback& afterAddCallback() const { return afterAddCallback_; }
+    const BeforeRemoveCallback& beforeRemoveCallback() const { return beforeRemoveCallback_; }
+    const AfterRemoveCallback& afterRemoveCallback() const { return afterRemoveCallback_; }
+    const PipelineChangedCallback& pipelineChangedCallback() const { return pipelineChangedCallback_; }
+    const ChannelExceptionCallback& exceptionCallback() const { return exceptionCallback_; }
+    const UserEventCallback& userEventCallback() const { return userEventCallback_; }
+    const ChannelOpenCallback& channelOpenCallback() const { return channelOpenCallback_; }
+    const ChannelActiveCallback& channelActiveCallback() const { return channelActiveCallback_; }
+    const ChannelInactiveCallback& channelInactiveCallback() const { return channelInactiveCallback_; }
+    const ChannelMessageUpdatedCallback& channelMessageUpdatedCallback() const { return channelMessageUpdatedCallback_; }
+    const BindFunctor& bindFunctor() const { return bindFunctor_; }
+    const ConnectFunctor& connectFunctor() const { return connectFunctor_; }
+    const DisconnectFunctor& disconnectFunctor() const { return disconnectFunctor_; }
+    const CloseFunctor& closeFunctor() const { return closeFunctor_; }
+    const FlushFunctor& flushFunctor() const { return flushFunctor_; }
+
+    void setBeforeAddCallback(const BeforeAddCallback& beforeAdd) { beforeAddCallback_ = beforeAdd; }
+    void setAfterAddCallback(const AfterAddCallback& afterAdd) { afterAddCallback_ = afterAdd; }
+    void setBeforeRemoveCallback(const BeforeRemoveCallback& beforeRemove) { beforeRemoveCallback_ = beforeRemove; }
+    void setAfterRemoveCallback(const AfterRemoveCallback& afterRemove) { afterRemoveCallback_ = afterRemove; }
+    void setPipelineChangedCallback(const PipelineChangedCallback& pipelineChanged) { pipelineChangedCallback_ = pipelineChanged; }
+
+    void setExceptionCallback(const ChannelExceptionCallback& exception) { exceptionCallback_ = exception; }
+    void setUserEventCallback(const UserEventCallback& userEvent) { userEventCallback_ = userEvent; }
+
+    void setChannelOpenCallback(const ChannelOpenCallback& channelOpen) { channelOpenCallback_ = channelOpen; }
+    void setChannelActiveCallback(const ChannelActiveCallback& channelActive) { channelActiveCallback_ = channelActive; }
+    void setChannelInactiveCallback(const ChannelInactiveCallback& channelInactive) { channelInactiveCallback_ = channelInactive; }
+    void setChannelMessageUpdatedCallback(const ChannelMessageUpdatedCallback& messageUpdated) { channelMessageUpdatedCallback_ = messageUpdated; }
+
+    void setBindFunctor(const BindFunctor& bindFun) { bindFunctor_ = bindFun; }
+    void setConnectFunctor(const ConnectFunctor& connectFun) { connectFunctor_ = connectFun; }
+    void setDisconnectFunctor(const DisconnectFunctor& disconnectFun) { disconnectFunctor_ = disconnectFun; }
+    void setCloseFunctor(const CloseFunctor& closeFun) { closeFunctor_ = closeFun; }
+    void setFlushFunctor(const FlushFunctor& flushFun) { flushFunctor_ = flushFun; }
+
+public:
+    void fireChannelOpen();
+    void fireChannelActive();
+    void fireChannelInactive();
+    void fireExceptionCaught(const ChannelException& cause);
+    void fireUserEventTriggered(const boost::any& evt);
+    void fireMessageUpdated();
+
+    const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+                                 const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+                                    const SocketAddress& localAddress,
+                                    const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& close();
+    const ChannelFuturePtr& close(const ChannelFuturePtr& future);
+
+    const ChannelFuturePtr& flush();
+    const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
+
+public:
+    void fireBeforeAdd() { if (beforeAddCallback_) { beforeAddCallback_(*this); } }
+    void fireAfterAdd() { if (afterAddCallback_) { afterAddCallback_(*this); } }
+    void fireBeforeRemove() { if (beforeRemoveCallback_) { beforeRemoveCallback_(*this); } }
+    void fireAfterRemove() { if (afterRemoveCallback_) { afterRemoveCallback_(*this); } }
+    void firePipelineChanged() {
+        onPipelineChanged();
+
+        if (pipelineChangedCallback_) { pipelineChangedCallback_(*this); }
+    }
+
+    void fireChannelOpen(ChannelHandlerContext& ctx);
+    void fireChannelActive(ChannelHandlerContext& ctx);
+    void fireChannelInactive(ChannelHandlerContext& ctx);
+    void fireMessageUpdated(ChannelHandlerContext& ctx);
+    void fireExceptionCaught(ChannelHandlerContext& ctx, const ChannelException& cause);
+    void fireUserEventTriggered(ChannelHandlerContext& ctx, const boost::any& evt);
 
     const ChannelFuturePtr& bind(ChannelHandlerContext& ctx,
                                  const SocketAddress& localAddress,
@@ -340,180 +451,118 @@ public:
     const ChannelFuturePtr& flush(ChannelHandlerContext& ctx,
                                   const ChannelFuturePtr& future);
 
-    virtual void fireChannelOpen(ChannelHandlerContext& ctx);
-    virtual void fireChannelActive(ChannelHandlerContext& ctx);
-    virtual void fireChannelInactive(ChannelHandlerContext& ctx);
-    virtual void fireMessageUpdated(ChannelHandlerContext& ctx);
-    virtual void fireExceptionCaught(ChannelHandlerContext& ctx,
-                                     const ChannelException& cause);
-    virtual void fireUserEventTriggered(ChannelHandlerContext& ctx,
-                                        const boost::any& evt);
+protected:
+    ChannelHandlerContext(const std::string& name);
+
+    ChannelHandlerContext(const std::string& name,
+                          const EventLoopPtr& eventLoop);
+
+    virtual void onPipelineChanged() {
+        resetEventTransferContexts();
+    }
 
 private:
-    void init(const ChannelHandlerPtr& handler);
-
-    void attach();
-    void detach();
-
-    ChannelFuturePtr newFuture();
-    ChannelFuturePtr newSucceededFuture();
-    ChannelFuturePtr newFailedFuture(const ChannelException& cause);
-
     void notifyHandlerException(const ChannelPipelineException& e);
 
     void clearOutboundChannelBuffer(ChannelHandlerContext& ctx);
     void clearInboundChannelBuffer(ChannelHandlerContext& ctx);
 
-protected:
-    bool canHandleInbound;
-    bool canHandleOutbound;
+    void resetEventTransferContexts() {
+        hasNextUserEventHandler_ = true;
+        hasNextMessageUpdatedHandler_ = true;
 
-    bool hasInboundBufferHandler;
-    bool hasInboundMessageHandler;
-    bool hasOutboundBufferHandler;
-    bool hasOutboundMessageHandler;
+        hasNextChannelOpenHandler_ = true;
+        hasNextChannelActiveHandler_ = true;
+        hasNextChannelInactiveHandler_ = true;
+        hasNextChannelExceptionHandler_ = true;
 
-    ChannelHandlerPtr         handler;
-    ChannelInboundHandlerPtr  inboundHandler;
-    ChannelOutboundHandlerPtr outboundHandler;
+        hasPrevBindHandler_ = true;
+        hasPrevConnectHandler_ = true;
+        hasPrevDisconnectHandler_ = true;
+        hasPrevCloseHandler_ = true;
 
-    ChannelHandlerContext* next;
-    ChannelHandlerContext* prev;
+        hasPrevFlushHandler_ = true;
 
-    ChannelHandlerContext* nextInboundContext;
-    ChannelHandlerContext* nextOutboundContext;
+        nextUserEventHandler_ = NULL;
+        nextMessageUpdatedHandler_ = NULL;
 
-    std::string name;
+        nextChannelOpenHandler_ = NULL;
+        nextChannelActiveHandler_ = NULL;
+        nextChannelInactiveHandler_ = NULL;
+        nextChannelExceptionHandler_ = NULL;
 
-    ChannelPipeline& pipeline;
-    EventLoopPtr eventloop;
+        prevBindHandler_ = NULL;
+        prevConnectHandler_ = NULL;
+        prevDisconnectHandler_ = NULL;
+        prevCloseHandler_ = NULL;
+        prevFlushHandler_ = NULL;
+    }
+
+private:
+    BeforeAddCallback beforeAddCallback_;
+    AfterAddCallback afterAddCallback_;
+    BeforeRemoveCallback beforeRemoveCallback_;
+    AfterRemoveCallback afterRemoveCallback_;
+
+    PipelineChangedCallback pipelineChangedCallback_;
+
+    ChannelExceptionCallback exceptionCallback_;
+    UserEventCallback userEventCallback_;
+
+    ChannelOpenCallback channelOpenCallback_;
+    ChannelActiveCallback channelActiveCallback_;
+    ChannelInactiveCallback channelInactiveCallback_;
+    ChannelMessageUpdatedCallback channelMessageUpdatedCallback_;
+
+    BindFunctor bindFunctor_;
+    ConnectFunctor connectFunctor_;
+    DisconnectFunctor disconnectFunctor_;
+    CloseFunctor closeFunctor_;
+    FlushFunctor flushFunctor_;
+
+private:
+    std::string name_;
+
+    ChannelHandlerContext* next_;
+    ChannelHandlerContext* prev_;
+
+    bool hasNextUserEventHandler_;
+    bool hasNextMessageUpdatedHandler_;
+
+    bool hasNextChannelOpenHandler_;
+    bool hasNextChannelActiveHandler_;
+    bool hasNextChannelInactiveHandler_;
+    bool hasNextChannelExceptionHandler_;
+
+    bool hasPrevBindHandler_;
+    bool hasPrevConnectHandler_;
+    bool hasPrevDisconnectHandler_;
+    bool hasPrevCloseHandler_;
+    bool hasPrevFlushHandler_;
+
+    ChannelHandlerContext* nextUserEventHandler_;
+    ChannelHandlerContext* nextMessageUpdatedHandler_;
+
+    ChannelHandlerContext* nextChannelOpenHandler_;
+    ChannelHandlerContext* nextChannelActiveHandler_;
+    ChannelHandlerContext* nextChannelInactiveHandler_;
+    ChannelHandlerContext* nextChannelExceptionHandler_;
+
+    ChannelHandlerContext* prevBindHandler_;
+    ChannelHandlerContext* prevConnectHandler_;
+    ChannelHandlerContext* prevDisconnectHandler_;
+    ChannelHandlerContext* prevCloseHandler_;
+
+    ChannelHandlerContext* prevFlushHandler_;
+
+    ChannelWeakPtr channel_;
+    ChannelPipeline* pipeline_;
+    EventLoopPtr eventLoop_;
 };
 
 inline
-const ChannelPipeline& ChannelHandlerContext::getPipeline() const {
-    return pipeline;
-}
-
-inline
-ChannelPipeline& ChannelHandlerContext::getPipeline() {
-    return pipeline;
-}
-
-inline
-const EventLoopPtr& ChannelHandlerContext::getEventLoop() const {
-    return eventloop;
-}
-
-inline
-const std::string& ChannelHandlerContext::getName() const {
-    return name;
-}
-
-inline
-const ChannelHandlerPtr& ChannelHandlerContext::getHandler() const {
-    return handler;
-}
-
-inline
-const ChannelInboundHandlerPtr& ChannelHandlerContext::getInboundHandler() const {
-    return inboundHandler;
-}
-
-inline
-const ChannelOutboundHandlerPtr& ChannelHandlerContext::getOutboundHandler() const {
-    return outboundHandler;
-}
-
-inline
-bool ChannelHandlerContext::canHandleInboundMessage() const {
-    return canHandleInbound;
-}
-
-inline
-bool ChannelHandlerContext::canHandleOutboundMessage() const {
-    return canHandleOutbound;
-}
-
-template<typename T> inline
-T* ChannelHandlerContext::nextInboundMessageHandlerContext() {
-    return nextInboundMessageHandlerContext<T>(nextInboundContext);
-}
-
-template<typename T> inline
-T* ChannelHandlerContext::nextInboundMessageHandlerContext(ChannelHandlerContext* ctx) {
-    ChannelHandlerContext* next = ctx;
-
-    if (!next) {
-        return (T*)NULL;
-    }
-
-    if (next->hasInboundMessageHandler) {
-        T* context = dynamic_cast<T*>(next);
-
-        if (context) { return context; }
-    }
-
-    next = next->nextInboundContext;
-
-    while (true) {
-        if (!next) {
-            return (T*)NULL;
-        }
-
-        if (next->hasInboundMessageHandler) {
-            T* context = dynamic_cast<T*>(next);
-
-            if (context) { return context; }
-        }
-
-        next = next->nextInboundContext;
-    }
-}
-
-template<typename T> inline
-T* ChannelHandlerContext::nextOutboundMessageHandlerContext() {
-    if (!canHandleOutbound) {
-        ChannelHandlerContext* preCtx = prev;
-
-        while (preCtx) {
-            if (preCtx->canHandleOutbound) {
-                return nextOutboundMessageHandlerContext<T>(preCtx);
-            }
-
-            preCtx = preCtx->prev;
-        }
-
-        return NULL;
-    }
-
-    return nextOutboundMessageHandlerContext<T>(nextOutboundContext);
-}
-
-template<typename T> inline
-T* ChannelHandlerContext::nextOutboundMessageHandlerContext(ChannelHandlerContext* ctx) {
-    ChannelHandlerContext* next = ctx;
-
-    if (!next) {
-        return (T*)NULL;
-    }
-
-    if (next->hasOutboundMessageHandler) {
-        return dynamic_cast<T*>(next);
-    }
-
-    next = next->nextInboundContext;
-
-    while (true) {
-        if (!next) {
-            return (T*)NULL;
-        }
-
-        if (next->hasOutboundMessageHandler) {
-            return dynamic_cast<T*>(next);
-        }
-
-        next = next->nextInboundContext;
-    }
+ChannelPtr ChannelHandlerContext::channel() const {
+    return channel_.lock();
 }
 
 }

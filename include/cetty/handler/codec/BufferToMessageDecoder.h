@@ -32,31 +32,78 @@
  */
 
 #include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelPipelineMessageTransfer.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/handler/codec/DecoderException.h>
-#include <cetty/util/Exception.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
 using namespace cetty::buffer;
-using namespace cetty::util;
+using namespace cetty::channel;
 
-template<typename InboundOutT>
-class BufferToMessageDecoder : public ChannelInboundBufferHandler {
+template<typename H,
+         typename InboundOut,
+         typename Ctx = ChannelMessageHandlerContext<H,
+         ChannelBufferPtr,
+         InboundOut,
+         VoidMessage,
+         VoidMessage,
+         ChannelBufferContainer,
+         ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>,
+         VoidMessageContainer,
+         VoidMessageContainer> >
+class BufferToMessageDecoder : private boost::noncopyable {
 public:
-    virtual void afterAdd(ChannelHandlerContext& ctx) {
-        inboundTransfer.setContext(ctx);
+    typedef Ctx Context;
+    typedef BufferToMessageDecoder<H, InboundOut, Context> Self;
+
+    typedef boost::function<InboundOut(ChannelHandlerContext&, const ChannelBufferPtr&)> Decoder;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+
+    typedef ChannelMessageContainer<ChannelBufferPtr, MESSAGE_STREAM> InboundContainer;
+    typedef ChannelMessageTransfer<InboundOut,
+            ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+            TRANSFER_INBOUND> InboundTransfer;
+
+public:
+    BufferToMessageDecoder() {
     }
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
+    BufferToMessageDecoder(const Decoder& decoder)
+        : decoder_(decoder) {
+    }
+
+    ~BufferToMessageDecoder() {}
+
+    void registerTo(Context& ctx) {
+        transfer_ = ctx.inboundTransfer();
+        container_ = ctx.inboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &Self::messageUpdated,
+                this,
+                _1));
+
+        ctx.setChannelInactiveCallback(boost::bind(
+                                           &Self::channelInactive,
+                                           this,
+                                           _1));
+    }
+
+    void setDecoder(const Decoder& decoder) {
+        decoder_ = decoder;
+    }
+
+    void messageUpdated(ChannelHandlerContext& ctx) {
         callDecode(ctx);
     }
 
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
+    void channelInactive(ChannelHandlerContext& ctx) {
+#if 0
         const ChannelBufferPtr& in = getInboundChannelBuffer();
 
         if (in && in->readable()) {
@@ -77,14 +124,12 @@ public:
         }
 
         ctx.fireChannelInactive();
+#endif
     }
 
-    virtual InboundOutT decode(ChannelHandlerContext& ctx,
-                               const ChannelBufferPtr& in) = 0;
-
-    virtual InboundOutT decodeLast(ChannelHandlerContext& ctx,
-                                   const ChannelBufferPtr& in) {
-        return decode(ctx, in);
+    InboundOut decodeLast(ChannelHandlerContext& ctx,
+                          const ChannelBufferPtr& in) {
+        return decoder_(ctx, in);
     }
 
 #if 0
@@ -118,14 +163,13 @@ public:
 
 protected:
     void callDecode(ChannelHandlerContext& ctx) {
-        const ChannelBufferPtr& in = getInboundChannelBuffer();
-
+        const ChannelBufferPtr& in = container_->getMessages();
         bool decoded = false;
 
         for (;;) {
             try {
                 int oldInputLength = in->readableBytes();
-                InboundOutT o = decode(ctx, in);
+                InboundOut o = decoder_(ctx, in);
 
                 if (!o) {
                     if (oldInputLength == in->readableBytes()) {
@@ -137,12 +181,12 @@ protected:
                 }
                 else {
                     if (oldInputLength == in->readableBytes()) {
-                        throw IllegalStateException(
+                        throw cetty::util::IllegalStateException(
                             "decode() did not read anything but decoded a message.");
                     }
                 }
 
-                if (inboundTransfer.unfoldAndAdd(o)) {
+                if (transfer_->unfoldAndAdd(o)) {
                     decoded = true;
                 }
                 else {
@@ -176,7 +220,10 @@ protected:
     }
 
 protected:
-    ChannelPipelineMessageTransfer<InboundOutT, ChannelInboundMessageHandlerContext<InboundOutT> > inboundTransfer;
+    Decoder decoder_;
+
+    InboundTransfer* transfer_;
+    InboundContainer* container_;
 };
 
 }

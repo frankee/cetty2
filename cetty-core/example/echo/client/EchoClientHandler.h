@@ -23,8 +23,8 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelException.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/channel/ChannelHandlerContext.h>
+#include <cetty/channel/ChannelInboundBufferHandler.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/util/Exception.h>
@@ -44,31 +44,40 @@ using namespace cetty::util;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
-class EchoClientHandler : public ChannelInboundBufferHandlerAdapter<> {
+class EchoClientHandler : private boost::noncopyable {
 public:
-    /**
-     * Creates a client-side handler.
-     */
-    EchoClientHandler(int firstMessageSize);
-    virtual ~EchoClientHandler() {}
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::Context Context;
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::InboundContainer InboundContainer;
+    typedef ChannelInboudBufferHandler<EchoClientHandler>::OutboundTransfer OutboundTransfer;
 
-    int getTransferredBytes() const {
-        return transferredBytes;
+public:
+    EchoClientHandler(int firstMessageSize);
+
+    void registerTo(Context& ctx) {
+        container_ = ctx.inboundContainer();
+        transfer_ = ctx.outboundTransfer();
+
+        ctx.setChannelActiveCallback(boost::bind(&EchoClientHandler::channelActive, this, _1));
+        ctx.setChannelMessageUpdatedCallback(boost::bind(&EchoClientHandler::messageUpdated, this, _1));
+        ctx.setExceptionCallback(boost::bind(&EchoClientHandler::exceptionCaught, this, _1, _2));
     }
 
-    virtual void channelActive(ChannelHandlerContext& ctx);
+    void channelActive(ChannelHandlerContext& ctx);
+    void messageUpdated(ChannelHandlerContext& ctx);
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e);
-
-    virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const;
+    void exceptionCaught(ChannelHandlerContext& ctx,
+        const Exception& cause) {
+            // Close the connection when an exception is raised.
+            LOG_WARN << "Unexpected exception from downstream.";
+            ctx.close();
+    }
 
 private:
     int firstMessageSize;
     int transferredBytes;
+
+    InboundContainer* container_;
+    OutboundTransfer* transfer_;
 
     ChannelBufferPtr firstMessage;
 };

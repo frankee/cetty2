@@ -16,23 +16,15 @@
 
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
 
+#include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/handler/codec/LengthFieldPrepender.h>
-#include <cetty/handler/codec/http/HttpRequest.h>
-#include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/handler/codec/http/HttpRequestDecoder.h>
-#include <cetty/handler/codec/http/HttpResponseEncoder.h>
-#include <cetty/handler/codec/http/HttpChunkAggregator.h>
 #include <cetty/protobuf/service/ProtobufUtil.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceMessageCodec.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
-
-#include <cetty/channel/CombinedChannelMessageHandler.h>
 
 namespace cetty {
 namespace protobuf {
@@ -41,7 +33,6 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
-using namespace cetty::handler::codec::http;
 using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::protobuf::service::handler;
@@ -49,12 +40,13 @@ using namespace cetty::protobuf::service::handler;
 static const std::string PROTOBUF_SERVICE_RPC("rpc");
 
 ProtobufServerBuilder::ProtobufServerBuilder()
-    : ServerBuilder() {
+    : builder_() {
     init();
 }
 
-ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt, int childThreadCnt)
-    : ServerBuilder(parentThreadCnt, childThreadCnt) {
+ProtobufServerBuilder::ProtobufServerBuilder(int parentThreadCnt,
+        int childThreadCnt)
+    : builder_(parentThreadCnt, childThreadCnt) {
     init();
 }
 
@@ -67,64 +59,47 @@ ProtobufServerBuilder& ProtobufServerBuilder::registerService(
     return *this;
 }
 
+bool ProtobufServerBuilder::initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<LengthFieldBasedFrameDecoder::Handler>(
+        "frameDecoder",
+        LengthFieldBasedFrameDecoder::HandlerPtr(new LengthFieldBasedFrameDecoder(
+                    16 * 1024 * 1024,
+                    0,
+                    4,
+                    0,
+                    4,
+                    4,
+                    ProtobufUtil::adler32Checksum)));
+
+    pipeline.addLast<LengthFieldPrepender::Handler>(
+        "frameEncoder",
+        LengthFieldPrepender::HandlerPtr(new LengthFieldPrepender(
+                4,
+                4,
+                ProtobufUtil::adler32Checksum)));
+
+    pipeline.addLast<ProtobufServiceMessageCodec::Handler>(
+        "protobufCodec",
+        ProtobufServiceMessageCodec::HandlerPtr(new ProtobufServiceMessageCodec));
+
+    pipeline.addLast<ProtobufServiceMessageHandler>(
+        "messageHandler",
+        ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
+
+    return true;
+}
+
 ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
-    return build(PROTOBUF_SERVICE_RPC, port);
+    return builder_.build(PROTOBUF_SERVICE_RPC, port);
 }
 
 void ProtobufServerBuilder::init() {
-    registerPipeline(PROTOBUF_SERVICE_RPC, createProtobufServicePipeline());
-}
-
-class ProtobufServiceCodec
-    : public CombinedChannelMessageHandler<ChannelBufferPtr,
-    ProtobufServiceMessagePtr,
-    ProtobufServiceMessagePtr,
-    ChannelBufferPtr,
-    ChannelOutboundBufferHandlerContext> {
-public:
-    ProtobufServiceCodec()
-        : CombinedChannelMessageHandler<ChannelBufferPtr,
-    ProtobufServiceMessagePtr,
-    ProtobufServiceMessagePtr,
-    ChannelBufferPtr,
-    ChannelOutboundBufferHandlerContext> (new ProtobufServiceMessageDecoder,
-        new ProtobufServiceMessageEncoder) {}
-
-    virtual ~ProtobufServiceCodec() {}
-
-    virtual ChannelHandlerPtr clone() {
-        return new ProtobufServiceCodec;
-    }
-
-    virtual std::string toString() const {
-        return "ProtobufServiceCodec";
-    }
-};
-
-ChannelPipelinePtr ProtobufServerBuilder::createProtobufServicePipeline() {
-    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
-
-    pipeline->addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
-                          16 * 1024 * 1024,
-                          0,
-                          4,
-                          0,
-                          4,
-                          4,
-                          ProtobufUtil::adler32Checksum));
-
-    pipeline->addLast("frameEncoder", new LengthFieldPrepender(
-                          4,
-                          4,
-                          ProtobufUtil::adler32Checksum));
-
-    pipeline->addLast("protoCodec", new ProtobufServiceCodec);
-    //pipeline->addLast("protobufDecoder", new ProtobufServiceMessageDecoder());
-    //pipeline->addLast("protobufEncoder", new ProtobufServiceMessageEncoder());
-
-    pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
-
-    return pipeline;
+    builder_.registerServer(PROTOBUF_SERVICE_RPC,
+                   boost::bind(&ProtobufServerBuilder::initializeChannel,
+                               this,
+                               _1));
 }
 
 }

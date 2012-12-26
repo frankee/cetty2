@@ -22,7 +22,7 @@
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelPtr.h>
-#include <cetty/channel/ChannelMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -31,14 +31,28 @@ namespace gearman {
 using namespace cetty::channel;
 using namespace cetty::gearman::protocol;
 
-class GearmanWorkerHandler;
-typedef boost::intrusive_ptr<GearmanWorkerHandler> GearmanWorkerHandlerPtr;
+class GearmanWorkerHandler : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandler<GearmanWorkerHandler,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr,
+            GearmanMessagePtr> MessageHandler;
 
-class GearmanWorkerHandler
-    : public ChannelMessageHandlerAdapter<GearmanMessagePtr,
-      GearmanMessagePtr,
-      GearmanMessagePtr,
-          GearmanMessagePtr> {
+    typedef MessageHandler::Context Context;
+
+    typedef MessageHandler::InboundContainer InboundContainer;
+    typedef MessageHandler::OutboundContainer OutboundContainer;
+
+    typedef MessageHandler::InboundQueue InboundQueue;
+    typedef MessageHandler::OutboundQueue OutboundQueue;
+
+    typedef MessageHandler::InboundTransfer InboundTransfer;
+    typedef MessageHandler::OutboundTransfer OutboundTransfer;
+
+    typedef MessageHandler::Handler Handler;
+    typedef MessageHandler::HandlerPtr HandlerPtr;
+
 public:
     typedef boost::function1<GearmanMessagePtr, const GearmanMessagePtr&> GrabJobCallback;
 
@@ -48,27 +62,40 @@ public:
     GearmanWorkerHandler(int maxGrabIdleCount,
                          const std::map<std::string, GrabJobCallback> workerFunctors);
 
-    virtual ~GearmanWorkerHandler();
-
-    virtual void channelActive(ChannelHandlerContext& ctx);
-
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+    ~GearmanWorkerHandler();
 
     void registerWorker(const std::string& functionName,
                         const GrabJobCallback& worker);
 
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const GearmanMessagePtr& msg);
+    void registerTo(Context& ctx) {
+        ctx.setChannelActiveCallback(boost::bind(
+            &GearmanWorkerHandler::channelActive,
+            this,
+            _1));
 
-    virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &GearmanWorkerHandler::messageReceived,
+                this,
+                _1));
+
+        ctx.setFlushFunctor(boost::bind(
+                                &GearmanWorkerHandler::flush,
+                                this,
+                                _1,
+                                _2));
+    }
 
 private:
+    void channelActive(ChannelHandlerContext& ctx);
+
+    void messageReceived(ChannelHandlerContext& ctx);
+
+    void flush(ChannelHandlerContext& ctx,
+               const ChannelFuturePtr& future);
+
     void handleJob(const GearmanMessagePtr& gearmanMessage,
                    ChannelHandlerContext& ctx);
 
-private:
     void registerFunction(const std::string& functionName,
                           ChannelHandlerContext& ctx);
 
@@ -80,11 +107,17 @@ private:
     typedef std::map<std::string, GrabJobCallback> CallbackMap;
 
 private:
-    bool isSleep;
-    int grabIdleCount;
-    int maxGrabIdleCount;
-    ChannelPtr channel;
-    CallbackMap workerFunctors;
+    bool isSleep_;
+    int grabIdleCount_;
+    int maxGrabIdleCount_;
+
+    CallbackMap workerFunctors_;
+
+    InboundTransfer* inboundTransfer_;
+    InboundContainer* inboundContainer_;
+
+    OutboundTransfer* outboundTransfer_;
+    OutboundContainer* outboundContainer_;
 };
 
 }

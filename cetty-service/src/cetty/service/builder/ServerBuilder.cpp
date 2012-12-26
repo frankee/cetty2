@@ -17,9 +17,8 @@
 #include <cetty/service/builder/ServerBuilder.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
-#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/Logger.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -37,14 +36,13 @@
 
 #endif
 
-
 namespace cetty {
 namespace service {
 namespace builder {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
-using namespace cetty::bootstrap;
+using namespace cetty::channel::asio;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::logging;
@@ -134,54 +132,163 @@ static void createPidFile(const char* pidfile) {}
 #endif
 
 ServerBuilder::ServerBuilder() {
-    ConfigCenter::instance().configure(&config);
+    ConfigCenter::instance().configure(&config_);
     init();
 }
 
 ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
-    ConfigCenter::instance().configure(&config);
-    config.parentThreadCount = parentThreadCnt;
-    config.childThreadCount = childThreadCnt;
-    init();
-}
-
-ServerBuilder::ServerBuilder(const ServerBuilderConfig& config)
-    : config(config) {
+    ConfigCenter::instance().configure(&config_);
+    config_.parentThreadCount = parentThreadCnt;
+    config_.childThreadCount = childThreadCnt;
     init();
 }
 
 ServerBuilder::~ServerBuilder() {
-    deinit();
+}
+
+ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+        const ChildInitializer& childInitializer) {
+    ChannelOptions empty;
+    return registerServer(name,
+                          empty,
+                          empty,
+                          childInitializer);
+}
+
+ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer) {
+    if (name.empty()) {
+        LOG_WARN << "name is empty, can not register the server.";
+        return *this;
+    }
+
+    if (!childInitializer) {
+        LOG_WARN << "childInitializer is empty, can not register the server.";
+        return *this;
+    }
+
+    ServerBootstrapPtr bootstrap = new AsioServerBootstrap(
+        parentEventLoopPool_,
+        childEventLoopPool_);
+
+    bootstrap->setChildInitializer(childInitializer);
+
+    if (!options.empty()) {
+        bootstrap->setOptions(options);
+    }
+
+    if (!childOptions.empty()) {
+        bootstrap->setChildOptions(childOptions);
+    }
+
+    bootstraps_.insert(std::make_pair(name, bootstrap));
+
+    return *this;
+}
+
+ServerBuilder& ServerBuilder::setOptions(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions) {
+    ServerBootstraps::const_iterator itr = bootstraps_.find(name);
+
+    if (itr != bootstraps_.end()) {
+        itr->second->setOptions(options);
+        itr->second->setChildOptions(childOptions);
+    }
+    else {
+        LOG_WARN << "can not find the server: "
+                 << name
+                 << ", do nothing.";
+    }
+
+    return *this;
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        int port) {
+    return build(name, std::string(), port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelPipelinePtr& pipeline,
-                                int port) {
-    return build(name, pipeline, std::string(), port);
-}
-
-ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelPipelinePtr& pipeline,
                                 const std::string& host,
                                 int port) {
+    ServerBootstraps::const_iterator itr = bootstraps_.find(name);
+
+    if (itr == bootstraps_.end()) {
+        LOG_WARN << "has not found such server: "
+                 << name
+                 << " in builder registers, should registerServer first.";
+
+        return ChannelPtr();
+    }
+
+    return build(itr->second, host, port);
+}
+
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                const ChildInitializer& initializer,
+                                int port) {
+    return build(name, ChannelOptions(), ChannelOptions(), initializer, std::string(), port);
+}
+
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                const ChildInitializer& initializer,
+                                const std::string& host,
+                                int port) {
+    return build(name, ChannelOptions(), ChannelOptions(), initializer, host, port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer,
+        int port) {
+    return build(name, options, childOptions, childInitializer, std::string(), port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+        const ChannelOptions& options,
+        const ChannelOptions& childOptions,
+        const ChildInitializer& childInitializer,
+        const std::string& host,
+        int port) {
     if (name.empty()) {
         printf("parameter error, empty name or invalid address.");
         return ChannelPtr();
     }
 
-    ServerBootstrap* bootstrap = new ServerBootstrap(
-        new AsioServerSocketChannelFactory(parentEventLoopPool,
-                                           childEventLoopPool));
-    bootstraps.insert(std::make_pair(name, bootstrap));
+    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(
+        parentEventLoopPool_,
+        childEventLoopPool_);
 
-    //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
-    //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-    bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    bootstrap->setPipeline(pipeline);
+    bootstraps_.insert(std::make_pair(name, bootstrap));
 
+
+    if (childOptions.empty()) {
+        //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+    }
+
+    if (options.empty()) {
+        //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
+        //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+        bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    }
+
+    if (childInitializer) {
+        bootstrap->setChildInitializer(childInitializer);
+    }
+    else {
+        LOG_WARN << "childInitializer is empty, channel will not work fine.";
+    }
+
+    return build(bootstrap, host, port);
+}
+
+cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap, const std::string& host, int port) {
     ChannelFuturePtr future;
 
     if (host.empty()) {
@@ -192,61 +299,57 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (future->await()->isSuccess()) {
-        return future->getChannel();
+        return future->channel();
     }
     else {
         return ChannelPtr();
     }
 }
 
-ChannelPtr ServerBuilder::build(const std::string& name, int port) {
-    ChannelPipelinePtr pipeline = getPipeline(name);
-
-    if (pipeline) {
-        return build(name, pipeline, port);
-    }
-
-    return ChannelPtr();
-}
-
 int ServerBuilder::init() {
-    if (config.deamonize) {
+    if (config_.deamonize) {
         daemonize();
     }
 
-    if (!parentEventLoopPool) {
-        parentEventLoopPool = new AsioServicePool(config.parentThreadCount);
+    if (!parentEventLoopPool_) {
+        parentEventLoopPool_ = new AsioServicePool(config_.parentThreadCount);
     }
 
-    if (!childEventLoopPool) {
-        if (config.childThreadCount) {
-            childEventLoopPool = new AsioServicePool(config.childThreadCount);
+    if (!childEventLoopPool_) {
+        if (config_.childThreadCount) {
+            childEventLoopPool_ = new AsioServicePool(config_.childThreadCount);
         }
         else {
-            childEventLoopPool = parentEventLoopPool;
+            childEventLoopPool_ = parentEventLoopPool_;
         }
     }
 
-    Logger::logLevel(LogLevel::parseFrom(config.logLevel));
+    Logger::logLevel(LogLevel::parseFrom(config_.logLevel));
 
     return 0;
 }
 
-void ServerBuilder::deinit() {
+void ServerBuilder::shutdown() {
+    ServerBootstraps::iterator itr;
 
-}
-
-void ServerBuilder::stop() {
-    std::map<std::string, ServerBootstrap*>::iterator itr;
-
-    for (itr = bootstraps.begin(); itr != bootstraps.end(); ++itr) {
+    for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
         itr->second->shutdown();
     }
 }
 
 void ServerBuilder::waitingForExit() {
-    if (config.deamonize) {
-        createPidFile(config.pidfile.c_str());
+    if (config_.deamonize) {
+        createPidFile(config_.pidfile.c_str());
+
+        ServerBootstraps::iterator itr;
+        for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
+            const std::vector<ChannelPtr> channels =
+                itr->second->serverChannels();
+
+            for (std::size_t i = 0; i < channels.size(); ++i) {
+                channels[i]->closeFuture()->awaitUninterruptibly();
+            }
+        }
     }
     else {
         printf("Server is running...\n");
@@ -258,7 +361,7 @@ void ServerBuilder::waitingForExit() {
             input = getchar();
 
             if (input == 'q') {
-                stop();
+                shutdown();
                 break;
             }
         }
@@ -266,56 +369,41 @@ void ServerBuilder::waitingForExit() {
     }
 }
 
-void ServerBuilder::buildAll() {
-    std::size_t j = config.servers.size();
+ServerBuilder& ServerBuilder::buildAll() {
+    std::size_t j = config_.servers.size();
 
     for (std::size_t i = 0; i < j; ++i) {
-        const ServerBuilderConfig::Server& server = *config.servers[i];
+        const ServerBuilderConfig::Server& server = *config_.servers[i];
+        const std::string& name = server.name;
 
-        if (!server.pipeline.empty()) {
-            ChannelPipelinePtr pipeline = getPipeline(server.pipeline);
-
-            if (server.host.empty()) {
-                build(server.pipeline, pipeline, server.port);
-            }
-            else {
-                build(server.pipeline, pipeline, server.host, server.port);
-            }
+        if (name.empty()) {
+            LOG_WARN << "has not config the server name, will not start the server.";
+            continue;
         }
-        else {
-            LOG_WARN << "has no pipeline config, will not start the server.";
+
+        if (server.port == 0) {
+            LOG_WARN << "config the server: "
+                     << name
+                     << " , which port is 0, will skip it.";
+            continue;
         }
-    }
-}
 
-void ServerBuilder::getBuiltServers(std::map<std::string, ChannelPtr>* names) {
+        ServerBootstraps::const_iterator itr
+            = bootstraps_.find(server.name);
 
-}
+        if (itr == bootstraps_.end()) {
+            LOG_WARN << "the server: "
+                     << name
+                     << "has not register to the builder, should register first.";
+            continue;
+        }
 
-void ServerBuilder::registerPipeline(const std::string& name,
-                                     const ChannelPipelinePtr& pipeline) {
-    if (!name.empty()) {
-        pipelines[name] = pipeline;
-    }
-}
+        //TODO setting the options
 
-void ServerBuilder::unregisterPipeline(const std::string& name) {
-    std::map<std::string, ChannelPipelinePtr>::iterator itr =
-        pipelines.find(name);
-
-    if (itr != pipelines.end()) {
-        pipelines.erase(itr);
-    }
-}
-
-cetty::channel::ChannelPipelinePtr ServerBuilder::getPipeline(const std::string& name) {
-    std::map<std::string, ChannelPipelinePtr>::iterator itr = pipelines.find(name);
-
-    if (itr != pipelines.end()) {
-        return itr->second;
+        build(itr->second, server.host, server.port);
     }
 
-    return ChannelPipelinePtr();
+    return *this;
 }
 
 }

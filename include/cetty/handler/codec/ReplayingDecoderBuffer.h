@@ -51,6 +51,10 @@ public:
         writerIdx = buffer->writerIndex();
     }
 
+    const ChannelBufferPtr& unwrap() const {
+        return buffer;
+    }
+
     void terminate() {
         terminated = true;
     }

@@ -20,10 +20,13 @@
 #include <vector>
 #include <boost/thread.hpp>
 #include <cetty/channel/EventLoopPtr.h>
+#include <cetty/util/CurrentThread.h>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
 namespace channel {
+
+    using namespace cetty::util;
 
 class EventLoopPool : public cetty::util::ReferenceCounter<EventLoopPool> {
 public:
@@ -34,7 +37,7 @@ public:
     };
 
     typedef std::vector<EventLoopHolder*> EventLoops;
-    typedef std::map<boost::thread::id, EventLoopPtr> EventLoopMap;
+    typedef std::map<ThreadId, EventLoopPtr> EventLoopMap;
 
     static const EventLoopPtr& current();
 
@@ -91,10 +94,10 @@ protected:
     int eventLoopCnt;
 
     // The next io_service to use for a connection.
-    int nextServiceIndex;
+    int nextServiceIndex_;
 
     //
-    boost::thread::id mainThreadId;
+    ThreadId mainThreadId;
 
     EventLoops eventLoops;
 

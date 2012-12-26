@@ -18,7 +18,7 @@
 
 #include <cetty/channel/Timeout.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/handler/timeout/ReadTimeoutHandler.h>
 

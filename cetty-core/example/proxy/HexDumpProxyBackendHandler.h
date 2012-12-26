@@ -27,7 +27,7 @@
 
 using namespace cetty::buffer;
 
-class HexDumpProxyBackendHandler : public cetty::channel::ChannelInboundBufferHandlerAdapter<> {
+class HexDumpProxyBackendHandler : private boost::noncopyable {
 public:
     HexDumpProxyBackendHandler(const ChannelPtr& inboundChannel) {
         this.inboundChannel = inboundChannel;

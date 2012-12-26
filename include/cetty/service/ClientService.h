@@ -19,55 +19,72 @@
 
 #include <vector>
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/AbstractChannel.h>
-#include <cetty/channel/DefaultChannelConfig.h>
+#include <cetty/channel/Channel.h>
+#include <cetty/channel/ChannelConfig.h>
 
 #include <cetty/service/ServiceFuture.h>
 #include <cetty/service/ClientServicePtr.h>
-#include <cetty/service/ServiceRequestHandler.h>
+#include <cetty/service/ClientServiceDispatcher.h>
 
 namespace cetty {
 namespace service {
 
 using namespace cetty::channel;
 
-class ClientService : public cetty::channel::AbstractChannel {
+template<typename Request, typename Response>
+class ClientService : public cetty::channel::Channel {
+public:
+    typedef ClientService<Request, Response> Self;
+
+    typedef ClientServiceDispatcher<Self*,
+            Request,
+            Response> ClientDispatcher;
+
+    typedef typename ClientDispatcher::Context Context;
+    typedef typename ClientDispatcher::Context::Handler Handler;
+    typedef typename ClientDispatcher::Context::HandlerPtr HandlerPtr;
+
 public:
     ClientService(const EventLoopPtr& eventLoop,
-                  const ChannelFactoryPtr& factory,
-                  const ChannelPipelinePtr& pipeline);
+                  const Initializer& initializer,
+                  const Connections& connections)
+        : Channel(ChannelPtr(), eventLoop),
+          eventLoop_(eventLoop),
+          dispatcher_(eventLoop, connections, initializer) {
+    }
 
     virtual ~ClientService() {}
 
-    virtual ChannelConfig& getConfig();
-    virtual const ChannelConfig& getConfig() const;
+    virtual bool isOpen() const { return true; }
+    virtual bool isActive() const { return true; }
 
-    virtual const SocketAddress& getLocalAddress() const;
-    virtual const SocketAddress& getRemoteAddress() const;
+    void registerTo(Context& ctx) {
+        dispatcher_.registerTo(ctx);
+    }
 
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
+private:
+    void doBind(const SocketAddress& localAddress) {}
+    void doDisconnect() {}
+    void doClose() {}
 
-    virtual void setPipeline(const ChannelPipelinePtr& pipeline);
+    void doInitialize() {
+        //pipeline().setHead<HandlerPtr>("dispatcher", this);
+        pipeline().setHead(new Context("dispatcher", this));
+    }
 
-protected:
-    virtual void doBind(const SocketAddress& localAddress);
-    virtual void doDisconnect();
-    virtual void doClose();
-
-protected:
-    EventLoopPtr  eventLoop;
-    DefaultChannelConfig config;
+private:
+    EventLoopPtr eventLoop_;
+    ClientDispatcher dispatcher_;
 };
 
-template<typename ReqT, typename RepT>
+template<typename Request, typename Response>
 void callMethod(const ChannelPtr& channel,
-                const ReqT& request,
-                const boost::intrusive_ptr<ServiceFuture<RepT> >& future) {
+                const Request& request,
+                const boost::intrusive_ptr<ServiceFuture<Response> >& future) {
     if (channel) {
-        boost::intrusive_ptr<OutstandingCall<ReqT, RepT> > outstanding(
-            new OutstandingCall<ReqT, RepT>(request, future));
-        channel->write(outstanding);
+        boost::intrusive_ptr<OutstandingCall<Request, Response> > outstanding(
+            new OutstandingCall<Request, Response>(request, future));
+        channel->writeMessage(outstanding);
     }
 }
 

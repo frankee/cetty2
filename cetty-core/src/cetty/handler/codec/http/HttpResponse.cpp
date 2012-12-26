@@ -27,33 +27,35 @@ using namespace cetty::buffer;
 using namespace cetty::util;
 
 HttpResponse::HttpResponse()
-    : status(HttpResponseStatus::NOT_FOUND) {
+    : version_(HttpVersion::HTTP_1_1),
+    status_(HttpResponseStatus::NOT_FOUND) {
 }
 
 HttpResponse::HttpResponse(const HttpVersion& version, const HttpResponseStatus& status)
-    : HttpMessage(version), status(status) {
+    : version_(version),
+    status_(status) {
 }
 
 void HttpResponse::clear() {
-    HttpMessage::clear();
-    status = HttpResponseStatus::NOT_FOUND;
+    headers_.clear();
+    status_ = HttpResponseStatus::NOT_FOUND;
 }
 
 std::string HttpResponse::toString() const {
     std::string buf;
     buf.reserve(2048);
 
-    StringUtil::printf(&buf,
-                          "HttpResponse (TransferEncoding: %s)\r\n%s %s",
-                          getTransferEncoding().toString().c_str(),
-                          getProtocolVersion().getText().c_str(),
-                          getStatus().toString().c_str());
-
-    ConstHeaderIterator end = getLastHeader();
-
-    for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
-        StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
-    }
+//     StringUtil::printf(&buf,
+//                           "HttpResponse (TransferEncoding: %s)\r\n%s %s",
+//                           transferEncoding().toString().c_str(),
+//                           getProtocolVersion().getText().c_str(),
+//                           status().toString().c_str());
+// 
+//     ConstHeaderIterator end = getLastHeader();
+// 
+//     for (ConstHeaderIterator itr = getFirstHeader(); itr != end; ++itr) {
+//         StringUtil::printf(&buf, "\r\n%s: %s", itr->first.c_str(), itr->second.c_str());
+//     }
 
     return buf;
 }

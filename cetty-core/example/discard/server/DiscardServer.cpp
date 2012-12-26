@@ -21,7 +21,7 @@
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
 
 #include "DiscardServerHandler.h"
 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            f->channel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

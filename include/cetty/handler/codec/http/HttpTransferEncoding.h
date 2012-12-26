@@ -76,15 +76,15 @@ public:
 public:
     HttpTransferEncoding(int value, bool single)
         : cetty::util::Enum<HttpTransferEncoding>(value),
-          single(single) {}
+          single_(single) {}
 
     HttpTransferEncoding(const HttpTransferEncoding& rhs)
         : cetty::util::Enum<HttpTransferEncoding>(rhs),
-          single(rhs.single) {}
+          single_(rhs.single_) {}
 
     HttpTransferEncoding& operator=(const HttpTransferEncoding& rhs) {
         v = rhs.v;
-        single = rhs.single;
+        single_ = rhs.single_;
         return *this;
     }
 
@@ -92,22 +92,22 @@ public:
      * Returns {@code true} if and only if a complete HTTP message is composed of an
      * {@link HttpMessage} and one or more {@link HttpChunk}s.
      */
-    bool isMultiple() const {
-        return !single;
+    bool multiple() const {
+        return !single_;
     }
 
     /**
      * Returns {@code true} if and only if a single {@link HttpMessage} represents a complete
      * HTTP message, not followed by any {@link HttpChunk}s.
      */
-    bool isSingle() const {
-        return single;
+    bool single() const {
+        return single_;
     }
 
     std::string toString() const;
 
 private:
-    bool single;
+    bool single_;
 };
 
 }

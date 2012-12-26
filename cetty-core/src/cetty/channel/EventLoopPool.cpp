@@ -25,7 +25,7 @@ EventLoopPool::EventLoopMap EventLoopPool::allEventLoops;
 static EventLoopPtr emptyEventLoop;
 
 const EventLoopPtr& EventLoopPool::current() {
-    boost::thread::id id = boost::this_thread::get_id();
+    const ThreadId& id = CurrentThread::id();
     EventLoopMap::iterator itr = allEventLoops.find(id);
     if (itr != allEventLoops.end()) {
         return itr->second;
@@ -48,7 +48,7 @@ EventLoopPool::EventLoopPool(int threadCnt)
         //LOG_WARN(logger, "onlyMainThread.");
     }
 
-    mainThreadId = boost::this_thread::get_id();
+    mainThreadId = CurrentThread::id();
 }
 
 EventLoopPool::~EventLoopPool() {

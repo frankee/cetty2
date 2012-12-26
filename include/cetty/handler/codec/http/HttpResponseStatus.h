@@ -302,6 +302,7 @@ public:
      */
     static HttpResponseStatus NOT_EXTENDED;
 
+public:
     /**
      * Returns the {@link HttpResponseStatus} represented by the specified code.
      * If the specified code is a standard HTTP status code, a cached instance
@@ -309,6 +310,7 @@ public:
      */
     static HttpResponseStatus valueOf(int code);
 
+public:
     /**
      * Creates a new instance with the specified <tt>code</tt> and its
      * <tt>reasonPhrase</tt>.
@@ -318,34 +320,30 @@ public:
     /**
      * Returns the code of this status.
      */
-    int getCode() const {
-        return code;
+    int code() const {
+        return code_;
     }
 
     /**
      * Returns the reason phrase of this status.
      */
-    const std::string& getReasonPhrase() const {
-        return reasonPhrase;
-    }
-
-    int hashCode() const {
-        return getCode();
+    const std::string& reasonPhrase() const {
+        return reasonPhrase_;
     }
 
     bool equals(const HttpResponseStatus& status) {
-        return getCode() == status.getCode();
+        return code_ == status.code_;
     }
 
     int compareTo(const HttpResponseStatus& status) {
-        return getCode() - status.getCode();
+        return code_ - status.code_;
     }
 
     std::string toString() const;
 
 private:
-    int code;
-    std::string reasonPhrase;
+    int code_;
+    std::string reasonPhrase_;
 };
 
 

@@ -27,9 +27,9 @@ namespace util {
 
 class Process {
 public:
-#if defined(BOOST_POSIX_API)
+#if defined(CETTY_OS_FAMILY_UNIX)
     typedef pid_t PID;
-#elif defined(BOOST_WINDOWS_API)
+#elif defined(CETTY_OS_FAMILY_WINDOWS)
     typedef unsigned long PID;
 #endif
 

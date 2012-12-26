@@ -22,10 +22,8 @@
  */
 
 #include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 
-
-class HexDumpProxyFrontendHandler : public ChannelInboundBufferHandlerAdapter<> {
+class HexDumpProxyFrontendHandler : private boost::noncopyable {
 public:
     HexDumpProxyFrontendHandler(const std::string& remoteHost,
                                 int remotePort)
@@ -36,10 +34,10 @@ public:
     virtual void channelActive(ChannelHandlerContext& ctx) {
         // TODO: Suspend incoming traffic until connected to the remote host.
         //       Currently, we just keep the inbound traffic in the client channel's outbound buffer.
-        const ChannelPtr& inboundChannel = ctx.getChannel();
+        const ChannelPtr& inboundChannel = ctx.channel();
 
         // Start the connection attempt.
-        Bootstrap b = new Bootstrap();
+        AbstractBootstrap b = new AbstractBootstrap();
         b.group(inboundChannel.eventLoop())
         .channel(NioSocketChannel.class)
         .remoteAddress(remoteHost, remotePort)

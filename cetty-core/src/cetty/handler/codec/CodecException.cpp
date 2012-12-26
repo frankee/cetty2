@@ -20,9 +20,7 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-using namespace cetty::util;
-
-CETTY_IMPLEMENT_EXCEPTION(CodecException, ChannelException, "Codec exception")
+CETTY_IMPLEMENT_EXCEPTION(CodecException, cetty::channel::ChannelException, "Codec exception")
 
 }
 }

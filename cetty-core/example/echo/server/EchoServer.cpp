@@ -3,26 +3,27 @@
 
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-
 #include "EchoServerHandler.h"
 
-#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/IpAddress.h>
 #include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelFuture.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+
+#include <cetty/logging/LogLevel.h>
+#include <cetty/logging/Logger.h>
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::channel::asio;
 
-using namespace cetty::bootstrap;
+using namespace cetty::bootstrap::asio;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
+using namespace cetty::logging;
 
 int main(int argc, char* argv[]) {
     int threadCount = 1;
@@ -31,12 +32,14 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
+    ChannelInitializer1<EchoServerHandler> initializer("echo");
 
-    ServerBootstrap bootstrap(factory);
+    Logger::logLevel(LogLevel::FATAL);
 
-    bootstrap.setPipeline(ChannelPipelines::pipeline(new EchoServerHandler))
-    .setOption(ChannelOption::CO_TCP_NODELAY, true)
+    AsioServerBootstrap bootstrap(threadCount);
+    bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1));
+
+    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
 
@@ -52,7 +55,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            f->channel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

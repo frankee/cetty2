@@ -23,13 +23,17 @@
 
 #include <string>
 #include <vector>
+#include <cetty/util/NameValueCollection.h>
+#include <cetty/handler/codec/http/Cookie.h>
+#include <cetty/handler/codec/http/HttpVersion.h>
+#include <cetty/handler/codec/http/HttpTransferEncoding.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 namespace http {
 
-class HttpMessage;
+using namespace cetty::util;
 
 /**
  * Provides the constants for the standard HTTP header names and values and
@@ -447,13 +451,189 @@ public:
         static const std::string WEBSOCKET;
     };
 
+public:
+    typedef NameValueCollection::ConstIterator ConstHeaderIterator;
+
+public:
+    HttpHeaders()
+        : transferEncoding_(HttpTransferEncoding::SINGLE) {}
+
+    bool hasHeader(const std::string& name) const {
+        return headers_.has(name);
+    }
+
+    /**
+     * Returns the header value with the specified header name.  If there are
+     * more than one header value for the specified header name, the first
+     * value is returned.
+     *
+     * @return the header value or <tt>null</tt> if there is no such header
+     */
+    const std::string& headerValue(const std::string& name) const {
+        return headers_.get(name);
+    }
+
+    /**
+     * Returns the header value with the specified header name.  If there are
+     * more than one header value for the specified header name, the first
+     * value is returned.
+     *
+     * @return the header value or the <tt>defaultValue</tt> if there is no such
+     *         header
+     */
+    const std::string& headerValue(const std::string& name,
+                                   const std::string& defaultValue) const {
+        return headers_.get(name, defaultValue);
+    }
+
+    /**
+     * Returns the integer header value with the specified header name.  If
+     * there are more than one header value for the specified header name, the
+     * first value is returned.
+     *
+     * @return the header value
+     * @throws NumberFormatException
+     *         if there is no such header or the header value is not a number
+     */
+    int headerIntValue(const std::string& name) {
+        const std::string& value = headers_.get(name);
+
+        if (!value.empty()) {
+            return StringUtil::strto32(value);
+        }
+        else {
+            return 0;
+        }
+    }
+
+    /**
+     * Returns the integer header value with the specified header name.  If
+     * there are more than one header value for the specified header name, the
+     * first value is returned.
+     *
+     * @return the header value or the <tt>defaultValue</tt> if there is no such
+     *         header or the header value is not a number
+     */
+    int headerIntValue(const std::string& name, int defaultValue) {
+        const std::string& value = headers_.get(name);
+
+        if (!value.empty() && StringUtil::isDigits(name)) {
+            return StringUtil::strto32(value);
+        }
+        else {
+            return defaultValue;
+        }
+    }
+
+    /**
+    * Get the header values with the specified header name.
+    *
+    * @param name the specified header name
+    * @param header the {@link StringList} of header values.
+    *               An empty list if there is no such header.
+    *
+    */
+    void headerValues(const std::string& name, std::vector<std::string>* headers) const {
+        if (headers) {
+            headers_.get(name, headers);
+        }
+    }
+
+    /**
+    * Get the all header names and values that this message contains.
+    *
+    * @param nameValues The {@link NameValueList} of the header name-value pairs.
+    *                   An empty list if there is no header in this message.
+    */
+    ConstHeaderIterator firstHeader() const {
+        return headers_.begin();
+    }
+
+    ConstHeaderIterator lastHeader() const {
+        return headers_.end();
+    }
+
+    /**
+    * Returns <tt>true</tt> if and only if there is a header with the specified
+    * header name.
+    */
+    bool containsHeader(const std::string& name) const {
+        return headers_.has(name);
+    }
+
+    /**
+    * Get the {@link StringList} of all header names that this message contains.
+    */
+    void headerNames(std::vector<std::string>* names) const {
+        headers_.getNames(names);
+    }
+
+    /**
+    * Adds a new header with the specified name and string value.
+    */
+    void addHeader(const std::string& name, int value) {
+        headers_.add(name, StringUtil::numtostr(value));
+    }
+
+    /**
+    * Adds a new header with the specified name and string value.
+    */
+    void addHeader(const std::string& name, const std::string& value) {
+        headers_.add(name, value);
+    }
+
+    /**
+    * Adds a new header with the specified name and int value.
+    */
+    void setHeader(const std::string& name, int value) {
+        headers_.set(name, StringUtil::numtostr(value));
+    }
+
+    void setHeader(const std::string& name, const std::string& value) {
+        headers_.set(name, value);
+    }
+
+    /**
+    * Sets a new header with the specified name and values.  If there is an
+    * existing header with the same name, the existing header is removed.
+    */
+    void setHeader(const std::string& name, const std::vector<std::string>& values) {
+        headers_.set(name, values.begin(), values.end());
+    }
+
+    void setHeader(const std::string& name, const std::vector<int>& values);
+
+    /**
+    * Removes the header with the specified name.
+    */
+    void removeHeader(const std::string& name) {
+        headers_.erase(name);
+    }
+
+    /**
+    * Removes the header with the specified name and value.
+    * If only one value with the name, then move the name item completely,
+    * otherwise only remove the value.
+    */
+    void removeHeader(const std::string& name, const std::string& value) {
+        headers_.erase(name, value);
+    }
+
+    /**
+    * Removes all headers from this message.
+    */
+    void clear() {
+        headers_.clear();
+        cookies_.clear();
+    }
+
     /**
      * Returns <tt>true</tt> if and only if the connection can remain open and
      * thus 'kept alive'.  This methods respects the value of the
      * <tt>"Connection"</tt> header first and then the return value of
      * {@link HttpVersion#isKeepAliveDefault()}.
      */
-    static bool isKeepAlive(const HttpMessage& message);
+    bool keepAlive(const HttpVersion& version = HttpVersion::HTTP_1_1) const;
 
     /**
      * Sets the value of the <tt>"Connection"</tt> header depending on the
@@ -474,84 +654,8 @@ public:
      *     </ul></li>
      * </ul>
      */
-    static void setKeepAlive(HttpMessage& message, bool keepAlive);
-
-    /**
-     * Returns the header value with the specified header name.  If there are
-     * more than one header value for the specified header name, the first
-     * value is returned.
-     *
-     * @return the header value or <tt>null</tt> if there is no such header
-     */
-    static const std::string& getHeader(const HttpMessage& message, const std::string& name);
-
-    /**
-     * Returns the header value with the specified header name.  If there are
-     * more than one header value for the specified header name, the first
-     * value is returned.
-     *
-     * @return the header value or the <tt>defaultValue</tt> if there is no such
-     *         header
-     */
-    static const std::string& getHeader(const HttpMessage& message, const std::string& name, const std::string& defaultValue);
-
-    /**
-     * Sets a new header with the specified name and value.  If there is an
-     * existing header with the same name, the existing header is removed.
-     */
-    static void setHeader(HttpMessage& message, const std::string& name, const std::string& value);
-    static void setHeader(HttpMessage& message, const std::string& name, int vlaue);
-
-    /**
-     * Sets a new header with the specified name and values.  If there is an
-     * existing header with the same name, the existing header is removed.
-     */
-    static void setHeader(HttpMessage& message, const std::string& name, const std::vector<std::string>& values);
-    static void setHeader(HttpMessage& message, const std::string& name, const std::vector<int>& values);
-
-    /**
-     * Adds a new header with the specified name and value.
-     */
-    static void addHeader(HttpMessage& message, const std::string& name, const std::string& value);
-    static void addHeader(HttpMessage& message, const std::string& name, int value);
-
-    /**
-     * Returns the integer header value with the specified header name.  If
-     * there are more than one header value for the specified header name, the
-     * first value is returned.
-     *
-     * @return the header value
-     * @throws NumberFormatException
-     *         if there is no such header or the header value is not a number
-     */
-    static int getIntHeader(const HttpMessage& message, const std::string& name);
-
-    /**
-     * Returns the integer header value with the specified header name.  If
-     * there are more than one header value for the specified header name, the
-     * first value is returned.
-     *
-     * @return the header value or the <tt>defaultValue</tt> if there is no such
-     *         header or the header value is not a number
-     */
-    static int getIntHeader(const HttpMessage& message, const std::string& name, int defaultValue);
-
-    /**
-     * Sets a new integer header with the specified name and value.  If there
-     * is an existing header with the same name, the existing header is removed.
-     */
-    static void setIntHeader(HttpMessage& message, const std::string& name, int value);
-
-    /**
-     * Sets a new integer header with the specified name and values.  If there
-     * is an existing header with the same name, the existing header is removed.
-     */
-    static void setIntHeader(HttpMessage& message, const std::string& name, std::vector<int>& values);
-
-    /**
-     * Adds a new integer header with the specified name and value.
-     */
-    static void addIntHeader(HttpMessage& message, const std::string& name, int value);
+    void setKeepAlive(bool keepAlive,
+                      const HttpVersion& version = HttpVersion::HTTP_1_1);
 
     /**
      * Returns the length of the content.  Please note that this value is
@@ -562,61 +666,70 @@ public:
      * @return the content length or <tt>0</tt> if this message does not have
      *         the <tt>"Content-Length"</tt> header
      */
-    static int getContentLength(const HttpMessage& message);
-
-    /**
-     * Returns the length of the content.  Please note that this value is
-     * not retrieved from {@link HttpMessage#getContent()} but from the
-     * <tt>"Content-Length"</tt> header, and thus they are independent from each
-     * other.
-     *
-     * @return the content length or <tt>defaultValue</tt> if this message does
-     *         not have the <tt>"Content-Length"</tt> header
-     */
-    static int getContentLength(const HttpMessage& message, int defaultValue);
+    int contentLength() const;
 
     /**
      * Sets the <tt>"Content-Length"</tt> header.
      */
-    static void setContentLength(HttpMessage& message, int length);
+    void setContentLength(int length);
 
     /**
      * Returns the value of the <tt>"Host"</tt> header.
      */
-    static const std::string& getHost(const HttpMessage& message);
+    const std::string& host() const;
 
     /**
      * Returns the value of the <tt>"Host"</tt> header.  If there is no such
      * header, the <tt>defaultValue</tt> is returned.
      */
-    static const std::string& getHost(const HttpMessage& message, const std::string& defaultValue);
+    const std::string& host(const std::string& defaultValue) const;
 
     /**
      * Sets the <tt>"Host"</tt> header.
      */
-    static void setHost(HttpMessage& message, const std::string& value);
+    void setHost(const std::string& value);
 
     /**
-     * Returns <tt>true</tt> if and only if the specified message contains the
-     * <tt>"Expect: 100-continue"</tt> header.
+     * Returns the transfer encoding of this {@link HttpMessage}.
+     * <ul>
+     * <li>{@link HttpTransferEncoding#CHUNKED} - an HTTP message whose {@code "Transfer-Encoding"}
+     * is {@code "chunked"}.</li>
+     * <li>{@link HttpTransferEncoding#STREAMED} - an HTTP message which is not chunked, but
+     *     is followed by {@link HttpChunk}s that represent its content.  {@link #getContent()}
+     *     returns an empty buffer.</li>
+     * <li>{@link HttpTransferEncoding#SINGLE} - a self-contained HTTP message which is not chunked
+     *     and {@link #getContent()} returns the full content.</li>
+     * </ul>
      */
-    static bool is100ContinueExpected(const HttpMessage& message);
+    const HttpTransferEncoding& transferEncoding() const;
 
     /**
-     * Sets the <tt>"Expect: 100-continue"</tt> header to the specified message.
-     * If there is any existing <tt>"Expect"</tt> header, they are replaced with
-     * the new one.
+     * Sets the transfer encoding of this {@link HttpMessage}.
+     * <ul>
+     * <li>If set to {@link HttpTransferEncoding#CHUNKED}, the {@code "Transfer-Encoding: chunked"}
+     * header is set and the {@code "Content-Length"} header and the content of this message are
+     * removed automatically.</li>
+     * <li>If set to {@link HttpTransferEncoding#STREAMED}, the {@code "Transfer-Encoding: chunked"}
+     * header and the content of this message are removed automatically.</li>
+     * <li>If set to {@link HttpTransferEncoding#SINGLE}, the {@code "Transfer-Encoding: chunked"}
+     * header is removed automatically.</li>
+     * </ul>
+     * For more information about what {@link HttpTransferEncoding} means, see {@link #getTransferEncoding()}.
      */
-    static void set100ContinueExpected(HttpMessage& message);
+    void setTransferEncoding(const HttpTransferEncoding& te);
 
-    /**
-     * Sets or removes the <tt>"Expect: 100-continue"</tt> header to / from the
-     * specified message.  If the specified <tt>value</tt> is <tt>true</tt>,
-     * the <tt>"Expect: 100-continue"</tt> header is set and all other previous
-     * <tt>"Expect"</tt> headers are removed.  Otherwise, all <tt>"Expect"</tt>
-     * headers are removed completely.
-     */
-    static void set100ContinueExpected(HttpMessage& message, bool set);
+    void addCookie(const Cookie& cookie);
+    void addCookie(const std::string& name, const std::string& value);
+
+    const std::vector<Cookie>& cookies() const;
+
+    void toString(std::string* str) const;
+
+private:
+    NameValueCollection headers_;
+    HttpTransferEncoding transferEncoding_;
+
+    mutable std::vector<Cookie> cookies_;
 };
 
 }

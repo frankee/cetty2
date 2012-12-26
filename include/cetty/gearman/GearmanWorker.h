@@ -18,21 +18,20 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/socket/asio/AsioServicePoolPtr.h>
+#include <cetty/channel/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/pool/WatermarkConnectionPool.h>
 
 namespace cetty {
 namespace gearman {
 
-using namespace cetty::channel::socket::asio;
 using namespace cetty::service;
 using namespace cetty::service::pool;
 
 class GearmanWorker : public cetty::util::ReferenceCounter<GearmanWorker, int> {
 public:
     GearmanWorker(const EventLoopPtr& eventLoop,
-                  const ChannelPipelinePtr& pipeline,
+                  const Channel::Initializer& initializer,
                   const Connections& connections);
 
     virtual ~GearmanWorker();

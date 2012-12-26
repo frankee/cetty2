@@ -44,6 +44,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufSerialization", "..\..\..\cetty-protobuf\build\ProtobufSerialization\ProtobufSerialization.vcxproj", "{4C1FE082-9FCA-4A06-9AC1-BBBFD30E69D6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufEchoClient", "..\..\..\cetty-protobuf\build\echo\ProtobufEchoClient.vcxproj", "{90CF637D-4D5E-4C16-A970-9F1D37F4328E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0FE3882-462B-48CC-8AB7-8363E8F20BE8} = {F0FE3882-462B-48CC-8AB7-8363E8F20BE8}
+		{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1} = {17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}
+		{7AD046C3-EC07-409B-9A39-F1A6404EC5C5} = {7AD046C3-EC07-409B-9A39-F1A6404EC5C5}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConfigGenerator", "..\..\..\cetty-config\build\ConfigGenerator\ConfigGenerator.vcxproj", "{0452B388-3767-4DED-930D-652177D13DCD}"
 EndProject
@@ -92,6 +97,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CraftEchoServer", "..\..\..
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoClient", "..\echo\EchoClient.vcxproj", "{73CE27B2-1F98-49B4-9E79-C4F88840ACB3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B} = {5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EchoServer", "..\echo\EchoServer.vcxproj", "{D8476A3C-7ECF-4D11-8C2D-ED48401749F7}"
 EndProject

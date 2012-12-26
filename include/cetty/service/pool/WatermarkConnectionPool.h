@@ -46,24 +46,26 @@ public:
 
     int setLowWatermark(int lowWatermark);
     int setHighWatermark(int hightWatermark);
-    int getLowWatermark() const { return lowWatermark; }
-    int getHighWatermark() const { return highWatermark; }
+
+    int lowWatermark() const { return lowWatermark_; }
+    int highWatermark() const { return highWatermark_; }
 
     void start();
 
 private:
-    int lowWatermark;
-    int highWatermark;
-    int maxWaiters;
+    int maxWaiters_;
+    int lowWatermark_;
+    int highWatermark_;
+    
 };
 
 inline int WatermarkConnectionPool::setLowWatermark(int lowWatermark) {
-    this->lowWatermark = lowWatermark;
+    this->lowWatermark_ = lowWatermark;
     return 0;
 }
     
 inline int WatermarkConnectionPool::setHighWatermark(int hightWatermark) {
-    this->highWatermark = highWatermark;
+    this->highWatermark_ = highWatermark_;
     return 0;
 }
 

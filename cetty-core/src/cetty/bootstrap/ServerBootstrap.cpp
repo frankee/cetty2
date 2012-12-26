@@ -20,19 +20,18 @@
 #include <boost/thread.hpp>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/channel/EventLoopPool.h>
+#include <cetty/channel/IpAddress.h>
+#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelConfig.h>
-#include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/ServerChannelFactory.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipeline.h>
+#include <cetty/channel/ChannelInitializer.h>
 #include <cetty/channel/ChannelFutureListener.h>
-#include <cetty/channel/ChannelHandlerContext.h>
-#include <cetty/channel/ChannelInboundMessageHandler.h>
-#include <cetty/channel/socket/ServerSocketChannelFactory.h>
-#include <cetty/channel/IpAddress.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
+
 
 #include <cetty/util/Exception.h>
 
@@ -42,25 +41,45 @@ namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket;
 using namespace cetty::util;
 
-class Acceptor : public cetty::channel::ChannelInboundMessageHandler<ChannelPtr> {
+class Acceptor : private boost::noncopyable {
 public:
-    Acceptor(ServerBootstrap& bootstrap) : bootstrap(bootstrap) {
+    typedef boost::shared_ptr<Acceptor> Ptr;
+
+    typedef ChannelMessageContainer<ChannelPtr, MESSAGE_BLOCK> InboundContainer;
+    typedef InboundContainer::MessageQueue InboundQueue;
+
+    typedef ChannelMessageHandlerContext<Acceptor,
+            ChannelPtr,
+            VoidMessage,
+            VoidMessage,
+            VoidMessage,
+            InboundContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
+
+public:
+    Acceptor(ServerBootstrap& bootstrap)
+        : bootstrap_(bootstrap),
+          context_() {
     }
 
-    virtual ~Acceptor() {}
+    ~Acceptor() {}
 
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
+    void registerTo(Context& ctx) {
+        context_ = &ctx;
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &Acceptor::messageUpdated,
+                this,
+                _1));
     }
 
-    virtual std::string toString() const {
-        return "Acceptor";
-    }
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        InboundQueue& inboundQueue = context_->inboundContainer()->getMessages();
 
-    virtual void messageUpdated(ChannelHandlerContext& ctx) {
         while (!inboundQueue.empty()) {
             const ChannelPtr& child = inboundQueue.front();
 
@@ -68,11 +87,16 @@ public:
                 break;
             }
 
-            const ChannelOption::Options& childOptions = bootstrap.getChildOptions();
-            ChannelOption::Options::const_iterator itr = childOptions.begin();
+            child->setInitializer(bootstrap_.childInitializer());
+
+            const ChannelOptions& childOptions =
+                bootstrap_.childOptions();
+
+            ChannelOptions::ConstIterator itr = childOptions.begin();
+
             for (; itr != childOptions.end(); ++itr) {
-                if (!child->getConfig().setOption(itr->first, itr->second)) {
-                    //logger.warn("Unknown channel option: " + e);
+                if (!child->config().setOption(itr->first, itr->second)) {
+                    LOG_WARN << "set " << itr->first.name() << " failed.";
                 }
             }
 
@@ -81,52 +105,47 @@ public:
     }
 
 private:
-    ServerBootstrap& bootstrap;
+    ServerBootstrap& bootstrap_;
+    Context* context_;
 };
-
-const ChannelHandlerPtr& ServerBootstrap::getParentHandler() {
-    return this->parentHandler;
-}
-
-ServerBootstrap& ServerBootstrap::setParentHandler(const ChannelHandlerPtr& parentHandler) {
-    this->parentHandler = parentHandler;
-
-    return *this;
-}
 
 ChannelFuturePtr ServerBootstrap::bind(int port) {
     return bind(SocketAddress(IpAddress::IPv4, port));
 }
 
-ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
-    return bind(SocketAddress(ip, port));
+bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<Acceptor>("acceptor",
+                               Acceptor::Ptr(new Acceptor(*this)));
+
+    if (parentHandler_) {
+        pipeline.addLast(parentHandler_);
+    }
+
+    return true;
 }
 
 ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     // bossPipeline's life cycle will be managed by the server channel.
-    ChannelPipelinePtr serverPipeline = ChannelPipelines::pipeline();
-
-    ChannelHandlerPtr acceptor(new Acceptor(*this));
-    ChannelHandlerPtr parentHandler = getParentHandler();
-
-    serverPipeline->addLast("acceptor", acceptor);
-
-    if (parentHandler) {
-        serverPipeline->addLast("userHandler", parentHandler->clone());
-    }
-
-    const ChannelFactoryPtr& factory = getFactory();
-
-    if (!factory) {
-        LOG_ERROR << "has not set the factory.";
-        return NullChannel::instance()->getCloseFuture();
-    }
-
-    ChannelPtr channel = factory->newChannel(serverPipeline);
+    ChannelPtr channel = newChannel();
 
     if (!channel) {
         LOG_ERROR << "Server channel factory failed to create a new channel.";
-        return NullChannel::instance()->getCloseFuture();
+        return NullChannel::instance()->newFailedFuture(
+                   ChannelException("Failed to create a new channel."));
+    }
+
+    channel->setInitializer(boost::bind(
+                                &ServerBootstrap::initServerChannel,
+                                this,
+                                _1));
+
+    channel->initialize();
+
+    if (channel->isOpen()) {
+        LOG_INFO << "Opened the AsioServerSocketChannel.";
+        serverChannels_.push_back(channel);
     }
 
     ChannelFuturePtr future = channel->newFuture();
@@ -135,57 +154,73 @@ ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
     return future;
 }
 
+cetty::channel::ChannelFuturePtr ServerBootstrap::bind() {
+    return bind(localAddress());
+}
+
+cetty::channel::ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
+    return bind(SocketAddress(ip, port));
+}
+
+ServerBootstrap& ServerBootstrap::setChildOptions(const ChannelOptions& options) {
+    childOptions_ = options;
+    return *this;
+}
+
 ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
-                                     const ChannelOption::Variant& value) {
-    if (value.empty()) {
-        childOptions.erase(option);
-        LOG_WARN << "setOption, the key ("
-            << option.getName()
-            << ") is empty value, remove from the options.";
+        const ChannelOption::Variant& value) {
+    childOptions_.setOption(option, value);
+    return *this;
+}
+
+void ServerBootstrap::shutdown() {
+    EventLoopPoolPtr serverPool = eventLoopPool();
+
+    if (serverPool) {
+        serverPool->stop();
+        serverPool->waitForStop();
+    }
+
+    childPool_->stop();
+    childPool_->waitForStop();
+
+    serverChannels_.clear();
+
+    if (parentHandler_) {
+        delete parentHandler_;
+    }
+}
+
+ServerBootstrap::ServerBootstrap() : parentHandler_() {
+
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool) : AbstractBootstrap<ServerBootstrap>(pool),
+    parentHandler_() {
+        setChildEventLoopPool(pool);
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) : AbstractBootstrap<ServerBootstrap>(parent),
+    parentHandler_() {
+        if (child) {
+            setChildEventLoopPool(child);
+            LOG_WARN << "set null EventLoopPool to child, using parent.";
+        }
+        else {
+            setChildEventLoopPool(parent);
+        }
+}
+
+ServerBootstrap& ServerBootstrap::setEventLoopPools(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) {
+    if (child) {
+        childPool_ = child;
     }
     else {
-        LOG_INFO << "set Option, the key is " << option.getName();
-        childOptions.insert(std::make_pair(option, value));
+        childPool_ = parent;
     }
 
-    return *this;
-}
+    AbstractBootstrap<ServerBootstrap>::setEventLoopPool(parent);
 
-const ChannelOption::Options& ServerBootstrap::getChildOptions() const {
-    return childOptions;
-}
-
-ServerBootstrap& ServerBootstrap::setFactory(const ChannelFactoryPtr& factory) {
-    ChannelPipelinePtr childPipeline = getPipeline();
-    if (childPipeline) {
-        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
-            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
-        if (serverFactory) {
-            serverFactory->setChildChannelPipeline(childPipeline);
-        }
-        else {
-            //
-        }
-    }
-
-    Bootstrap::setFactory(factory);
-    return *this;
-}
-
-ServerBootstrap& ServerBootstrap::setPipeline(const ChannelPipelinePtr& pipeline) {
-    ChannelFactoryPtr factory = getFactory();
-    if (factory) {
-        boost::intrusive_ptr<ServerChannelFactory> serverFactory =
-            boost::dynamic_pointer_cast<ServerChannelFactory>(factory);
-        if (serverFactory) {
-            serverFactory->setChildChannelPipeline(pipeline);
-        }
-        else {
-            //
-        }
-    }
-
-    Bootstrap::setPipeline(pipeline);
     return *this;
 }
 

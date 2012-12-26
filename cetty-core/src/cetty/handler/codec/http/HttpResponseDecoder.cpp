@@ -24,50 +24,30 @@ namespace handler {
 namespace codec {
 namespace http {
 
-using namespace cetty::util;
-
-HttpResponseDecoder::HttpResponseDecoder()
-    : HttpMessageDecoder(MAX_INITIAL_LINE_LENGTH,
-        MAX_HEADER_SIZE,
-        MAX_CHUNK_SIZE),
-      response(new HttpResponse) {
+void HttpResponseDecoder::registerTo(Context& ctx) {
+    decoder_.registerTo(ctx);
+//     ctx.setExceptionCallback(boost::bind(
+//                                  HttpResponseDecoder::exceptionCaught,
+//                                  this,
+//                                  _1,
+//                                  _2));
 }
 
-HttpResponseDecoder::HttpResponseDecoder(int maxInitialLineLength,
-        int maxHeaderSize,
-        int maxChunkSize)
-    : HttpMessageDecoder(maxInitialLineLength,
-        maxHeaderSize,
-        maxChunkSize),
-      response(new HttpResponse) {
-}
+void HttpResponseDecoder::init() {
+    decoder_.setInitialState(responseDecoder_.initialState());
+    decoder_.setDecoder(boost::bind(&HttpPackageDecoder::decode,
+                                    &responseDecoder_,
+                                    _1,
+                                    _2,
+                                    _3));
 
-HttpResponseDecoder::~HttpResponseDecoder() {
-
-}
-
-cetty::channel::ChannelHandlerPtr HttpResponseDecoder::clone() {
-    return ChannelHandlerPtr(
-               new HttpResponseDecoder(maxInitialLineLength,
-                                       maxHeaderSize,
-                                       maxChunkSize));
-}
-
-std::string HttpResponseDecoder::toString() const {
-    return "HttpResponseDecoder";
-}
-
-HttpMessagePtr HttpResponseDecoder::createMessage(const StringPiece& str1,
-    const StringPiece& str2,
-    const StringPiece& str3) {
-    response->clear();
-    response->setProtocolVersion(HttpVersion::valueOf(str1));
-    response->setStatus(HttpResponseStatus(StringUtil::strto32(str2), str3));
-    return response;
-}
-
-bool HttpResponseDecoder::isDecodingRequest() const {
-    return false;
+    responseDecoder_.setCheckPointInvoker(decoder_.checkPointInvoker());
+    responseDecoder_.setHttpPackageCreator(boost::bind(
+            &HttpResponseCreator::create,
+            &responseCreator_,
+            _1,
+            _2,
+            _3));
 }
 
 }

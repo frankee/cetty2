@@ -64,8 +64,8 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
     // Try all delimiters and choose the delimiter which yields the shortest frame.
     //int minFrameLength = Integer::MAX_VALUE;
 
-    if (!reply) {
-        reply = RedisReplyPtr(new RedisReply);
+    if (!reply_) {
+        reply_ = RedisReplyPtr(new RedisReply);
     }
 
     StringPiece bytes;
@@ -76,7 +76,7 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
     if (frameLength < 0) {
         LOG_DEBUG << "has not find the \"\\r\\n\", continue to reading";
 
-        if (bytes.length() > maxBulkSize) {
+        if (bytes.length() > maxBulkSize_) {
             LOG_ERROR << "reading the data has bigger then the maxBulkSize";
             //buffer->skipBytes(buffer->readableBytes());
         }
@@ -87,95 +87,95 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
         LOG_ERROR << "parsing reply from server, but is an empty line";
         //TODO fire an error?
         buffer->skipBytes(frameLength + 2);
-        reply->setType(RedisReplyType::NIL);
+        reply_->setType(RedisReplyType::NIL);
         return reset();
     }
 
     if (READ_INITIAL == state) {
         if (bytes[0] == REDIS_PREFIX_STATUS_REPLY) {
-            reply->setType(RedisReplyType::STATUS);
+            reply_->setType(RedisReplyType::STATUS);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(getFrameBytes(bytes, frameLength));
+            reply_->setValue(getFrameBytes(bytes, frameLength));
         }
         else if (bytes[0] == REDIS_PREFIX_INTEGER_REPLY) {
-            reply->setType(RedisReplyType::INTEGER);
+            reply_->setType(RedisReplyType::INTEGER);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(getFrameInt(bytes, frameLength));
+            reply_->setValue(getFrameInt(bytes, frameLength));
         }
         else if (bytes[0] == REDIS_PREFIX_ERROR_REPLY) {
-            reply->setType(RedisReplyType::ERROR);
+            reply_->setType(RedisReplyType::ERROR);
             buffer->skipBytes(frameLength + 2);
-            reply->setValue(getFrameBytes(bytes, frameLength));
+            reply_->setValue(getFrameBytes(bytes, frameLength));
         }
         else if (bytes[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
-            reply->setType(RedisReplyType::STRING);
-            bulkSize = getFrameInt(bytes, frameLength);
+            reply_->setType(RedisReplyType::STRING);
+            bulkSize_ = getFrameInt(bytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
-            if (bulkSize < 0) {
-                reply->setType(RedisReplyType::NIL);
+            if (bulkSize_ < 0) {
+                reply_->setType(RedisReplyType::NIL);
                 return reset();
             }
 
-            if (bulkSize == 0) {
-                reply->setValue(std::string());
+            if (bulkSize_ == 0) {
+                reply_->setValue(std::string());
                 return reset();
             }
 
-            if (bytes.length() >= frameLength + 4 + bulkSize) {
+            if (bytes.length() >= frameLength + 4 + bulkSize_) {
                 StringPiece data;
                 buffer->readableBytes(&data);
-                buffer->skipBytes(bulkSize + 2);
-                reply->setValue(StringPiece(data.data(), bulkSize));
+                buffer->skipBytes(bulkSize_ + 2);
+                reply_->setValue(StringPiece(data.data(), bulkSize_));
             }
             else {
-                checkpoint(READ_BULK);
+                checkPoint_(READ_BULK);
                 return RedisReplyPtr();
             }
         }
         else if (bytes[0] == REDIS_PREFIX_MULTI_BULK_REPLY) {
-            reply->setType(RedisReplyType::ARRAY);
-            bulkSize = 0;
-            multiBulkSize = getFrameInt(bytes, frameLength);
+            reply_->setType(RedisReplyType::ARRAY);
+            bulkSize_ = 0;
+            multiBulkSize_ = getFrameInt(bytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
-            if (multiBulkSize < 0) {
-                reply->setType(RedisReplyType::NIL);
+            if (multiBulkSize_ < 0) {
+                reply_->setType(RedisReplyType::NIL);
                 return reset();
             }
 
-            if (multiBulkSize == 0) {
-                reply->setValue(std::vector<StringPiece>());
+            if (multiBulkSize_ == 0) {
+                reply_->setValue(std::vector<StringPiece>());
                 return reset();
             }
 
-            std::vector<StringPiece>* bulks = reply->getMutableArray();
+            std::vector<StringPiece>* bulks = reply_->getMutableArray();
             BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
             return readMultiBukls(buffer, bytes, bulks);
         }
     }
     else if (READ_BULK == state) {
-        if (bytes.length() >= bulkSize + 2) {
+        if (bytes.length() >= bulkSize_ + 2) {
             StringPiece data;
             buffer->readableBytes(&data);
-            buffer->skipBytes(bulkSize + 2);
-            reply->setValue(StringPiece(data.data(), bulkSize));
+            buffer->skipBytes(bulkSize_ + 2);
+            reply_->setValue(StringPiece(data.data(), bulkSize_));
         }
         else {
-            checkpoint(READ_BULK);
+            checkPoint_(READ_BULK);
             return RedisReplyPtr();
         }
     }
     else if (READ_MULTI_BULK == state) {
-        std::vector<StringPiece>* bulks = reply->getMutableArray();
+        std::vector<StringPiece>* bulks = reply_->getMutableArray();
         BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
 
-        if (bulkSize > 0) {
+        if (bulkSize_ > 0) {
             DLOG_DEBUG << "bulkSize is not empty, directly to read the bulk data";
 
             if (!readMultiBulkElement(buffer, bytes, bulks)) {
                 DLOG_TRACE << "data has not read completely - bulk size, continue to reading";
-                checkpoint(READ_MULTI_BULK);
+                checkPoint_(READ_MULTI_BULK);
                 return RedisReplyPtr();
             }
         }
@@ -191,14 +191,14 @@ void RedisReplyMessageDecoder::fail(ChannelHandlerContext& ctx, long frameLength
         ctx.fireExceptionCaught(ctx,
                                 TooLongFrameException(StringUtil::printf(
                                             "frame length exceeds %d: %d - discarded",
-                                            maxBulkSize,
+                                            maxBulkSize_,
                                             frameLength)));
     }
     else {
         ctx.fireExceptionCaught(ctx,
                                 TooLongFrameException(StringUtil::printf(
                                             "frame length exceeds %d - discarded",
-                                            maxBulkSize)));
+                                            maxBulkSize_)));
     }
 }
 
@@ -218,18 +218,14 @@ int RedisReplyMessageDecoder::indexOf(const StringPiece& bytes, int offset) {
 }
 
 RedisReplyPtr RedisReplyMessageDecoder::reset() {
-    RedisReplyPtr message = this->reply;
+    RedisReplyPtr message = this->reply_;
 
-    this->reply.reset();
-    this->bulkSize = 0;
-    this->multiBulkSize = 0;
+    this->reply_.reset();
+    this->bulkSize_ = 0;
+    this->multiBulkSize_ = 0;
 
-    checkpoint(READ_INITIAL);
+    checkPoint_(READ_INITIAL);
     return message;
-}
-
-ChannelHandlerPtr RedisReplyMessageDecoder::clone() {
-    return ChannelHandlerPtr(new RedisReplyMessageDecoder());
 }
 
 bool RedisReplyMessageDecoder::readMultiBulkElement(
@@ -237,13 +233,13 @@ bool RedisReplyMessageDecoder::readMultiBulkElement(
     const StringPiece& bytes,
     std::vector<StringPiece>* bulks) {
 
-    if (bytes.length() >= bulkSize + 2) {
+    if (bytes.length() >= bulkSize_ + 2) {
         StringPiece data;
         buffer->readableBytes(&data);
-        buffer->skipBytes(bulkSize + 2);
-        bulks->push_back(StringPiece(data.data(), bulkSize));
-        bulkSize = 0;
-        --multiBulkSize;
+        buffer->skipBytes(bulkSize_ + 2);
+        bulks->push_back(StringPiece(data.data(), bulkSize_));
+        bulkSize_ = 0;
+        --multiBulkSize_;
         return true;
     }
 
@@ -254,7 +250,7 @@ RedisReplyPtr RedisReplyMessageDecoder::readMultiBukls(
     const ReplayingDecoderBufferPtr& buffer,
     const StringPiece& bytes,
     std::vector<StringPiece>* bulks) {
-    int j = multiBulkSize;
+    int j = multiBulkSize_;
 
     for (int i = 0; i < j; ++i) {
         StringPiece subBytes;
@@ -263,7 +259,7 @@ RedisReplyPtr RedisReplyMessageDecoder::readMultiBukls(
 
         if (frameLength < 0) {
             DLOG_TRACE << "data has not read completely - multi-bulk size, continue to reading";
-            checkpoint(READ_MULTI_BULK);
+            checkPoint_(READ_MULTI_BULK);
             return RedisReplyPtr();
         }
 
@@ -277,27 +273,27 @@ RedisReplyPtr RedisReplyMessageDecoder::readMultiBukls(
 
             //TODO fire an error?
             buffer->skipBytes(frameLength + 2);
-            reply->setType(RedisReplyType::NIL);
+            reply_->setType(RedisReplyType::NIL);
             return reset();
         }
 
         if (subBytes[1] != '-') {
-            bulkSize = getFrameInt(subBytes, frameLength);
+            bulkSize_ = getFrameInt(subBytes, frameLength);
             buffer->skipBytes(frameLength + 2);
 
-            if (bytes.length() >= frameLength + 4 + bulkSize) {
+            if (bytes.length() >= frameLength + 4 + bulkSize_) {
                 readMultiBulkElement(buffer, bytes, bulks);
             }
             else {
                 DLOG_TRACE << "data has not read completely - bulk size, continue to reading";
-                checkpoint(READ_MULTI_BULK);
+                checkPoint_(READ_MULTI_BULK);
                 return RedisReplyPtr();
             }
         }
         else {
             bulks->push_back(StringPiece());
             buffer->skipBytes(frameLength + 2);
-            --multiBulkSize;
+            --multiBulkSize_;
         }
     }
 

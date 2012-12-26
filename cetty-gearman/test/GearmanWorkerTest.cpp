@@ -1,6 +1,6 @@
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelMessage.h>
 #include <cetty/channel/ChannelFuture.h>
@@ -169,7 +169,7 @@ int main()
 	ChannelFuturePtr future = bootstrap.connect(host,port);
 	future->awaitUninterruptibly();
 
-	ChannelPtr c = future->getChannel();
+	ChannelPtr c = future->channel();
 	
 	testForCando(c);
 	//testForPreSleep(c);
@@ -186,7 +186,7 @@ int main()
 
 	
 	system("PAUSE");
-	c->getCloseFuture()->awaitUninterruptibly();
+	c->closeFuture()->awaitUninterruptibly();
 
 	// Shut down thread pools to exit.
 	bootstrap.shutdown();

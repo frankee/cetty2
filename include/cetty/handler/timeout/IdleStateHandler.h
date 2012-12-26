@@ -26,7 +26,7 @@
 
 #include <cetty/Types.h>
 #include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/AbstractChannelHandler.h>
+#include <cetty/channel/ChannelHandler.h>
 
 namespace cetty {
 namespace handler {
@@ -123,15 +123,14 @@ class IdleStateEvent;
  * @apiviz.has org.jboss.netty.handler.timeout.IdleStateEvent oneway - - triggers
  */
 
-class IdleStateHandler : public cetty::channel::AbstractChannelHandler {
+class IdleStateHandler : private boost::noncopyable {
 public:
     typedef boost::posix_time::ptime Time;
     typedef boost::posix_time::time_duration Duration;
 
     typedef boost::function2<void, ChannelHandlerContext&, const IdleStateEvent&> IdleEventCallback;
 
-private:
-    typedef boost::function0<void> TimeoutCallback;
+    typedef ChannelHandler<IdleStateHandler>::Context Context;
 
 public:
     /**
@@ -187,51 +186,70 @@ public:
      * Return the readerIdleTime that was given when instance this class in milliseconds.
      *
      */
-    int64_t getReaderIdleTimeInMillis() const {
-        return readerIdleTimeMillis;
+    int64_t readerIdleTimeInMillis() const {
+        return readerIdleTimeMillis_;
     }
 
     /**
      * Return the writerIdleTime that was given when instance this class in milliseconds.
      *
      */
-    int64_t getWriterIdleTimeInMillis() const {
-        return writerIdleTimeMillis;
+    int64_t writerIdleTimeInMillis() const {
+        return writerIdleTimeMillis_;
     }
 
     /**
      * Return the allIdleTime that was given when instance this class in milliseconds.
      *
      */
-    int64_t getAllIdleTimeInMillis() const {
-        return allIdleTimeMillis;
+    int64_t allIdleTimeInMillis() const {
+        return allIdleTimeMillis_;
     }
-
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx); // NOOP
-
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx); // NOOP
-
-    virtual void channelActive(ChannelHandlerContext& ctx);
-
-    virtual void channelInactive(ChannelHandlerContext& ctx);
-
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
-
-    virtual void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
-
-    virtual ChannelHandlerPtr clone();
-
-    virtual std::string toString() const;
 
     void setIdleEventCallback(const IdleEventCallback& idleEventCallback) {
         if (idleEventCallback) {
-            this->idleEventCallback = idleEventCallback;
+            this->idleEventCallback_ = idleEventCallback;
         }
     }
 
+    void registerTo(Context& ctx) {
+        ctx.setBeforeAddCallback(boost::bind(
+                                     &IdleStateHandler::beforeAdd,
+                                     this,
+                                     _1));
+        ctx.setBeforeRemoveCallback(boost::bind(
+                                        &IdleStateHandler::beforeRemove,
+                                        this,
+                                        _1));
+        ctx.setChannelActiveCallback(boost::bind(
+                                         &IdleStateHandler::channelActive,
+                                         this,
+                                         _1));
+        ctx.setChannelInactiveCallback(boost::bind(
+                                           &IdleStateHandler::channelInactive,
+                                           this,
+                                           _1));
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &IdleStateHandler::messageUpdated,
+                this,
+                _1));
+        ctx.setFlushFunctor(boost::bind(
+                                &IdleStateHandler::flush,
+                                this,
+                                _1,
+                                _2));
+    }
+
 private:
+    void beforeAdd(ChannelHandlerContext& ctx);
+    void beforeRemove(ChannelHandlerContext& ctx);
+
+    void channelActive(ChannelHandlerContext& ctx);
+    void channelInactive(ChannelHandlerContext& ctx);
+
+    void messageUpdated(ChannelHandlerContext& ctx);
+    void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
+
     void initialize(ChannelHandlerContext& ctx);
     void destroy();
 
@@ -245,29 +263,32 @@ private:
     void handleAllIdleTimeout(ChannelHandlerContext& ctx);
 
 private:
-    int64_t readerIdleTimeMillis;
-    TimeoutPtr readerIdleTimeout;
-    Time lastReadTime;
-    int readerIdleCount;
+    typedef boost::function0<void> TimerCallback;
 
-    TimeoutCallback readerIdleTimeCallback;
+private:
+    int64_t readerIdleTimeMillis_;
+    TimeoutPtr readerIdleTimeout_;
+    Time lastReadTime_;
+    int readerIdleCount_;
 
-    int64_t writerIdleTimeMillis;
-    TimeoutPtr writerIdleTimeout;
-    Time lastWriteTime;
-    int writerIdleCount;
+    TimerCallback readerIdleTimerCallback_;
 
-    TimeoutCallback writerIdleTimeCallback;
+    int64_t writerIdleTimeMillis_;
+    TimeoutPtr writerIdleTimeout_;
+    Time lastWriteTime_;
+    int writerIdleCount_;
 
-    int64_t allIdleTimeMillis;
-    TimeoutPtr allIdleTimeout;
-    int allIdleCount;
+    TimerCallback writerIdleTimerCallback_;
 
-    TimeoutCallback allIdleTimeCallback;
+    int64_t allIdleTimeMillis_;
+    TimeoutPtr allIdleTimeout_;
+    int allIdleCount_;
 
-    int state; // 0 - none, 1 - initialized, 2 - destroyed
+    TimerCallback allIdleTimeCallback_;
 
-    IdleEventCallback idleEventCallback;
+    int state_; // 0 - none, 1 - initialized, 2 - destroyed
+
+    IdleEventCallback idleEventCallback_;
 };
 
 }

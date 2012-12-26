@@ -74,7 +74,6 @@ ServiceGenerator::~ServiceGenerator() {}
 void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
     protoHasService = true;
 
-    fprintf(stderr, "GenerateDeclarations\n");
     // Forward-declare the stub type.
     printer->Print(vars_,
                    "class $classname$_Stub;\n"
@@ -91,7 +90,13 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                                              ClassName(method->input_type(), false)));
         output_types.push_back(std::make_pair(ClassName(method->output_type(), true),
                                               ClassName(method->output_type(), false)));
-        method_names.push_back(method->name());
+        
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        method_names.push_back(methodName);
     }
 
     for (int i = 0; i < j; ++i) {
@@ -166,11 +171,11 @@ void ServiceGenerator::GenerateStubDefinition(io::Printer* printer) {
     printer->Indent();
 
     printer->Print(vars_,
-                   "$classname$_Stub(const ::cetty::service::ClientServicePtr& service);\n"
+                   "$classname$_Stub(const ::cetty::channel::ChannelPtr& channel);\n"
                    "~$classname$_Stub();\n"
                    "\n"
-                   "inline const ::cetty::service::ClientServicePtr& channel() {\n"
-                   "    return channel_.getService();\n"
+                   "inline ::cetty::channel::ChannelPtr channel() {\n"
+                   "    return channel_.channel();\n"
                    "}\n"
                    "\n"
                    "// implements $classname$ ------------------------------------------\n"
@@ -194,6 +199,12 @@ void ServiceGenerator::GenerateMethodSignatures(
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
         sub_vars["classname"] = descriptor_->name();
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
         sub_vars["name"] = method->name();
         sub_vars["input_type"] = ClassName(method->input_type(), false);
         sub_vars["output_type"] = ClassName(method->output_type(), false);
@@ -210,7 +221,7 @@ void ServiceGenerator::GenerateMethodSignatures(
                            "using $classname$::$name$;\n"
 
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                           "                     const $name$ServiceFuturePtr& future);\n");
+                           "                     const $servicefuture$& future);\n");
         }
     }
 }
@@ -252,8 +263,8 @@ void ServiceGenerator::GenerateImplementation(io::Printer* printer) {
 
     // Generate stub implementation.
     printer->Print(vars_,
-                   "$classname$_Stub::$classname$_Stub(const cetty::service::ClientServicePtr& service)\n"
-                   "  : channel_(service), owns_channel_(false) {\n"
+                   "$classname$_Stub::$classname$_Stub(const cetty::channel::ChannelPtr& channel)\n"
+                   "  : channel_(channel), owns_channel_(false) {\n"
                    "    static int init = 0;\n"
                    "    if (!init) {\n"
                    "        ::cetty::protobuf::service::ProtobufServiceRegister& serviceRegister =\n"
@@ -389,6 +400,14 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
     for (int i = 0; i < descriptor_->method_count(); i++) {
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
+        
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
+        
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);
@@ -397,7 +416,7 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
 
         printer->Print(sub_vars,
                        "void $classname$_Stub::$name$(const Const$input_type$Ptr& request,\n"
-                       "                              const $name$ServiceFuturePtr& future) {\n"
+                       "                              const $servicefuture$& future) {\n"
                        "  channel_.CallMethod<Const$input_type$Ptr, $output_type$Ptr>(descriptor()->method($index$),\n"
                        "                                                              request,\n"
                        "                                                              future);\n"

@@ -21,8 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelOption.h>
-#include <cetty/channel/ChannelPipelineFactoryPtr.h>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+#include <cetty/channel/ChannelOptions.h>
 
 namespace cetty {
 namespace channel {
@@ -70,16 +71,23 @@ namespace channel {
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  *
  */
-class ChannelConfig {
+class ChannelConfig : private boost::noncopyable {
 public:
-    virtual ~ChannelConfig() {}
+    typedef boost::function<bool (const ChannelOption&,
+        const ChannelOption::Variant&)> SetOptionCallback;
+
+public:
+    ChannelConfig()
+        : connectTimeoutMillis_(10000/*ms*/) {}
+
+    ~ChannelConfig() {}
 
     /**
      * Sets the configuration properties from the specified map.
      *
      * @throws InvalidArgumentException if there is invalid value.
      */
-    virtual void setOptions(const ChannelOption::Options& options) = 0;
+    void setOptions(const ChannelOptions& options);
 
     /**
      * Sets a configuration property with the specified name and value.
@@ -103,8 +111,8 @@ public:
      *
      * @throws InvalidArgumentException if the value is invalid.
      */
-    virtual bool setOption(const ChannelOption& option,
-                           const ChannelOption::Variant& value) = 0;
+    bool setOption(const ChannelOption& option,
+                           const ChannelOption::Variant& value);
 
     /**
      * Returns the connect timeout of the channel in milliseconds.  If the
@@ -113,7 +121,7 @@ public:
      *
      * @return the connect timeout in milliseconds, <tt>0</tt> if disabled.
      */
-    virtual int getConnectTimeout() const = 0;
+    int connectTimeout() const;
 
     /**
      * Sets the connect timeout of the channel in milliseconds.  If the
@@ -123,8 +131,25 @@ public:
      * @param connectTimeoutMillis the connect timeout in milliseconds.
      *                             <tt>0</tt> to disable.
      */
-    virtual void setConnectTimeout(int connectTimeoutMillis) = 0;
+    void setConnectTimeout(int connectTimeoutMillis);
+
+    const SetOptionCallback& setOptionCallback() const {
+        return callback_;
+    }
+
+    void setSetOptionCallback(const SetOptionCallback& callback) {
+        callback_ = callback;
+    }
+
+private:
+    int connectTimeoutMillis_; // 10 seconds
+    SetOptionCallback callback_;
 };
+
+inline
+int ChannelConfig::connectTimeout() const {
+    return connectTimeoutMillis_;
+}
 
 }
 }

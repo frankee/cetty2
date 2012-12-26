@@ -21,8 +21,9 @@
 #include <string>
 #include <vector>
 #include <boost/noncopyable.hpp>
-#include <cetty/bootstrap/ServerBootstrap.h>
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
+#include <cetty/bootstrap/ServerBootstrapPtr.h>
 #include <cetty/service/builder/ServerBuilderConfig.h>
 
 namespace cetty {
@@ -36,55 +37,96 @@ using namespace cetty::config;
 
 class ServerBuilder : private boost::noncopyable {
 public:
+    typedef Channel::Initializer ChildInitializer;
+
+public:
     ServerBuilder();
     ServerBuilder(int parentThreadCnt, int childThreadCnt = 0);
-    ServerBuilder(const ServerBuilderConfig& config);
 
     virtual ~ServerBuilder();
 
-    ChannelPtr build(const std::string& name,
-                     const ChannelPipelinePtr& pipeline,
-                     int port);
+    ServerBuilder& registerServer(const std::string& name,
+                        const ChildInitializer& childInitializer);
+
+    ServerBuilder& registerServer(const std::string& name,
+                        const ChannelOptions& options,
+                        const ChannelOptions& childOptions,
+                        const ChildInitializer& childInitializer);
+
+    ServerBuilder& setOptions(const std::string& name,
+                    const ChannelOptions& options,
+                    const ChannelOptions& childOptions);
+
+    ChannelPtr build(const std::string& name, int port);
 
     ChannelPtr build(const std::string& name,
-                     const ChannelPipelinePtr& pipeline,
                      const std::string& host,
                      int port);
 
-    void buildAll();
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     int port);
 
-    void getBuiltServers(std::map<std::string, ChannelPtr>* names);
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port);
+
+    ChannelPtr build(const std::string& name,
+                     const ChannelOptions& options,
+                     const ChannelOptions& childOptions,
+                     const ChildInitializer& childInitializer,
+                     int port);
+
+    ChannelPtr build(const std::string& name,
+                     const ChannelOptions& options,
+                     const ChannelOptions& childOptions,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port);
+
+    ServerBuilder& buildAll();
 
     void waitingForExit();
 
-    void registerPipeline(const std::string& name, const ChannelPipelinePtr& pipeline);
-    void unregisterPipeline(const std::string& name);
-
-    ChannelPipelinePtr getPipeline(const std::string& name);
-
-    const ServerBuilderConfig& getConfig() const { return config; }
-
-    const EventLoopPoolPtr& getParentPool() const { return parentEventLoopPool; }
-    const EventLoopPoolPtr& getChildPool() const { return childEventLoopPool; }
-
-protected:
-    ChannelPtr build(const std::string& name, int port);
-
-    void stop();
+    const ServerBuilderConfig& config() const;
+    const EventLoopPoolPtr& parentPool() const;
+    const EventLoopPoolPtr& childPool() const;
 
 private:
     int init();
-    void deinit();
+    void shutdown();
+
+    ChannelPtr build(const ServerBootstrapPtr& bootstrap,
+                     const std::string& host,
+                     int port);
 
 private:
-    ServerBuilderConfig config;
+    typedef std::map<std::string, ServerBootstrapPtr> ServerBootstraps;
 
-    EventLoopPoolPtr parentEventLoopPool;
-    EventLoopPoolPtr childEventLoopPool;
+private:
+    ServerBuilderConfig config_;
 
-    std::map<std::string, ChannelPipelinePtr> pipelines;
-    std::map<std::string, ServerBootstrap*> bootstraps;
+    EventLoopPoolPtr parentEventLoopPool_;
+    EventLoopPoolPtr childEventLoopPool_;
+
+    ServerBootstraps bootstraps_;
 };
+
+inline
+const ServerBuilderConfig& ServerBuilder::config() const {
+    return config_;
+}
+
+inline
+const EventLoopPoolPtr& ServerBuilder::parentPool() const {
+    return parentEventLoopPool_;
+}
+
+inline
+const EventLoopPoolPtr& ServerBuilder::childPool() const {
+    return childEventLoopPool_;
+}
 
 }
 }

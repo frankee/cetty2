@@ -17,13 +17,17 @@
  * under the License.
  */
 
-#include <boost/intrusive_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace cetty { namespace channel { 
 
 class Channel;
-typedef boost::intrusive_ptr<Channel> ChannelPtr;
-typedef boost::intrusive_ptr<Channel const> ConstChannelPtr;
+typedef boost::shared_ptr<Channel> ChannelPtr;
+typedef boost::shared_ptr<Channel const> ConstChannelPtr;
+
+typedef boost::weak_ptr<Channel> ChannelWeakPtr;
+typedef boost::weak_ptr<Channel const> ConstChannelWeakPtr;
 
 }}
 

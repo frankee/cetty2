@@ -21,7 +21,7 @@
 #include <boost/bind.hpp>
 
 #include <cetty/util/StringPiece.h>
-#include <cetty/service/ClientService.h>
+#include <cetty/channel/ChannelPtr.h>
 #include <cetty/redis/RedisServiceFuture.h>
 #include <cetty/redis/protocol/RedisCommandPtr.h>
 #include <cetty/redis/protocol/RedisReplyPtr.h>
@@ -31,13 +31,15 @@ namespace cetty {
 namespace redis {
 
 using namespace cetty::util;
+using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::redis::protocol;
 
 class RedisClient {
 public:
-    RedisClient(const ClientServicePtr& clientService)
-        : clientService(clientService) {}
+    RedisClient(const ChannelPtr& channel)
+        : channel_(channel) {}
+
     ~RedisClient() {}
 
     typedef boost::function2<void,
@@ -104,7 +106,7 @@ private:
         const MultiBulkCallBack& callback);
 
 private:
-    ClientServicePtr clientService;
+    ChannelPtr channel_;
 };
 
 }

@@ -19,7 +19,8 @@
 
 #include <deque>
 #include <cetty/Types.h>
-#include <cetty/channel/ChannelInboundMessageHandlerAdapter.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
@@ -39,41 +40,57 @@ class Channel;
 
 namespace cetty {
 namespace protobuf {
-namespace proto {
-class RpcMessage;
-}
-}
-}
-
-namespace cetty {
-namespace protobuf {
 namespace service {
 namespace handler {
 using namespace cetty::channel;
 
-class ProtobufServiceMessageHandler;
-typedef boost::intrusive_ptr<ProtobufServiceMessageHandler> ProtobufServiceMessageHandlerPtr;
-
-class ProtobufServiceMessageHandler
-    : public ChannelInboundMessageHandlerAdapter<ProtobufServiceMessagePtr,
-      VoidChannelMessage,
-          ProtobufServiceMessagePtr> {
+class ProtobufServiceMessageHandler : private boost::noncopyable {
 public:
-    ProtobufServiceMessageHandler();
-    virtual ~ProtobufServiceMessageHandler();
+    typedef ChannelMessageContainer<ProtobufServiceMessagePtr,
+            MESSAGE_BLOCK> InboundContainer;
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+    typedef InboundContainer::MessageQueue InboundQueue;
 
-protected:
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const ProtobufServiceMessagePtr& msg);
+    typedef ChannelMessageHandlerContext<ProtobufServiceMessageHandler,
+            ProtobufServiceMessagePtr,
+            VoidMessage,
+            VoidMessage,
+            ProtobufServiceMessagePtr,
+            InboundContainer,
+            VoidMessageContainer,
+            VoidMessageContainer,
+            InboundContainer> Context;
+
+    typedef Context::Handler Handler;
+    typedef Context::HandlerPtr HandlerPtr;
+
+public:
+    ProtobufServiceMessageHandler() {}
+    ~ProtobufServiceMessageHandler() {}
+
+public:
+    void registerTo(Context& ctx) {
+        context_ = &ctx;
+
+        ctx.setChannelMessageUpdatedCallback(boost::bind(
+                &ProtobufServiceMessageHandler::messageUpdated,
+                this,
+                _1));
+    }
 
 private:
+    void messageUpdated(ChannelHandlerContext& ctx);
+
+    void messageReceived(ChannelHandlerContext& ctx,
+                         const ProtobufServiceMessagePtr& msg);
+
     void doneCallback(const MessagePtr& response,
                       ChannelHandlerContext& ctx,
                       ProtobufServiceMessagePtr req,
                       int64_t id);
+
+private:
+    Context* context_;
 };
 
 }

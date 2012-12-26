@@ -21,9 +21,11 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/CombinedChannelBufferMessageHandler.h>
-#include <cetty/handler/codec/http/HttpRequestDecoder.h>
-#include <cetty/handler/codec/http/HttpResponseEncoder.h>
+#include <cetty/handler/codec/ReplayingDecoder.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
+#include <cetty/handler/codec/http/HttpRequestCreator.h>
+#include <cetty/handler/codec/http/HttpPackageDecoder.h>
+#include <cetty/handler/codec/http/HttpPackageEncoder.h>
 
 namespace cetty {
 namespace handler {
@@ -44,8 +46,20 @@ namespace http {
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpResponseEncoder
  */
 
-class HttpServerCodec
-        : public cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> {
+class HttpServerCodec : private boost::noncopyable {
+public:
+    typedef boost::shared_ptr<HttpServerCodec> HandlerPtr;
+
+    typedef ChannelMessageHandlerContext<HttpServerCodec,
+            ChannelBufferPtr,
+            HttpPackage,
+            HttpPackage,
+            ChannelBufferPtr,
+            ChannelBufferContainer,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
+            ChannelBufferContainer> Context;
+
 public:
     /**
      * Creates a new instance with the default decoder options
@@ -53,23 +67,66 @@ public:
      * <tt>maxChunkSize (8192)</tt>).
      */
     HttpServerCodec()
-        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
-            new HttpRequestDecoder(4096, 8192, 8192),
-            new HttpResponseEncoder) {
+        :  requestDecoder_(HttpPackageDecoder::REQUEST, 4096, 8192, 8192) {
+        init();
     }
 
     /**
      * Creates a new instance with the specified decoder options.
      */
-    HttpServerCodec(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize)
-        : cetty::channel::CombinedChannelBufferMessageHandler<HttpPackage> (
-            new HttpRequestDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize),
-            new HttpResponseEncoder) {
+    HttpServerCodec(int maxInitialLineLength,
+                    int maxHeaderSize,
+                    int maxChunkSize)
+        : requestDecoder_(HttpPackageDecoder::REQUEST,
+                          maxInitialLineLength,
+                          maxHeaderSize,
+                          maxChunkSize) {
+        init();
     }
 
-    virtual std::string toString() const {
-        return "HttpServerCodec";
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
     }
+
+private:
+    void init() {
+        decoder_.setInitialState(requestDecoder_.initialState());
+        decoder_.setDecoder(boost::bind(&HttpPackageDecoder::decode,
+                                        &requestDecoder_,
+                                        _1,
+                                        _2,
+                                        _3));
+
+        requestDecoder_.setCheckPointInvoker(decoder_.checkPointInvoker());
+        requestDecoder_.setHttpPackageCreator(boost::bind(
+                &HttpRequestCreator::create,
+                &requestCreator_,
+                _1,
+                _2,
+                _3));
+
+        responseEncoder_.setInitialLineEncoder(boost::bind(
+                HttpPackageEncoder::encodeResponseInitialLine,
+                _1,
+                _2));
+
+        encoder_.setEncoder(boost::bind(
+                                &HttpPackageEncoder::encode,
+                                &responseEncoder_,
+                                _1,
+                                _2,
+                                _3));
+    }
+
+private:
+    HttpRequestCreator requestCreator_;
+
+    HttpPackageDecoder requestDecoder_;
+    HttpPackageEncoder responseEncoder_;
+
+    ReplayingDecoder<HttpServerCodec, HttpPackage, Context> decoder_;
+    MessageToBufferEncoder<HttpServerCodec, HttpPackage, Context> encoder_;
 };
 
 }

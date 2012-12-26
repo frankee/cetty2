@@ -21,15 +21,15 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <deque>
+#include <vector>
 
-#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelHandlerWrapper.h>
 
-#include <cetty/bootstrap/Bootstrap.h>
+#include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/ServerBootstrapPtr.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -155,50 +155,63 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ServerBootstrap : public Bootstrap {
+class ServerBootstrap : public AbstractBootstrap<ServerBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
      * {@link #setFactory(ChannelFactory)} must be called before any I/O
      * operation is requested.
      */
-    ServerBootstrap() {}
-
-    /**
-     * Creates a new instance with the specified initial {@link ChannelFactory}.
-     */
-    ServerBootstrap(const ChannelFactoryPtr& channelFactory)
-        : Bootstrap(channelFactory) {
-    }
+    ServerBootstrap();
+    ServerBootstrap(const EventLoopPoolPtr& pool);
+    ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child);
 
     virtual ~ServerBootstrap() {}
 
-    virtual ServerBootstrap& setFactory(const ChannelFactoryPtr& factory);
-    virtual ServerBootstrap& setPipeline(const ChannelPipelinePtr& pipeline);
+    /**
+     * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
+     * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
+     * {@link Channel}'s.
+     */
+    ServerBootstrap& setEventLoopPools(const EventLoopPoolPtr& parent,
+                                       const EventLoopPoolPtr& child);
 
+    ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool);
+
+    const EventLoopPoolPtr& childPool() const;
+
+    template<typename T>
+    ServerBootstrap& setParentHandler(
+        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        if (parentHandler_) {
+            delete parentHandler_;
+        }
+
+        parentHandler_ =
+            new typename ChannelHandlerWrapper<T>::Handler::Context("parent", handler);
+
+        return *this;
+    }
+
+    const ChannelOptions& childOptions() const;
+
+    ServerBootstrap& setChildOptions(const ChannelOptions& options);
+    /**
+     * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they get created
+     * (after the acceptor accepted the {@link Channel}). Use a value of <code>null</code> to remove a previous set
+     * {@link ChannelOption}.
+     */
     ServerBootstrap& setChildOption(const ChannelOption& option,
-        const ChannelOption::Variant& value);
+                                    const ChannelOption::Variant& value);
 
-    const ChannelOption::Options& getChildOptions() const;
-
-    /**
-     * Returns an optional {@link ChannelHandler} which intercepts an event
-     * of a newly bound server-side channel which accepts incoming connections.
-     *
-     * @return the parent channel handler.
-     *         <tt>NULL</tt> if no parent channel handler is set.
-     */
-    const ChannelHandlerPtr& getParentHandler();
+    const Channel::Initializer& childInitializer() const;
 
     /**
-     * Sets an optional {@link ChannelHandler} which intercepts an event of
-     * a newly bound server-side channel which accepts incoming connections.
-     *
-     * @param parentHandler
-     *        the parent channel handler.
-     *        <tt>NULL</tt> to unset the current parent channel handler.
+     * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
      */
-    ServerBootstrap& setParentHandler(const ChannelHandlerPtr& parentHandler);
+    ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer);
+
+    ChannelFuturePtr bind();
 
     /**
      * Creates a new channel which is bound to the local address with only port.
@@ -214,7 +227,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelFuturePtr bind(int port);
+    ChannelFuturePtr bind(int port);
 
     /**
      * Creates a new channel which is bound to the ip and port.  This method is
@@ -230,7 +243,7 @@ public:
      *                      bind it to the local address, return null ChannelPtr
      *
      */
-    virtual ChannelFuturePtr bind(const std::string& ip, int port);
+    ChannelFuturePtr bind(const std::string& ip, int port);
 
     /**
      * Creates a new channel which is bound to the specified local address.
@@ -239,12 +252,58 @@ public:
      *         if failed to create a new channel and
      *                      bind it to the local address, return null ChannelPtr
      */
-    virtual ChannelFuturePtr bind(const SocketAddress& localAddress);
+    ChannelFuturePtr bind(const SocketAddress& localAddress);
+
+    virtual void shutdown();
+
+    const std::vector<ChannelPtr>& serverChannels() const;
+
+protected:
+    virtual ChannelPtr newChannel() = 0;
 
 private:
-    ChannelHandlerPtr parentHandler;
-    ChannelOption::Options childOptions;
+    bool initServerChannel(const ChannelPtr& channel);
+
+private:
+    EventLoopPoolPtr childPool_;
+    ChannelOptions childOptions_;
+    Channel::Initializer childInitializer_;
+
+    ChannelHandlerContext* parentHandler_;
+    std::vector<ChannelPtr> serverChannels_;
 };
+
+inline
+const ChannelOptions& ServerBootstrap::childOptions() const {
+    return childOptions_;
+}
+
+inline
+const EventLoopPoolPtr& ServerBootstrap::childPool() const {
+    return childPool_;
+}
+
+inline
+const Channel::Initializer& ServerBootstrap::childInitializer() const {
+    return childInitializer_;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setChildEventLoopPool(const EventLoopPoolPtr& pool) {
+    childPool_ = pool;
+    return *this;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setChildInitializer(const Channel::Initializer& initializer) {
+    childInitializer_ = initializer;
+    return *this;
+}
+
+inline
+const std::vector<ChannelPtr>& ServerBootstrap::serverChannels() const {
+    return serverChannels_;
+}
 
 }
 }

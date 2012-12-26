@@ -17,48 +17,45 @@
  * under the License.
  */
 
-#include <cetty/buffer/ChannelBufferPtr.h>
 #include <cetty/handler/codec/MessageToMessageDecoder.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
-
-namespace cetty {
-namespace protobuf {
-namespace service {
-class ServiceMessage;
-}
-}
-}
+#include <cetty/protobuf/service/handler/MessageCodec.h>
 
 namespace cetty {
 namespace protobuf {
 namespace service {
 namespace handler {
 
-using namespace cetty::buffer;
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
-using namespace cetty::protobuf::service;
-using namespace cetty::protobuf::service::handler;
 
-class ProtobufServiceMessageDecoder
-    : public MessageToMessageDecoder<ChannelBufferPtr, ProtobufServiceMessagePtr> {
+class ProtobufServiceMessageDecoder : private boost::noncopyable {
 public:
-    ProtobufServiceMessageDecoder() {}
-    virtual ~ProtobufServiceMessageDecoder() {}
+    typedef MessageToMessageDecoder<ProtobufServiceMessageDecoder,
+            ChannelBufferPtr,
+            ProtobufServiceMessagePtr> Decoder;
 
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+    typedef Decoder::Context Context;
+    typedef Decoder::Handler Handler;
+    typedef Decoder::HandlerPtr HandlerPtr;
 
-    static int decode(const ChannelBufferPtr& buffer,
-                      const ProtobufServiceMessagePtr& message);
+public:
+    ProtobufServiceMessageDecoder()
+        : decoder_(boost::bind(
+        MessageCodec::decode,
+        _1,
+        _2)) {
+    }
 
-protected:
-    virtual ProtobufServiceMessagePtr decode(ChannelHandlerContext& ctx,
-        const ChannelBufferPtr& msg);
+    ~ProtobufServiceMessageDecoder() {
+    }
+
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+    }
 
 private:
-    static int decodePayload(const ChannelBufferPtr& buffer,
-                             const ProtobufServiceMessagePtr& message);
+    Decoder decoder_;
 };
 
 }

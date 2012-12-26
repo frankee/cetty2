@@ -19,8 +19,8 @@
  */
 
 #include <cetty/bootstrap/ClientBootstrap.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/IpAddress.h>
@@ -80,10 +80,10 @@ int main(int argc, const char* argv[]) {
     ChannelFuturePtr future = bootstrap.connect(host, port);
     future->awaitUninterruptibly();
 
-    ChannelPtr channel = future->getChannel();
+    ChannelPtr channel = future->channel();
 
     // Wait until the connection is closed or the connection attempt fails.
-    channel->getCloseFuture()->awaitUninterruptibly();
+    channel->closeFuture()->awaitUninterruptibly();
 
     // Shut down thread pools to exit.
     bootstrap.shutdown();

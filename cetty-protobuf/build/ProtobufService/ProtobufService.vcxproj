@@ -13,12 +13,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\builder\ProtobufServerBuilder.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\MessageCodec.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceInboundFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufMessageCodec.h" />
-    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceRequestHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufCodec.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufClientServiceAdaptor.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufService.h" />
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufServiceFuture.h" />
@@ -32,10 +33,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\builder\ProtobufServerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageEncoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\MessageCodec.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufServiceMessageHandler.cpp" />
-    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufMessageCodec.cpp" />
+    <ClCompile Include="..\..\src\cetty\protobuf\service\handler\ProtobufCodec.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufClientServiceAdaptor.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp" />

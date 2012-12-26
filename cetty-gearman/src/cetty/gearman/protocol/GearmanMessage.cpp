@@ -26,127 +26,50 @@ const std::string GearmanMessage::RESPONSE_MAGIC("\0RES", 4);
 const std::string GearmanMessage::REQUEST_MAGIC("\0REQ", 4);
 
 GearmanMessage::GearmanMessage(int type) {
-    this->type = type;
+    this->type_ = type;
 }
 GearmanMessage::GearmanMessage(int type, const ChannelBufferPtr& payload) {
-    this->type = type;
-    this->data = payload;
+    this->type_ = type;
+    this->data_ = payload;
 }
 GearmanMessage::GearmanMessage(int type, const std::string& param) {
-    this->type = type;
-    this->parameters.push_back(param);
+    this->type_ = type;
+    this->parameters_.push_back(param);
 }
 GearmanMessage::GearmanMessage(int type, const std::string& param, const ChannelBufferPtr& payload) {
-    this->type = type;
+    this->type_ = type;
 
     if (param.size()>0) {
-        this->parameters.push_back(param);
+        this->parameters_.push_back(param);
     }
 
-    this->data = payload;
+    this->data_ = payload;
 }
 
 GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2) {
-    this->type = type;
-    this->parameters.push_back(param1);
-    this->parameters.push_back(param2);
+    this->type_ = type;
+    this->parameters_.push_back(param1);
+    this->parameters_.push_back(param2);
 }
 
 GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2, const std::string& param3) {
-    this->type = type;
-    this->parameters.push_back(param1);
-    this->parameters.push_back(param2);
-    this->parameters.push_back(param3);
+    this->type_ = type;
+    this->parameters_.push_back(param1);
+    this->parameters_.push_back(param2);
+    this->parameters_.push_back(param3);
 }
 GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2, const ChannelBufferPtr& payload) {
-    this->type = type;
-    this->parameters.push_back(param1);
-    this->parameters.push_back(param2);
-    this->data = payload;
+    this->type_ = type;
+    this->parameters_.push_back(param1);
+    this->parameters_.push_back(param2);
+    this->data_ = payload;
 }
 
-GearmanMessagePtr GearmanMessage::createEchoReqMessage(const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::ECHO_REQ,payload));
-}
+
 //worker
-GearmanMessagePtr GearmanMessage::createCandoMessage(const std::string& functionName) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::CAN_DO,functionName));
-}
-
-GearmanMessagePtr GearmanMessage::createCandoTimeoutMessage(const std::string& functionName, int timeout) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::CAN_DO_TIMEOUT,functionName,StringUtil::printf("%d",timeout)));
-}
-
-GearmanMessagePtr GearmanMessage::createCantdoMessage(const std::string& functionName) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::CANT_DO,functionName));
-}
-GearmanMessagePtr GearmanMessage::createResetAbilitiesMessage() {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::RESET_ABILITIES));
-}
-GearmanMessagePtr GearmanMessage::createPreSleepMessage() {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::PRE_SLEEP));
-}
-GearmanMessagePtr GearmanMessage::createGrabJobMessage() {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::GRAB_JOB));
-}
-GearmanMessagePtr GearmanMessage::createGrabJobUniqMessage() {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::GRAB_JOB_UNIQ));
-}
-
-GearmanMessagePtr GearmanMessage::createWorkStautsMessage(const std::string& jobHandle, int numerator, int denominator) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_STATUS,jobHandle,StringUtil::printf("%d",numerator),StringUtil::printf("%d",numerator)));
-}
-GearmanMessagePtr GearmanMessage::createWorkCompleteMessage(const std::string& jobHandle, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_COMPLETE,jobHandle,payload));
-}
-GearmanMessagePtr GearmanMessage::createWorkFailMessage(const std::string& jobHandle) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_FAIL,jobHandle));
-}
-GearmanMessagePtr GearmanMessage::createWorkWarningMessage(const std::string& jobHandle, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_WARNING,jobHandle,payload));
-}
-GearmanMessagePtr GearmanMessage::createWorkExceptionMessage(const std::string& jobHandle, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_EXCEPTION,jobHandle,payload));
-}
-GearmanMessagePtr GearmanMessage::createWorkDataMessage(const std::string& jobHandle, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::WORK_DATA,jobHandle,payload));
-}
-
-GearmanMessagePtr GearmanMessage::createSetClientIdMessage(const std::string& clientId) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SET_CLIENT_ID,clientId));
-}
-GearmanMessagePtr GearmanMessage::createAllYoursMessage() {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::ALL_YOURS));
-}
 
 
-// client
-GearmanMessagePtr GearmanMessage::createsubmitJobMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB,functionName,uniqueId,payload));
-}
-GearmanMessagePtr GearmanMessage::createsubmitJobHighMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB_HIGH,functionName,uniqueId,payload));
-}
-GearmanMessagePtr GearmanMessage::createsubmitJobLowMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB_LOW,functionName,uniqueId,payload));
-}
 
-GearmanMessagePtr GearmanMessage::createsubmitJobBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB_BG,functionName,uniqueId,payload));
-}
-GearmanMessagePtr GearmanMessage::createsubmitJobHighBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB_HIGH_BG,functionName,uniqueId,payload));
-}
-GearmanMessagePtr GearmanMessage::createsubmitJobLowBGMessage(const std::string& functionName, const std::string& uniqueId, const ChannelBufferPtr& payload) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::SUBMIT_JOB_LOW_BG,functionName,uniqueId,payload));
-}
-
-GearmanMessagePtr GearmanMessage::createGetStatusMessage(const std::string& jobHandle) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::GET_STATUS,jobHandle));
-}
-GearmanMessagePtr GearmanMessage::createOptionReqMessage(const std::string& option) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::OPTION_REQ));
-}
 
 }
 }

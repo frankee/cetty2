@@ -163,7 +163,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
     const HttpRequestPtr& req,
     const ProtobufServiceMessagePtr& message) {
     const ServiceResponseMapper::ResponseTemplate* tmpl
-        = mapper->match(message->getService(), message->getMethod());
+        = mapper->match(message->service(), message->method());
 
     if (tmpl) {
         HttpResponsePtr response(new HttpResponse(HttpVersion::HTTP_1_1,
@@ -171,7 +171,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         ServiceResponseMapper::setHttpHeaders(*tmpl, response);
 
-        const std::string& format = req->getLabel();
+        const std::string& format = req->label();
         ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(format);
 
         if (!formatter) {
@@ -179,7 +179,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
             //response->setStatus(HttpResponseStatus::NOT_FOUND);
         }
 
-        Message* paylod = message->getPayload();
+        Message* paylod = message->payload();
 
         if (!paylod) {
             //
@@ -203,7 +203,7 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
 
         // for jsonp
         if (format == "json") {
-            std::string jquery = req->getQueryParameters().get("jsoncallback");
+            std::string jquery = req->queryParameters().get("jsoncallback");
 
             if (!jquery.empty()) {
                 jquery.append("(");
@@ -213,20 +213,20 @@ HttpResponsePtr ProtobufMessage2HttpResponse::getHttpResponse(
         }
 
         // Decide whether to close the connection or not.
-        bool keepAlive = HttpHeaders::isKeepAlive(*req);
+        bool keepAlive = req->keepAlive();
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
             LOG_DEBUG << "keep alive mode,set the content_length header";
             
-            response->setHeader(HttpHeaders::Names::CONNECTION,
+            response->headers().setHeader(HttpHeaders::Names::CONNECTION,
                 HttpHeaders::Values::KEEP_ALIVE);
             
-            response->setHeader(HttpHeaders::Names::CONTENT_LENGTH,
-                                response->getContent()->readableBytes());
+            response->headers().setHeader(HttpHeaders::Names::CONTENT_LENGTH,
+                                response->content()->readableBytes());
         }
         else {
-            response->setHeader(HttpHeaders::Names::CONNECTION,
+            response->headers().setHeader(HttpHeaders::Names::CONNECTION,
                                 HttpHeaders::Values::CLOSE);
         }
 

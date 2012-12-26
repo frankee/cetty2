@@ -17,20 +17,19 @@
 #include <cetty/craft/builder/CraftServerBuilder.h>
 
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelPipelines.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/handler/codec/LengthFieldPrepender.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
-#include <cetty/handler/codec/http/HttpRequestDecoder.h>
-#include <cetty/handler/codec/http/HttpResponseEncoder.h>
-#include <cetty/handler/codec/http/HttpChunkAggregator.h>
+#include <cetty/handler/codec/http/HttpServerCodec.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageDecoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 #include <cetty/craft/http/HttpServiceFilter.h>
+#include <cetty/craft/http/ServiceRequestMapper.h>
+#include <cetty/craft/http/ServiceResponseMapper.h>
 
 namespace cetty {
 namespace craft {
@@ -48,12 +47,12 @@ using namespace cetty::craft::http;
 static const std::string PROTOBUF_SERVICE_HTTP("http");
 
 CraftServerBuilder::CraftServerBuilder()
-    : ProtobufServerBuilder() {
+    : builder_() {
     init();
 }
 
 CraftServerBuilder::CraftServerBuilder(int parentThreadCnt, int childThreadCnt)
-    : ProtobufServerBuilder(parentThreadCnt, childThreadCnt) {
+    : builder_(parentThreadCnt, childThreadCnt) {
     init();
 }
 
@@ -61,35 +60,39 @@ CraftServerBuilder::~CraftServerBuilder() {
 }
 
 ChannelPtr CraftServerBuilder::buildHttp(int port) {
-    return build(PROTOBUF_SERVICE_HTTP, port);
+    return builder_.serverBuilder().build(PROTOBUF_SERVICE_HTTP, port);
 }
 
-void CraftServerBuilder::init() {
-    registerPipeline(PROTOBUF_SERVICE_HTTP, createHttpServicePipeline());
-    //printf("has not set the configCenter, so can't inti the http service.\n");
-}
-
-ChannelPipelinePtr CraftServerBuilder::createHttpServicePipeline() {
-    ChannelPipelinePtr pipeline = ChannelPipelines::pipeline();
+bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
 
     //if (ssl) {
     //}
 
-    pipeline->addLast("decoder", new HttpRequestDecoder());
-
-    // Uncomment the following line if you don't want to handle HttpChunks.
-    pipeline->addLast("aggregator", new HttpChunkAggregator(1048576));
-
-    pipeline->addLast("encoder", new HttpResponseEncoder());
+    pipeline.addLast<HttpServerCodec::HandlerPtr>("httpCodec",
+            HttpServerCodec::HandlerPtr(new HttpServerCodec));
 
     // Remove the following line if you don't want automatic content compression.
     //pipeline.addLast("deflater", new HttpContentCompressor());
 
-    pipeline->addLast("protobufFilter", new HttpServiceFilter());
+    pipeline.addLast<HttpServiceFilter::HandlerPtr>("protobufFilter",
+            HttpServiceFilter::HandlerPtr(
+                new HttpServiceFilter(requestMapper_, responseMapper_)));
 
-    pipeline->addLast("messageHandler", new ProtobufServiceMessageHandler());
+    pipeline.addLast<ProtobufServiceMessageHandler::HandlerPtr>("messageHandler",
+            ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
 
-    return pipeline;
+    return true;
+}
+
+void CraftServerBuilder::init() {
+    requestMapper_ = new ServiceRequestMapper();
+    responseMapper_ = new ServiceResponseMapper();
+
+    builder_.serverBuilder().registerServer(PROTOBUF_SERVICE_HTTP,
+                                            boost::bind(&CraftServerBuilder::initializeChildChannel,
+                                                    this,
+                                                    _1));
 }
 
 }

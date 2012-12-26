@@ -21,8 +21,8 @@
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/socket/asio/AsioServicePool.h>
-#include <cetty/channel/socket/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
 #include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
 #include <cetty/handler/codec/Delimiters.h>
 #include <TelnetServerHandler.h>
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
         input = getchar();
 
         if (input == 'q') {
-            f->getChannel()->getCloseFuture()->awaitUninterruptibly();
+            f->channel()->closeFuture()->awaitUninterruptibly();
             return 0;
         }
     }

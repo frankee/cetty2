@@ -56,7 +56,7 @@ public:
         }
 
         println(StringUtil::printf("Connected to: %s",
-                                      getRemoteAddress().c_str()));
+                                   getRemoteAddress().c_str()));
     }
 
     virtual void messageUpdated(ChannelHandlerContext& ctx) {
@@ -78,11 +78,11 @@ public:
     virtual void channelInactive(ChannelHandlerContext& ctx) {
         printf(StringUtil::printf("Sleeping for: %d s", RECONNECT_DELAY).c_str());
 
-        timeout = ctx.getEventLoop()->runAfter(RECONNECT_DELAY * 1000,
-                                               boost::bind(
-                                                       &UptimeClientHandler::handleReConnection,
-                                                       this,
-                                                       boost::ref(bootstrap)));
+        timeout = ctx.eventLoop()->runAfter(RECONNECT_DELAY * 1000,
+                                            boost::bind(
+                                                &UptimeClientHandler::handleReConnection,
+                                                this,
+                                                boost::ref(bootstrap)));
     }
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {

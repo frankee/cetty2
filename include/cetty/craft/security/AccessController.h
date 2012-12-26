@@ -17,31 +17,38 @@
  * under the License.
  */
 
-#include <cetty/protobuf/service/handler/ProtobufServiceMessageFilter.h>
+#include <cetty/protobuf/service/handler/ProtobufServiceInboundFilter.h>
 
 namespace cetty {
 namespace craft {
 namespace security {
 
 using namespace cetty::channel;
-using namespace cetty::protobuf::service;
+using namespace cetty::protobuf::service::handler;
 
-class AccessController
-        : public cetty::protobuf::service::handler::ProtobufServiceMessageFilter {
+class AccessController {
+public:
+    typedef ProtobufServiceInboundFilter<AccessController> InboundFilter;
+
+    typedef InboundFilter::FilterCallback FilterCallback;
+
 public:
     AccessController();
-    virtual ~AccessController();
-
-protected:
-    virtual void filter(ChannelHandlerContext& ctx,
-                        const ProtobufServiceMessagePtr& req);
+    ~AccessController();
 
 private:
+    void filter(ChannelHandlerContext& ctx,
+                const ProtobufServiceMessagePtr& req,
+                const FilterCallback& filterCallback);
+
     void onAuthorized(bool permitted,
                       const std::string& principal,
                       const std::string& permission,
                       ChannelHandlerContext& ctx,
                       const ProtobufServiceMessagePtr& req);
+
+private:
+    InboundFilter inboundFilter_;
 };
 
 }

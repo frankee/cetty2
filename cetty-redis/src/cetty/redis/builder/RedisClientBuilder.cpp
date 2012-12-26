@@ -47,13 +47,20 @@ RedisClientBuilder::RedisClientBuilder(const EventLoopPoolPtr& eventLoopPool)
     init();
 }
 
+bool initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+
+    pipeline.addLast<RedisCommandEncoder::HandlerPtr>("redisEncoder",
+        RedisCommandEncoder::HandlerPtr(new RedisCommandEncoder));
+
+    pipeline.addLast<RedisReplyMessageDecoder::HandlerPtr>("redisDecoder",
+        RedisReplyMessageDecoder::HandlerPtr(new RedisReplyMessageDecoder));
+
+    return true;
+}
+
 void RedisClientBuilder::init() {
-    pipeline = ChannelPipelines::pipeline();
-
-    pipeline->addLast("redisEncoder", new RedisCommandEncoder);
-    pipeline->addLast("redisDecoder", new RedisReplyMessageDecoder());
-
-    ClientBuilderType::setPipeline(pipeline);
+    setChannelInitializer(boost::bind(initializeChannel, _1));
 }
 
 }

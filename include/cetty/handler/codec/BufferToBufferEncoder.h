@@ -48,23 +48,64 @@ namespace codec {
 using namespace cetty::buffer;
 using namespace cetty::channel;
 
-class BufferToBufferEncoder : public ChannelOutboundBufferHandler {
+template<typename H,
+         typename Context = ChannelMessageHandlerContext<H,
+         VoidMessage,
+         VoidMessage,
+         ChannelBufferPtr,
+         ChannelBufferPtr,
+         VoidMessageContainer,
+         VoidMessageContainer,
+         ChannelBufferContainer,
+         ChannelBufferContainer> >
+class BufferToBufferEncoder : boost::noncopyable {
 public:
-    typedef ChannelOutboundBufferHandlerContext BufferContext;
+    typedef boost::function<ChannelBufferPtr(ChannelHandlerContext&, const ChannelBufferPtr&)> Encoder;
+
 
 public:
     BufferToBufferEncoder();
     virtual ~BufferToBufferEncoder();
 
+    void registerTo(Context& ctx) {
+
+    }
+
     virtual void flush(ChannelHandlerContext& ctx,
-                       const ChannelFuturePtr& future);
+                       const ChannelFuturePtr& future) {
+                           const ChannelBufferPtr& in = getOutboundChannelBuffer();
+                           ChannelBufferPtr out;
+                           //out = ctx.nextOutboundByteBuffer();
 
-protected:
-    virtual ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                                    const ChannelBufferPtr& in) = 0;
+                           //int oldOutSize = out->readableBytes();
 
-protected:
-    ChannelPipelineMessageTransfer<ChannelBufferPtr, BufferContext> outboundTransfer;
+                           while (in->readable()) {
+                               int oldInSize = in->readableBytes();
+
+                               try {
+                                   out = encode(ctx, in);
+                               }
+                               catch (const CodecException& e) {
+                                   ctx.fireExceptionCaught(e);
+                               }
+                               catch (const std::exception& e) {
+                                   ctx.fireExceptionCaught(EncoderException(e.what()));
+                               }
+
+                               if (oldInSize == in->readableBytes()) {
+                                   break;
+                               }
+                           }
+
+                           //if (out->readableBytes() > oldOutSize) {
+                           //    in->discardReadBytes();
+                           //}
+
+                           ctx.flush(future);
+    }
+
+private:
+    Encoder encoder_;
 };
 
 }

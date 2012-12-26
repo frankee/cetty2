@@ -22,7 +22,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/socket/asio/AsioClientSocketChannelFactory.h>
+#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
@@ -112,7 +112,7 @@ int main(int argc, const char* argv[]) {
     ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
 
     // Wait until the connection attempt succeeds or fails.
-    ChannelPtr channel = future->awaitUninterruptibly()->getChannel();
+    ChannelPtr channel = future->awaitUninterruptibly()->channel();
 
     if (!future->isSuccess()) {
         bootstrap.shutdown();
@@ -139,7 +139,7 @@ int main(int argc, const char* argv[]) {
     channel->write(request);
 
     // Wait for the server to close the connection.
-    channel->getCloseFuture()->awaitUninterruptibly();
+    channel->closeFuture()->awaitUninterruptibly();
 
     // Shut down executor threads to exit.
     bootstrap.shutdown();

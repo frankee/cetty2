@@ -102,9 +102,9 @@ void protobuf_AddDesc_echo_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\necho.proto\022\004echo\"\036\n\013EchoRequest\022\017\n\007pay"
     "load\030\001 \002(\t\"\037\n\014EchoResponse\022\017\n\007payload\030\002 "
-    "\002(\t2<\n\013EchoService\022-\n\004Echo\022\021.echo.EchoRe"
-    "quest\032\022.echo.EchoResponseB)\n\023cetty.proto"
-    "buf.echoB\tEchoProto\200\001\001\210\001\001\220\001\001", 188);
+    "\002(\t2<\n\013EchoService\022-\n\004echo\022\021.echo.EchoRe"
+    "quest\032\022.echo.EchoResponseB&\n\020cetty.craft"
+    ".echoB\tEchoProto\200\001\001\210\001\001\220\001\001", 185);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "echo.proto", &protobuf_RegisterTypes);
   EchoRequest::default_instance_ = new EchoRequest();
@@ -586,7 +586,7 @@ const ::google::protobuf::ServiceDescriptor* EchoService::GetDescriptor() {
   return EchoService_descriptor_;
 }
 
-void EchoService::Echo(const ConstEchoRequestPtr& request,
+void EchoService::echo(const ConstEchoRequestPtr& request,
                          const EchoResponsePtr& response,
                          const DoneCallback& done) {
   assert(0);
@@ -599,7 +599,7 @@ void EchoService::CallMethod(const ::google::protobuf::MethodDescriptor* method,
   GOOGLE_DCHECK_EQ(method->service(), EchoService_descriptor_);
   switch(method->index()) {
     case 0:
-      Echo(static_cast< ConstEchoRequestPtr>(request),
+      echo(static_cast< ConstEchoRequestPtr>(request),
              static_cast< EchoResponsePtr>(response),
              done);
       break;
@@ -633,16 +633,16 @@ const ::google::protobuf::Message* EchoService::GetResponsePrototype(
   }
 }
 
-EchoService_Stub::EchoService_Stub(const cetty::service::ClientServicePtr& service)
-  : channel_(service), owns_channel_(false) {
+EchoService_Stub::EchoService_Stub(const cetty::channel::ChannelPtr& channel)
+  : channel_(channel), owns_channel_(false) {
     static int init = 0;
     if (!init) {
         ::cetty::protobuf::service::ProtobufServiceRegister& serviceRegister =
             ::cetty::protobuf::service::ProtobufServiceRegister::instance();
 
        serviceRegister.registerResponsePrototype("echo.EchoService",
-                                                 "Echo",
-                                                 &EchoResponse::default_instance());
+                                                 "echo",
+                                                 &::echo::EchoResponse::default_instance());
 
         init = 1;
     }
@@ -650,8 +650,8 @@ EchoService_Stub::EchoService_Stub(const cetty::service::ClientServicePtr& servi
 EchoService_Stub::~EchoService_Stub() {
 }
 
-void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
-                              const EchoServiceFuturePtr& future) {
+void EchoService_Stub::echo(const ConstEchoRequestPtr& request,
+                              const echoServiceFuturePtr& future) {
   channel_.CallMethod<ConstEchoRequestPtr, EchoResponsePtr>(descriptor()->method(0),
                                                               request,
                                                               future);
@@ -662,3 +662,5 @@ void EchoService_Stub::Echo(const ConstEchoRequestPtr& request,
 }  // namespace echo
 
 // @@protoc_insertion_point(global_scope)
+
+

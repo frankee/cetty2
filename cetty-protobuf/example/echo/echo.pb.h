@@ -218,8 +218,8 @@ class EchoService_Stub;
 typedef ::echo::EchoRequest* EchoRequestPtr;
 typedef ::echo::EchoRequest const* ConstEchoRequestPtr;
 typedef ::echo::EchoResponse* EchoResponsePtr;
-typedef ::cetty::service::ServiceFuture<EchoResponsePtr> EchoServiceFuture;
-typedef boost::intrusive_ptr<EchoServiceFuture> EchoServiceFuturePtr;
+typedef ::cetty::service::ServiceFuture<EchoResponsePtr> echoServiceFuture;
+typedef boost::intrusive_ptr<echoServiceFuture> echoServiceFuturePtr;
 
 class EchoService : public ::cetty::protobuf::service::ProtobufService {
  protected:
@@ -232,7 +232,7 @@ class EchoService : public ::cetty::protobuf::service::ProtobufService {
   
   static const ::google::protobuf::ServiceDescriptor* descriptor();
   
-  virtual void Echo(const ConstEchoRequestPtr& request,
+  virtual void echo(const ConstEchoRequestPtr& request,
                        const EchoResponsePtr& response,
                        const DoneCallback& done);
   
@@ -255,18 +255,18 @@ class EchoService : public ::cetty::protobuf::service::ProtobufService {
 
 class EchoService_Stub : public EchoService {
  public:
-  EchoService_Stub(const ::cetty::service::ClientServicePtr& service);
+  EchoService_Stub(const ::cetty::channel::ChannelPtr& channel);
   ~EchoService_Stub();
   
-  inline const ::cetty::service::ClientServicePtr& channel() {
-      return channel_.getService();
+  inline ::cetty::channel::ChannelPtr channel() {
+      return channel_.channel();
   }
   
   // implements EchoService ------------------------------------------
   
-  using EchoService::Echo;
-  virtual void Echo(const ConstEchoRequestPtr& request,
-                       const EchoServiceFuturePtr& future);
+  using EchoService::echo;
+  virtual void echo(const ConstEchoRequestPtr& request,
+                       const echoServiceFuturePtr& future);
  private:
   cetty::protobuf::service::ProtobufClientServiceAdaptor channel_;
   bool owns_channel_;
@@ -423,3 +423,4 @@ namespace protobuf {
 // Local Variables:
 // mode: c++
 // End:
+

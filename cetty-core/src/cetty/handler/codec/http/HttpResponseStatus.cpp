@@ -260,7 +260,7 @@ cetty::handler::codec::http::HttpResponseStatus HttpResponseStatus::valueOf(int 
 }
 
 HttpResponseStatus::HttpResponseStatus(int code, const StringPiece& reasonPhrase)
-    : code(code), reasonPhrase(reasonPhrase.data(), reasonPhrase.size()) {
+    : code_(code), reasonPhrase_(reasonPhrase.data(), reasonPhrase.size()) {
     if (code < 0) {
         throw InvalidArgumentException("code: < 0 (expected: 0+)");
     }
@@ -277,7 +277,7 @@ HttpResponseStatus::HttpResponseStatus(int code, const StringPiece& reasonPhrase
 }
 
 std::string HttpResponseStatus::toString() const {
-    return StringUtil::printf("%d %s", code, reasonPhrase.c_str());
+    return StringUtil::printf("%d %s", code_, reasonPhrase_.c_str());
 }
 
 }

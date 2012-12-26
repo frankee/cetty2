@@ -19,9 +19,7 @@
 namespace cetty {
 namespace channel {
 
-using namespace cetty::util;
-
-CETTY_IMPLEMENT_EXCEPTION(ChannelException, RuntimeException, "Channel I/O operation fails")
+CETTY_IMPLEMENT_EXCEPTION(ChannelException, cetty::util::RuntimeException, "Channel I/O operation fails")
 
 }
 }

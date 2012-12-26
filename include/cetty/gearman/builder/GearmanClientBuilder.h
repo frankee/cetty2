@@ -18,6 +18,7 @@
  */
 
 #include <cetty/service/builder/ClientBuilder.h>
+#include <cetty/gearman/GearmanClientPtr.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {
@@ -28,24 +29,25 @@ using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman::protocol;
 
-class GearmanClientBuilder
-        : public cetty::service::builder::ClientBuilder<GearmanMessagePtr, GearmanMessagePtr> {
+class GearmanClientBuilder : private boost::noncopyable {
 public:
-    typedef ClientBuilder<GearmanMessagePtr, GearmanMessagePtr> ClientBuilderType;
+    typedef ClientBuilder<GearmanMessagePtr, GearmanMessagePtr> Builder;
 
 public:
     GearmanClientBuilder();
     GearmanClientBuilder(int threadCnt);
-    GearmanClientBuilder(const EventLoopPoolPtr& eventLoopPool);
     GearmanClientBuilder(const EventLoopPtr& eventLoop);
+    GearmanClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
-    virtual ~GearmanClientBuilder(){}
+    void addConnection(const std::string& host, int port);
+
+    GearmanClientPtr build();
 
 private:
     void init();
 
 private:
-    ChannelPipelinePtr pipeline;
+    Builder builder_;
 };
 
 }

@@ -171,14 +171,14 @@ private:
             const std::string& arg,             \
             int code = 0);                      \
         CLS(const std::string& message,         \
-            const cetty::util::Exception& exc,  \
+            const ::cetty::util::Exception& exc,  \
             int code = 0);                      \
         CLS(const CLS& exc);                    \
         virtual ~CLS() throw();                 \
         CLS& operator = (const CLS& exc);       \
         const char* name() const throw();       \
         const char* className() const throw();  \
-        cetty::util::Exception* clone() const;  \
+        ::cetty::util::Exception* clone() const;  \
         void rethrow() const;                   \
     };
 

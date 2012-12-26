@@ -24,9 +24,10 @@
  *
  */
 
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuturePtr.h>
-#include <cetty/bootstrap/Bootstrap.h>
+#include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/ClientBootstrapPtr.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -119,7 +120,7 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ClientBootstrap : public Bootstrap {
+class ClientBootstrap : public AbstractBootstrap<ClientBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
@@ -127,17 +128,16 @@ public:
      * operation is requested.
      */
     ClientBootstrap();
-
-    /**
-     * Creates a new instance with the specified initial {@link ChannelFactory}.
-     */
-    ClientBootstrap(const ChannelFactoryPtr& channelFactory);
+    ClientBootstrap(const EventLoopPoolPtr& pool);
 
     virtual ~ClientBootstrap() {}
 
-    ClientBootstrap& remoteAddress(const std::string& host, int port);
-
     const SocketAddress& remoteAddress() const;
+    ClientBootstrap& setRemoteAddress(const SocketAddress& address);
+    ClientBootstrap& setRemoteAddress(const std::string& host, int port);
+
+    const Channel::Initializer& channelInitializer() const;
+    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer);
 
     ChannelFuturePtr connect();
 
@@ -196,24 +196,61 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    virtual ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                                     const SocketAddress& localAddress);
+    ChannelFuturePtr connect(const SocketAddress& remote, const SocketAddress& local);
 
+    virtual void shutdown();
+
+protected:
+    virtual ChannelPtr newChannel() = 0;
 
 private:
-    SocketAddress remote;
+    typedef std::map<int, ChannelPtr> ClientChannels;
+
+private:
+    SocketAddress remoteAddress_;
+    Channel::Initializer initializer_;
+
+    ClientChannels clientChannels_;
 };
 
 inline
-ClientBootstrap& ClientBootstrap::remoteAddress(const std::string& host,
+ClientBootstrap& ClientBootstrap::setRemoteAddress(const SocketAddress& address) {
+    remoteAddress_ = address;
+    return *this;
+}
+
+inline
+ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
         int port) {
-    this->remote = SocketAddress(host, port);
+    remoteAddress_ = SocketAddress(host, port);
     return *this;
 }
 
 inline
 const SocketAddress& ClientBootstrap::remoteAddress() const {
-    return remote;
+    return remoteAddress_;
+}
+
+inline
+ClientBootstrap& ClientBootstrap::setChannelInitializer(
+    const Channel::Initializer& initializer) {
+    initializer_ = initializer;
+    return *this;
+}
+
+inline
+const Channel::Initializer& ClientBootstrap::channelInitializer() const {
+    return initializer_;
+}
+
+inline
+ChannelFuturePtr ClientBootstrap::connect() {
+    return connect(remoteAddress_);
+}
+
+inline
+ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
+    return connect(SocketAddress(host, port));
 }
 
 }

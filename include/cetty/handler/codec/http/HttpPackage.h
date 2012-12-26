@@ -20,7 +20,6 @@
 #include <boost/variant.hpp>
 
 #include <cetty/handler/codec/http/HttpChunk.h>
-#include <cetty/handler/codec/http/HttpMessage.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/handler/codec/http/HttpChunkTrailer.h>
@@ -32,56 +31,84 @@ namespace http {
 
 class HttpPackage {
 public:
-    typedef boost::variant<HttpMessagePtr, HttpChunkPtr, HttpChunkTrailerPtr> Variant;
+    typedef boost::variant<HttpRequestPtr, HttpResponsePtr, HttpChunkPtr, HttpChunkTrailerPtr> Variant;
 
 public:
     Variant variant;
 
 public:
     HttpPackage() {}
-    HttpPackage(const HttpChunkPtr& chunk) : variant(chunk) {}
-    HttpPackage(const HttpMessagePtr& message) : variant(message) {}
+    HttpPackage(const HttpChunkPtr& chunk)
+        : variant(chunk) {
+    }
     HttpPackage(const HttpRequestPtr& request)
-        : variant(boost::static_pointer_cast<HttpMessage>(request)) {
+        : variant(request) {
     }
     HttpPackage(const HttpResponsePtr& response)
-        : variant(boost::static_pointer_cast<HttpMessage>(response)) {
+        : variant(response) {
     }
     HttpPackage(const HttpChunkTrailerPtr& chunkTailer)
-        : variant(chunkTailer) {}
+        : variant(chunkTailer) {
+    }
 
     operator bool() const;
 
-    bool isHttpMessage() const;
+    int contentLength(int defaultValue) const;
+    bool is100ContinueExpected() const;
+    const HttpTransferEncoding& transferEncoding() const;
+
+    void setTransferEncoding(const HttpTransferEncoding& te);
+    void setContent(const ChannelBufferPtr& content);
+
+    HttpHeaders* headers();
+
+    bool isHttpRequest() const;
+    bool isHttpResponse() const;
     bool isHttpChunk() const;
     bool isHttpChunkTrailer() const;
 
-    HttpMessagePtr httpMessage() const;
+    HttpRequestPtr httpRequest() const;
+    HttpResponsePtr httpResponse() const;
     HttpChunkPtr httpChunk() const;
     HttpChunkTrailerPtr httpChunkTrailer() const;
 };
 
 inline
-bool HttpPackage::isHttpMessage() const {
+bool HttpPackage::isHttpRequest() const {
     return variant.which() == 0;
 }
 
 inline
-bool HttpPackage::isHttpChunk() const {
+bool HttpPackage::isHttpResponse() const {
     return variant.which() == 1;
 }
 
 inline
-bool HttpPackage::isHttpChunkTrailer() const {
+bool HttpPackage::isHttpChunk() const {
     return variant.which() == 2;
 }
 
 inline
-HttpMessagePtr HttpPackage::httpMessage() const {
-    if (isHttpMessage()) {
-        return boost::get<HttpMessagePtr>(variant);
+bool HttpPackage::isHttpChunkTrailer() const {
+    return variant.which() == 3;
+}
+
+inline
+HttpRequestPtr HttpPackage::httpRequest() const {
+    if (isHttpRequest()) {
+        return boost::get<HttpRequestPtr>(variant);
     }
-    return HttpMessagePtr();
+
+    return HttpRequestPtr();
+}
+
+inline
+HttpResponsePtr HttpPackage::httpResponse() const {
+    if (isHttpResponse()) {
+        return boost::get<HttpResponsePtr>(variant);
+    }
+
+    return HttpResponsePtr();
 }
 
 inline
@@ -89,6 +116,7 @@ HttpChunkPtr HttpPackage::httpChunk() const {
     if (isHttpChunk()) {
         return boost::get<HttpChunkPtr>(variant);
     }
+
     return HttpChunkPtr();
 }
 
@@ -97,6 +125,7 @@ HttpChunkTrailerPtr HttpPackage::httpChunkTrailer() const {
     if (isHttpChunkTrailer()) {
         return boost::get<HttpChunkTrailerPtr>(variant);
     }
+
     return HttpChunkTrailerPtr();
 }
 

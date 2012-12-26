@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_CODEC_MESSAGETOMESSAGECODEC_H)
 #define CETTY_HANDLER_CODEC_MESSAGETOMESSAGECODEC_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -16,43 +17,82 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageEncoder.h>
 #include <cetty/handler/codec/MessageToMessageDecoder.h>
+#include <cetty/handler/codec/MessageToMessageEncoder.h>
 
 namespace cetty {
 namespace handler {
 namespace codec {
 
-template<InboundInT, InboundOutT, OutboundInT, OutboundOutT>
-class MessageToMessageCodec
-    : public MessageToMessageDecoder<InboundInT, InboundOutT>,
-      public MessageToMessageEncoder<OutboundInT, OutboundOutT> {
+template<typename H,
+         typename InboundIn,
+         typename InboundOut,
+         typename OutboundIn,
+         typename OutboundOut>
+class MessageToMessageCodec : private boost::noncopyable {
+public:
+    typedef ChannelMessageHandlerContext<H,
+            InboundIn,
+            InboundOut,
+            OutboundIn,
+            OutboundOut,
+            ChannelMessageContainer<InboundIn, MESSAGE_BLOCK>,
+            ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+            ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
+            ChannelMessageContainer<OutboundOut, MESSAGE_BLOCK> > Context;
+
+    typedef typename ChannelHandlerWrapper<H>::Handler Handler;
+    typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
+
+    typedef MessageToMessageDecoder<H, InboundIn, InboundOut, Context> MessageDecoder;
+    typedef MessageToMessageEncoder<H, OutboundIn, OutboundOut, Context> MessageEncoder;
+
+    typedef typename MessageDecoder::Decoder Decoder;
+    typedef typename MessageEncoder::Encoder Encoder;
+
+    typedef typename MessageDecoder::DecodableChecker DecodableChecker;
+    typedef typename MessageEncoder::EncodableChecker EncodableChecker;
+
+    typedef typename MessageDecoder::InboundContainer InboundContainer;
+    typedef typename MessageEncoder::OutboundContainer OutboundContainer;
+
+    typedef typename MessageDecoder::InboundQueue InboundQueue;
+    typedef typename MessageEncoder::OutboundQueue OutboundQueue;
+
+    typedef typename MessageDecoder::InboundTransfer InboundTransfer;
+    typedef typename MessageEncoder::OutboundTransfer OutboundTransfer;
 
 public:
-    MessageToMessageCodec() {}
-    virtual ~MessageToMessageCodec() {}
+    MessageToMessageCodec() {
+    }
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx);
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx);
+    MessageToMessageCodec(const Decoder& decoder, const Encoder& encoder)
+        : decoder_(decoder),
+          encoder_(encoder) {
+    }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-        const ChannelException& cause);
+    void setDecoder(const Decoder& decoder) {
+        decoder_.setDecoder(decoder);
+    }
 
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-        const boost::any& evt);
+    void setEncoder(const Encoder& encoder) {
+        encoder_.setEncoder(encoder);
+    }
 
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+    void setChecker(const DecodableChecker& decodableChecker,
+                    const EncodableChecker& encodableChecker) {
+        decoder_.setDecodableChecker(decodableChecker);
+        encoder_.setEncodableChecker(encodableChecker);
+    }
 
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
+    }
+
+private:
+    MessageDecoder decoder_;
+    MessageEncoder encoder_;
 };
 
 }

@@ -1,5 +1,6 @@
 #if !defined(CETTY_HANDLER_CODEC_BUFFERTOMESSAGECODEC_H)
 #define CETTY_HANDLER_CODEC_BUFFERTOMESSAGECODEC_H
+
 /*
  * Copyright 2012 The Netty Project
  *
@@ -38,36 +39,39 @@ namespace cetty {
 namespace handler {
 namespace codec {
 
-template<typename InboundOutT, typename OutboundInT>
-class BufferToMessageCodec
-    : public BufferToMessageDecoder<InboundOutT>,
-    public MessageToBufferEncoder<OutboundInT> {
+template<typename H,
+         typename InboundOut,
+         typename OutboundIn>
+class BufferToMessageCodec : private boost::noncopyable {
+public:
+    typename BufferToMessageDecoder::Decoder Decoder;
+    typename MessageToBufferEncoder::Encoder Encoder;
+
+    typename ChannelMessageHandlerContext<H,
+             ChannelBufferPtr,
+             InboundOut,
+             OutboundIn,
+             ChannelBufferPtr,
+             ChannelBufferContainer,
+             ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
+             ChannelMessageContainer<OutboundIn, MESSAGE_BLOCK>,
+             ChannelBufferContainer> Context;
 
 public:
-    BufferToMessageCodec() {}
-    virtual ~BufferToMessageCodec() {}
+    BufferToMessageCodec(const Decoder& decoder, const Encoder& encoder)
+        : decoder_(decoder), encoder_(encoder) {
+    }
 
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx);
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx);
+    ~BufferToMessageCodec() {}
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-        const ChannelException& cause);
+    void registerTo(Context& ctx) {
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
+    }
 
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-        const boost::any& evt);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-        const EventLoopPtr& eventLoop,
-        ChannelPipeline& pipeline,
-        ChannelHandlerContext* prev,
-        ChannelHandlerContext* next);
+private:
+    BufferToMessageDecoder<H, InboundOut, Context> decoder_;
+    MessageToBufferEncoder<H, OutboundIn, Context> encoder_;
 };
 
 }

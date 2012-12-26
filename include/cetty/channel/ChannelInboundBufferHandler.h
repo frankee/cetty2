@@ -17,63 +17,29 @@
  * under the License.
  */
 
-#include <cetty/channel/ChannelInboundHandler.h>
-#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-using namespace cetty::buffer;
-
-class ChannelInboundBufferHandlerContext;
-
-class ChannelInboundBufferHandler : public ChannelInboundHandler {
+template<typename H>
+class ChannelInboudBufferHandler {
 public:
-    ChannelInboundBufferHandler();
-    virtual ~ChannelInboundBufferHandler();
+    typedef ChannelMessageHandlerContext<H,
+        ChannelBufferPtr,
+        VoidMessage,
+        VoidMessage,
+        ChannelBufferPtr,
+        ChannelBufferContainer,
+        VoidMessageContainer,
+        VoidMessageContainer,
+        ChannelBufferContainer> Context;
 
-    virtual void channelOpen(ChannelHandlerContext& ctx);
-    virtual void channelActive(ChannelHandlerContext& ctx);
-    virtual void channelInactive(ChannelHandlerContext& ctx);
-    virtual void messageUpdated(ChannelHandlerContext& ctx);
-
-    virtual void beforeAdd(ChannelHandlerContext& ctx);
-    virtual void afterAdd(ChannelHandlerContext& ctx);
-    virtual void beforeRemove(ChannelHandlerContext& ctx);
-    virtual void afterRemove(ChannelHandlerContext& ctx);
-
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
-                                 const ChannelException& cause);
-
-    virtual void userEventTriggered(ChannelHandlerContext& ctx,
-                                    const boost::any& evt);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next);
-
-    virtual ChannelHandlerContext* createContext(const std::string& name,
-            const EventLoopPtr& eventLoop,
-            ChannelPipeline& pipeline,
-            ChannelHandlerContext* prev,
-            ChannelHandlerContext* next);
-
-    virtual void setInboundChannelBuffer(const ChannelBufferPtr& buffer);
-
-    const ChannelBufferPtr& getInboundChannelBuffer() const;
-
-protected:
-    virtual void messageReceived(ChannelHandlerContext& ctx,
-                                 const ChannelBufferPtr& msg);
-
-private:
-    ChannelBufferPtr inboundBuffer;
+    typedef ChannelBufferContainer InboundContainer;
+    typedef ChannelMessageTransfer<ChannelBufferPtr,
+        ChannelBufferContainer,
+        TRANSFER_OUTBOUND> OutboundTransfer;
 };
-
-inline const ChannelBufferPtr& ChannelInboundBufferHandler::getInboundChannelBuffer() const {
-    return this->inboundBuffer;
-}
 
 }
 }

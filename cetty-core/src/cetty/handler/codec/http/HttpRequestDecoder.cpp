@@ -23,61 +23,35 @@ namespace handler {
 namespace codec {
 namespace http {
 
-
-HttpRequestDecoder::HttpRequestDecoder(int maxInitialLineLength,
-                                       int maxHeaderSize,
-                                       int maxChunkSize)
-    : HttpMessageDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize) {
+void HttpRequestDecoder::registerTo(Context& ctx) {
+    decoder_.registerTo(ctx);
+    ctx.setExceptionCallback(boost::bind(
+                                 &HttpRequestDecoder::exceptionCaught,
+                                 this,
+                                 _1,
+                                 _2));
 }
 
-HttpRequestDecoder::HttpRequestDecoder()
-    : HttpMessageDecoder(4096, 8192, 8192) {
-}
+void HttpRequestDecoder::init() {
+    decoder_.setInitialState(requestDecoder_.initialState());
+    decoder_.setDecoder(boost::bind(&HttpPackageDecoder::decode,
+                                    &requestDecoder_,
+                                    _1,
+                                    _2,
+                                    _3));
 
-
-HttpRequestDecoder::~HttpRequestDecoder() {
-}
-
-ChannelHandlerPtr HttpRequestDecoder::clone() {
-    return ChannelHandlerPtr(
-               new HttpRequestDecoder(maxInitialLineLength,
-                                      maxHeaderSize,
-                                      maxChunkSize));
-}
-
-std::string HttpRequestDecoder::toString() const {
-    return "HttpRequestDecoder";
-}
-
-HttpMessagePtr HttpRequestDecoder::createMessage(const StringPiece& str1,
-        const StringPiece& str2,
-        const StringPiece& str3) {
-
-    BOOST_ASSERT(!str1.empty() && !str2.empty() && !str3.empty()
-                 && "createMessage parameters should not be NULL");
-
-    if (!request) { //has not initial ready.
-        request = new HttpRequest(HttpVersion::valueOf(str3),
-                                  HttpMethod::valueOf(str1),
-                                  str2);
-    }
-    else {
-        request->clear();
-        request->setProtocolVersion(HttpVersion::valueOf(str3));
-        request->setMethod(HttpMethod::valueOf(str1));
-        request->setUri(str2);
-    }
-
-    return request;
-}
-
-bool HttpRequestDecoder::isDecodingRequest() const {
-    return true;
+    requestDecoder_.setCheckPointInvoker(decoder_.checkPointInvoker());
+    requestDecoder_.setHttpPackageCreator(boost::bind(
+            &HttpRequestCreator::create,
+            &requestCreator_,
+            _1,
+            _2,
+            _3));
 }
 
 void HttpRequestDecoder::exceptionCaught(ChannelHandlerContext& ctx,
         const ChannelException& cause) {
-    
+
 }
 
 }

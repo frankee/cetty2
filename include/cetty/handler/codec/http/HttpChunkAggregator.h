@@ -57,8 +57,7 @@ class HttpPackageVisitor;
  * @apiviz.has org.jboss.netty.handler.codec.http.HttpChunk oneway - - filters out
  */
 
-class HttpChunkAggregator
-        : public MessageToMessageDecoder<HttpPackage, HttpMessagePtr> {
+class HttpChunkAggregator {
 public:
     /**
      * Creates a new instance.
@@ -70,23 +69,19 @@ public:
      */
     HttpChunkAggregator(int maxContentLength);
 
-    virtual ~HttpChunkAggregator() {}
-
-    virtual ChannelHandlerPtr clone();
-    virtual std::string toString() const;
+    ~HttpChunkAggregator() {}
 
 protected:
-    virtual HttpMessagePtr decode(ChannelHandlerContext& ctx,
+    HttpPackage decode(ChannelHandlerContext& ctx,
                                   const HttpPackage& msg);
 
     void appendToCumulation(const ChannelBufferPtr& input);
 
 private:
-    friend class HttpPackageVisitor;
+    int maxContentLength_;
+    HttpPackage currentMessage_;
 
-private:
-    int maxContentLength;
-    HttpMessagePtr currentMessage;
+    MessageToMessageDecoder<HttpChunkAggregator, HttpPackage, HttpPackage> decoder_;
 };
 
 }
