@@ -22,7 +22,6 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
-#include <mongo/db/json.h>
 #include <mongo/client/dbclient.h>
 
 #include <cetty/logging/LoggerHelper.h>
