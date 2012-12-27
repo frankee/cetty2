@@ -199,6 +199,12 @@ void ServiceGenerator::GenerateMethodSignatures(
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
         sub_vars["classname"] = descriptor_->name();
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
         sub_vars["name"] = method->name();
         sub_vars["input_type"] = ClassName(method->input_type(), false);
         sub_vars["output_type"] = ClassName(method->output_type(), false);
@@ -215,7 +221,7 @@ void ServiceGenerator::GenerateMethodSignatures(
                            "using $classname$::$name$;\n"
 
                            "$virtual$void $name$(const Const$input_type$Ptr& request,\n"
-                           "                     const $name$ServiceFuturePtr& future);\n");
+                           "                     const $servicefuture$& future);\n");
         }
     }
 }
@@ -394,6 +400,14 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
     for (int i = 0; i < descriptor_->method_count(); i++) {
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
+        
+        // capitalize the method name.
+        std::string methodName = method->name();
+        if (methodName[0] >= 'a' && methodName[0] <= 'z') {
+            methodName[0] += ('A' - 'a');
+        }
+        sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
+        
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);
@@ -402,7 +416,7 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
 
         printer->Print(sub_vars,
                        "void $classname$_Stub::$name$(const Const$input_type$Ptr& request,\n"
-                       "                              const $name$ServiceFuturePtr& future) {\n"
+                       "                              const $servicefuture$& future) {\n"
                        "  channel_.CallMethod<Const$input_type$Ptr, $output_type$Ptr>(descriptor()->method($index$),\n"
                        "                                                              request,\n"
                        "                                                              future);\n"

@@ -15,6 +15,7 @@ endif()
 AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/xml XML_DIR)
 
 AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/png PNG_DIR)
+AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/bson BSON_DIR)
 
 SET(GENERATOR_DIR cetty/protobuf/service/generator)
 
@@ -27,7 +28,7 @@ message(STATUS ${PROTO_HDS})
 SET(pbservice_sources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR})
 SET(pbservice_lib cetty-protobuf)
 
-SET(pbserialization_sources ${SERIALIZATION_DIR} ${JSON_DIR} ${XML_DIR} ${PNG_DIR})
+SET(pbserialization_sources ${SERIALIZATION_DIR} ${JSON_DIR} ${XML_DIR} ${PNG_DIR} ${BSON_DIR})
 SET(pbserialization_lib cetty-protobuf-serialization)
 
 cxx_static_library(${pbservice_lib} ${pbservice_sources})

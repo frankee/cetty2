@@ -68,7 +68,8 @@ private:
     void doClose() {}
 
     void doInitialize() {
-        pipeline().setHead<HandlerPtr>("dispatcher", this);
+        //pipeline().setHead<HandlerPtr>("dispatcher", this);
+        pipeline().setHead(new Context("dispatcher", this));
     }
 
 private:

@@ -47,7 +47,7 @@ public:
     }
 
     ChannelPtr build() {
-        builder_.build();
+        return builder_.build();
     }
 
 private:

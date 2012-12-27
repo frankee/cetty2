@@ -22,7 +22,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
-#include <mongodb/db/json.h>
+#include <mongo/client/dbclient.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -113,14 +113,14 @@ void ProtobufBsonFormatter::formatSingleField(const google::protobuf::Message& m
             }
 
             case FieldDescriptor::CPPTYPE_INT64:    {       //= 2,     // TYPE_INT64, TYPE_SINT64, TYPE_SFIXED64
-                std::vector<int64> values;
+                std::vector<long long> values;
                 values.reserve(fieldsize);
 
                 for (int i = 0; i < fieldsize; ++i) {
                     values.push_back(reflection->GetRepeatedInt64(message,field,i));
                 }
 
-                builder.append(fieldName,values);
+                builder.append(fieldName, values);
 
                 break;
             }
@@ -223,7 +223,7 @@ void ProtobufBsonFormatter::formatSingleField(const google::protobuf::Message& m
                 for (int i = 0; i < fieldsize; ++i)  {
                     char number[16] = {0};
                     sprintf(number, "%d", i);
-                    BSONObjBuilder obj = sub.subobjStart(number);
+                    BSONObjBuilder obj(sub.subobjStart(number));
                     formatMessage(reflection->GetRepeatedMessage(message, field, i), obj);
                     obj.done();
                 }
@@ -241,12 +241,13 @@ void ProtobufBsonFormatter::formatSingleField(const google::protobuf::Message& m
         else { //not repeated
             switch (/*cppType*/field->cpp_type()) {
             case FieldDescriptor::CPPTYPE_INT32:    {       //= 1,     // TYPE_INT32, TYPE_SINT32, TYPE_SFIXED32
-                builder.append(fieldName,reflection->GetInt32(message,field));
+                builder.append(fieldName, reflection->GetInt32(message,field));
                 break;
             }
 
             case FieldDescriptor::CPPTYPE_INT64:    {       //= 2,     // TYPE_INT64, TYPE_SINT64, TYPE_SFIXED64
-                builder.append(fieldName,reflection->GetInt64(message,field));
+                builder.append(fieldName,
+                    static_cast<long long>(reflection->GetInt64(message,field)));
                 break;
             }
 
@@ -256,7 +257,8 @@ void ProtobufBsonFormatter::formatSingleField(const google::protobuf::Message& m
             }
 
             case FieldDescriptor::CPPTYPE_UINT64:   {       //= 4,     // TYPE_UINT64, TYPE_FIXED64
-                builder.append(fieldName,(long long)reflection->GetUInt64(message,field));
+                builder.append(fieldName,
+                    static_cast<long long>(reflection->GetUInt64(message,field)));
                 break;
             }
 
