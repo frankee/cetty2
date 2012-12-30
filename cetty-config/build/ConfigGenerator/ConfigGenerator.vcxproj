@@ -38,7 +38,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\bin</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\include</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\bin\</OutDir>
@@ -102,21 +102,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppFile.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\config.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\FileGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppMessage.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
-    <ClCompile Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppFile.h" />
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\FileGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h" />
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppMessage.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />
-    <ClInclude Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

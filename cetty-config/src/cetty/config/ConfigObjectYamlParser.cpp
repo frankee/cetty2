@@ -16,9 +16,9 @@
 
 #include <yaml-cpp/yaml.h>
 #include <cetty/config/ConfigObject.h>
-#include <cetty/config/KeyValuePair.h>
 #include <cetty/config/ConfigDescriptor.h>
 #include <cetty/config/ConfigReflection.h>
+#include <cetty/config/KeyValuePair.cnf.h>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -68,7 +68,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
                     return false;
                 }
             }
-            else if (object->name() == KeyValuePair::NAME) {
+            else if (object->name() == "cetty.config.KeyValuePair") {
                 KeyValuePair* kv = dynamic_cast<KeyValuePair*>(object);
                 if (kv) {
                     kv->key = node.begin()->first.Scalar();
@@ -76,7 +76,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
                 }
                 else {
                     LOG_ERROR << "the config object name is "
-                        << KeyValuePair::NAME
+                        << "cetty.config.KeyValuePair"
                         << " , but the instance is not KeyValuePair";
 
                     return false;

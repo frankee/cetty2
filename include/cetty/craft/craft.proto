@@ -4,12 +4,16 @@ option java_package = "io.cetty.craft";
 option java_outer_classname = "CraftProto";
 
 enum Lang {
+	(craft_enum_options).query_params="l";
+	
 	en_US = 0;
     zh_CN = 1;
     zh_TW = 2;
 }
 
 message KeyValue {
+	(craft_message_options).code = "{key}-{value}";
+	
 	optional string   key = 1;
 	optional string value = 2;
 }
@@ -29,7 +33,10 @@ message Status {
 }
 
 message Session {
-	optional string   id = 1;
+	optional string   id = 1[
+		(craft).cookie_param = "id",
+	];
+	
 	optional string user = 2;
 }
 
@@ -37,7 +44,10 @@ message Authority {
 	optional Session  session = 1;
 	
     optional string       key = 2;
-    optional string signature = 3;
+	
+    optional string signature = 3 [
+		(craft).query_param = "",
+	];
 
 	optional string        ip = 8;
 	optional string      host = 9; // non-ip
@@ -48,18 +58,17 @@ message ErrorResponse {
 }
 
 message CraftFieldOptions {
-    optional string  path_param = 1;
-	optional string query_param = 2;
+    optional string   path_param = 1;
+	optional string  query_param = 2;
 	optional string header_param = 3;
 	optional string cookie_param = 4;
 	
-	optional string default = 5;
+	optional string      default = 5;
 	
-	optional bool ignore_sign = 10;
-	optional string pattern = 11;
-	optional int32 decimal_min = 12;
-	optional int32 decimal_max = 13;
-	
+	optional bool    ignore_sign = 20;
+	optional string      pattern = 21;
+	optional int32   decimal_min = 22;
+	optional int32   decimal_max = 23;
 }
 
 message CraftMessageOptions {
@@ -81,13 +90,17 @@ message CraftServiceOptions {
 }
 
 extend google.protobuf.FieldOptions {
-  optional CraftFieldOptions craft = 50001;
+  optional CraftFieldOptions craft = 60100;
+}
+
+extend google.protobuf.MessageOptions {
+	optional CraftMessageOptions craft_message_options = 60100;
 }
 
 extend google.protobuf.MethodOptions {
-  optional CraftMethodOptions craft = 50001;
+  optional CraftMethodOptions craft_method_options = 60100;
 }
 
 extend google.protobuf.ServiceOptions {
-  optional CraftServiceOptions craft = 50001;
+  optional CraftServiceOptions craft_service_options = 60100;
 }

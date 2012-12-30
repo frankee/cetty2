@@ -31,7 +31,7 @@
 // Author: kenton@google.com (Kenton Varda)
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
-#include <cetty/config/generator/cpp/CppMessage.h>
+#include <cetty/config/generator/cpp/MessageGenerator.h>
 
 #include <algorithm>
 #include <map>

@@ -42,7 +42,6 @@ ConfigCenter& ConfigCenter::instance() {
 ConfigCenter::ConfigCenter()
     : argc_(0),
       argv_(NULL),
-      importer_(new ConfigFileImporter()),
       description_("Allowed options") {
 
     description_.add_options()
@@ -51,10 +50,6 @@ ConfigCenter::ConfigCenter()
 }
 
 ConfigCenter::~ConfigCenter() {
-    if (importer_) {
-        delete importer_;
-    }
-
     cmdlineTrie_.freeData();
 }
 
@@ -137,16 +132,99 @@ bool ConfigCenter::load(const std::string& str) {
 }
 
 bool ConfigCenter::loadFromFile(const std::string& file) {
-    std::string content;
+    root_ = parseFromFile(file);
 
-    if (!importer_->fileContent(file, &content)) {
-        return load(content.c_str());
-    }
-    else {
-
+    if (!root_) {
+        return false;
     }
 
     return true;
+}
+
+YAML::Node ConfigCenter::parseFromFile(const std::string& file) {
+    std::vector<std::string> files;
+    ConfigFileImporter importer;
+
+    importer.find(file, &files);
+
+    YAML::Node root;
+    std::string content;
+
+    for (std::size_t i = 0; i < files.size(); ++i) {
+        content.clear();
+
+        if (getFileContent(files[i], &content)) {
+            try {
+                YAML::Node node = YAML::Load(content);
+                mergeNode(node, &root);
+            }
+            catch (const std::exception& e) {
+                LOG_ERROR << "parse the yaml configure file error: " << e.what();
+            }
+        }
+    }
+
+    return root;
+}
+
+bool ConfigCenter::getFileContent(const std::string& file, std::string* content) {
+    std::fstream filestream;
+    filestream.open(file.c_str(), std::fstream::in);
+
+    if (!filestream.is_open()) {
+        filestream.close();
+        LOG_ERROR << "can not open the configure file: " << file;
+        return false;
+    }
+
+    std::string line;
+
+    while (!filestream.eof()) {
+        std::getline(filestream, line);
+        content->append(line);
+        content->append("\n");
+    }
+
+    filestream.close();
+
+    return true;
+}
+
+void ConfigCenter::mergeNode(const YAML::Node& from, YAML::Node* to) {
+    BOOST_ASSERT(to && from.IsMap());
+
+    if (!to->IsDefined()) {
+        *to = from;
+        return;
+    }
+
+    YAML::Node::const_iterator itr = from.begin();
+
+    for (; itr != from.end(); ++itr) {
+        YAML::Node& node = (*to)[itr->first.Scalar()];
+
+        if (!node.IsDefined()) {
+            node = itr->second;
+            continue;
+        }
+
+        YAML::Node mergeFrom = itr->second;
+        YAML::Node::const_iterator j = mergeFrom.begin();
+
+        if (node.IsMap() && mergeFrom.IsMap()) {
+            for (; j != mergeFrom.end(); ++j) {
+                node[j->first.Scalar()] = j->second;
+            }
+        }
+        else if (node.IsSequence() && mergeFrom.IsSequence()) {
+            for (; j != mergeFrom.end(); ++j) {
+                node.push_back(j->second);
+            }
+        }
+        else {
+            LOG_ERROR << "node can not merge.";
+        }
+    }
 }
 
 bool ConfigCenter::configure(ConfigObject* object) const {
@@ -180,39 +258,6 @@ bool ConfigCenter::configure(const std::string& name,
     }
 
     return result;
-}
-
-bool ConfigCenter::getFileContent(const std::vector<std::string>& files, std::string* content) {
-    std::vector<std::string>::const_iterator itr = files.begin();
-
-    for (; itr != files.end(); ++itr) {
-        getFileContent(*itr, content);
-    }
-
-    return !content->empty();
-}
-
-bool ConfigCenter::getFileContent(const std::string& file, std::string* content) {
-    std::fstream filestream;
-    filestream.open(file.c_str(), std::fstream::in);
-
-    if (!filestream.is_open()) {
-        filestream.close();
-        LOG_ERROR << "can not open the configure file: " << file;
-        return false;
-    }
-
-    std::string line;
-
-    while (!filestream.eof()) {
-        std::getline(filestream, line);
-        content->append(line);
-        content->append("\n");
-    }
-
-    filestream.close();
-
-    return true;
 }
 
 bool ConfigCenter::configureFromString(const char* str, ConfigObject* object) {
@@ -250,7 +295,7 @@ bool ConfigCenter::configureFromFile(const std::string& file,
     YAML::Node root;
 
     try {
-        root = YAML::LoadFile(file);
+        root = parseFromFile(file);
     }
     catch (const std::exception& e) {
         LOG_ERROR << "parse the yaml configure file error: " << e.what();

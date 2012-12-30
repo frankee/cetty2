@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -25,24 +26,16 @@ namespace cetty {
 namespace config {
 
 class FileNameMatchPattern;
-class IncludeLine;
+class ImportLine;
 
 class ConfigFileImporter {
 public:
     ConfigFileImporter();
 
-    int fileContent(const std::string& file, std::string* content);
+    int find(const std::string& file, std::vector<std::string>* imports);
 
 private:
-    int find(const std::string& file, std::vector<std::string>* files);
-
-    void findFile(const boost::filesystem::path& filePath,
-                  const FileNameMatchPattern& pattern,
-                  std::vector<std::string>* files);
-
-    int getFileIncludes(const std::string& file, std::vector<IncludeLine>* includes);
-
-
+    int getImportLines(const std::string& file, std::vector<std::string>* lines);
 };
 
 }

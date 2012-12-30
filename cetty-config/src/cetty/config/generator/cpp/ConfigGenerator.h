@@ -27,10 +27,10 @@ namespace cpp {
 using namespace google::protobuf;
 using namespace google::protobuf::compiler;
 
-class CppGenerator : public google::protobuf::compiler::CodeGenerator {
+class ConfigGenerator : public google::protobuf::compiler::CodeGenerator {
 public:
-    CppGenerator() {}
-    virtual ~CppGenerator() {}
+    ConfigGenerator() {}
+    virtual ~ConfigGenerator() {}
 
     virtual bool Generate(const FileDescriptor* file,
                           const string& parameter,

@@ -14,14 +14,18 @@
  * under the License.
  */
 
-#include <cetty/config/generator/cpp/CppGenerator.h>
+#include <cetty/config/generator/cpp/ConfigGenerator.h>
 
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/compiler/command_line_interface.h>
+#include <google/protobuf/compiler/plugin.h>
 
-#include <cetty/config/generator/cpp/CppFile.h>
+#include <cetty/config/config.pb.h>
+#include <cetty/config/generator/cpp/FileGenerator.h>
 #include <cetty/config/generator/cpp/CppHelpers.h>
+#include <cetty/protobuf/service/ProtobufUtil.h>
 
 namespace cetty {
 namespace config {
@@ -30,8 +34,9 @@ namespace cpp {
 
 using namespace google::protobuf;
 using namespace google::protobuf::compiler;
+using namespace cetty::protobuf::service;
 
-bool CppGenerator::Generate(const FileDescriptor* file,
+bool ConfigGenerator::Generate(const FileDescriptor* file,
                             const string& parameter,
                             GeneratorContext* generatorContext,
                             string* error) const {
@@ -74,6 +79,9 @@ bool CppGenerator::Generate(const FileDescriptor* file,
     std::string basename = StripProto(file->name());
     basename.append(".cnf");
 
+    boost::optional<std::string> fileName =
+        ProtobufUtil::getOption<std::string>(file, "config_file_options", "source_file_name");
+
     FileGenerator fileGenerator(file, dllexport_decl);
 
     // Generate header.
@@ -98,4 +106,25 @@ bool CppGenerator::Generate(const FileDescriptor* file,
 }
 }
 }
+}
+
+using namespace google::protobuf::compiler;
+using namespace cetty::config::generator::cpp;
+
+//#define GENERATOR_NOT_PLUGIN
+
+int main(int argc, char* argv[]) {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    ConfigGenerator generator;
+
+#if defined(GENERATOR_NOT_PLUGIN)
+    google::protobuf::compiler::CommandLineInterface cli;
+    cli.RegisterGenerator("--config_out", &generator,
+        "Generate C++ header and source.");
+
+    return cli.Run(argc, argv);
+#else
+    PluginMain(argc, argv, &generator);
+#endif
 }

@@ -32,9 +32,10 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
-#include <cetty/config/generator/cpp/CppFile.h>
+#include <cetty/config/generator/cpp/FileGenerator.h>
+
 #include <cetty/config/generator/cpp/CppHelpers.h>
-#include <cetty/config/generator/cpp/CppMessage.h>
+#include <cetty/config/generator/cpp/MessageGenerator.h>
 
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/descriptor.pb.h>
@@ -138,17 +139,24 @@ void FileGenerator::GenerateHeader(io::Printer* printer) {
         "filename", file_->name(),
         "filename_identifier", filename_identifier);
 
-    printer->Print(
-        "#include <cetty/config/ConfigObject.h>\n"
-        "#include <cetty/config/KeyValuePair.h>\n"
-        "#include <cetty/config/ConfigDescriptor.h>\n"
-        "\n");
+    printer->Print("#include <cetty/config/ConfigObject.h>\n"
+                   "#include <cetty/config/ConfigDescriptor.h>\n");
+
+    if (file_->name() != "KeyValuePair") {
+        printer->Print("#include <cetty/config/KeyValuePair.cnf.h>\n\n");
+    }
 
     for (int i = 0; i < file_->dependency_count(); i++) {
+        const std::string& dependency = file_->dependency(i)->name();
+
+        if (dependency == "config") {
+            continue;
+        }
+
         printer->Print(
             "#include \"$dependency$.cnf.h\"\n",
             "dependency",
-            StripProto(file_->dependency(i)->name()));
+            StripProto(dependency));
     }
 
     // Open namespace.

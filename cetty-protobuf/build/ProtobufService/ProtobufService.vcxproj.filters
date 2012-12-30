@@ -66,6 +66,9 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\handler\ProtobufServiceInboundFilter.h">
       <Filter>protobuf\handler</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufFieldTraits.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">

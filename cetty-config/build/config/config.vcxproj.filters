@@ -21,9 +21,6 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigDescriptor.cpp">
       <Filter>config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\KeyValuePair.cpp">
-      <Filter>config</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cetty\config\ConfigFileImporter.cpp">
       <Filter>config</Filter>
     </ClCompile>
@@ -44,13 +41,13 @@
     <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h">
       <Filter>config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\config\KeyValuePair.h">
-      <Filter>config</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cetty\config\ConfigFileImporter.h">
       <Filter>config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigReflectionImpl.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\config\KeyValuePair.cnf.h">
       <Filter>config</Filter>
     </ClInclude>
   </ItemGroup>

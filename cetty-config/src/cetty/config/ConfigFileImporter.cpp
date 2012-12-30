@@ -16,6 +16,7 @@
 
 #include <cetty/config/ConfigFileImporter.h>
 
+#include <yaml-cpp/node/node.h>
 #include <boost/algorithm/string.hpp>
 #include <cetty/util/StringUtil.h>
 
@@ -27,168 +28,191 @@ namespace config {
 using namespace cetty::util;
 using namespace cetty::logging;
 
-class FileNameMatchPattern {
+static const std::string IMPORT_KEY = "#import";
+
+class ImportLine {
 public:
-    std::string prefix;
-    std::string postfix;
-    std::string fullName;
-    boost::filesystem::path fatherPath;
-
-    bool parse(const std::string& str, boost::filesystem::path* filePath);
-    bool match(const std::string& filename) const;
-
-    bool isMatchAll() const;
-};
-
-class IncludeLine {
-public:
-    boost::filesystem::path filePath;
-    FileNameMatchPattern pattern;
-
-    IncludeLine(const std::string& str, boost::filesystem::path filePath) {
-        pattern.fatherPath = filePath.parent_path();
-        parse(str);
+    ImportLine(const std::string& file, const std::string& line)
+        : folderPath_(file), parentPath_(folderPath_.parent_path()) {
+        init(line);
     }
 
-    bool parse(const std::string& str);
+    int getImports(std::vector<std::string>* matches) {
+        BOOST_ASSERT(matches && "matches should not be null.");
+
+        boost::filesystem::directory_iterator end;
+
+        if (boost::filesystem::exists(folderPath_)) {
+            boost::filesystem::directory_iterator pos(folderPath_);
+            bool isMatchAll = isAllMatchedMode();
+
+            for (; pos != end; ++pos) {
+                if (is_directory(*pos)) {
+                    continue;
+                }
+
+                if (isMatchAll || match(pos->path().filename().string())) {
+                    matches->push_back(pos->path().string());
+                }
+            }
+        }
+
+        return static_cast<int>(matches->size());
+    }
+
+private:
+    void init(const std::string& str) {
+        std::string::size_type pos = str.find(IMPORT_KEY);
+
+        if (pos == str.npos) {
+            LOG_ERROR << "This is not the import line: " << str;
+            return;
+        }
+
+        std::string subStr = str.substr(pos + IMPORT_KEY.size());
+        boost::algorithm::trim(subStr);
+
+        if (subStr.empty()) {
+            LOG_ERROR << "the import line is illegal: " << str;
+            return;
+        }
+
+        // filter out the double quoter
+        if (subStr[0] == '\"') {
+            std::size_t size = subStr.size();
+
+            if (size > 1 && subStr[size - 1] == '\"') {
+                subStr = subStr.substr(1, size - 2);
+                boost::algorithm::trim(subStr);
+            }
+            else {
+                LOG_ERROR << "the import line is illegal: " << str;
+                return;
+            }
+        }
+
+        folderPath_ = subStr;
+        std::string parentPathStr = folderPath_.parent_path().string();
+
+        if (!folderPath_.is_complete() && parentPath_.string().compare(parentPathStr) != 0) {
+            folderPath_ = (parentPath_ /= parentPathStr);
+        }
+
+        // parse simple * match
+        std::string fileName = folderPath_.filename().string();
+
+        if (fileName.find("*") == fileName.npos) {
+            fullMatch_ = fileName;
+        }
+        else if (fileName.compare("*") == 0) {
+            // match all mode.
+        }
+        else {
+            std::vector<std::string> keyWords;
+            cetty::util::StringUtil::split(fileName, "*", &keyWords);
+
+            //             if (1 == keyWords.size()) {
+            //                 fullMatch_ = p.filename().string();
+            //             }
+            //
+            //             if (2 == keyWords.size()) {
+            //                 prefixMatch_ = keyWords[0];
+            //                 postfixMatch_ = keyWords[1];
+            //                 fullMatch_ = p.filename().string();
+            //             }
+        }
+    }
+
+    bool match(const std::string& filename) const {
+        if (!fullMatch_.empty()) {
+            return fullMatch_ == filename;
+        }
+
+        if (!prefixMatch_.empty())  {
+            if (StringUtil::hasPrefixString(filename, prefixMatch_)) {
+                if (!postfixMatch_.empty()) {
+                    return StringUtil::hasSuffixString(filename, postfixMatch_);
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+
+        if (!postfixMatch_.empty()) {
+            return StringUtil::hasSuffixString(filename, postfixMatch_);
+        }
+
+        return false;
+    }
+
+    bool isAllMatchedMode() const {
+        return fullMatch_.empty() &&
+               prefixMatch_.empty() &&
+               postfixMatch_.empty();
+    }
+
+private:
+    std::string fullMatch_;
+    std::string prefixMatch_;
+    std::string postfixMatch_;
+
+    boost::filesystem::path folderPath_;
+    boost::filesystem::path parentPath_;
 };
 
 ConfigFileImporter::ConfigFileImporter() {
 }
 
 int ConfigFileImporter::find(const std::string& file,
-                                  std::vector<std::string>* files) {
-    if (files == NULL) {
-        LOG_ERROR << "the files is null!";
+                             std::vector<std::string>* imports) {
+    if (imports == NULL) {
+        LOG_ERROR << "the imports is null!";
         return 0;
-    }
-
-    if (!files->empty()) {
-
     }
 
     std::fstream filestream;
     filestream.open(file.c_str(), std::fstream::in);
 
     if (!filestream.is_open()) {
-        filestream.close();
-        std::cout<<"can not find the file"<<std::endl;
+        LOG_WARN << "the file " << file << " does not exist.";
         return 0;
     }
+    else {
+        filestream.close();
+    }
 
-    filestream.close();
-
-    std::vector<IncludeLine> includes;
-    int filesCnt = getFileIncludes(file, &includes);
-
-    if (std::find(files->begin(), files->end(), file) == files->end()) {
-        files->push_back(file);
+    // prevent to circular import
+    if (std::find(imports->begin(), imports->end(), file) == imports->end()) {
+        imports->push_back(file);
     }
     else {
         return 0;
     }
 
-    for (int i = 0; i < filesCnt; ++i) {
-        const IncludeLine& include = includes[i];
-        findFile(include.filePath, include.pattern, files);
-    }
+    // load importers
+    std::vector<std::string> importLines;
+    getImportLines(file, &importLines);
 
-    return (int)files->size();
-}
+    for (std::size_t i = 0; i < importLines.size(); ++i) {
+        ImportLine line(file, importLines[i]);
+        std::vector<std::string> files;
+        line.getImports(&files);
 
-bool filterIncludeLine(const std::string line) {
-    std::string::size_type pos = line.find("#include");
-
-    if (pos != std::string::npos) {
-        return true;
-    }
-
-    return false;
-}
-
-bool FileNameMatchPattern::parse(const std::string& str,
-                                 boost::filesystem::path* filePath) {
-    //处理相对路径
-    boost::filesystem::path p(str);
-    *filePath = p.parent_path();
-    std::string pathStr = p.parent_path().string();
-
-    if (!p.is_complete() && fatherPath.string().compare(p.parent_path().string()) != 0) {
-        *filePath = (fatherPath /= pathStr);
-    }
-
-    //取出文件名 并分割
-    std::vector<std::string> keyWords;
-    cetty::util::StringUtil::split(p.filename().string(),"*", &keyWords);
-
-    if (1 == keyWords.size()) {
-        fullName = p.filename().string();
-    }
-
-    if (2 == keyWords.size()) {
-        prefix = keyWords[0];
-        postfix = keyWords[1];
-        fullName = p.filename().string();
-    }
-
-    return true;
-}
-
-bool FileNameMatchPattern::isMatchAll() const {
-    return true;
-}
-
-bool FileNameMatchPattern::match(const std::string& filename) const {
-    if (prefix.empty() && postfix.empty()) {
-        return true;
-    }
-    else if (!prefix.empty() && StringUtil::hasPrefixString(filename, prefix)) {
-        if (!postfix.empty() && StringUtil::hasSuffixString(filename, postfix)) {
-            return true;
-        }
-        else if (postfix.empty()) {
-            return true;
-        }
-    }
-    else if (prefix.empty()
-             && !postfix.empty()
-             && StringUtil::hasSuffixString(filename, postfix)) {
-        return true;
-    }
-
-    return false;
-}
-
-bool IncludeLine::parse(const std::string& str) {
-    std::string::size_type pos;
-    std::string subStr;
-
-    pos = str.find("#include");
-
-    subStr = str.substr(pos+strlen("#include"));
-    boost::algorithm::trim(subStr);  //除去空格 获得路径
-
-    //有双引号就过滤 双引号
-    if (subStr.find_first_of("\"") != subStr.npos) {
-        if (subStr.find_first_of("\"") != subStr.find_last_of("\"")) {
-            subStr = subStr.substr(1, subStr.find_last_of("\"")-1);
-            boost::algorithm::trim(subStr);
-        }
-        else {
-            std::cout<<"the includeline is wrong!"<<std::endl;
+        for (std::size_t j = 0; j < files.size(); ++j) {
+            find(files[j], imports);
         }
     }
 
-    pattern.parse(subStr, &filePath);
-
-    return true;
+    return static_cast<int>(imports->size());
 }
 
-int ConfigFileImporter::getFileIncludes(const std::string& file,
-        std::vector<IncludeLine>* includes) {
-    BOOST_ASSERT(includes && "the includes is null!");
+int ConfigFileImporter::getImportLines(const std::string& file, std::vector<std::string>* lines) {
+    BOOST_ASSERT(lines && "the lines is null!");
 
-    std::vector<std::string> lines;
     std::fstream filestream;
     filestream.open(file.c_str(), std::fstream::in);
 
@@ -198,52 +222,13 @@ int ConfigFileImporter::getFileIncludes(const std::string& file,
         std::getline(filestream, line);
         boost::algorithm::trim(line);
 
-        if (!line.empty()) {
-            lines.push_back(line);
+        if (line.find(IMPORT_KEY) != std::string::npos) {
+            lines->push_back(line);
         }
     }
 
     filestream.close();
-
-    boost::filesystem::path p(file);
-    std::string includeLineStr;
-
-    for (size_t i = lines.size(); i > 0; --i) {
-        // is include file
-        if (!filterIncludeLine(lines[i-1])) {
-            break;
-        }
-
-        includes->push_back(IncludeLine(lines[i-1], p));
-    }
-
-    return includes->size();
-}
-
-void ConfigFileImporter::findFile(const boost::filesystem::path& filePath,
-                                       const FileNameMatchPattern& pattern,
-                                       std::vector<std::string>* files) {
-    boost::filesystem::directory_iterator end;
-
-    if (boost::filesystem::exists(filePath)) {
-        boost::filesystem::directory_iterator pos(filePath);
-
-        for (; pos != end; ++pos) {
-            if (pattern.isMatchAll()) {
-
-            }
-
-            if (is_directory(*pos)) {
-                continue;
-            }
-
-            if (pattern.match(pos->path().filename().string())) { //如果是 * 所有文件都将匹配成功  即全部遍历
-
-                find(pos->path().string(), files);
-            }
-        }
-    }
-
+    return static_cast<int>(lines->size());
 }
 
 }

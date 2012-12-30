@@ -121,6 +121,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TelnetServer", "..\telnet\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memcached", "..\..\..\cetty-memcached\build\memcached\Memcached.vcxproj", "{4E884AF4-B887-470E-A89B-76261E66C3B5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml", "..\..\..\..\thirdparty\yaml-cpp\yaml.vcxproj", "{DC1A14A7-047C-4151-97F5-AED607FE1EE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -283,6 +285,10 @@ Global
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Debug|Win32.Build.0 = Debug|Win32
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.ActiveCfg = Release|Win32
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.Build.0 = Release|Win32
+		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Debug|Win32.Build.0 = Debug|Win32
+		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Release|Win32.ActiveCfg = Release|Win32
+		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

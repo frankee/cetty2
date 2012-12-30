@@ -19,6 +19,7 @@
 
 #include <string>
 #include <yaml-cpp/node/node.h>
+#include <boost/scoped_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <cetty/util/SimpleTrie.h>
 
@@ -26,7 +27,6 @@ namespace cetty {
 namespace config {
 
 class ConfigObject;
-class ConfigFileImporter;
 
 using namespace cetty::util;
 
@@ -65,8 +65,9 @@ public:
     static bool configureFromFile(const std::string& file, ConfigObject* object);
 
 private:
-    bool getFileContent(const std::vector<std::string>& files, std::string* content);
-    bool getFileContent(const std::string& file, std::string* content);
+    static YAML::Node parseFromFile(const std::string& file);
+    static void mergeNode(const YAML::Node& from, YAML::Node* to);
+    static bool getFileContent(const std::string& file, std::string* content);
 
 private:
     static ConfigCenter* center_;
@@ -76,7 +77,6 @@ private:
     char** argv_;
 
     YAML::Node root_;
-    ConfigFileImporter* importer_;
 
     CmdlineTrie cmdlineTrie_;
     boost::program_options::variables_map vm_;

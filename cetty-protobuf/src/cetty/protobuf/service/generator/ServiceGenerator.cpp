@@ -51,8 +51,6 @@ string SimpleItoa(int i);
 namespace compiler {
 namespace cpp {
 
-bool ServiceGenerator::protoHasService = false;
-
 string ClassName(const Descriptor* descriptor, bool qualified);
 
 ServiceGenerator::ServiceGenerator(const ServiceDescriptor* descriptor,
@@ -72,8 +70,6 @@ ServiceGenerator::ServiceGenerator(const ServiceDescriptor* descriptor,
 ServiceGenerator::~ServiceGenerator() {}
 
 void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
-    protoHasService = true;
-
     // Forward-declare the stub type.
     printer->Print(vars_,
                    "class $classname$_Stub;\n"
@@ -90,12 +86,14 @@ void ServiceGenerator::GenerateDeclarations(io::Printer* printer) {
                                              ClassName(method->input_type(), false)));
         output_types.push_back(std::make_pair(ClassName(method->output_type(), true),
                                               ClassName(method->output_type(), false)));
-        
+
         // capitalize the method name.
         std::string methodName = method->name();
+
         if (methodName[0] >= 'a' && methodName[0] <= 'z') {
             methodName[0] += ('A' - 'a');
         }
+
         method_names.push_back(methodName);
     }
 
@@ -201,9 +199,11 @@ void ServiceGenerator::GenerateMethodSignatures(
         sub_vars["classname"] = descriptor_->name();
         // capitalize the method name.
         std::string methodName = method->name();
+
         if (methodName[0] >= 'a' && methodName[0] <= 'z') {
             methodName[0] += ('A' - 'a');
         }
+
         sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
         sub_vars["name"] = method->name();
         sub_vars["input_type"] = ClassName(method->input_type(), false);
@@ -400,14 +400,16 @@ void ServiceGenerator::GenerateStubMethods(io::Printer* printer) {
     for (int i = 0; i < descriptor_->method_count(); i++) {
         const MethodDescriptor* method = descriptor_->method(i);
         map<string, string> sub_vars;
-        
+
         // capitalize the method name.
         std::string methodName = method->name();
+
         if (methodName[0] >= 'a' && methodName[0] <= 'z') {
             methodName[0] += ('A' - 'a');
         }
+
         sub_vars["servicefuture"] = methodName + "ServiceFuturePtr";
-        
+
         sub_vars["classname"] = descriptor_->name();
         sub_vars["name"] = method->name();
         sub_vars["index"] = SimpleItoa(i);

@@ -1,52 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="cpp">
-      <UniqueIdentifier>{7e6796dd-7787-4d6b-8f7a-a3b8e7000b16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="yaml">
-      <UniqueIdentifier>{8c69b45b-744e-4593-9b61-b7e83e6b8d4d}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="..\..\src\cetty\config\config.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\FileGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppGenerator.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppFile.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppMessage.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.cpp">
-      <Filter>yaml</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppGenerator.h">
-      <Filter>cpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppFile.h">
-      <Filter>cpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h">
-      <Filter>cpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppMessage.h">
-      <Filter>cpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h">
-      <Filter>cpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.h">
-      <Filter>yaml</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\FileGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.h" />
   </ItemGroup>
 </Project>

@@ -19,10 +19,14 @@
 
 #include <vector>
 #include <boost/variant.hpp>
+#include <boost/optional.hpp>
 #include <boost/function.hpp>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/stubs/common.h>
 
 #include <cetty/Types.h>
+#include <cetty/protobuf/service/ProtobufFieldTraits.h>
 
 namespace google {
 namespace protobuf {
@@ -34,7 +38,7 @@ namespace cetty {
 namespace protobuf {
 namespace service {
 
-using google::protobuf::Message;
+using namespace google::protobuf;
 
 class ProtobufUtil {
 public:
@@ -51,6 +55,57 @@ public:
 
 public:
     static ChecksumFunction adler32Checksum;
+
+    template<typename OptionType, typename DescriptorType>
+    static boost::optional<OptionType> getOption(const DescriptorType* descriptor,
+            const std::string& option) {
+        if (descriptor) {
+            const Message& options = descriptor->options();
+            return getOptionField<OptionType>(options, option);
+        }
+        else {
+            return boost::optional<OptionType>();
+        }
+    }
+
+    template<typename OptionType, typename DescriptorType>
+    static boost::optional<OptionType> getOption(const DescriptorType* descriptor,
+            const std::string& option,
+            const std::string& field) {
+        boost::optional<Message const*> msg =
+            getOption<Message const*>(descriptor, option);
+
+        if (msg && boost::get<Message const*>(msg)) {
+            return getOptionField<OptionType>(**msg, field);
+        }
+
+        return boost::optional<OptionType>();
+    }
+
+    template<typename T>
+    static boost::optional<T> getOptionField(const Message& message,
+            const std::string& field) {
+        const Reflection* reflection = message.GetReflection();
+        const Descriptor* descriptor = message.GetDescriptor();
+
+        std::vector<const FieldDescriptor*> fields;
+        reflection->ListFields(message, &fields);
+
+        for (std::size_t i = 0; i < fields.size(); ++i) {
+            const FieldDescriptor* f = fields[i];
+
+            if (f->name().compare(field) != 0) {
+                continue;
+            }
+
+            if (!f->is_repeated() &&
+                    f->cpp_type() == ProtobufFieldTraits<T>::FIELD_TYPE) {
+                return ProtobufFieldTraits<T>::getField(message, reflection, f);
+            }
+        }
+
+        return boost::optional<T>();
+    }
 
     static FieldValue getMessageFieldValue(const Message& message,
                                            const std::string& name);
