@@ -18,7 +18,10 @@
 *#
 *~
 *.pb.cc
+*.pb.cpp
 *.pb.h
+*.cnf.cpp
+*.cnf.h
 *.h-
 *.cpp-
 *.cc-
