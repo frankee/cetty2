@@ -43,6 +43,7 @@
 #include <boost/function.hpp>
 #include <boost/algorithm/string/compare.hpp>
 #include <cetty/util/StringUtil.h>
+#include <cetty/util/StringPiece.h>
 
 namespace cetty {
 namespace util {
@@ -118,6 +119,8 @@ public:
 
     const int get(const std::string& name, std::vector<std::string>* values) const;
     /// Returns all of the values of the name-value pair with the given name.
+
+    const int get(const std::string& name, std::vector<StringPiece>* values) const;
 
     const int getNames(std::vector<std::string>* names) const;
 

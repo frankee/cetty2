@@ -1,0 +1,13 @@
+option java_package = "io.cetty.protobuf.service";
+option java_outer_classname = "ServiceOptionsProto";
+
+import "google/protobuf/descriptor.proto";
+
+message ServiceMethodOptions {
+    optional bool idempotent = 1;
+    optional bool  no_return = 2;
+}
+
+extend google.protobuf.MethodOptions {
+    optional ServiceMethodOptions service_method_options = 60001;
+}

@@ -93,7 +93,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-service\src\cetty\service\builder\ServerBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cpp" />
+    <ClCompile Include="..\..\src\cetty\service\builder\ServerBuilderConfig.cnf.cpp" />
     <ClCompile Include="..\..\src\cetty\service\pool\CachingConnectionPool.cpp" />
     <ClCompile Include="..\..\src\cetty\service\pool\ConnectionPool.cpp" />
     <ClCompile Include="..\..\src\cetty\service\pool\WatermarkConnectionPool.cpp" />
@@ -102,7 +102,7 @@
     <ClInclude Include="..\..\..\include\cetty\service\builder\ClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\Cluster.h" />
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.cnf.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />

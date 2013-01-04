@@ -20,7 +20,6 @@
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 #include <cetty/protobuf/service/builder/ProtobufServerBuilder.h>
-#include <cetty/craft/http/ServiceMapperPtr.h>
 
 namespace cetty {
 namespace config {
@@ -35,7 +34,6 @@ namespace builder {
 using namespace cetty::channel;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::builder;
-using namespace cetty::craft::http;
 
 class CraftServerBuilder : private boost::noncopyable {
 public:
@@ -78,16 +76,7 @@ private:
 
 private:
     ProtobufServerBuilder builder_;
-
-    ServiceRequestMapperPtr requestMapper_;
-    ServiceResponseMapperPtr responseMapper_;
 };
-
-inline
-CraftServerBuilder& CraftServerBuilder::registerService(const ProtobufServicePtr& service) {
-    builder_.registerService(service);
-    return *this;
-}
 
 inline
 ChannelPtr CraftServerBuilder::build(const std::string& name,

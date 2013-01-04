@@ -16,14 +16,14 @@
 
 #include <cetty/craft/http/HttpServiceFilter.h>
 
-#include <cetty/config/ConfigCenter.h>
 #include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/handler/codec/http/HttpHeaders.h>
 #include <cetty/handler/codec/http/HttpRequest.h>
 #include <cetty/handler/codec/http/HttpResponse.h>
 #include <cetty/protobuf/service/ProtobufServiceMessage.h>
-#include <cetty/craft/http/ServiceRequestMapper.h>
-#include <cetty/craft/http/ServiceResponseMapper.h>
+
+#include <cetty/craft/http/ServiceRequestMapping.h>
+#include <cetty/craft/http/ServiceResponseMapping.h>
 
 namespace cetty {
 namespace craft {
@@ -33,35 +33,12 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec::http;
 using namespace cetty::protobuf::service;
 
-HttpServiceFilter::HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
-                                     const ServiceResponseMapperPtr& responseMapper)
-    : requestMapper_(requestMapper),
-      responseMapper_(responseMapper),
-      http2proto_(requestMapper),
-      proto2http_(responseMapper) {
-    filter_.setRequestFilter(boost::bind(&HttpServiceFilter::filterRequest,
-                                         this,
-                                         _1,
-                                         _2));
-    filter_.setResponseFilter(boost::bind(&HttpServiceFilter::filterResponse,
-                                          this,
-                                          _1,
-                                          _2,
-                                          _3,
-                                          _4));
-}
-
 HttpServiceFilter::HttpServiceFilter() {
-    requestMapper_ = new ServiceRequestMapper();
-    responseMapper_ = new ServiceResponseMapper();
-
-    http2proto_.setRequestMapper(requestMapper_);
-    proto2http_.setResponseMapper(responseMapper_);
-
     filter_.setRequestFilter(boost::bind(&HttpServiceFilter::filterRequest,
         this,
         _1,
         _2));
+
     filter_.setResponseFilter(boost::bind(&HttpServiceFilter::filterResponse,
         this,
         _1,
@@ -70,10 +47,12 @@ HttpServiceFilter::HttpServiceFilter() {
         _4));
 }
 
-ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(ChannelHandlerContext& ctx,
+ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
+    ChannelHandlerContext& ctx,
         const HttpPackage& req) {
     HttpRequestPtr request = req.httpRequest();
-    ProtobufServiceMessagePtr msg = http2proto_.getProtobufMessage(request);
+    ProtobufServiceMessagePtr msg =
+        ServiceRequestMapping::instance().toProtobufMessage(request);
 
     if (!msg) {
         HttpResponsePtr response = new HttpResponse(
@@ -89,8 +68,8 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& rep,
         const ChannelFuturePtr& future) {
     HttpRequestPtr request = req.httpRequest();
-
-    HttpResponsePtr response = proto2http_.getHttpResponse(request, rep);
+    HttpResponsePtr response =
+        ServiceResponseMapping::instance().toHttpResponse(request, rep);
 
     if (!response) {
         LOG_WARN << "HttpServiceFilter filterResponse has an error.";

@@ -28,14 +28,15 @@ ConfigObjectDescriptor::ConfigObjectDescriptor(ConfigObject* defaultInstance,
         int count,
         ConstConfigFieldDescriptorPtr descriptor,
         ...) {
-    BOOST_ASSERT(defaultInstance_ && descriptor);
+    BOOST_ASSERT(defaultInstance);
 
-    va_list valist;
+    defaultInstance_ = defaultInstance;
 
-    if (!descriptor) {
+    if (count <= 0 || !descriptor) {
         return;
     }
 
+    va_list valist;
     va_start(valist, descriptor);
 
     fields_.push_back(descriptor);

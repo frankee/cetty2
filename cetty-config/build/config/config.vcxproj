@@ -99,6 +99,7 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectCmdlineParser.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectYamlParser.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\KeyValuePair.cnf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h" />

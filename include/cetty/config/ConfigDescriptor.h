@@ -29,8 +29,8 @@ class ConfigObject;
     class DescriptorRegister##Object {\
     public:\
         DescriptorRegister##Object() {\
-            ConfigObject::addDescriptor(\
-                                        new ConfigObjectDescriptor(\
+            ::cetty::config::ConfigObject::addDescriptor(\
+                                        new ::cetty::config::ConfigObjectDescriptor(\
                                                 new Object,\
                                                 fieldCnt,\
                                                 field,\
@@ -41,37 +41,37 @@ class ConfigObject;
 
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
-    new ConfigFieldDescriptor(\
+    new ::cetty::config::ConfigFieldDescriptor(\
                               static_cast<int>(reinterpret_cast<const char*>(\
                                       &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
                               #FIELD,\
                               #CPP_TYPE\
                              )\
      
 #define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
-    new ConfigFieldDescriptor(\
+    new ::cetty::config::ConfigFieldDescriptor(\
                               static_cast<int>(reinterpret_cast<const char*>(\
                                       &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
                               #FIELD,\
                               #CLASS\
                              )\
      
 #define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
-    new ConfigFieldDescriptor(\
+    new ::cetty::config::ConfigFieldDescriptor(\
                               static_cast<int>(reinterpret_cast<const char*>(\
                                       &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
                               #FIELD,\
                               true\
                              )\
      
 #define CETTY_CONFIG_REPEATED_OBJECT_FIELD(TYPE, FIELD, CLASS) \
-    new ConfigFieldDescriptor(\
+    new ::cetty::config::ConfigFieldDescriptor(\
                               static_cast<int>(reinterpret_cast<const char*>(\
                                       &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
                               #FIELD,\
                               #CLASS,\
                               true\

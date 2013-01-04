@@ -27,10 +27,6 @@ class Service : public cetty::util::ReferenceCounter<Service> {
 public:
     Service() {}
     virtual ~Service() {}
-
-private:
-    Service(const Service&);
-    Service& operator=(const Service&);
 };
 
 typedef boost::intrusive_ptr<Service> ServicePtr;

@@ -28,8 +28,8 @@
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageEncoder.h>
 #include <cetty/protobuf/service/handler/ProtobufServiceMessageHandler.h>
 #include <cetty/craft/http/HttpServiceFilter.h>
-#include <cetty/craft/http/ServiceRequestMapper.h>
-#include <cetty/craft/http/ServiceResponseMapper.h>
+#include <cetty/craft/http/ServiceRequestMapping.h>
+#include <cetty/craft/http/ServiceResponseMapping.h>
 
 namespace cetty {
 namespace craft {
@@ -59,6 +59,16 @@ CraftServerBuilder::CraftServerBuilder(int parentThreadCnt, int childThreadCnt)
 CraftServerBuilder::~CraftServerBuilder() {
 }
 
+CraftServerBuilder& CraftServerBuilder::registerService(const ProtobufServicePtr& service) {
+    builder_.registerService(service);
+
+    //intialize the maping.
+    ServiceRequestMapping::instance();
+    ServiceResponseMapping::instance();
+
+    return *this;
+}
+
 ChannelPtr CraftServerBuilder::buildHttp(int port) {
     return builder_.serverBuilder().build(PROTOBUF_SERVICE_HTTP, port);
 }
@@ -77,7 +87,7 @@ bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
 
     pipeline.addLast<HttpServiceFilter::HandlerPtr>("protobufFilter",
             HttpServiceFilter::HandlerPtr(
-                new HttpServiceFilter(requestMapper_, responseMapper_)));
+                new HttpServiceFilter()));
 
     pipeline.addLast<ProtobufServiceMessageHandler::HandlerPtr>("messageHandler",
             ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
@@ -86,8 +96,6 @@ bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
 }
 
 void CraftServerBuilder::init() {
-    requestMapper_ = new ServiceRequestMapper();
-    responseMapper_ = new ServiceResponseMapper();
 
     builder_.serverBuilder().registerServer(PROTOBUF_SERVICE_HTTP,
                                             boost::bind(&CraftServerBuilder::initializeChildChannel,

@@ -38,7 +38,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\include</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\bin</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\bin\</OutDir>
@@ -102,7 +102,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\config\config.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\config\config_options.pb.cc" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\FileGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />

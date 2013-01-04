@@ -307,24 +307,34 @@ cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootst
 }
 
 int ServerBuilder::init() {
-    if (config_.deamonize) {
+    if (config_.deamonize && boost::get<bool>(config_.deamonize)) {
         daemonize();
     }
 
     if (!parentEventLoopPool_) {
-        parentEventLoopPool_ = new AsioServicePool(config_.parentThreadCount);
+        int parentThreadCount = 1;
+
+        if (config_.parentThreadCount) {
+            parentThreadCount = boost::get<int>(config_.parentThreadCount);
+        }
+
+        parentEventLoopPool_ = new AsioServicePool(parentThreadCount);
     }
 
     if (!childEventLoopPool_) {
         if (config_.childThreadCount) {
-            childEventLoopPool_ = new AsioServicePool(config_.childThreadCount);
+            childEventLoopPool_ = new AsioServicePool(
+                boost::get<int>(config_.childThreadCount));
         }
         else {
             childEventLoopPool_ = parentEventLoopPool_;
         }
     }
 
-    Logger::logLevel(LogLevel::parseFrom(config_.logLevel));
+    if (config_.logger) {
+        Logger::logLevel(LogLevel::parseFrom(config_.logger->level));
+    }
+
 
     return 0;
 }
@@ -342,6 +352,7 @@ void ServerBuilder::waitingForExit() {
         createPidFile(config_.pidfile.c_str());
 
         ServerBootstraps::iterator itr;
+
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             const std::vector<ChannelPtr> channels =
                 itr->second->serverChannels();
@@ -374,14 +385,14 @@ ServerBuilder& ServerBuilder::buildAll() {
 
     for (std::size_t i = 0; i < j; ++i) {
         const ServerBuilderConfig::Server& server = *config_.servers[i];
-        const std::string& name = server.name;
+        const std::string& name = server.name();
 
         if (name.empty()) {
             LOG_WARN << "has not config the server name, will not start the server.";
             continue;
         }
 
-        if (server.port == 0) {
+        if (!server.port) {
             LOG_WARN << "config the server: "
                      << name
                      << " , which port is 0, will skip it.";
@@ -389,7 +400,7 @@ ServerBuilder& ServerBuilder::buildAll() {
         }
 
         ServerBootstraps::const_iterator itr
-            = bootstraps_.find(server.name);
+            = bootstraps_.find(server.name());
 
         if (itr == bootstraps_.end()) {
             LOG_WARN << "the server: "
@@ -400,7 +411,7 @@ ServerBuilder& ServerBuilder::buildAll() {
 
         //TODO setting the options
 
-        build(itr->second, server.host, server.port);
+        build(itr->second, server.host, boost::get<int>(server.port));
     }
 
     return *this;

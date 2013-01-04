@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/protobuf/service/ProtobufServicePtr.h>
 
@@ -23,12 +25,15 @@ using google::protobuf::Message;
 using google::protobuf::Service;
 using google::protobuf::MethodDescriptor;
 
-class ProtobufServiceRegister {
+class ProtobufServiceRegister : private boost::noncopyable {
 public:
     typedef std::map<std::string, ProtobufServicePtr> ServiceMap;
     typedef std::map<std::string, const Message*> ResponsePrototypeMap;
     typedef ServiceMap::iterator ServiceIterator;
     typedef ServiceMap::const_iterator ServiceConstIterator;
+
+    typedef boost::function<void (ProtobufServicePtr const&)> ServiceRegisteredCallback;
+    typedef std::vector<ServiceRegisteredCallback> ServiceRegisteredCallbacks;
 
 public:
     static ProtobufServiceRegister& instance();
@@ -37,19 +42,28 @@ public:
     int  registerService(const ProtobufServicePtr& service);
     void unregisterService(const std::string& name);
 
-    int registerResponsePrototype(const std::string& service, const std::string& method, const Message* proto);
-    void unregisterResponsePrototype(const std::string& service, const std::string& method);
+    int registerResponsePrototype(const std::string& service,
+                                  const std::string& method,
+                                  const Message* proto);
 
+    void unregisterResponsePrototype(const std::string& service,
+                                     const std::string& method);
+
+    void registerServiceRegisteredCallback(
+        const ServiceRegisteredCallback& callback);
+
+    int getServices(std::vector<std::string>* names) const;
     const ProtobufServicePtr& getService(const std::string& name) const;
-    int getRegisteredServices(std::vector<std::string>* names) const;
 
-    ServiceIterator serviceBegin() { return serviceMap.begin(); }
-    ServiceIterator serviceEnd() { return serviceMap.end(); }
-    ServiceConstIterator serviceBegin() const { return serviceMap.begin(); }
-    ServiceConstIterator serviceEnd() const { return serviceMap.end(); }
+    ServiceIterator serviceBegin();
+    ServiceIterator serviceEnd();
 
-    const MethodDescriptor* getMethodDescriptor(const ProtobufServicePtr& service,
-            const std::string& method) const;
+    ServiceConstIterator serviceBegin() const;
+    ServiceConstIterator serviceEnd() const;
+
+    const MethodDescriptor* getMethodDescriptor(
+        const ProtobufServicePtr& service,
+        const std::string& method) const;
 
     const Message* getRequestPrototype(const ProtobufServicePtr& service,
                                        const std::string& method) const;
@@ -59,6 +73,7 @@ public:
 
     const Message* getRequestPrototype(const std::string& service,
                                        const std::string& method) const;
+
     const Message* getResponsePrototype(const std::string& service,
                                         const std::string& method) const;
 
@@ -69,13 +84,32 @@ private:
     ProtobufServiceRegister();
     ~ProtobufServiceRegister();
 
-    ProtobufServiceRegister(const ProtobufServiceRegister&);
-    ProtobufServiceRegister& operator=(const ProtobufServiceRegister&);
-
 private:
-    ServiceMap serviceMap;
-    ResponsePrototypeMap responsePrototypeMap;
+    ServiceMap serviceMap_;
+    ResponsePrototypeMap responsePrototypeMap_;
+
+    ServiceRegisteredCallbacks callbacks_;
 };
+
+inline
+ProtobufServiceRegister::ServiceIterator ProtobufServiceRegister::serviceBegin() {
+    return serviceMap_.begin();
+}
+
+inline
+ProtobufServiceRegister::ServiceConstIterator ProtobufServiceRegister::serviceBegin() const {
+    return serviceMap_.begin();
+}
+
+inline
+ProtobufServiceRegister::ServiceIterator ProtobufServiceRegister::serviceEnd() {
+    return serviceMap_.end();
+}
+
+inline
+ProtobufServiceRegister::ServiceConstIterator ProtobufServiceRegister::serviceEnd() const {
+    return serviceMap_.end();
+}
 
 }
 }

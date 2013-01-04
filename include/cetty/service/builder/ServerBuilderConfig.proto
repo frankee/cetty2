@@ -1,0 +1,69 @@
+package cetty.service.builder;
+
+import "cetty/config/config_options.proto";
+
+option (config_file_options).config_file_name = "";
+option (config_file_options).source_file_name = "";
+
+message ServerConfig {
+}
+
+message ServerBuilderConfig {
+	option (config_message_options).root = true;
+
+	message Server {
+		option (config_message_options).coded = "{host}:{port}";
+		
+		optional string host = 1 [
+		default = "127.0.0.1",
+		 (config_options).note = "# If you want you can bind a single interface, if the bind option is not \n# specified all the interfaces will listen for incoming connections.",
+	  (config_options).commented = true
+		];
+		
+		optional int32  port = 2 [
+			(config_options).note = "# Accept connections on the specified port."
+		];
+		
+		optional ServerConfig config = 3;
+	}
+	
+	message Limit {
+		optional int32 maxConcurrentRequests = 1;
+	}
+	
+	message Timeout {
+		optional int32 hostConnectionMaxIdleTime = 1;
+	}
+	
+	message Logger {
+		optional string logger = 1;
+		optional string level = 2;
+	}
+	
+	optional bool deamonize = 1 [
+		default = true,
+		(config_options).note = "# By default cetty does not run as a daemon. Use 'true' if you need it.\n# Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.",
+		(config_options).commented = true,
+		(config_options).cmdline = true,
+		(config_options).cmdline_long  = "deamon",
+		(config_options).cmdline_short = "d"];
+		
+    optional string pidfile = 2 [
+		default = "/var/run/xxx.pid",
+		(config_options).note = "# When running daemonized, Redis writes a pid file in /var/run/redis.pid by\n# default. You can specify a custom pid file location here.",
+        (config_options).commented = true
+	];
+	
+    repeated Server servers = 3 [
+		(config_options).default = "[{\"http\", \"\", 8080}, {\"rpc\", null, 18080}]"
+	];
+
+    optional int32 parentThreadCount = 4;
+    optional int32 childThreadCount = 5;
+    optional int32 backlog = 6;
+    
+	optional Logger logger = 7;
+
+    optional Limit limit = 8;
+    optional Timeout timeout = 9;
+}

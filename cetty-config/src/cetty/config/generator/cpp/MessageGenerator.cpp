@@ -315,8 +315,13 @@ GenerateTypeRegistrations(io::Printer* printer) {
         "classname", classname_,
         "count", simpleI2A(descriptor_->field_count()));
 
+    if (descriptor_->field_count() == 0) {
+        printer->Print("                            NULL);\n");
+    }
+
     for (int i = 0; i < descriptor_->field_count(); i++) {
         const FieldDescriptor* field = descriptor_->field(i);
+
         if (field->is_repeated()) {
             switch (field->cpp_type()) {
             case FieldDescriptor::CPPTYPE_INT32:
@@ -429,12 +434,25 @@ GenerateStructors(io::Printer* printer) {
     // Generate the default constructor.
     printer->Print(
         "$classname$::$classname$()\n"
-        "  : ::cetty::config::ConfigObject(\"$class_full_name$\") {\n"
-        "}\n",
+        "  : ::cetty::config::ConfigObject(\"$class_full_name$\")",
         "classname", classname_,
         "class_full_name", descriptor_->full_name());
 
+    for (int i = 0; i < descriptor_->field_count(); i++) {
+        const FieldDescriptor* field = descriptor_->field(i);
+
+        if (!field->is_repeated() &&
+            field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
+                printer->Print(
+                    ",\n    $name$()",
+                    "name", FieldName(field));
+        }
+    }
+
+    printer->Print(" {\n}\n");
+
 #if 0
+
     // The default instance needs all of its embedded message pointers
     // cross-linked to other default instances.  We can't do this initialization
     // in the constructor because some other default instances may not have been
@@ -492,7 +510,7 @@ void MessageGenerator::GenerateCommandLines(io::Printer* printer) {
         KeyValuePairCmdline() {
             options_description options("ServerBuiderConfig");
             op.add_options()
-                ("deamon, d", value<bool>, "xxxxx");
+            ("deamon, d", value<bool>, "xxxxx");
 
             ConfigCenter::instance().addOptions(options);
             ConfigCenter::instance().addCmdlineName("", "");

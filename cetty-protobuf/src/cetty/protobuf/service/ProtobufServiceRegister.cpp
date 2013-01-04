@@ -24,24 +24,30 @@ int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) 
         return -1;
     }
 
-    std::string serviceName = service->GetDescriptor()->full_name();
+    const std::string& serviceName = service->GetDescriptor()->full_name();
 
-    ServiceIterator itr = serviceMap.find(serviceName);
+    ServiceIterator itr = serviceMap_.find(serviceName);
 
-    if (itr != serviceMap.end()) {
+    if (itr != serviceMap_.end()) {
         printf("the name of the service already registered, will be update.\n");
-        serviceMap.erase(itr);
+        serviceMap_.erase(itr);
     }
 
-    serviceMap[serviceName] = service;
+    serviceMap_[serviceName] = service;
+
+    ServiceRegisteredCallbacks::iterator callbackItr = callbacks_.begin();
+    for (; callbackItr != callbacks_.end(); ++itr) {
+        (*callbackItr)(service);
+    }
+
     return 0;
 }
 
 void ProtobufServiceRegister::unregisterService(const std::string& name) {
-    ServiceIterator itr = serviceMap.find(name);
+    ServiceIterator itr = serviceMap_.find(name);
 
-    if (itr != serviceMap.end()) {
-        serviceMap.erase(itr);
+    if (itr != serviceMap_.end()) {
+        serviceMap_.erase(itr);
     }
 }
 
@@ -50,9 +56,9 @@ const ProtobufServicePtr& ProtobufServiceRegister::getService(const std::string&
         return nullService;
     }
 
-    ServiceMap::const_iterator itr = serviceMap.find(name);
+    ServiceMap::const_iterator itr = serviceMap_.find(name);
 
-    if (itr != serviceMap.end()) {
+    if (itr != serviceMap_.end()) {
         return itr->second;
     }
 
@@ -113,13 +119,13 @@ const Message* ProtobufServiceRegister::getResponsePrototype(
     return NULL;
 }
 
-int ProtobufServiceRegister::getRegisteredServices(std::vector<std::string>* names) const {
+int ProtobufServiceRegister::getServices(std::vector<std::string>* names) const {
     if (NULL == names) { return 0; }
 
     int count = 0;
-    ServiceMap::const_iterator itr = serviceMap.begin();
+    ServiceMap::const_iterator itr = serviceMap_.begin();
 
-    for (; itr != serviceMap.end(); ++itr) {
+    for (; itr != serviceMap_.end(); ++itr) {
         names->push_back(itr->first);
         ++count;
     }
@@ -140,24 +146,24 @@ int ProtobufServiceRegister::registerResponsePrototype(const std::string& servic
     }
 
     // if duplicated, just override.
-    responsePrototypeMap[service + method] = proto;
+    responsePrototypeMap_[service + method] = proto;
     return 0;
 }
 
 void ProtobufServiceRegister::unregisterResponsePrototype(const std::string& service,
         const std::string& method) {
-    ResponsePrototypeMap::iterator itr = responsePrototypeMap.find(service + method);
+    ResponsePrototypeMap::iterator itr = responsePrototypeMap_.find(service + method);
 
-    if (itr != responsePrototypeMap.end()) {
-        responsePrototypeMap.erase(itr);
+    if (itr != responsePrototypeMap_.end()) {
+        responsePrototypeMap_.erase(itr);
     }
 }
 
 const Message* ProtobufServiceRegister::getRequestPrototype(const std::string& service,
         const std::string& method) const {
-    ServiceMap::const_iterator itr = serviceMap.find(service);
+    ServiceMap::const_iterator itr = serviceMap_.find(service);
 
-    if (itr != serviceMap.end()) {
+    if (itr != serviceMap_.end()) {
         return getRequestPrototype(itr->second, method);
     }
 
@@ -167,21 +173,31 @@ const Message* ProtobufServiceRegister::getRequestPrototype(const std::string& s
 const Message* ProtobufServiceRegister::getResponsePrototype(const std::string& service,
         const std::string& method) const {
     std::string key(service);
-    ResponsePrototypeMap::const_iterator repItr = responsePrototypeMap.find(service + method);
+    ResponsePrototypeMap::const_iterator repItr = responsePrototypeMap_.find(service + method);
 
-    if (repItr != responsePrototypeMap.end()) {
+    if (repItr != responsePrototypeMap_.end()) {
         return repItr->second;
     }
 
-    ServiceMap::const_iterator itr = serviceMap.find(service);
+    ServiceMap::const_iterator itr = serviceMap_.find(service);
 
-    if (itr != serviceMap.end()) {
+    if (itr != serviceMap_.end()) {
         return getResponsePrototype(itr->second, method);
     }
 
     return NULL;
 }
 
+void ProtobufServiceRegister::registerServiceRegisteredCallback(const ServiceRegisteredCallback& callback) {
+    if (callback) {
+        ServiceMap::const_iterator itr;
+        for (itr = serviceMap_.begin(); itr != serviceMap_.end(); ++itr) {
+            callback(itr->second);
+        }
+
+        callbacks_.push_back(callback);
+    }
+}
 
 }
 }

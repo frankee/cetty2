@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\config\config.pb.cc" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\FileGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
+    <ClCompile Include="..\..\src\cetty\config\config_options.pb.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />

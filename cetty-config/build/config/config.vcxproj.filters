@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectCmdlineParser.cpp">
       <Filter>config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\config\KeyValuePair.cnf.cpp">
+      <Filter>config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h">

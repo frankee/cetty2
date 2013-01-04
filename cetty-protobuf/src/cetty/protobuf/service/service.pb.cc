@@ -109,35 +109,27 @@ void protobuf_AddDesc_cetty_2fprotobuf_2fservice_2fservice_2eproto() {
   already_here = true;
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  ::google::protobuf::protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eproto();
+  ::protobuf_AddDesc_cetty_2fprotobuf_2fservice_2fservice_5foptions_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n$cetty/protobuf/service/service.proto\022\026"
-    "cetty.protobuf.service\032 google/protobuf/"
-    "descriptor.proto\"\372\001\n\016ServiceMessage\0221\n\004t"
-    "ype\030\001 \002(\0162#.cetty.protobuf.service.Messa"
-    "geType\022\n\n\002id\030\002 \002(\006\022\017\n\007service\030\003 \001(\t\022\016\n\006m"
-    "ethod\030\004 \001(\t\0220\n\005error\030\005 \001(\0162!.cetty.proto"
-    "buf.service.ErrorCode\022\030\n\020request_encodin"
-    "g\030\006 \001(\t\022\031\n\021response_encoding\030\007 \001(\t\022\017\n\007re"
-    "quest\030\010 \001(\014\022\020\n\010response\030\t \001(\014\"\007\n\005Empty*3"
-    "\n\013MessageType\022\013\n\007REQUEST\020\001\022\014\n\010RESPONSE\020\002"
-    "\022\t\n\005ERROR\020\003*t\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017"
-    "\n\013WRONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_ME"
-    "THOD\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_R"
-    "ESPONSE\020\005:3\n\nidempotent\022\036.google.protobu"
-    "f.MethodOptions\030\327\010 \001(\010:2\n\tno_return\022\036.go"
-    "ogle.protobuf.MethodOptions\030\330\010 \001(\010B)\n\031io"
-    ".cetty.protobuf.serviceB\014ServiceProto", 677);
+    "cetty.protobuf.service\032,cetty/protobuf/s"
+    "ervice/service_options.proto\"\372\001\n\016Service"
+    "Message\0221\n\004type\030\001 \002(\0162#.cetty.protobuf.s"
+    "ervice.MessageType\022\n\n\002id\030\002 \002(\006\022\017\n\007servic"
+    "e\030\003 \001(\t\022\016\n\006method\030\004 \001(\t\0220\n\005error\030\005 \001(\0162!"
+    ".cetty.protobuf.service.ErrorCode\022\030\n\020req"
+    "uest_encoding\030\006 \001(\t\022\031\n\021response_encoding"
+    "\030\007 \001(\t\022\017\n\007request\030\010 \001(\014\022\020\n\010response\030\t \001("
+    "\014\"\007\n\005Empty*3\n\013MessageType\022\013\n\007REQUEST\020\001\022\014"
+    "\n\010RESPONSE\020\002\022\t\n\005ERROR\020\003*t\n\tErrorCode\022\014\n\010"
+    "NO_ERROR\020\000\022\017\n\013WRONG_PROTO\020\001\022\016\n\nNO_SERVIC"
+    "E\020\002\022\r\n\tNO_METHOD\020\003\022\023\n\017INVALID_REQUEST\020\004\022"
+    "\024\n\020INVALID_RESPONSE\020\005B)\n\031io.cetty.protob"
+    "uf.serviceB\014ServiceProto", 584);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "cetty/protobuf/service/service.proto", &protobuf_RegisterTypes);
   ServiceMessage::default_instance_ = new ServiceMessage();
   Empty::default_instance_ = new Empty();
-  ::google::protobuf::internal::ExtensionSet::RegisterExtension(
-    &::google::protobuf::MethodOptions::default_instance(),
-    1111, 8, false, false);
-  ::google::protobuf::internal::ExtensionSet::RegisterExtension(
-    &::google::protobuf::MethodOptions::default_instance(),
-    1112, 8, false, false);
   ServiceMessage::default_instance_->InitAsDefaultInstance();
   Empty::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_cetty_2fprotobuf_2fservice_2fservice_2eproto);
@@ -966,12 +958,6 @@ void Empty::Swap(Empty* other) {
   return metadata;
 }
 
-::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::MethodOptions,
-    ::google::protobuf::internal::PrimitiveTypeTraits< bool >, 8, false >
-  idempotent(kIdempotentFieldNumber, false);
-::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::MethodOptions,
-    ::google::protobuf::internal::PrimitiveTypeTraits< bool >, 8, false >
-  no_return(kNoReturnFieldNumber, false);
 
 // @@protoc_insertion_point(namespace_scope)
 

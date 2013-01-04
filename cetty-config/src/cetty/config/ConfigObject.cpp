@@ -31,6 +31,7 @@ ConfigReflection* ConfigObject::reflection_ = NULL;
 ConfigObject::ConfigObject(const std::string& name)
     : name_(name),
       className_(name) {
+    reflection();
 }
 
 ConfigObject::~ConfigObject() {

@@ -25,26 +25,21 @@ namespace config {
 ConfigReflection::ConfigReflection() {
 }
 
+void ConfigReflection::listFields(const ConfigObject& object,
+                                  std::vector<const ConfigFieldDescriptor*>* output) const {
+
+}
+
 ConfigObject* ConfigReflection::addObject(ConfigObject* object,
         const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
     // We must allocate a new object.
-    std::string className(object->className());
-    //className += "_";
-    //className += field->className;
-
-    const ConfigObject* prototype = ConfigObject::getDefaultObject(className);
-
-    if (NULL == prototype) {
-        prototype = ConfigObject::getDefaultObject(field->className);
-    }
+    const ConfigObject* prototype = ConfigObject::getDefaultObject(field->className);
 
     if (NULL == prototype) {
         LOG_ERROR << "can not find such object "
-                  << className
-                  << " or "
                   << field->className;
 
         return NULL;

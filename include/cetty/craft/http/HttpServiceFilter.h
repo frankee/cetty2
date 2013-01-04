@@ -21,10 +21,6 @@
 #include <cetty/handler/codec/http/HttpPackage.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
 
-#include <cetty/craft/http/ServiceMapperPtr.h>
-#include <cetty/craft/http/HttpRequest2ProtobufMessage.h>
-#include <cetty/craft/http/ProtobufMessage2HttpResponse.h>
-
 namespace cetty {
 namespace craft {
 namespace http {
@@ -49,9 +45,6 @@ public:
 public:
     HttpServiceFilter();
 
-    HttpServiceFilter(const ServiceRequestMapperPtr& requestMapper,
-                      const ServiceResponseMapperPtr& responseMap);
-
     void registerTo(Context& ctx) {
         filter_.registerTo(ctx);
 
@@ -61,10 +54,10 @@ public:
                                              _2));
     }
 
+private:
     void exceptionCaught(ChannelHandlerContext& ctx,
                          const ChannelException& cause);
 
-private:
     ProtobufServiceMessagePtr filterRequest(ChannelHandlerContext& ctx,
                                             const HttpPackage& req);
 
@@ -75,12 +68,6 @@ private:
 
 private:
     Filter filter_;
-
-    ServiceRequestMapperPtr requestMapper_;
-    ServiceResponseMapperPtr responseMapper_;
-
-    HttpRequest2ProtobufMessage http2proto_;
-    ProtobufMessage2HttpResponse proto2http_;
 };
 
 }

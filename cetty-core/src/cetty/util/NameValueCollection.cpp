@@ -106,7 +106,8 @@ const std::string& NameValueCollection::get(const std::string& name) const {
     }
 }
 
-const std::string& NameValueCollection::get(const std::string& name, const std::string& defaultValue) const {
+const std::string& NameValueCollection::get(const std::string& name,
+        const std::string& defaultValue) const {
     ConstIterator it = _map.find(name);
 
     if (it != _map.end()) {
@@ -119,6 +120,7 @@ const std::string& NameValueCollection::get(const std::string& name, const std::
 
 const std::string& NameValueCollection::getLast(const std::string& name) const {
     ConstIterator it = findLast(name);
+
     if (it != _map.end()) {
         return it->second;
     }
@@ -127,7 +129,8 @@ const std::string& NameValueCollection::getLast(const std::string& name) const {
     }
 }
 
-const std::string& NameValueCollection::getLast(const std::string& name, const std::string& defaultValue) const {
+const std::string& NameValueCollection::getLast(const std::string& name,
+        const std::string& defaultValue) const {
     ConstIterator it = findLast(name);
 
     if (it != _map.end()) {
@@ -138,7 +141,8 @@ const std::string& NameValueCollection::getLast(const std::string& name, const s
     }
 }
 
-const int NameValueCollection::get(const std::string& name, std::vector<std::string>* values) const {
+const int NameValueCollection::get(const std::string& name,
+                                   std::vector<std::string>* values) const {
     int count = 0;
 
     if (values) {
@@ -155,6 +159,25 @@ const int NameValueCollection::get(const std::string& name, std::vector<std::str
     return count;
 }
 
+const int NameValueCollection::get(const std::string& name,
+                                   std::vector<StringPiece>* values) const {
+    int count = 0;
+
+    if (values) {
+        std::pair<ConstIterator, ConstIterator> range = _map.equal_range(name);
+
+        ConstIterator itr = range.first;
+
+        for (; itr != _map.end() && itr != range.second; ++itr) {
+            values->push_back(itr->second);
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+
 const int NameValueCollection::getNames(std::vector<std::string>* names) const {
     int count = 0;
 
@@ -162,7 +185,9 @@ const int NameValueCollection::getNames(std::vector<std::string>* names) const {
         for (ConstIterator itr = _map.begin(); itr != _map.end(); ++itr) {
             bool duplicated = false;
 
-            for (std::vector<std::string>::const_iterator i = names->begin(); i != names->end(); ++i) {
+            std::vector<std::string>::const_iterator i;
+
+            for (i = names->begin(); i != names->end(); ++i) {
                 if (boost::iequals(*i, itr->second)) {
                     duplicated = true;
                     break;
@@ -183,7 +208,8 @@ bool NameValueCollection::has(const std::string& name) const {
     return _map.find(name) != _map.end();
 }
 
-bool NameValueCollection::has(const std::string& name, const std::string& value) const {
+bool NameValueCollection::has(const std::string& name,
+                              const std::string& value) const {
     for (ConstIterator itr = _map.find(name); itr != _map.end(); ++itr) {
         if (boost::algorithm::iequals(itr->second, value)) {
             return true;
@@ -193,23 +219,29 @@ bool NameValueCollection::has(const std::string& name, const std::string& value)
     return false;
 }
 
-NameValueCollection::ConstIterator NameValueCollection::find(const std::string& name) const {
+NameValueCollection::ConstIterator NameValueCollection::find(
+    const std::string& name) const {
     return _map.find(name);
 }
 
-NameValueCollection::ConstIterator NameValueCollection::findLast(const std::string& name) const {
+NameValueCollection::ConstIterator NameValueCollection::findLast(
+    const std::string& name) const {
     std::pair<ConstIterator,ConstIterator> range = _map.equal_range(name);
+
     if (range.first != _map.end()) {
         return --range.second;
     }
+
     return range.first;
 }
 
-NameValueCollection::ConstIterator NameValueCollection::lowerBound(const std::string& name) const {
+NameValueCollection::ConstIterator NameValueCollection::lowerBound(
+    const std::string& name) const {
     return this->_map.lower_bound(name);
 }
 
-NameValueCollection::ConstIterator NameValueCollection::upperBound(const std::string& name) const {
+NameValueCollection::ConstIterator NameValueCollection::upperBound(
+    const std::string& name) const {
     return this->_map.upper_bound(name);
 }
 
@@ -233,7 +265,8 @@ void NameValueCollection::erase(const std::string& name) {
     _map.erase(name);
 }
 
-void NameValueCollection::erase(const std::string& name, const std::string& value) {
+void NameValueCollection::erase(const std::string& name,
+                                const std::string& value) {
     for (Iterator itr = _map.find(name); itr != _map.end(); ++itr) {
         if (itr->second == value) {
             _map.erase(itr);
@@ -245,7 +278,8 @@ void NameValueCollection::clear() {
     _map.clear();
 }
 
-void NameValueCollection::setValidateNameFunctor(const ValidateNameFunctor& functor) {
+void NameValueCollection::setValidateNameFunctor(
+    const ValidateNameFunctor& functor) {
     this->validateNameFunctor = functor;
 }
 

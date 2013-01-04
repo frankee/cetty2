@@ -1,10 +1,13 @@
 package cetty.craft;
 
+import "cetty/craft/craft_options.proto";
+import "cetty/protobuf/service/service_options.proto";
+
 option java_package = "io.cetty.craft";
 option java_outer_classname = "CraftProto";
 
 enum Lang {
-	(craft_enum_options).query_params="l";
+	option (craft_enum_options).query_param="lang";
 	
 	en_US = 0;
     zh_CN = 1;
@@ -12,7 +15,7 @@ enum Lang {
 }
 
 message KeyValue {
-	(craft_message_options).code = "{key}-{value}";
+	option (craft_message_options).text_pattern = "{key:}={value:}";
 	
 	optional string   key = 1;
 	optional string value = 2;
@@ -34,7 +37,7 @@ message Status {
 
 message Session {
 	optional string   id = 1[
-		(craft).cookie_param = "id",
+		(craft_options).cookie_param = "id"
 	];
 	
 	optional string user = 2;
@@ -46,7 +49,7 @@ message Authority {
     optional string       key = 2;
 	
     optional string signature = 3 [
-		(craft).query_param = "",
+		(craft_options).query_param = "sig"
 	];
 
 	optional string        ip = 8;
@@ -57,50 +60,8 @@ message ErrorResponse {
 	optional Status status = 1;
 }
 
-message CraftFieldOptions {
-    optional string   path_param = 1;
-	optional string  query_param = 2;
-	optional string header_param = 3;
-	optional string cookie_param = 4;
-	
-	optional string      default = 5;
-	
-	optional bool    ignore_sign = 20;
-	optional string      pattern = 21;
-	optional int32   decimal_min = 22;
-	optional int32   decimal_max = 23;
+message Encoding {
+	optional string   type = 1;
+	optional bytes content = 2;
 }
 
-message CraftMessageOptions {
-	optional string query_param = 2;
-}
-
-message CraftMethodOptions {
-	optional string method = 1;
-	optional string   path = 2;
-	optional string  query = 3;
-	optional string header = 4;
-	optional string cookie = 5;
-	
-	optional int32  timeout = 10;
-}
-
-message CraftServiceOptions {
-	optional string   path = 1;
-}
-
-extend google.protobuf.FieldOptions {
-  optional CraftFieldOptions craft = 60100;
-}
-
-extend google.protobuf.MessageOptions {
-	optional CraftMessageOptions craft_message_options = 60100;
-}
-
-extend google.protobuf.MethodOptions {
-  optional CraftMethodOptions craft_method_options = 60100;
-}
-
-extend google.protobuf.ServiceOptions {
-  optional CraftServiceOptions craft_service_options = 60100;
-}

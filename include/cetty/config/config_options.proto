@@ -1,5 +1,3 @@
-package cetty.config;
-
 import "google/protobuf/descriptor.proto";
 
 message ConfigFileOptions {
@@ -9,6 +7,7 @@ message ConfigFileOptions {
 
 message ConfigMessageOptions {
 	optional string coded = 1;
+	optional bool    root = 2;
 }
 
 message ConfigFieldOptions {
@@ -23,13 +22,13 @@ message ConfigFieldOptions {
 }
 
 extend google.protobuf.FieldOptions {
-    optional ConfigFieldOptions config = 60001;
+    optional ConfigFieldOptions config_options = 60050;
 }
 
 extend google.protobuf.MessageOptions {
-    optional ConfigMessageOptions config_message_options = 60001;
+    optional ConfigMessageOptions config_message_options = 60050;
 }
 
 extend google.protobuf.FileOptions {
-    optional ConfigFileOptions config_file_options = 60001;
+    optional ConfigFileOptions config_file_options = 60050;
 }

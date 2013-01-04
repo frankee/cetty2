@@ -142,14 +142,14 @@ void FileGenerator::GenerateHeader(io::Printer* printer) {
     printer->Print("#include <cetty/config/ConfigObject.h>\n"
                    "#include <cetty/config/ConfigDescriptor.h>\n");
 
-    if (file_->name() != "KeyValuePair") {
+    if (file_->name() != "cetty/config/KeyValuePair.proto") {
         printer->Print("#include <cetty/config/KeyValuePair.cnf.h>\n\n");
     }
 
     for (int i = 0; i < file_->dependency_count(); i++) {
         const std::string& dependency = file_->dependency(i)->name();
 
-        if (dependency == "config") {
+        if (dependency == "cetty/config/config_options.proto") {
             continue;
         }
 
@@ -228,7 +228,7 @@ void FileGenerator::GenerateSource(io::Printer* printer) {
 void FileGenerator::GenerateNamespaceOpeners(io::Printer* printer) {
     if (package_parts_.size() > 0) { printer->Print("\n"); }
 
-    for (int i = 0; i < package_parts_.size(); i++) {
+    for (std::size_t i = 0; i < package_parts_.size(); i++) {
         printer->Print("namespace $part$ {\n",
                        "part", package_parts_[i]);
     }

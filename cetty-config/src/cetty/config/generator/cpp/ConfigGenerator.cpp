@@ -22,7 +22,7 @@
 #include <google/protobuf/compiler/command_line_interface.h>
 #include <google/protobuf/compiler/plugin.h>
 
-#include <cetty/config/config.pb.h>
+#include <cetty/config/config_options.pb.h>
 #include <cetty/config/generator/cpp/FileGenerator.h>
 #include <cetty/config/generator/cpp/CppHelpers.h>
 #include <cetty/protobuf/service/ProtobufUtil.h>
@@ -81,6 +81,9 @@ bool ConfigGenerator::Generate(const FileDescriptor* file,
 
     boost::optional<std::string> fileName =
         ProtobufUtil::getOption<std::string>(file, "config_file_options", "source_file_name");
+
+    bool hasExtension = file->options().HasExtension(config_file_options);
+    const ConfigFileOptions& op = file->options().GetExtension(config_file_options);
 
     FileGenerator fileGenerator(file, dllexport_decl);
 

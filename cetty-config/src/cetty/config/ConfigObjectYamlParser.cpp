@@ -41,7 +41,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
 
     for (; itr != descriptor->end(); ++itr) {
         const ConfigFieldDescriptor* field = *itr;
-        const YAML::Node fieldNode = node[field->name];
+        const YAML::Node& fieldNode = node[field->name];
 
         if (fieldNode.Type() == YAML::NodeType::Null) {
             LOG_INFO << "field " << field->name << " has none value, skip it.";
@@ -129,13 +129,13 @@ int parseField(const ConfigFieldDescriptor* field,
                 //   - objectName :
                 //       field1 : value
                 //       field2 : value
-
-                const std::string& objectName = itr->first.Scalar();
+                
+                const std::string& objectName = itr->begin()->first.Scalar();
                 if (!objectName.empty()) {
                     obj->setName(objectName);
-                } 
+                }
 
-                if (!parseConfigObject(*itr, obj)) {
+                if (!parseConfigObject(itr->begin()->second, obj)) {
                     return false;
                 }
 

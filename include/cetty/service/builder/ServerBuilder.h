@@ -24,7 +24,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 #include <cetty/bootstrap/ServerBootstrapPtr.h>
-#include <cetty/service/builder/ServerBuilderConfig.h>
+#include <cetty/service/builder/ServerBuilderConfig.cnf.h>
 
 namespace cetty {
 namespace service {

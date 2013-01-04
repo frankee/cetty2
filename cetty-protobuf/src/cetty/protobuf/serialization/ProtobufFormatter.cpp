@@ -34,19 +34,11 @@ struct ProtobufFormatterRegister {
         ProtobufFormatter::registerFormatter("json", new json::ProtobufJsonFormatter);
 #endif
 
-#if (PNG_FORMATTER_PLUGIN)
-        ProtobufFormatter::registerFormatter("png", new png::ProtobufPngFormatter);
-#endif
     }
     ~ProtobufFormatterRegister() {
 #if (JSON_FORMATTER_PLUGIN)
         unregister("json");
 #endif
-
-#if (PNG_FORMATTER_PLUGIN)
-        unregister("png");
-#endif
-
         ProtobufFormatter::clear();
     }
 

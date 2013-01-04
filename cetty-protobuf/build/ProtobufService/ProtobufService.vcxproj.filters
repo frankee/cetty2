@@ -69,6 +69,9 @@
     <ClInclude Include="..\..\..\include\cetty\protobuf\service\ProtobufFieldTraits.h">
       <Filter>protobuf</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\protobuf\service\service_options.pb.h">
+      <Filter>protobuf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\protobuf\service\ProtobufServiceRegister.cpp">
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\protobuf\service\handler\MessageCodec.cpp">
       <Filter>protobuf\handler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\protobuf\service\service_options.pb.cc">
+      <Filter>protobuf</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

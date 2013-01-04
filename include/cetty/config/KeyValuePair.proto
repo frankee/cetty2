@@ -1,9 +1,9 @@
 package cetty.config;
 
-import "cetty/config/config.proto";
+import "cetty/config/config_options.proto";
 
-option (config_file_options).config_file_name = "";
-option (config_file_options).source_file_name = "KeyValuePair";
+//option (config_file_options).config_file_name = "";
+//option (config_file_options).source_file_name = "KeyValuePair";
 
 message KeyValuePair {
 	option (config_message_options).coded = "{key}={value}";
