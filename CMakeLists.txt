@@ -320,7 +320,7 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
 
     set(OUT_HEADER "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.h")
 	set(GEN_SOURCE "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
-    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
+    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
 
     list(APPEND ${HDRS} ${OUT_HEADER})
     list(APPEND ${SRCS} ${OUT_SOURCE})
@@ -329,6 +329,75 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
 	  COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
 	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND mv
+	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
+      WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
+      MAIN_DEPENDENCY ${ABS_FIL}
+      VERBATIM)
+  endforeach()
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+endfunction()
+
+function(GENERATE_PROTOBUF SRCS HDRS)
+  if(NOT ARGN)
+    message(SEND_ERROR "Error: GENERATE_PROTOBUF() called without any proto files")
+    return()
+  endif(NOT ARGN)
+
+  set(${SRCS})
+  set(${HDRS})
+  foreach(FIL ${ARGN})
+    get_filename_component(FIL_PATH ${FIL} PATH)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(ABS_FILE ${FIL} ABSOLUTE)
+
+    set(OUT_HEADER "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.h")
+	set(GEN_SOURCE "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
+    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+
+    list(APPEND ${HDRS} ${OUT_HEADER})
+    list(APPEND ${SRCS} ${OUT_SOURCE})
+
+    add_custom_command(
+      OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
+	  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+	  ARGS ${FIL} --cpp_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND mv
+	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
+      WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
+      MAIN_DEPENDENCY ${ABS_FIL}
+      VERBATIM)
+  endforeach()
+  set(${SRCS} ${${SRCS}} PARENT_SCOPE)
+  set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+endfunction()
+
+
+function(GENERATE_CONFIG SRCS HDRS)
+  if(NOT ARGN)
+    message(SEND_ERROR "Error: GENERATE_CONFIG() called without any proto files")
+    return()
+  endif(NOT ARGN)
+
+  set(${SRCS})
+  set(${HDRS})
+  foreach(FIL ${ARGN})
+    get_filename_component(FIL_PATH ${FIL} PATH)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(ABS_FILE ${FIL} ABSOLUTE)
+
+    set(OUT_HEADER "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.cnf.h")
+	set(GEN_SOURCE "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.cnf.cpp")
+    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.cnf.cpp")
+
+    list(APPEND ${HDRS} ${OUT_HEADER})
+    list(APPEND ${SRCS} ${OUT_SOURCE})
+
+    add_custom_command(
+      OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
+	  COMMAND ${PROJECT_BINARY_DIR}/bin/ConfigGenerator
+	  ARGS ${FIL} --config_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}

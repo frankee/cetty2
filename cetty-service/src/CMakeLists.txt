@@ -7,7 +7,9 @@ AUX_SOURCE_DIRECTORY(cetty/service/pool POOL_DIR)
 AUX_SOURCE_DIRECTORY(cetty/service/http HTTP_DIR)
 AUX_SOURCE_DIRECTORY(cetty/service SERVICE_DIR)
 
-SET(service_sources ${BUILDER_DIR} ${HTTP_DIR} ${POOL_DIR} ${SERVICE_DIR})
+GENERATE_CONFIG(CONFIG_SRCS CONFIG_HDS cetty/service/builder/ServerBuilderConfig.proto)
+
+SET(service_sources ${BUILDER_DIR} ${HTTP_DIR} ${POOL_DIR} ${SERVICE_DIR} ${CONFIG_SRCS})
 SET(service_lib cetty-service)
 
 cxx_static_library(${service_lib} ${service_sources})

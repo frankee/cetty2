@@ -20,8 +20,6 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
-#include <google/protobuf/compiler/plugin.h>
-#include <google/protobuf/compiler/command_line_interface.h>
 
 namespace cetty {
 namespace config {
@@ -59,24 +57,4 @@ bool YamlGenerator::Generate(const FileDescriptor* file,
 }
 }
 }
-}
-
-using namespace google::protobuf::compiler;
-using namespace cetty::config::generator::yaml;
-
-int main(int argc, char* argv[]) {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    YamlGenerator generator;
-
-#if defined(GENERATOR_NOT_PLUGIN)
-    google::protobuf::compiler::CommandLineInterface cli;
-    
-    cli.RegisterGenerator("--yaml_out", &generator,
-                          "Generate yaml configure file.");
-
-    return cli.Run(argc, argv);
-#else
-    PluginMain(argc, argv, &generator);
-#endif
 }

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
@@ -14,13 +15,31 @@
  * under the License.
  */
 
-#include <google/protobuf/compiler/code_generator.h>
-#include <google/protobuf/compiler/command_line_interface.h>
 #include <google/protobuf/compiler/plugin.h>
-#include <google/protobuf/io/printer.h>
+#include <google/protobuf/compiler/command_line_interface.h>
 
-#include <cetty/config/generator/cpp/CppGenerator.h>
+#include <cetty/config/generator/cpp/ConfigGenerator.h>
 #include <cetty/config/generator/yaml/YamlGenerator.h>
 
-using namespace std;
+using namespace google::protobuf::compiler;
+using namespace cetty::config::generator::cpp;
+using namespace cetty::config::generator::yaml;
+
+int main(int argc, char* argv[]) {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    ConfigGenerator generator;
+    YamlGenerator yamlGenerator;
+
+    google::protobuf::compiler::CommandLineInterface cli;
+    cli.RegisterGenerator("--config_out", &generator,
+        "Generate C++ header and source.");
+
+    cli.RegisterGenerator("--yaml_out", &yamlGenerator,
+        "Generate yaml configure file.");
+
+    return cli.Run(argc, argv);
+
+    //PluginMain(argc, argv, &generator);
+}
 

@@ -19,8 +19,6 @@
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/compiler/command_line_interface.h>
-#include <google/protobuf/compiler/plugin.h>
 
 #include <cetty/config/config_options.pb.h>
 #include <cetty/config/generator/cpp/FileGenerator.h>
@@ -109,25 +107,4 @@ bool ConfigGenerator::Generate(const FileDescriptor* file,
 }
 }
 }
-}
-
-using namespace google::protobuf::compiler;
-using namespace cetty::config::generator::cpp;
-
-#define GENERATOR_NOT_PLUGIN
-
-int main(int argc, char* argv[]) {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    ConfigGenerator generator;
-
-#if defined(GENERATOR_NOT_PLUGIN)
-    google::protobuf::compiler::CommandLineInterface cli;
-    cli.RegisterGenerator("--config_out", &generator,
-        "Generate C++ header and source.");
-
-    return cli.Run(argc, argv);
-#else
-    PluginMain(argc, argv, &generator);
-#endif
 }
