@@ -16,7 +16,7 @@
 
 #include <cetty/protobuf/service/ProtobufUtil.h>
 
-#include <zlib/zlib.h>
+#include <zlib.h>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>

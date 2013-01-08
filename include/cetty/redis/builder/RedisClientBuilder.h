@@ -28,8 +28,7 @@ namespace builder {
 using namespace cetty::service::builder;
 using namespace cetty::redis::protocol;
 
-class RedisClientBuilder
-        : public ClientBuilder<RedisCommandPtr, RedisReplyPtr> {
+class RedisClientBuilder {
 public:
     typedef ClientBuilder<RedisCommandPtr, RedisReplyPtr> ClientBuilderType;
 
@@ -39,8 +38,19 @@ public:
     RedisClientBuilder(const EventLoopPtr& eventLoop);
     RedisClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
+    void addConnection(const std::string& host, int port, int limit = 1) {
+        builder_.addConnection(host, port, limit);
+    }
+
+    ChannelPtr build() {
+        return builder_.build();
+    }
+
 private:
     void init();
+
+private:
+    ClientBuilderType builder_;
 };
 
 }

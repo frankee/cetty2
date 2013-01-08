@@ -114,7 +114,7 @@ bool ConfigGenerator::Generate(const FileDescriptor* file,
 using namespace google::protobuf::compiler;
 using namespace cetty::config::generator::cpp;
 
-//#define GENERATOR_NOT_PLUGIN
+#define GENERATOR_NOT_PLUGIN
 
 int main(int argc, char* argv[]) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;

@@ -35,6 +35,7 @@ ConfigObject::ConfigObject(const std::string& name)
 }
 
 ConfigObject::~ConfigObject() {
+    clear();
 }
 
 const ConfigReflection* ConfigObject::reflection() const {

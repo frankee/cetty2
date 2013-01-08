@@ -67,7 +67,23 @@ LINK_DIRECTORIES(${YAMLCPP_LIBRARY_DIRS})
 
 find_package(Soci)
 include_directories(${SOCI_INCLUDE_DIRS})
-LINK_DIRECTORIES(${SOCI_LIBRARY})
+LINK_DIRECTORIES(${SOCI_LIBRARY_DIR})
+
+find_package(Gperftools)
+if (Gperftools_found)
+    include_directories(${GPERFTOOLS_INCLUDE_DIRS})
+    LINK_DIRECTORIES(${GPERFTOOLS_LIBRARY_DIRS})
+else (Gperftools_found)
+    message(STATUS "Gperftools library not found")
+endif (Gperftools_found)
+
+find_package(Mongo)
+if (Mongo_found)
+    include_directories(${MONGO_INCLUDE_DIR})
+    LINK_DIRECTORIES(${MONGO_LIBRARY_DIRS})
+else (Mongo_found)
+    message(STATUS "mongo library not found")
+endif (Mongo_found)
 
 # Defines the compiler/linker flags used to build cetty.  You can
 # tweak these definitions to suit your need.  A variable's value is
@@ -264,15 +280,26 @@ function(PROTOBUF_GENERATE_SERVICE SRCS)
 
   set(${SRCS})
   foreach(FIL ${ARGN})
-    get_filename_component(FIL_WE ${FIL} NAME_WE)
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+	get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(ABS_FILE ${FIL} ABSOLUTE)
 
+	set(GEN_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.h")
+	set(OUT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
+	set(GEN_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/${FIL_WE}.pb.cc")
+    set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
+	
+	list(APPEND ${SRCS} ${OUT_SOURCE})
+	
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
+      OUTPUT ${OUT_SOURCE} ${OUT_HEADER}
       COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-      ARGS ./${FIL} --cpp_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      MAIN_DEPENDENCY ${FIL}
+	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND mv
+	  ARGS ${GEN_HEADER} ${OUT_HEADER}
+	  COMMAND mv
+	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
+	  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      MAIN_DEPENDENCY ${ABS_FILE}
       VERBATIM )
   endforeach()
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
@@ -292,6 +319,7 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
     get_filename_component(ABS_FILE ${FIL} ABSOLUTE)
 
     set(OUT_HEADER "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.h")
+	set(GEN_SOURCE "${PROJECT_INCLUDE_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
     set(OUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PATH}/${FIL_WE}.pb.cc")
 
     list(APPEND ${HDRS} ${OUT_HEADER})
@@ -299,8 +327,10 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
 
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
-      COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-      ARGS ${FIL} --cpp_out=. --src_out=${CMAKE_CURRENT_BINARY_DIR} -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
+	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND mv
+	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
       MAIN_DEPENDENCY ${ABS_FIL}
       VERBATIM)
@@ -324,11 +354,11 @@ else ()
 endif()
 
 ADD_SUBDIRECTORY(cetty-service)
-#ADD_SUBDIRECTORY(cetty-redis)
+ADD_SUBDIRECTORY(cetty-redis)
 #ADD_SUBDIRECTORY(cetty-shiro)
 
 ADD_SUBDIRECTORY(cetty-protobuf)
-#ADD_SUBDIRECTORY(cetty-gearman)
+ADD_SUBDIRECTORY(cetty-gearman)
 
 ADD_SUBDIRECTORY(cetty-craft)
 

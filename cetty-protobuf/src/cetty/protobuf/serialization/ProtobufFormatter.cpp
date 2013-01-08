@@ -18,7 +18,6 @@
 
 #include <cetty/util/StringUtil.h>
 #include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
-#include <cetty/protobuf/serialization/png/ProtobufPngFormatter.h>
 
 namespace cetty {
 namespace protobuf {

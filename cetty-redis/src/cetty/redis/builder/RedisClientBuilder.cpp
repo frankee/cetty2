@@ -28,22 +28,22 @@ using namespace cetty::redis;
 using namespace cetty::redis::protocol;
 
 RedisClientBuilder::RedisClientBuilder()
-    : ClientBuilderType() {
+    : builder_() {
     init();
 }
 
 RedisClientBuilder::RedisClientBuilder(int threadCnt)
-    : ClientBuilderType(threadCnt) {
+    : builder_(threadCnt) {
     init();
 }
 
 RedisClientBuilder::RedisClientBuilder(const EventLoopPtr& eventLoop)
-    : ClientBuilderType(eventLoop) {
+    : builder_(eventLoop) {
     init();
 }
 
 RedisClientBuilder::RedisClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : ClientBuilderType(eventLoopPool) {
+    : builder_(eventLoopPool) {
     init();
 }
 
@@ -60,7 +60,7 @@ bool initializeChannel(const ChannelPtr& channel) {
 }
 
 void RedisClientBuilder::init() {
-    setChannelInitializer(boost::bind(initializeChannel, _1));
+    builder_.setClientInitializer(boost::bind(initializeChannel, _1));
 }
 
 }

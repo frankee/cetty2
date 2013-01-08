@@ -201,7 +201,7 @@ void ConfigCenter::mergeNode(const YAML::Node& from, YAML::Node* to) {
     YAML::Node::const_iterator itr = from.begin();
 
     for (; itr != from.end(); ++itr) {
-        YAML::Node& node = (*to)[itr->first.Scalar()];
+        YAML::Node node = (*to)[itr->first.Scalar()];
 
         if (!node.IsDefined()) {
             node = itr->second;

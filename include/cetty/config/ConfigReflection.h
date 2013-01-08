@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/none_t.hpp>
 #include <boost/optional.hpp>
 #include <boost/noncopyable.hpp>
 #include <cetty/Types.h>
@@ -150,7 +151,8 @@ public:
             mutableRaw<boost::optional<T> >(object, field);
 
         if (raw) {
-            raw->swap(boost::optional<T>());
+            boost::none_t null;
+            (*raw) = null;
         }
     }
 

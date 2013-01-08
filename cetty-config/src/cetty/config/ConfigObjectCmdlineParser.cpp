@@ -73,7 +73,7 @@ static int parseField(const ConfigFieldDescriptor* field,
             object->setInt64(field, option.as<int64_t>());
             break;
 
-        case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+        case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
             object->setDouble(field, option.as<double>());
             break;
 
