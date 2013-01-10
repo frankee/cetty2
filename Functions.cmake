@@ -99,7 +99,7 @@ function(cxx_link_with_pb name)
   endif()
 endfunction()
 
-function(PROTOBUF_GENERATE_SERVICE SRCS)
+function(GENERATE_SERVICE SRCS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE() called without any proto files")
     return()
@@ -121,7 +121,7 @@ function(PROTOBUF_GENERATE_SERVICE SRCS)
 	
     add_custom_command(
       OUTPUT ${OUT_SOURCE} ${OUT_HEADER}
-      COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
+      COMMAND ${CETTY_SERVICE_GENERATOR}
 	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_HEADER} ${OUT_HEADER}
@@ -134,7 +134,7 @@ function(PROTOBUF_GENERATE_SERVICE SRCS)
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
 endfunction()
 
-function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
+function(GENERATE_SERVICE_SEPARATE SRCS HDRS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE_SEPARATE() called without any proto files")
     return()
@@ -156,7 +156,7 @@ function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
 
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
+	  COMMAND ${CETTY_SERVICE_GENERATOR}
 	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
@@ -225,7 +225,7 @@ function(GENERATE_CONFIG SRCS HDRS)
 
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/ConfigGenerator
+	  COMMAND ${CETTY_CONFIG_GENERATOR}
 	  ARGS ${FIL} --config_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
