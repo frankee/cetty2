@@ -11,10 +11,10 @@ AUX_SOURCE_DIRECTORY(cetty/craft/access CRAFT_ACCESS_DIR)
 SET(craft_sources ${CRAFT_DIR} ${CRAFT_BUILDER_DIR} ${CRAFT_HTTP_DIR})
 SET(craft_lib cetty-craft)
 
-protobuf_generate_service_separate(PROTO_SRCS PROTO_HDRS cetty/craft/craft.proto  cetty/craft/craft_options.proto)
+GENERATE_SERVICE_separate(PROTO_SRCS PROTO_HDRS cetty/craft/craft.proto  cetty/craft/craft_options.proto)
 #message(STATUS "generate source files ${PROTO_SRCS}")
 
-protobuf_generate_service_separate(PROTO_ACCESS_SRCS PROTO_ACCESS_HDRS cetty/craft/access/AccessControl.proto)
+GENERATE_SERVICE_separate(PROTO_ACCESS_SRCS PROTO_ACCESS_HDRS cetty/craft/access/AccessControl.proto)
 message(STATUS "generate source files ${PROTO_ACCESS_SRCS}")
 
 cxx_static_library(${craft_lib} ${craft_sources} ${PROTO_SRCS})

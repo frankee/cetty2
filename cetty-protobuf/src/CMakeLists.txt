@@ -20,7 +20,7 @@ SET(GENERATOR_DIR cetty/protobuf/service/generator)
 cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR} cetty/protobuf/service/generator/ServiceGenerator.cpp)
 cxx_link_with_pb(ProtobufServiceGenerator protoc)
 
-PROTOBUF_GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service_options.proto cetty/protobuf/service/service.proto)
+GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service_options.proto cetty/protobuf/service/service.proto)
 message(STATUS ${PROTO_HDS})
 
 SET(pbservice_sources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR} ${PROTO_SRCS})

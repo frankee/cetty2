@@ -99,9 +99,9 @@ function(cxx_link_with_pb name)
   endif()
 endfunction()
 
-function(PROTOBUF_GENERATE_SERVICE SRCS)
+function(GENERATE_SERVICE SRCS)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE() called without any proto files")
+    message(SEND_ERROR "Error: GENERATE_SERVICE() called without any proto files")
     return()
   endif(NOT ARGN)
 
@@ -134,9 +134,9 @@ function(PROTOBUF_GENERATE_SERVICE SRCS)
   set(${SRCS} ${${SRCS}} PARENT_SCOPE)
 endfunction()
 
-function(PROTOBUF_GENERATE_SERVICE_SEPARATE SRCS HDRS)
+function(GENERATE_SERVICE_SEPARATE SRCS HDRS)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE_SEPARATE() called without any proto files")
+    message(SEND_ERROR "Error: GENERATE_SERVICE_SEPARATE() called without any proto files")
     return()
   endif(NOT ARGN)
 
