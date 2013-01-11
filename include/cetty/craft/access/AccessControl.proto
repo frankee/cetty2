@@ -12,24 +12,24 @@ option java_generic_services = true;
 
 message PreLoginRequest {
 	optional string      host = 1;
-	optional string user_name = 2;
+	optional string user_name = 2  [(craft_options).query_param="u"];
 }
 
 message PreLoginResponse {
 	optional cetty.craft.Status   status = 1;
 	optional cetty.craft.Session session = 2;
 	
-	optional string       nonce = 3;
-	optional string server_time = 4;
+	optional string       nonce = 5;
+	optional string server_time = 6;
 }
 
 message LoginRequest {
 	optional string      user_name = 1 [(craft_options).query_param="u"];
 	optional string          nonce = 2 [(craft_options).query_param="n"];
-	optional string    server_time = 3 [(craft_options).query_param="st"];
+	optional string    server_time = 3 [(craft_options).query_param="time"];
 	
-	optional string           host = 8;
-	optional string encoded_passwd = 9;
+	optional string           host = 8 [(craft_options).query_param="host"];
+	optional string encoded_passwd = 9 [(craft_options).query_param="pwd"];
 }
 
 message LoginResponse {
@@ -46,11 +46,20 @@ message LogoutResponse {
 }
 
 service AccessControlService {
+    (craft_service_optional).path="/api/{version}/sso";
+	
 	rpc preLogin (PreLoginRequest) returns (PreLoginResponse) {
 		option (craft_method_options).method="get";
-		option (craft_method_options).path="/api/echo";
+		option (craft_method_options).path="/prelogin.{format}";
 	};
 	
-	rpc login (LoginRequest) returns (LoginResponse);
-	rpc logout (LogoutRequest) returns (LogoutResponse);
+	rpc login (LoginRequest) returns (LoginResponse) {
+	    option (craft_method_options).method="get";
+		option (craft_method_options).path="/login.{format}";
+	};
+	
+	rpc logout (LogoutRequest) returns (LogoutResponse) {
+	    option (craft_method_options).method="get";
+		option (craft_method_options).path="/logout.{format}";
+	};
 }
