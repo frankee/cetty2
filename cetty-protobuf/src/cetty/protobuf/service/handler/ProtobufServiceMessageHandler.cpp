@@ -43,8 +43,6 @@ using namespace cetty::protobuf::service;
 using namespace google::protobuf;
 
 void ProtobufServiceMessageHandler::messageUpdated(ChannelHandlerContext& ctx) {
-    bool notify = false;
-
     InboundQueue& inboundQueue =
         context_->inboundContainer()->getMessages();
 

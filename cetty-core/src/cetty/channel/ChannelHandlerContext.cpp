@@ -17,6 +17,7 @@
 #include <cetty/channel/ChannelHandlerContext.h>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/NullChannel.h>
 #include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/DefaultChannelFuture.h>
@@ -958,6 +959,10 @@ ChannelFuturePtr ChannelHandlerContext::newFuture() {
     if (!channel_.expired()) {
         return new DefaultChannelFuture(channel_, false);
     }
+    else {
+        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        return new DefaultChannelFuture(NullChannel::instance(), false);
+    }
 }
 
 ChannelFuturePtr ChannelHandlerContext::newVoidFuture() {
@@ -968,10 +973,20 @@ ChannelFuturePtr ChannelHandlerContext::newSucceededFuture() {
     if (!channel_.expired()) {
         return channel_.lock()->newSucceededFuture();
     }
+    else {
+        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        return NullChannel::instance()->newSucceededFuture();
+    }
 }
 
 ChannelFuturePtr ChannelHandlerContext::newFailedFuture(const ChannelException& cause) {
-    return channel_.lock()->newFailedFuture(cause);
+    if (!channel_.expired()) {
+        return channel_.lock()->newFailedFuture(cause);
+    }
+    else {
+        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        return NullChannel::instance()->newFailedFuture(cause);
+    }
 }
 
 void ChannelHandlerContext::notifyHandlerException(const ChannelPipelineException& e) {

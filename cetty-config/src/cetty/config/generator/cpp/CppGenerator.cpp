@@ -62,9 +62,9 @@ bool CppGenerator::Generate(const FileDescriptor* file,
     //   }
     // FOO_EXPORT is a macro which should expand to __declspec(dllexport) or
     // __declspec(dllimport) depending on what is being compiled.
-    string dllexport_decl;
+    std::string dllexport_decl;
 
-    for (int i = 0; i < options.size(); i++) {
+    for (std::size_t i = 0; i < options.size(); i++) {
         if (options[i].first == "dllexport_decl") {
             dllexport_decl = options[i].second;
         }
@@ -80,8 +80,8 @@ bool CppGenerator::Generate(const FileDescriptor* file,
     boost::optional<std::string> fileName =
         ProtobufUtil::getOption<std::string>(file, "config_file_options", "source_file_name");
 
-    bool hasExtension = file->options().HasExtension(config_file_options);
-    const ConfigFileOptions& op = file->options().GetExtension(config_file_options);
+    //bool hasExtension = file->options().HasExtension(config_file_options);
+    //const ConfigFileOptions& op = file->options().GetExtension(config_file_options);
 
     FileGenerator fileGenerator(file, dllexport_decl);
 

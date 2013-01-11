@@ -51,13 +51,9 @@ public:
     bool configure(const std::string& name, ConfigObject* object) const;
 
     bool addCmdlineName(const std::string& fieldName,
-                        const std::string& cmdline) {
-        cmdlineTrie_.addKey(fieldName, new std::string(cmdline));
-    }
+        const std::string& cmdline);
 
-    void addOptions(const boost::program_options::options_description& desc) {
-        description_.add(desc);
-    }
+    void addOptions(const boost::program_options::options_description& desc);
 
 public:
     static bool configureFromString(const char* str, ConfigObject* object);
@@ -83,6 +79,17 @@ private:
     boost::program_options::options_description description_;
 };
 
+    inline
+    bool ConfigCenter::addCmdlineName(const std::string& fieldName,
+        const std::string& cmdline) {
+        cmdlineTrie_.addKey(fieldName, new std::string(cmdline));
+        return true;
+    }
+
+    inline
+    void ConfigCenter::addOptions(const boost::program_options::options_description& desc) {
+        description_.add(desc);
+    }
 }
 }
 

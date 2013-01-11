@@ -324,7 +324,7 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
     context->setPrev(prev);
     context->setNext(next);
 
-    contexts_.erase(ctx->name());
+    contexts_.erase(oldName);
     contexts_[newName] = context;
 
     ChannelHandlerLifeCycleException removeException;

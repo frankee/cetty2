@@ -393,7 +393,7 @@ void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
         doConnect(remoteAddress, localAddress, future);
 
         // Schedule connect timeout.
-        int connectTimeoutMillis = config().connectTimeout();
+        //int connectTimeoutMillis = config().connectTimeout();
 
         //         if (connectTimeoutMillis > 0) {
         //             eventLoop()->runAfter(connectTimeoutMillis, boost::bind(

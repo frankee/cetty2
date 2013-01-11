@@ -32,7 +32,7 @@ using namespace boost::asio::ip;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
     tcp::acceptor& acceptor)
-    : reuseAddress_(true), acceptor_(acceptor) {
+    : acceptor_(acceptor), reuseAddress_(true) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
