@@ -1,0 +1,15 @@
+package cetty.shiro.authc;
+
+import "cetty/config/config_options.proto";
+
+message WSSEConfig {
+    optional int32       nonce_length = 1;
+    optional int32 server_time_expire = 2;
+	
+	optional string           backend = 3;
+    optional string connection_string = 4;
+
+    optional string  user_token_query = 5;
+    optional string user_token_update = 6;
+    optional string   user_token_save = 7;
+}

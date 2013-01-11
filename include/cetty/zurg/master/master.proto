@@ -1,13 +1,9 @@
 package cetty.zurg.master;
 
-option cc_generic_services = true;
-option java_generic_services = true;
-option py_generic_services = true;
+import "cetty/zurg/slave/slave.proto";
+
 option java_package = "io.cetty.zurg.master";
 option java_outer_classname = "MasterProto";
-
-import "cetty/protobuf/service/service.proto";
-import "cetty/zurg/slave/slave.proto";
 
 message SlaveHeartbeat {
   message Uname {
@@ -48,14 +44,3 @@ message SlaveHeartbeat {
   // not so dynamic per minute
   repeated cetty.zurg.slave.DiskUsage disk_usage = 50;
 }
-
-service MasterService {
-  rpc slaveHeartbeat (SlaveHeartbeat) returns (cetty.protobuf.service.Empty) {
-    option (cetty.protobuf.service.no_return) = true;
-  }
-  
-  rpc appStatusChange (cetty.zurg.slave.ApplicationStatus) returns (cetty.protobuf.service.Empty) {
-    option (cetty.protobuf.service.no_return) = true;
-  }
-}
-

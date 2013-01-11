@@ -1,0 +1,11 @@
+package cetty.shiro.session;
+
+import "cetty/config/config_options.proto";
+
+message SessionManagerConfig {
+	optional bool  delete_invalidated_session = 1;
+	optional bool enable_validation_scheduler = 2;
+
+	optional int32     global_session_timeout = 3;
+    optional int32  session_validate_interval = 4;
+}

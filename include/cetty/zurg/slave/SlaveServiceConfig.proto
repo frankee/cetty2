@@ -1,0 +1,16 @@
+package cetty.zurg.slave;
+
+import "cetty/config/config_options.proto";
+
+message SlaveServiceConfig {
+    optional string   name = 1;
+	optional string prefix = 2 [default = "/tmp"];
+	
+	optional string master_address = 3 [default = "127.0.0.1:6636"];
+	
+	optional int32    zombie_interval = 20;
+	optional int32 heartbeat_interval = 21;
+	
+	optional bool     redirect_stdout = 22;
+	optional bool     redirect_stderr = 23;
+}

@@ -9,6 +9,7 @@
 #define APPLICATIONMANAGER_H_
 
 #include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/slave/slave_service.pb.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoop.h>
 #include <cetty/zurg/slave/Process.h>

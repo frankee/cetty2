@@ -145,7 +145,7 @@ Heartbeat::Heartbeat(const EventLoopPtr& loop,
       stub_(stub),
       procFs_(new ProcFs),
       beating_(false) {
-    ConfigCenter::instance().configure(&config_);
+    //ConfigCenter::instance().configure(&config_);
     init();
 }
 
@@ -155,21 +155,21 @@ Heartbeat::~Heartbeat() {
 
 void Heartbeat::init() {
     // todo init data about config if some data is not inited
-    name_ = config_.name;
+    //name_ = config_.name;
 
-    if (config_.listenPort <= 0) {
-        LOG_ERROR << "Slave listen port not greater than 0.";
-        exit(0);
-    }
+    //if (config_.listenPort <= 0) {
+    //    LOG_ERROR << "Slave listen port not greater than 0.";
+    //    exit(0);
+    //}
 
-    port_ = config_.listenPort;
+    //port_ = config_.listenPort;
 
-    if (config_.heartbeatInterval <= 0) { config_.heartbeatInterval = 3000; }
+    //if (config_.heartbeatInterval <= 0) { config_.heartbeatInterval = 3000; }
 }
 
 void Heartbeat::start() {
     beating_ = true;
-    loop_->runEvery(config_.heartbeatInterval, boost::bind(&Heartbeat::onTimer, this));
+    loop_->runEvery(heartbeatInterval_, boost::bind(&Heartbeat::onTimer, this));
 }
 
 void Heartbeat::stop() {

@@ -1,7 +1,4 @@
 #include <cetty/zurg/slave/ProcessManager.h>
-#include <cetty/channel/asio/AsioService.h>
-#include <cetty/logging/LoggerHelper.h>
-#include <cetty/config/ConfigCenter.h>
 
 #include <assert.h>
 #include <signal.h>
@@ -10,6 +7,9 @@
 
 #include <boost/bind.hpp>
 
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/config/ConfigCenter.h>
 
 namespace cetty {
 namespace zurg {

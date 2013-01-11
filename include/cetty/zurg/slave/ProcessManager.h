@@ -36,7 +36,7 @@ public:
     typedef boost::function<void ()> stopAllCallback;
 
 public:
-    ProcessManager(const EventLoopPtr& loop);
+    ProcessManager(const EventLoopPtr& loop, int zombieInterval);
     ~ProcessManager();
 
     void start();
@@ -61,7 +61,7 @@ private:
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
-    ZurgSlaveConfig config_;
+    int zombieInterval_;
     boost::asio::signal_set signals_;
     EventLoopPtr loop_;
     std::map<pid_t, Callback> callbacks_;

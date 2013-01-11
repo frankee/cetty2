@@ -1,0 +1,7 @@
+package cetty.shiro;
+
+import "cetty/config/config_options.proto";
+
+message SecurityManagerConfig {
+    optional string realm = 1;
+}

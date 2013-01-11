@@ -1,17 +1,18 @@
 
 #include <cetty/zurg/slave/SlaveServiceImpl.h>
+
+#include <boost/weak_ptr.hpp>
+#include <cetty/util/SmallFile.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/channel/EventLoopPool.h>
+#include <cetty/config/ConfigCenter.h>
+
 #include <cetty/zurg/slave/Process.h>
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
 #include <cetty/zurg/slave/ZurgSlave.h>
 #include <cetty/zurg/Util.h>
-#include <cetty/util/SmallFile.h>
-#include <cetty/logging/LoggerHelper.h>
-#include <cetty/channel/EventLoopPoolPtr.h>
-#include <cetty/channel/EventLoopPool.h>
-
-#include <boost/weak_ptr.hpp>
 
 namespace cetty {
 namespace zurg {
@@ -20,10 +21,12 @@ namespace slave {
 using namespace cetty::zurg;
 using namespace cetty::util;
 using namespace cetty::channel;
+using namespace cetty::config;
 
-SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop)
-    : processManager(new ProcessManager(loop)),
-      applicationManager(new ApplicationManager(processManager.get())) {
+SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop) {
+    ConfigCenter::instance().configure(&config_);
+    processManager_.reset(new ProcessManager(loop), config_.zombieInterval);
+        applicationManager_.reset(new ApplicationManager(processManager_.get()));
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
@@ -35,7 +38,7 @@ void SlaveServiceImpl::getHardware(
     const GetHardwareResponsePtr& response,
     const DoneCallback& done) {
 
-    LOG_INFO << "SlaveServiceImpl::getHardware - lshw = " 
+    LOG_INFO << "SlaveServiceImpl::getHardware - lshw = "
              << request->lshw();
 
     GetHardwareTaskPtr task(new GetHardwareTask(request, response, done, *this));
@@ -96,7 +99,8 @@ void SlaveServiceImpl::getFileChecksum(
                 done
             )
         );
-    } else {
+    }
+    else {
         GetFileChecksumResponse response;
         done(&response);
     }
@@ -105,19 +109,21 @@ void SlaveServiceImpl::getFileChecksum(
 void SlaveServiceImpl::getFileChecksumDone(
     const ConstGetFileChecksumRequestPtr& request,
     const google::protobuf::Message* message,
-    const DoneCallback& done){
+    const DoneCallback& done) {
 
     const RunCommandResponse* runCommandResp =
-          google::protobuf::down_cast<const RunCommandResponse*>(message);
+        google::protobuf::down_cast<const RunCommandResponse*>(message);
 
     const std::string& lines = runCommandResp->std_output();
     std::map<StringPiece, StringPiece> md5sums;
     parseMd5sum(lines, &md5sums);
 
     GetFileChecksumResponse response;
-    for (int i = 0; i < request->files_size(); ++i){
+
+    for (int i = 0; i < request->files_size(); ++i) {
         md5sums[request->files(i)].copy_to(response.add_md5sums());
     }
+
     done(&response);
 }
 
@@ -134,13 +140,15 @@ void SlaveServiceImpl::runCommand(
 
     try {
         err = process->start();
-    } catch (...) {}
+    }
+    catch (...) {}
 
     if (err) {
         response->set_error_code(err);
         done(response);
-    } else {
-        processManager->runAtExit(
+    }
+    else {
+        processManager_->runAtExit(
             process->pid(),  // bind strong ptr
             boost::bind(
                 &Process::onCommandExit,
@@ -154,9 +162,9 @@ void SlaveServiceImpl::runCommand(
         assert(elp);
         boost::weak_ptr<Process> weakProcessPtr(process);
         TimeoutPtr timerId = elp->runAfter(
-            request->timeout(),
-            boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
-        );
+                                 request->timeout(),
+                                 boost::bind(&Process::onTimeoutWeak, weakProcessPtr)
+                             );
 
         process->setTimerId(timerId);
     }
@@ -188,10 +196,10 @@ void SlaveServiceImpl::runScript(
 }
 
 void SlaveServiceImpl::listProcesses(
-       const ConstListProcessesRequestPtr& request,
-       const ListProcessesResponsePtr& response,
-       const DoneCallback& done
-   ){
+    const ConstListProcessesRequestPtr& request,
+    const ListProcessesResponsePtr& response,
+    const DoneCallback& done
+) {
 
 }
 
@@ -200,35 +208,35 @@ void SlaveServiceImpl::addApplication(
     const AddApplicationResponsePtr& response,
     const DoneCallback& done) {
 
-    applicationManager->add(request, response, done);
+    applicationManager_->add(request, response, done);
 }
 
 void SlaveServiceImpl::startApplications(
     const ConstStartApplicationsRequestPtr& request,
     const StartApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    applicationManager->start(request, response, done);
+    applicationManager_->start(request, response, done);
 }
 
 void SlaveServiceImpl::stopApplications(
     const ConstStopApplicationRequestPtr& request,
     const StopApplicationResponsePtr& response,
     const DoneCallback& done) {
-    applicationManager->stop(request, response, done);
+    applicationManager_->stop(request, response, done);
 }
 
 void SlaveServiceImpl::listApplications(
     const ConstListApplicationsRequestPtr& request,
     const ListApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    applicationManager->list(request, response, done);
+    applicationManager_->list(request, response, done);
 }
 
 void SlaveServiceImpl::removeApplications(
     const ConstRemoveApplicationsRequestPtr& request,
     const RemoveApplicationsResponsePtr& response,
     const DoneCallback& done) {
-    applicationManager->remove(request, response, done);
+    applicationManager_->remove(request, response, done);
 }
 
 }

@@ -1,0 +1,17 @@
+package cetty.shiro.realm;
+
+import "cetty/config/config_options.proto";
+
+message SqlRealmConfig {
+    optional bool enable_lookup_permissions = 1;
+    optional int32 salt_style = 2;
+
+    optional string                 name = 5;
+	
+    optional string              backend = 6;
+    optional string    connection_string = 7;
+
+    optional string authentication_query = 8;
+    optional string     user_roles_query = 9;
+    optional string    permissions_query = 10;
+}

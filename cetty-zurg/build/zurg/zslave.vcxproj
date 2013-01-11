@@ -114,10 +114,8 @@
     <ClCompile Include="..\..\src\cetty\zurg\slave\Process.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ProcessManager.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ProcStatFile.cpp" />
-    <ClCompile Include="..\..\src\cetty\zurg\slave\slave.pb.cc" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\SlaveServiceImpl.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlave.cpp" />
-    <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlaveConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -128,14 +126,13 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\Process.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ProcessManager.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ProcStatFile.h" />
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\slave.pb.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\SlaveServiceImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h" />
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlaveConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto" />
+    <None Include="..\..\..\include\cetty\zurg\slave\slave_service.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

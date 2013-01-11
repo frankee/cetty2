@@ -1,0 +1,25 @@
+package cetty.zurg.master;
+
+import "cetty/craft/craft.proto";
+import "cetty/craft/craft_options.proto";
+import "cetty/protobuf/service/service.proto";
+
+import "cetty/zurg/slave/slave.proto";
+import "cetty/zurg/master/master.proto";
+
+option cc_generic_services = true;
+option java_generic_services = true;
+option py_generic_services = true;
+
+option java_package = "io.cetty.zurg.master";
+option java_outer_classname = "MasterServiceProto";
+
+service MasterService {
+  rpc slaveHeartbeat (SlaveHeartbeat) returns (cetty.protobuf.service.Empty) {
+    option (service_method_options).no_return = true;
+  }
+  
+  rpc appStatusChange (cetty.zurg.slave.ApplicationStatus) returns (cetty.protobuf.service.Empty) {
+    option (service_method_options).no_return = true;
+  }
+}

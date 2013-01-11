@@ -8,18 +8,18 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
-#include <cetty/zurg/slave/slave.pb.h>
-#include <cetty/protobuf/service/ProtobufService.h>
-#include <cetty/channel/EventLoopPtr.h>
-#include <cetty/channel/EventLoop.h>
-#include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/Timeout.h>
-
+#include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <string>
+
+#include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/EventLoopPtr.h>
+
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/slave/slave_service.pb.h>
+#include <cetty/protobuf/service/ProtobufService.h>
 
 struct rusage;
 

@@ -1,0 +1,8 @@
+package cetty.shiro.session;
+
+import "cetty/config/config_options.proto";
+
+message RedisSessionDAOConfig {
+    optional string host = 1;
+    optional int32  port = 2;
+}

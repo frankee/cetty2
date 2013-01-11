@@ -9,10 +9,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
     <ClCompile Include="..\..\src\cetty\zurg\slave\ApplicationManager.cpp">
       <Filter>slave</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\GetHardwareTask.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\cetty\zurg\slave\Heartbeat.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\Pipe.cpp">
       <Filter>slave</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\zurg\slave\Process.cpp">
@@ -21,30 +28,18 @@
     <ClCompile Include="..\..\src\cetty\zurg\slave\ProcessManager.cpp">
       <Filter>slave</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\zurg\slave\ProcStatFile.cpp">
+      <Filter>slave</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\cetty\zurg\slave\SlaveServiceImpl.cpp">
       <Filter>slave</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlave.cpp">
       <Filter>slave</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\slave\GetHardwareTask.cpp">
-      <Filter>slave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\slave\Pipe.cpp">
-      <Filter>slave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\slave\ProcStatFile.cpp">
-      <Filter>slave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\slave\ZurgSlaveConfig.cpp">
-      <Filter>slave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\slave\slave.pb.cc">
-      <Filter>slave</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ApplicationManager.h">
       <Filter>slave</Filter>
     </ClInclude>
@@ -72,16 +67,12 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h">
       <Filter>slave</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlaveConfig.h">
-      <Filter>slave</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\slave.pb.h">
-      <Filter>slave</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto">
+      <Filter>slave</Filter>
+    </None>
+    <None Include="..\..\..\include\cetty\zurg\slave\slave_service.proto">
       <Filter>slave</Filter>
     </None>
   </ItemGroup>

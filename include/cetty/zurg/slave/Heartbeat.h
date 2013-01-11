@@ -39,14 +39,14 @@ private:
 
     void beat(bool showStatic);
 
+private:
+    int heartbeatInterval_;
     EventLoopPtr loop_;
     std::string name_;
     int port_;
     MasterService_Stub* stub_;
     boost::scoped_ptr<ProcFs> procFs_;
     bool beating_;
-
-    ZurgSlaveConfig config_;
 };
 
 }

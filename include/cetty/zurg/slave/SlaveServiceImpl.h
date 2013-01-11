@@ -8,11 +8,11 @@
 #ifndef SLAVESERVICEIMPL_H_
 #define SLAVESERVICEIMPL_H_
 
-#include <cetty/zurg/slave/slave.pb.h>
-#include <cetty/channel/EventLoopPtr.h>
-
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/zurg/slave/slave_service.pb.h>
+#include <cetty/zurg/slave/SlaveServiceConfig.cnf.h>
 
 namespace cetty {
 namespace zurg {
@@ -89,8 +89,9 @@ private:
                              const DoneCallback& done);
 
 private:
-    boost::scoped_ptr<ProcessManager> processManager;
-    boost::scoped_ptr<ApplicationManager> applicationManager;
+    SlaveServiceConfig config_;
+    boost::scoped_ptr<ProcessManager> processManager_;
+    boost::scoped_ptr<ApplicationManager> applicationManager_;
 };
 
 }
