@@ -13,7 +13,6 @@ else()
 endif()
 
 AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/xml XML_DIR)
-
 AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/bson BSON_DIR)
 
 SET(GENERATOR_DIR cetty/protobuf/service/generator)
@@ -21,10 +20,10 @@ SET(GENERATOR_DIR cetty/protobuf/service/generator)
 cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR} cetty/protobuf/service/generator/ServiceGenerator.cpp)
 cxx_link_with_pb(ProtobufServiceGenerator protoc)
 
-PROTOBUF_GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service.proto)
+PROTOBUF_GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service_options.proto cetty/protobuf/service/service.proto)
 message(STATUS ${PROTO_HDS})
 
-SET(pbservice_sources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR})
+SET(pbservice_sources ${SERVICE_DIR} ${BUILDER_DIR} ${HANDLER_DIR} ${PROTO_SRCS})
 SET(pbservice_lib cetty-protobuf)
 
 SET(pbserialization_sources ${SERIALIZATION_DIR} ${JSON_DIR} ${XML_DIR} ${BSON_DIR})
