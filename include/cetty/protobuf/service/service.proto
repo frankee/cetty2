@@ -1,3 +1,5 @@
+import "cetty/protobuf/service/service_options.proto";
+
 package cetty.protobuf.service;
 
 option java_package = "io.cetty.protobuf.service";

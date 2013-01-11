@@ -38,10 +38,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\bin</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\include</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\bin\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
@@ -51,6 +51,7 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)d</TargetName>
+    <CustomBuildBeforeTargets Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -76,6 +77,9 @@
       <TargetMachine>MachineX86</TargetMachine>
       <Profile>true</Profile>
     </Link>
+    <CustomBuildStep>
+      <Command>../proto_gen.cmd</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -103,18 +107,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\config\config_options.pb.cc" />
+    <ClCompile Include="..\..\src\cetty\config\generator\ConfigGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\FileGenerator.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.cpp" />
+    <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\CppHelpers.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\config\generator\cpp\strutil.cc" />
+    <ClCompile Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\FileGenerator.h" />
-    <ClInclude Include="..\..\src\cetty\config\generator\cpp\ConfigGenerator.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppGenerator.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\CppHelpers.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\MessageGenerator.h" />
     <ClInclude Include="..\..\src\cetty\config\generator\cpp\strutil.h" />
+    <ClInclude Include="..\..\src\cetty\config\generator\yaml\YamlGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

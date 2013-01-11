@@ -5,7 +5,8 @@ import "cetty/craft/craft_options.proto";
 option py_generic_services = true;
 option cc_generic_services = true;
 option java_generic_services = true;
-option java_package = "cetty.craft.echo";
+
+option java_package = "io.cetty.craft.echo";
 option java_outer_classname = "EchoProto";
 
 message EchoRequest {

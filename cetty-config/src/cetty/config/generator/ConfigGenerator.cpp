@@ -18,7 +18,7 @@
 #include <google/protobuf/compiler/plugin.h>
 #include <google/protobuf/compiler/command_line_interface.h>
 
-#include <cetty/config/generator/cpp/ConfigGenerator.h>
+#include <cetty/config/generator/cpp/CppGenerator.h>
 #include <cetty/config/generator/yaml/YamlGenerator.h>
 
 using namespace google::protobuf::compiler;
@@ -28,11 +28,11 @@ using namespace cetty::config::generator::yaml;
 int main(int argc, char* argv[]) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    ConfigGenerator generator;
+    CppGenerator cppGenerator;
     YamlGenerator yamlGenerator;
 
     google::protobuf::compiler::CommandLineInterface cli;
-    cli.RegisterGenerator("--config_out", &generator,
+    cli.RegisterGenerator("--config_out", &cppGenerator,
         "Generate C++ header and source.");
 
     cli.RegisterGenerator("--yaml_out", &yamlGenerator,

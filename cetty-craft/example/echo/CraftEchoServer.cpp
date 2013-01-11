@@ -21,9 +21,9 @@ public:
             rep = new EchoResponse;
         }
 
-        for (int i = 0; i < 100; ++i) {
+        //for (int i = 0; i < 100; ++i) {
             rep->mutable_payload()->append(request->payload());
-        }
+        //}
 
         //boost::this_thread::sleep(boost::posix_time::microseconds(100));
 

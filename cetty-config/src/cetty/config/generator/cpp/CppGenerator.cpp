@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#include <cetty/config/generator/cpp/ConfigGenerator.h>
+#include <cetty/config/generator/cpp/CppGenerator.h>
 
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
@@ -34,7 +34,7 @@ using namespace google::protobuf;
 using namespace google::protobuf::compiler;
 using namespace cetty::protobuf::service;
 
-bool ConfigGenerator::Generate(const FileDescriptor* file,
+bool CppGenerator::Generate(const FileDescriptor* file,
                             const string& parameter,
                             GeneratorContext* generatorContext,
                             string* error) const {
