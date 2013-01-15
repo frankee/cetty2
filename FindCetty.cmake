@@ -8,7 +8,7 @@ FIND_PATH(CETTY_INCLUDE_DIR ${CETTY_HEADER_FILES}
     /usr/local/include
     /opt/include
     /opt/cetty/include
-	/opt/home/projects/cetty/include)
+	/home/projects/cetty/include)
 
 FIND_LIBRARY(CETTY_LIBRARY
     NAMES cetty cetty-config cetty-craft cetty-gearman cetty-protobuf cetty-protobuf-serialization cetty-redis cetty-service
@@ -16,7 +16,7 @@ FIND_LIBRARY(CETTY_LIBRARY
 	PATHS /usr/local
           /opt
           /opt/cetty
-          /opt/home/projects/cetty)
+          /home/projects/cetty)
 		  
 GET_FILENAME_COMPONENT(CETTY_LIBRARY_DIR ${CETTY_LIBRARY} PATH)
 
@@ -25,14 +25,14 @@ FIND_PROGRAM(CETTY_SERVICE_GENERATOR ProtobufServiceGenerator
 	/usr/local/bin
 	/opt/bin
 	/opt/cetty/bin
-	/opt/home/projects/cetty)
+	/home/projects/cetty)
 	
 FIND_PROGRAM(CETTY_CONFIG_GENERATOR ConfigGenerator
     /usr/bin
 	/usr/local/bin
 	/opt/bin
 	/opt/cetty/bin
-	/opt/home/projects/cetty/bin)
+	/home/projects/cetty/bin)
 	
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CETTY DEFAULT_MSG

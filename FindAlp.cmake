@@ -8,7 +8,7 @@ FIND_PATH(ALP_INCLUDE_DIR ${ALP_HEADER_FILES}
         /usr/local/include
         /opt/include
         /opt/alp/include
-		/opt/home/projects/alp/include)
+		/home/projects/alp/include)
 
 FIND_LIBRARY(ALP_LIBRARY
 	NAMES alp
@@ -16,7 +16,7 @@ FIND_LIBRARY(ALP_LIBRARY
 	PATHS /usr/local
           /opt
           /opt/alp
-		  /opt/home/projects/alp)
+		  /home/projects/alp)
 
 
 include(FindPackageHandleStandardArgs)
