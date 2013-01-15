@@ -16,7 +16,8 @@ FIND_LIBRARY(ALP_LIBRARY
 	PATHS /usr/local
           /opt
           /opt/alp
-		  /home/projects/alp)
+		  /home/projects/alp
+		  /home/projects/alp/builder)
 
 
 include(FindPackageHandleStandardArgs)

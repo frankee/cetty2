@@ -16,7 +16,8 @@ FIND_LIBRARY(CETTY_LIBRARY
 	PATHS /usr/local
           /opt
           /opt/cetty
-          /home/projects/cetty)
+          /home/projects/cetty
+		  /home/projects/cetty/builder)
 		  
 GET_FILENAME_COMPONENT(CETTY_LIBRARY_DIR ${CETTY_LIBRARY} PATH)
 
@@ -25,14 +26,16 @@ FIND_PROGRAM(CETTY_SERVICE_GENERATOR ProtobufServiceGenerator
 	/usr/local/bin
 	/opt/bin
 	/opt/cetty/bin
-	/home/projects/cetty)
+	/home/projects/cetty/bin
+	/home/projects/cetty/builder/bin)
 	
 FIND_PROGRAM(CETTY_CONFIG_GENERATOR ConfigGenerator
     /usr/bin
 	/usr/local/bin
 	/opt/bin
 	/opt/cetty/bin
-	/home/projects/cetty/bin)
+	/home/projects/cetty/bin
+	/home/projects/cetty/builder/bin)
 	
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CETTY DEFAULT_MSG
