@@ -7,47 +7,44 @@ FIND_PATH(CETTY_INCLUDE_DIR ${CETTY_HEADER_FILES}
 	/usr/include
     /usr/local/include
     /opt/include
-    /opt/cetty/include)
+    /opt/cetty/include
+	/opt/home/projects/cetty/include)
 
-mark_as_advanced(CETTY_INCLUDE_DIR)
-
-FIND_LIBRARY(CETTY_LIBRARY_DIR 
-	NAMES cetty
-	PATHS /usr/local/lib
-          /usr/local/lib64
-          /opt/lib
-          /opt/lib64
-          /opt/cetty/lib
-          /opt/cetty/lib64)
+FIND_LIBRARY(CETTY_LIBRARY
+    NAMES cetty cetty-config cetty-craft cetty-gearman cetty-protobuf cetty-protobuf-serialization cetty-redis cetty-service
+	PATH_SUFFIXES lib64 lib
+	PATHS /usr/local
+          /opt
+          /opt/cetty
+          /opt/home/projects/cetty)
 		  
+GET_FILENAME_COMPONENT(CETTY_LIBRARY_DIR ${CETTY_LIBRARY} PATH)
+
 FIND_PROGRAM(CETTY_SERVICE_GENERATOR ProtobufServiceGenerator
     /usr/bin
 	/usr/local/bin
 	/opt/bin
-	/opt/cetty/bin)
+	/opt/cetty/bin
+	/opt/home/projects/cetty)
 	
 FIND_PROGRAM(CETTY_CONFIG_GENERATOR ConfigGenerator
     /usr/bin
 	/usr/local/bin
 	/opt/bin
-	/opt/cetty/bin)
+	/opt/cetty/bin
+	/opt/home/projects/cetty/bin)
 	
-if (CETTY_INCLUDE_DIR AND CETTY_LIBRARY_DIR)
-    set(CETTY_FOUND TRUE)	
-endif (CETTY_INCLUDE_DIR AND CETTY_LIBRARY_DIR)
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(CETTY DEFAULT_MSG
+    CETTY_LIBRARY CETTY_INCLUDE_DIR)
 
 if (CETTY_FOUND)
-    message(STATUS "found cetty: ${CETTY_LIBRARY}")
+    message(STATUS "found cetty: ${CETTY_LIBRARY} ${CETTY_INCLUDE_DIR}")
 else (CETTY_FOUND)
     message(STATUS "could not find cetty library")
 endif (CETTY_FOUND)
 
-mark_as_advanced(CETTY_LIBRARY_DIR)
-
-include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CETTY DEFAULT_MSG
-    CETTY_LIBRARY_DIR CETTY_INCLUDE_DIR)
+mark_as_advanced(CETTY_LIBRARY CETTY_INCLUDE_DIR)
 
 SET(CETTY_INCLUDE_DIRS ${CETTY_INCLUDE_DIR})
-SET(CETTY_LIBRARY_DIRS ${CETTY_LIBRARY_DIR})
-
+SET(CETTY_LIBRARYS ${CETTY_LIBRARY})
