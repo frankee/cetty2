@@ -15,7 +15,7 @@ FIND_LIBRARY(GEOS_LIBRARY
               /opt
               /opt/geos)
 
-
+GET_FILENAME_COMPONENT(GEOS_LIBRARY_DIR ${GEOS_LIBRARY} PATH)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GEOS DEFAULT_MSG

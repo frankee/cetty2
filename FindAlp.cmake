@@ -19,6 +19,7 @@ FIND_LIBRARY(ALP_LIBRARY
 		  /home/projects/alp
 		  /home/projects/alp/builder)
 
+GET_FILENAME_COMPONENT(ALP_LIBRARY_DIR ${ALP_LIBRARY} PATH)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALP DEFAULT_MSG

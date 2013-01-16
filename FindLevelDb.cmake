@@ -1,0 +1,29 @@
+set(LEVELDB_HEADER_FILES leveldb/db.h)
+
+FIND_PATH(LEVELDB_INCLUDE_DIR ${LEVELDB_HEADER_FILES}
+	/usr/include
+    /usr/local/include
+    /opt/include
+    /opt/leveldb/include)
+
+FIND_LIBRARY(LEVELDB_LIBRARY
+    NAMES leveldb
+	PATH_SUFFIXES lib64 lib
+	PATHS /usr/local
+          /opt
+          /opt/leveldb)
+		  
+GET_FILENAME_COMPONENT(LEVELDB_LIBRARY_DIR ${LEVELDB_LIBRARY} PATH)
+	
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LEVELDB DEFAULT_MSG
+    LEVELDB_LIBRARY LEVELDB_INCLUDE_DIR)
+
+if (LEVELDB_FOUND)
+    message(STATUS "found leveldb: ${LEVELDB_LIBRARY} ${CETTY_INCLUDE_DIR}")
+endif (LEVELDB_FOUND)
+
+mark_as_advanced(LEVELDB_LIBRARY LEVELDB_INCLUDE_DIR)
+
+SET(LEVELDB_INCLUDE_DIRS ${LEVELDB_INCLUDE_DIR})
+SET(LEVELDB_LIBRARYS ${LEVELDB_LIBRARY})
