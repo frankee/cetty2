@@ -11,7 +11,7 @@ FIND_PATH(CETTY_INCLUDE_DIR ${CETTY_HEADER_FILES}
 	/home/projects/cetty/include)
 
 FIND_LIBRARY(CETTY_LIBRARY
-    NAMES cetty cetty-config cetty-craft cetty-gearman cetty-protobuf cetty-protobuf-serialization cetty-redis cetty-service
+    NAMES cetty
 	PATH_SUFFIXES lib64 lib
 	PATHS /usr/local
           /opt
@@ -50,4 +50,4 @@ endif (CETTY_FOUND)
 mark_as_advanced(CETTY_LIBRARY CETTY_INCLUDE_DIR)
 
 SET(CETTY_INCLUDE_DIRS ${CETTY_INCLUDE_DIR})
-SET(CETTY_LIBRARYS ${CETTY_LIBRARY})
+SET(CETTY_LIBRARYS cetty-craft cetty-service cetty-protobuf cetty-protobuf-serialization cetty-config cetty)
