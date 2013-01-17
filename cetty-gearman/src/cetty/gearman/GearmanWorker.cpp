@@ -29,11 +29,11 @@ using namespace cetty::service::pool;
 GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
                              const Channel::Initializer& initializer,
                              const Connections& connections)
-    : connectionPool(connections,
+    : connectionPool_(connections,
                      (int)connections.size(),
                      (int)connections.size()) {
-    connectionPool.setChannelInitializer(initializer);
-    connectionPool.start();
+    connectionPool_.setChannelInitializer(initializer);
+    connectionPool_.start();
 }
 
 GearmanWorker::~GearmanWorker() {

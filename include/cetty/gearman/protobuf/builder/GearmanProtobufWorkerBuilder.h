@@ -35,15 +35,35 @@ public:
 public:
     GearmanProtobufWorkerBuilder();
     GearmanProtobufWorkerBuilder(int threadCnt);
-    
+
     GearmanProtobufWorkerBuilder& addConnection(const std::string& host, int port);
     GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);
 
-    const std::vector<GearmanWorkerPtr>& buildWorkers();
+    GearmanProtobufWorkerBuilder& buildWorkers();
+
+    void waitingForExit();
 
 private:
     GearmanWorkerBuilder builder_;
 };
+
+inline
+GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::addConnection(
+    const std::string& host, int port) {
+    builder_.addConnection(host, port);
+    return *this;
+}
+
+inline
+GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::buildWorkers() {
+    builder_.buildWorkers();
+    return *this;
+}
+
+inline
+void GearmanProtobufWorkerBuilder::waitingForExit() {
+    builder_.waitingForExit();
+}
 
 }
 }

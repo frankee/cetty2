@@ -45,5 +45,7 @@ int main(int argc, char* argv[]) {
 
     //builder.buildAll();
     builder.waitingForExit();
+
+    getchar();
     return 0;
 }

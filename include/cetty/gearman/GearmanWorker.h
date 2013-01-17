@@ -21,6 +21,7 @@
 #include <cetty/channel/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/pool/WatermarkConnectionPool.h>
+#include <cetty/gearman/GearmanWorkerPtr.h>
 
 namespace cetty {
 namespace gearman {
@@ -47,7 +48,7 @@ public:
     void grabUniqueJob();
 
 private:
-    WatermarkConnectionPool connectionPool;
+    WatermarkConnectionPool connectionPool_;
 };
 
 }

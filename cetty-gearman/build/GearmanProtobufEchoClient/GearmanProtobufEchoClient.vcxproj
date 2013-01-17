@@ -11,7 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sample\echo\protobuf\GearmanProtobufEchoClient.cpp" />
+    <ClCompile Include="..\..\example\echo\protobuf\echo.pb.cc" />
+    <ClCompile Include="..\..\example\echo\protobuf\GearmanProtobufEchoClient.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\example\echo\protobuf\echo.pb.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DC6266AF-849C-4940-AD4F-C7EFB76B8B73}</ProjectGuid>

@@ -21,7 +21,7 @@
 
 #include <cetty/service/Connection.h>
 #include <cetty/service/builder/ClientBuilder.h>
-#include <cetty/gearman/GearmanWorkerPtr.h>
+#include <cetty/gearman/GearmanWorker.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
 namespace cetty {

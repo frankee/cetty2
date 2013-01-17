@@ -39,7 +39,7 @@ public:
     GearmanProtobufClientBuilder(const EventLoopPtr& eventLoop);
     GearmanProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool);
     
-    ~GearmanProtobufClientBuilder();
+    ~GearmanProtobufClientBuilder() {}
 
     void addConnection(const std::string& host, int port) {
         builder_.addConnection(host, port, 1);

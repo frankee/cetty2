@@ -1,8 +1,10 @@
 package echo;
+
 option py_generic_services = true;
 option cc_generic_services = true;
 option java_generic_services = true;
-option java_package = "cetty.protobuf.echo";
+
+option java_package = "io.cetty.protobuf.echo";
 option java_outer_classname = "EchoProto";
 
 message EchoRequest {
@@ -14,5 +16,5 @@ message EchoResponse {
 }
 
 service EchoService {
-  rpc Echo (EchoRequest) returns (EchoResponse);
+  rpc echo (EchoRequest) returns (EchoResponse);
 }

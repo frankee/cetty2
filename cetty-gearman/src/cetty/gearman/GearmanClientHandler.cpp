@@ -32,7 +32,11 @@ using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::gearman::protocol;
 
-GearmanClientHandler::GearmanClientHandler() {
+GearmanClientHandler::GearmanClientHandler()
+    : inboundTransfer_(NULL),
+      inboundContainer_(NULL),
+      outboundTransfer_(NULL),
+      outboundContainer_(NULL) {
 }
 
 void GearmanClientHandler::registerTo(Context& ctx) {

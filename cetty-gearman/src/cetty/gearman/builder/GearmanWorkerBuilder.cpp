@@ -95,6 +95,10 @@ bool GearmanWorkerBuilder::initializeChannel(const ChannelPtr& channel) {
     return true;
 }
 
+void GearmanWorkerBuilder::waitingForExit() {
+    //TODO
+}
+
 }
 }
 }
