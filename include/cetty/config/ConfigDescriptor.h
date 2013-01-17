@@ -64,6 +64,7 @@ class ConfigObject;
                                       &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
                               ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
                               #FIELD,\
+                              #CPP_TYPE,\
                               true\
                              )\
      

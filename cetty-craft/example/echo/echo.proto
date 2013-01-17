@@ -20,6 +20,6 @@ message EchoResponse {
 service EchoService {
   rpc echo (EchoRequest) returns (EchoResponse) {
 	option (craft_method_options).method="get";
-	option (craft_method_options).path="/api/echo";
+	option (craft_method_options).path="/api/echo.{format}";
   };
 }
