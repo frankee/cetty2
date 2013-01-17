@@ -44,6 +44,8 @@ using namespace google::protobuf;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::serialization;
 
+static boost::thread_specific_ptr<boost::smatch> regexResultPtr;
+
 class ServiceMethod {
 public:
     ServiceMethod()
@@ -65,7 +67,7 @@ public:
             descriptor_ = descriptor;
             service_ = descriptor_->service()->full_name();
 
-            return true;
+            return initRegex();
         }
         else {
             return false;
@@ -81,10 +83,12 @@ public:
             return request->uri().getPath().compare(path_) == 0;
         }
         else {
-            boost::smatch what;
-
-            if (boost::regex_match(request->uri().getPath(), what, regex_, boost::match_extra)) {
-
+            boost::smatch& result = getRegexResult();
+            if (boost::regex_match(request->uri().getPath(),
+                                   result,
+                                   regex_,
+                                   boost::match_extra)) {
+                return true;
             }
         }
 
@@ -102,12 +106,83 @@ public:
         return descriptor_->full_name();
     }
 
-    StringPiece pathParamValue(const std::string& name) {
-        return StringPiece();
+    std::string pathParamValue(const std::string& name) const {
+        std::map<std::string, int>::const_iterator itr = params_.find(name);
+        if (itr != params_.end()) {
+            const boost::smatch& result = getRegexResult();
+            if (itr->second < static_cast<int>(result.size())) {
+                return result[itr->second];
+            }
+        }
+        return std::string();
     }
 
 private:
-    std::string getPathRegex(const std::string& path);
+    boost::smatch& getRegexResult() const {
+        boost::smatch* result = regexResultPtr.get();
+
+        if (!result) {
+            result = new boost::smatch;
+            regexResultPtr.reset(result);
+        }
+
+        return *result;
+    }
+
+    bool initRegex() {
+        bool inBrace = false;
+        int paramCount = 0;
+        std::string param;
+        std::string regexStr;
+        std::size_t braceIndex = 0;
+
+        for (std::size_t i = 0; i < path_.size(); ++i) {
+            switch (path_[i]) {
+            case '{':
+                if (!inBrace) {
+                    inBrace = true;
+                }
+                else {
+                    return false;
+                }
+
+                braceIndex = i;
+                break;
+
+            case '}':
+                if (inBrace) {
+                    inBrace = false;
+                }
+                else {
+                    return false;
+                }
+
+                ++paramCount;
+
+                param = path_.substr(braceIndex + 1, i - braceIndex - 1);
+
+                regexStr.append("(.*)");
+                params_[param] = paramCount;
+                break;
+
+            case '.':
+                regexStr.append("\\.");
+                break;
+
+            default:
+                if (!inBrace) {
+                    regexStr.append(1, path_[i]);
+                }
+
+                break;
+            }
+        }
+
+        if (!regexStr.empty()) {
+            regex_ = regexStr;
+        }
+        return true;
+    }
 
 private:
     const MethodDescriptor* descriptor_;
@@ -198,6 +273,8 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
     BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
 
     bool parsed = false;
+
+    //std::string format = method.pathParamValue("format");
 
     if (descriptor->options().HasExtension(craft_message_options)) {
         const CraftMessageOptions& messageOptions =
@@ -415,6 +492,7 @@ void ServiceRequestMapping::onServiceRegistered(const ProtobufServicePtr& servic
 
     int methodCount = descriptor->method_count();
     std::string methodName;
+
     for (int i = 0; i < methodCount; ++i) {
         const MethodDescriptor* method = descriptor->method(i);
         ServiceMethod* serviceMethod = new ServiceMethod;
@@ -448,8 +526,6 @@ cetty::util::StringPiece ServiceRequestMapping::getValue(
     const CraftMessageOptions& options) {
     return StringPiece();
 }
-
-
 
 }
 }

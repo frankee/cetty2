@@ -16,7 +16,7 @@
 
 #include <cetty/protobuf/service/ProtobufUtil.h>
 
-#include <zlib.h>
+#include <cetty/util/Adler32.h>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
@@ -32,7 +32,7 @@ using namespace google::protobuf;
 using namespace cetty::logging;
 
 ProtobufUtil::FieldValue ProtobufUtil::getMessageFieldValue(const Message& message,
-    const std::string& name) {
+        const std::string& name) {
 
     std::string fieldName;
     std::string subFieldName;
@@ -179,9 +179,8 @@ void ProtobufUtil::logHandler(google::protobuf::LogLevel level,
 
 static uint32_t adler32Check(const uint8_t* buffer, int bufferSize) {
     return static_cast<uint32_t>(
-               ::adler32(1,
-                         reinterpret_cast<const Bytef*>(buffer),
-                         static_cast<uInt>(bufferSize)));
+               cetty::util::Adler32::adler32(reinterpret_cast<char const*>(buffer),
+                       bufferSize));
 }
 
 ProtobufUtil::ChecksumFunction ProtobufUtil::adler32Checksum =
