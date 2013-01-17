@@ -9,19 +9,23 @@ FIND_PATH(YAMLCPP_INCLUDE_DIR ${YAMLCPP_HEADER_FILE}
   )
 mark_as_advanced(YAMLCPP_INCLUDE_DIR)
 
-FIND_LIBRARY(YAMLCPP_LIBRARY_DIR NAMES yaml-cpp PATHS
-	/usr/local/lib
-        /usr/local/lib64
-	/usr/lib
-        /usr/lib64
-	/opt/yaml/lib
-        /opt/yaml/lib64
-  )
-mark_as_advanced(YAMLCPP_LIBRARY_DIR)
+FIND_LIBRARY(YAMLCPP_LIBRARY
+   NAMES yaml-cpp
+   PATH_SUFFIXES lib64 lib
+   PATHS
+	/usr/local
+	/usr
+	/opt/yaml)
+mark_as_advanced(YAMLCPP_LIBRARY)
 
-if(YAMLCPP_INCLUDE_DIR)
-  add_definitions(-DHAS_YAMLCPP)
-endif()
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(YAMLCPP DEFAULT_MSG
+    YAMLCPP_LIBRARY YAMLCPP_INCLUDE_DIR)
+
+if (YAMLCPP_FOUND)
+    message(STATUS "found YAML-CPP: ${YAMLCPP_LIBRARY}")
+	add_definitions(-DHAS_YAMLCPP)
+endif (YAMLCPP_FOUND)
 
 SET(YAMLCPP_INCLUDE_DIRS ${YAMLCPP_INCLUDE_DIR})
-SET(YAMLCPP_LIBRARY_DIRS ${YAMLCPP_LIBRARY_DIR})
+SET(YAMLCPP_LIBRARYS ${YAMLCPP_LIBRARY})
