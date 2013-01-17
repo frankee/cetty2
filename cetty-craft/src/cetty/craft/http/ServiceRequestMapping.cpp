@@ -84,6 +84,7 @@ public:
         }
         else {
             boost::smatch& result = getRegexResult();
+
             if (boost::regex_match(request->uri().getPath(),
                                    result,
                                    regex_,
@@ -108,12 +109,15 @@ public:
 
     std::string pathParamValue(const std::string& name) const {
         std::map<std::string, int>::const_iterator itr = params_.find(name);
+
         if (itr != params_.end()) {
             const boost::smatch& result = getRegexResult();
+
             if (itr->second < static_cast<int>(result.size())) {
                 return result[itr->second];
             }
         }
+
         return std::string();
     }
 
@@ -181,6 +185,7 @@ private:
         if (!regexStr.empty()) {
             regex_ = regexStr;
         }
+
         return true;
     }
 
@@ -524,6 +529,23 @@ ServiceMethod* ServiceRequestMapping::route(const HttpRequestPtr& request) {
 cetty::util::StringPiece ServiceRequestMapping::getValue(
     const HttpRequestPtr& request,
     const CraftMessageOptions& options) {
+    if (options.has_path_param()) {
+
+    }
+    else if (options.has_query_param()) {
+        const NameValueCollection& nameValues = request->queryParameters();
+        return nameValues.get(options.query_param());
+    }
+    else if (options.has_cookie_param()) {
+
+    }
+    else if (options.has_header_param()) {
+
+    }
+    else if (options.has_form_param()) {
+
+    }
+
     return StringPiece();
 }
 
