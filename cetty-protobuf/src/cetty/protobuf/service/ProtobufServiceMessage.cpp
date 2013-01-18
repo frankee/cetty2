@@ -172,7 +172,15 @@ bool ProtobufServiceMessage::checkType(int type) {
 }
 
 int ProtobufServiceMessage::messageSize() const {
-    return message_->ByteSize() + (payload_ ? payload_->ByteSize() + 8 : 0);
+    return message_->ByteSize() + (payload_ ? payload_->ByteSize() + 12 : 4);
+}
+
+void ProtobufServiceMessage::methodFullName(std::string* name) const {
+    if (name) {
+        name->assign(service());
+        name->append(1, '.');
+        name->append(method());
+    }
 }
 
 }

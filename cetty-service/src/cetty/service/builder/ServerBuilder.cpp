@@ -265,7 +265,6 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-
     if (childOptions.empty()) {
         //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     }

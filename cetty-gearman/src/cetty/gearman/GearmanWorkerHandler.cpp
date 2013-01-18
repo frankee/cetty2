@@ -38,13 +38,21 @@ using namespace cetty::buffer;
 GearmanWorkerHandler::GearmanWorkerHandler()
     : isSleep_(false),
       grabIdleCount_(0),
-      maxGrabIdleCount_(3) {
+      maxGrabIdleCount_(3),
+      inboundTransfer_(),
+      inboundContainer_(),
+      outboundTransfer_(),
+      outboundContainer_() {
 }
 
 GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount)
     :isSleep_(false),
      grabIdleCount_(0),
-     maxGrabIdleCount_(maxGrabIdleCount) {
+     maxGrabIdleCount_(maxGrabIdleCount),
+     inboundTransfer_(),
+     inboundContainer_(),
+     outboundTransfer_(),
+     outboundContainer_() {
 }
 
 GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount,
@@ -52,7 +60,11 @@ GearmanWorkerHandler::GearmanWorkerHandler(int maxGrabIdleCount,
     :isSleep_(false),
      grabIdleCount_(0),
      maxGrabIdleCount_(maxGrabIdleCount),
-     workerFunctors_(workerFunctors) {
+     workerFunctors_(workerFunctors),
+     inboundTransfer_(),
+     inboundContainer_(),
+     outboundTransfer_(),
+     outboundContainer_() {
 }
 
 GearmanWorkerHandler::~GearmanWorkerHandler() {
@@ -60,7 +72,8 @@ GearmanWorkerHandler::~GearmanWorkerHandler() {
 
 void GearmanWorkerHandler::registerWorker(const std::string& functionName,
         const GrabJobCallback& worker) {
-    workerFunctors_.insert(std::pair<std::string, GrabJobCallback>(functionName, worker));
+    workerFunctors_.insert(
+        std::pair<std::string, GrabJobCallback>(functionName, worker));
 }
 
 void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
@@ -81,14 +94,13 @@ void GearmanWorkerHandler::handleJob(const GearmanMessagePtr& gearmanMessage,
             if (outboundTransfer_->unfoldAndAdd(message)) {
                 ctx.flush();
             }
-        }
-        else {
-            ctx.fireMessageUpdated();
+
+            return;
         }
     }
-    else {
-        ctx.fireMessageUpdated();
-    }
+
+    inboundTransfer_->unfoldAndAdd(gearmanMessage);
+    ctx.fireMessageUpdated();
 }
 
 void GearmanWorkerHandler::registerFunction(const std::string& functionName,
@@ -125,7 +137,7 @@ void GearmanWorkerHandler::preSleep(ChannelHandlerContext& ctx) {
 }
 
 void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx) {
-    std::string  data;
+    std::string data;
     std::string jobhandle;
 
     InboundQueue& queue = inboundContainer_->getMessages();
@@ -193,6 +205,8 @@ void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx) {
                 break;
             }
         }
+
+        queue.pop_front();
     }
 }
 
@@ -226,6 +240,30 @@ void GearmanWorkerHandler::channelActive(ChannelHandlerContext& ctx) {
     }
 
     grabJob(ctx);
+}
+
+void GearmanWorkerHandler::registerTo(Context& ctx) {
+    inboundTransfer_ = ctx.inboundTransfer();
+    inboundContainer_ = ctx.inboundContainer();
+
+    outboundTransfer_ = ctx.outboundTransfer();
+    outboundContainer_ = ctx.outboundContainer();
+
+    ctx.setChannelActiveCallback(boost::bind(
+                                     &GearmanWorkerHandler::channelActive,
+                                     this,
+                                     _1));
+
+    ctx.setChannelMessageUpdatedCallback(boost::bind(
+            &GearmanWorkerHandler::messageReceived,
+            this,
+            _1));
+
+    ctx.setFlushFunctor(boost::bind(
+                            &GearmanWorkerHandler::flush,
+                            this,
+                            _1,
+                            _2));
 }
 
 }

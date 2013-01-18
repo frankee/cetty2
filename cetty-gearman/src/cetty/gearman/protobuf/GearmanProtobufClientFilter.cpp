@@ -54,7 +54,9 @@ GearmanProtobufClientFilter::~GearmanProtobufClientFilter() {}
 GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
     ChannelHandlerContext& ctx,
     const ProtobufServiceMessagePtr& req) {
-    const std::string& method = req->method();
+    std::string method;
+    req->methodFullName(&method);
+
     ChannelBufferPtr buffer
         = Unpooled::buffer(req->messageSize() + 8);
 

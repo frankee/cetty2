@@ -146,7 +146,7 @@ private:
     boost::asio::ip::tcp::socket tcpSocket_;
 
     ChannelBufferPtr readBuffer_;
-    ChannelBufferContainer* bridgeContainer_;
+    ChannelBufferContainer* bufferContainer_;
     boost::scoped_ptr<AsioWriteOperationQueue> writeQueue_;
 
     AsioSocketChannelConfig socketConfig_;

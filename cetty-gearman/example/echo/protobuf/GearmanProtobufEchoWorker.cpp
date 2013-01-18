@@ -15,7 +15,7 @@ public:
     virtual ~EchoServiceImpl() {
     }
 
-    virtual void Echo(const ConstEchoRequestPtr& request,
+    virtual void echo(const ConstEchoRequestPtr& request,
                       const EchoResponsePtr& response,
                       const DoneCallback& done) {
         EchoResponsePtr rep(response);
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     GearmanProtobufWorkerBuilder builder(1);
     builder.registerService(new echo::EchoServiceImpl);
-    builder.addConnection("192.168.1.162",4730);
+    builder.addConnection("192.168.1.108",4730);
     builder.buildWorkers();
 
     //builder.buildAll();

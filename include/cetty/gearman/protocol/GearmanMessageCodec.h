@@ -17,7 +17,9 @@
  * under the License.
  */
 
-#include <cetty/handler/codec/MessageToMessageCodec.h>
+#include <cetty/handler/codec/MessageToBufferEncoder.h>
+#include <cetty/handler/codec/MessageToMessageDecoder.h>
+
 #include <cetty/gearman/protocol/GearmanMessage.h>
 
 namespace cetty {
@@ -29,23 +31,50 @@ using namespace cetty::handler::codec;
 
 class GearmanMessageCodec : private boost::noncopyable {
 public:
-    typedef MessageToMessageCodec<GearmanMessageCodec,
+    typedef ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK> InboundContainer;
+    typedef ChannelMessageContainer<GearmanMessagePtr, MESSAGE_BLOCK> NextInboundContainer;
+
+    typedef ChannelMessageContainer<GearmanMessagePtr, MESSAGE_BLOCK> OutboundContainer;
+    typedef ChannelMessageContainer<ChannelBufferPtr, MESSAGE_STREAM> NextOutboundContainer;
+
+    typedef ChannelMessageHandlerContext<GearmanMessageCodec,
             ChannelBufferPtr,
             GearmanMessagePtr,
             GearmanMessagePtr,
-            ChannelBufferPtr> Codec;
+            ChannelBufferPtr,
+            InboundContainer,
+            NextInboundContainer,
+            OutboundContainer,
+            NextOutboundContainer> Context;
 
-    typedef Codec::Context Context;
+    typedef ChannelHandlerWrapper<GearmanMessageCodec>::Handler Handler;
+    typedef ChannelHandlerWrapper<GearmanMessageCodec>::HandlerPtr HandlerPtr;
 
-    typedef Codec::Handler Handler;
-    typedef Codec::HandlerPtr HandlerPtr;
+    typedef MessageToMessageDecoder<GearmanMessageCodec,
+            ChannelBufferPtr,
+            GearmanMessagePtr,
+            Context> MessageDecoder;
+
+    typedef MessageToBufferEncoder<GearmanMessageCodec,
+            GearmanMessagePtr,
+            Context> MessageEncoder;
+
+    typedef MessageDecoder::Decoder Decoder;
+    typedef MessageEncoder::Encoder Encoder;
+
+    typedef InboundContainer::MessageQueue InboundQueue;
+    typedef OutboundContainer::MessageQueue OutboundQueue;
+
+    typedef MessageDecoder::InboundTransfer InboundTransfer;
+    typedef MessageEncoder::OutboundTransfer OutboundTransfer;
 
 public:
     GearmanMessageCodec();
     ~GearmanMessageCodec();
 
     void registerTo(Context& ctx) {
-        codec_.registerTo(ctx);
+        decoder_.registerTo(ctx);
+        encoder_.registerTo(ctx);
     }
 
 private:
@@ -67,7 +96,8 @@ private:
                               bool withZeroPad);
 
 private:
-    Codec codec_;
+    MessageDecoder decoder_;
+    MessageEncoder encoder_;
 };
 
 }

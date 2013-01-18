@@ -46,8 +46,8 @@ message LogoutResponse {
 }
 
 service AccessControlService {
-    (craft_service_optional).path="/api/{version}/sso";
-	
+    option (craft_service_options).path="/api/{version}/sso";
+
 	rpc preLogin (PreLoginRequest) returns (PreLoginResponse) {
 		option (craft_method_options).method="get";
 		option (craft_method_options).path="/prelogin.{format}";

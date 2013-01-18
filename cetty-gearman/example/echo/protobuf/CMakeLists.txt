@@ -1,25 +1,20 @@
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+GENERATE_SERVICE(PROTO_SRCS echo.proto)
+message(STATUS "gearman protobuf echo example using ${PROTO_SRCS}")
 
-#find_package(Protobuf REQUIRED)
-#include_directories(${PROTOBUF_INCLUDE_DIRS})
-#LINK_DIRECTORIES(${PROTOBUF_LIB_DIRS})
+SET(PB_DEPENDENCIES cetty-gearman cetty-protobuf-serialization cetty-protobuf cetty-service cetty-config cetty yaml-cpp)
 
-#add_executable(server  "server.cpp" "echo.pb.cc")
-#set_target_properties(server PROPERTIES COMPILE_FLAGS "${cxx_default}")
-#target_link_libraries(server protobufservice cettyservice cettyconfig cetty ${PROTOBUF_LIBRARIES})
+cxx_executable_current_path_no_link(GearmanProtobufEchoWorker ${PROTO_SRCS})
 
-#add_executable(client  "client.cpp" "echo.pb.cc")
-#set_target_properties(client PROPERTIES COMPILE_FLAGS "${cxx_default}")
-#target_link_libraries(client protobufservice cettyservice cettyconfig cetty ${PROTOBUF_LIBRARIES})
-include_directories(. /usr/local/include)
+if (GPERFTOOLS_LIBRARY)
+    cxx_link_with_pb(GearmanProtobufEchoWorker ${GPERFTOOLS_LIBRARY} ${PB_DEPENDENCIES})
+else (GPERFTOOLS_LIBRARY)
+    cxx_link_with_pb(GearmanProtobufEchoWorker ${PB_DEPENDENCIES})
+endif (GPERFTOOLS_LIBRARY)
 
-link_directories(/usr/local/lib)
+cxx_executable_current_path_no_link(GearmanProtobufEchoClient ${PROTO_SRCS})
 
-
-SET(SAMPLE_DEPENDENCIES gearman protobufservice  cettyservice cettyconfig
-cetty protobuf)
-
-cxx_executable_current_path_no_link(GearmanProtobufEchoClient "echo.pb.cc")
-target_link_libraries(GearmanProtobufEchoClient ${SAMPLE_DEPENDENCIES})
-cxx_executable_current_path_no_link(GearmanProtobufEchoWorker "echo.pb.cc")
-target_link_libraries(GearmanProtobufEchoWorker ${SAMPLE_DEPENDENCIES})
+if (GPERFTOOLS_LIBRARY)
+    cxx_link_with_pb(GearmanProtobufEchoClient ${GPERFTOOLS_LIBRARY} ${PB_DEPENDENCIES})
+else (GPERFTOOLS_LIBRARY)
+    cxx_link_with_pb(GearmanProtobufEchoClient ${PB_DEPENDENCIES})
+endif (GPERFTOOLS_LIBRARY)

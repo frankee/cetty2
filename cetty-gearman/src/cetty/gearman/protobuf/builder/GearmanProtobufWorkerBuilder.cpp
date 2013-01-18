@@ -82,9 +82,9 @@ GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(
     WorkFunctor nullWorker;
 
     for (int i = 0; i < methodCnt; ++i) {
-        //functionName = serviceName;
         const MethodDescriptor* method = descriptor->method(i);
-        functionName = method->name();
+        functionName = method->full_name();
+
         //register the worker function
         builder_.registerWorker(functionName, nullWorker);
     }

@@ -118,6 +118,8 @@ private:
         else {
             nextOutboundBuffer_.reset();
         }
+
+        ctx.fireChannelActive();
     }
 
     void flush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {

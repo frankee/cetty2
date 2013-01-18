@@ -25,11 +25,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "service", "..\..\..\cetty-service\build\service\service.vcxproj", "{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gearman", "..\..\..\cetty-gearman\build\gearman\gearman.vcxproj", "{CA71411F-D9FF-4686-8DC6-56A2FC982D9B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1} = {17B13DB1-0458-4DA5-BD2B-EF8E2274BBF1}
-		{7AD046C3-EC07-409B-9A39-F1A6404EC5C5} = {7AD046C3-EC07-409B-9A39-F1A6404EC5C5}
-		{5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B} = {5C94F9F3-765C-4614-BADC-BCFEC0EE4B7B}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanEchoClient", "..\..\..\cetty-gearman\build\GearmanEchoClient\GearmanEchoClient.vcxproj", "{E19E303B-ED55-4945-90CA-CFF36E1ED81B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -66,6 +61,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtobufServiceTest", "..\..\..\cetty-protobuf\build\ProtobufServiceTest\ProtobufServiceTest.vcxproj", "{75945FE9-9A6B-4A85-96E0-F4A7F0B20527}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanProtobufEchoClient", "..\..\..\cetty-gearman\build\GearmanProtobufEchoClient\GearmanProtobufEchoClient.vcxproj", "{DC6266AF-849C-4940-AD4F-C7EFB76B8B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CA71411F-D9FF-4686-8DC6-56A2FC982D9B} = {CA71411F-D9FF-4686-8DC6-56A2FC982D9B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanProtobufEchoWorker", "..\..\..\cetty-gearman\build\GearmanProtobufEchoWorker\GearmanProtobufEchoWorker.vcxproj", "{F25952F1-9ED5-4D5B-A644-97A4CF9EB495}"
 	ProjectSection(ProjectDependencies) = postProject

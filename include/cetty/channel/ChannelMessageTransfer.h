@@ -167,6 +167,10 @@ public:
             return true;
         }
 
+        if (!!msg) {
+            LOG_WARN << "have not found the next container for the message";
+        }
+
         return false;
     }
 

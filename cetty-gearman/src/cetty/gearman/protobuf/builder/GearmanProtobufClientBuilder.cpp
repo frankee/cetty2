@@ -17,7 +17,6 @@
 
 #include <cetty/gearman/protobuf/builder/GearmanProtobufClientBuilder.h>
 
-
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/LengthFieldBasedFrameDecoder.h>
 #include <cetty/gearman/GearmanClientHandler.h>
@@ -33,7 +32,6 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec;
 using namespace cetty::gearman::protocol;
 using namespace cetty::protobuf::service;
-
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder()
     : builder_() {

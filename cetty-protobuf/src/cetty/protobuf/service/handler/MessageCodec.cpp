@@ -149,9 +149,7 @@ ChannelBufferPtr MessageCodec::encode(ChannelHandlerContext& ctx,
     if (msg) {
         int msgSize = msg->messageSize();
         ChannelBufferPtr buffer = Unpooled::buffer(msgSize + 32, 4);
-        buffer->writeBytes("RPC0");
         encodeMessage(msg, buffer);
-
         return buffer;
     }
     else {
@@ -166,6 +164,8 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
     BOOST_ASSERT(!serviceMessage.has_request()
                  && !serviceMessage.has_response()
                  && "Can not contain the response or request payload in service message");
+    
+    buffer->writeBytes("RPC0");
 
     encodeProtobuf(serviceMessage, buffer);
 

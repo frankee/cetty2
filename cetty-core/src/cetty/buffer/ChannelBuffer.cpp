@@ -844,17 +844,21 @@ int ChannelBuffer::indexNotOf(int fromIndex, int toIndex, const StringPiece& val
 int ChannelBuffer::bytesBefore(int8_t value, int offset, int length) const {
     int readableCnt = readableBytes();
 
-    if (offset > readableCnt || length < 0) {
+    if (offset > readableCnt || length == 0) {
         return 0;
     }
 
-    if (offset < 0) { offset = 0; }
+    if (offset < 0) {
+        offset = 0;
+    }
 
-    int endIndex = offset + readerIdx + length;
+    int endIndex = length < 0 ? writerIdx : offset + readerIdx + length;
 
-    if (endIndex > writerIdx) { endIndex = writerIdx; }
+    if (endIndex > writerIdx) {
+        endIndex = writerIdx;
+    }
 
-    return indexOf(readerIdx + offset, endIndex, StringPiece((const char*)&value, 1));
+    return indexOf(readerIdx + offset, endIndex, value) - readerIdx - offset;
 }
 
 int ChannelBuffer::bytesBefore(const StringPiece& value, int offset, int length) const {

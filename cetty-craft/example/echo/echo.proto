@@ -10,6 +10,8 @@ option java_package = "io.cetty.craft.echo";
 option java_outer_classname = "EchoProto";
 
 message EchoRequest {
+  option (craft_message_options).query_param="req";
+  
   required string payload = 1 [(craft_options).query_param = "p"];
 }
 

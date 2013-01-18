@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <boost/noncopyable.hpp>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
@@ -98,10 +99,16 @@ private:
             loop = eventLoopPool_->getNextLoop();
         }
 
-        return ChannelPtr(new ServiceChannel(loop,
+        ChannelPtr channel(new ServiceChannel(loop,
                                              clientInitializer_,
                                              connections_));
+
+        clientChannels_.insert(std::make_pair(channel->id(), channel));
+        return channel;
     }
+
+private:
+    typedef std::map<int, ChannelPtr> ClientChannels;
 
 private:
     Connections connections_;
@@ -111,6 +118,8 @@ private:
 
     Channel::Initializer clientInitializer_;
     Channel::Initializer serviceInitializer_;
+
+    ClientChannels clientChannels_;
 };
 
 }

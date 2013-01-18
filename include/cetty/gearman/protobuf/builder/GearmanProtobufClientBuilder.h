@@ -41,8 +41,9 @@ public:
     
     ~GearmanProtobufClientBuilder() {}
 
-    void addConnection(const std::string& host, int port) {
+    GearmanProtobufClientBuilder& addConnection(const std::string& host, int port) {
         builder_.addConnection(host, port, 1);
+        return *this;
     }
 
     ChannelPtr build() {

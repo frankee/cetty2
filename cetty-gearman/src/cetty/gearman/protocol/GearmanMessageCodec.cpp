@@ -43,15 +43,15 @@ const int MessageParamSize[] = {
 };
 
 GearmanMessageCodec::GearmanMessageCodec() {
-    codec_.setDecoder(boost::bind(&GearmanMessageCodec::decode,
-                                  this,
-                                  _1,
-                                  _2));
+    decoder_.setDecoder(boost::bind(&GearmanMessageCodec::decode,
+                                    this,
+                                    _1,
+                                    _2));
 
-    codec_.setEncoder(boost::bind(&GearmanMessageCodec::encode,
-                                  this,
-                                  _1,
-                                  _2));
+    encoder_.setEncoder(boost::bind(&GearmanMessageCodec::encode,
+                                    this,
+                                    _1,
+                                    _2));
 }
 
 GearmanMessageCodec::~GearmanMessageCodec() {

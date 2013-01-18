@@ -57,7 +57,7 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       readBuffer_(Unpooled::buffer(1024 * 16)),
-      bridgeContainer_(),
+      bufferContainer_(),
       socketConfig_(tcpSocket_) {
     writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
@@ -72,7 +72,7 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       readBuffer_(Unpooled::buffer(1024 * 16)),
-      bridgeContainer_(),
+      bufferContainer_(),
       socketConfig_(tcpSocket_) {
     writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
@@ -87,7 +87,7 @@ AsioSocketChannel::AsioSocketChannel(int id, const EventLoopPtr& eventLoop)
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       readBuffer_(Unpooled::buffer(1024 * 16)),
-      bridgeContainer_(),
+      bufferContainer_(),
       socketConfig_(tcpSocket_) {
     writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
@@ -104,7 +104,7 @@ AsioSocketChannel::AsioSocketChannel(int id,
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       tcpSocket_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
       readBuffer_(Unpooled::buffer(1024 * 16)),
-      bridgeContainer_(),
+      bufferContainer_(),
       socketConfig_(tcpSocket_) {
     writeQueue_.reset(new AsioWriteOperationQueue(*this));
 }
@@ -479,9 +479,9 @@ void AsioSocketChannel::doClose() {
 void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                 const ChannelFuturePtr& future) {
 
-    BOOST_ASSERT(bridgeContainer_);
+    BOOST_ASSERT(bufferContainer_);
 
-    const ChannelBufferPtr& buffer = bridgeContainer_->getMessages();
+    const ChannelBufferPtr& buffer = bufferContainer_->getMessages();
 
     if (!isActive()) {
         LOG_WARN << "sending the msg, but the socket is disconnected, clean up write buffer.";
@@ -560,7 +560,7 @@ void AsioSocketChannel::doInitialize() {
 void AsioSocketChannel::registerTo(Context& context) {
     Channel::registerTo(context);
 
-    bridgeContainer_ = context.outboundContainer();
+    bufferContainer_ = context.outboundContainer();
 
     context.setConnectFunctor(boost::bind(
                                   &AsioSocketChannel::doConnect,

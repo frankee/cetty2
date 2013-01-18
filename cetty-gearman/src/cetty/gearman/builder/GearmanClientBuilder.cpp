@@ -75,8 +75,9 @@ cetty::gearman::GearmanClientPtr GearmanClientBuilder::build() {
     return new GearmanClient(builder_.build());
 }
 
-void GearmanClientBuilder::addConnection(const std::string& host, int port) {
+GearmanClientBuilder& GearmanClientBuilder::addConnection(const std::string& host, int port) {
     builder_.addConnection(host, port, 1);
+    return *this;
 }
 
 }

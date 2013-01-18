@@ -18,6 +18,7 @@
  */
 
 #include <vector>
+#include <string>
 #include <boost/noncopyable.hpp>
 
 namespace cetty {
@@ -99,8 +100,8 @@ public:
 
     int offset;
     int type;
-    const char* name;
-    const char* className;
+    std::string name;
+    std::string className;
 
     ConfigFieldDescriptor(int offset,
                           int type,

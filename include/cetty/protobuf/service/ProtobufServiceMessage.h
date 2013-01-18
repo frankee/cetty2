@@ -50,9 +50,9 @@ public:
     bool isRequest() const;
     bool isResponse() const;
     bool isError() const;
-
-    void setType(int type);
+    
     int type() const;
+    void setType(int type);
 
     int64_t id() const;
     void setId(int64_t id);
@@ -62,6 +62,8 @@ public:
 
     const std::string& method() const;
     std::string* mutableMethod();
+
+    void methodFullName(std::string* name) const;
 
     const ServiceMessage& serviceMessage() const;
     ServiceMessage* mutableServiceMessage() {

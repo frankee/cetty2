@@ -45,7 +45,7 @@ private:
 
 int main(int argc, char* argv[]) {
     GearmanProtobufClientBuilder builder(1);
-    builder.addConnection("192.168.1.162", 4730);
+    builder.addConnection("192.168.1.108", 4730);
     EchoClient client(builder.build());
     client.sendRequest();
 

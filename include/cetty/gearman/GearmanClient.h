@@ -36,7 +36,10 @@ public:
     };
 
 public:
-    GearmanClient(const ChannelPtr& service) {}
+    GearmanClient(const ChannelPtr& channel)
+        : channel_(channel) {
+    }
+
     virtual ~GearmanClient() {}
 
     GearmanServiceFuturePtr submitJob(const std::string& functionName,
@@ -60,8 +63,12 @@ public:
     GearmanServiceFuturePtr setOption(const std::string& key,
                                       const std::string& value);
 
+    const ChannelPtr& channel() const {
+        return channel_;
+    }
+
 private:
-    ChannelPtr service;
+    ChannelPtr channel_;
 };
 
 }

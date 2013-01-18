@@ -63,7 +63,7 @@ void GearmanClientHandler::submitJob(ChannelHandlerContext& ctx,
 void GearmanClientHandler::messageReceived(ChannelHandlerContext& ctx) {
     std::string  data;
 
-    OutboundQueue& queue = outboundContainer_->getMessages();
+    InboundQueue& queue = inboundContainer_->getMessages();
 
     while (!queue.empty()) {
         GearmanMessagePtr& msg = queue.front();

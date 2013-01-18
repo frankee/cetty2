@@ -67,23 +67,7 @@ public:
     void registerWorker(const std::string& functionName,
                         const GrabJobCallback& worker);
 
-    void registerTo(Context& ctx) {
-        ctx.setChannelActiveCallback(boost::bind(
-            &GearmanWorkerHandler::channelActive,
-            this,
-            _1));
-
-        ctx.setChannelMessageUpdatedCallback(boost::bind(
-                &GearmanWorkerHandler::messageReceived,
-                this,
-                _1));
-
-        ctx.setFlushFunctor(boost::bind(
-                                &GearmanWorkerHandler::flush,
-                                this,
-                                _1,
-                                _2));
-    }
+    void registerTo(Context& ctx);
 
 private:
     void channelActive(ChannelHandlerContext& ctx);

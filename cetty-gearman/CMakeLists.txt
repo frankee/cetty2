@@ -14,7 +14,7 @@ option(BUILD_CETTY_GEARMAN_EXAMPLES "Build sample programs." ON)
 # build_gtest_samples option to ON.  You can do it by running ccmake
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
 
-if (BUILD_CETTY_GEARMAN_EXAMPLES)
-	MESSAGE(STATUS "BUILDING SAMPLES...")
+#if (BUILD_CETTY_GEARMAN_EXAMPLES)
+	MESSAGE(STATUS "BUILDING GEARMAN SAMPLES...")
 	ADD_SUBDIRECTORY(example)
-endif(BUILD_CETTY_GEARMAN_EXAMPLES)
+#endif(BUILD_CETTY_GEARMAN_EXAMPLES)
