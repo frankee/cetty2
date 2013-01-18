@@ -18,6 +18,7 @@
  */
 
 #include <vector>
+#include <string>
 #include <boost/noncopyable.hpp>
 
 namespace cetty {

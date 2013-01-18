@@ -37,6 +37,7 @@ Debug/
 Release/
 ipch/
 CMakeFiles/
+.settings/
 builder/bin
 builder/cetty-*
 builder/CMakeFiles
@@ -44,3 +45,4 @@ builder/lib
 builder/*.cmake
 builder/CMakeCache.txt
 builder/Makefile
+

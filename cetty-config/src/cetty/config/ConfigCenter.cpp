@@ -88,7 +88,7 @@ bool ConfigCenter::load(int argc, char* argv[]) {
         LOG_INFO << "no command line parameter, using default " << program;
 
         std::vector<std::string> candidateFiles;
-        candidateFiles.push_back(std::string("./") + program);
+        candidateFiles.push_back(program);
 
         // /usr/local/bin  /usr/local/etc(or conf)
         // /opt/your_folder/bin  /opt/your_folder/etc(or conf)
