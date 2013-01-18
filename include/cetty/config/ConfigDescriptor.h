@@ -141,6 +141,8 @@ public:
     int fieldCnt() const;
     ConstConfigFieldDescriptorPtr field(int index) const;
 
+    bool hasField(const std::string& name) const;
+
 private:
     FieldDescriptors fields_;
     ConfigObject* defaultInstance_;
@@ -169,6 +171,17 @@ int ConfigObjectDescriptor::fieldCnt() const {
 inline
 ConstConfigFieldDescriptorPtr ConfigObjectDescriptor::field(int index) const {
     return fields_[index];
+}
+
+inline
+bool ConfigObjectDescriptor::hasField(const std::string& name) const {
+    for (std::size_t i = 0; i < fields_.size(); ++i) {
+        if (fields_[i]->name == name) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 }

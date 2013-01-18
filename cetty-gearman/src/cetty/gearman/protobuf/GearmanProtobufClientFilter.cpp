@@ -48,8 +48,8 @@ GearmanProtobufClientFilter::GearmanProtobufClientFilter() {
 
 }
 
-GearmanProtobufClientFilter::~GearmanProtobufClientFilter() {}
-
+GearmanProtobufClientFilter::~GearmanProtobufClientFilter() {
+}
 
 GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
     ChannelHandlerContext& ctx,

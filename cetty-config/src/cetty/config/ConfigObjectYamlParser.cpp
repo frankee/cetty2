@@ -125,18 +125,29 @@ int parseField(const ConfigFieldDescriptor* field,
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
                 ConfigObject* obj = object->addObject(field);
 
+                // case-1
                 // items:
                 //   - objectName :
                 //       field1 : value
                 //       field2 : value
+                //
+                // case-2
+                // items:
+                //   - field1 : value
+                //     field2 : value
                 
                 const std::string& objectName = itr->begin()->first.Scalar();
-                if (!objectName.empty()) {
+                if (!objectName.empty() && !obj->descriptor()->hasField(objectName)) {
                     obj->setName(objectName);
-                }
 
-                if (!parseConfigObject(itr->begin()->second, obj)) {
-                    return false;
+                    if (!parseConfigObject(itr->begin()->second, obj)) {
+                        return false;
+                    }
+                }
+                else { // case-2
+                    if (!parseConfigObject(*itr, obj)) {
+                        return false;
+                    }
                 }
 
                 break;
