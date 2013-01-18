@@ -50,4 +50,4 @@ endif (CETTY_FOUND)
 mark_as_advanced(CETTY_LIBRARY CETTY_INCLUDE_DIR)
 
 SET(CETTY_INCLUDE_DIRS ${CETTY_INCLUDE_DIR})
-SET(CETTY_LIBRARYS cetty-craft cetty-service cetty-protobuf cetty-protobuf-serialization cetty-config cetty)
+SET(CETTY_LIBRARYS cetty-redis cetty-craft cetty-service cetty-protobuf cetty-protobuf-serialization cetty-config cetty)
