@@ -32,8 +32,8 @@ void ConfigReflection::listFields(const ConfigObject& object,
 
 ConfigObject* ConfigReflection::mutableObject(ConfigObject* object,
     const ConfigFieldDescriptor* field) const {
-    ConfigObject* obj = *mutableRaw<ConfigObject*>(object, field);
-    if (!obj) {
+    ConfigObject** obj = mutableRaw<ConfigObject*>(object, field);
+    if (!*obj) {
         const ConfigObject* prototype = 
             ConfigObject::getDefaultObject(field->className);
 
@@ -46,10 +46,10 @@ ConfigObject* ConfigReflection::mutableObject(ConfigObject* object,
 
         ConfigObject* newObject = prototype->create();
 
-        obj = newObject;
+        *obj = newObject;
     }
 
-    return obj;
+    return *obj;
 }
 
 ConfigObject* ConfigReflection::addObject(ConfigObject* object,
