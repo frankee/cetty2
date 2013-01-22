@@ -281,12 +281,6 @@ void ConfigReflection::setString(ConfigObject* object,
 }
 
 inline
-ConfigObject* ConfigReflection::mutableObject(ConfigObject* object,
-        const ConfigFieldDescriptor* field) const {
-    return *mutableRaw<ConfigObject*>(object, field);
-}
-
-inline
 void ConfigReflection::addInt32(ConfigObject* object,
                                 const ConfigFieldDescriptor* field,
                                 int value) const {

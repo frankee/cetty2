@@ -173,8 +173,8 @@ beantalk的客户端，
 * 配置系统
 ** 说明
    cetty config是用来提供应用开发者方便的配置系统。通常的使用流程包含：
-   1. 定义{模块名称}.conf.proto文件；
-   2. 使用ConfigGenerator生成对应的{模块名称}Config.h/cpp, {模块名称}.yml, {模块名称}Cmdline.h/cpp
+   1. 定义{模块名称}Config.proto文件；
+   2. 使用ConfigGenerator生成对应的{模块名称}Config.cnf.h/cpp, {模块名称}.tmpl.yml, {模块名称}Cmdline.cnf.h/cpp
       1) {模块名称}Config.h/cpp是模块的配置类（struct），用户可以直接操作配置类进行程序的配置，同时该类会将配置的Meta信息（Description、Reflection）注册到到全局的Meta信息中心，以供程序自动从{模块名称}.yml文件中读取并配置{模块名称}Config。
       2) {模块名称}.yml是对应的配置文件模板，对于没有default值的field会处于注释状态，具有的option有：
          1. field的option：mark=true/false来设置是否默认注释该field。
@@ -197,7 +197,9 @@ beantalk的客户端，
       - #inlcude path/to/*.yml
    3. 配置文件与命令行可以同时使用；
    4. 使用上尽可能少写代码或是重复文本，配置对象直接编译进系统，不需要通过字符串名称来获取；
-   5. 配置系统不依赖于具体的文件格式，可以选择支持yml，json，xml，ini（在表达顺序容器的时候比较ugly）。
+   5. 配置系统不依赖于具体的文件格式，可以选择支持yml，json，xml。
+
+
 
 ** 使用
 #+BEGIN_EXAMPLE
@@ -209,6 +211,7 @@ int main(int argc, char* argv[]) {
     //ConfigureCenter::instance().configure(&config);
 }
 #+END_EXAMPLE
+
 
 * 基于Google Protobuf的RPC系统
   支持Protobuf RPC，REST，SOAP1.1

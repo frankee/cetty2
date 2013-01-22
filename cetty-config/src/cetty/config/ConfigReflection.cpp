@@ -30,13 +30,36 @@ void ConfigReflection::listFields(const ConfigObject& object,
 
 }
 
+ConfigObject* ConfigReflection::mutableObject(ConfigObject* object,
+    const ConfigFieldDescriptor* field) const {
+    ConfigObject* obj = *mutableRaw<ConfigObject*>(object, field);
+    if (!obj) {
+        const ConfigObject* prototype = 
+            ConfigObject::getDefaultObject(field->className);
+
+        if (NULL == prototype) {
+            LOG_ERROR << "can not find such object "
+                << field->className;
+
+            return NULL;
+        }
+
+        ConfigObject* newObject = prototype->create();
+
+        obj = newObject;
+    }
+
+    return obj;
+}
+
 ConfigObject* ConfigReflection::addObject(ConfigObject* object,
         const ConfigFieldDescriptor* field) const {
     std::vector<ConfigObject*>* repeated =
         mutableRaw<std::vector<ConfigObject*> >(object, field);
 
     // We must allocate a new object.
-    const ConfigObject* prototype = ConfigObject::getDefaultObject(field->className);
+    const ConfigObject* prototype =
+        ConfigObject::getDefaultObject(field->className);
 
     if (NULL == prototype) {
         LOG_ERROR << "can not find such object "

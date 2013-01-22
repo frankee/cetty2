@@ -18,7 +18,6 @@
 
 #include <boost/assert.hpp>
 
-#include <cetty/config/ConfigReflection.h>
 #include <cetty/config/ConfigReflectionImpl.h>
 #include <cetty/config/ConfigDescriptor.h>
 
