@@ -446,7 +446,7 @@ GenerateStructors(io::Printer* printer) {
             field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
                 printer->Print(
                     ",\n    $name$()",
-                    "name", FieldName(field));
+                    "name", field->camelcase_name());
         }
     }
 
