@@ -53,7 +53,6 @@ public:
 
 public:
     GearmanClientHandler();
-    ~GearmanClientHandler() {}
 
     void registerTo(Context& ctx);
 

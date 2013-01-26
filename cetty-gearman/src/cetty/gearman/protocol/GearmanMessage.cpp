@@ -25,51 +25,63 @@ namespace protocol {
 const std::string GearmanMessage::RESPONSE_MAGIC("\0RES", 4);
 const std::string GearmanMessage::REQUEST_MAGIC("\0REQ", 4);
 
-GearmanMessage::GearmanMessage(int type) {
-    this->type_ = type;
+GearmanMessage::GearmanMessage()
+    : type_(),
+      paramCount_() {
 }
-GearmanMessage::GearmanMessage(int type, const ChannelBufferPtr& payload) {
-    this->type_ = type;
-    this->data_ = payload;
+
+GearmanMessage::GearmanMessage(int type)
+    : type_(type) {
 }
-GearmanMessage::GearmanMessage(int type, const std::string& param) {
-    this->type_ = type;
-    this->parameters_.push_back(param);
+
+GearmanMessage::GearmanMessage(int type, const ChannelBufferPtr& data)
+    : type_(type),
+      data_(data) {
 }
-GearmanMessage::GearmanMessage(int type, const std::string& param, const ChannelBufferPtr& payload) {
+
+GearmanMessage::GearmanMessage(int type, const std::string& param)
+    : type_(type) {
+    parameters_.push_back(param);
+}
+
+GearmanMessage::GearmanMessage(int type,
+                               const std::string& param,
+                               const ChannelBufferPtr& data) {
     this->type_ = type;
 
-    if (param.size()>0) {
+    if (!param.empty()) {
         this->parameters_.push_back(param);
     }
 
-    this->data_ = payload;
+    this->data_ = data;
 }
 
-GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2) {
+GearmanMessage::GearmanMessage(int type,
+                               const std::string& param1,
+                               const std::string& param2) {
     this->type_ = type;
     this->parameters_.push_back(param1);
     this->parameters_.push_back(param2);
 }
 
-GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2, const std::string& param3) {
+GearmanMessage::GearmanMessage(int type,
+                               const std::string& param1,
+                               const std::string& param2,
+                               const std::string& param3) {
     this->type_ = type;
     this->parameters_.push_back(param1);
     this->parameters_.push_back(param2);
     this->parameters_.push_back(param3);
 }
-GearmanMessage::GearmanMessage(int type, const std::string& param1, const std::string& param2, const ChannelBufferPtr& payload) {
+GearmanMessage::GearmanMessage(int type,
+                               const std::string& param1,
+                               const std::string& param2,
+                               const ChannelBufferPtr& data) {
     this->type_ = type;
     this->parameters_.push_back(param1);
     this->parameters_.push_back(param2);
-    this->data_ = payload;
+    this->data_ = data;
 }
-
-
-//worker
-
-
-
 
 }
 }

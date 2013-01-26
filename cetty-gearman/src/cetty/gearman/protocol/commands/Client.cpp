@@ -79,11 +79,12 @@ GearmanMessagePtr submitJobLowBGMessage(const std::string& functionName,
 }
 
 GearmanMessagePtr getStatusMessage(const std::string& jobHandle) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::GET_STATUS,jobHandle));
+    return new GearmanMessage(GearmanMessage::GET_STATUS,
+                              jobHandle);
 }
 
 GearmanMessagePtr optionReqMessage(const std::string& option) {
-    return GearmanMessagePtr(new GearmanMessage(GearmanMessage::OPTION_REQ));
+    return new GearmanMessage(GearmanMessage::OPTION_REQ);
 }
 
 }

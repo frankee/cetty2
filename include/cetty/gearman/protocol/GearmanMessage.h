@@ -73,7 +73,9 @@ public:
         SUBMIT_JOB_LOW     = 33,
         SUBMIT_JOB_LOW_BG  = 34,
         SUBMIT_JOB_SCHED   = 35,
-        SUBMIT_JOB_EPOCH   = 36
+        SUBMIT_JOB_EPOCH   = 36,
+
+        MAX_MESSAGE_TYPE   = 36
     };
 
 public:
@@ -81,26 +83,31 @@ public:
     static const std::string RESPONSE_MAGIC;
 
 public:
-    GearmanMessage() {}
+    GearmanMessage();
+
     GearmanMessage(int type);
-    GearmanMessage(int type, const ChannelBufferPtr& payload);
+
+    GearmanMessage(int type, const ChannelBufferPtr& playload);
 
     GearmanMessage(int type, const std::string& param);
-    GearmanMessage(int type,
-        const std::string& param,
-        const ChannelBufferPtr& payload);
 
     GearmanMessage(int type,
-        const std::string& param1,
-        const std::string& param2);
+                   const std::string& param,
+                   const ChannelBufferPtr& playload);
+
     GearmanMessage(int type,
-        const std::string& param1,
-        const std::string& param2,
-        const std::string& param3);
+                   const std::string& param1,
+                   const std::string& param2);
+
     GearmanMessage(int type,
-        const std::string& param1,
-        const std::string& param2,
-        const ChannelBufferPtr& payload);
+                   const std::string& param1,
+                   const std::string& param2,
+                   const std::string& param3);
+
+    GearmanMessage(int type,
+                   const std::string& param1,
+                   const std::string& param2,
+                   const ChannelBufferPtr& playload);
 
     ~GearmanMessage() {}
 
@@ -108,6 +115,11 @@ public:
 
     const std::vector<std::string>& parameters() const { return parameters_; }
     const std::string& getParameter(int index) { return parameters_.at(index); }
+
+    std::string* addParameter() {
+        parameters_.resize(parameters_.size()+1);
+        return &parameters_.back();
+    }
 
     const ChannelBufferPtr& data()const { return data_; }
     void setData(const ChannelBufferPtr& data) {
@@ -117,17 +129,13 @@ public:
     int type() const { return type_; }
     void setType(int type) { this->type_ = type; }
 
-    std::string* addParameter() {
-        parameters_.resize(parameters_.size()+1);
-        return &parameters_.back();
-    }
+    int paramCount() const { return paramCount_; }
 
-private:
-    GearmanMessage(const GearmanMessage&);
-    GearmanMessage& operator=(const GearmanMessage&);
+    bool empty() const { return type_ > 0 && type_ <= MAX_MESSAGE_TYPE; }
 
 private:
     int type_;
+    int paramCount_;
     ChannelBufferPtr data_;
     std::vector<std::string> parameters_;
 };
