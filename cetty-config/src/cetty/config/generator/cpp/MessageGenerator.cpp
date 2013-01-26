@@ -218,12 +218,12 @@ GenerateClassDefinition(io::Printer* printer) {
 
             case FieldDescriptor::CPPTYPE_MESSAGE:
                 if (isNestType(descriptor_, field)) {
-                    printer->Print("std::vector<$class_name$*> $field_name$;\n",
+                    printer->Print("std::vector< $class_name$*> $field_name$;\n",
                                    "class_name", field->message_type()->name(),
                                    "field_name", field->camelcase_name());
                 }
                 else {
-                    printer->Print("std::vector<$class_name$*> $field_name$;\n",
+                    printer->Print("std::vector< $class_name$*> $field_name$;\n",
                                    "class_name", ClassName(field->message_type(), true),
                                    "field_name", field->camelcase_name());
                 }
