@@ -23,7 +23,6 @@ namespace cetty {
 namespace logging {
 
 cetty::logging::LogLevel Logger::level = LogLevel::DEBUG;
-cetty::logging::LogPatternFormatter Logger::formatter;
 
 Logger::Logger(SourceFile file, int line)
     : message(LogLevel::INFO, file.data, line) {
