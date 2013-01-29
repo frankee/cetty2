@@ -140,6 +140,8 @@ message AddApplicationRequest {
   repeated string     md5sum_files = 20;
   repeated string expected_md5sums = 21;
   optional bool         md5sum_now = 22;
+
+  optional bool       auto_recover = 30 [default = true];
 }
 
 message AddApplicationResponse {
