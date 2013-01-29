@@ -3,6 +3,7 @@ package cetty.zurg.master;
 import "cetty/craft/craft.proto";
 import "cetty/craft/craft_options.proto";
 import "cetty/protobuf/service/service.proto";
+import "cetty/protobuf/service/service_options.proto";
 
 import "cetty/zurg/slave/slave.proto";
 import "cetty/zurg/master/master.proto";

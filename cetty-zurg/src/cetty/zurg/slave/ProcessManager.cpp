@@ -7,16 +7,17 @@
 
 #include <boost/bind.hpp>
 
-#include <cetty/channel/asio/AsioService.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/config/ConfigCenter.h>
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/zurg/slave/SlaveServiceConfig.cnf.h>
 
 namespace cetty {
 namespace zurg {
 namespace slave {
 
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::channel::asio;
 using namespace cetty::config;
 
 ProcessManager::ProcessManager(const EventLoopPtr& loop)
@@ -24,9 +25,9 @@ ProcessManager::ProcessManager(const EventLoopPtr& loop)
       loop_(loop) {
     ConfigCenter::instance().configure(&config_);
 
-    if (config_.zombieInterval <= 0) {
-        config_.zombieInterval = 3000;
-    }
+//     if (config_.zombieInterval <= 0) {
+//         config_.zombieInterval = 3000;
+//     }
 
     signals_.add(SIGCHLD);
     signals_.add(SIGTERM);

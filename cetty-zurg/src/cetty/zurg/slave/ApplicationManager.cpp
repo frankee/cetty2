@@ -80,7 +80,10 @@ void ApplicationManager::startApp(const Application& app, ApplicationStatus* out
     ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
 
     if (status->state() != kRunning) {
-        ProcessPtr process(new Process(appRequest));
+        ProcessPtr process(new Process(appRequest,
+            processManager->config().slaveName,
+            processManager->config().prefix));
+
         int err = 12; // ENOMEM;
 
         try {

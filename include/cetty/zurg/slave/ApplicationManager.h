@@ -8,17 +8,15 @@
 #ifndef APPLICATIONMANAGER_H_
 #define APPLICATIONMANAGER_H_
 
-#include <cetty/zurg/slave/slave.pb.h>
-#include <cetty/zurg/slave/slave_service.pb.h>
-#include <cetty/channel/EventLoopPtr.h>
-#include <cetty/channel/EventLoop.h>
-#include <cetty/zurg/slave/Process.h>
-
+#include <map>
+#include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <map>
-#include <string>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/zurg/slave/Process.h>
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/slave/slave_service.pb.h>
 
 struct rusage;
 

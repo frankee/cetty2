@@ -1,16 +1,4 @@
 #include <cetty/zurg/slave/Process.h>
-#include <cetty/util/Process.h>
-#include <cetty/zurg/slave/ZurgSlave.h>
-#include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/slave/slave.pb.h>
-#include <cetty/zurg/Util.h>
-#include <cetty/zurg/slave/Pipe.h>
-#include <cetty/zurg/slave/ProcStatFile.h>
-#include <cetty/util/SmallFile.h>
-
-#include <boost/weak_ptr.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <fcntl.h>
 #include <signal.h>
@@ -18,6 +6,20 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+
+#include <boost/weak_ptr.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <cetty/util/Process.h>
+#include <cetty/util/SmallFile.h>
+#include <cetty/util/StringUtil.h>
+#include <cetty/logging/LoggerHelper.h>
+
+#include <cetty/zurg/Util.h>
+#include <cetty/zurg/slave/Pipe.h>
+#include <cetty/zurg/slave/slave.pb.h>
+#include <cetty/zurg/slave/ProcStatFile.h>
 
 namespace cetty {
 namespace zurg {
@@ -77,19 +79,27 @@ std::string getFileConent(const std::string& fileName, bool remove) {
 Process::Process(
     const ConstRunCommandRequestPtr& request,
     const RunCommandResponsePtr& response,
-    const DoneCallback& done)
+    const DoneCallback& done,
+    bool redirectStdout,
+    bool redirectStderr,
+    const std::string& slaveName,
+    const std::string& slavePrefix)
     : request_(request),
       response_(response),
       doneCallback_(done),
       childPid_(0),
       startTimeInJiffies_(0),
-      redirectStdout_(ZurgSlave::instance().config_.isRdtCmdStdout),
-      redirectStderr_(ZurgSlave::instance().config_.isRdtCmdStderr),
+      redirectStdout_(redirectStdout),
+      redirectStderr_(redirectStdout),
+      slaveName_(slaveName),
+      slavePrefix_(slavePrefix),
       runCommand_(true) {
 
 }
 
-Process::Process(const AddApplicationRequestPtr& appRequest)
+Process::Process(const AddApplicationRequestPtr& appRequest,
+    const std::string& slaveName,
+    const std::string& slavePrefix)
     : request_(),
       response_(new RunCommandResponse()),
       doneCallback_(),
@@ -98,6 +108,8 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
       startTimeInJiffies_(0),
       redirectStdout_(appRequest->redirect_stdout()),
       redirectStderr_(appRequest->redirect_stderr()),
+      slaveName_(slaveName),
+      slavePrefix_(slavePrefix),
       runCommand_(false) {
 
     // Transform application request to run command request.
@@ -105,14 +117,12 @@ Process::Process(const AddApplicationRequestPtr& appRequest)
     request->set_command(appRequest->binary());
     if(!appRequest->cwd().empty()) {
     	request->set_cwd(appRequest->cwd());
-    } else {
-        char dir[256];
-        snprintf(dir, sizeof dir, "%s/%s/%s",
-                 ZurgSlave::instance().getPrefix().c_str(),
-                 ZurgSlave::instance().getName().c_str(),
-                 appRequest->name().c_str());
-
-        request->set_cwd(dir);
+    }
+    else {
+        StringUtil::printf(request->mutable_cwd(), "%s/%s/%s",
+            slavePrefix_.c_str(),
+            slaveName_.c_str(),
+            appRequest->name().c_str());
     }
 
     request->mutable_args()->CopyFrom(appRequest->args());
@@ -321,8 +331,8 @@ int Process::afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError) {
         ssize_t len = ::readlink(filename, buf, sizeof buf);
 
         if (len >= 0) {
-            exe_file_.assign(buf, len);
-            LOG_INFO << filename << " -> " << exe_file_;
+            exeFile_.assign(buf, len);
+            LOG_INFO << filename << " -> " << exeFile_;
         }
         else {
             LOG_ERROR << "Fail to read link " << filename;
@@ -407,7 +417,7 @@ void Process::onCommandExit(const int status, const struct rusage& ru) {
     response_->set_status(status);
     response_->set_std_output(getCommandOutput());
     response_->set_std_error(getCommandError());
-    response_->set_executable_file(exe_file_);
+    response_->set_executable_file(exeFile_);
     response_->set_start_time_us(getMicroSecs(startTime_));
     response_->set_finish_time_us(getMicroSecs(microsec_clock::local_time()));
     response_->set_user_time(getSeconds(ru.ru_utime));

@@ -180,60 +180,60 @@ message RemoveApplicationsResponse {
 }
 
 service SlaveService {
-  (craft_service_options).path = "/zurg/api";
+  option (craft_service_options).path = "/zurg/api";
   
   rpc getHardware (GetHardwareRequest) returns (GetHardwareResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/hardware.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/hardware.{format}";
   };
   
   rpc getFileContent (GetFileContentRequest) returns (GetFileContentResponse) {
-    (craft_method_options).method = "get";
-	(craft_method_options).path = "/file.{format}";
+    option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/file.{format}";
   };
   
   rpc getFileChecksum (GetFileChecksumRequest) returns (GetFileChecksumResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/file/checksum.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/file/checksum.{format}";
   };
   
   rpc listProcesses (ListProcessesRequest) returns (ListProcessesResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/processes.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/processes.{format}";
   };
   
   rpc runCommand (RunCommandRequest) returns (RunCommandResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/command.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/command.{format}";
   };
   
   rpc runScript (RunScriptRequest) returns (RunCommandResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/script.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/script.{format}";
   };
   
   rpc addApplication (AddApplicationRequest) returns (AddApplicationResponse) {
-	(craft_method_options).method = "put";
-	(craft_method_options).path = "/application.{format}";
+	option (craft_method_options).method = "put";
+	option (craft_method_options).path = "/application.{format}";
   };
   
   rpc listApplications (ListApplicationsRequest) returns (ListApplicationsResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/application.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/application.{format}";
   };
   
   rpc removeApplications (RemoveApplicationsRequest) returns (RemoveApplicationsResponse) {
-	(craft_method_options).method = "delete";
-	(craft_method_options).path = "/application.{format}";
+	option (craft_method_options).method = "delete";
+	option (craft_method_options).path = "/application.{format}";
   };
   
   rpc startApplications (StartApplicationsRequest) returns (StartApplicationsResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/applications/start.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/applications/start.{format}";
   };
   
   rpc stopApplications (StopApplicationRequest) returns (StopApplicationResponse) {
-	(craft_method_options).method = "get";
-	(craft_method_options).path = "/applications/stop.{format}";
+	option (craft_method_options).method = "get";
+	option (craft_method_options).path = "/applications/stop.{format}";
   };
 }

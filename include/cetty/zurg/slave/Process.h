@@ -14,7 +14,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
-#include <cetty/channel/TimeoutPtr.h>
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/EventLoopPtr.h>
 
 #include <cetty/zurg/slave/slave.pb.h>
@@ -45,13 +45,17 @@ typedef boost::function1<void, const MessagePtr&> DoneCallback;
 class Process : public boost::enable_shared_from_this<Process>,
         boost::noncopyable {
 public:
-    Process(
-        const ConstRunCommandRequestPtr& request,
-        const RunCommandResponsePtr& response,
-        const DoneCallback& done
-    );
+    Process(const ConstRunCommandRequestPtr& request,
+            const RunCommandResponsePtr& response,
+            const DoneCallback& done,
+            bool redirectStdout,
+            bool redirectStderr,
+            const std::string& slaveName,
+            const std::string& slavePrefix);
 
-    Process(const AddApplicationRequestPtr& request);
+    Process(const AddApplicationRequestPtr& request,
+            const std::string& slaveName,
+            const std::string& slavePrefix);
 
     ~Process();
 
@@ -61,7 +65,7 @@ public:
     pid_t pid() const { return childPid_; }
     const std::string& name() const { return name_; }
 
-    void setTimerId(const cetty::channel::TimeoutPtr timerId) {
+    void setTimerId(const cetty::channel::TimeoutPtr& timerId) {
         timerId_ = timerId;
     }
 
@@ -69,6 +73,7 @@ public:
     void onTimeout();
 
     static void onTimeoutWeak(const boost::weak_ptr<Process>& wkPtr);
+
 private:
     /*
      * @brief launch new process image
@@ -83,18 +88,22 @@ private:
     // get new process's run information
     int afterFork(Pipe& execError, Pipe& stdOutput, Pipe& stdError);
 
+    std::string getCommandOutput();
+    std::string getCommandError();
+
 private:
     static const std::string STDOUT_PREFIX_;
     static const std::string STDERR_PREFIX_;
     static const int CHILD_SLEEP_SECS_;
 
+private:
     ConstRunCommandRequestPtr request_;
     RunCommandResponsePtr response_;
     DoneCallback doneCallback_;
 
     pid_t childPid_;
     std::string name_;
-    std::string exe_file_;
+    std::string exeFile_;
 
     boost::posix_time::ptime startTime_;
     int64_t startTimeInJiffies_;
@@ -102,11 +111,11 @@ private:
 
     bool redirectStdout_;
     bool redirectStderr_;
+    std::string slaveName_;
+    std::string slavePrefix_;
+
     bool runCommand_;
 
-private:
-    std::string getCommandOutput();
-    std::string getCommandError();
 };
 
 }

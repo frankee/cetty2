@@ -1,13 +1,13 @@
 #ifndef HEARTBEAT_H_
 #define HEARTBEAT_H_
 
-#include <cetty/channel/EventLoopPtr.h>
-#include <cetty/channel/EventLoop.h>
-#include <cetty/zurg/slave/ZurgSlaveConfig.h>
-
+#include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <string>
+
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/zurg/slave/SlaveServiceConfig.cnf.h>
 
 namespace cetty {
 namespace zurg {

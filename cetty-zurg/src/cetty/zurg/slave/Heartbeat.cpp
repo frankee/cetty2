@@ -1,17 +1,18 @@
 #include <cetty/zurg/slave/Heartbeat.h>
-#include <cetty/zurg/slave/ZurgSlaveConfig.h>
-#include <cetty/zurg/master/master.pb.h>
-#include <cetty/protobuf/service/service.pb.h>
-#include <cetty/channel/EventLoopPtr.h>
-#include <cetty/logging/LoggerHelper.h>
-#include <cetty/zurg/Util.h>
-#include <cetty/config/ConfigCenter.h>
-#include <cetty/util/SmallFile.h>
-#include <cetty/util/Process.h>
 
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <sys/utsname.h>
 #include <stdlib.h>
+#include <sys/utsname.h>
+#include <boost/date_time/posix_time/ptime.hpp>
+
+#include <cetty/util/Process.h>
+#include <cetty/util/SmallFile.h>
+#include <cetty/channel/EventLoop.h>
+#include <cetty/config/ConfigCenter.h>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/protobuf/service/service.pb.h>
+
+#include <cetty/zurg/Util.h>
+#include <cetty/zurg/master/master_service.pb.h>
 
 namespace cetty {
 namespace zurg {
@@ -222,7 +223,7 @@ void Heartbeat::beat(bool showStatic) {
     strip_stat(hb.mutable_proc_stat());
 
     // todo fix error
-    slaveHeartbeatServiceFuturePtr hbsf = new slaveHeartbeatServiceFuture();
+    SlaveHeartbeatServiceFuturePtr hbsf = new SlaveHeartbeatServiceFuture();
     stub_->slaveHeartbeat(&hb, hbsf);
 }
 

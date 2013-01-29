@@ -8,14 +8,13 @@
 #ifndef PROCESSMANAGER_H_
 #define PROCESSMANAGER_H_
 
-#include <cetty/channel/EventLoopPtr.h>
-#include <cetty/channel/EventLoop.h>
-#include <cetty/zurg/slave/ZurgSlaveConfig.h>
-
 #include <map>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/asio/signal_set.hpp>
+
+#include <cetty/channel/EventLoopPtr.h>
+#include <cetty/zurg/slave/SlaveServiceConfig.cnf.h>
 
 struct rusage;
 
@@ -36,7 +35,7 @@ public:
     typedef boost::function<void ()> stopAllCallback;
 
 public:
-    ProcessManager(const EventLoopPtr& loop, int zombieInterval);
+    ProcessManager(const EventLoopPtr& loop);
     ~ProcessManager();
 
     void start();
@@ -54,6 +53,10 @@ public:
      */
     void stopAll(){ if(stopAll_) stopAll_();}
 
+    const SlaveServiceConfig& config() const {
+        return config_;
+    }
+
 private:
     void onTimer();
     void startSignalWait();
@@ -61,7 +64,7 @@ private:
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
-    int zombieInterval_;
+    SlaveServiceConfig config_;
     boost::asio::signal_set signals_;
     EventLoopPtr loop_;
     std::map<pid_t, Callback> callbacks_;

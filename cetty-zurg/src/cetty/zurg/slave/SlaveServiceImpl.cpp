@@ -1,18 +1,16 @@
-
 #include <cetty/zurg/slave/SlaveServiceImpl.h>
 
 #include <boost/weak_ptr.hpp>
 #include <cetty/util/SmallFile.h>
+#include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/channel/EventLoopPool.h>
-#include <cetty/config/ConfigCenter.h>
 
+#include <cetty/zurg/Util.h>
 #include <cetty/zurg/slave/Process.h>
 #include <cetty/zurg/slave/ApplicationManager.h>
 #include <cetty/zurg/slave/ProcessManager.h>
 #include <cetty/zurg/slave/GetHardwareTask.h>
-#include <cetty/zurg/slave/ZurgSlave.h>
-#include <cetty/zurg/Util.h>
 
 namespace cetty {
 namespace zurg {
@@ -25,7 +23,7 @@ using namespace cetty::config;
 
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop) {
     ConfigCenter::instance().configure(&config_);
-    processManager_.reset(new ProcessManager(loop), config_.zombieInterval);
+    processManager_.reset(new ProcessManager(loop));
         applicationManager_.reset(new ApplicationManager(processManager_.get()));
 }
 
@@ -134,7 +132,9 @@ void SlaveServiceImpl::runCommand(
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(request, response, done));
+    ProcessPtr process(new Process(request, response, done, true, true, 
+        config_.slaveName,
+        config_.prefix));
 
     int err = 12; // ENOMEM;
 
