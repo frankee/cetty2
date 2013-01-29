@@ -200,26 +200,26 @@ void Heartbeat::beat(bool showStatic) {
         }
 
         hb.set_slave_pid(cetty::util::Process::id());
-        hb.set_start_time_us(getMicroSecs(g_startTime));
+        hb.set_start_time(getMicroSecs(g_startTime));
         // hb.set_slave_version(slave_version);
-        FILL_HB("/proc/cpuinfo", cpuinfo);
+        FILL_HB("/proc/cpuinfo", cpu_info);
         FILL_HB("/proc/version", version);
         FILL_HB("/etc/mtab", etc_mtab);
-        strip_cpuinfo(hb.mutable_cpuinfo());
+        strip_cpuinfo(hb.mutable_cpu_info());
         // sysctl
         fill_uname(&hb);
     }
 
-    hb.set_send_time_us(now());
+    hb.set_send_time(now());
 
-    FILL_HB("/proc/meminfo", meminfo);
+    FILL_HB("/proc/meminfo", mem_info);
     FILL_HB("/proc/stat", proc_stat);
-    FILL_HB("/proc/loadavg", loadavg);
-    FILL_HB("/proc/diskstats", diskstats);
+    FILL_HB("/proc/loadavg", load_avg);
+    FILL_HB("/proc/diskstats", disk_stats);
     FILL_HB("/proc/net/dev", net_dev);
     FILL_HB("/proc/net/tcp", net_tcp);
-    strip_diskstats(hb.mutable_diskstats());
-    strip_meminfo(hb.mutable_meminfo());
+    strip_diskstats(hb.mutable_disk_stats());
+    strip_meminfo(hb.mutable_mem_info());
     strip_stat(hb.mutable_proc_stat());
 
     // todo fix error
