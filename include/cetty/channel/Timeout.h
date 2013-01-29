@@ -23,6 +23,7 @@
 
 #include <boost/cstdint.hpp>
 #include <cetty/util/ReferenceCounter.h>
+#include <cetty/channel/TimeoutPtr.h>
 
 namespace cetty {
 namespace channel {

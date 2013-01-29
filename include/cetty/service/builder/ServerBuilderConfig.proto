@@ -9,10 +9,10 @@ message ServerConfig {
 }
 
 message ServerBuilderConfig {
-	option (config_message_options).root = true;
+	//option (config_message_options).root = true;
 
 	message Server {
-		option (config_message_options).coded = "{host}:{port}";
+		//option (config_message_options).coded = "{host}:{port}";
 		
 		optional string host = 1 [
 		default = "127.0.0.1",
@@ -44,9 +44,8 @@ message ServerBuilderConfig {
 		default = true,
 		(config_options).note = "# By default cetty does not run as a daemon. Use 'true' if you need it.\n# Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.",
 		(config_options).commented = true,
-		(config_options).cmdline = true,
-		(config_options).cmdline_long  = "deamon",
-		(config_options).cmdline_short = "d"];
+		(config_options).cmd   = "deamon",
+		(config_options).short_cmd = "d"];
 		
     optional string pidfile = 2 [
 		default = "/var/run/xxx.pid",

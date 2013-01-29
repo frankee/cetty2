@@ -18,7 +18,7 @@ AUX_SOURCE_DIRECTORY(cetty/protobuf/serialization/bson BSON_DIR)
 SET(GENERATOR_DIR cetty/protobuf/service/generator)
 
 cxx_executable_no_link(ProtobufServiceGenerator ${GENERATOR_DIR} cetty/protobuf/service/generator/ServiceGenerator.cpp)
-cxx_link_with_pb(ProtobufServiceGenerator protoc)
+cxx_link_pb(ProtobufServiceGenerator protoc)
 
 GENERATE_SERVICE_SEPARATE(PROTO_SRCS PROTO_HDS cetty/protobuf/service/service_options.proto cetty/protobuf/service/service.proto)
 message(STATUS ${PROTO_HDS})

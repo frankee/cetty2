@@ -6,19 +6,20 @@ message ConfigFileOptions {
 }
 
 message ConfigMessageOptions {
-	optional string coded = 1;
-	optional bool    root = 2;
+	optional string template = 1; // {xx}-{yy}
 }
 
 message ConfigFieldOptions {
-	optional string default = 1;
-	optional string    note = 2;
+	optional string default = 1; // default value for encoded message string
+	optional bool       map = 2;
 	
-	optional bool commented = 3;
+	// for conf file
+	optional string    note = 20;
+	optional bool commented = 21;
 	
-	optional bool         cmdline = 5;
-	optional string  cmdline_long = 6;
-	optional string cmdline_short = 7;
+	// for cmdline
+	optional string       cmd = 40;
+	optional string short_cmd = 41;
 }
 
 extend google.protobuf.FieldOptions {
