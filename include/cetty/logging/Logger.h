@@ -60,7 +60,9 @@ public:
 
 public:
     static const LogPatternFormatter& getFormatter() {
-        return formatter;
+    	static LogPatternFormatter *formatter = new LogPatternFormatter();
+
+        return *formatter;
     }
 
     static bool isEnabled(const LogLevel& level) {
@@ -78,7 +80,7 @@ private:
     LogMessage message;
 
     static LogLevel level;
-    static LogPatternFormatter formatter;
+    // static LogPatternFormatter formatter;
 };
 
 }

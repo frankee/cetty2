@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <iostream>
 
 namespace cetty {
 namespace logging {
