@@ -31,11 +31,11 @@ class ConfigObject;
     public:\
         DescriptorRegister##Object() {\
             ::cetty::config::ConfigObject::addDescriptor(\
-                                        new ::cetty::config::ConfigObjectDescriptor(\
-                                                new Object,\
-                                                fieldCnt,\
-                                                field,\
-                                                ##__VA_ARGS__));\
+                    new ::cetty::config::ConfigObjectDescriptor(\
+                            new Object,\
+                            fieldCnt,\
+                            field,\
+                            ##__VA_ARGS__));\
         }\
     };\
     static DescriptorRegister##Object descriptorRegister##Object;
@@ -43,43 +43,56 @@ class ConfigObject;
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-                              #FIELD,\
-                              #CPP_TYPE\
-                             )\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE)
      
 #define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
-                              #FIELD,\
-                              #CLASS\
-                             )\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS)
      
 #define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-                              #FIELD,\
-                              #CPP_TYPE,\
-                              true\
-                             )\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::VECTOR)
      
 #define CETTY_CONFIG_REPEATED_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
-                              #FIELD,\
-                              #CLASS,\
-                              true\
-                             )\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::VECTOR)
      
-
+#define CETTY_CONFIG_MAP_FIELD(TYPE, FIELD, CPP_TYPE) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::MAP)
+     
+#define CETTY_CONFIG_MAP_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::MAP)
+     
 class ConfigFieldDescriptor {
 public:
     // Specifies the C++ data type used to represent the field.  There is a
@@ -96,10 +109,17 @@ public:
         MAX_CPPTYPE         = 10,    // Constant useful for defining lookup tables
     };
 
-    bool repeated;
+    enum ContainerType {
+        SINGLE = 0,
+        VECTOR = 1,
+        MAP    = 2
+    };
 
+    bool optional;
     int offset;
     int type;
+    int containerType;
+
     std::string name;
     std::string className;
 
@@ -107,10 +127,10 @@ public:
                           int type,
                           const char* name,
                           const char* className,
-                          bool repeated = false)
-        : repeated(repeated),
-          offset(offset),
+                          int containerType = SINGLE)
+        : offset(offset),
           type(type),
+          containerType(containerType),
           name(name),
           className(className) {
     }

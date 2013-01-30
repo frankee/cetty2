@@ -25,12 +25,33 @@
 namespace cetty {
 namespace config {
 
+class ConfigObject;
+typedef ConfigObject* ConfigObjectPtr;
+typedef ConfigObject const* ConstConfigObjectPtr;
+
 class ConfigObject {
+public:
+    typedef boost::optional<int> IntOption;
+    typedef boost::optional<int64_t> Int64Option;
+    typedef boost::optional<double> DoubleOption;
+    typedef boost::optional<bool> BoolOption;
+
+    typedef std::map<std::string, int> IntMap;
+    typedef std::map<std::string, int64_t> Int64Map;
+    typedef std::map<std::string, double> DoubleMap;
+    typedef std::map<std::string, bool> BoolMap;
+    typedef std::map<std::string, ConfigObject*> ObjectMap;
+
+    typedef ConfigObject* Ptr;
+    typedef ConfigObject const* ConstPtr;
+
+private:
+    typedef std::map<std::string, ConfigObjectDescriptor*> ObjectDescriptors;
+
 public:
     ConfigObject(const std::string& name);
     virtual ~ConfigObject();
 
-    const ConfigReflection* reflection() const;
     const ConfigObjectDescriptor* descriptor() const;
 
     const std::string& name() const;
@@ -44,81 +65,175 @@ public:
     virtual void copyFrom(const ConfigObject& from);
 
     // reflections
+    void list(std::vector<const ConfigFieldDescriptor*>* fields) const;
 
-    void listFields(std::vector<const ConfigFieldDescriptor*>* output) const;
+    bool has(const ConfigFieldDescriptor* field) const;
 
-    bool hasInt(const ConfigFieldDescriptor* field) const;
+    template<typename T>
+    const T& get(const ConfigFieldDescriptor* field) const {
+        return *constRaw<T>(field);
+    }
 
     int getInt(const ConfigFieldDescriptor* field) const;
-
-    bool hasInt64(const ConfigFieldDescriptor* field) const;
-
     int64_t getInt64(const ConfigFieldDescriptor* field) const;
-
-    bool hasDouble(const ConfigFieldDescriptor* field) const;
-
     double getDouble(const ConfigFieldDescriptor* field) const;
-
-    bool hasBool(const ConfigFieldDescriptor* field) const;
-
     bool getBool(const ConfigFieldDescriptor* field) const;
+    const std::string& getString(const ConfigFieldDescriptor* field) const;
 
-    std::string getString(const ConfigFieldDescriptor* field) const;
+    template<typename T>
+    void set(const ConfigFieldDescriptor* field, const T& value) {
+        BOOST_STATIC_ASSERT(!IsVector<T>::VALUE && !IsMap<T>::VALUE);
 
-    void setInt32(const ConfigFieldDescriptor* field,
-                  int value);
+        BOOST_ASSERT(field);
 
-    void setInt64(const ConfigFieldDescriptor* field,
-                  int64_t value);
-    void setDouble(const ConfigFieldDescriptor* field,
-                   double value);
-    void setBool(const ConfigFieldDescriptor* field,
-                 bool value);
-    void setString(const ConfigFieldDescriptor* field,
-                   const std::string& value);
+        if (field->optional) {
+            *mutableRaw<boost::optional<T> >(field) = value;
+        }
+        else {
+            *mutableRaw<T>(field) = value;
+        }
+    }
+
+    void set(const ConfigFieldDescriptor* field, const std::string& value) {
+        BOOST_ASSERT(field);
+        mutableRaw<std::string>(field)->assign(value);
+    }
+
+    void set(const ConfigFieldDescriptor* field, const ConfigObject& value) {
+        BOOST_ASSERT(field);
+        mutableObject(field)->copyFrom(value);
+    }
+
+    void set(const ConfigFieldDescriptor* field, const ConfigObject*& value) {
+        BOOST_ASSERT(field);
+
+        if (value) {
+            mutableObject(field)->copyFrom(*value);
+        }
+    }
+
+    template<typename T>
+    T* mutableField(const ConfigFieldDescriptor* field) {
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE);
+        return mutableRaw<T>(field);
+    }
 
     ConfigObject* mutableObject(const ConfigFieldDescriptor* field);
 
-    void addInt32(const ConfigFieldDescriptor* field,
-                  int value);
-    void addInt32(const ConfigFieldDescriptor* field,
-                  const std::vector<int>& value);
-    void addInt64(const ConfigFieldDescriptor* field,
-                  int64_t value);
-    void addInt64(const ConfigFieldDescriptor* field,
-                  const std::vector<int64_t>& value);
-    void addDouble(const ConfigFieldDescriptor* field,
-                   double value);
-    void addDouble(const ConfigFieldDescriptor* field,
-                   const std::vector<double>& value);
-    void addBool(const ConfigFieldDescriptor* field,
-                 bool value);
-    void addBool(const ConfigFieldDescriptor* field,
-                 const std::vector<bool>& value);
-    void addString(const ConfigFieldDescriptor* field,
-                   const std::string& value);
-    void addString(const ConfigFieldDescriptor* field,
-                   const std::vector<std::string>& value);
+    template<typename T>
+    void add(const ConfigFieldDescriptor* field, const T& value) {
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE && !IsMap<T>::VALUE);
+        mutableRaw<std::vector<T> >(field)->push_back(value);
+    }
+
+    template<typename T>
+    void add(const ConfigFieldDescriptor* field,
+             const std::string& key,
+             const T& value) {
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE);
+        mutableRaw<std::map<std::string, T> >(field)->insert(
+            std::make_pair(key, value));
+    }
+
+    template<typename T>
+    void add(const ConfigFieldDescriptor* field,
+             const std::vector<T>& values) {
+        BOOST_ASSERT(!IsPointer<T>::VALUE);
+        std::vector<T>* to = mutableRaw<std::vector<T> >(field);
+
+        if (to) {
+            to->insert(to->end(), value.begin(), value.end());
+        }
+    }
+
+    template<typename T>
+    void add(const ConfigFieldDescriptor* field,
+             const std::map<std::string, T>& values) {
+        BOOST_ASSERT(!IsPointer<T>::VALUE);
+    }
 
     ConfigObject* addObject(const ConfigFieldDescriptor* field);
+    ConfigObject* addObject(const ConfigFieldDescriptor* field,
+                            const std::string& key);
 
 public:
     static void addDescriptor(ConfigObjectDescriptor* descriptor);
+    static const ConfigObject* defaultObject(const std::string& name);
 
-    static const ConfigObject* getDefaultObject(const std::string& name);
+    static ObjectDescriptors& objectDescriptors();
+
+private:
+    template <typename T>
+    inline T* mutableRaw(const ConfigFieldDescriptor* field) const {
+        void* ptr = reinterpret_cast<uint8_t*>(this) + field->offset;
+        return reinterpret_cast<T*>(ptr);
+    }
+
+    template<typename t>
+    inline const T* constRaw(const ConfigFieldDescriptor* field) const {
+        const void* ptr = reinterpret_cast<const uint8_t*>(this) +
+                          field->offset;
+        return reinterpret_cast<const T*>(ptr);
+    }
+
+    template<typename T>
+    void copyField(const ConfigFieldDescriptor* field, const ConfigObject& from) {
+        BOOST_ASSERT(field);
+
+        if (field->optional &&
+                field->type != CPPTYPE_STRING &&
+                field->type != CPPTYPE_OBJECT) {
+            const boost::optional<T>& value =
+                from.get<boost::optional<T> >(field);
+
+            if (value) {
+                set<T>(field, value);
+            }
+        }
+        else {
+            set<T>(field, from.get<T>(field));
+        }
+    }
+
+    template<typename T>
+    void copyRepeatedField(const ConfigFieldDescriptor* field, const ConfigObject& from) {
+        const std::vector<T>& value =
+            getField<std::vector<T> >(from, field);
+
+        if (!value.empty()) {
+            std::vector<T>* toValue = mutableRaw<std::vector<T> >(to, field);
+            toValue->assign(value.begin(), value.end());
+        }
+    }
+
+    template<typename T>
+    void clearField(ConfigObject* object,
+                    const ConfigFieldDescriptor* field) const {
+        boost::optional<T>* raw =
+            mutableRaw<boost::optional<T> >(object, field);
+
+        if (raw) {
+            boost::none_t null;
+            (*raw) = null;
+        }
+    }
+
+    template<typename T>
+    void clearRepeatedField(ConfigObject* object,
+                            const ConfigFieldDescriptor* field) const {
+        std::vector<T>* raw = mutableRaw<std::vector<T> >(object, field);
+
+        if (raw) {
+            raw->clear();
+        }
+    }
+
+private:
+    static ObjectDescriptors* objectDescriptors_;
 
 private:
     std::string name_;
     std::string className_;
-
-private:
-    typedef std::map<std::string, ConfigObjectDescriptor*> ObjectDescriptorMap;
-
-private:
-    static ObjectDescriptorMap& objectDescriptorMap();
-
-    static ObjectDescriptorMap* objects_;
-    static ConfigReflection* reflection_;
 };
 
 inline
@@ -134,6 +249,54 @@ const std::string& ConfigObject::name() const {
 inline
 void ConfigObject::setName(const std::string& name) {
     name_ = name;
+}
+
+template<> inline
+void ConfigObject::copyRepeatedField<ConfigObject*>(const ConfigObject& from,
+        const ConfigFieldDescriptor* field,
+        ConfigObject* to) const {
+    std::vector<ConfigObject*> values =
+        getField<std::vector<ConfigObject*> >(from, field);
+
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        ConfigObject* toValue = addObject(to, field);
+        toValue->copyFrom(*values[i]);
+    }
+}
+
+template<> inline
+void ConfigObject::clearRepeatedField<ConfigObject*>(ConfigObject* object,
+        const ConfigFieldDescriptor* field) const {
+
+    std::vector<ConfigObject*>* raw = mutableRaw<std::vector<ConfigObject*> >(object, field);
+
+    if (raw) {
+        for (std::size_t i = 0; i < raw->size(); ++i) {
+            delete raw->at(i);
+        }
+
+        raw->clear();
+    }
+}
+
+template<> inline
+void ConfigObject::clearField<std::string>(ConfigObject* object,
+        const ConfigFieldDescriptor* field) const {
+    std::string* str = mutableRaw<std::string>(object, field);
+
+    if (str) {
+        str->clear();
+    }
+}
+
+template<> inline
+void ConfigObject::clearField<ConfigObject*>(ConfigObject* object,
+        const ConfigFieldDescriptor* field) const {
+    ConfigObject** obj = mutableRaw<ConfigObject*>(object, field);
+
+    if (obj && *obj) {
+        (*obj)->clear();
+    }
 }
 
 }
