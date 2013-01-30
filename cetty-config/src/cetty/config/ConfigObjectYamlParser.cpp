@@ -56,7 +56,7 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
             // class SingleFiledConfig : public cetty::config::ConfigObject {
             //     std::vector<int> numbers;
             // }
-            // 
+            //
             // // in YAML config file:
             //
             // SingleFiledConfig :
@@ -70,14 +70,15 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
             }
             else if (object->name() == "cetty.config.KeyValuePair") {
                 KeyValuePair* kv = dynamic_cast<KeyValuePair*>(object);
+
                 if (kv) {
                     kv->key = node.begin()->first.Scalar();
                     kv->value = node.begin()->second.Scalar();
                 }
                 else {
                     LOG_ERROR << "the config object name is "
-                        << "cetty.config.KeyValuePair"
-                        << " , but the instance is not KeyValuePair";
+                              << "cetty.config.KeyValuePair"
+                              << " , but the instance is not KeyValuePair";
 
                     return false;
                 }
@@ -106,6 +107,9 @@ int parseField(const ConfigFieldDescriptor* field,
 
         for (; itr != node.end(); ++itr) {
             switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                break;
+
             case ConfigFieldDescriptor::CPPTYPE_INT32:
                 object->addInt32(field, itr->as<int>());
                 break;
@@ -135,8 +139,9 @@ int parseField(const ConfigFieldDescriptor* field,
                 // items:
                 //   - field1 : value
                 //     field2 : value
-                
+
                 const std::string& objectName = itr->begin()->first.Scalar();
+
                 if (!objectName.empty() && !obj->descriptor()->hasField(objectName)) {
                     obj->setName(objectName);
 
@@ -156,6 +161,18 @@ int parseField(const ConfigFieldDescriptor* field,
     }
     else {
         switch (field->type) {
+        case ConfigFieldDescriptor::CPPTYPE_BOOL:
+            if (node.Scalar() == "true" ||
+                    node.Scalar() == "1" ||
+                    node.Scalar() == "yes") {
+                object->setBool(field, true);
+            }
+            else {
+                object->setBool(field, false);
+            }
+
+            break;
+
         case ConfigFieldDescriptor::CPPTYPE_INT32:
             object->setInt32(field, node.as<int>());
             break;
