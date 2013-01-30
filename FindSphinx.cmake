@@ -1,0 +1,33 @@
+#find LOG4CPLUS
+
+SET(SPHINX_HEADER_FILE sphinx/sphinx.h)
+
+FIND_PATH(SPHINX_INCLUDE_DIR ${SPHINX_HEADER_FILE}
+	/usr/local/include
+    /usr/include
+	/opt/sphinx/include
+  )
+mark_as_advanced(SPHINX_INCLUDE_DIR)
+
+FIND_LIBRARY(SPHINX_LIBRARY
+   NAMES sphinx
+   PATH_SUFFIXES lib64 lib
+   PATHS
+	/usr/local
+	/usr
+	/opt/sphinx)
+mark_as_advanced(SPHINX_LIBRARY)
+
+GET_FILENAME_COMPONENT(SPHINX_LIBRARY_DIR ${SPHINX_LIBRARY} PATH)
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SPHINX DEFAULT_MSG
+    SPHINX_LIBRARY SPHINX_INCLUDE_DIR)
+
+if (SPHINX_FOUND)
+    message(STATUS "found SPHINX: ${SPHINX_LIBRARY}")
+	add_definitions(-DHAS_SPHINX)
+endif (SPHINX_FOUND)
+
+SET(SPHINX_INCLUDE_DIRS ${SPHINX_INCLUDE_DIR})
+SET(SPHINX_LIBRARYS ${SPHINX_LIBRARY})
