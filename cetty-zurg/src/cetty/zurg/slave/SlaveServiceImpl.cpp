@@ -89,13 +89,8 @@ void SlaveServiceImpl::getFileChecksum(
         runCommand(
             runCommandReq,
             NULL,
-            boost::bind(
-                &SlaveServiceImpl::getFileChecksumDone,
-                this,
-                request,
-                _1, // response
-                done
-            )
+            boost::bind(&SlaveServiceImpl::getFileChecksumDone,
+                        this, request, _1, done)
         );
     }
     else {
@@ -150,12 +145,8 @@ void SlaveServiceImpl::runCommand(
     else {
         processManager_->runAtExit(
             process->pid(),  // bind strong ptr
-            boost::bind(
-                &Process::onCommandExit,
-                process,
-                _1,
-                _2
-            )
+            boost::bind(&Process::onCommandExit,
+                        process, _1, _2)
         );
 
         EventLoopPtr elp = EventLoopPool::current();
@@ -168,7 +159,6 @@ void SlaveServiceImpl::runCommand(
 
         process->setTimerId(timerId);
     }
-
 }
 
 void SlaveServiceImpl::runScript(
