@@ -178,16 +178,13 @@ int Process::start() {
         int stderrFd = -1;
 
         std::string startTimeStr = to_iso_string(startTime_);
-        stdoutFd = redirect(
-                       redirectStdout_,
-                       request_->cwd() + "/" + STDOUT_PREFIX_,
-                       startTimeStr.c_str()
-                   );
-        stderrFd = redirect(
-                       redirectStderr_,
-                       request_->cwd() + "/" + STDERR_PREFIX_,
-                       startTimeStr.c_str()
-                   );
+        stdoutFd = redirect(redirectStdout_,
+                            request_->cwd() + "/" + STDOUT_PREFIX_,
+                            startTimeStr.c_str());
+
+        stderrFd = redirect(redirectStderr_,
+                            request_->cwd() + "/" + STDERR_PREFIX_,
+                            startTimeStr.c_str());
 
         execChild(execError, stdoutFd, stderrFd);
     }
@@ -382,14 +379,13 @@ void Process::onTimeout() {
     const ProcStatFile stat(childPid_);
 
     if (stat.valid_
-            && stat.ppid_ == cetty::util::Process::id()
-            && stat.startTime_ == startTimeInJiffies_) {
+        && stat.ppid_ == cetty::util::Process::id()
+        && stat.startTime_ == startTimeInJiffies_) {
+
         int ret = ::kill(childPid_, SIGINT);
 
-        if (ret < 0) {
-            if (errno == ESRCH)
-                LOG_INFO << "Process [" << childPid_
-                         << " is not exist.";
+        if (ret < 0 && errno == ESRCH) {
+            LOG_INFO << "Process [" << childPid_ << " is not exist.";
         }
     }
 }

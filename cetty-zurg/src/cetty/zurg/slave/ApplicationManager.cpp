@@ -26,7 +26,6 @@ void ApplicationManager::add(
 
     assert(request->name().find('/') == std::string::npos); // FIXME
 
-
     std::pair<ApplicationMap::iterator, bool> insertRet =
         applications.insert(
             std::pair<std::string, Application>(request->name(), Application()));
@@ -49,7 +48,7 @@ void ApplicationManager::add(
         response->mutable_prev_request()->CopyFrom(*prev_request);
     }
 
-    done(response);
+    if(done) done(response);
 }
 
 void ApplicationManager::start(
@@ -71,10 +70,11 @@ void ApplicationManager::start(
         }
     }
 
-    done(response);
+    if(done) done(response);
 }
 
-void ApplicationManager::startApp(const Application& app, ApplicationStatus* out) {
+void ApplicationManager::startApp(const Application& app,
+		                          ApplicationStatus* out) {
     const AddApplicationRequestPtr appRequest =
         const_cast<AddApplicationRequest*>(&(app.request));
     ApplicationStatus* status = const_cast<ApplicationStatus*>(&app.status);
@@ -103,10 +103,7 @@ void ApplicationManager::startApp(const Application& app, ApplicationStatus* out
                 process->pid(),
                 boost::bind(
                     &ApplicationManager::onProcessExit,
-                    this,
-                    process,
-                    _1, // status
-                    _2  // rusage
+                    this, process, _1, _2
                 )
             );
         }
@@ -146,7 +143,7 @@ void ApplicationManager::stop(
 	    responseStatus.set_name(appName);
 	    responseStatus.set_message("Application is unknown.");
 	}
-	done(response);
+	if(done) done(response);
 }
 
 void ApplicationManager::onProcessExit(
@@ -195,12 +192,14 @@ void ApplicationManager::list(
 		} else if((*it).second.status.state() == kError){
 			as->set_message("ERROR");
 		}
+
 		if((*it).second.status.state() == kRunning){
 			pid_t pid = (*it).second.status.pid();
 			if(pid > 0) kill(pid, SIGSTOP);
 		}
 	}
-	done(response);
+
+	if(done) done(response);
 }
 
 void ApplicationManager::remove(
@@ -214,7 +213,6 @@ void ApplicationManager::remove(
 		name = request->name(i);
 		applications.erase(name);
 	}
-
 }
 
 void ApplicationManager::stopAll(){

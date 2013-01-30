@@ -53,14 +53,12 @@ void SlaveServiceImpl::getFileContent(
     int64_t file_size = 0;
     int64_t modify_time = 0;
     int64_t create_time = 0;
-    int err = SmallFile::readFile(
-                  request->file_name(),
-                  request->max_size(),
-                  response->mutable_content(),
-                  &file_size,
-                  &modify_time,
-                  &create_time
-              );
+    int err = SmallFile::readFile(request->file_name(),
+                                  request->max_size(),
+                                  response->mutable_content(),
+                                  &file_size,
+                                  &modify_time,
+                                  &create_time);
     response->set_error_code(err);
     response->set_file_size(file_size);
     response->set_modify_time(modify_time);
@@ -188,8 +186,7 @@ void SlaveServiceImpl::runScript(
 void SlaveServiceImpl::listProcesses(
     const ConstListProcessesRequestPtr& request,
     const ListProcessesResponsePtr& response,
-    const DoneCallback& done
-) {
+    const DoneCallback& done) {
 
 }
 
