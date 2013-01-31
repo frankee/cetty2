@@ -23,6 +23,8 @@
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
 #include <boost/static_assert.hpp>
+
+#include <cetty/Types.h>
 #include <cetty/util/MetaProgramming.h>
 
 namespace cetty {

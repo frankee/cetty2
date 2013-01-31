@@ -581,6 +581,11 @@ GenerateStructors(io::Printer* printer) {
                         "name", field->camelcase_name(),
                         "default", field->default_value_bool() ? "true" : "false");
                 }
+                else if (field->is_required()) {
+                    printer->Print(
+                        ",\n    $name$(false)",
+                        "name", field->camelcase_name());
+                }
 
                 break;
 
@@ -590,6 +595,11 @@ GenerateStructors(io::Printer* printer) {
                         ",\n    $name$($default$)",
                         "name", field->camelcase_name(),
                         "default", StringUtil::numtostr(field->default_value_int32()));
+                }
+                else if (field->is_required()) {
+                    printer->Print(
+                        ",\n    $name$(0)",
+                        "name", field->camelcase_name());
                 }
 
                 break;
@@ -601,7 +611,11 @@ GenerateStructors(io::Printer* printer) {
                         "name", field->camelcase_name(),
                         "default", StringUtil::numtostr(field->default_value_int64()));
                 }
-
+                else if (field->is_required()) {
+                    printer->Print(
+                        ",\n    $name$(0)",
+                        "name", field->camelcase_name());
+                }
                 break;
 
             case FieldDescriptor::CPPTYPE_DOUBLE:
@@ -611,13 +625,18 @@ GenerateStructors(io::Printer* printer) {
                         "name", field->camelcase_name(),
                         "default", StringUtil::numtostr(field->default_value_double()));
                 }
+                else if (field->is_required()) {
+                    printer->Print(
+                        ",\n    $name$(0)",
+                        "name", field->camelcase_name());
+                }
 
                 break;
 
             case FieldDescriptor::CPPTYPE_STRING:
                 if (field->has_default_value()) {
                     printer->Print(
-                        ",\n    $name$($default$)",
+                        ",\n    $name$(\"$default$\")",
                         "name", field->camelcase_name(),
                         "default", field->default_value_string());
                 }

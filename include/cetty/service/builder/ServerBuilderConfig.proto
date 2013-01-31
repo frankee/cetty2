@@ -9,8 +9,6 @@ message ServerConfig {
 }
 
 message ServerBuilderConfig {
-	//option (config_message_options).root = true;
-
 	message Server {
 		//option (config_message_options).coded = "{host}:{port}";
 		
@@ -20,7 +18,7 @@ message ServerBuilderConfig {
 	  (config_options).commented = true
 		];
 		
-		optional int32  port = 2 [
+		required int32  port = 2 [
 			(config_options).note = "# Accept connections on the specified port."
 		];
 		
@@ -28,20 +26,19 @@ message ServerBuilderConfig {
 	}
 	
 	message Limit {
-		optional int32 maxConcurrentRequests = 1;
+		required int32 maxConcurrentRequests = 1 [default=10000];
 	}
 	
 	message Timeout {
-		optional int32 hostConnectionMaxIdleTime = 1;
+		required int32 hostConnectionMaxIdleTime = 1[default=1800];
 	}
 	
 	message Logger {
 		optional string logger = 1;
-		optional string level = 2;
+		optional string  level = 2;
 	}
 	
-	optional bool deamonize = 1 [
-		default = true,
+	required bool deamonize = 1 [
 		(config_options).note = "# By default cetty does not run as a daemon. Use 'true' if you need it.\n# Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.",
 		(config_options).commented = true,
 		(config_options).cmd   = "deamon",
@@ -58,8 +55,8 @@ message ServerBuilderConfig {
 	];
 
     optional int32 parentThreadCount = 4;
-    optional int32 childThreadCount = 5;
-    optional int32 backlog = 6;
+    optional int32  childThreadCount = 5;
+    optional int32           backlog = 6;
     
 	optional Logger logger = 7;
 

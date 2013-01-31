@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <vector>
 #include <string>
 #include <boost/noncopyable.hpp>
@@ -163,6 +164,8 @@ public:
     typedef std::vector<ConstConfigFieldDescriptorPtr> FieldDescriptors;
     typedef FieldDescriptors::const_iterator ConstIterator;
 
+    typedef std::map<std::string, ConstConfigFieldDescriptorPtr> FieldDescriptorMap;
+
 public:
     ConfigObjectDescriptor(ConfigObject* defaultInstance,
                            int count,
@@ -180,11 +183,13 @@ public:
 
     int fieldCnt() const;
     ConstConfigFieldDescriptorPtr field(int index) const;
+    ConstConfigFieldDescriptorPtr field(const std::string& name) const;
 
     bool hasField(const std::string& name) const;
 
 private:
     FieldDescriptors fields_;
+    FieldDescriptorMap fieldMap_;
     ConfigObject* defaultInstance_;
 };
 
@@ -214,14 +219,18 @@ ConstConfigFieldDescriptorPtr ConfigObjectDescriptor::field(int index) const {
 }
 
 inline
-bool ConfigObjectDescriptor::hasField(const std::string& name) const {
-    for (std::size_t i = 0; i < fields_.size(); ++i) {
-        if (fields_[i]->name == name) {
-            return true;
-        }
+ConstConfigFieldDescriptorPtr
+ConfigObjectDescriptor::field(const std::string& name) const {
+    FieldDescriptorMap::const_iterator itr = fieldMap_.find(name);
+    if (itr != fieldMap_.end()) {
+        return itr->second;
     }
+    return NULL;
+}
 
-    return false;
+inline
+bool ConfigObjectDescriptor::hasField(const std::string& name) const {
+    return fieldMap_.find(name) != fieldMap_.end();
 }
 
 }
