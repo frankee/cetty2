@@ -46,11 +46,15 @@
 #include <google/protobuf/descriptor.pb.h>
 
 #include <cetty/config/generator/cpp/CppHelpers.h>
+#include <cetty/config/config_options.pb.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace config {
 namespace generator {
 namespace cpp {
+
+using namespace cetty::util;
 
 std::string simpleI2A(int i) {
     char buf[64] = {0};
@@ -73,15 +77,6 @@ struct FieldOrderingByNumber {
                            const FieldDescriptor* b) const {
         return a->number() < b->number();
     }
-};
-
-const char* kWireTypeNames[] = {
-    "VARINT",
-    "FIXED64",
-    "LENGTH_DELIMITED",
-    "START_GROUP",
-    "END_GROUP",
-    "FIXED32",
 };
 
 // Sort the fields of the given Descriptor by number into a new[]'d array
@@ -193,63 +188,173 @@ GenerateClassDefinition(io::Printer* printer) {
 
     for (int i = 0; i < descriptor_->field_count(); i++) {
         const FieldDescriptor* field = descriptor_->field(i);
+        const ConfigFieldOptions& fieldOptions =
+            field->options().GetExtension(config_options);
 
         if (field->is_repeated()) {
-            switch (field->cpp_type()) {
-            case FieldDescriptor::CPPTYPE_INT32:
-                printer->Print("std::vector<int> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+            if (fieldOptions.has_map() && fieldOptions.map()) {
+                switch (field->cpp_type()) {
+                case FieldDescriptor::CPPTYPE_BOOL:
+                    printer->Print("std::map<std::string, bool> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
 
-            case FieldDescriptor::CPPTYPE_INT64:
-                printer->Print("std::vector<int64_t> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+                case FieldDescriptor::CPPTYPE_INT32:
+                    printer->Print("std::map<std::string, int> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
 
-            case FieldDescriptor::CPPTYPE_BOOL:
-                printer->Print("std::vector<bool> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+                case FieldDescriptor::CPPTYPE_INT64:
+                    printer->Print("std::map<std::string, int64_t> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
 
-            case FieldDescriptor::CPPTYPE_DOUBLE:
-                printer->Print("std::vector<double> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+                case FieldDescriptor::CPPTYPE_DOUBLE:
+                    printer->Print("std::map<std::string, double> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
 
-            case FieldDescriptor::CPPTYPE_STRING:
-                printer->Print("std::vector<std::string> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+                case FieldDescriptor::CPPTYPE_STRING:
+                    printer->Print("std::map<std::string, std::string> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
 
-            case FieldDescriptor::CPPTYPE_MESSAGE:
-                if (isNestType(descriptor_, field)) {
-                    printer->Print("std::vector< $class_name$*> $field_name$;\n",
-                                   "class_name", field->message_type()->name(),
-                                   "field_name", field->camelcase_name());
+                case FieldDescriptor::CPPTYPE_MESSAGE:
+                    if (isNestType(descriptor_, field)) {
+                        printer->Print(
+                            "std::map<std::string,  $class_name$*> $field_name$;\n",
+                            "class_name", field->message_type()->name(),
+                            "field_name", field->camelcase_name());
+                    }
+                    else {
+                        printer->Print(
+                            "std::map<std::string,  $class_name$*> $field_name$;\n",
+                            "class_name", ClassName(field->message_type(), true),
+                            "field_name", field->camelcase_name());
+                    }
+
+                    break;
+
+                default:
+                    break;
                 }
-                else {
-                    printer->Print("std::vector< $class_name$*> $field_name$;\n",
-                                   "class_name", ClassName(field->message_type(), true),
-                                   "field_name", field->camelcase_name());
+            }
+            else {
+                switch (field->cpp_type()) {
+                case FieldDescriptor::CPPTYPE_BOOL:
+                    printer->Print("std::vector<bool> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
+
+                case FieldDescriptor::CPPTYPE_INT32:
+                    printer->Print("std::vector<int> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
+
+                case FieldDescriptor::CPPTYPE_INT64:
+                    printer->Print("std::vector<int64_t> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
+
+
+
+                case FieldDescriptor::CPPTYPE_DOUBLE:
+                    printer->Print("std::vector<double> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
+
+                case FieldDescriptor::CPPTYPE_STRING:
+                    printer->Print("std::vector<std::string> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                    break;
+
+                case FieldDescriptor::CPPTYPE_MESSAGE:
+                    if (isNestType(descriptor_, field)) {
+                        printer->Print(
+                            "std::vector< $class_name$*> $field_name$;\n",
+                            "class_name", field->message_type()->name(),
+                            "field_name", field->camelcase_name());
+                    }
+                    else {
+                        printer->Print(
+                            "std::vector< $class_name$*> $field_name$;\n",
+                            "class_name", ClassName(field->message_type(), true),
+                            "field_name", field->camelcase_name());
+                    }
+
+                    break;
+
+                default:
+                    break;
                 }
-
-                break;
-
-            default:
-                break;
             }
         }
         else {
             switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_BOOL:
+                if (field->is_optional()) {
+                    printer->Print("boost::optional<bool> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+                else {
+                    printer->Print("bool $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+
+                break;
+
             case FieldDescriptor::CPPTYPE_INT32:
-                printer->Print("boost::optional<int> $field_name$;\n", "field_name", field->camelcase_name());
+                if (field->is_optional()) {
+                    printer->Print("boost::optional<int> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+                else {
+                    printer->Print("int $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+
                 break;
 
             case FieldDescriptor::CPPTYPE_INT64:
-                printer->Print("boost::optional<int64_t> $field_name$;\n", "field_name", field->camelcase_name());
-                break;
+                if (field->is_optional()) {
+                    printer->Print("boost::optional<int64_t> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+                else {
+                    printer->Print("int64_t $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
 
-            case FieldDescriptor::CPPTYPE_BOOL:
-                printer->Print("boost::optional<bool> $field_name$;\n", "field_name", field->camelcase_name());
                 break;
 
             case FieldDescriptor::CPPTYPE_DOUBLE:
-                printer->Print("boost::optional<double> $field_name$;\n", "field_name", field->camelcase_name());
+                if (field->is_optional()) {
+                    printer->Print("boost::optional<double> $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+                else {
+                    printer->Print("double $field_name$;\n",
+                                   "field_name",
+                                   field->camelcase_name());
+                }
+
                 break;
 
             case FieldDescriptor::CPPTYPE_STRING:
@@ -322,81 +427,106 @@ GenerateTypeRegistrations(io::Printer* printer) {
 
     for (int i = 0; i < descriptor_->field_count(); i++) {
         const FieldDescriptor* field = descriptor_->field(i);
+        const ConfigFieldOptions& fieldOptions =
+            field->options().GetExtension(config_options);
+        bool isMap = fieldOptions.has_map() && fieldOptions.map();
 
         if (field->is_repeated()) {
             switch (field->cpp_type()) {
             case FieldDescriptor::CPPTYPE_INT32:
                 printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, INT32)",
+                    "                            CETTY_CONFIG_$repeated_type$_FIELD($classname$, $field_name$, INT32)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "repeated_type", isMap ? "MAP" : "LIST");
                 break;
 
             case FieldDescriptor::CPPTYPE_INT64:
                 printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, INT64)",
+                    "                            CETTY_CONFIG_$repeated_type$_FIELD($classname$, $field_name$, INT64)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "repeated_type", isMap ? "MAP" : "LIST");
                 break;
 
             case FieldDescriptor::CPPTYPE_BOOL:
                 printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, BOOL)",
+                    "                            CETTY_CONFIG_$repeated_type$_FIELD($classname$, $field_name$, BOOL)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "repeated_type", isMap ? "MAP" : "LIST");
                 break;
 
             case FieldDescriptor::CPPTYPE_DOUBLE:
                 printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, DOUBLE)",
+                    "                            CETTY_CONFIG_$repeated_type$_FIELD($classname$, $field_name$, DOUBLE)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "repeated_type", isMap ? "MAP" : "LIST");
                 break;
 
             case FieldDescriptor::CPPTYPE_STRING:
                 printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_FIELD($classname$, $field_name$, STRING)",
+                    "                            CETTY_CONFIG_$repeated_type$_FIELD($classname$, $field_name$, STRING)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "repeated_type", isMap ? "MAP" : "LIST");
                 break;
 
             case FieldDescriptor::CPPTYPE_MESSAGE:
-                printer->Print(
-                    "                            CETTY_CONFIG_REPEATED_OBJECT_FIELD($classname$, $field_name$, $field_class$)",
-                    "classname", classname_,
-                    "field_name", field->camelcase_name(),
-                    "field_class", field->message_type()->full_name());
+                if (isMap) {
+                    printer->Print(
+                        "                            CETTY_CONFIG_MAP_OBJECT_FIELD($classname$, $field_name$, $field_class$)",
+                        "classname", classname_,
+                        "field_name", field->camelcase_name(),
+                        "field_class", field->message_type()->full_name());
+                }
+                else {
+                    printer->Print(
+                        "                            CETTY_CONFIG_LIST_OBJECT_FIELD($classname$, $field_name$, $field_class$)",
+                        "classname", classname_,
+                        "field_name", field->camelcase_name(),
+                        "field_class", field->message_type()->full_name());
+                }
+
                 break;
             }
         }
         else {
+            bool isOptional = field->is_optional();
+
             switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_BOOL:
+                printer->Print(
+                    "                            CETTY_CONFIG_$optional$FIELD($classname$, $field_name$, BOOL)",
+                    "classname", classname_,
+                    "field_name", field->camelcase_name(),
+                    "optional", isOptional ? "OPTIONAL_" : "");
+                break;
+
             case FieldDescriptor::CPPTYPE_INT32:
                 printer->Print(
-                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, INT32)",
+                    "                            CETTY_CONFIG_$optional$FIELD($classname$, $field_name$, INT32)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "optional", isOptional ? "OPTIONAL_" : "");
                 break;
 
             case FieldDescriptor::CPPTYPE_INT64:
                 printer->Print(
-                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, INT64)",
+                    "                            CETTY_CONFIG_$optional$FIELD($classname$, $field_name$, INT64)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "optional", isOptional ? "OPTIONAL_" : "");
                 break;
 
-            case FieldDescriptor::CPPTYPE_BOOL:
-                printer->Print(
-                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, BOOL)",
-                    "classname", classname_,
-                    "field_name", field->camelcase_name());
-                break;
 
             case FieldDescriptor::CPPTYPE_DOUBLE:
                 printer->Print(
-                    "                            CETTY_CONFIG_FIELD($classname$, $field_name$, DOUBLE)",
+                    "                            CETTY_CONFIG_$optional$FIELD($classname$, $field_name$, DOUBLE)",
                     "classname", classname_,
-                    "field_name", field->camelcase_name());
+                    "field_name", field->camelcase_name(),
+                    "optional", isOptional ? "OPTIONAL_" : "");
                 break;
 
             case FieldDescriptor::CPPTYPE_STRING:
@@ -442,41 +572,80 @@ GenerateStructors(io::Printer* printer) {
     for (int i = 0; i < descriptor_->field_count(); i++) {
         const FieldDescriptor* field = descriptor_->field(i);
 
-        if (!field->is_repeated() &&
-            field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
-                printer->Print(
-                    ",\n    $name$()",
-                    "name", field->camelcase_name());
+        if (!field->is_repeated()) {
+            switch (field->cpp_type()) {
+            case FieldDescriptor::CPPTYPE_BOOL:
+                if (field->has_default_value()) {
+                    printer->Print(
+                        ",\n    $name$($default$)",
+                        "name", field->camelcase_name(),
+                        "default", field->default_value_bool() ? "true" : "false");
+                }
+
+                break;
+
+            case FieldDescriptor::CPPTYPE_INT32:
+                if (field->has_default_value()) {
+                    printer->Print(
+                        ",\n    $name$($default$)",
+                        "name", field->camelcase_name(),
+                        "default", StringUtil::numtostr(field->default_value_int32()));
+                }
+
+                break;
+
+            case FieldDescriptor::CPPTYPE_INT64:
+                if (field->has_default_value()) {
+                    printer->Print(
+                        ",\n    $name$($default$)",
+                        "name", field->camelcase_name(),
+                        "default", StringUtil::numtostr(field->default_value_int64()));
+                }
+
+                break;
+
+            case FieldDescriptor::CPPTYPE_DOUBLE:
+                if (field->has_default_value()) {
+                    printer->Print(
+                        ",\n    $name$($default$)",
+                        "name", field->camelcase_name(),
+                        "default", StringUtil::numtostr(field->default_value_double()));
+                }
+
+                break;
+
+            case FieldDescriptor::CPPTYPE_STRING:
+                if (field->has_default_value()) {
+                    printer->Print(
+                        ",\n    $name$($default$)",
+                        "name", field->camelcase_name(),
+                        "default", field->default_value_string());
+                }
+
+                break;
+
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                if (field->has_default_value()) {
+                    // "object encoded string"
+                    //object->parseFrom();
+                }
+                else {
+                    printer->Print(
+                        ",\n    $name$()",
+                        "name", field->camelcase_name());
+                }
+                
+                break;
+            }
+
+        }
+        else {
+            // ["value1","value2","value3"]    // for list
+            // {"key1":"value","key2":"value"} // for map
         }
     }
 
     printer->Print(" {\n}\n");
-
-#if 0
-
-    // The default instance needs all of its embedded message pointers
-    // cross-linked to other default instances.  We can't do this initialization
-    // in the constructor because some other default instances may not have been
-    // constructed yet at that time.
-    // TODO(kenton):  Maybe all message fields (even for non-default messages)
-    //   should be initialized to point at default instances rather than NULL?
-    for (int i = 0; i < descriptor_->field_count(); i++) {
-        const FieldDescriptor* field = descriptor_->field(i);
-
-        if (!field->is_repeated() &&
-                field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
-            printer->Print(
-                "  $name$_ = const_cast< $type$*>(&$type$::default_instance());\n",
-                "name", FieldName(field),
-                "type", FieldMessageTypeName(field));
-        }
-    }
-
-    printer->Print(
-        "}\n"
-        "\n");
-
-#endif
 
     // Generate the copy constructor.
     printer->Print(

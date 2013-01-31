@@ -22,7 +22,6 @@
 #include <vector>
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/static_assert.hpp>
 #include <cetty/util/MetaProgramming.h>
 
@@ -34,7 +33,7 @@ using namespace cetty::util;
 class ConfigFieldDescriptor;
 class ConfigObjectDescriptor;
 
-class ConfigObject : private boost::noncopyable {
+class ConfigObject {
 private:
     typedef std::map<std::string, ConfigObjectDescriptor*> ObjectDescriptors;
 

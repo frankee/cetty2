@@ -16,11 +16,12 @@ cetty-doto
 	1，同步netty4 release之后的版本，主要是content codec部分，以及一些优化部分
 	2，优化decode的效率
 
-* cetty-config
-	1，config descript中增加父class信息，以及自身的一些信息
-	2, 单个对象，使用mutable设值时，如果初始化为NULL，则存在问题
-	3，对象内嵌对象的class名称，应该包含其父对象（或者就可以包含namespace）*
-	
+* TODO cetty-config
+config descript中增加父class信息，以及自身的一些信息
+单个对象，使用mutable设值时，如果初始化为NULL，则存在问题
+对象内嵌对象的class名称，应该包含其父对象（或者就可以包含namespace）*
+
+
 * cetty-craft
    1. HTTP与protobuf之间转换时，field的验证（参数的绑定与校验）
       具体做法，在定义protobuf时，增加field相关的验证option

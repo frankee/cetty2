@@ -93,21 +93,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigCenter.cpp" />
-    <ClCompile Include="..\..\..\cetty-config\src\cetty\config\ConfigReflection.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigDescriptor.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigFileImporter.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObject.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectCmdlineParser.cpp" />
     <ClCompile Include="..\..\src\cetty\config\ConfigObjectYamlParser.cpp" />
-    <ClCompile Include="..\..\src\cetty\config\KeyValuePair.cnf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\config\ConfigCenter.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigDescriptor.h" />
     <ClInclude Include="..\..\..\include\cetty\config\ConfigObject.h" />
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflection.h" />
-    <ClInclude Include="..\..\..\include\cetty\config\ConfigReflectionImpl.h" />
-    <ClInclude Include="..\..\..\include\cetty\config\KeyValuePair.cnf.h" />
     <ClInclude Include="..\..\src\cetty\config\ConfigFileImporter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
