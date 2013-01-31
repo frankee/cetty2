@@ -47,34 +47,50 @@ class ConfigObject;
                              &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
             ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
             #FIELD,\
-            #CPP_TYPE)
-     
-#define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
-    new ::cetty::config::ConfigFieldDescriptor(\
-            static_cast<int>(reinterpret_cast<const char*>(\
-                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
-            #FIELD,\
-            #CLASS)
-     
-#define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            false)
+
+#define CETTY_CONFIG_OPTIONAL_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
             static_cast<int>(reinterpret_cast<const char*>(\
                              &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
             ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
             #FIELD,\
             #CPP_TYPE,\
-            ::cetty::config::ConfigFieldDescriptor::VECTOR)
-     
-#define CETTY_CONFIG_REPEATED_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            true)
+
+#define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
             static_cast<int>(reinterpret_cast<const char*>(\
                              &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
             ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
             #FIELD,\
             #CLASS,\
-            ::cetty::config::ConfigFieldDescriptor::VECTOR)
-     
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            false)
+
+#define CETTY_CONFIG_LIST_FIELD(TYPE, FIELD, CPP_TYPE) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::LIST,\
+            false)
+
+#define CETTY_CONFIG_LIST_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::LIST,\
+            false)
+
 #define CETTY_CONFIG_MAP_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
             static_cast<int>(reinterpret_cast<const char*>(\
@@ -82,8 +98,9 @@ class ConfigObject;
             ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
             #FIELD,\
             #CPP_TYPE,\
-            ::cetty::config::ConfigFieldDescriptor::MAP)
-     
+            ::cetty::config::ConfigFieldDescriptor::MAP,\
+            false)
+
 #define CETTY_CONFIG_MAP_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
             static_cast<int>(reinterpret_cast<const char*>(\
@@ -91,8 +108,9 @@ class ConfigObject;
             ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
             #FIELD,\
             #CLASS,\
-            ::cetty::config::ConfigFieldDescriptor::MAP)
-     
+            ::cetty::config::ConfigFieldDescriptor::MAP,\
+            false)
+
 class ConfigFieldDescriptor {
 public:
     // Specifies the C++ data type used to represent the field.  There is a
@@ -109,16 +127,16 @@ public:
         MAX_CPPTYPE         = 10,    // Constant useful for defining lookup tables
     };
 
-    enum ContainerType {
-        SINGLE = 0,
-        VECTOR = 1,
-        MAP    = 2
+    enum RepeatedType {
+        NO_REPEATED = 0,
+        LIST        = 1,
+        MAP         = 2
     };
 
     bool optional;
-    int offset;
-    int type;
-    int containerType;
+    int  offset;
+    int  type;
+    int  repeatedType;
 
     std::string name;
     std::string className;
@@ -127,10 +145,12 @@ public:
                           int type,
                           const char* name,
                           const char* className,
-                          int containerType = SINGLE)
-        : offset(offset),
+                          int repeatedType,
+                          bool optional)
+        : optional(optional),
+          offset(offset),
           type(type),
-          containerType(containerType),
+          repeatedType(repeatedType),
           name(name),
           className(className) {
     }

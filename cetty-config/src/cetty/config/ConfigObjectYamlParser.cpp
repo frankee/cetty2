@@ -63,23 +63,8 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
             //   - 5
             //
             // will set the '5' to numbers filed in the SingleFiledConfig object.
-            if (descriptor->fieldCnt() == 1 && field->repeated) {
+            if (descriptor->fieldCnt() == 1 && field->repeatedType) {
                 if (!parseField(field, node, object)) {
-                    return false;
-                }
-            }
-            else if (object->name() == "cetty.config.KeyValuePair") {
-                KeyValuePair* kv = dynamic_cast<KeyValuePair*>(object);
-
-                if (kv) {
-                    kv->key = node.begin()->first.Scalar();
-                    kv->value = node.begin()->second.Scalar();
-                }
-                else {
-                    LOG_ERROR << "the config object name is "
-                              << "cetty.config.KeyValuePair"
-                              << " , but the instance is not KeyValuePair";
-
                     return false;
                 }
             }
@@ -101,29 +86,66 @@ bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
 int parseField(const ConfigFieldDescriptor* field,
                const YAML::Node& node,
                ConfigObject* object) {
+    YAML::Node::const_iterator itr = node.begin();
 
-    if (field->repeated) {
-        YAML::Node::const_iterator itr = node.begin();
+    switch (field->repeatedType) {
+    case ConfigFieldDescriptor::NO_REPEATED:
+        switch (field->type) {
+        case ConfigFieldDescriptor::CPPTYPE_BOOL:
+            if (node.Scalar() == "true" ||
+                    node.Scalar() == "1" ||
+                    node.Scalar() == "yes") {
+                object->set<bool>(field, true);
+            }
+            else {
+                object->set<bool>(field, false);
+            }
 
+            break;
+
+        case ConfigFieldDescriptor::CPPTYPE_INT32:
+            object->set<int>(field, node.as<int>());
+            break;
+
+        case ConfigFieldDescriptor::CPPTYPE_INT64:
+            object->set<int64_t>(field, node.as<int64_t>());
+            break;
+
+        case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+            object->set<double>(field, node.as<double>());
+            break;
+
+        case ConfigFieldDescriptor::CPPTYPE_STRING:
+            object->set<std::string>(field, node.Scalar());
+            break;
+
+        case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+            ConfigObject* obj = object->mutableObject(field);
+            return parseConfigObject(node, obj);
+        }
+
+        break;
+
+    case ConfigFieldDescriptor::LIST:
         for (; itr != node.end(); ++itr) {
             switch (field->type) {
             case ConfigFieldDescriptor::CPPTYPE_BOOL:
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_INT32:
-                object->addInt32(field, itr->as<int>());
+                object->add<int>(field, itr->as<int>());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_INT64:
-                object->addInt64(field, itr->as<int64_t>());
+                object->add<int64_t>(field, itr->as<int64_t>());
                 break;
 
             case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                object->addDouble(field, itr->as<double>());
+                object->add<double>(field, itr->as<double>());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_STRING:
-                object->addString(field, itr->Scalar());
+                object->add<std::string>(field, itr->Scalar());
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
@@ -144,56 +166,68 @@ int parseField(const ConfigFieldDescriptor* field,
 
                 if (!objectName.empty() && !obj->descriptor()->hasField(objectName)) {
                     obj->setName(objectName);
-
-                    if (!parseConfigObject(itr->begin()->second, obj)) {
-                        return false;
-                    }
+                    return parseConfigObject(itr->begin()->second, obj);
                 }
                 else { // case-2
-                    if (!parseConfigObject(*itr, obj)) {
-                        return false;
-                    }
+                    return parseConfigObject(*itr, obj);
                 }
 
                 break;
             }
         }
-    }
-    else {
-        switch (field->type) {
-        case ConfigFieldDescriptor::CPPTYPE_BOOL:
-            if (node.Scalar() == "true" ||
-                    node.Scalar() == "1" ||
-                    node.Scalar() == "yes") {
-                object->setBool(field, true);
+
+        break;
+
+    case ConfigFieldDescriptor::MAP:
+        for (; itr != node.end(); ++itr) {
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                object->add<int>(field,
+                                 itr->first.Scalar(),
+                                 itr->second.as<int>());
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                object->add<int64_t>(field,
+                                     itr->first.Scalar(),
+                                     itr->as<int64_t>());
+                break;
+
+            case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                object->add<double>(field,
+                                    itr->first.Scalar(),
+                                    itr->second.as<double>());
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                object->add<std::string>(field,
+                                         itr->first.Scalar(),
+                                         itr->second.Scalar());
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                ConfigObject* obj = object->addObject(field, itr->first.Scalar());
+
+                // case-1
+                // items:
+                //   - objectName :
+                //       field1 : value
+                //       field2 : value
+                //
+                // case-2
+                // items:
+                //   - field1 : value
+                //     field2 : value
+                return parseConfigObject(itr->second, obj);
+
+                break;
             }
-            else {
-                object->setBool(field, false);
-            }
-
-            break;
-
-        case ConfigFieldDescriptor::CPPTYPE_INT32:
-            object->setInt32(field, node.as<int>());
-            break;
-
-        case ConfigFieldDescriptor::CPPTYPE_INT64:
-            object->setInt64(field, node.as<int64_t>());
-            break;
-
-        case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-            object->setDouble(field, node.as<double>());
-            break;
-
-        case ConfigFieldDescriptor::CPPTYPE_STRING:
-            object->setString(field, node.Scalar());
-            break;
-
-        case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-            ConfigObject* obj = object->mutableObject(field);
-            return parseConfigObject(node, obj);
-            break;
         }
+
+        break;
     }
 
     return true;

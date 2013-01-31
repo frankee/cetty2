@@ -17,6 +17,9 @@
  * under the License.
  */
 
+#include <map>
+#include <vector>
+
 namespace cetty {
 namespace util {
 
@@ -98,7 +101,7 @@ struct IsMap {
 };
 
 template<typename K, typename V>
-struct IsMap<std::map<K, T> > {
+struct IsMap<std::map<K, V> > {
     enum {
         VALUE = 1
     };

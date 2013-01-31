@@ -82,7 +82,7 @@ static int parseField(const ConfigFieldDescriptor* field,
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-            ConfigObject* obj = object->mutableObject(field);
+            ConfigObject* obj = object->mutableField(field);
             //return parseConfigObject(, obj);
             break;
         }

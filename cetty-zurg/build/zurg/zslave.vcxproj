@@ -127,11 +127,11 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ProcessManager.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\ProcStatFile.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\SlaveServiceImpl.h" />
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h" />
     <ClInclude Include="..\..\..\include\cetty\zurg\Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto" />
+    <None Include="..\..\..\include\cetty\zurg\slave\SlaveServiceConfig.proto" />
     <None Include="..\..\..\include\cetty\zurg\slave\slave_service.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
