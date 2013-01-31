@@ -213,6 +213,8 @@ void ApplicationManager::remove(
 		name = request->name(i);
 		applications.erase(name);
 	}
+
+	if (done) done(response);
 }
 
 void ApplicationManager::stopAll(){
