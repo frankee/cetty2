@@ -21,13 +21,13 @@
 namespace cetty {
 namespace channel {
 
-EventLoopPool::EventLoopMap EventLoopPool::allEventLoops;
+EventLoopPool::EventLoopMap EventLoopPool::allEventLoops_;
 static EventLoopPtr emptyEventLoop;
 
 const EventLoopPtr& EventLoopPool::current() {
     const ThreadId& id = CurrentThread::id();
-    EventLoopMap::iterator itr = allEventLoops.find(id);
-    if (itr != allEventLoops.end()) {
+    EventLoopMap::iterator itr = allEventLoops_.find(id);
+    if (itr != allEventLoops_.end()) {
         return itr->second;
     }
 
@@ -35,26 +35,27 @@ const EventLoopPtr& EventLoopPool::current() {
 }
 
 EventLoopPool::EventLoopPool(int threadCnt)
-    : started(false),
-      mainThread(0 == threadCnt),
-      threadCnt(threadCnt),
-      eventLoopCnt(mainThread ? 1 : threadCnt) {
+    : started_(false),
+      mainThread_(0 == threadCnt),
+      threadCnt_(threadCnt),
+      eventLoopCnt_(mainThread_ ? 1 : threadCnt) {
 
     if (threadCnt < 0) {
-        threadCnt = boost::thread::hardware_concurrency();
+        threadCnt_ = boost::thread::hardware_concurrency();
+        eventLoopCnt_ = threadCnt_;
         //LOG_WARN(logger, "poolSize is negative, instead of the cpu number : %d.", threadCnt);
     }
     else if (0 == threadCnt) {
         //LOG_WARN(logger, "onlyMainThread.");
     }
 
-    mainThreadId = CurrentThread::id();
+    mainThreadId_ = CurrentThread::id();
 }
 
 EventLoopPool::~EventLoopPool() {
-    EventLoops::iterator itr = eventLoops.begin();
+    EventLoops::iterator itr = eventLoops_.begin();
 
-    for (; itr != eventLoops.end(); ++itr) {
+    for (; itr != eventLoops_.end(); ++itr) {
         EventLoopHolder* holder = *itr;
 
         if (holder) {
