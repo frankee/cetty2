@@ -202,7 +202,6 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
             LOG_ERROR << "Duplicate stderr failed.";
             throw static_cast<int>(errno);
         }
-
         close(stdError);
 
         ProcStatFile stat(cetty::util::Process::id());
@@ -250,15 +249,13 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
             LOG_ERROR << "Duplicate stdin failed.";
             throw static_cast<int>(errno);
         }
-
         ::close(stdInput);
 
         if (::dup2(stdOutput, STDOUT_FILENO) < 0) {
             LOG_ERROR << "Duplicate stdout failed.";
             throw static_cast<int>(errno);
         }
-
-        close(stdOutput);
+        ::close(stdOutput);
 
         if (!setFl(STDOUT_FILENO, O_SYNC)) {
             LOG_ERROR << "Set file O_SYNC failed.";
