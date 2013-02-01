@@ -24,7 +24,80 @@ using namespace cetty::config;
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop) {
     ConfigCenter::instance().configure(&config_);
     processManager_.reset(new ProcessManager(loop));
-        applicationManager_.reset(new ApplicationManager(processManager_.get()));
+    applicationManager_.reset(new ApplicationManager(processManager_.get()));
+
+    // start all configured applications
+    init();
+}
+
+void SlaveServiceImpl::init() {
+	AddApplicationRequestPtr request = NULL;
+	AddApplicationResponsePtr response = NULL;
+
+	StartApplicationsRequestPtr startRequest = NULL;
+	StartApplicationsResponsePtr startResponse = NULL;
+
+	RemoveApplicationsRequestPtr removeRequest = NULL;
+	RemoveApplicationsResponsePtr removeResponse = NULL;
+
+	DoneCallback emptyCallback;
+
+	size_t i = 0;
+	for(; i < config_.applications.size(); ++i) {
+		std::string name = config_.applications.at(i)->name;
+
+        request = new AddApplicationRequest();
+        request->set_name(name);
+        request->set_binary(config_.applications.at(i)->binary);
+        request->set_cwd(config_.applications.at(i)->cwd);
+
+        size_t j = 0;
+        for(; j < config_.applications.at(i)->args.size(); ++ j)
+        	request->add_args(config_.applications.at(i)->args.at(j));
+
+        for(j = 0; j < config_.applications.at(i)->envs.size(); ++j)
+        	request->add_envs(config_.applications.at(i)->envs.at(j));
+
+        if (config_.applications.at(i)->redirectStdout)
+            request->set_redirect_stdout(config_.applications.at(i)->redirectStdout.get());
+        if(config_.applications.at(i)->redirectStderr)
+        	request->set_redirect_stderr(config_.applications.at(i)->redirectStderr.get());
+
+        if(config_.applications.at(i)->autoRecover)
+        	request->set_auto_recover(config_.applications.at(i)->autoRecover.get());
+
+
+        response = new AddApplicationResponse();
+
+        addApplication(request, response, emptyCallback);
+        LOG_INFO << "add application " << name;
+
+        delete request;
+        delete response;
+
+        startRequest = new StartApplicationsRequest();
+        startResponse = new StartApplicationsResponse();
+        startRequest->add_names()->assign(name);
+        startApplications(startRequest, startResponse, emptyCallback);
+
+        if(startResponse->status(0).state() == kError){
+        	LOG_ERROR << "start application " << name << " failed";
+
+        	removeRequest = new RemoveApplicationsRequest();
+        	removeResponse = new RemoveApplicationsResponse();
+            removeRequest->add_name(name);
+            removeApplications(removeRequest, removeResponse, emptyCallback);
+
+            delete removeRequest;
+            delete removeResponse;
+        }
+
+        LOG_INFO << "application [" << name << "] "
+        		 << startResponse->status(0).message();
+
+        delete startRequest;
+        delete startResponse;
+	}
 }
 
 SlaveServiceImpl::~SlaveServiceImpl() {
@@ -53,14 +126,12 @@ void SlaveServiceImpl::getFileContent(
     int64_t file_size = 0;
     int64_t modify_time = 0;
     int64_t create_time = 0;
-    int err = SmallFile::readFile(
-                  request->file_name(),
-                  request->max_size(),
-                  response->mutable_content(),
-                  &file_size,
-                  &modify_time,
-                  &create_time
-              );
+    int err = SmallFile::readFile(request->file_name(),
+                                  request->max_size(),
+                                  response->mutable_content(),
+                                  &file_size,
+                                  &modify_time,
+                                  &create_time);
     response->set_error_code(err);
     response->set_file_size(file_size);
     response->set_modify_time(modify_time);
@@ -89,13 +160,8 @@ void SlaveServiceImpl::getFileChecksum(
         runCommand(
             runCommandReq,
             NULL,
-            boost::bind(
-                &SlaveServiceImpl::getFileChecksumDone,
-                this,
-                request,
-                _1, // response
-                done
-            )
+            boost::bind(&SlaveServiceImpl::getFileChecksumDone,
+                        this, request, _1, done)
         );
     }
     else {
@@ -150,12 +216,8 @@ void SlaveServiceImpl::runCommand(
     else {
         processManager_->runAtExit(
             process->pid(),  // bind strong ptr
-            boost::bind(
-                &Process::onCommandExit,
-                process,
-                _1,
-                _2
-            )
+            boost::bind(&Process::onCommandExit,
+                        process, _1, _2)
         );
 
         EventLoopPtr elp = EventLoopPool::current();
@@ -168,7 +230,6 @@ void SlaveServiceImpl::runCommand(
 
         process->setTimerId(timerId);
     }
-
 }
 
 void SlaveServiceImpl::runScript(
@@ -198,8 +259,7 @@ void SlaveServiceImpl::runScript(
 void SlaveServiceImpl::listProcesses(
     const ConstListProcessesRequestPtr& request,
     const ListProcessesResponsePtr& response,
-    const DoneCallback& done
-) {
+    const DoneCallback& done) {
 
 }
 
