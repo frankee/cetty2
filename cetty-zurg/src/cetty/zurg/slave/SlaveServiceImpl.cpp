@@ -52,8 +52,9 @@ void SlaveServiceImpl::init() {
         request->set_cwd(config_.applications.at(i)->cwd);
 
         size_t j = 0;
-        for(; j < config_.applications.at(i)->args.size(); ++ j)
+        for(; j < config_.applications.at(i)->args.size(); ++ j){
         	request->add_args(config_.applications.at(i)->args.at(j));
+        }
 
         for(j = 0; j < config_.applications.at(i)->envs.size(); ++j)
         	request->add_envs(config_.applications.at(i)->envs.at(j));
