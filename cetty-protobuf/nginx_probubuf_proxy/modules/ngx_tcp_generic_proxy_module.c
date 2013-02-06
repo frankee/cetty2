@@ -608,11 +608,13 @@ ngx_tcp_proxy_get_session_upstream(ngx_tcp_session_t *s) {
 			continue;
 		}
 
-		if(name->len != upstreams[i].name.len) {
-			continue;
+		if(name->len == upstreams[i].name.len &&
+		   ngx_strncmp(name->data, upstreams[i].name.data, name->len) == 0) {
+			return &upstreams[i];
 		}
 
-		if(ngx_strncmp(name->data, upstreams[i].name.data, name->len) == 0) {
+		if(upstreams[i].name.data[upstreams[i].name.len - 1] == '*' &&
+		   ngx_strncmp(name->data, upstreams[i].name.data, upstreams[i].name.len - 1) == 0) {
 			return &upstreams[i];
 		}
 	}
@@ -635,11 +637,14 @@ ngx_tcp_procy_get_server_upstream(ngx_tcp_session_t *s) {
 
     plcfs = pscf->locations.elts;
     for(i = 0; i < pscf->locations.nelts; ++i){
-    	if(name->len != plcfs[i].name.len) {
-    		continue;
+    	if(name->len == plcfs[i].name.len &&
+    	   ngx_strncmp(name->data, plcfs[i].name.data, name->len) == 0) {
+    		plcf = &plcfs[i];
+    		break;
     	}
 
-    	if(ngx_strncmp(name->data, plcfs[i].name.data, name->len) == 0) {
+    	if(plcfs[i].name.data[plcfs[i].name.len - 1] == '*' &&
+    	   ngx_strncmp(name->data, plcfs[i].name.data, plcfs[i].name.len - 1) == 0) {
             plcf = &plcfs[i];
             break;
     	}
@@ -793,19 +798,4 @@ ngx_tcp_proxy_peer_handler(ngx_event_t *ev){
     }
 }
 
-/*
-static ngx_uint_t
-ngx_tcp_check_has_active_upstream(ngx_tcp_session_t *s) {
-	ngx_tcp_upstream_t              *us;
-	ngx_uint_t                       i;
 
-	us = s->upstreams.elts;
-	for(i = 0; i < s->upstreams.nelts; ++i) {
-		if(!us[i].unused) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-*/
