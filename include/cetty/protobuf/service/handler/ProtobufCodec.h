@@ -18,7 +18,7 @@
  */
 
 #include <cetty/Types.h>
-#include <cetty/buffer/ChannelBufferPtr.h>
+#include <cetty/buffer/ChannelBuffer.h>
 
 namespace cetty {
 namespace protobuf {
@@ -39,13 +39,8 @@ public:
     };
 
 public:
-    inline static int getTagWireType(int64_t tag) {
-        return static_cast<int>(tag & TAG_TYPE_MASK);
-    }
-
-    inline static int getTagFieldNumber(int64_t tag) {
-        return static_cast<int>(tag >> TAG_TYPE_BITS);
-    }
+    static int getTagWireType(int64_t tag);
+    static int getTagFieldNumber(int64_t tag);
 
     static bool decodeField(const ChannelBufferPtr& buffer,
                             int* wireType,
@@ -54,7 +49,7 @@ public:
 
     static int64_t decodeFixed64(const ChannelBufferPtr& buffer);
     static int decodeFixed32(const ChannelBufferPtr& buffer);
-    static int decodeVarint(const ChannelBufferPtr& buffer);
+    static int64_t decodeVarint(const ChannelBufferPtr& buffer);
 
     static void encodeFixed64(const ChannelBufferPtr& buffer, int64_t data);
     static void encodeFixed32(const ChannelBufferPtr& buffer, int data);
@@ -63,7 +58,7 @@ public:
                           int fieldNum,
                           int type);
 
-    static void encodeVarint(const ChannelBufferPtr& buffer, int val);
+    static void encodeVarint(const ChannelBufferPtr& buffer, int64_t val);
 
 private:
     ProtobufCodec() {}
@@ -74,6 +69,46 @@ private:
     // Mask for those bits.
     static const int TAG_TYPE_MASK = (1 << TAG_TYPE_BITS) - 1;
 };
+
+inline
+int ProtobufCodec::getTagWireType(int64_t tag) {
+    return static_cast<int>(tag & TAG_TYPE_MASK);
+}
+
+inline
+int ProtobufCodec::getTagFieldNumber(int64_t tag) {
+    return static_cast<int>(tag >> TAG_TYPE_BITS);
+}
+
+inline
+int64_t ProtobufCodec::decodeFixed64(const ChannelBufferPtr& buffer) {
+    return buffer->readLong();
+}
+
+inline
+int ProtobufCodec::decodeFixed32(const ChannelBufferPtr& buffer) {
+    return buffer->readInt();
+}
+
+inline
+void ProtobufCodec::encodeFixed64(const ChannelBufferPtr& buffer,
+                                  int64_t data) {
+    buffer->writeLong(data);
+}
+
+inline
+void ProtobufCodec::encodeFixed32(const ChannelBufferPtr& buffer,
+                                  int data) {
+    buffer->writeInt(data);
+}
+
+inline
+void ProtobufCodec::encodeTag(const ChannelBufferPtr& buffer,
+                              int fieldNum,
+                              int type) {
+    int tag = (fieldNum << 3) | type;
+    encodeVarint(buffer, tag);
+}
 
 }
 }

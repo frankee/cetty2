@@ -88,6 +88,7 @@ private:
                              const google::protobuf::Message* message,
                              const DoneCallback& done);
 
+    void init();
 private:
     SlaveServiceConfig config_;
     boost::scoped_ptr<ProcessManager> processManager_;

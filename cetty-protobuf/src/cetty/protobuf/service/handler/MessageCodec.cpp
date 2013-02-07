@@ -37,37 +37,59 @@ int MessageCodec::decodePayload(const ChannelBufferPtr& buffer,
     const google::protobuf::Message* prototype = NULL;
 
     const ServiceMessage& serviceMessage = message->serviceMessage();
+    const std::string& service = serviceMessage.service();
+    const std::string& method = serviceMessage.method();
 
     if (serviceMessage.type() == REQUEST) {
         prototype = ProtobufServiceRegister::instance().getRequestPrototype(
-                        serviceMessage.service(), serviceMessage.method());
+                        service,
+                        method);
     }
     else if (serviceMessage.type() == RESPONSE) {
         prototype = ProtobufServiceRegister::instance().getResponsePrototype(
-                        serviceMessage.service(), serviceMessage.method());
+                        service,
+                        method);
+    }
+
+    if (!prototype) {
+        LOG_WARN << "parse the message of failed, unknown service or method.";
+        return -1;
     }
 
     google::protobuf::Message* payload = prototype->New();
     StringPiece arry;
     buffer->readableBytes(&arry);
-    payload->ParseFromArray(arry.data(), arry.length());
-    buffer->offsetReaderIndex(arry.length());
 
-    message->setPayload(payload);
+    if (payload && payload->ParseFromArray(arry.data(), arry.length())) {
+        buffer->offsetReaderIndex(arry.length());
+        message->setPayload(payload);
+        return 0;
+    }
+    else {
+        if (payload) {
+            delete payload;
+        }
 
-    return true;
+        buffer->offsetReaderIndex(arry.length());
+
+        LOG_WARN << "parse the message of service: " << service
+                 << ", method " << method
+                 << ", type " << serviceMessage.type()
+                 << " failed.";
+
+        return -1;
+    }
 }
 
 //if successful then return 0,if type is wrong return -1;
 int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
-                         const ProtobufServiceMessagePtr& message) {
+                                const ProtobufServiceMessagePtr& message) {
     ServiceMessage* serviceMessage = message->mutableServiceMessage();
-    bool flag = false;
 
     // for "RPC0"
     buffer->offsetReaderIndex(4);
 
-    while (buffer->readable() && !flag) {
+    while (buffer->readable()) {
         int wireType = 0;
         int fieldNum = 0;
         int fieldLength = 0;
@@ -108,14 +130,10 @@ int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
                 break;
 
             case 8:
-                decodePayload(buffer, message);
-                flag = true;
-                break;
+                return decodePayload(buffer, message);
 
             case 9:
-                decodePayload(buffer, message);
-                flag = true;
-                break;
+                return decodePayload(buffer, message);
 
             default:
                 break;
@@ -136,9 +154,11 @@ ProtobufServiceMessagePtr MessageCodec::decode(ChannelHandlerContext& ctx,
             return message;
         }
         else {
-            // error here
-            printf("MessageCodec::decode failed because of type wrong");
+            LOG_WARN << "decode Message failed.";
         }
+    }
+    else {
+        LOG_WARN << "input channel buffer empty, decode failed.";
     }
 
     return ProtobufServiceMessagePtr();
@@ -164,7 +184,7 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
     BOOST_ASSERT(!serviceMessage.has_request()
                  && !serviceMessage.has_response()
                  && "Can not contain the response or request payload in service message");
-    
+
     buffer->writeBytes("RPC0");
 
     encodeProtobuf(serviceMessage, buffer);
@@ -186,12 +206,20 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
 }
 
 void MessageCodec::encodeProtobuf(const google::protobuf::Message& message,
-    const ChannelBufferPtr& buffer) {
-        int length;
-        char* bytes = buffer->writableBytes(&length);
-        int messageSize = message.GetCachedSize();
-        message.SerializeWithCachedSizesToArray((google::protobuf::uint8*)bytes);
-        buffer->offsetWriterIndex(messageSize);
+                                  const ChannelBufferPtr& buffer) {
+    int length;
+    char* bytes = buffer->writableBytes(&length);
+    int messageSize = message.GetCachedSize();
+
+    if (length < messageSize) {
+        buffer->ensureWritableBytes(messageSize);
+        bytes = buffer->writableBytes(&length);
+    }
+
+    message.SerializeWithCachedSizesToArray(
+        reinterpret_cast<google::protobuf::uint8*>(bytes));
+
+    buffer->offsetWriterIndex(messageSize);
 }
 
 }

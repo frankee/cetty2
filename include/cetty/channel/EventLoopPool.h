@@ -64,13 +64,13 @@ public:
     EventLoopPool(int threadCnt);
     virtual ~EventLoopPool();
 
-    bool isStarted() const { return started; }
-    bool isMainThread() const { return mainThread; }
-    bool empty() const { return 0 == eventLoopCnt; }
+    bool isStarted() const { return started_; }
+    bool isMainThread() const { return mainThread_; }
+    bool empty() const { return 0 == eventLoopCnt_; }
     
-    int getEventLoopCnt() const { return eventLoopCnt; }
-    Iterator begin() { return Iterator(eventLoops.begin()); }
-    Iterator end() { return Iterator(eventLoops.end()); }
+    int getEventLoopCnt() const { return eventLoopCnt_; }
+    Iterator begin() { return Iterator(eventLoops_.begin()); }
+    Iterator end() { return Iterator(eventLoops_.end()); }
 
     virtual bool start() = 0;
     
@@ -87,22 +87,22 @@ public:
     virtual const EventLoopPtr& getNextLoop() = 0;
 
 protected:
-    bool started;
-    bool mainThread; //< indicated this pool is only use the program's main thread.
+    bool started_;
+    bool mainThread_; //< indicated this pool is only use the program's main thread.
     
-    int threadCnt;
-    int eventLoopCnt;
+    int threadCnt_;
+    int eventLoopCnt_;
 
     // The next io_service to use for a connection.
     int nextServiceIndex_;
 
     //
-    ThreadId mainThreadId;
+    ThreadId mainThreadId_;
 
-    EventLoops eventLoops;
+    EventLoops eventLoops_;
 
 protected:
-    static EventLoopMap allEventLoops;
+    static EventLoopMap allEventLoops_;
 };
 
 }

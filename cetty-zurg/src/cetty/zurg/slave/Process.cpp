@@ -143,14 +143,6 @@ Process::~Process() {
 int Process::start() {
     startTime_ = boost::posix_time::microsec_clock::universal_time();
 
-    // todo: assert(numThreads() == 1);
-    int availabltFds = maxOpenFiles() - openedFiles();
-
-    if (availabltFds < 20) {
-        // to fork() and capture stdout/stderr, we need new file descriptors.
-        return EMFILE;
-    }
-
     Pipe execError;
     Pipe stdOutput;
     Pipe stdError;
@@ -205,6 +197,13 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
 
     try {
         execError.closeRead();
+
+        if (::dup2(stdError, STDERR_FILENO) < 0) {
+            LOG_ERROR << "Duplicate stderr failed.";
+            throw static_cast<int>(errno);
+        }
+        close(stdError);
+
         ProcStatFile stat(cetty::util::Process::id());
 
         if (!stat.valid_) {
@@ -226,14 +225,11 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
 
         argv.push_back(NULL);
 
-        //todo ::sigprocmask(SIG_SETMASK, &oldSigmask, NULL);
         if (::chdir(request_->cwd().c_str()) < 0) {
             LOG_ERROR << "Set process's work directory failed.";
             throw static_cast<int>(errno);
         }
 
-        // FIXME: max_memory_mb
-        // FIXME: environ with execvpe
         int stdInput = ::open("/dev/null", O_RDONLY);
 
         if (stdInput < 0) {
@@ -253,31 +249,22 @@ void Process::execChild(Pipe& execError, int stdOutput, int stdError) {
             LOG_ERROR << "Duplicate stdin failed.";
             throw static_cast<int>(errno);
         }
-
         ::close(stdInput);
 
         if (::dup2(stdOutput, STDOUT_FILENO) < 0) {
             LOG_ERROR << "Duplicate stdout failed.";
             throw static_cast<int>(errno);
         }
-
-        close(stdOutput);
+        ::close(stdOutput);
 
         if (!setFl(STDOUT_FILENO, O_SYNC)) {
             LOG_ERROR << "Set file O_SYNC failed.";
         }
 
-        if (::dup2(stdError, STDERR_FILENO) < 0) {
-            LOG_ERROR << "Duplicate stderr failed.";
-            throw static_cast<int>(errno);
-        }
-
-        close(stdError);
-
         const char* cmd = request_->command().c_str();
         ::execvp(cmd, const_cast<char**>(&*argv.begin()));
 
-        LOG_INFO << "Execute new process image failed.";
+        LOG_ERROR << "Execute new process image failed.";
         throw static_cast<int>(errno);
     }
     catch (int error) {
