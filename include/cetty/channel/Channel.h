@@ -42,7 +42,7 @@ namespace channel {
 
 using namespace cetty::util;
 
-class SocketAddress;
+class InetAddress;
 class ChannelConfig;
 class ChannelSink;
 
@@ -192,26 +192,29 @@ public:
      * Returns the local address where this channel is bound to.
      *
      * @return the local address of this channel.
-     * @remark Return an {@link SocketAddress NULL_ADDRESS}
+     * @remark Return an {@link InetAddress NULL_ADDRESS}
      * if this channel is not bound.
      */
-    const SocketAddress& localAddress() const;
+    const InetAddress& localAddress() const;
 
     /**
      * Returns the remote address where this channel is connected to.
      *
      * @return the remote address of this channel.
-     * @remark An empty {@link SocketAddress NULL_ADDRESS}
+     * @remark An empty {@link InetAddress NULL_ADDRESS}
      *         if this channel is not connected.
      *         If this channel is not connected but it can receive messages
      *         from arbitrary remote addresses (e.g. {@link DatagramChannel},
      *         use {@link MessageEvent#getRemoteAddress()} to determine
      *         the origination of the received message as this method will
-     *         return {@link SocketAddress NULL_ADDRESS}.
+     *         return {@link InetAddress NULL_ADDRESS}.
      */
-    const SocketAddress& remoteAddress() const;
+    const InetAddress& remoteAddress() const;
 
     ChannelFuturePtr newFuture();
+    
+    ChannelFuturePtr newVoidFuture();
+
     ChannelFuturePtr newFailedFuture(const Exception& e);
 
     /**
@@ -220,8 +223,6 @@ public:
      * for easy use.
      */
     ChannelFuturePtr newSucceededFuture();
-
-    ChannelFuturePtr newVoidFuture();
 
     /**
      * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
@@ -233,29 +234,29 @@ public:
 
     void setInitializer(const Initializer& initializer);
 
-    void initialize();
-
 public:
-    ChannelFuturePtr bind(const SocketAddress& localAddress);
+    void open();
 
-    ChannelFuturePtr connect(const SocketAddress& remoteAddress);
+    ChannelFuturePtr bind(const InetAddress& localAddress);
 
-    ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                             const SocketAddress& localAddress);
+    ChannelFuturePtr connect(const InetAddress& remoteAddress);
+
+    ChannelFuturePtr connect(const InetAddress& remoteAddress,
+                             const InetAddress& localAddress);
 
     ChannelFuturePtr disconnect();
     
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
-    const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+    const ChannelFuturePtr& bind(const InetAddress& localAddress,
                                  const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+    const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
                                     const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                    const SocketAddress& localAddress,
+    const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
+                                    const InetAddress& localAddress,
                                     const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
@@ -267,7 +268,7 @@ public:
      * Sends a message to this channel asynchronously.    If this channel was
      * created by a connectionless transport (e.g. {@link DatagramChannel})
      * and is not connected yet, you have to call
-     * {@link #write(const ChannelMessage&, const SocketAddress&, bool)}
+     * {@link #write(const ChannelMessage&, const InetAddress&, bool)}
      * instead.  Otherwise, the write request will fail with
      * {@link NotYetConnectedException} and an <tt>'exceptionCaught'</tt> event
      * will be triggered.
@@ -341,7 +342,7 @@ protected:
             const ChannelPtr& parent,
             const EventLoopPtr& eventLoop);
 
-    virtual void doBind(const SocketAddress& localAddress) = 0;
+    virtual void doBind(const InetAddress& localAddress) = 0;
     virtual void doDisconnect() = 0;
 
     virtual void doPreClose() {} // NOOP by default
@@ -375,7 +376,7 @@ private:
 
 private:
     void doBind(ChannelHandlerContext& ctx,
-                const SocketAddress& localAddress,
+                const InetAddress& localAddress,
                 const ChannelFuturePtr& future);
 
     void doDisconnect(ChannelHandlerContext& ctx,
@@ -397,8 +398,8 @@ private:
     ChannelFuturePtr succeededFuture_;
     ChannelFuturePtr closeFuture_;
 
-    SocketAddress localAddress_;
-    SocketAddress remoteAddress_;
+    InetAddress localAddress_;
+    InetAddress remoteAddress_;
 
     /** Cache for the string representation of this channel */
     mutable std::string strVal_;
@@ -435,12 +436,12 @@ const ChannelConfig& Channel::config() const {
 }
 
 inline
-const SocketAddress& Channel::localAddress() const {
+const InetAddress& Channel::localAddress() const {
     return localAddress_;
 }
 
 inline
-const SocketAddress& Channel::remoteAddress() const {
+const InetAddress& Channel::remoteAddress() const {
     return remoteAddress_;
 }
 
@@ -465,36 +466,36 @@ const ChannelFuturePtr& Channel::closeFuture() {
 }
 
 inline
-ChannelFuturePtr Channel::bind(const SocketAddress& localAddress) {
+ChannelFuturePtr Channel::bind(const InetAddress& localAddress) {
     return pipeline_->bind(localAddress);
 }
 
 inline
-const ChannelFuturePtr& Channel::bind(const SocketAddress& localAddress,
+const ChannelFuturePtr& Channel::bind(const InetAddress& localAddress,
                                       const ChannelFuturePtr& future) {
     return pipeline_->bind(localAddress, future);
 }
 
 inline
-ChannelFuturePtr Channel::connect(const SocketAddress& remoteAddress) {
+ChannelFuturePtr Channel::connect(const InetAddress& remoteAddress) {
     return pipeline_->connect(remoteAddress);
 }
 
 inline
-ChannelFuturePtr Channel::connect(const SocketAddress& remoteAddress,
-                                  const SocketAddress& localAddress) {
+ChannelFuturePtr Channel::connect(const InetAddress& remoteAddress,
+                                  const InetAddress& localAddress) {
     return pipeline_->connect(remoteAddress, localAddress);
 }
 
 inline
-const ChannelFuturePtr& Channel::connect(const SocketAddress& remoteAddress,
+const ChannelFuturePtr& Channel::connect(const InetAddress& remoteAddress,
         const ChannelFuturePtr& future) {
     return pipeline_->connect(remoteAddress, future);
 }
 
 inline
-const ChannelFuturePtr& Channel::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
+const ChannelFuturePtr& Channel::connect(const InetAddress& remoteAddress,
+        const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
     return pipeline_->connect(remoteAddress, localAddress, future);
 }

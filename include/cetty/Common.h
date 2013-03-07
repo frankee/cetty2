@@ -17,7 +17,11 @@
  * under the License.
  */
 
+namespace cetty {
 
+#define CETTY_REFERENCED(x) void(x)
+
+}
 
 #endif //#if !defined(CETTY_COMMON_H)
 

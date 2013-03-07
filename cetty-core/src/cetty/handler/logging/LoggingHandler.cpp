@@ -17,7 +17,7 @@
 #include <cetty/handler/logging/LoggingHandler.h>
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 
 #include <cetty/logging/Logger.h>
 
@@ -74,7 +74,7 @@ void LoggingHandler::userEventTriggered(ChannelHandlerContext& ctx,
 }
 
 void LoggingHandler::bind(ChannelHandlerContext& ctx,
-                          const SocketAddress& localAddress,
+                          const InetAddress& localAddress,
                           const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level_)) {
         Logger("loggerHander", 0, level_).stream()
@@ -86,8 +86,8 @@ void LoggingHandler::bind(ChannelHandlerContext& ctx,
 }
 
 void LoggingHandler::connect(ChannelHandlerContext& ctx,
-                             const SocketAddress& remoteAddress,
-                             const SocketAddress& localAddress,
+                             const InetAddress& remoteAddress,
+                             const InetAddress& localAddress,
                              const ChannelFuturePtr& future) {
     if (Logger::isEnabled(level_)) {
         Logger("loggerHander", 0, level_).stream()

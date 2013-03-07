@@ -28,7 +28,7 @@
 #include <boost/detail/atomic_count.hpp>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelMessageContainer.h>
@@ -88,23 +88,23 @@ public:
     void registerTo(Context& context);
 
 private:
-    virtual void doBind(const SocketAddress& localAddress);
+    virtual void doBind(const InetAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
 
     virtual void doInitialize();
 
     void doConnect(ChannelHandlerContext& ctx,
-                   const SocketAddress& remoteAddress,
-                   const SocketAddress& localAddress,
+                   const InetAddress& remoteAddress,
+                   const InetAddress& localAddress,
                    const ChannelFuturePtr& future);
 
     void handleConnectTimeout();
     void handleConnectFailed();
     void handleConnectSuccess();
 
-    void doConnect(const SocketAddress& remoteAddress,
-                   const SocketAddress& localAddress,
+    void doConnect(const InetAddress& remoteAddress,
+                   const InetAddress& localAddress,
                    const ChannelFuturePtr& connectFuture);
 
     void doFlush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
@@ -133,7 +133,6 @@ private:
 private:
     friend class AsioWriteOperationQueue;
     friend class AsioServerSocketChannel;
-    friend class AsioSocketChannelSinkHandler;
 
 private:
     bool opened_;

@@ -22,7 +22,6 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/Types.h>
-#include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/Timeout.h>
 #include <cetty/channel/EventLoopPtr.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
@@ -37,33 +36,67 @@ using namespace cetty::util;
 
 class EventLoop : public cetty::util::ReferenceCounter<EventLoop, int> {
 public:
-    typedef boost::function0<void> Functor;
+    typedef boost::function0<void> Handler;
 
 public:
     EventLoop(const EventLoopPoolPtr& pool);
 
     virtual ~EventLoop();
 
+    /**
+     * the the id of thread which the EventLoop in.
+     */
     const ThreadId& threadId() const;
+
+    /**
+     * set the thread id when the EventLoop initializing.
+     */
     void setThreadId(const ThreadId& id);
 
+    /**
+     * the EventLoopPool which the EventLoop in.
+     */
     const EventLoopPoolPtr& eventLoopPool() const;
 
+    /**
+     * test the current context is int the thread which the EventLoop in.
+     */
     bool inLoopThread() const;
 
+    //virtual void start();
+
+    /**
+     * stop the EventLoop, no block
+     * default clear the reference count of the EventLoopPoolPtr
+     */
     virtual void stop();
 
-    virtual void post(const Functor& handler) = 0;
+    //virtual void dispatch(const Handler& handler) = 0;
 
+    /**
+     *
+     */
+    virtual void post(const Handler& handler) = 0;
+
+    /**
+     *
+     */
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-                             const Functor& timerCallback) = 0;
+                             const Handler& handler) = 0;
 
-    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback) = 0;
-    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback) = 0;
-
-private:
-    EventLoop(const EventLoop&);
-    EventLoop& operator=(const EventLoop&);
+    /**
+     *
+     *
+     */
+    virtual TimeoutPtr runAfter(int64_t millisecond,
+                                const Handler& handler) = 0;
+    
+    /**
+     *
+     *
+     */
+    virtual TimeoutPtr runEvery(int64_t millisecond,
+                                const Handler& handler) = 0;
 
 private:
     ThreadId threadId_;

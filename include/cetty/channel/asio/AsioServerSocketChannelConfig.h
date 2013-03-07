@@ -46,18 +46,22 @@ public:
     const boost::optional<bool>& isReuseAddress() const;
     void setReuseAddress(bool reuseAddress);
 
-    const boost::optional<int>& getReceiveBufferSize() const;
+    const boost::optional<int>& receiveBufferSize() const;
     void setReceiveBufferSize(int receiveBufferSize);
 
-    void setPerformancePreferences(int connectionTime, int latency, int bandwidth);
+    void setPerformancePreferences(int connectionTime,
+        int latency,
+        int bandwidth);
 
-    const boost::optional<int>& getBacklog() const;
+    const boost::optional<int>& backlog() const;
     void setBacklog(int backlog);
+
+    void apply();
 
     bool isReuseAddress(tcp::acceptor& acceptor) const;
     void setReuseAddress(tcp::acceptor& acceptor);
 
-    int getReceiveBufferSize(tcp::acceptor& acceptor) const;
+    int receiveBufferSize(tcp::acceptor& acceptor) const;
     void setReceiveBufferSize(tcp::acceptor& acceptor);
 
 private:

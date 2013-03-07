@@ -3,23 +3,21 @@
 
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
-#include "EchoServerHandler.h"
 
-#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
-
-#include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/ChannelInitializer.h>
+
+#include <cetty/bootstrap/ServerBootstrap.h>
 
 #include <cetty/logging/LogLevel.h>
 #include <cetty/logging/Logger.h>
 
-using namespace cetty::channel;
-using namespace cetty::channel::asio;
+#include "EchoServerHandler.h"
 
-using namespace cetty::bootstrap::asio;
+using namespace cetty::channel;
+
+using namespace cetty::bootstrap;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
@@ -32,34 +30,17 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
+    Logger::logLevel(LogLevel::INFO);
     ChannelInitializer1<EchoServerHandler> initializer("echo");
 
-    Logger::logLevel(LogLevel::FATAL);
+    ServerBootstrap bootstrap(threadCount);
 
-    AsioServerBootstrap bootstrap(threadCount);
-    bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1));
+    bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1))
+        .setChannelOption(ChannelOption::CO_TCP_NODELAY, true)
+        .setChannelOption(ChannelOption::CO_SO_REUSEADDR, true)
+        .setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096)
+        .bind(1980)->await();
 
-    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
-    .setOption(ChannelOption::CO_SO_REUSEADDR, true)
-    .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-
-    // Bind and start to accept incoming connections.
-    ChannelFuturePtr f = bootstrap.bind(1980)->await();
-
-    printf("Server is running...\n");
-    printf("To quit server, press 'q'.\n");
-
-    char input;
-
-    do {
-        input = getchar();
-
-        if (input == 'q') {
-            f->channel()->closeFuture()->awaitUninterruptibly();
-            return 0;
-        }
-    }
-    while (true);
-    
-    return -1;
+    bootstrap.waitingForExit();
+    return 0;
 }

@@ -18,15 +18,27 @@
 #include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/EventLoop.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace channel {
 
-EventLoopPool::EventLoopMap EventLoopPool::allEventLoops_;
+EventLoopPool::EventLoops EventLoopPool::allEventLoops_;
+
 static EventLoopPtr emptyEventLoop;
+
+EventLoopPool::Iterator::Iterator(const HolderIterator& iter)
+    : iter_(iter) {
+}
+
+EventLoopPool::Iterator::Iterator(const Iterator& iter)
+    : iter_(iter.iter_) {
+}
 
 const EventLoopPtr& EventLoopPool::current() {
     const ThreadId& id = CurrentThread::id();
-    EventLoopMap::iterator itr = allEventLoops_.find(id);
+    EventLoops::iterator itr = allEventLoops_.find(id);
+
     if (itr != allEventLoops_.end()) {
         return itr->second;
     }
@@ -34,34 +46,26 @@ const EventLoopPtr& EventLoopPool::current() {
     return emptyEventLoop;
 }
 
-EventLoopPool::EventLoopPool(int threadCnt)
+EventLoopPool::EventLoopPool(int ioThreadCount)
     : started_(false),
-      mainThread_(0 == threadCnt),
-      threadCnt_(threadCnt),
-      eventLoopCnt_(mainThread_ ? 1 : threadCnt) {
+      singleThread_(0 == ioThreadCount),
+      threadCnt_(ioThreadCount),
+      eventLoopCnt_(singleThread_ ? 1 : ioThreadCount) {
 
-    if (threadCnt < 0) {
+    if (ioThreadCount < 0) {
         threadCnt_ = boost::thread::hardware_concurrency();
         eventLoopCnt_ = threadCnt_;
-        //LOG_WARN(logger, "poolSize is negative, instead of the cpu number : %d.", threadCnt);
+        LOG_WARN << "poolSize is negative, instead of the cpu number : "
+                 << threadCnt_;
     }
-    else if (0 == threadCnt) {
-        //LOG_WARN(logger, "onlyMainThread.");
+    else if (0 == threadCnt_) {
+        LOG_WARN << "onlyMainThread.";
     }
 
     mainThreadId_ = CurrentThread::id();
 }
 
 EventLoopPool::~EventLoopPool() {
-    EventLoops::iterator itr = eventLoops_.begin();
-
-    for (; itr != eventLoops_.end(); ++itr) {
-        EventLoopHolder* holder = *itr;
-
-        if (holder) {
-            delete holder;
-        }
-    }
 }
 
 }

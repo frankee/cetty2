@@ -147,12 +147,12 @@ private:
                             const boost::any& evt);
 
     void bind(ChannelHandlerContext& ctx,
-              const SocketAddress& localAddress,
+              const InetAddress& localAddress,
               const ChannelFuturePtr& future);
 
     void connect(ChannelHandlerContext& ctx,
-                 const SocketAddress& remoteAddress,
-                 const SocketAddress& localAddress,
+                 const InetAddress& remoteAddress,
+                 const InetAddress& localAddress,
                  const ChannelFuturePtr& future);
 
     void disconnect(ChannelHandlerContext& ctx,

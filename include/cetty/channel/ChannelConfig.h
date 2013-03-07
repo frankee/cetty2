@@ -74,7 +74,7 @@ namespace channel {
 class ChannelConfig : private boost::noncopyable {
 public:
     typedef boost::function<bool (const ChannelOption&,
-        const ChannelOption::Variant&)> SetOptionCallback;
+                                  const ChannelOption::Variant&)> OptionSetCallback;
 
 public:
     ChannelConfig()
@@ -112,7 +112,7 @@ public:
      * @throws InvalidArgumentException if the value is invalid.
      */
     bool setOption(const ChannelOption& option,
-                           const ChannelOption::Variant& value);
+                   const ChannelOption::Variant& value);
 
     /**
      * Returns the connect timeout of the channel in milliseconds.  If the
@@ -133,22 +133,29 @@ public:
      */
     void setConnectTimeout(int connectTimeoutMillis);
 
-    const SetOptionCallback& setOptionCallback() const {
-        return callback_;
-    }
+    const OptionSetCallback& optionSetCallback() const;
 
-    void setSetOptionCallback(const SetOptionCallback& callback) {
-        callback_ = callback;
-    }
+    void setOptionSetCallback(const OptionSetCallback& callback);
 
 private:
     int connectTimeoutMillis_; // 10 seconds
-    SetOptionCallback callback_;
+    OptionSetCallback callback_;
 };
 
 inline
 int ChannelConfig::connectTimeout() const {
     return connectTimeoutMillis_;
+}
+
+inline
+const ChannelConfig::OptionSetCallback& ChannelConfig::optionSetCallback() const {
+    return callback_;
+}
+
+inline
+void ChannelConfig::setOptionSetCallback(
+    const ChannelConfig::OptionSetCallback& callback) {
+    callback_ = callback;
 }
 
 }

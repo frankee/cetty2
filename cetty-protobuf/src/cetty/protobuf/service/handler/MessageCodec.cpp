@@ -32,6 +32,18 @@ namespace protobuf {
 namespace service {
 namespace handler {
 
+enum FieldNumber {
+    FIELD_NUM_TYPE              = 1,
+    FIELD_NUM_ID                = 2,
+    FIELD_NUM_SERVICE           = 3,
+    FIELD_NUM_METHOD            = 4,
+    FIELD_NUM_ERROR             = 5,
+    FIELD_NUM_REQUEST_ENCODING  = 6,
+    FIELD_NUM_RESPONSE_ENCODING = 7,
+    FIELD_NUM_REQUEST           = 8,
+    FIELD_NUM_RESPONSE          = 9
+};
+
 int MessageCodec::decodePayload(const ChannelBufferPtr& buffer,
                                 const ProtobufServiceMessagePtr& message) {
     const google::protobuf::Message* prototype = NULL;
@@ -100,7 +112,7 @@ int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
         if (ProtobufCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
             switch (fieldNum) {
                 //involved varint
-            case 1:
+            case FIELD_NUM_TYPE:
                 type = ProtobufCodec::decodeVarint(buffer);
 
                 if (type != REQUEST && type != RESPONSE && type != ERROR) {
@@ -110,29 +122,29 @@ int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
                 serviceMessage->set_type(static_cast<MessageType>(type));
                 break;
 
-            case 2:
+            case FIELD_NUM_ID:
                 id = ProtobufCodec::decodeFixed64(buffer);
                 id = ChannelBufferUtil::swapLong(id);
                 serviceMessage->set_id(id);
                 break;
 
-            case 3:
+            case FIELD_NUM_SERVICE:
                 buffer->readBytes(serviceMessage->mutable_service(), fieldLength);
                 break;
 
-            case 4:
+            case FIELD_NUM_METHOD:
                 buffer->readBytes(serviceMessage->mutable_method(), fieldLength);
                 break;
 
-            case 5:
+            case FIELD_NUM_ERROR:
                 error = ProtobufCodec::decodeVarint(buffer);
                 serviceMessage->set_error((ErrorCode)error);
                 break;
 
-            case 8:
+            case FIELD_NUM_REQUEST:
                 return decodePayload(buffer, message);
 
-            case 9:
+            case FIELD_NUM_RESPONSE:
                 return decodePayload(buffer, message);
 
             default:
@@ -191,14 +203,18 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
 
     if (serviceMessage.type() == REQUEST) {
         int payloadSize = message->payload()->GetCachedSize();
-        ProtobufCodec::encodeTag(buffer, 8, ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufCodec::encodeTag(buffer,
+                                 FIELD_NUM_REQUEST,
+                                 ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
         ProtobufCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobuf(*message->payload(), buffer);
     }
     else if (serviceMessage.type() == RESPONSE) {
         int payloadSize = message->payload()->GetCachedSize();
-        ProtobufCodec::encodeTag(buffer, 9, ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
+        ProtobufCodec::encodeTag(buffer,
+                                 FIELD_NUM_RESPONSE,
+                                 ProtobufCodec::WIRETYPE_LENGTH_DELIMITED);
         ProtobufCodec::encodeVarint(buffer, payloadSize);
 
         encodeProtobuf(*message->payload(), buffer);

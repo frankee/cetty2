@@ -21,6 +21,9 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/util/CurrentThread.h>
+#include <cetty/logging/LoggerHelper.h>
+
 #include <cetty/channel/Timeout.h>
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/EventLoopPool.h>
@@ -35,25 +38,34 @@ class EmbeddedEventLoop : public EventLoop {
 public:
     EmbeddedEventLoop()
         : EventLoop(EventLoopPoolPtr()) {
-        setThreadId(boost::this_thread::get_id());
+        setThreadId(CurrentThread::id());
     }
 
     virtual ~EmbeddedEventLoop() {}
 
-    virtual void post(const Functor& handler) {
+    virtual const std::string& type() const {
+        static const std::string TYPE("embedded");
+        return TYPE;
+    }
+
+    virtual void post(const Handler& handler) {
         if (handler) {
             handler();
         }
     }
+
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-                             const Functor& timerCallback) {
+                             const Handler& handler) {
+        LOG_WARN << "EmbeddedEventLoop does not support runAt";
         return TimeoutPtr();
     }
 
-    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback) {
+    virtual TimeoutPtr runAfter(int64_t millisecond, const Handler& handler) {
+        LOG_WARN << "EmbeddedEventLoop does not support runAfter";
         return TimeoutPtr();
     }
-    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback) {
+    virtual TimeoutPtr runEvery(int64_t millisecond, const Handler& handler) {
+        LOG_WARN << "EmbeddedEventLoop does not support runEvery";
         return TimeoutPtr();
     }
 };

@@ -72,7 +72,7 @@ bool AsioSocketChannelConfig::setOption(const ChannelOption& option,
     return true;
 }
 
-const boost::optional<int>& AsioSocketChannelConfig::getReceiveBufferSize() const {
+const boost::optional<int>& AsioSocketChannelConfig::receiveBufferSize() const {
     if (receiveBufferSize_) {
         return receiveBufferSize_;
     }
@@ -89,7 +89,7 @@ const boost::optional<int>& AsioSocketChannelConfig::getReceiveBufferSize() cons
     return receiveBufferSize_;
 }
 
-const boost::optional<int>& AsioSocketChannelConfig::getSendBufferSize() const {
+const boost::optional<int>& AsioSocketChannelConfig::sendBufferSize() const {
     if (sendBufferSize_) {
         return sendBufferSize_;
     }
@@ -106,7 +106,7 @@ const boost::optional<int>& AsioSocketChannelConfig::getSendBufferSize() const {
     return sendBufferSize_;
 }
 
-const boost::optional<int>& AsioSocketChannelConfig::getSoLinger() const {
+const boost::optional<int>& AsioSocketChannelConfig::soLinger() const {
     if (soLinger_) {
         return soLinger_;
     }
@@ -265,7 +265,7 @@ void AsioSocketChannelConfig::setWriteBufferLowWaterMark(int writeBufferLowWater
     }
 }
 
-int AsioSocketChannelConfig::getWriteBufferLowWaterMark() const {
+int AsioSocketChannelConfig::writeBufferLowWaterMark() const {
     if (writeBufferLowWaterMark_ == 0) {
         try {
             boost::asio::ip::tcp::socket::send_low_watermark option;
@@ -295,7 +295,7 @@ void AsioSocketChannelConfig::setReceiveBufferLowWaterMark(int receiveBufferLowW
     }
 }
 
-int AsioSocketChannelConfig::getReceiveBufferLowWaterMark() const {
+int AsioSocketChannelConfig::receiveBufferLowWaterMark() const {
     try {
         boost::asio::ip::tcp::socket::receive_low_watermark option;
         this->socket_.get_option(option);
@@ -306,7 +306,7 @@ int AsioSocketChannelConfig::getReceiveBufferLowWaterMark() const {
     }
 }
 
-int AsioSocketChannelConfig::getWriteBufferHighWaterMark() const {
+int AsioSocketChannelConfig::writeBufferHighWaterMark() const {
     return writeBufferHighWaterMark_;
 }
 

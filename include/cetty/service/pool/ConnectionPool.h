@@ -24,17 +24,18 @@
 #include <boost/function.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
-#include <cetty/bootstrap/asio/AsioClientBootstrap.h>
+
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/service/Connection.h>
+#include <cetty/bootstrap/ClientBootstrap.h>
 
 namespace cetty {
 namespace service {
 namespace pool {
 
-using namespace cetty::bootstrap::asio;
 using namespace cetty::channel;
 using namespace cetty::service;
+using namespace cetty::bootstrap;
 
 class ConnectionPool : private boost::noncopyable {
 public:
@@ -49,8 +50,8 @@ public:
     ChannelPtr getChannel();
     ChannelPtr getChannel(const ConnectedCallback& callback);
 
-    AsioClientBootstrap& getBootstrap() {
-        return this->bootstrap_;
+    ClientBootstrap& bootstrap() {
+        return bootstrap_;
     }
 
     void setChannelInitializer(const Channel::Initializer& initializer);
@@ -71,7 +72,7 @@ protected:
 
 protected:
     std::vector<Connection> connections_;
-    AsioClientBootstrap bootstrap_;
+    ClientBootstrap bootstrap_;
 
 private:
     bool connecting_;

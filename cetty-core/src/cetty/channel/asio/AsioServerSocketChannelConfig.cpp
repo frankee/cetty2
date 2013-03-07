@@ -32,7 +32,8 @@ using namespace boost::asio::ip;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
     tcp::acceptor& acceptor)
-    : acceptor_(acceptor), reuseAddress_(true) {
+    : acceptor_(acceptor),
+    reuseAddress_(true) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
@@ -104,19 +105,19 @@ void AsioServerSocketChannelConfig::setReuseAddress(tcp::acceptor& acceptor) {
 }
 
 const boost::optional<int>&
-AsioServerSocketChannelConfig::getReceiveBufferSize() const {
+AsioServerSocketChannelConfig::receiveBufferSize() const {
     if (receiveBufferSize_) {
         return receiveBufferSize_;
     }
 
     if (this->acceptor_.is_open()) {
-        this->receiveBufferSize_ = getReceiveBufferSize(this->acceptor_);
+        this->receiveBufferSize_ = receiveBufferSize(this->acceptor_);
     }
 
     return receiveBufferSize_;
 }
 
-int AsioServerSocketChannelConfig::getReceiveBufferSize(tcp::acceptor& acceptor) const {
+int AsioServerSocketChannelConfig::receiveBufferSize(tcp::acceptor& acceptor) const {
     try {
         tcp::acceptor::receive_buffer_size option;
         acceptor.get_option(option);
@@ -155,7 +156,7 @@ void AsioServerSocketChannelConfig::setPerformancePreferences(int connectionTime
     //socket.setPerformancePreferences(connectionTime, latency, bandwidth);
 }
 
-const boost::optional<int>& AsioServerSocketChannelConfig::getBacklog() const {
+const boost::optional<int>& AsioServerSocketChannelConfig::backlog() const {
     return this->backlog_;
 }
 

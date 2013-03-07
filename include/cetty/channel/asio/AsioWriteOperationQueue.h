@@ -157,7 +157,7 @@ public:
         return ops_.back();
     }
 
-    int  getWriteBufferSize() const {
+    int getWriteBufferSize() const {
         return writeBufferSize_;
     }
 

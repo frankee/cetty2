@@ -72,29 +72,32 @@ public:
     bool setOption(const ChannelOption& option,
                            const ChannelOption::Variant& value);
 
-    const boost::optional<int>& getReceiveBufferSize() const;
-    const boost::optional<int>& getSendBufferSize() const;
-    const boost::optional<int>& getSoLinger() const;
+    const boost::optional<int>& receiveBufferSize() const;
+    const boost::optional<int>& sendBufferSize() const;
+    const boost::optional<int>& soLinger() const;
 
     const boost::optional<bool>& isKeepAlive() const;
     const boost::optional<bool>& isReuseAddress() const;
     const boost::optional<bool>& isTcpNoDelay() const;
 
     void setKeepAlive(bool keepAlive);
-    void setPerformancePreferences(int connectionTime, int latency, int bandwidth);
+    void setPerformancePreferences(int connectionTime,
+        int latency,
+        int bandwidth);
+
     void setReceiveBufferSize(int receiveBufferSize);
     void setReuseAddress(bool reuseAddress);
     void setSendBufferSize(int sendBufferSize);
     void setSoLinger(int soLinger);
     void setTcpNoDelay(bool tcpNoDelay);
 
-    int getWriteBufferHighWaterMark() const;
+    int writeBufferHighWaterMark() const;
     void setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
 
     /**
      * Gets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    int getWriteBufferLowWaterMark() const;
+    int writeBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_SNDLOWAT</tt></a> option.
@@ -104,7 +107,7 @@ public:
     /**
      * Gets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    int getReceiveBufferLowWaterMark() const;
+    int receiveBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_RCVLOWAT</tt></a> option.

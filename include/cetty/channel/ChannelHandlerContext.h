@@ -29,7 +29,7 @@
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelMessageContainer.h>
 #include <cetty/buffer/ChannelBuffer.h>
@@ -150,6 +150,9 @@ class ChannelPipelineException;
 
 class ChannelHandlerContext : private boost::noncopyable {
 public:
+    /**
+     * Gets called before the {@link ChannelHandler} is added to the actual context.
+     */
     typedef boost::function<void (ChannelHandlerContext&)> BeforeAddCallback;
 
     typedef boost::function<void (ChannelHandlerContext&)> AfterAddCallback;
@@ -175,12 +178,12 @@ public:
     typedef boost::function<void (ChannelHandlerContext&)> ChannelMessageUpdatedCallback;
 
     typedef boost::function<void (ChannelHandlerContext&,
-                                  const SocketAddress&,
+                                  const InetAddress&,
                                   const ChannelFuturePtr&)> BindFunctor;
 
     typedef boost::function<void (ChannelHandlerContext&,
-                                  const SocketAddress&,
-                                  const SocketAddress&,
+                                  const InetAddress&,
+                                  const InetAddress&,
                                   const ChannelFuturePtr&)> ConnectFunctor;
 
     typedef boost::function<void (ChannelHandlerContext&,
@@ -191,6 +194,10 @@ public:
 
     typedef boost::function<void (ChannelHandlerContext&,
                                   const ChannelFuturePtr&)> FlushFunctor;
+
+    typedef boost::function<void (ChannelHandlerContext&,
+        boost::any,
+        ChannelFuturePtr const&)> SendEventFunctor;
 
 public:
     virtual ~ChannelHandlerContext() {}
@@ -400,11 +407,11 @@ public:
     void fireUserEventTriggered(const boost::any& evt);
     void fireMessageUpdated();
 
-    const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+    const ChannelFuturePtr& bind(const InetAddress& localAddress,
                                  const ChannelFuturePtr& future);
 
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                    const SocketAddress& localAddress,
+    const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
+                                    const InetAddress& localAddress,
                                     const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
@@ -434,12 +441,12 @@ public:
     void fireUserEventTriggered(ChannelHandlerContext& ctx, const boost::any& evt);
 
     const ChannelFuturePtr& bind(ChannelHandlerContext& ctx,
-                                 const SocketAddress& localAddress,
+                                 const InetAddress& localAddress,
                                  const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& connect(ChannelHandlerContext& ctx,
-                                    const SocketAddress& remoteAddress,
-                                    const SocketAddress& localAddress,
+                                    const InetAddress& remoteAddress,
+                                    const InetAddress& localAddress,
                                     const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& disconnect(ChannelHandlerContext& ctx,

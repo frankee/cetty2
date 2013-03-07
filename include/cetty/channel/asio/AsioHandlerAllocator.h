@@ -8,6 +8,7 @@
 //
 
 #include <boost/asio.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/aligned_storage.hpp>
 
 namespace cetty {
@@ -19,10 +20,11 @@ namespace asio {
 // requests. If the memory is in use when an allocation request is made, the
 // allocator delegates allocation to the global heap.
 
-template<typename CounterType>
+template<typename CounterT>
 class AsioHandlerAllocator : private boost::noncopyable {
 public:
-    AsioHandlerAllocator() : used(0) {}
+    AsioHandlerAllocator()
+        : used_(0) {}
 
     void* allocate(std::size_t size) {
         // Under multi-thread environment, the worst situation will be:
@@ -35,12 +37,12 @@ public:
         //   x: --in_use_
         // Then Thread3 will not use the storage, which should,
         // however, it's still ok but a little performance lost.
-        if (size < storage.size) {
-            if (++used == 1) {
-                return storage.address();
+        if (size < storage_.size) {
+            if (++used_ == 1) {
+                return storage_.address();
             }
             else {
-                --used;
+                --used_;
             }
         }
 
@@ -48,8 +50,8 @@ public:
     }
 
     void deallocate(void* pointer) {
-        if (pointer == storage.address()) {
-            --used;
+        if (pointer == storage_.address()) {
+            --used_;
         }
         else {
             ::operator delete(pointer);
@@ -58,57 +60,59 @@ public:
 
 private:
     // Storage space used for handler-based custom memory allocation.
-    boost::aligned_storage<1024> storage;
+    boost::aligned_storage<1024> storage_;
 
     // Whether the handler-based custom allocation storage has been used.
-    CounterType used;
+    CounterT used_;
 };
 
 // Wrapper class template for handler objects to allow handler memory
 // allocation to be customised. Calls to operator() are forwarded to the
 // encapsulated handler.
-template <typename Handler, typename CounterType>
+template <typename Handler, typename CounterT>
 class AsioCustomAllocHandler {
 public:
-    AsioCustomAllocHandler(AsioHandlerAllocator<CounterType>& a, Handler h)
-        : allocator(a),
-          handler(h) {
+    AsioCustomAllocHandler(AsioHandlerAllocator<CounterT>& a, Handler h)
+        : allocator_(a),
+          handler_(h) {
     }
 
     void operator()() {
-        handler();
+        handler_();
     }
 
     template <typename Arg1>
     void operator()(Arg1 arg1) {
-        handler(arg1);
+        handler_(arg1);
     }
 
     template <typename Arg1, typename Arg2>
     void operator()(Arg1 arg1, Arg2 arg2) {
-        handler(arg1, arg2);
+        handler_(arg1, arg2);
     }
 
     friend void* asio_handler_allocate(std::size_t size,
-                                       AsioCustomAllocHandler<Handler, CounterType>* h) {
-        return h->allocator.allocate(size);
+                                       AsioCustomAllocHandler<Handler, CounterT>* h) {
+        return h->allocator_.allocate(size);
     }
 
-    friend void asio_handler_deallocate(void* pointer, std::size_t /*size*/,
-                                        AsioCustomAllocHandler<Handler, CounterType>* h) {
-        h->allocator.deallocate(pointer);
+    friend void asio_handler_deallocate(void* pointer,
+                                        std::size_t /*size*/,
+                                        AsioCustomAllocHandler<Handler, CounterT>* h) {
+        h->allocator_.deallocate(pointer);
     }
 
 private:
-    AsioHandlerAllocator<CounterType>& allocator;
-    Handler handler;
+    AsioHandlerAllocator<CounterT>& allocator_;
+    Handler handler_;
 };
 
 // Helper function to wrap a handler object to add custom allocation.
-template <typename Handler, typename CounterType>
-inline AsioCustomAllocHandler<Handler, CounterType> makeCustomAllocHandler(
-    AsioHandlerAllocator<CounterType>& a, Handler h) {
-    return AsioCustomAllocHandler<Handler, CounterType>(a, h);
+template <typename Handler, typename CounterT>
+inline AsioCustomAllocHandler<Handler, CounterT> makeCustomAllocHandler(
+    AsioHandlerAllocator<CounterT>& a,
+    Handler h) {
+    return AsioCustomAllocHandler<Handler, CounterT>(a, h);
 }
 
 }

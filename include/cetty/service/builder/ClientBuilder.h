@@ -77,7 +77,7 @@ public:
             channel->setInitializer(serviceInitializer_);
         }
 
-        channel->initialize();
+        channel->open();
         channel->pipeline().fireChannelActive();
 
         return channel;
@@ -96,7 +96,7 @@ private:
         EventLoopPtr loop = eventLoop_;
 
         if (!loop) {
-            loop = eventLoopPool_->getNextLoop();
+            loop = eventLoopPool_->nextLoop();
         }
 
         ChannelPtr channel(new ServiceChannel(loop,

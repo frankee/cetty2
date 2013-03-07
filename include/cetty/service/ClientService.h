@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    void doBind(const SocketAddress& localAddress) {}
+    void doBind(const InetAddress& localAddress) {}
     void doDisconnect() {}
     void doClose() {}
 

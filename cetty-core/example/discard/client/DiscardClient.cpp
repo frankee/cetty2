@@ -24,7 +24,7 @@
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 
 #include "DiscardClientHandler.h"

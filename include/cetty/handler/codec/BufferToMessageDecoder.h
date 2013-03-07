@@ -196,8 +196,8 @@ protected:
             catch (const CodecException& e) {
                 if (decoded) {
                     decoded = false;
-                    in->discardReadBytes();
                     ctx.fireMessageUpdated();
+                    in->discardReadBytes();
                 }
 
                 ctx.fireExceptionCaught(e);
@@ -205,8 +205,8 @@ protected:
             catch (const std::exception& e) {
                 if (decoded) {
                     decoded = false;
-                    in->discardReadBytes();
                     ctx.fireMessageUpdated();
+                    in->discardReadBytes();
                 }
 
                 ctx.fireExceptionCaught(DecoderException(e.what()));
@@ -214,8 +214,8 @@ protected:
         }
 
         if (decoded) {
-            in->discardReadBytes();
             ctx.fireMessageUpdated();
+            in->discardReadBytes();
         }
     }
 

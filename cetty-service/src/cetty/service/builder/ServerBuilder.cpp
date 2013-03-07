@@ -18,23 +18,11 @@
 
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/asio/AsioServicePool.h>
-#include <cetty/bootstrap/asio/AsioServerBootstrap.h>
+#include <cetty/bootstrap/ServerUtil.h>
+#include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/Logger.h>
 #include <cetty/logging/LoggerHelper.h>
-
-#if (defined(linux) || defined(__linux) || defined(__linux__))
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-
-#endif
 
 namespace cetty {
 namespace service {
@@ -42,94 +30,10 @@ namespace builder {
 
 using namespace cetty::channel;
 using namespace cetty::channel::asio;
-using namespace cetty::bootstrap::asio;
+using namespace cetty::bootstrap;
 using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::logging;
-
-#if (defined(linux) || defined(__linux) || defined(__linux__))
-
-/* Anti-warning macro... */
-#define CETTY_NOTUSED(V) ((void) V)
-
-static void daemonize() {
-    int fd;
-
-    if (fork() != 0) { exit(0); } /* parent exits */
-
-    pid_t sid = setsid(); /* create a new session for the child process */
-
-    if (sid < 0) {
-        /* Log the failure */
-        exit(EXIT_FAILURE);
-    }
-
-    /* Change the current working directory */
-    if ((chdir("/")) < 0) {
-        /* Log the failure */
-        exit(EXIT_FAILURE);
-    }
-
-    /* Every output goes to /dev/null. */
-    if ((fd = open("/dev/null", O_RDWR, 0)) != -1) {
-        dup2(fd, STDIN_FILENO);
-        dup2(fd, STDOUT_FILENO);
-        dup2(fd, STDERR_FILENO);
-
-        if (fd > STDERR_FILENO) {
-            close(fd);
-        }
-    }
-    else { /* Close out the standard file descriptors */
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
-    }
-}
-
-void createPidFile(const char* pidfile) {
-    if (NULL == pidfile) { return; }
-
-    /* Try to write the pid file in a best-effort way. */
-    FILE* fp = fopen(pidfile, "w");
-
-    if (fp) {
-        fprintf(fp,"%d\n",(int)getpid());
-        fclose(fp);
-    }
-}
-
-static void sigtermHandler(int sig) {
-    CETTY_NOTUSED(sig);
-
-    //LOGGER(LOGGER_WARN,"Received SIGTERM, scheduling shutdown...");
-    //server.shutdown_asap = 1;
-}
-
-#undef CETTY_NOTUSED
-
-void setupSignalHandlers() {
-    signal(SIGHUP, SIG_IGN);
-    signal(SIGPIPE, SIG_IGN);
-
-    struct sigaction act;
-
-    /* When the SA_SIGINFO flag is set in sa_flags then sa_sigaction is used.
-     * Otherwise, sa_handler is used. */
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
-    act.sa_handler = sigtermHandler;
-    sigaction(SIGTERM, &act, NULL);
-
-    return;
-}
-
-#else
-
-static void daemonize() {}
-static void createPidFile(const char* pidfile) {}
-
-#endif
 
 ServerBuilder::ServerBuilder() {
     ConfigCenter::instance().configure(&config_);
@@ -169,14 +73,14 @@ ServerBuilder& ServerBuilder::registerServer(const std::string& name,
         return *this;
     }
 
-    ServerBootstrapPtr bootstrap = new AsioServerBootstrap(
+    ServerBootstrapPtr bootstrap = new ServerBootstrap(
         parentEventLoopPool_,
         childEventLoopPool_);
 
     bootstrap->setChildInitializer(childInitializer);
 
     if (!options.empty()) {
-        bootstrap->setOptions(options);
+        bootstrap->setChannelOptions(options);
     }
 
     if (!childOptions.empty()) {
@@ -194,7 +98,7 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
     ServerBootstraps::const_iterator itr = bootstraps_.find(name);
 
     if (itr != bootstraps_.end()) {
-        itr->second->setOptions(options);
+        itr->second->setChannelOptions(options);
         itr->second->setChildOptions(childOptions);
     }
     else {
@@ -230,14 +134,24 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 int port) {
-    return build(name, ChannelOptions(), ChannelOptions(), initializer, std::string(), port);
+    return build(name,
+                 ChannelOptions(),
+                 ChannelOptions(),
+                 initializer,
+                 std::string(),
+                 port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 const std::string& host,
                                 int port) {
-    return build(name, ChannelOptions(), ChannelOptions(), initializer, host, port);
+    return build(name,
+                 ChannelOptions(),
+                 ChannelOptions(),
+                 initializer,
+                 host,
+                 port);
 }
 
 cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
@@ -245,7 +159,12 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
         const ChannelOptions& childOptions,
         const ChildInitializer& childInitializer,
         int port) {
-    return build(name, options, childOptions, childInitializer, std::string(), port);
+    return build(name,
+                 options,
+                 childOptions,
+                 childInitializer,
+                 std::string(),
+                 port);
 }
 
 cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
@@ -255,11 +174,11 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
         const std::string& host,
         int port) {
     if (name.empty()) {
-        printf("parameter error, empty name or invalid address.");
+        LOG_WARN << "parameter error, empty name or invalid address.";
         return ChannelPtr();
     }
 
-    AsioServerBootstrap* bootstrap = new AsioServerBootstrap(
+    ServerBootstrap* bootstrap = new ServerBootstrap(
         parentEventLoopPool_,
         childEventLoopPool_);
 
@@ -270,11 +189,11 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (options.empty()) {
-        //bootstrap->setOption(ChannelOption::CO_SO_LINGER, 0);
-        //bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-        bootstrap->setOption(ChannelOption::CO_TCP_NODELAY, true);
-        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+        //bootstrap->setChannelOption(ChannelOption::CO_SO_LINGER, 0);
+        //bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
+        bootstrap->setChannelOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
 
     if (childInitializer) {
@@ -287,7 +206,9 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
     return build(bootstrap, host, port);
 }
 
-cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap, const std::string& host, int port) {
+cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
+        const std::string& host,
+        int port) {
     ChannelFuturePtr future;
 
     if (host.empty()) {
@@ -307,7 +228,7 @@ cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootst
 
 int ServerBuilder::init() {
     if (config_.deamonize && boost::get<bool>(config_.deamonize)) {
-        daemonize();
+        ServerUtil::daemonize();
     }
 
     if (!parentEventLoopPool_) {
@@ -334,7 +255,6 @@ int ServerBuilder::init() {
         Logger::logLevel(LogLevel::parseFrom(config_.logger->level));
     }
 
-
     return 0;
 }
 
@@ -347,14 +267,13 @@ void ServerBuilder::shutdown() {
 }
 
 void ServerBuilder::waitingForExit() {
-    if (config_.deamonize) {
-        createPidFile(config_.pidfile.c_str());
+    ServerBootstraps::iterator itr;
 
-        ServerBootstraps::iterator itr;
+    if (config_.deamonize) {
+        ServerUtil::createPidFile(config_.pidfile.c_str());
 
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
-            const std::vector<ChannelPtr> channels =
-                itr->second->serverChannels();
+            ServerBootstrap::Channels& channels = itr->second->channels();
 
             for (std::size_t i = 0; i < channels.size(); ++i) {
                 channels[i]->closeFuture()->awaitUninterruptibly();
@@ -362,7 +281,18 @@ void ServerBuilder::waitingForExit() {
         }
     }
     else {
-        printf("Server is running...\n");
+        printf("Servers: \n");
+
+        for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
+            ServerBootstrap::Channels& channels = itr->second->channels();
+
+            for (std::size_t i = 0; i < channels.size(); ++i) {
+                printf("    Channel ID: %d has bind to %s\n",
+                       channels[i]->id(),
+                       channels[i]->localAddress().toString().c_str());
+            }
+        }
+
         printf("To quit server, press 'q'.\n");
 
         char input;

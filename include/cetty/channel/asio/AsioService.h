@@ -42,33 +42,40 @@ public:
         : EventLoop(pool) {
     }
 
-    boost::asio::io_service& service() { return ioService; }
+    boost::asio::io_service& service();
 
     virtual void stop();
 
-    virtual void post(const Functor& handler);
+    virtual void post(const Handler& handler);
 
     virtual TimeoutPtr runAt(const boost::posix_time::ptime& timestamp,
-                             const Functor& timerCallback);
+                             const Handler& handler);
 
-    virtual TimeoutPtr runAfter(int64_t millisecond, const Functor& timerCallback);
+    virtual TimeoutPtr runAfter(int64_t millisecond,
+                                const Handler& handler);
 
-    virtual TimeoutPtr runEvery(int64_t millisecond, const Functor& timerCallback);
+    virtual TimeoutPtr runEvery(int64_t millisecond,
+                                const Handler& handler);
 
 private:
     void timerExpiresCallback(const boost::system::error_code& code,
-                              const Functor& timerCallback,
+                              const Handler& handler,
                               const AsioDeadlineTimeoutPtr& timeout);
 
     void repeatTimerExpiresCallback(const boost::system::error_code& code,
-                                    const Functor& timerCallback,
+                                    const Handler& handler,
                                     int64_t millisecond,
                                     const AsioDeadlineTimeoutPtr& timeout);
 
 private:
-    boost::asio::io_service ioService;
-    std::list<AsioDeadlineTimeoutPtr> timers;
+    boost::asio::io_service ioService_;
+    std::list<AsioDeadlineTimeoutPtr> timers_;
 };
+
+inline
+boost::asio::io_service& AsioService::service() {
+    return ioService_;
+}
 
 }
 }

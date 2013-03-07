@@ -60,7 +60,8 @@ public:
 public:
     ChannelOption(const std::string& name,
                   const boost::static_visitor<bool>* checker)
-        : name_(name), checker_(checker) {
+        : name_(name),
+          checker_(checker) {
     }
 
     ChannelOption(const ChannelOption& option);

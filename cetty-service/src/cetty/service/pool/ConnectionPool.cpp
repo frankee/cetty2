@@ -26,7 +26,7 @@ namespace pool {
 
 using namespace cetty::channel;
 using namespace cetty::service;
-using namespace cetty::bootstrap::asio;
+using namespace cetty::bootstrap;
 
 ConnectionPool::ConnectionPool(const Connections& connections)
     : connections_(connections),

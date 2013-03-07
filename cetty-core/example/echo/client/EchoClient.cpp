@@ -5,18 +5,17 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/smart_ptr/enable_shared_from_this2.hpp>
 
-#include <cetty/bootstrap/asio/AsioClientBootstrap.h>
+#include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelInitializer.h>
-#include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 
 #include "EchoClientHandler.h"
 
 using namespace cetty::channel;
 
-using namespace cetty::bootstrap::asio;
+using namespace cetty::bootstrap;
 using namespace cetty::buffer;
 
 using namespace cetty::util;
@@ -51,29 +50,19 @@ int main(int argc, char* argv[]) {
     }
 
     // Configure the client.
-    AsioClientBootstrap bootstrap(ioThreadCount);
+    ClientBootstrap bootstrap(ioThreadCount);
     ChannelInitializer1<EchoClientHandler> initializer;
 
     // Set up the pipeline factory.
-    bootstrap.setChannelInitializer(boost::bind<bool>(initializer, _1, firstMessageSize));
-
-    // Start the connection attempt.
-    std::vector<ChannelPtr> clientChannels;
+    bootstrap.setChannelInitializer(
+        boost::bind<bool>(initializer, _1, firstMessageSize));
 
     for (int i = 0; i < clientCount; ++i) {
         ChannelFuturePtr future = bootstrap.connect(host, port);
         future->awaitUninterruptibly();
         //BOOST_ASSERT(future->awaitUninterruptibly()->isSuccess());
-
-        clientChannels.push_back(future->channel());
     }
 
-    // Wait until the connection is closed or the connection attempt fails.
-    for (size_t i = 0; i < clientChannels.size(); ++i) {
-        clientChannels[i]->closeFuture()->awaitUninterruptibly();
-    }
-
-    // Shut down thread pools to exit.
-    bootstrap.shutdown();
+    bootstrap.waitingForExit();
     return 0;
 }

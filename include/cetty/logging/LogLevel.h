@@ -62,8 +62,6 @@ private:
     LogLevel(int value) : cetty::util::Enum<LogLevel>(value) {}
 };
 
-//static const std::string LOG_LEVEL_STR[];
-
 }
 }
 

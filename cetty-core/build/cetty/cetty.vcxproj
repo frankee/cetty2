@@ -92,21 +92,19 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\bootstrap\asio\AsioClientBootstrap.cpp" />
-    <ClCompile Include="..\..\src\cetty\bootstrap\asio\AsioServerBootstrap.cpp" />
     <ClCompile Include="..\..\src\cetty\bootstrap\ClientBootstrap.cpp" />
+    <ClCompile Include="..\..\src\cetty\bootstrap\ServerUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferUtil.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\asio\AsioIpAddressImplFactory.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioServerSocketChannel.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioServerSocketChannelConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioService.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioServicePool.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\asio\AsioSocketAddressImplFactory.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioSocketChannel.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioSocketChannelConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioWriteOperationQueue.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\Channel.cpp" />
+    <ClCompile Include="..\..\src\cetty\channel\InetAddress.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelException.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelFutureListener.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelHandlerContext.cpp" />
@@ -120,10 +118,7 @@
     <ClCompile Include="..\..\src\cetty\channel\DefaultChannelFuture.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\ChannelPipeline.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\FailedChannelFuture.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\IpAddress.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\NetworkInterface.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\NullChannel.cpp" />
-    <ClCompile Include="..\..\src\cetty\channel\SocketAddress.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\SucceededChannelFuture.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ByteOrder.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\Unpooled.cpp" />
@@ -195,28 +190,26 @@
     <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioClientBootstrap.h" />
-    <ClInclude Include="..\..\..\include\cetty\bootstrap\asio\AsioServerBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrapPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrapPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferInputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferOutputStream.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBufferUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioDeadlineTimeout.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioHandlerAllocator.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioIpAddressImplFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioServerSocketChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioServerSocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioService.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioServicePool.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioServicePoolPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioServicePtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioSocketAddressImplFactory.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioSocketChannel.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioSocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioWriteOperationQueue.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\InetAddress.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerWrapper.h" />
@@ -252,12 +245,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPool.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\EventLoopPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\FailedChannelFuture.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\IpAddress.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\IpAddressImpl.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\NetworkInterface.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\NullChannel.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\SocketAddress.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\SocketAddressImpl.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\SucceededChannelFuture.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Timeout.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\TimeoutPtr.h" />
@@ -364,7 +352,7 @@
     <ClInclude Include="..\..\..\include\cetty\buffer\HeapChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\SlicedChannelBuffer.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\WrappedChannelBuffer.h" />
-    <ClInclude Include="..\..\..\include\cetty\bootstrap\AbstractBootstrap.h" />
+    <ClInclude Include="..\..\..\include\cetty\bootstrap\Bootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerBootstrap.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Enum.h" />
@@ -375,8 +363,6 @@
     <ClInclude Include="..\..\..\include\cetty\util\ReferenceCounter.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Serializable.h" />
     <ClInclude Include="..\..\..\include\cetty\util\URI.h" />
-    <ClInclude Include="..\..\src\cetty\channel\asio\AsioIpAddressImpl.h" />
-    <ClInclude Include="..\..\src\cetty\channel\asio\AsioSocketAddressImpl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

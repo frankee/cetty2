@@ -19,6 +19,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+
+#include <cetty/util/StringUtil.h>
+
 namespace cetty {
 namespace logging {
 
@@ -40,14 +43,23 @@ Logger::Logger(SourceFile file, int line, bool toAbort)
     : message(toAbort ? LogLevel::FATAL : LogLevel::ERROR, file.data, line) {
 }
 
+#if defined(WIN32) && defined(DEBUG)
+    #include <windows.h>
+#endif
+
 Logger::~Logger() {
     if (message.finish()) {
         const char* buffer = message.getBuffer();
-        std::fwrite(buffer, strlen(buffer), 1, stdout);
-        //fwrite(msg, 1, len, stdout);
 
+#if defined(WIN32) && defined(DEBUG)
+        std::wstring out;
+        ::cetty::util::StringUtil::utftoucs(buffer, &out);
+        OutputDebugString(out.c_str());
+#else
+        std::fwrite(buffer, strlen(buffer), 1, stderr);
+#endif
         if (message.getLevel() == LogLevel::FATAL) {
-            std::fflush(stdout);
+            std::fflush(stderr);
         }
     }
 }

@@ -22,32 +22,49 @@
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelConfig.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelException.h>
 
 #include <cetty/logging/LoggerHelper.h>
+
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioSocketChannel.h>
 
 namespace cetty {
 namespace bootstrap {
 
 using namespace cetty::channel;
+using namespace cetty::channel::asio;
 
 ClientBootstrap::ClientBootstrap() {
-
 }
 
 ClientBootstrap::ClientBootstrap(const EventLoopPoolPtr& pool)
-    : AbstractBootstrap<ClientBootstrap>(pool) {
+    : Bootstrap<ClientBootstrap>(pool) {
 }
 
-ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remoteAddress) {
-    return connect(remoteAddress, SocketAddress::NULL_ADDRESS);
+ClientBootstrap::ClientBootstrap(const EventLoopPtr& eventLoop)
+    : eventLoop_(eventLoop) {
 }
 
-ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
-        const SocketAddress& local) {
-    if (!remote.validated()) {
-        LOG_ERROR << "the remote address is invalidated, then return a failed future.";
+ClientBootstrap::ClientBootstrap(int threadCnt) {
+    if (threadCnt < 1) {
+        LOG_WARN << "client bootstrap thread count should no less than 1";
+        threadCnt = 1;
+    }
+
+    setEventLoopPool(new AsioServicePool(threadCnt));
+}
+
+ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remoteAddress) {
+    return connect(remoteAddress, InetAddress::NULL_ADDRESS);
+}
+
+ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
+        const InetAddress& local) {
+    if (!remote) {
+        LOG_INFO << "the remote address is invalidated, then return a failed future.";
         return NullChannel::instance()->newFailedFuture(
                    ChannelException("Failed to initialize a pipeline."));
     }
@@ -55,7 +72,7 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
     ChannelPtr ch = newChannel();
 
     if (!ch) {
-        LOG_ERROR << "failed to create a new channel, then return a failed future.";
+        LOG_INFO << "failed to create a new channel, then return a failed future.";
         return NullChannel::instance()->newFailedFuture(
                    ChannelException("Failed to create a new channel."));
     }
@@ -63,14 +80,14 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
     ch->setInitializer(initializer_);
 
     // Set the options.
-    ch->config().setOptions(options());
+    ch->config().setOptions(channelOptions());
 
-    ch->initialize();
+    ch->open();
 
-    clientChannels_[ch->id()] = ch;
+    insertChannel(ch->id(), ch);
 
     // Bind.
-    if (localAddress().validated()) {
+    if (localAddress()) {
         LOG_INFO << "bind the channel to local address" << local.toString();
         ChannelFuturePtr future = ch->bind(local);
         future->awaitUninterruptibly();
@@ -82,9 +99,34 @@ ChannelFuturePtr ClientBootstrap::connect(const SocketAddress& remote,
 
 void ClientBootstrap::shutdown() {
     EventLoopPoolPtr pool = eventLoopPool();
+
     if (pool) {
         pool->stop();
-        pool->waitForStop();
+        pool->waitingForStop();
+    }
+}
+
+ChannelPtr ClientBootstrap::newChannel() {
+    const EventLoopPoolPtr& pool = eventLoopPool();
+    const EventLoopPtr& eventLoop =
+        pool ? pool->nextLoop() : eventLoop_;
+    
+    if (boost::dynamic_pointer_cast<AsioService>(eventLoop)) {
+        return ChannelPtr(new AsioSocketChannel(eventLoop));
+    }
+    else {
+        // other implement
+        BOOST_ASSERT(false);
+        return ChannelPtr();
+    }
+}
+
+void ClientBootstrap::waitingForExit() {
+    //shutdown();
+    Channels& clientChannels = channels();
+    Channels::const_iterator itr = clientChannels.begin();
+    for (; itr != clientChannels.end(); ++itr) {
+        itr->second->closeFuture()->awaitUninterruptibly();
     }
 }
 

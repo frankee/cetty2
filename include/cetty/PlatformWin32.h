@@ -44,12 +44,10 @@
 	#error Must compile with /MD, /MDd, /MT or /MTd
 #endif
 
-
 // Check debug/release settings consistency
 #if defined(NDEBUG) && defined(_DEBUG)
 	#error Inconsistent build settings (check for /MD[d])
 #endif
-
 
 #if defined(_WIN32)
 	#if !defined(_WIN32_WINNT)
@@ -59,7 +57,6 @@
 		#define WIN32_LEAN_AND_MEAN
 	#endif
 #endif
-
 
 // Turn off some annoying warnings
 #if defined(_MSC_VER)
@@ -71,7 +68,6 @@
 	#pragma warning(disable:4675) // resolved overload was found by argument-dependent lookup
 	#pragma warning(disable:4275) // non dll-interface class 'std::exception' used as base for dll-interface class 'Poco::Exception'
 #endif
-
 
 #if defined(__INTEL_COMPILER)
 	#pragma warning(disable:1738) // base class dllexport/dllimport specification differs from that of the derived class

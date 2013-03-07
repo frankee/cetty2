@@ -22,13 +22,10 @@
  */
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SocketAddress.h>
-
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
-
 #include <cetty/channel/embedded/EmbeddedEventLoop.h>
-
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -174,7 +171,7 @@ protected:
         return outboundOutContainer_ && !outboundOutContainer_->empty();
     }
 
-    void doBind(const SocketAddress& localAddress) {
+    void doBind(const InetAddress& localAddress) {
         // NOOP
     }
 
@@ -227,7 +224,7 @@ private:
         }
     }
 
-    void channelOpen(ChannelHandlerContext& ctx) {
+    void onChannelOpen(ChannelHandlerContext& ctx) {
         pipeline->fireChannelActive();
         state_ = 1;
     }
@@ -241,7 +238,7 @@ private:
                                      _2));
 
         ctx.setChannelOpenCallback(boost::bind(
-                                       &ThisChannel::channelOpen,
+                                       &ThisChannel::onChannelOpen,
                                        this,
                                        _1));
     }

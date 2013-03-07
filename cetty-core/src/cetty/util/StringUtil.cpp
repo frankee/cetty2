@@ -1266,5 +1266,87 @@ std::string* StringUtil::hextostr(uint64_t hex, std::string* str) {
     return str;
 }
 
+namespace detail {
+    typedef unsigned short ucs2_t;  /* Unicode character [D5] */
+    typedef unsigned int   ucs4_t;  /* Unicode scalar character [D28] */
+    typedef ucs4_t    ucs_t;
+
+    const static int UCS_CHAR_INVALID = 0xFFFE;
+    const static int UCS_CHAR_NONE = 0xFFFF;
+
+    int convertToUcs(const unsigned char** inbuf, std::size_t* inbytesleft) {
+        const unsigned char* in = *inbuf;
+        unsigned char byte = *in++;
+        ucs_t res = byte;
+
+        if (byte >= 0xC0) {
+            if (byte < 0xE0) {
+                if (*inbytesleft < 2) {
+                    return UCS_CHAR_NONE;
+                }
+
+                res = (*in & 0xC0) == 0x80 ?
+                    ((byte & 0x1F) << 6) | (*in++ & 0x3F) : UCS_CHAR_INVALID;
+            }
+            else if (byte < 0xF0) {
+                if (*inbytesleft < 3) { return UCS_CHAR_NONE; }
+
+                if (((in[0] & 0xC0) == 0x80) && ((in[1] & 0xC0) == 0x80)) {
+                    res = ((byte & 0x0F) << 12) | ((in[0] & 0x3F) << 6)
+                        | (in[1] & 0x3F);
+                    in += 2;
+                }
+                else {
+                    res = UCS_CHAR_INVALID;
+                }
+            }
+            else if (byte <= 0xF4) {
+                if (*inbytesleft < 4) { return UCS_CHAR_NONE; }
+
+                if (((byte == 0xF4 && ((in[0] & 0xF0) == 0x80))
+                    || ((in[0] & 0xC0) == 0x80))
+                    && ((in[1] & 0xC0) == 0x80)
+                    && ((in[2] & 0xC0) == 0x80)) {
+                        res = ((byte & 0x7) << 18) | ((in[0] & 0x3F) << 12)
+                            | ((in[1] & 0x3F) << 6) | (in[2] & 0x3F);
+                        in += 3;
+                }
+                else {
+                    res = UCS_CHAR_INVALID;
+                }
+            }
+            else {
+                res = UCS_CHAR_INVALID;
+            }
+        }
+        else if (byte & 0x80) {
+            res = UCS_CHAR_INVALID;
+        }
+
+        *inbytesleft -= (in - *inbuf);
+        *inbuf = in;
+        return res;
+    }
+}
+
+void StringUtil::utftoucs(const std::string& src, std::wstring* dest) {
+    std::size_t inSize = src.size();
+    const unsigned char* inBuf =
+        reinterpret_cast<const unsigned char*>(src.c_str());
+
+    while (inSize > 0) {
+        int byte = detail::convertToUcs(&inBuf, &inSize);
+
+        if (byte == detail::UCS_CHAR_INVALID) { return; }
+        if (byte == detail::UCS_CHAR_NONE) { break; }
+
+        dest->push_back( static_cast<wchar_t>(byte));
+    }
+}
+
+void StringUtil::utftoucs(const std::string& src, std::vector<uint32_t>* dest) {
+
+}
+
 }
 }

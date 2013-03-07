@@ -49,12 +49,12 @@ template<typename T>
 struct ChannelHandlerWrapper<boost::weak_ptr<T> > {
     typedef T Handler;
     typedef boost::shared_ptr<T> HandlerPtr;
-    typedef boost::weak_ptr<T> StoredHandlerPtr;
+    typedef boost::weak_ptr<T>   StoredHandlerPtr;
 };
 
 template<typename T>
 struct ChannelHandlerWrapper<T* > {
-    typedef T Handler;
+    typedef T  Handler;
     typedef T* HandlerPtr;
     typedef T* StoredHandlerPtr;
 };

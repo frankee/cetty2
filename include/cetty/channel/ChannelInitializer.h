@@ -98,23 +98,7 @@ public:
         pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
         return true;
     }
-
-//     template<typename Arg, int WhichArg>
-//     bool initialize(const ChannelPtr& channel, Arg arg) {
-//         ChannelPipeline& pipeline = channel->pipeline();
-//         pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1, arg));
-//         pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
-//         return true;
-//     }
 };
-
-// template<typename T1, typename T2> template<typename Arg> inline
-// bool ChannelInitializer2<T1, T2>::initialize<Arg, ChannelInitializer2::ARG_HANDLER2>(const ChannelPtr& channel, Arg arg) {
-//     ChannelPipeline& pipeline = channel->pipeline();
-//     pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
-//     pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2, arg));
-//     return true;
-// }
 
 template<typename T1, typename T2, typename T3>
 class ChannelInitializer3 {

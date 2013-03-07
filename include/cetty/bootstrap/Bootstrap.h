@@ -1,5 +1,6 @@
-#if !defined(CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H)
-#define CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H
+#if !defined(CETTY_BOOTSTRAP_BOOTSTRAP_H)
+#define CETTY_BOOTSTRAP_BOOTSTRAP_H
+
 /*
  * Copyright 2009 Red Hat, Inc.
  *
@@ -19,11 +20,13 @@
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
+#include <map>
 
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/ReferenceCounter.h>
 
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/ChannelOptions.h>
 
@@ -49,27 +52,41 @@ using namespace cetty::channel;
  */
 
 template<typename T>
-class AbstractBootstrap : public cetty::util::ReferenceCounter<T> {
+class Bootstrap : public cetty::util::ReferenceCounter<T> {
 public:
-    virtual ~AbstractBootstrap() {}
+    typedef std::map<int, ChannelPtr> Channels;
 
-    const SocketAddress& localAddress() const;
+public:
+    virtual ~Bootstrap() {}
 
     /**
-     * See {@link #setLocalAddress(const SocketAddress&)}
+     *
+     */
+    const InetAddress& localAddress() const;
+
+    /**
+     * See {@link #setLocalAddress(const InetAddress&)}
      */
     T& setLocalAddress(int port);
 
     /**
-     * See {@link #localAddress(const SocketAddress&)}
+     * See {@link #localAddress(const InetAddress&)}
      */
     T& setLocalAddress(const std::string& host, int port);
 
-    T& setLocalAddress(const SocketAddress& localAddress);
+    /**
+     *
+     */
+    T& setLocalAddress(const InetAddress& localAddress);
 
-
+    /**
+     *
+     */
     const EventLoopPoolPtr& eventLoopPool() const;
 
+    /**
+     *
+     */
     T& setEventLoopPool(const EventLoopPoolPtr& pool);
 
     /**
@@ -77,14 +94,14 @@ public:
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    ChannelOptions& options();
+    ChannelOptions& channelOptions();
 
     /**
      * Returns the options which configures a new {@link Channel} and its
      * child {@link Channel}s.  The names of the child {@link Channel} options
      * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
      */
-    const ChannelOptions& options() const;
+    const ChannelOptions& channelOptions() const;
 
     /**
      * Returns the value of the option with the specified key.  To retrieve
@@ -96,14 +113,14 @@ public:
      * @return the option value if the option is found.
      *         <tt>empty boost::any</tt> otherwise.
      */
-    ChannelOption::Variant getOption(const ChannelOption& option) const;
+    ChannelOption::Variant channelOption(const ChannelOption& option) const;
 
     /**
      * Sets the options which configures a new {@link Channel} and its child
      * {@link Channel}s.  To set the options of a child {@link Channel}, prefixed
      * <tt>"child."</tt> to the option name (e.g. <tt>"child.keepAlive"</tt>).
      */
-    T& setOptions(const ChannelOptions& options);
+    T& setChannelOptions(const ChannelOptions& options);
 
     /**
      * Sets an option with the specified key and value.  If there's already
@@ -116,8 +133,11 @@ public:
      * @param key    the option name
      * @param value  the option value
      */
-    T& setOption(const ChannelOption& option,
-                 const ChannelOption::Variant& value);
+    T& setChannelOption(const ChannelOption& option,
+                        const ChannelOption::Variant& value);
+
+    Channels& channels();
+    const Channels& channels() const;
 
     /**
      * Shutdown the {@link AbstractBootstrap} and the {@link EventLoopGroup} which is
@@ -126,17 +146,23 @@ public:
      */
     virtual void shutdown() = 0;
 
+    virtual void waitingForExit() = 0;
+
 protected:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
      * {@link #setFactory(ChannelFactory)} must be called at once before any
      * I/O operation is requested.
      */
-    AbstractBootstrap() {}
+    Bootstrap() {}
 
-    AbstractBootstrap(const EventLoopPoolPtr& pool)
+    Bootstrap(const EventLoopPoolPtr& pool)
         : eventLoopPool_(pool) {
     }
+
+    void insertChannel(int id, const ChannelPtr& channel);
+    void removeChannel(int id);
+    void clearChannels();
 
 private:
     T& castThis() {
@@ -145,56 +171,68 @@ private:
 
 private:
     ChannelOptions options_;
-    SocketAddress localAddress_;
+    InetAddress    localAddress_;
     EventLoopPoolPtr eventLoopPool_;
+
+    Channels channels_;
 };
 
 template<typename T> inline
-const SocketAddress& AbstractBootstrap<T>::localAddress() const {
+typename Bootstrap<T>::Channels& Bootstrap<T>::channels() {
+    return channels_;
+}
+
+template<typename T> inline
+typename const Bootstrap<T>::Channels& Bootstrap<T>::channels() const {
+    return channels_;
+}
+
+template<typename T> inline
+const InetAddress& Bootstrap<T>::localAddress() const {
     return localAddress_;
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setLocalAddress(const SocketAddress& address) {
+T& Bootstrap<T>::setLocalAddress(const InetAddress& address) {
     localAddress_ = address;
     return castThis();
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setLocalAddress(int port) {
-    localAddress_ = SocketAddress(port);
+T& Bootstrap<T>::setLocalAddress(int port) {
+    localAddress_ = InetAddress(port);
     return castThis();
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setLocalAddress(const std::string& host, int port) {
-    localAddress_ = SocketAddress(host, port);
+T& Bootstrap<T>::setLocalAddress(const std::string& host, int port) {
+    localAddress_ = InetAddress(host, port);
     return castThis();
 }
 
 template<typename T> inline
-const EventLoopPoolPtr& AbstractBootstrap<T>::eventLoopPool() const {
+const EventLoopPoolPtr& Bootstrap<T>::eventLoopPool() const {
     return eventLoopPool_;
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setEventLoopPool(const EventLoopPoolPtr& pool) {
+T& Bootstrap<T>::setEventLoopPool(const EventLoopPoolPtr& pool) {
     eventLoopPool_ = pool;
     return castThis();
 }
 
 template<typename T> inline
-ChannelOptions& AbstractBootstrap<T>::options() {
+ChannelOptions& Bootstrap<T>::channelOptions() {
     return options_;
 }
 
 template<typename T> inline
-const ChannelOptions& AbstractBootstrap<T>::options() const {
+const ChannelOptions& Bootstrap<T>::channelOptions() const {
     return options_;
 }
 
 template<typename T> inline
-ChannelOption::Variant AbstractBootstrap<T>::getOption(const ChannelOption& option) const {
+ChannelOption::Variant Bootstrap<T>::channelOption(const ChannelOption& option) const {
     ChannelOptions::ConstIterator itr = options.find(option);
 
     if (itr == options.end()) {
@@ -206,7 +244,7 @@ ChannelOption::Variant AbstractBootstrap<T>::getOption(const ChannelOption& opti
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setOptions(const ChannelOptions& options) {
+T& Bootstrap<T>::setChannelOptions(const ChannelOptions& options) {
     LOG_INFO << "set options using map, will reset the original options.";
     options_ = options;
 
@@ -214,16 +252,33 @@ T& AbstractBootstrap<T>::setOptions(const ChannelOptions& options) {
 }
 
 template<typename T> inline
-T& AbstractBootstrap<T>::setOption(const ChannelOption& option,
-                                   const ChannelOption::Variant& value) {
+T& Bootstrap<T>::setChannelOption(const ChannelOption& option,
+                                  const ChannelOption::Variant& value) {
     options_.setOption(option, value);
     return castThis();
 }
 
+template<typename T>
+void Bootstrap<T>::clearChannels() {
+    channels_.clear();
+}
+
+
+template<typename T>
+void cetty::bootstrap::Bootstrap<T>::removeChannel(int id) {
+    channels_.erase(id);
+}
+
+
+template<typename T>
+void cetty::bootstrap::Bootstrap<T>::insertChannel(int id, const ChannelPtr& channel) {
+    channels_.insert(std::make_pair(id, channel));
+}
+
 }
 }
 
-#endif //#if !defined(CETTY_BOOTSTRAP_ABSTRACTBOOTSTRAP_H)
+#endif //#if !defined(CETTY_BOOTSTRAP_BOOTSTRAP_H)
 
 // Local Variables:
 // mode: c++

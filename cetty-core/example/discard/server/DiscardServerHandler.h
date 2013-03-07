@@ -23,9 +23,8 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelConfig.h>
+#include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/ChannelInboundBufferHandler.h>
-#include <cetty/channel/ChannelInboundBufferHandlerContext.h>
-#include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/buffer/ChannelBuffer.h>
 
 using namespace cetty::channel;
@@ -39,30 +38,36 @@ using namespace cetty::buffer;
  *
  * @version $Rev: 2121 $, $Date: 2010-02-02 09:38:07 +0900 (Tue, 02 Feb 2010) $
  */
-class DiscardServerHandler : public ChannelInboundBufferHandlerAdapter<> {
+class DiscardServerHandler : private boost::noncopyable {
 public:
-    DiscardServerHandler() {}
-    virtual ~DiscardServerHandler() {}
+    typedef ChannelInboudBufferHandler<DiscardServerHandler>::Context Context;
+    typedef ChannelInboudBufferHandler<DiscardServerHandler>::InboundContainer InboundContainer;
 
-    virtual ChannelHandlerPtr clone() {
-        return shared_from_this();
+public:
+    DiscardServerHandler() {
     }
 
-    virtual void messageReceived(ChannelHandlerContext& ctx) {
-        // Discard received data silently by doing nothing.
-        getInboundChannelBuffer()->clear();
+    ~DiscardServerHandler() {}
+
+    void registerTo(Context& ctx) {
+        container_ = ctx.inboundContainer();
+
+        ctx.setChannelMessageUpdatedCallback(
+            boost::bind(&DiscardServerHandler::messageUpdated,
+            this,
+            _1));
     }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx, const ChannelException& e) {
-        // Close the connection when an exception is raised.
-        LOG_WARN << "Unexpected exception (" << e.what() << ") from downstream.";
-        ctx.close();
+    void messageUpdated(ChannelHandlerContext& ctx) {
+        const ChannelBufferPtr& buffer = container_->getMessages();
+
+        if (buffer) {
+            buffer->clear();
+        }
     }
 
-    virtual std::string toString() const {
-        return "DiscardServerHandler";
-    }
+private:
+    InboundContainer* container_;
 };
-
 
 #endif //#if !defined(DISCARD_DISCARDSERVERHANDLER_H)

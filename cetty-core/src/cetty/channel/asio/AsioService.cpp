@@ -24,28 +24,28 @@ using namespace cetty::channel;
 
 void AsioService::stop() {
     EventLoop::stop();
-    ioService.stop();
+    ioService_.stop();
 }
 
-void AsioService::post(const Functor& handler) {
-    ioService.post(handler);
+void AsioService::post(const Handler& handler) {
+    ioService_.post(handler);
 }
 
 TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp,
-                              const Functor& timerCallback) {
-    if (timerCallback) {
+                              const Handler& handler) {
+    if (handler) {
         AsioDeadlineTimeoutPtr timeout
-            = new AsioDeadlineTimeout(ioService, timestamp);
+            = new AsioDeadlineTimeout(ioService_, timestamp);
 
         timeout->timer().async_wait(boost::bind(
                                            &AsioService::timerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
-                                           timerCallback,
+                                           handler,
                                            boost::cref(timeout)));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-        timers.push_back(timeout);
+        timers_.push_back(timeout);
         return boost::static_pointer_cast<Timeout>(timeout);
     }
     else {
@@ -54,20 +54,20 @@ TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp,
 }
 
 TimeoutPtr AsioService::runAfter(int64_t millisecond,
-                                 const Functor& timerCallback) {
-    if (timerCallback) {
+                                 const Handler& handler) {
+    if (handler) {
         AsioDeadlineTimeoutPtr timeout
-            = new AsioDeadlineTimeout(ioService, millisecond);
+            = new AsioDeadlineTimeout(ioService_, millisecond);
 
         timeout->timer().async_wait(boost::bind(
                                            &AsioService::timerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
-                                           timerCallback,
+                                           handler,
                                            boost::cref(timeout)));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-        timers.push_back(timeout);
+        timers_.push_back(timeout);
         return boost::static_pointer_cast<Timeout>(timeout);
     }
     else {
@@ -76,20 +76,20 @@ TimeoutPtr AsioService::runAfter(int64_t millisecond,
 }
 
 TimeoutPtr AsioService::runEvery(int64_t millisecond,
-                                 const Functor& timerCallback) {
-    if (timerCallback) {
+                                 const Handler& handler) {
+    if (handler) {
         AsioDeadlineTimeoutPtr timeout
-            = new AsioDeadlineTimeout(ioService, millisecond);
+            = new AsioDeadlineTimeout(ioService_, millisecond);
 
         timeout->timer().async_wait(boost::bind(
                                            &AsioService::repeatTimerExpiresCallback,
                                            this,
                                            boost::asio::placeholders::error,
-                                           timerCallback,
+                                           handler,
                                            millisecond,
                                            boost::cref(timeout)));
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-        timers.push_back(timeout);
+        timers_.push_back(timeout);
         return boost::static_pointer_cast<Timeout>(timeout);
     }
     else {
@@ -98,32 +98,32 @@ TimeoutPtr AsioService::runEvery(int64_t millisecond,
 }
 
 void AsioService::timerExpiresCallback(const boost::system::error_code& code,
-                                       const Functor& timerCallback,
+                                       const Handler& handler,
                                        const AsioDeadlineTimeoutPtr& timeout) {
     if (code != boost::asio::error::operation_aborted) {
         timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
-        timerCallback();
+        handler();
     }
     else {
         timeout->setState(AsioDeadlineTimeout::TIMER_CANCELLED);
     }
 
-    timers.remove(timeout);
+    timers_.remove(timeout);
 }
 
 void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& code,
-        const Functor& timerCallback,
+        const Handler& handler,
         int64_t millisecond,
         const AsioDeadlineTimeoutPtr& timeout) {
     if (code != boost::asio::error::operation_aborted) {
         timeout->setState(AsioDeadlineTimeout::TIMER_EXPIRED);
-        timerCallback();
+        handler();
 
-        timers.remove(timeout);
+        timers_.remove(timeout);
 
         //FIXME
         AsioDeadlineTimeoutPtr newTimeout
-            = new AsioDeadlineTimeout(ioService, millisecond);
+            = new AsioDeadlineTimeout(ioService_, millisecond);
 
         boost::system::error_code code;
         boost::asio::deadline_timer& timer = newTimeout->timer();
@@ -135,11 +135,11 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
             timer.async_wait(boost::bind(&AsioService::repeatTimerExpiresCallback,
                                          this,
                                          boost::asio::placeholders::error,
-                                         timerCallback,
+                                         handler,
                                          millisecond,
                                          newTimeout));
             newTimeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
-            timers.push_back(newTimeout);
+            timers_.push_back(newTimeout);
         }
         else {
             //timers.remove(timeout);
@@ -148,7 +148,7 @@ void AsioService::repeatTimerExpiresCallback(const boost::system::error_code& co
     }
     else {
         timeout->setState(AsioDeadlineTimeout::TIMER_CANCELLED);
-        timers.remove(timeout);
+        timers_.remove(timeout);
     }
 }
 

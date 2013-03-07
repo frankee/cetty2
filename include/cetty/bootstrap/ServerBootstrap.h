@@ -25,10 +25,10 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelHandlerWrapper.h>
 
-#include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/Bootstrap.h>
 #include <cetty/bootstrap/ServerBootstrapPtr.h>
 
 namespace cetty {
@@ -52,7 +52,7 @@ using namespace cetty::channel;
  *
  * A parent channel is a channel which is supposed to accept incoming
  * connections.  It is created by this bootstrap's {@link ChannelFactory} via
- * {@link #bind()} and {@link #bind(SocketAddress)}.
+ * {@link #bind()} and {@link #bind(InetAddress)}.
  * <p>
  * Once successfully bound, the parent channel starts to accept incoming
  * connections, and the accepted connections become the children of the
@@ -69,7 +69,7 @@ using namespace cetty::channel;
  * {@link ServerBootstrap} b = ...;
  *
  * // Options for a parent channel
- * b.setOption("localAddress", new {@link InetSocketAddress}(8080));
+ * b.setOption("localAddress", new {@link InetInetAddress}(8080));
  * b.setOption("reuseAddress", true);
  *
  * // Options for its children
@@ -155,7 +155,7 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ServerBootstrap : public AbstractBootstrap<ServerBootstrap> {
+class ServerBootstrap : public Bootstrap<ServerBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
@@ -163,22 +163,30 @@ public:
      * operation is requested.
      */
     ServerBootstrap();
+    ServerBootstrap(int parentThreadCnt, int childThreadCnt = 0);
+
     ServerBootstrap(const EventLoopPoolPtr& pool);
-    ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child);
+    ServerBootstrap(const EventLoopPoolPtr& parent,
+                    const EventLoopPoolPtr& child);
 
     virtual ~ServerBootstrap() {}
+
+    bool deamonize() const;
+    ServerBootstrap& setDeamonize(bool deamon);
+
+    const std::string pidFileName() const;
+    ServerBootstrap& setPidFileName(const std::string& fileName);
+
+    const EventLoopPoolPtr& parentLoopPool() const;
+    const EventLoopPoolPtr& childLoopPool() const;
 
     /**
      * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
      * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
      * {@link Channel}'s.
      */
-    ServerBootstrap& setEventLoopPools(const EventLoopPoolPtr& parent,
-                                       const EventLoopPoolPtr& child);
-
+    ServerBootstrap& setParentEventLoopPool(const EventLoopPoolPtr& pool);
     ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool);
-
-    const EventLoopPoolPtr& childPool() const;
 
     template<typename T>
     ServerBootstrap& setParentHandler(
@@ -219,7 +227,7 @@ public:
      *
      * <pre>
      * {@link ServerBootstrap} b = ...;
-     * b.bind(SocketAddress(port));
+     * b.bind(InetAddress(port));
      * </pre>
      *
      * @return a new bound channel which accepts incoming connections
@@ -235,7 +243,7 @@ public:
      *
      * <pre>
      * {@link ServerBootstrap} b = ...;
-     * b.bind(SocketAddress(ip, port));
+     * b.bind(InetAddress(ip, port));
      * </pre>
      *
      * @return a new bound channel which accepts incoming connections
@@ -252,26 +260,54 @@ public:
      *         if failed to create a new channel and
      *                      bind it to the local address, return null ChannelPtr
      */
-    ChannelFuturePtr bind(const SocketAddress& localAddress);
+    ChannelFuturePtr bind(const InetAddress& localAddress);
 
     virtual void shutdown();
 
-    const std::vector<ChannelPtr>& serverChannels() const;
-
-protected:
-    virtual ChannelPtr newChannel() = 0;
+    virtual void waitingForExit();
 
 private:
+    ChannelPtr newChannel();
+
     bool initServerChannel(const ChannelPtr& channel);
 
 private:
+    bool deamonize_;
+    std::string pidFile_;
+
     EventLoopPoolPtr childPool_;
     ChannelOptions childOptions_;
     Channel::Initializer childInitializer_;
 
     ChannelHandlerContext* parentHandler_;
-    std::vector<ChannelPtr> serverChannels_;
 };
+
+inline
+bool ServerBootstrap::deamonize() const {
+    return deamonize_;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setDeamonize(bool deamon) {
+    deamonize_ = deamon;
+    return *this;
+}
+
+inline
+const std::string ServerBootstrap::pidFileName() const {
+    return pidFile_;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setPidFileName(const std::string& fileName) {
+    pidFile_ = fileName;
+    return *this;
+}
+
+inline
+const EventLoopPoolPtr& ServerBootstrap::parentLoopPool() const {
+    return eventLoopPool();
+}
 
 inline
 const ChannelOptions& ServerBootstrap::childOptions() const {
@@ -279,7 +315,20 @@ const ChannelOptions& ServerBootstrap::childOptions() const {
 }
 
 inline
-const EventLoopPoolPtr& ServerBootstrap::childPool() const {
+ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
+        const ChannelOption::Variant& value) {
+    childOptions_.setOption(option, value);
+    return *this;
+}
+
+inline
+ServerBootstrap& ServerBootstrap::setChildOptions(const ChannelOptions& options) {
+    childOptions_ = options;
+    return *this;
+}
+
+inline
+const EventLoopPoolPtr& ServerBootstrap::childLoopPool() const {
     return childPool_;
 }
 
@@ -298,11 +347,6 @@ inline
 ServerBootstrap& ServerBootstrap::setChildInitializer(const Channel::Initializer& initializer) {
     childInitializer_ = initializer;
     return *this;
-}
-
-inline
-const std::vector<ChannelPtr>& ServerBootstrap::serverChannels() const {
-    return serverChannels_;
 }
 
 }

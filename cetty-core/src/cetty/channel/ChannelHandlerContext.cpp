@@ -18,7 +18,7 @@
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/NullChannel.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/DefaultChannelFuture.h>
 #include <cetty/channel/ChannelPipelineException.h>
@@ -525,7 +525,7 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
     }
 }
 
-const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAddress,
+const ChannelFuturePtr& ChannelHandlerContext::bind(const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
 
     if (prevBindHandler_) {
@@ -555,9 +555,9 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(const SocketAddress& localAd
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
-        const SocketAddress& localAddress,
+        const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
-    if (!localAddress.validated()) {
+    if (!localAddress) {
         future->setFailure(ChannelException("localAddress is invalid."));
         return future;
     }
@@ -612,8 +612,8 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
     return future;
 }
 
-const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
+const ChannelFuturePtr& ChannelHandlerContext::connect(const InetAddress& remoteAddress,
+        const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
     if (prevConnectHandler_) {
         return connect(*prevConnectHandler_, remoteAddress, localAddress, future);
@@ -642,11 +642,11 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(const SocketAddress& remo
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ctx,
-        const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
+        const InetAddress& remoteAddress,
+        const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
 
-    if (!remoteAddress.validated()) {
+    if (!remoteAddress) {
         future->setFailure(ChannelException("remoteAddress is invalid."));
         return future;
     }

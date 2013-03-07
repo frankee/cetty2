@@ -21,7 +21,7 @@
 #include <boost/assert.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/ChannelException.h>
@@ -114,7 +114,7 @@ AsioSocketChannel::~AsioSocketChannel() {
 }
 
 #if 0
-const SocketAddress& AsioSocketChannel::localAddress() const {
+const InetAddress& AsioSocketChannel::localAddress() const {
     if (localAddress.validated()) {
         return localAddress;
     }
@@ -123,8 +123,8 @@ const SocketAddress& AsioSocketChannel::localAddress() const {
     tcp::endpoint endpoint = tcpSocket_.local_endpoint(ec);
 
     if (!ec) {
-        localAddress = SocketAddress(SocketAddressImplPtr(
-                                         new AsioTcpSocketAddressImpl(
+        localAddress = InetAddress(InetAddressImplPtr(
+                                         new AsioTcpInetAddressImpl(
                                              ioService_->service(),
                                              endpoint)));
     }
@@ -135,7 +135,7 @@ const SocketAddress& AsioSocketChannel::localAddress() const {
     return localAddress;
 }
 
-const SocketAddress& AsioSocketChannel::remoteAddress() const {
+const InetAddress& AsioSocketChannel::remoteAddress() const {
     if (remoteAddress.validated()) {
         return remoteAddress;
     }
@@ -144,8 +144,8 @@ const SocketAddress& AsioSocketChannel::remoteAddress() const {
     tcp::endpoint endpoint = tcpSocket_.remote_endpoint(ec);
 
     if (!ec) {
-        remoteAddress = SocketAddress(SocketAddressImplPtr(
-                                          new AsioTcpSocketAddressImpl(
+        remoteAddress = InetAddress(InetAddressImplPtr(
+                                          new AsioTcpInetAddressImpl(
                                               ioService_->service(),
                                               endpoint)));
     }
@@ -311,10 +311,10 @@ void AsioSocketChannel::cleanUpWriteBuffer() {
     }
 }
 
-void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
-                                  const SocketAddress& localAddress,
+void AsioSocketChannel::doConnect(const InetAddress& remoteAddress,
+                                  const InetAddress& localAddress,
                                   const ChannelFuturePtr& connectFuture) {
-    const std::string& hostname = remoteAddress.hostName();
+    const std::string& hostname = remoteAddress.host();
     std::string port = StringUtil::numtostr(remoteAddress.port());
 
     boost::asio::ip::tcp::resolver resolver(ioService()->service());
@@ -354,7 +354,7 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 
     const EventLoopPoolPtr& pool = eventLoop()->eventLoopPool();
 
-    if (pool && pool->isMainThread()) {
+    if (pool && pool->isSingleThread()) {
         LOG_INFO << "the asio service pool starting to run in main thread.";
 
         if (pool->start()) {
@@ -376,8 +376,8 @@ void AsioSocketChannel::doConnect(const SocketAddress& remoteAddress,
 }
 
 void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
-    const SocketAddress& remoteAddress,
-    const SocketAddress& localAddress,
+    const InetAddress& remoteAddress,
+    const InetAddress& localAddress,
     const ChannelFuturePtr& future) {
     if (!isOpen()) {
         return;
@@ -434,7 +434,7 @@ void AsioSocketChannel::beginRead() {
     isReading_ = true;
 }
 
-void AsioSocketChannel::doBind(const SocketAddress& localAddress) {
+void AsioSocketChannel::doBind(const InetAddress& localAddress) {
 
 }
 
@@ -542,7 +542,7 @@ void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
 
 void AsioSocketChannel::doInitialize() {
     if (!initialized_) {
-        Channel::config().setSetOptionCallback(boost::bind(
+        Channel::config().setOptionSetCallback(boost::bind(
             &AsioSocketChannelConfig::setOption,
             &socketConfig_,
             _1,

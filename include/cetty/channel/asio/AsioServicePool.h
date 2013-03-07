@@ -49,7 +49,7 @@ public:
      */
     AsioServicePool(int threadCnt);
 
-    ~AsioServicePool() {}
+    virtual ~AsioServicePool() {}
 
     /**
      * Run all io_service objects in the pool.
@@ -58,28 +58,28 @@ public:
     virtual bool start();
 
     /**
-     *
-     */
-    virtual void waitForStop();
-
-    /**
      * Stop all io_service objects in the pool.
      */
     virtual void stop();
 
-    virtual const EventLoopPtr& getNextLoop();
+    /**
+     *
+     */
+    virtual void waitingForStop();
+
+    virtual const EventLoopPtr& nextLoop();
 
     /**
      * Get an io_service to use.
      */
-    const AsioServicePtr& getNextService();
+    const AsioServicePtr& nextService();
 
 private:
     AsioServicePool(const AsioServicePool&);
     AsioServicePool& operator=(const AsioServicePool&);
 
     int runIOservice(AsioServiceHolder* holder);
-    AsioServiceHolder* getNextServiceHolder();
+    AsioServiceHolder* nextServiceHolder();
 
 private:
     typedef boost::shared_ptr<boost::thread> ThreadPtr;

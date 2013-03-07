@@ -16,13 +16,9 @@
 
 #include <cetty/bootstrap/ServerBootstrap.h>
 
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelFactory.h>
-#include <cetty/channel/asio/AsioServicePool.h>
-#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
+#include <cetty/channel/InetAddress.h>
+#include <cetty/channel/ChannelPipeline.h>
 #include <cetty/handler/codec/DelimiterBasedFrameDecoder.h>
 #include <cetty/handler/codec/Delimiters.h>
 #include <TelnetServerHandler.h>
@@ -43,6 +39,13 @@ using namespace cetty::util;
  *
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
  */
+
+static bool initializeChannel(const ChannelPtr& channel) {
+    ChannelPipeline& pipeline = channel->pipeline();
+    pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters::lineDelimiter()));
+    pipeline.addLast(new TelnetServerHandler);
+}
+
 int main(int argc, char* argv[]) {
     int threadCount = 1;
 
@@ -50,35 +53,14 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    ChannelFactoryPtr factory = new AsioServerSocketChannelFactory(threadCount);
+    ServerBootstrap bootstrap(threadCount);
 
-    ServerBootstrap bootstrap(factory);
+    bootstrap.setChildInitializer(boost::bind(initializeChannel, _1))
+        .setChannelOption(ChannelOption::CO_TCP_NODELAY, true)
+        .setChannelOption(ChannelOption::CO_SO_REUSEADDR, true)
+        .setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096)
+        .bind(1980)->await();
 
-    bootstrap.setPipeline(ChannelPipelines::pipeline(
-        new DelimiterBasedFrameDecoder(8192, Delimiters::lineDelimiter()),
-        new TelnetServerHandler));
-
-    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
-        .setOption(ChannelOption::CO_SO_REUSEADDR, true)
-        .setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-
-    // Bind and start to accept incoming connections.
-    ChannelFuturePtr f = bootstrap.bind(8080)->await();
-
-    printf("Server is running...\n");
-    printf("To quit server, press 'q'.\n");
-
-    char input;
-
-    do {
-        input = getchar();
-
-        if (input == 'q') {
-            f->channel()->closeFuture()->awaitUninterruptibly();
-            return 0;
-        }
-    }
-    while (true);
-
-    return -1;
+    bootstrap.waitingForExit();
+    return 0;
 }

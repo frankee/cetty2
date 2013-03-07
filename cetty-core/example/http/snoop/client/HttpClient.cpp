@@ -20,7 +20,7 @@
 
 #include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelPipelines.h>
 #include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 
@@ -109,7 +109,7 @@ int main(int argc, const char* argv[]) {
     bootstrap.setPipeline(getPipeline(ssl));
 
     // Start the connection attempt.
-    ChannelFuturePtr future = bootstrap.connect(SocketAddress(host, port));
+    ChannelFuturePtr future = bootstrap.connect(InetAddress(host, port));
 
     // Wait until the connection attempt succeeds or fails.
     ChannelPtr channel = future->awaitUninterruptibly()->channel();

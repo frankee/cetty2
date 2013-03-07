@@ -508,20 +508,20 @@ public:
     void fireUserEventTriggered(const boost::any& evt);
     void fireExceptionCaught(const ChannelException& cause);
 
-    ChannelFuturePtr bind(const SocketAddress& localAddress);
-    ChannelFuturePtr connect(const SocketAddress& remoteAddress);
-    ChannelFuturePtr connect(const SocketAddress& remoteAddress,
-                             const SocketAddress& localAddress);
+    ChannelFuturePtr bind(const InetAddress& localAddress);
+    ChannelFuturePtr connect(const InetAddress& remoteAddress);
+    ChannelFuturePtr connect(const InetAddress& remoteAddress,
+                             const InetAddress& localAddress);
     ChannelFuturePtr disconnect();
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
-    const ChannelFuturePtr& bind(const SocketAddress& localAddress,
+    const ChannelFuturePtr& bind(const InetAddress& localAddress,
                                  const ChannelFuturePtr& future);
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
+    const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
                                     const ChannelFuturePtr& future);
-    const ChannelFuturePtr& connect(const SocketAddress& remoteAddress,
-                                    const SocketAddress& localAddress,
+    const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
+                                    const InetAddress& localAddress,
                                     const ChannelFuturePtr& future);
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
     const ChannelFuturePtr& close(const ChannelFuturePtr& future);

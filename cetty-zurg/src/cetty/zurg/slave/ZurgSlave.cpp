@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     CraftServerBuilder builder;
     builder.registerService(
-        new SlaveServiceImpl(builder.parentPool()->getNextLoop()));
+        new SlaveServiceImpl(builder.parentPool()->nextLoop()));
 
     builder.buildAll().waitingForExit();
     return 0;

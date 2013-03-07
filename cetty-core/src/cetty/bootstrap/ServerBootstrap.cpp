@@ -22,8 +22,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/EventLoop.h>
 #include <cetty/channel/EventLoopPool.h>
-#include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelConfig.h>
 #include <cetty/channel/ChannelException.h>
@@ -32,16 +31,21 @@
 #include <cetty/channel/ChannelFutureListener.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
-
 #include <cetty/util/Exception.h>
-
 #include <cetty/logging/LoggerHelper.h>
+
+#include <cetty/channel/asio/AsioService.h>
+#include <cetty/channel/asio/AsioServicePool.h>
+#include <cetty/channel/asio/AsioServerSocketChannel.h>
+
+#include <cetty/bootstrap/ServerUtil.h>
 
 namespace cetty {
 namespace bootstrap {
 
-using namespace cetty::channel;
 using namespace cetty::util;
+using namespace cetty::channel;
+using namespace cetty::channel::asio;
 
 class Acceptor : private boost::noncopyable {
 public:
@@ -63,13 +67,13 @@ public:
 public:
     Acceptor(ServerBootstrap& bootstrap)
         : bootstrap_(bootstrap),
-          context_() {
+          inboundContainer_() {
     }
 
     ~Acceptor() {}
 
     void registerTo(Context& ctx) {
-        context_ = &ctx;
+        inboundContainer_ = ctx.inboundContainer();
 
         ctx.setChannelMessageUpdatedCallback(boost::bind(
                 &Acceptor::messageUpdated,
@@ -78,7 +82,7 @@ public:
     }
 
     void messageUpdated(ChannelHandlerContext& ctx) {
-        InboundQueue& inboundQueue = context_->inboundContainer()->getMessages();
+        InboundQueue& inboundQueue = inboundContainer_->getMessages();
 
         while (!inboundQueue.empty()) {
             const ChannelPtr& child = inboundQueue.front();
@@ -106,11 +110,120 @@ public:
 
 private:
     ServerBootstrap& bootstrap_;
-    Context* context_;
+    InboundContainer* inboundContainer_;
 };
 
+ServerBootstrap::ServerBootstrap()
+    : deamonize_(false),
+      parentHandler_() {
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool)
+    : Bootstrap<ServerBootstrap>(pool),
+      deamonize_(false),
+      parentHandler_() {
+    setChildEventLoopPool(pool);
+}
+
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent,
+                                 const EventLoopPoolPtr& child)
+    : Bootstrap<ServerBootstrap>(parent),
+      deamonize_(false),
+      parentHandler_() {
+    if (child) {
+        setChildEventLoopPool(child);
+        LOG_WARN << "set null EventLoopPool to child, using parent.";
+    }
+    else {
+        setChildEventLoopPool(parent);
+    }
+}
+
+ServerBootstrap::ServerBootstrap(int parentThreadCnt, int childThreadCnt)
+    : deamonize_(false),
+      parentHandler_() {
+    setParentEventLoopPool(new AsioServicePool(parentThreadCnt));
+
+    if (childThreadCnt > 0) {
+        setChildEventLoopPool(new AsioServicePool(childThreadCnt));
+    }
+}
+
+ServerBootstrap& ServerBootstrap::setParentEventLoopPool(
+    const EventLoopPoolPtr& pool) {
+    if (pool) {
+        if (!childPool_) {
+            childPool_ = pool;
+            LOG_INFO << "child pool has not been set,"
+                     " using the same pool with parent";
+        }
+
+        Bootstrap<ServerBootstrap>::setEventLoopPool(pool);
+    }
+    else {
+        LOG_WARN << "setting the NULL EventLoopPool, skip it";
+    }
+
+    return *this;
+}
+
+ChannelFuturePtr ServerBootstrap::bind() {
+    return bind(localAddress());
+}
+
 ChannelFuturePtr ServerBootstrap::bind(int port) {
-    return bind(SocketAddress(IpAddress::IPv4, port));
+    return bind(InetAddress(InetAddress::FAMILY_IPv4, port));
+}
+
+ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
+    return bind(InetAddress(ip, port));
+}
+
+ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
+    // bossPipeline's life cycle will be managed by the server channel.
+    ChannelPtr channel = newChannel();
+
+    if (!channel) {
+        LOG_INFO << "Server channel factory failed to create a new channel.";
+        return NullChannel::instance()->newFailedFuture(
+                   ChannelException("Failed to create a new channel."));
+    }
+
+    channel->setInitializer(boost::bind(
+                                &ServerBootstrap::initServerChannel,
+                                this,
+                                _1));
+
+    channel->open();
+
+    if (channel->isOpen()) {
+        LOG_INFO << "Opened the AsioServerSocketChannel.";
+        insertChannel(channel->id(), channel);
+    }
+
+    ChannelFuturePtr future = channel->newFuture();
+    channel->bind(localAddress, future)->addListener(
+        ChannelFutureListener::CLOSE_ON_FAILURE);
+
+    return future;
+}
+
+void ServerBootstrap::shutdown() {
+    EventLoopPoolPtr serverPool = eventLoopPool();
+
+    if (serverPool) {
+        serverPool->stop();
+        serverPool->waitingForStop();
+    }
+
+    childPool_->stop();
+    childPool_->waitingForStop();
+
+    clearChannels();
+
+    if (parentHandler_) {
+        delete parentHandler_;
+    }
 }
 
 bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
@@ -126,102 +239,59 @@ bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
     return true;
 }
 
-ChannelFuturePtr ServerBootstrap::bind(const SocketAddress& localAddress) {
-    // bossPipeline's life cycle will be managed by the server channel.
-    ChannelPtr channel = newChannel();
+ChannelPtr ServerBootstrap::newChannel() {
+    const EventLoopPoolPtr& parent = eventLoopPool();
 
-    if (!channel) {
-        LOG_ERROR << "Server channel factory failed to create a new channel.";
-        return NullChannel::instance()->newFailedFuture(
-                   ChannelException("Failed to create a new channel."));
-    }
-
-    channel->setInitializer(boost::bind(
-                                &ServerBootstrap::initServerChannel,
-                                this,
-                                _1));
-
-    channel->initialize();
-
-    if (channel->isOpen()) {
-        LOG_INFO << "Opened the AsioServerSocketChannel.";
-        serverChannels_.push_back(channel);
-    }
-
-    ChannelFuturePtr future = channel->newFuture();
-    channel->bind(localAddress, future)->addListener(ChannelFutureListener::CLOSE_ON_FAILURE);
-
-    return future;
-}
-
-cetty::channel::ChannelFuturePtr ServerBootstrap::bind() {
-    return bind(localAddress());
-}
-
-cetty::channel::ChannelFuturePtr ServerBootstrap::bind(const std::string& ip, int port) {
-    return bind(SocketAddress(ip, port));
-}
-
-ServerBootstrap& ServerBootstrap::setChildOptions(const ChannelOptions& options) {
-    childOptions_ = options;
-    return *this;
-}
-
-ServerBootstrap& ServerBootstrap::setChildOption(const ChannelOption& option,
-        const ChannelOption::Variant& value) {
-    childOptions_.setOption(option, value);
-    return *this;
-}
-
-void ServerBootstrap::shutdown() {
-    EventLoopPoolPtr serverPool = eventLoopPool();
-
-    if (serverPool) {
-        serverPool->stop();
-        serverPool->waitForStop();
-    }
-
-    childPool_->stop();
-    childPool_->waitForStop();
-
-    serverChannels_.clear();
-
-    if (parentHandler_) {
-        delete parentHandler_;
-    }
-}
-
-ServerBootstrap::ServerBootstrap() : parentHandler_() {
-
-}
-
-ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool) : AbstractBootstrap<ServerBootstrap>(pool),
-    parentHandler_() {
-        setChildEventLoopPool(pool);
-}
-
-ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) : AbstractBootstrap<ServerBootstrap>(parent),
-    parentHandler_() {
-        if (child) {
-            setChildEventLoopPool(child);
-            LOG_WARN << "set null EventLoopPool to child, using parent.";
+    if (parent) {
+        if (boost::dynamic_pointer_cast<AsioServicePool>(parent)) {
+            return ChannelPtr(
+                       new AsioServerSocketChannel(parent->nextLoop(),
+                                                   childLoopPool()));
         }
-        else {
-            setChildEventLoopPool(parent);
-        }
-}
-
-ServerBootstrap& ServerBootstrap::setEventLoopPools(const EventLoopPoolPtr& parent, const EventLoopPoolPtr& child) {
-    if (child) {
-        childPool_ = child;
     }
     else {
-        childPool_ = parent;
+        LOG_WARN << "has not set the parent EventLoopPool.";
+        return ChannelPtr();
+    }
+}
+
+void ServerBootstrap::waitingForExit() {
+    const Channels& serverChannels = channels();
+
+    if (deamonize_) {
+        ServerUtil::createPidFile(pidFile_);
+
+        Channels::const_iterator itr = serverChannels.begin();
+
+        for (; itr != serverChannels.end(); ++itr) {
+            itr->second->closeFuture()->awaitUninterruptibly();
+        }
+    }
+    else {
+        printf("Servers: \n");
+        Channels::const_iterator itr = serverChannels.begin();
+
+        for (; itr != serverChannels.end(); ++itr) {
+            printf("    Channel ID: %d has bind to %s\n",
+                   itr->second->id(),
+                   itr->second->localAddress().toString().c_str());
+        }
+
+        printf("To quit server, press 'q'.\n");
+
+        char input;
+
+        do {
+            input = getchar();
+
+            if (input == 'q') {
+                break;
+            }
+        }
+        while (true);
     }
 
-    AbstractBootstrap<ServerBootstrap>::setEventLoopPool(parent);
-
-    return *this;
+    shutdown();
 }
 
 }

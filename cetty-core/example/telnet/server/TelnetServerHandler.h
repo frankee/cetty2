@@ -23,7 +23,7 @@
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelInboundBufferHandlerAdapter.h>
 #include <cetty/channel/ChannelFutureListener.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/StringUtil.h>
 

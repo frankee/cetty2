@@ -19,14 +19,12 @@
 
 /*
  * Copyright (c) 2010-2011 frankee zhou (frankee.zhou at gmail dot com)
- *
  * Distributed under under the Apache License, version 2.0 (the "License").
- *
  */
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuturePtr.h>
-#include <cetty/bootstrap/AbstractBootstrap.h>
+#include <cetty/bootstrap/Bootstrap.h>
 #include <cetty/bootstrap/ClientBootstrapPtr.h>
 
 namespace cetty {
@@ -46,7 +44,7 @@ using namespace cetty::channel;
  * {@link ClientBootstrap} b = ...;
  *
  * // Options for a new channel
- * b.setOption("remoteAddress", boost::any({@link SocketAddress}("example.com", 8080)));
+ * b.setOption("remoteAddress", boost::any({@link InetAddress}("example.com", 8080)));
  * b.setOption("tcpNoDelay", true);
  * b.setOption("receiveBufferSize", 1048576);
  * </pre>
@@ -120,7 +118,7 @@ using namespace cetty::channel;
  * @apiviz.landmark
  */
 
-class ClientBootstrap : public AbstractBootstrap<ClientBootstrap> {
+class ClientBootstrap : public Bootstrap<ClientBootstrap> {
 public:
     /**
      * Creates a new instance with no {@link ChannelFactory} set.
@@ -128,16 +126,22 @@ public:
      * operation is requested.
      */
     ClientBootstrap();
+    ClientBootstrap(const EventLoopPtr& eventLoop);
     ClientBootstrap(const EventLoopPoolPtr& pool);
+
+    ClientBootstrap(int threadCnt);
 
     virtual ~ClientBootstrap() {}
 
-    const SocketAddress& remoteAddress() const;
-    ClientBootstrap& setRemoteAddress(const SocketAddress& address);
+    const InetAddress& remoteAddress() const;
+
+    ClientBootstrap& setRemoteAddress(const InetAddress& address);
     ClientBootstrap& setRemoteAddress(const std::string& host, int port);
 
     const Channel::Initializer& channelInitializer() const;
-    ClientBootstrap& setChannelInitializer(const Channel::Initializer& initializer);
+
+    ClientBootstrap& setChannelInitializer(
+        const Channel::Initializer& initializer);
 
     ChannelFuturePtr connect();
 
@@ -181,7 +185,7 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    ChannelFuturePtr connect(const SocketAddress& remoteAddress);
+    ChannelFuturePtr connect(const InetAddress& remoteAddress);
 
     /**
      * Attempts a new connection with the specified <tt>remoteAddress</tt> and
@@ -196,25 +200,23 @@ public:
      *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
      *            failed to create a new {@link ChannelPipeline}
      */
-    ChannelFuturePtr connect(const SocketAddress& remote, const SocketAddress& local);
+    ChannelFuturePtr connect(const InetAddress& remote, const InetAddress& local);
+
+    virtual void waitingForExit();
 
     virtual void shutdown();
 
-protected:
-    virtual ChannelPtr newChannel() = 0;
+private:
+    ChannelPtr newChannel();
 
 private:
-    typedef std::map<int, ChannelPtr> ClientChannels;
-
-private:
-    SocketAddress remoteAddress_;
+    EventLoopPtr eventLoop_;
+    InetAddress remoteAddress_;
     Channel::Initializer initializer_;
-
-    ClientChannels clientChannels_;
 };
 
 inline
-ClientBootstrap& ClientBootstrap::setRemoteAddress(const SocketAddress& address) {
+ClientBootstrap& ClientBootstrap::setRemoteAddress(const InetAddress& address) {
     remoteAddress_ = address;
     return *this;
 }
@@ -222,12 +224,12 @@ ClientBootstrap& ClientBootstrap::setRemoteAddress(const SocketAddress& address)
 inline
 ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
         int port) {
-    remoteAddress_ = SocketAddress(host, port);
+    remoteAddress_ = InetAddress(host, port);
     return *this;
 }
 
 inline
-const SocketAddress& ClientBootstrap::remoteAddress() const {
+const InetAddress& ClientBootstrap::remoteAddress() const {
     return remoteAddress_;
 }
 
@@ -250,7 +252,7 @@ ChannelFuturePtr ClientBootstrap::connect() {
 
 inline
 ChannelFuturePtr ClientBootstrap::connect(const std::string& host, int port) {
-    return connect(SocketAddress(host, port));
+    return connect(InetAddress(host, port));
 }
 
 }

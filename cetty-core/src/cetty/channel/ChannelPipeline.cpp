@@ -17,7 +17,7 @@
 #include <cetty/channel/ChannelPipeline.h>
 
 #include <cetty/channel/Channel.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/DefaultChannelFuture.h>
@@ -561,11 +561,11 @@ void ChannelPipeline::fireMessageUpdated() {
     }
 }
 
-ChannelFuturePtr ChannelPipeline::bind(const SocketAddress& localAddress) {
+ChannelFuturePtr ChannelPipeline::bind(const InetAddress& localAddress) {
     return bind(localAddress, channel_.lock()->newFuture());
 }
 
-const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
+const ChannelFuturePtr& ChannelPipeline::bind(const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
     if (tail_) {
         return tail_->bind(*tail_, localAddress, future);
@@ -577,28 +577,28 @@ const ChannelFuturePtr& ChannelPipeline::bind(const SocketAddress& localAddress,
     }
 }
 
-ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress) {
+ChannelFuturePtr ChannelPipeline::connect(const InetAddress& remoteAddress) {
     return connect(remoteAddress,
-                   SocketAddress::NULL_ADDRESS,
+                   InetAddress::NULL_ADDRESS,
                    channel_.lock()->newFuture());
 }
 
-ChannelFuturePtr ChannelPipeline::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress) {
+ChannelFuturePtr ChannelPipeline::connect(const InetAddress& remoteAddress,
+        const InetAddress& localAddress) {
     return connect(remoteAddress,
                    localAddress,
                    channel_.lock()->newFuture());
 }
 
-const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress,
+const ChannelFuturePtr& ChannelPipeline::connect(const InetAddress& remoteAddress,
         const ChannelFuturePtr& future) {
     return connect(remoteAddress,
-                   SocketAddress::NULL_ADDRESS,
+                   InetAddress::NULL_ADDRESS,
                    future);
 }
 
-const ChannelFuturePtr& ChannelPipeline::connect(const SocketAddress& remoteAddress,
-        const SocketAddress& localAddress,
+const ChannelFuturePtr& ChannelPipeline::connect(const InetAddress& remoteAddress,
+        const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
     if (tail_) {
         return tail_->connect(*tail_, remoteAddress, localAddress, future);

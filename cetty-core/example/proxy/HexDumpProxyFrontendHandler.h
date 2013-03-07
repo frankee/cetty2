@@ -37,7 +37,7 @@ public:
         const ChannelPtr& inboundChannel = ctx.channel();
 
         // Start the connection attempt.
-        AbstractBootstrap b = new AbstractBootstrap();
+        Bootstrap b = new Bootstrap();
         b.group(inboundChannel.eventLoop())
         .channel(NioSocketChannel.class)
         .remoteAddress(remoteHost, remotePort)

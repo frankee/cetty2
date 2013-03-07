@@ -39,7 +39,7 @@ public:
     static const ChannelPtr& instance();
 
 protected:
-    virtual void doBind(const SocketAddress& localAddress) {}
+    virtual void doBind(const InetAddress& localAddress) {}
     virtual void doDisconnect() {}
     virtual void doClose() {}
 

@@ -24,8 +24,7 @@
 #include <deque>
 #include <boost/asio.hpp>
 
-#include <cetty/channel/IpAddress.h>
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/EventLoopPoolPtr.h>
 
 #include <cetty/channel/asio/AsioSocketChannel.h>
@@ -70,7 +69,7 @@ public:
     }
 
 protected:
-    virtual void doBind(const SocketAddress& localAddress);
+    virtual void doBind(const InetAddress& localAddress);
     virtual void doDisconnect();
     virtual void doClose();
 
@@ -101,8 +100,8 @@ private:
 
     ReusableChildChannels reusableChildChannels_;
 
-    IpAddress::Family ipFamily;
-    mutable SocketAddress localAddress;
+    int addressFamily;
+    mutable InetAddress localAddress;
 };
 
 }

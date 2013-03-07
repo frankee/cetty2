@@ -17,7 +17,7 @@
 
 #include <boost/bind.hpp>
 
-#include <cetty/channel/SocketAddress.h>
+#include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/VoidChannelFuture.h>
 #include <cetty/channel/FailedChannelFuture.h>
@@ -59,10 +59,10 @@ Channel::~Channel() {
     }
 }
 
-void Channel::initialize() {
+void Channel::open() {
     ChannelPtr self = shared_from_this();
 
-    if (!succeededFuture_) {
+    if (!succeededFuture_) { // Once have been opened
         pipeline_ = new ChannelPipeline(self);
         succeededFuture_ = new SucceededChannelFuture(self);
         closeFuture_ = new DefaultChannelFuture(self, false);
@@ -133,10 +133,10 @@ std::string Channel::toString() const {
         return strVal_;
     }
 
-    const SocketAddress& local = localAddress();
-    const SocketAddress& remote = remoteAddress();
+    const InetAddress& local = localAddress();
+    const InetAddress& remote = remoteAddress();
 
-    if (remote.validated()) {
+    if (remote) {
         if (!parent()) { // server channel or client channel
             StringUtil::printf(&strVal_, "[id: 0x%08x, %s => %s]", id(),
                                local.toString().c_str(),
@@ -148,7 +148,7 @@ std::string Channel::toString() const {
                                local.toString().c_str());
         }
     }
-    else if (local.validated()) {
+    else if (local) {
         StringUtil::printf(&strVal_, "[id: 0x%08x, %s]", id(),
                            local.toString().c_str());
     }
@@ -160,7 +160,7 @@ std::string Channel::toString() const {
 }
 
 void Channel::doBind(ChannelHandlerContext& ctx,
-                     const SocketAddress& localAddress,
+                     const InetAddress& localAddress,
                      const ChannelFuturePtr& future) {
     if (!isOpen()) {
         return;
@@ -169,6 +169,8 @@ void Channel::doBind(ChannelHandlerContext& ctx,
     try {
         bool wasActive = isActive();
         doBind(localAddress);
+        localAddress_ = localAddress;
+
         future->setSuccess();
 
         if (!wasActive && isActive()) {
@@ -176,6 +178,9 @@ void Channel::doBind(ChannelHandlerContext& ctx,
         }
     }
     catch (const std::exception& e) {
+        LOG_DEBUG << "exception happened : " << e.what()
+                  << ", when binding to " << localAddress.toString();
+
         //future->setFailure(e);
         //channel.pipeline->fireExceptionCaught(t);
         closeIfClosed();
