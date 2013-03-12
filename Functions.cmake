@@ -83,54 +83,33 @@ function(cxx_executable_current_path_no_link name)
   cxx_executable_with_flags_no_link(${name} 0 "${name}.cpp" ${ARGN})
 endfunction()
 
-set (MEMPOOL_LIBRARY "")
-if (GPERFTOOLS_LIBRARY AND CMAKE_BUILD_TYPE)
-  string(COMPARE NOTEQUAL ${CMAKE_BUILD_TYPE} "DEBUG" IS_RELEASE)
-  if (${IS_RELEASE})
-    set (MEMPOOL_LIBRARY ${GPERFTOOLS_LIBRARY})
-	MESSAGE(STATUS "seting the MEMPOOL_LIBRARY to ${GPERFTOOLS_LIBRARY}")
-  endif (${IS_RELEASE})
-endif (GPERFTOOLS_LIBRARY AND CMAKE_BUILD_TYPE)
-
 function(cxx_link name)
   if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${MEMPOOL_LIBRARY} ${ARGN})
+    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${ARGN})
   elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${Boost_LIBRARIES} ${MEMPOOL_LIBRARY} ${ARGN})
+    target_link_libraries(${name} ${Boost_LIBRARIES} ${ARGN})
   endif()
 endfunction()
 
-function(cxx_link_pb name)
+function(cxx_link_with_pb name)
   if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} z)
   elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} z)
   endif()
 endfunction()
-
-set(CRAFT_LIBRARYS cetty-craft cetty-protobuf cetty-protobuf-serialization cetty-service cetty-config cetty)
 
 function(cxx_link_craft name)
   if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${CETTY_LIBRARYS} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARY} z)
   elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
-  endif()
-endfunction()
-
-set(GEARMAN_LIBRARYS cetty-gearman cetty-protobuf cetty-protobuf-serialization cetty-service cetty-config cetty)
-
-function(cxx_link_gearman name)
-  if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${GEARMAN_LIBRARYS} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
-  elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${GEARMAN_LIBRARYS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${CETTY_LIBRARYS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${YAMLCPP_LIBRARY} z)
   endif()
 endfunction()
 
 function(GENERATE_SERVICE SRCS)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: GENERATE_SERVICE() called without any proto files")
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE() called without any proto files")
     return()
   endif(NOT ARGN)
 
@@ -150,8 +129,8 @@ function(GENERATE_SERVICE SRCS)
 	
     add_custom_command(
       OUTPUT ${OUT_SOURCE} ${OUT_HEADER}
-      COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+      COMMAND ${CETTY_SERVICE_GENERATOR}
+	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR} -I${CETTY_INCLUDE_DIR} 
 	  COMMAND mv
 	  ARGS ${GEN_HEADER} ${OUT_HEADER}
 	  COMMAND mv
@@ -165,7 +144,7 @@ endfunction()
 
 function(GENERATE_SERVICE_SEPARATE SRCS HDRS)
   if(NOT ARGN)
-    message(SEND_ERROR "Error: GENERATE_SERVICE_SEPARATE() called without any proto files")
+    message(SEND_ERROR "Error: PROTOBUF_GENERATE_SERVICE_SEPARATE() called without any proto files")
     return()
   endif(NOT ARGN)
 
@@ -185,8 +164,8 @@ function(GENERATE_SERVICE_SEPARATE SRCS HDRS)
 
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/ProtobufServiceGenerator
-	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND ${CETTY_SERVICE_GENERATOR}
+	  ARGS ${FIL} --service_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR} -I${CETTY_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
@@ -220,7 +199,7 @@ function(GENERATE_PROTOBUF SRCS HDRS)
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
 	  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-	  ARGS ${FIL} --cpp_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  ARGS ${FIL} --cpp_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR} -I${CETTY_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
@@ -254,8 +233,8 @@ function(GENERATE_CONFIG SRCS HDRS)
 
     add_custom_command(
       OUTPUT ${OUT_HEADER} ${OUT_SOURCE}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/ConfigGenerator
-	  ARGS ${FIL} --config_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR}
+	  COMMAND ${CETTY_CONFIG_GENERATOR}
+	  ARGS ${FIL} --config_out=. -I. -I${PROJECT_INCLUDE_DIR} -I${PROTOBUF_INCLUDE_DIR} -I${CETTY_INCLUDE_DIR}
 	  COMMAND mv
 	  ARGS ${GEN_SOURCE} ${OUT_SOURCE}
       WORKING_DIRECTORY ${PROJECT_INCLUDE_DIR}
