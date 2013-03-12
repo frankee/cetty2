@@ -15,6 +15,9 @@ namespace beanstalk {
 namespace protocol {
 namespace command {
 
+#define DEFAULT_PRIORITY 1024
+#define DEFAULT_TTR 60
+
 /**
 * Adds a job consisting of a string to the server
 *
@@ -25,7 +28,10 @@ namespace command {
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 * @throws ServerException With reason JOB_TOO_BIG on jobs the server deems too big
 */
-BeanstalkCommandPtr put(const std::string &data);
+BeanstalkCommandPtr put(const std::string &data,
+		                int pri = DEFAULT_PRIORITY,
+		                int delay = 0,
+		                int ttr = DEFAULT_TTR);
 
 /**
 * Selects the tube to send jobs through. If no tube has been selected,
