@@ -216,7 +216,6 @@ private:
 
     void onOpen(ChannelHandlerContext& ctx) {
         setActived();
-        pipeline->fireChannelActive();
     }
 
     void registerInboundTo(const ChannelPtr& channel, InboundOutContext& ctx) {

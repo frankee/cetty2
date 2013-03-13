@@ -233,7 +233,6 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
                  << remoteAddress().toString();
         
         setActived();
-        pipeline().fireChannelActive();
         cf->setSuccess();
 
         beginRead();

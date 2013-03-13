@@ -188,9 +188,7 @@ public:
      */
     bool isActive() const;
 
-    void setActived() {
-        state_ = CHANNEL_ACTIVED;
-    }
+    void setActived();
 
     /**
      * Returns the local address where this channel is bound to.

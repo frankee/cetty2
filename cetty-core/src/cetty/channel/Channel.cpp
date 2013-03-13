@@ -173,8 +173,8 @@ void Channel::doBind(ChannelHandlerContext& ctx,
         bool wasActive = isActive();
 
         if (doBind(localAddress)) {
+            setActived();
             future->setSuccess();
-            pipeline_->fireChannelActive();
         }
         else {
             LOG_WARN << "unable binding to " << localAddress.toString();
@@ -252,6 +252,11 @@ void Channel::closeIfClosed() {
     }
 
     //close(voidFuture());
+}
+
+void Channel::setActived() {
+    state_ = CHANNEL_ACTIVED;
+    pipeline_->fireChannelActive();
 }
 
 }

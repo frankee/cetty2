@@ -168,7 +168,6 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         }
     }
 
-    setActived();
     return true;
 }
 
@@ -209,7 +208,6 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                             100);
 
         channel->setActived();
-        channel->pipeline().fireChannelActive();
         channel->beginRead();
 
         AsioSocketChannelPtr newChannel;
