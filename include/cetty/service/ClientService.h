@@ -55,20 +55,27 @@ public:
 
     virtual ~ClientService() {}
 
-    virtual bool isOpen() const { return true; }
-    virtual bool isActive() const { return true; }
-
     void registerTo(Context& ctx) {
         dispatcher_.registerTo(ctx);
+
+        ctx.setChannelOpenCallback(boost::bind(
+                                       &ClientService::onOpen,
+                                       this,
+                                       _1));
     }
 
 private:
-    void doBind(const InetAddress& localAddress) {}
-    void doDisconnect() {}
-    void doClose() {}
+    bool doBind(const InetAddress& localAddress) { return true; }
+    bool doDisconnect() { return true; }
+    bool doClose() { return true; }
 
     void doInitialize() {
         pipeline().setHead(new Context("dispatcher", this));
+    }
+
+    void onOpen(ChannelHandlerContext& ctx) {
+        setActived();
+        ctx.fireChannelActive(ctx);
     }
 
 private:

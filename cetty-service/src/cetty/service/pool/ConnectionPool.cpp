@@ -69,21 +69,26 @@ cetty::channel::ChannelPtr ConnectionPool::getChannel() {
 void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     connecting_ = false;
 
-    ChannelConnection* conn = new ChannelConnection;
-    ChannelPtr channel = future.channel();
+    if (future.isSuccess()) {
+        ChannelConnection* conn = new ChannelConnection;
+        ChannelPtr channel = future.channel();
 
-    conn->channel = channel;
-    int id = channel->id();
-    channels_.insert(id, conn);
+        conn->channel = channel;
+        int id = channel->id();
+        channels_.insert(id, conn);
 
-    while (!callbacks_.empty()) {
-        const ConnectedCallback& call = callbacks_.front();
+        while (!callbacks_.empty()) {
+            const ConnectedCallback& call = callbacks_.front();
 
-        if (call) {
-            call(channel);
+            if (call) {
+                call(channel);
+            }
+
+            callbacks_.pop_front();
         }
-
-        callbacks_.pop_front();
+    }
+    else {
+        //TODO
     }
 }
 

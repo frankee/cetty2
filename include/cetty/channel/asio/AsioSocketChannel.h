@@ -82,15 +82,12 @@ public:
 
     const AsioServicePtr& ioService();
 
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
-
     void registerTo(Context& context);
 
 private:
-    virtual void doBind(const InetAddress& localAddress);
-    virtual void doDisconnect();
-    virtual void doClose();
+    virtual bool doBind(const InetAddress& localAddress);
+    virtual bool doDisconnect();
+    virtual bool doClose();
 
     virtual void doInitialize();
 
@@ -135,7 +132,6 @@ private:
     friend class AsioServerSocketChannel;
 
 private:
-    bool opened_;
     bool isReading_;
     bool isWriting_;
     bool initialized_;

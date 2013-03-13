@@ -152,6 +152,7 @@ private:
 
     void channelActive(ChannelHandlerContext& ctx) {
         channel_ = ctx.channel();
+        ctx.fireChannelActive();
     }
 
     void setSuccess(Response& msg) {

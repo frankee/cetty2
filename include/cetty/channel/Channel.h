@@ -179,14 +179,18 @@ public:
     /**
      * Returns <tt>true</tt> if and only if this channel is open.
      */
-    virtual bool isOpen() const = 0;
+    bool isOpen() const;
 
     /**
      * Returns <tt>true</tt> if this channel is bound to a
      * {@link #getLocalAddress() local address} or connected to a
      * {@link #getRemoteAddress() remote address}.
      */
-    virtual bool isActive() const = 0;
+    bool isActive() const;
+
+    void setActived() {
+        state_ = CHANNEL_ACTIVED;
+    }
 
     /**
      * Returns the local address where this channel is bound to.
@@ -212,7 +216,7 @@ public:
     const InetAddress& remoteAddress() const;
 
     ChannelFuturePtr newFuture();
-    
+
     ChannelFuturePtr newVoidFuture();
 
     ChannelFuturePtr newFailedFuture(const Exception& e);
@@ -245,7 +249,7 @@ public:
                              const InetAddress& localAddress);
 
     ChannelFuturePtr disconnect();
-    
+
     ChannelFuturePtr close();
     ChannelFuturePtr flush();
 
@@ -336,39 +340,40 @@ protected:
      * @param sink
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
-
-    */
+     */
     Channel(int id,
             const ChannelPtr& parent,
             const EventLoopPtr& eventLoop);
 
-    virtual void doBind(const InetAddress& localAddress) = 0;
-    virtual void doDisconnect() = 0;
-
-    virtual void doPreClose() {} // NOOP by default
-    virtual void doClose() = 0;
+    virtual bool doBind(const InetAddress& localAddress) = 0;
+    virtual bool doDisconnect() = 0;
+    virtual bool doClose() = 0;
 
     virtual void doInitialize() {}
+    virtual void doPreClose() {} // NOOP by default
 
     void closeIfClosed();
+
+    void setLocalAddress(const InetAddress& local);
+    void setRemoteAddress(const InetAddress& remote);
 
     template<typename C>
     void registerTo(C& context) {
         context.setBindFunctor(boost::bind(&Channel::doBind,
-            this,
-            _1,
-            _2,
-            _3));
+                                           this,
+                                           _1,
+                                           _2,
+                                           _3));
 
         context.setDisconnectFunctor(boost::bind(&Channel::doDisconnect,
-            this,
-            _1,
-            _2));
+                                     this,
+                                     _1,
+                                     _2));
 
         context.setCloseFunctor(boost::bind(&Channel::doClose,
-            this,
-            _1,
-            _2));
+                                            this,
+                                            _1,
+                                            _2));
     }
 
 private:
@@ -386,7 +391,16 @@ private:
                  const ChannelFuturePtr& future);
 
 private:
+    enum ChannelState {
+        CHANNEL_INIT,
+        CHANNEL_OPENED,
+        CHANNEL_ACTIVED,
+        CHANNEL_INACTIVED
+    };
+
+private:
     int id_;
+    int state_;
 
     ChannelPtr parent_;
     EventLoopPtr eventLoop_;
@@ -446,13 +460,33 @@ const InetAddress& Channel::remoteAddress() const {
 }
 
 inline
-void Channel::setInitializer(const Channel::Initializer& initializer) {
-    initializer_ = initializer;
+void Channel::setLocalAddress(const InetAddress& local) {
+    localAddress_ = local;
+}
+
+inline
+void Channel::setRemoteAddress(const InetAddress& remote) {
+    remoteAddress_ = remote;
 }
 
 inline
 const Channel::Initializer& Channel::initializer() const {
     return initializer_;
+}
+
+inline
+void Channel::setInitializer(const Channel::Initializer& initializer) {
+    initializer_ = initializer;
+}
+
+inline
+bool Channel::isOpen() const {
+    return state_ == Channel::CHANNEL_OPENED;
+}
+
+inline
+bool Channel::isActive() const {
+    return state_ == Channel::CHANNEL_ACTIVED;
 }
 
 inline
@@ -467,29 +501,34 @@ const ChannelFuturePtr& Channel::closeFuture() {
 
 inline
 ChannelFuturePtr Channel::bind(const InetAddress& localAddress) {
+    localAddress_ = localAddress;
     return pipeline_->bind(localAddress);
 }
 
 inline
 const ChannelFuturePtr& Channel::bind(const InetAddress& localAddress,
                                       const ChannelFuturePtr& future) {
+    localAddress_ = localAddress;
     return pipeline_->bind(localAddress, future);
 }
 
 inline
 ChannelFuturePtr Channel::connect(const InetAddress& remoteAddress) {
+    remoteAddress_ = remoteAddress;
     return pipeline_->connect(remoteAddress);
 }
 
 inline
 ChannelFuturePtr Channel::connect(const InetAddress& remoteAddress,
                                   const InetAddress& localAddress) {
+    remoteAddress_ = remoteAddress;
     return pipeline_->connect(remoteAddress, localAddress);
 }
 
 inline
 const ChannelFuturePtr& Channel::connect(const InetAddress& remoteAddress,
         const ChannelFuturePtr& future) {
+    remoteAddress_ = remoteAddress;
     return pipeline_->connect(remoteAddress, future);
 }
 
@@ -497,6 +536,7 @@ inline
 const ChannelFuturePtr& Channel::connect(const InetAddress& remoteAddress,
         const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
+    remoteAddress_ = remoteAddress;
     return pipeline_->connect(remoteAddress, localAddress, future);
 }
 

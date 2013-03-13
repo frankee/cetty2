@@ -66,7 +66,6 @@ public:
 public:
     EmbeddedChannel()
         : Channel(ChannelPtr(), new EmbeddedEventLoop),
-          state_(),
           lastException_() {
     }
 
@@ -74,7 +73,6 @@ public:
     EmbeddedChannel(typename const ChannelHandlerWrapper<T>::HandlerPtr& handler)
         : Channel(ChannelPtr(),
                   new EmbeddedEventLoop),
-        state_(),
         lastException_() {
         contexts_.push_back(
             new typename ChannelHandlerWrapper<T>::Handler::Context("1", t));
@@ -84,14 +82,6 @@ public:
         if (lastException_) {
             delete lastException_;
         }
-    }
-
-    virtual bool isActive() const {
-        return state_ == 1;
-    }
-
-    virtual bool isOpen() const {
-        return state_ < 2;
     }
 
     template<typename T, typename MessageT>
@@ -171,16 +161,16 @@ protected:
         return outboundOutContainer_ && !outboundOutContainer_->empty();
     }
 
-    void doBind(const InetAddress& localAddress) {
-        // NOOP
+    virtual bool doBind(const InetAddress& localAddress) {
+        return true; // NOOP
     }
 
-    void doDisconnect() {
-        doClose();
+    virtual bool doDisconnect() {
+        return doClose();
     }
 
-    void doClose() {
-        state_ = 2;
+    virtual bool doClose() {
+        return true;
     }
 
 private:
@@ -199,18 +189,18 @@ private:
         ChannelPipeline& pipeline = Channel::pipeline();
 
         pipeline.addLast<ThisChannel*>("inboundOut",
-                                     this,
-                                     boost::bind(&EmbeddedChannel::registerInboundTo,
-                                             this,
-                                             _1,
-                                             _2));
+                                       this,
+                                       boost::bind(&EmbeddedChannel::registerInboundTo,
+                                               this,
+                                               _1,
+                                               _2));
 
         pipeline.setHead<ThisChannel*>("outboutOut",
-                                      this,
-                                      boost::bind(&EmbeddedChannel::registerOutboundTo,
-                                              this,
-                                              _1,
-                                              _2));
+                                       this,
+                                       boost::bind(&EmbeddedChannel::registerOutboundTo,
+                                               this,
+                                               _1,
+                                               _2));
     }
 
     void exceptionCaught(ChannelHandlerContext& ctx,
@@ -220,13 +210,13 @@ private:
         }
         else {
             LOG_WARN <<  "More than one exception was raised. "
-                              "Will report only the first one and log others.";
+                     "Will report only the first one and log others.";
         }
     }
 
-    void onChannelOpen(ChannelHandlerContext& ctx) {
+    void onOpen(ChannelHandlerContext& ctx) {
+        setActived();
         pipeline->fireChannelActive();
-        state_ = 1;
     }
 
     void registerInboundTo(const ChannelPtr& channel, InboundOutContext& ctx) {
@@ -238,7 +228,7 @@ private:
                                      _2));
 
         ctx.setChannelOpenCallback(boost::bind(
-                                       &ThisChannel::onChannelOpen,
+                                       &ThisChannel::onOpen,
                                        this,
                                        _1));
     }
@@ -248,7 +238,6 @@ private:
     }
 
 private:
-    int state_; // 0 = OPEN, 1 = ACTIVE, 2 = CLOSED
     Exception* lastException_;
 
     InboundOutContainer* inboundOutContainer_;
@@ -262,7 +251,7 @@ ChannelBufferPtr EmbeddedChannel<ChannelBufferPtr,
                  OutboundOut,
                  ChannelBufferContainer,
 OutboundOutContainer>::readInbound() {
-    const ChannelBufferPtr& out = inboundOutContext_->getMessages();
+    const ChannelBufferPtr& out = inboundOutContainer_->getMessages();
     return out;
 }
 

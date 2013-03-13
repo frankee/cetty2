@@ -29,13 +29,5 @@ const ChannelPtr& NullChannel::instance() {
     return nullChannel;
 }
 
-bool NullChannel::isOpen() const {
-    return false;
-}
-
-bool NullChannel::isActive() const {
-    return false;
-}
-
 }
 }

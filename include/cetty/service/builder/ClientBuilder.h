@@ -78,8 +78,6 @@ public:
         }
 
         channel->open();
-        channel->pipeline().fireChannelActive();
-
         return channel;
     }
 

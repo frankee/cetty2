@@ -35,6 +35,7 @@ namespace channel {
 Channel::Channel(const ChannelPtr& parent,
                  const EventLoopPtr& eventLoop)
     : id_(),
+      state_(CHANNEL_INIT),
       parent_(parent),
       eventLoop_(eventLoop),
       pipeline_() {
@@ -45,6 +46,7 @@ Channel::Channel(int id,
                  const ChannelPtr& parent,
                  const EventLoopPtr& eventLoop)
     : id_(id),
+      state_(CHANNEL_INIT),
       parent_(parent),
       eventLoop_(eventLoop),
       pipeline_() {
@@ -77,6 +79,7 @@ void Channel::open() {
 
     doInitialize();
 
+    state_ = CHANNEL_OPENED;
     pipeline_->fireChannelOpen();
 }
 
@@ -168,13 +171,15 @@ void Channel::doBind(ChannelHandlerContext& ctx,
 
     try {
         bool wasActive = isActive();
-        doBind(localAddress);
-        localAddress_ = localAddress;
 
-        future->setSuccess();
-
-        if (!wasActive && isActive()) {
+        if (doBind(localAddress)) {
+            future->setSuccess();
             pipeline_->fireChannelActive();
+        }
+        else {
+            LOG_WARN << "unable binding to " << localAddress.toString();
+            future->setFailure(ChannelException("unable binding"));
+            closeIfClosed();
         }
     }
     catch (const std::exception& e) {
@@ -187,20 +192,24 @@ void Channel::doBind(ChannelHandlerContext& ctx,
     }
 }
 
-void Channel::doDisconnect(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
+void Channel::doDisconnect(ChannelHandlerContext& ctx,
+                           const ChannelFuturePtr& future) {
     try {
-        bool wasActive = isActive();
-        doDisconnect();
-        future->setSuccess();
-
-        if (wasActive && !isActive()) {
-            pipeline_->fireChannelInactive();
+        if (isActive()) {
+            if (doDisconnect()) {
+                pipeline_->fireChannelInactive();
+            }
+        }
+        else {
+            future->setSuccess();
         }
     }
     catch (const std::exception& e) {
         //future.setFailure(t);
         closeIfClosed();
     }
+
+    state_ = CHANNEL_INACTIVED;
 }
 
 void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future) {
@@ -209,8 +218,15 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
     if (isOpen()) {
         try {
             doPreClose();
-            doClose();
-            future->setSuccess();
+
+            if (doClose()) {
+                future->setSuccess();
+
+                if (wasActive) {
+                    //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
+                    pipeline_->fireChannelInactive();
+                }
+            }
         }
         catch (const std::exception& e) {
             //future->setFailure(t);
@@ -221,16 +237,13 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
         //}
 
         //notifyFlushFutures(closedChannelException);
-
-        if (wasActive && !isActive()) {
-            //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
-            pipeline_->fireChannelInactive();
-        }
     }
     else {
         // Closed already.
         future->setSuccess();
     }
+
+    state_ = CHANNEL_INACTIVED;
 }
 
 void Channel::closeIfClosed() {

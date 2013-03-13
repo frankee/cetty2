@@ -88,8 +88,9 @@ AsioServerSocketChannel::~AsioServerSocketChannel() {
 //     return localAddress;
 // }
 
-void AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
+bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
     std::string host = localAddress.host();
+
     if (host.empty()) {
         host = "0.0.0.0";
     }
@@ -110,7 +111,8 @@ void AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
 
         if (ec) {
             LOG_ERROR << "failed to reopen the acceptor in different ip family.";
-            return doClose();
+            doClose();
+            return false;
         }
         else {
             LOG_INFO << "the server channel (acceptor) changed to open in IPV6 mode.";
@@ -124,8 +126,9 @@ void AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
 
     if (ec) {
         LOG_ERROR << "the server channel (acceptor) can not bind to the "
-            << localAddress.toString();
-        return doClose();
+                  << localAddress.toString();
+        doClose();
+        return false;
     }
 
     const boost::optional<int> backlog = socketConfig_.backlog();
@@ -139,8 +142,9 @@ void AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
 
     if (ec) {
         LOG_ERROR << "the server channel (acceptor) can not listen the "
-            << localAddress.toString();
-        return doClose();
+                  << localAddress.toString();
+        doClose();
+        return false;
     }
 
     accept();
@@ -163,6 +167,9 @@ void AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
             LOG_INFO << "the asio service pool started to running.";
         }
     }
+
+    setActived();
+    return true;
 }
 
 void AsioServerSocketChannel::accept() {
@@ -201,6 +208,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                                 _1),
                                             100);
 
+        channel->setActived();
         channel->pipeline().fireChannelActive();
         channel->beginRead();
 
@@ -232,7 +240,7 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
     }
 }
 
-void AsioServerSocketChannel::doClose() {
+bool AsioServerSocketChannel::doClose() {
     boost::system::error_code error;
 
     if (acceptor_.is_open()) {
@@ -257,18 +265,12 @@ void AsioServerSocketChannel::doClose() {
     }
 
     closeFuture()->setSuccess();
+
+    return true;
 }
 
-void AsioServerSocketChannel::doDisconnect() {
-    // NOOP
-}
-
-bool AsioServerSocketChannel::isActive() const {
-    return acceptor_.is_open() && localAddress;
-}
-
-bool AsioServerSocketChannel::isOpen() const {
-    return acceptor_.is_open();
+bool AsioServerSocketChannel::doDisconnect() {
+    return true; // NOOP
 }
 
 void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
@@ -279,12 +281,13 @@ void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
 #if !defined(NDEBUG)
         AsioSocketChannelPtr ch = itr->second;
         LOG_INFO << "the channel : " << ch->id()
-            << " 's use count is " << ch.use_count();
+                 << " 's use count is " << ch.use_count();
 
         if (ch.use_count() > 2) {
             LOG_ERROR << "the channel : " << ch->id()
-                << " has not closed properly.";
+                      << " has not closed properly.";
         }
+
 #endif
 
         reusableChildChannels_.push_back(itr->second);

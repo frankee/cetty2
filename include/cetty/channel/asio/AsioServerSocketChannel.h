@@ -49,9 +49,6 @@ public:
 
     virtual ~AsioServerSocketChannel();
 
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
-
 public:
     typedef ChannelMessageHandlerContext<
         AsioServerSocketChannel*,
@@ -69,9 +66,9 @@ public:
     }
 
 protected:
-    virtual void doBind(const InetAddress& localAddress);
-    virtual void doDisconnect();
-    virtual void doClose();
+    virtual bool doBind(const InetAddress& localAddress);
+    virtual bool doDisconnect();
+    virtual bool doClose();
 
     virtual void doInitialize();
 

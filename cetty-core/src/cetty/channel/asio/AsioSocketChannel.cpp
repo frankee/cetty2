@@ -49,7 +49,6 @@ using namespace boost::asio::ip;
 AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
                                      const EventLoopPtr& eventLoop)
     : Channel(parent, eventLoop),
-      opened_(false),
       isReading_(false),
       isWriting_(false),
       initialized_(false),
@@ -64,7 +63,6 @@ AsioSocketChannel::AsioSocketChannel(const ChannelPtr& parent,
 
 AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
     : Channel(ChannelPtr(), eventLoop),
-      opened_(false),
       isReading_(false),
       isWriting_(false),
       initialized_(false),
@@ -79,7 +77,6 @@ AsioSocketChannel::AsioSocketChannel(const EventLoopPtr& eventLoop)
 
 AsioSocketChannel::AsioSocketChannel(int id, const EventLoopPtr& eventLoop)
     : Channel(id, ChannelPtr(), eventLoop),
-      opened_(false),
       isReading_(false),
       isWriting_(false),
       initialized_(false),
@@ -96,7 +93,6 @@ AsioSocketChannel::AsioSocketChannel(int id,
                                      const ChannelPtr& parent,
                                      const EventLoopPtr& eventLoop)
     : Channel(id, parent, eventLoop),
-      opened_(false),
       isReading_(false),
       isWriting_(false),
       initialized_(false),
@@ -124,9 +120,9 @@ const InetAddress& AsioSocketChannel::localAddress() const {
 
     if (!ec) {
         localAddress = InetAddress(InetAddressImplPtr(
-                                         new AsioTcpInetAddressImpl(
-                                             ioService_->service(),
-                                             endpoint)));
+                                       new AsioTcpInetAddressImpl(
+                                           ioService_->service(),
+                                           endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the local address of the channel from asio.";
@@ -145,9 +141,9 @@ const InetAddress& AsioSocketChannel::remoteAddress() const {
 
     if (!ec) {
         remoteAddress = InetAddress(InetAddressImplPtr(
-                                          new AsioTcpInetAddressImpl(
-                                              ioService_->service(),
-                                              endpoint)));
+                                        new AsioTcpInetAddressImpl(
+                                            ioService_->service(),
+                                            endpoint)));
     }
     else {
         LOG_ERROR << "failed to get the remote address of the channel from asio.";
@@ -156,14 +152,6 @@ const InetAddress& AsioSocketChannel::remoteAddress() const {
     return remoteAddress;
 }
 #endif
-
-bool AsioSocketChannel::isActive() const {
-    return tcpSocket_.is_open() /*&& remoteAddress().validated()*/;
-}
-
-bool AsioSocketChannel::isOpen() const {
-    return opened_;
-}
 
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
@@ -178,7 +166,7 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
     else {
         isReading_ = false;
 
-        if (opened_) {
+        if (isOpen()) {
             close(newVoidFuture());
         }
 
@@ -243,7 +231,8 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
     if (!error) {
         LOG_INFO << "channel connected to the remote server %s, firing connected event."
                  << remoteAddress().toString();
-
+        
+        setActived();
         pipeline().fireChannelActive();
         cf->setSuccess();
 
@@ -376,9 +365,9 @@ void AsioSocketChannel::doConnect(const InetAddress& remoteAddress,
 }
 
 void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
-    const InetAddress& remoteAddress,
-    const InetAddress& localAddress,
-    const ChannelFuturePtr& future) {
+                                  const InetAddress& remoteAddress,
+                                  const InetAddress& localAddress,
+                                  const ChannelFuturePtr& future) {
     if (!isOpen()) {
         return;
     }
@@ -423,7 +412,7 @@ void AsioSocketChannel::beginRead() {
 
         buf = readBuffer_->writableBytes(&size);
     }
-    
+
     tcpSocket_.async_read_some(
         boost::asio::buffer(buf, size),
         boost::bind(&AsioSocketChannel::handleRead,
@@ -434,21 +423,19 @@ void AsioSocketChannel::beginRead() {
     isReading_ = true;
 }
 
-void AsioSocketChannel::doBind(const InetAddress& localAddress) {
-
+bool AsioSocketChannel::doBind(const InetAddress& localAddress) {
+    return true;
 }
 
-void AsioSocketChannel::doDisconnect() {
-    doClose();
+bool AsioSocketChannel::doDisconnect() {
+    return doClose();
 }
 
-void AsioSocketChannel::doClose() {
+bool AsioSocketChannel::doClose() {
     if (!isOpen()) {
         LOG_WARN << "do close the socket channel, but the channel already closed.";
-        return;
+        return true;
     }
-
-    opened_ = false;
 
     cleanUpWriteBuffer();
 
@@ -474,6 +461,8 @@ void AsioSocketChannel::doClose() {
     if (!isReading_) {
         closeFuture()->setSuccess();
     }
+
+    return true;
 }
 
 void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
@@ -543,18 +532,16 @@ void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
 void AsioSocketChannel::doInitialize() {
     if (!initialized_) {
         Channel::config().setOptionSetCallback(boost::bind(
-            &AsioSocketChannelConfig::setOption,
-            &socketConfig_,
-            _1,
-            _2));
+                &AsioSocketChannelConfig::setOption,
+                &socketConfig_,
+                _1,
+                _2));
 
         // no need use weak_ptr here
         pipeline().setHead<AsioSocketChannel*>("bridge", this);
 
         initialized_ = true;
     }
-
-    opened_ = true;
 }
 
 void AsioSocketChannel::registerTo(Context& context) {

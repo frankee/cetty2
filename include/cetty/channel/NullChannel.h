@@ -30,18 +30,15 @@ public:
 
     virtual ~NullChannel() {}
 
-    virtual bool isOpen() const;
-    virtual bool isActive() const;
-
     virtual std::string toString() const;
 
 public:
     static const ChannelPtr& instance();
 
 protected:
-    virtual void doBind(const InetAddress& localAddress) {}
-    virtual void doDisconnect() {}
-    virtual void doClose() {}
+    virtual bool doBind(const InetAddress& localAddress) { return true; }
+    virtual bool doDisconnect() { return true; }
+    virtual bool doClose() { return true; }
 
 private:
     static ChannelPtr nullChannel;
