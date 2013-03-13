@@ -59,7 +59,11 @@ BeanstalkCommandPtr peekReady();
 *
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
-BeanstalkCommandPtr del(unsigned int jobId);
+BeanstalkCommandPtr del(int jobId);
+
+BeanstalkCommandPtr release(int id,
+		                    int priority =  DEFAULT_PRIORITY,
+		                    int delay = 0);
 
 /**
 * The bury command puts a job into the "buried" state. Buried jobs are put into a FIFO linked
@@ -72,9 +76,9 @@ BeanstalkCommandPtr del(unsigned int jobId);
 * @throws ServerException With status NOT_FOUND if the job was not found on the server
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
-BeanstalkCommandPtr bury(unsigned int jobId, int priority = 10);
+BeanstalkCommandPtr bury(int jobId, int priority = 10);
 
-BeanstalkCommandPtr kick(unsigned int bound);
+BeanstalkCommandPtr kick(int bound);
 
 /**
  * The "watch" command adds the named tube to the watch list for the current connection. A reserve

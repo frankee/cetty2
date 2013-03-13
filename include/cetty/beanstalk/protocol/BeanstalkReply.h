@@ -24,19 +24,20 @@ using namespace cetty::util;
 
 class BeanstalkReply : public ReferenceCounter<BeanstalkReply> {
 public:
-	BeanstalkReply();
+	BeanstalkReply():id (0){}
 
 	void setResponse(const std::string &response) {
 		this->response = response;
 	}
 
 	const std::string &getResponse() { return response; }
-    std::vector<std::string> &getValue() { return value; }
+
+	void setValue(const std::string &value) { this->value = value; }
+    const std::string &getValue() { return value; }
 
     int getResponseType(const std::string &response);
-    static const std::map<std::string, int> &getReplyMap();
 
-private:
+public:
     static const int INSERTED;
     static const int BURIED;
     static const int USING;
@@ -46,6 +47,10 @@ private:
     static const int FOUND;
     static const int OK;
 
+private:
+    static const std::map<std::string, int> &getReplyMap();
+
+private:
     static const std::string inserted;
     static const std::string buried;
     static const std::string rusing;
@@ -55,8 +60,9 @@ private:
     static const std::string found;
     static const std::string ok;
 
+    int id;
     std::string response;
-    std::vector<std::string> value;
+    std::string value;
 };
 
 typedef boost::intrusive_ptr<BeanstalkReply> BeanstalkReplyPtr;

@@ -35,68 +35,82 @@ public:
     ~BeanstalkClient() {}
 
     typedef boost::function2<void,
-        const BeanstalkServiceFuture&,
-        const BeanstalkReplyPtr&> ReplyCallback;
+    		                 const BeanstalkServiceFuture&,
+                             const BeanstalkReplyPtr&> ReplyCallback;
 
-    typedef boost::function2<void, std::string, const std::vector<StringPiece>&> MultiBulkCallBack;
+    typedef boost::function1<void, std::string> CommandCallBack;
+    typedef boost::function2<void, std::string, int> IdCallBack;
+    typedef boost::function2<void, std::string, std::string> DataCallBack;
+    typedef boost::function3<void, std::string, int, std::string> IdDataCallBack;
 
 public:
-    void request(const BeanstalkCommandPtr& command, const BeanstalkServiceFuturePtr& future);
+    void request(const BeanstalkCommandPtr& command,
+    		     const BeanstalkServiceFuturePtr& future);
 
     void put(const std::string& data,
     		 int priority,
     		 int delay,
     		 int ttr,
-    		 const PutCallBack callback);
+    		 const IdCallBack &callback);
 
-    void setnx(const std::string& key, const StringPiece& value);
+    void use(const std::string &tubeName,
+    		 const DataCallBack &callback);
 
-    void get(const std::string& key, const BulkCallBack& callback);
+    void reserve(const IdDataCallBack &callback);
+    void reserve(int timeout, const IdDataCallBack &callback);
 
-    template<typename Iterator>
-    void get(const Iterator& keyBegin, const Iterator& keyEnd, const MultiBulkCallBack& callback) {
-        RedisCommandPtr command =
-            cetty::redis::protocol::commands::stringsCommandGet<Iterator>(keyBegin, keyEnd);
+    void del(int id, const CommandCallBack &callback);
 
-        RedisServiceFuturePtr future(new RedisServiceFuture(
-            boost::bind(&RedisClient::multiBulkCallBack, _1, _2, callback)));
+    void release(int id,
+    		     int priority,
+    		     int delay,
+    		     const CommandCallBack &callback);
 
-        request(command, future);
-    }
+    void bury(int id, int priority, const CommandCallBack &callback);
 
-    void del(const std::string& key);
+    void touch(int id, const CommandCallBack &callback);
 
-#if 0
-    void hset(const std::string& key, const std::string& field, const std::string& value);
-    void hset(const std::string& key, const std::string& field, const StringPiece& value);
+    void watch(const std::string &tube, const IdCallBack &callback);
+    void ignore(const std::string &tube, const IdCallBack &callback);
 
-    void hmset(const std::string& key, const std::vector<std::pair<std::string, std::string> >& fields, const StatusCallBack& done);
-    void hmset(const std::string& key, const std::vector<std::pair<std::string, StringPiece> >& fields, const StatusCallBack& done);
+    void peek(int id, const IdDataCallBack &callback);
+    void peekReady(const IdDataCallBack &callback);
+    void peekDelayed(const IdDataCallBack &callback);
+    void peekBuried(const IdDataCallBack &callback);
 
-    void hsetnx(const std::string& key, const std::string& field, const std::string& value, const StatusCallBack& done);
-    void hsetnx(const std::string& key, const std::string& field, const StringPiece& value, const StatusCallBack& done);
+    void kick(int bound, const IdCallBack &callback);
+    void kickJob(int id, const CommandCallBack &callback);
 
-    void hget(const std::string& key, const std::string& field, const BulkCallBack& done);
-    void hmget(const std::string& key, const std::vector<std::string>& fields, const MultiBulkCallBack& done);
+    void statsJob(int id, const DataCallBack &callback);
+    void statsTube(const std::string &tube, const DataCallBack &callback);
+    void stats(const DataCallBack &callback);
 
-    void rename(const std::string& key, const std::string& newKey, const StatusCallBack& done);
-#endif
+    void listTubes(const DataCallBack &callback);
+    void listTubeUsed(const DataCallBack &callback);
+    void listTubesWatched(const DataCallBack &callback);
 
-    void beginTransaction(const StatusCallBack& callback);
-    void commitTransaction(const StatusCallBack& callback);
+    void pauseTube(const std::string &tube,
+    		       int delay,
+    		       const CommandCallBack& callback);
+
+    void quit();
 
 private:
-    static void statusCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const RedisClient::StatusCallBack& callback);
+    static void commandCallBack(const BeanstalkServiceFuture& future,
+                                const BeanstalkReplyPtr& reply,
+                                const CommandCallBack& callback);
 
-    static void bulkCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const RedisClient::BulkCallBack& callback);
+    static void idCallBack(const BeanstalkServiceFuture& future,
+                           const BeanstalkReplyPtr& reply,
+                           const IdCallBack& callback);
 
-    static void multiBulkCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const MultiBulkCallBack& callback);
+    static void dataCallBack(const BeanstalkServiceFuture& future,
+                             const BeanstalkReplyPtr& reply,
+                             const DataCallBack& callback);
+
+    static void idDataCallBack(const BeanstalkServiceFuture& future,
+                               const BeanstalkReplyPtr& reply,
+                               const IdDataCallBack& callback);
 
 private:
     ChannelPtr channel_;
