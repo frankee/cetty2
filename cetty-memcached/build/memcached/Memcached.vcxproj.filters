@@ -12,87 +12,68 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp">
-      <Filter>builder</Filter>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Others.cpp">
+      <Filter>protocol\commands</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReply.cpp">
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Retrieval.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Storage.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommand.cpp">
       <Filter>protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReplyDecoder.cpp">
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommandDecoder.cpp">
       <Filter>protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Connection.cpp">
-      <Filter>protocol\commands</Filter>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommandEncoder.cpp">
+      <Filter>protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Hashes.cpp">
-      <Filter>protocol\commands</Filter>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReply.cpp">
+      <Filter>protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Keys.cpp">
-      <Filter>protocol\commands</Filter>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReplyDecoder.cpp">
+      <Filter>protocol</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Scripting.cpp">
-      <Filter>protocol\commands</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Server.cpp">
-      <Filter>protocol\commands</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\SortedSets.cpp">
-      <Filter>protocol\commands</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Strings.cpp">
-      <Filter>protocol\commands</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Transactions.cpp">
-      <Filter>protocol\commands</Filter>
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReplyEncoder.cpp">
+      <Filter>protocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h">
-      <Filter>builder</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Connection.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Others.h">
       <Filter>protocol\commands</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Hashes.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Retrieval.h">
       <Filter>protocol\commands</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Keys.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Storage.h">
       <Filter>protocol\commands</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Scripting.h">
-      <Filter>protocol\commands</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Server.h">
-      <Filter>protocol\commands</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\SortedSets.h">
-      <Filter>protocol\commands</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Strings.h">
-      <Filter>protocol\commands</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Transactions.h">
-      <Filter>protocol\commands</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommand.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommand.h">
       <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandEncoder.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandPtr.h">
       <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandPtr.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReply.h">
       <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReply.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyPtr.h">
       <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyDecoder.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandEncoder.h">
       <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyPtr.h">
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandDecoder.h">
       <Filter>protocol</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyDecoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyEncoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\memcached\MemcachedClient.h" />
   </ItemGroup>
 </Project>

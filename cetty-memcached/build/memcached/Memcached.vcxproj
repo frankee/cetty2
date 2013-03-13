@@ -11,36 +11,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Connection.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Hashes.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Keys.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Scripting.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Server.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\SortedSets.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Strings.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Transactions.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReply.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReplyDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Others.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Retrieval.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\commands\Storage.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommand.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommandDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedCommandEncoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReply.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReplyDecoder.cpp" />
+    <ClCompile Include="..\..\src\cetty\memcached\protocol\MemcachedReplyEncoder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Connection.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Hashes.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Keys.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Scripting.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Server.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\SortedSets.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Strings.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Transactions.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommand.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReply.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\MemcachedClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Others.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Retrieval.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\commands\Storage.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommand.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedCommandPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReply.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyDecoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyEncoder.h" />
+    <ClInclude Include="..\..\..\include\cetty\memcached\protocol\MemcachedReplyPtr.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4E884AF4-B887-470E-A89B-76261E66C3B5}</ProjectGuid>
