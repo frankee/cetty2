@@ -248,6 +248,10 @@ ChannelPtr ServerBootstrap::newChannel() {
                        new AsioServerSocketChannel(parent->nextLoop(),
                                                    childLoopPool()));
         }
+        else {
+            BOOST_ASSERT(false && "has not implement yet.");
+            return ChannelPtr();
+        }
     }
     else {
         LOG_WARN << "has not set the parent EventLoopPool.";

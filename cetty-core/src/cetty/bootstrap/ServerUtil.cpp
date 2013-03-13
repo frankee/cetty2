@@ -15,7 +15,9 @@
  * under the License.
  */
 
-#if (defined(linux) || defined(__linux) || defined(__linux__))
+#include <cetty/Platform.h>
+
+#if (CETTY_OS_FAMILY_UNIX)
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,17 +28,21 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <fcntl.h>
+#include <signal.h>
+
 #endif
 
 #include <string>
 #include <cetty/Common.h>
+#include <cetty/Platform.h>
 #include <cetty/bootstrap/ServerUtil.h>
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace bootstrap {
 
-#if (defined(linux) || defined(__linux) || defined(__linux__))
+#if (CETTY_OS_FAMILY_UNIX)
 
 void ServerUtil::daemonize() {
     int fd;
@@ -86,9 +92,10 @@ void ServerUtil::createPidFile(const std::string& pidfile) {
 }
 
 static void sigtermHandler(int sig) {
-    CETTY_REFERENCED(sig);
+    //CETTY_REFERENCED(sig);
     LOG_INFO << "Received signal " << sig;
 
+    /*
     std::vector<SignalHandler>::const_iterator itr = handlers_.begin();
     for (; itr != handlers_.end(); ++itr) {
         if (*itr) {
@@ -98,7 +105,7 @@ static void sigtermHandler(int sig) {
 
     if (sig == SIGTERM || sig == SIGINT) {
         LOG_INFO << "Received SIGTERM, scheduling shutdown...";
-    }
+    }*/
 }
 
 void ServerUtil::setupSignalHandlers() {

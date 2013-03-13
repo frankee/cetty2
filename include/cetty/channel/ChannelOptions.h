@@ -41,6 +41,8 @@ public:
     ConstIterator begin() const { return options_.begin(); }
     ConstIterator end() const { return options_.end(); }
 
+    ConstIterator find(const ChannelOption& option) { return options_.find(option); }
+
     ChannelOptions& setOption(const ChannelOption& option,
                               const ChannelOption::Variant& value) {
         if (value.empty()) {

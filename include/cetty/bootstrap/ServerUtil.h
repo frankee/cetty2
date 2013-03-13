@@ -31,7 +31,7 @@ public:
         SIG_STOP
     };
 
-    typedef boost::function<void (const SignalType&)> SignalHandler;
+    typedef boost::function<void (int)> SignalHandler;
 
 public:
     static void daemonize();
@@ -41,6 +41,9 @@ public:
     static void setupSignalHandlers(const SignalHandler& handler);
 
     static void registerSignalHandler(const SignalHandler& handler);
+
+private:
+    //static void sigtermHandler(int sig);
 
 private:
     ServerUtil();

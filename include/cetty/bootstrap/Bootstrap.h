@@ -183,7 +183,7 @@ typename Bootstrap<T>::Channels& Bootstrap<T>::channels() {
 }
 
 template<typename T> inline
-typename const Bootstrap<T>::Channels& Bootstrap<T>::channels() const {
+const typename Bootstrap<T>::Channels& Bootstrap<T>::channels() const {
     return channels_;
 }
 
@@ -233,9 +233,9 @@ const ChannelOptions& Bootstrap<T>::channelOptions() const {
 
 template<typename T> inline
 ChannelOption::Variant Bootstrap<T>::channelOption(const ChannelOption& option) const {
-    ChannelOptions::ConstIterator itr = options.find(option);
+    ChannelOptions::ConstIterator itr = options_.find(option);
 
-    if (itr == options.end()) {
+    if (itr == options_.end()) {
         LOG_WARN << "can not get the option of " << option.name();
         return ChannelOption::Variant();
     }

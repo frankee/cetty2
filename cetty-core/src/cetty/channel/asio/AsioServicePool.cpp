@@ -52,9 +52,9 @@ public:
     AsioServiceHolder(const AsioServicePtr& service)
         : state_(INITIALIZED),
           priority_(0),
+          work_(new io_service::work(service->service())),
           service_(service),
-          eventLoop_(boost::static_pointer_cast<EventLoop>(service)),
-          work_(new io_service::work(service->service())) {
+          eventLoop_(boost::static_pointer_cast<EventLoop>(service)) {
     }
 
     virtual ~AsioServiceHolder() {
