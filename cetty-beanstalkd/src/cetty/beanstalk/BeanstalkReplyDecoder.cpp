@@ -39,7 +39,81 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 
 
 	if (FIRST_LINE == state) {
-	        if (bytes[0] == REDIS_PREFIX_STATUS_REPLY) {
+        std::string response;
+        getResponse(bytes, &response);
+        reply->setResponse(response);
+
+        int replyCode = reply->getResponseType(response);
+
+        switch (replyCode) {
+        case BeanstalkReply::INSERTED:
+        	int id = -1;
+            getInt(bytes, &id, 8);
+            reply->setId(id);
+            break;
+
+        case BeanstalkReply::BURIED:
+            int id = -1;
+            getInt(bytes, &id, 6);
+            reply->setId(id);
+            break;
+
+        case BeanstalkReply::USING:
+        	std::string data;
+        	getData(bytes, &data, 5);
+        	reply->setValue(data);
+        	break;
+
+        case BeanstalkReply::RESERVED:
+        	int id = -1, size = -1, pos = -1;
+        	std::string temp(bytes.c_str());
+
+        	pos = temp.find(' ', 0);
+        	getInt(bytes, &id, pos);
+
+            pos = temp.find(' ', pos + 1);
+            getInt(bytes, &size, pos);
+
+            if(bytes.length() >= frameLength + size + 4) {
+            	reply->setValue(bytes.substr(frameLength + 2, size).as_string());
+            }
+            else {
+            	checkPoint(SECOND_LINE);
+            	return BeanstalkReplyPtr();
+            }
+            break;
+
+        case BeanstalkReply::OK:
+        	int size = -1;
+        	getInt(bytes, &size, 2);
+
+        	if (bytes.length() >= frameLength + size + 4) {
+        		reply->setValue(bytes.substr(frameLength + 2, size).as_string());
+        	}
+        	else {
+        		checkPoint(SECOND_LINE);
+        		return BeanstalkReplyPtr();
+        	}
+        	break;
+
+        case BeanstalkReply::WATCHING:
+        	int count = -1;
+        	getInt(bytes, &count, 8);
+
+        default: break;
+        }
+
+
+
+
+        if(replyCode == -1) {
+        	reply->setResponse(response);
+        	return reset;
+        }
+
+        if(replyCode == )
+
+	    if (bytes[0] == REDIS_PREFIX_STATUS_REPLY) {
 	            reply_->setType(RedisReplyType::STATUS);
 	            buffer->skipBytes(frameLength + 2);
 	            reply_->setValue(getFrameBytes(bytes, frameLength));
@@ -133,6 +207,11 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 	    return reset();
 }
 
+void BeanstalkReplyDecoder::getResponse(StringPiece &bytes,
+		                                std::string *response) {
+
+}
+
 int BeanstalkReplyDecoder::indexOf(const StringPiece& bytes, int offset) {
 	for (int i = offset; i < bytes.length(); ++i) {
 	    if (bytes[i] == '\r' || bytes[i] == '\0') {
@@ -146,6 +225,36 @@ int BeanstalkReplyDecoder::indexOf(const StringPiece& bytes, int offset) {
 	}
 
 	return -1;
+}
+
+void BeanstalkReplyDecoder::getInt(StringPiece &bytes,
+		                           int *value,
+		                           int offset) {
+	if (offset < 0) return;
+    int i = offset, j = 0;
+    while(i < bytes.length() && bytes[i] == ' ') i ++;
+
+    if (i >= bytes.length()) return;
+
+    j = i;
+    while(bytes[j] >= '0' && bytes[j] <= '9') ++j;
+
+    if (i ==j) return;
+
+    *value = StringUtil::strto32(StringPiece(&bytes[i], j - i));
+}
+
+void BeanstalkReplyDecoder::getData(StringPiece &bytes,
+		                            std::string *data,
+		                            int offset) {
+	if (data == NULL || offset < 0) return;
+
+	int i = offset;
+	while ((i < bytes.length() - 2) && bytes[i] == ' ') ++ i;
+
+	if ((i >= bytes.length() - 2)) return;
+
+	while (bytes[i] != '\r') data->append(1, bytes[i]), ++i;
 }
 
 BeanstalkReplyPtr BeanstalkReplyDecoder::reset() {

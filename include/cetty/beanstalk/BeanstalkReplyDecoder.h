@@ -51,6 +51,10 @@ private:
 
     int indexOf(const StringPiece& bytes, int offset);
 
+    void getResponse(StringPiece &bytes, std::string *response);
+    void getInt(StringPiece &bytes, int *value, int offset);
+    void getData(StringPiece &bytes, std::string *data, int offset);
+
     BeanstalkReplyPtr reset();
 
 private:

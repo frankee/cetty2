@@ -26,6 +26,9 @@ class BeanstalkReply : public ReferenceCounter<BeanstalkReply> {
 public:
 	BeanstalkReply():id (0){}
 
+	void setId(int id) { this->id = id; }
+	int getId() { return id; }
+
 	void setResponse(const std::string &response) {
 		this->response = response;
 	}
