@@ -24,10 +24,13 @@ using namespace cetty::util;
 
 class BeanstalkReply : public ReferenceCounter<BeanstalkReply> {
 public:
-	BeanstalkReply():id (0){}
+	BeanstalkReply():id (-1), count(-1){}
 
 	void setId(int id) { this->id = id; }
 	int getId() { return id; }
+
+	void setCount(int count) { this->count = count; }
+	int getCount() { return count; }
 
 	void setResponse(const std::string &response) {
 		this->response = response;
@@ -64,6 +67,7 @@ private:
     static const std::string ok;
 
     int id;
+    int count;
     std::string response;
     std::string value;
 };

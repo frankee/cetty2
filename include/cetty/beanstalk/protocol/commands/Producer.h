@@ -13,7 +13,7 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
+namespace commands {
 
 /**
 * Adds a job consisting of a string to the server

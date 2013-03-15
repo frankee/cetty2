@@ -30,7 +30,7 @@ using namespace cetty::beanstalk::protocol;
 class BeanstalkClient {
 public:
 	BeanstalkClient(const ChannelPtr& channel)
-        : channel_(channel) {}
+        : channel(channel) {}
 
     ~BeanstalkClient() {}
 
@@ -104,6 +104,10 @@ private:
                            const BeanstalkReplyPtr& reply,
                            const IdCallBack& callback);
 
+    static void countCallBack(const BeanstalkServiceFuture& future,
+                              const BeanstalkReplyPtr& reply,
+                              const IdCallBack& callback);
+
     static void dataCallBack(const BeanstalkServiceFuture& future,
                              const BeanstalkReplyPtr& reply,
                              const DataCallBack& callback);
@@ -113,7 +117,7 @@ private:
                                const IdDataCallBack& callback);
 
 private:
-    ChannelPtr channel_;
+    ChannelPtr channel;
 };
 
 }

@@ -49,6 +49,10 @@ BeanstalkCommandPtr reserve(int timeout);
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
 BeanstalkCommandPtr peekReady();
+BeanstalkCommandPtr peekDelayed();
+BeanstalkCommandPtr peekBuried();
+
+BeanstalkCommandPtr peek(int id);
 
 /**
 * The delete command removes a job from the server entirely. It is normally used by the client
@@ -79,6 +83,7 @@ BeanstalkCommandPtr release(int id,
 BeanstalkCommandPtr bury(int jobId, int priority = 10);
 
 BeanstalkCommandPtr kick(int bound);
+BeanstalkCommandPtr kickJob(int id);
 
 /**
  * The "watch" command adds the named tube to the watch list for the current connection. A reserve
@@ -99,6 +104,20 @@ BeanstalkCommandPtr watch(const std::string &tube);
  * @throws ServerException With reason BAD_FORMAT on unexpected server response
  */
 BeanstalkCommandPtr listTubes();
+
+BeanstalkCommandPtr touch(int id);
+BeanstalkCommandPtr ignore(const std::string &tubeName);
+
+BeanstalkCommandPtr quit();
+
+BeanstalkCommandPtr statsJob(int id);
+BeanstalkCommandPtr statsTube(const std::string &tube);
+BeanstalkCommandPtr stats();
+
+BeanstalkCommandPtr listTubeUsed();
+BeanstalkCommandPtr listTubesWatched();
+
+BeanstalkCommandPtr pauseTube(const std::string &tube, int delay);
 
 }
 }

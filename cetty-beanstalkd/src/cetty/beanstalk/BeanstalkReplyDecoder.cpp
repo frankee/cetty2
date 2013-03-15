@@ -42,6 +42,7 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
         std::string response;
         getResponse(bytes, &response);
         reply->setResponse(response);
+        buffer->skipBytes(frameLength + 2);
 
         int replyCode = reply->getResponseType(response);
 
@@ -65,17 +66,19 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
         	break;
 
         case BeanstalkReply::RESERVED:
-        	int id = -1, size = -1, pos = -1;
+        case BeanstalkReply::FOUND:
+        	int id = -1, pos = -1;
         	std::string temp(bytes.c_str());
 
         	pos = temp.find(' ', 0);
         	getInt(bytes, &id, pos);
 
             pos = temp.find(' ', pos + 1);
-            getInt(bytes, &size, pos);
+            getInt(bytes, &dataLength, pos);
 
-            if(bytes.length() >= frameLength + size + 4) {
-            	reply->setValue(bytes.substr(frameLength + 2, size).as_string());
+            if(bytes.length() >= frameLength + dataLength + 4) {
+            	reply->setValue(bytes.substr(frameLength + 2, dataLength).as_string());
+            	buffer->skipBytes(dataLength + 2);
             }
             else {
             	checkPoint(SECOND_LINE);
@@ -84,11 +87,11 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
             break;
 
         case BeanstalkReply::OK:
-        	int size = -1;
-        	getInt(bytes, &size, 2);
+        	getInt(bytes, &dataLength, 2);
 
-        	if (bytes.length() >= frameLength + size + 4) {
-        		reply->setValue(bytes.substr(frameLength + 2, size).as_string());
+        	if (bytes.length() >= frameLength + dataLength + 4) {
+        		reply->setValue(bytes.substr(frameLength + 2, dataLength).as_string());
+        		buffer->skipBytes(dataLength + 2);
         	}
         	else {
         		checkPoint(SECOND_LINE);
@@ -97,119 +100,41 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
         	break;
 
         case BeanstalkReply::WATCHING:
-        	int count = -1;
-        	getInt(bytes, &count, 8);
+        case BeanstalkReply::KICKED:
+        	int count = -1, pos = -1;
+        	std::string temp(bytes.c_str());
+        	pos = temp.find(' ', 0);
+
+        	getInt(bytes, &count, pos);
+            reply->setCount(count);
+        	break;
 
         default: break;
         }
+	}
+	else if (SECOND_LINE == state) {
+		if (bytes.length() >= dataLength + 2) {
+			buffer->skipBytes(dataLength + 2);
+			reply->setValue(bytes.substr(0, dataLength).as_string());
+		}
+		else {
+			checkPoint(SECOND_LINE);
+			return BeanstalkReplyPtr();
+		}
+	}
 
-
-
-
-        if(replyCode == -1) {
-        	reply->setResponse(response);
-        	return reset;
-        }
-
-        if(replyCode == )
-
-	    if (bytes[0] == REDIS_PREFIX_STATUS_REPLY) {
-	            reply_->setType(RedisReplyType::STATUS);
-	            buffer->skipBytes(frameLength + 2);
-	            reply_->setValue(getFrameBytes(bytes, frameLength));
-	        }
-	        else if (bytes[0] == REDIS_PREFIX_INTEGER_REPLY) {
-	            reply_->setType(RedisReplyType::INTEGER);
-	            buffer->skipBytes(frameLength + 2);
-	            reply_->setValue(getFrameInt(bytes, frameLength));
-	        }
-	        else if (bytes[0] == REDIS_PREFIX_ERROR_REPLY) {
-	            reply_->setType(RedisReplyType::ERROR);
-	            buffer->skipBytes(frameLength + 2);
-	            reply_->setValue(getFrameBytes(bytes, frameLength));
-	        }
-	        else if (bytes[0] == REDIS_PREFIX_SINGLE_BULK_REPLY) {
-	            reply_->setType(RedisReplyType::STRING);
-	            bulkSize_ = getFrameInt(bytes, frameLength);
-	            buffer->skipBytes(frameLength + 2);
-
-	            if (bulkSize_ < 0) {
-	                reply_->setType(RedisReplyType::NIL);
-	                return reset();
-	            }
-
-	            if (bulkSize_ == 0) {
-	                reply_->setValue(std::string());
-	                return reset();
-	            }
-
-	            if (bytes.length() >= frameLength + 4 + bulkSize_) {
-	                StringPiece data;
-	                buffer->readableBytes(&data);
-	                buffer->skipBytes(bulkSize_ + 2);
-	                reply_->setValue(StringPiece(data.data(), bulkSize_));
-	            }
-	            else {
-	                checkPoint_(READ_BULK);
-	                return RedisReplyPtr();
-	            }
-	        }
-	        else if (bytes[0] == REDIS_PREFIX_MULTI_BULK_REPLY) {
-	            reply_->setType(RedisReplyType::ARRAY);
-	            bulkSize_ = 0;
-	            multiBulkSize_ = getFrameInt(bytes, frameLength);
-	            buffer->skipBytes(frameLength + 2);
-
-	            if (multiBulkSize_ < 0) {
-	                reply_->setType(RedisReplyType::NIL);
-	                return reset();
-	            }
-
-	            if (multiBulkSize_ == 0) {
-	                reply_->setValue(std::vector<StringPiece>());
-	                return reset();
-	            }
-
-	            std::vector<StringPiece>* bulks = reply_->getMutableArray();
-	            BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
-	            return readMultiBukls(buffer, bytes, bulks);
-	        }
-	    }
-	    else if (READ_BULK == state) {
-	        if (bytes.length() >= bulkSize_ + 2) {
-	            StringPiece data;
-	            buffer->readableBytes(&data);
-	            buffer->skipBytes(bulkSize_ + 2);
-	            reply_->setValue(StringPiece(data.data(), bulkSize_));
-	        }
-	        else {
-	            checkPoint_(READ_BULK);
-	            return RedisReplyPtr();
-	        }
-	    }
-	    else if (READ_MULTI_BULK == state) {
-	        std::vector<StringPiece>* bulks = reply_->getMutableArray();
-	        BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
-
-	        if (bulkSize_ > 0) {
-	            DLOG_DEBUG << "bulkSize is not empty, directly to read the bulk data";
-
-	            if (!readMultiBulkElement(buffer, bytes, bulks)) {
-	                DLOG_TRACE << "data has not read completely - bulk size, continue to reading";
-	                checkPoint_(READ_MULTI_BULK);
-	                return RedisReplyPtr();
-	            }
-	        }
-
-	        return readMultiBukls(buffer, bytes, bulks);
-	    }
-
-	    return reset();
+	return reset();
 }
 
 void BeanstalkReplyDecoder::getResponse(StringPiece &bytes,
 		                                std::string *response) {
+	if (response == NULL) return;
 
+    std::string temp(bytes.c_str());
+    int pos = temp.find(' ', 0);
+    if(pos != std::string::npos) {
+    	response->assign(temp.c_str(), pos);
+    }
 }
 
 int BeanstalkReplyDecoder::indexOf(const StringPiece& bytes, int offset) {
