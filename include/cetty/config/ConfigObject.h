@@ -26,14 +26,12 @@
 
 #include <cetty/Types.h>
 #include <cetty/util/MetaProgramming.h>
+#include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
 namespace config {
 
 using namespace cetty::util;
-
-class ConfigFieldDescriptor;
-class ConfigObjectDescriptor;
 
 class ConfigObject {
 private:

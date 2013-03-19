@@ -14,12 +14,9 @@ SET(generator_sources ${GENERATOR_DIR}
  ${GENERATOR_YAML_DIR} ${GENERATOR_CPP_DIR} ${PROTO_SRCS})
 
 cxx_executable_no_link(ConfigGenerator cetty/config/generator  ${generator_sources})
-cxx_link_pb(ConfigGenerator protoc)
+cxx_link_pb(ConfigGenerator cetty protoc)
 
-GENERATE_CONFIG(CONFIG_SRCS CONFIG_HDS cetty/config/KeyValuePair.proto)
-message(STATUS ${CONFIG_HDS})
-
-SET(configure_sources ${CONFIG_DIR} ${PROTO_SRCS} ${CONFIG_SRCS})
+SET(configure_sources ${CONFIG_DIR} ${PROTO_SRCS})
 SET(configure_lib cetty-config)
 
 cxx_static_library(${configure_lib} ${configure_sources})

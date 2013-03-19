@@ -44,29 +44,25 @@ void SlaveServiceImpl::init() {
 
 	size_t i = 0;
 	for(; i < config_.applications.size(); ++i) {
-		std::string name = config_.applications.at(i)->name;
+        SlaveServiceConfig::Application* application = config_.applications[i];
+		std::string name = application->name;
 
         request = new AddApplicationRequest();
         request->set_name(name);
-        request->set_binary(config_.applications.at(i)->binary);
-        request->set_cwd(config_.applications.at(i)->cwd);
+        request->set_binary(application->binary);
+        request->set_cwd(application->cwd);
 
-        size_t j = 0;
-        for(; j < config_.applications.at(i)->args.size(); ++ j){
-        	request->add_args(config_.applications.at(i)->args.at(j));
+        request->set_redirect_stdout(application->redirectStdout);
+        request->set_redirect_stderr(application->redirectStderr);
+        request->set_auto_recover(application->autoRecover);
+
+        for(std::size_t j; j < application->args.size(); ++ j){
+        	request->add_args(application->args.at(j));
         }
 
-        for(j = 0; j < config_.applications.at(i)->envs.size(); ++j)
-        	request->add_envs(config_.applications.at(i)->envs.at(j));
-
-        if (config_.applications.at(i)->redirectStdout)
-            request->set_redirect_stdout(config_.applications.at(i)->redirectStdout.get());
-        if(config_.applications.at(i)->redirectStderr)
-        	request->set_redirect_stderr(config_.applications.at(i)->redirectStderr.get());
-
-        if(config_.applications.at(i)->autoRecover)
-        	request->set_auto_recover(config_.applications.at(i)->autoRecover.get());
-
+        for(std::size_t j = 0; j < application->envs.size(); ++j) {
+        	request->add_envs(application->envs.at(j));
+        }
 
         response = new AddApplicationResponse();
 

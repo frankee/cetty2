@@ -264,8 +264,6 @@ GenerateClassDefinition(io::Printer* printer) {
                                    field->camelcase_name());
                     break;
 
-
-
                 case FieldDescriptor::CPPTYPE_DOUBLE:
                     printer->Print("std::vector<double> $field_name$;\n",
                                    "field_name",
