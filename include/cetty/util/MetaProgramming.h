@@ -17,6 +17,9 @@
  * under the License.
  */
 
+#include <map>
+#include <vector>
+
 namespace cetty {
 namespace util {
 
@@ -27,14 +30,12 @@ struct IsReference {
     };
 };
 
-
 template <typename T>
 struct IsReference<T&> {
     enum {
         VALUE = 1
     };
 };
-
 
 template <typename T>
 struct IsReference<const T&> {
@@ -43,6 +44,82 @@ struct IsReference<const T&> {
     };
 };
 
+template <typename T>
+struct IsPointer {
+    enum {
+        VALUE = 0
+    };
+};
+
+template <typename T>
+struct IsPointer<T*> {
+    enum {
+        VALUE = 1
+    };
+};
+
+template <typename T>
+struct IsPointer<T const*> {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename T>
+struct IsVector {
+    enum {
+        VALUE = 0
+    };
+};
+
+template<typename T>
+struct IsVector<std::vector<T> > {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename T>
+struct IsVector<std::vector<T>& > {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename T>
+struct IsVector<const std::vector<T>& > {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename T>
+struct IsMap {
+    enum {
+        VALUE = 0
+    };
+};
+
+template<typename K, typename V>
+struct IsMap<std::map<K, V> > {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename K, typename V>
+struct IsMap<std::map<K, V>& > {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename K, typename V>
+struct IsMap<const std::map<K, V>& > {
+    enum {
+        VALUE = 1
+    };
+};
 
 template <typename T>
 struct IsConst

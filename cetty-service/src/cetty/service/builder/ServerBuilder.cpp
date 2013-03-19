@@ -232,19 +232,12 @@ int ServerBuilder::init() {
     }
 
     if (!parentEventLoopPool_) {
-        int parentThreadCount = 1;
-
-        if (config_.parentThreadCount) {
-            parentThreadCount = boost::get<int>(config_.parentThreadCount);
-        }
-
-        parentEventLoopPool_ = new AsioServicePool(parentThreadCount);
+        parentEventLoopPool_ = new AsioServicePool(config_.parentThreadCount);
     }
 
     if (!childEventLoopPool_) {
-        if (config_.childThreadCount) {
-            childEventLoopPool_ = new AsioServicePool(
-                boost::get<int>(config_.childThreadCount));
+        if (config_.childThreadCount > 0) {
+            childEventLoopPool_ = new AsioServicePool(config_.childThreadCount);
         }
         else {
             childEventLoopPool_ = parentEventLoopPool_;
@@ -285,11 +278,11 @@ void ServerBuilder::waitingForExit() {
 
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             ServerBootstrap::Channels& channels = itr->second->channels();
-
-            for (std::size_t i = 0; i < channels.size(); ++i) {
+            ServerBootstrap::Channels::const_iterator itr = channels.begin();
+            for (; itr != channels.end(); ++itr) {
                 printf("    Channel ID: %d has bind to %s\n",
-                       channels[i]->id(),
-                       channels[i]->localAddress().toString().c_str());
+                       itr->first,
+                       itr->second->localAddress().toString().c_str());
             }
         }
 
@@ -311,25 +304,32 @@ void ServerBuilder::waitingForExit() {
 
 ServerBuilder& ServerBuilder::buildAll() {
     std::size_t j = config_.servers.size();
-
-    for (std::size_t i = 0; i < j; ++i) {
-        const ServerBuilderConfig::Server& server = *config_.servers[i];
-        const std::string& name = server.name();
+    std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
+        config_.servers.begin();
+    for (; itr != config_.servers.end(); ++itr) {
+        const std::string& name = itr->first;
+        const ServerBuilderConfig::Server* server = itr->second;
 
         if (name.empty()) {
             LOG_WARN << "has not config the server name, will not start the server.";
             continue;
         }
 
-        if (!server.port) {
+        if (!server) {
+            LOG_WARN << "config the server: "
+                << name
+                << " has no config item, will skip it.";
+        }
+
+        if (server->port <= 0) {
             LOG_WARN << "config the server: "
                      << name
-                     << " , which port is 0, will skip it.";
+                     << " , which port is not great than 0, will skip it.";
             continue;
         }
 
         ServerBootstraps::const_iterator itr
-            = bootstraps_.find(server.name());
+            = bootstraps_.find(name);
 
         if (itr == bootstraps_.end()) {
             LOG_WARN << "the server: "
@@ -340,7 +340,7 @@ ServerBuilder& ServerBuilder::buildAll() {
 
         //TODO setting the options
 
-        build(itr->second, server.host, boost::get<int>(server.port));
+        build(itr->second, server->host, server->port);
     }
 
     return *this;

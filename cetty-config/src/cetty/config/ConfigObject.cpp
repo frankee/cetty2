@@ -18,203 +18,69 @@
 
 #include <boost/assert.hpp>
 
-#include <cetty/config/ConfigReflectionImpl.h>
+#include <cetty/logging/LoggerHelper.h>
 #include <cetty/config/ConfigDescriptor.h>
 
 namespace cetty {
 namespace config {
 
-ConfigObject::ObjectDescriptorMap* ConfigObject::objects_ = NULL;
-ConfigReflection* ConfigObject::reflection_ = NULL;
+ConfigObject::ObjectDescriptors* ConfigObject::objectDescriptors_ = NULL;
 
 ConfigObject::ConfigObject(const std::string& name)
     : name_(name),
       className_(name) {
-    reflection();
 }
 
 ConfigObject::~ConfigObject() {
     clear();
 }
 
-const ConfigReflection* ConfigObject::reflection() const {
-    if (!reflection_) {
-        reflection_ = new ConfigReflection;
+ConfigObject::ObjectDescriptors& ConfigObject::objectDescriptors() {
+    if (!objectDescriptors_) {
+        objectDescriptors_ = new ObjectDescriptors;
     }
 
-    return reflection_;
+    return *objectDescriptors_;
 }
 
 const ConfigObjectDescriptor* ConfigObject::descriptor() const {
-    ConfigObject::ObjectDescriptorMap& objects = objectDescriptorMap();
+    ObjectDescriptors& descriptors = objectDescriptors();
+    ObjectDescriptors::const_iterator itr = descriptors.find(className_);
 
-    ObjectDescriptorMap::const_iterator itr = objects.find(className_);
-
-    if (itr != objects.end()) {
+    if (itr != descriptors.end()) {
         return itr->second;
     }
-
-    return NULL;
+    else {
+        LOG_WARN << "this object has not register to the objectDescriptors.";
+        return NULL;
+    }
 }
 
 void ConfigObject::addDescriptor(ConfigObjectDescriptor* descriptor) {
     BOOST_ASSERT(descriptor);
 
-    ConfigObject::ObjectDescriptorMap& objects = objectDescriptorMap();
     const std::string& name = descriptor->className();
-    ObjectDescriptorMap::const_iterator itr = objects.find(name);
+    ObjectDescriptors& descriptors = objectDescriptors();
+    ObjectDescriptors::iterator itr = descriptors.find(name);
 
-    if (itr != objects.end()) {
+    if (itr != descriptors.end()) {
+        LOG_WARN << "the " << name
+            << " descriptor has already registered, will override older.";
 
+        itr->second = descriptor;
     }
     else {
-        objects[name] = descriptor;
+        descriptors[name] = descriptor;
     }
 }
 
-void ConfigObject::clear() {
-    std::vector<const ConfigFieldDescriptor*> fields;
-    listFields(&fields);
-
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        const ConfigFieldDescriptor* field = fields[i];
-
-        if (field->repeated) {
-            switch (field->type) {
-            case ConfigFieldDescriptor::CPPTYPE_BOOL:
-                reflection_->clearRepeatedField<bool>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT32:
-                reflection_->clearRepeatedField<int>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection_->clearRepeatedField<int64_t>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                reflection_->clearRepeatedField<double>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_STRING:
-                reflection_->clearRepeatedField<std::string>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                reflection_->clearRepeatedField<ConfigObject*>(this, field);
-                break;
-            }
-        }
-        else {
-            switch (field->type) {
-            case ConfigFieldDescriptor::CPPTYPE_BOOL:
-                reflection_->clearField<boost::optional<bool> >(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT32:
-                reflection_->clearField<boost::optional<int> >(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection_->clearField<boost::optional<int64_t> >(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                reflection_->clearField<boost::optional<double> >(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_STRING:
-                reflection_->clearField<std::string>(this, field);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                reflection_->clearField<ConfigObject*>(this, field);
-                break;
-            }
-        }
-    }
-}
-
-void ConfigObject::copyFrom(const ConfigObject& from) {
-    std::vector<const ConfigFieldDescriptor*> fields;
-    listFields(&fields);
-
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        const ConfigFieldDescriptor* field = fields[i];
-
-        if (field->repeated) {
-            switch (field->type) {
-            case ConfigFieldDescriptor::CPPTYPE_BOOL:
-                reflection_->copyRepeatedField<bool>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT32:
-                reflection_->copyRepeatedField<int>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection_->copyRepeatedField<int64_t>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                reflection_->copyRepeatedField<double>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_STRING:
-                reflection_->copyRepeatedField<std::string>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                reflection_->copyRepeatedField<ConfigObject*>(from, field, this);
-                break;
-            }
-        }
-        else {
-            switch (field->type) {
-            case ConfigFieldDescriptor::CPPTYPE_BOOL:
-                reflection_->copyField<boost::optional<bool> >(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT32:
-                reflection_->copyField<boost::optional<int> >(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_INT64:
-                reflection_->copyField<boost::optional<int64_t> >(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-                reflection_->copyField<boost::optional<double> >(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_STRING:
-                reflection_->copyField<std::string>(from, field, this);
-                break;
-
-            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                reflection_->copyField<ConfigObject*>(from, field, this);
-                break;
-            }
-        }
-    }
-}
-
-ConfigObject::ObjectDescriptorMap& ConfigObject::objectDescriptorMap() {
-    if (!objects_) {
-        objects_ = new ObjectDescriptorMap;
-    }
-
-    return *objects_;
-}
-
-const ConfigObject* ConfigObject::getDefaultObject(const std::string& name) {
+const ConfigObject* ConfigObject::defaultObject(const std::string& name) {
     if (name.empty()) {
         return NULL;
     }
 
-    ConfigObject::ObjectDescriptorMap& objects = objectDescriptorMap();
-    ObjectDescriptorMap::const_iterator itr = objects.find(name);
+    ObjectDescriptors& objects = objectDescriptors();
+    ObjectDescriptors::const_iterator itr = objects.find(name);
 
     if (itr != objects.end()) {
         return itr->second->defaultInstance();
@@ -223,136 +89,340 @@ const ConfigObject* ConfigObject::getDefaultObject(const std::string& name) {
     return NULL;
 }
 
-void ConfigObject::listFields(std::vector<const ConfigFieldDescriptor*>* output) const {
-    reflection_->listFields(*this, output);
+void ConfigObject::clear() {
+    std::vector<const ConfigFieldDescriptor*> fields;
+    list(&fields);
+
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const ConfigFieldDescriptor* field = fields[i];
+
+        switch (field->repeatedType) {
+        case ConfigFieldDescriptor::NO_REPEATED:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                clearField<bool>(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                clearField<int>(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                clearField<int64_t>(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                clearField<double>(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                clearField<std::string>(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                clearField<ConfigObject*>(field);
+                break;
+            }
+            break;
+        case ConfigFieldDescriptor::LIST:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                clearRepeatedField<std::vector<bool> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                clearRepeatedField<std::vector<int> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                clearRepeatedField<std::vector<int64_t> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                clearRepeatedField<std::vector<double> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                clearRepeatedField<std::vector<std::string> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                clearRepeatedField<std::vector<ConfigObject*> >(field);
+                break;
+            }
+            break;
+        case ConfigFieldDescriptor::MAP:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                clearRepeatedField<std::map<std::string, bool> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                clearRepeatedField<std::map<std::string, int> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                clearRepeatedField<std::map<std::string, int64_t> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                clearRepeatedField<std::map<std::string, double> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                clearRepeatedField<std::map<std::string, std::string> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                clearRepeatedField<std::map<std::string, ConfigObject*> >(field);
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }
 
-bool ConfigObject::hasInt(const ConfigFieldDescriptor* field) const {
-    return reflection_->getInt(*this, field);
+void ConfigObject::copyFrom(const ConfigObject& from) {
+    std::vector<const ConfigFieldDescriptor*> fields;
+    list(&fields);
+
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const ConfigFieldDescriptor* field = fields[i];
+        switch (field->repeatedType) {
+        case ConfigFieldDescriptor::NO_REPEATED:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                copyField<bool>(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                copyField<int>(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                copyField<int64_t>(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                copyField<double>(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                copyField<std::string>(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                copyField<ConfigObject*>(field, from);
+                break;
+            }
+            break;
+        case ConfigFieldDescriptor::LIST:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                copyRepeatedField<std::vector<bool> >(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                copyRepeatedField<std::vector<int> >(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                copyRepeatedField<std::vector<int64_t> >(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                copyRepeatedField<std::vector<double> >(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                copyRepeatedField<std::vector<std::string> >(field, from);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                copyRepeatedField<std::vector<ConfigObject*> >(field, from);
+                break;
+            }
+            break;
+        case ConfigFieldDescriptor::MAP:
+            switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_BOOL:
+                clearRepeatedField<std::map<std::string, bool> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT32:
+                clearRepeatedField<std::map<std::string, int> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_INT64:
+                clearRepeatedField<std::map<std::string, int64_t> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+                clearRepeatedField<std::map<std::string, double> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                clearRepeatedField<std::map<std::string, std::string> >(field);
+                break;
+
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                clearRepeatedField<std::map<std::string, ConfigObject*> >(field);
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }
 
-int ConfigObject::getInt(const ConfigFieldDescriptor* field) const {
-    boost::optional<int> value = reflection_->getInt(*this, field);
+void ConfigObject::list(std::vector<const ConfigFieldDescriptor*>* fields) const {
+    ObjectDescriptors& objects = objectDescriptors();
+    ObjectDescriptors::const_iterator itr = objects.find(className_);
+    BOOST_ASSERT(itr != objects.end());
 
-    if (value) {
-        return boost::get<int>(value);
+    const ConfigObjectDescriptor* descriptor = itr->second;
+    fields->insert(fields->end(),
+                   descriptor->begin(),
+                   descriptor->end());
+}
+
+bool ConfigObject::has(const ConfigFieldDescriptor* field) const {
+    BOOST_ASSERT(field);
+
+    if (field->optional) {
+        switch (field->type) {
+        case ConfigFieldDescriptor::CPPTYPE_BOOL:
+            return constRaw<boost::optional<bool> >(field)->is_initialized();
+        case ConfigFieldDescriptor::CPPTYPE_INT32:
+            return constRaw<boost::optional<int> >(field)->is_initialized();
+        case ConfigFieldDescriptor::CPPTYPE_INT64:
+            return constRaw<boost::optional<int64_t> >(field)->is_initialized();
+        case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+            return constRaw<boost::optional<double> >(field)->is_initialized();
+        default:
+            return false;
+        }
     }
 
-    return 0;
-}
-
-bool ConfigObject::hasInt64(const ConfigFieldDescriptor* field) const {
-    return reflection_->getInt64(*this, field);
-}
-
-int64_t ConfigObject::getInt64(const ConfigFieldDescriptor* field) const {
-    boost::optional<int64_t> value = reflection_->getInt64(*this, field);
-
-    if (value) {
-        return boost::get<int64_t>(value);
-    }
-
-    return 0;
-}
-
-bool ConfigObject::hasDouble(const ConfigFieldDescriptor* field) const {
-    return reflection_->getDouble(*this, field);
-}
-
-double ConfigObject::getDouble(const ConfigFieldDescriptor* field) const {
-    boost::optional<double> value = reflection_->getDouble(*this, field);
-
-    if (value) {
-        return boost::get<double>(value);
-    }
-
-    return 0;
-}
-
-bool ConfigObject::hasBool(const ConfigFieldDescriptor* field) const {
-    return reflection_->getBool(*this, field);
-}
-
-bool ConfigObject::getBool(const ConfigFieldDescriptor* field) const {
-    boost::optional<bool> value = reflection_->getBool(*this, field);
-
-    if (value) {
-        return boost::get<bool>(value);
+    switch (field->repeatedType) {
+    case ConfigFieldDescriptor::NO_REPEATED:
+        switch (field->type) {
+            case ConfigFieldDescriptor::CPPTYPE_STRING:
+                return !constRaw<std::string>(field)->empty();
+            case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+                return !*constRaw<ConfigObject*>(field);
+            default:
+                return true;
+        }
+        break;
+    case ConfigFieldDescriptor::LIST:
+        switch (field->type) {
+        case ConfigFieldDescriptor::CPPTYPE_BOOL:
+            return !constRaw<std::vector<bool> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_INT32:
+            return !constRaw<std::vector<int> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_INT64:
+            return !constRaw<std::vector<int64_t> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+            return !constRaw<std::vector<double> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_STRING:
+            return !constRaw<std::vector<std::string> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+            return !constRaw<std::vector<ConfigObject*> >(field)->empty();
+        }
+        break;
+    case ConfigFieldDescriptor::MAP:
+        switch (field->type) {
+        case ConfigFieldDescriptor::CPPTYPE_BOOL:
+            return !constRaw<std::map<std::string, bool> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_INT32:
+            return !constRaw<std::map<std::string, int> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_INT64:
+            return !constRaw<std::map<std::string, int64_t> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
+            return !constRaw<std::map<std::string, double> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_STRING:
+            return !constRaw<std::map<std::string, std::string> >(field)->empty();
+        case ConfigFieldDescriptor::CPPTYPE_OBJECT:
+            return !constRaw<std::map<std::string, ConfigObject*> >(field)->empty();
+        }
+        break;
     }
 
     return false;
 }
 
-std::string ConfigObject::getString(const ConfigFieldDescriptor* field) const {
-    return reflection_->getString(*this, field);
-}
-
-void ConfigObject::setInt32(const ConfigFieldDescriptor* field, int value) {
-    reflection_->setInt32(this, field, value);
-}
-
-void ConfigObject::setInt64(const ConfigFieldDescriptor* field, int64_t value) {
-    reflection_->setInt64(this, field, value);
-}
-
-void ConfigObject::setDouble(const ConfigFieldDescriptor* field, double value) {
-    reflection_->setDouble(this, field, value);
-}
-
-void ConfigObject::setBool(const ConfigFieldDescriptor* field, bool value) {
-    reflection_->setBool(this, field, value);
-}
-
-void ConfigObject::setString(const ConfigFieldDescriptor* field, const std::string& value) {
-    reflection_->setString(this, field, value);
-}
-
 ConfigObject* ConfigObject::mutableObject(const ConfigFieldDescriptor* field) {
-    return reflection_->mutableObject(this, field);
-}
+    ConfigObject** obj = mutableRaw<ConfigObject*>(field);
 
-void ConfigObject::addInt32(const ConfigFieldDescriptor* field, int value) {
-    reflection_->addInt32(this, field, value);
-}
+    if (!*obj) {
+        const ConfigObject* prototype = defaultObject(field->className);
 
-void ConfigObject::addInt32(const ConfigFieldDescriptor* field, const std::vector<int>& value) {
-    reflection_->addInt32(this, field, value);
-}
+        if (NULL == prototype) {
+            LOG_ERROR << "can not find such object "
+                      << field->className;
 
-void ConfigObject::addInt64(const ConfigFieldDescriptor* field, int64_t value) {
-    reflection_->addInt64(this, field, value);
-}
+            return NULL;
+        }
 
-void ConfigObject::addInt64(const ConfigFieldDescriptor* field, const std::vector<int64_t>& value) {
-    reflection_->addInt64(this, field, value);
-}
+        ConfigObject* newObject = prototype->create();
 
-void ConfigObject::addDouble(const ConfigFieldDescriptor* field, double value) {
-    reflection_->addDouble(this, field, value);
-}
+        *obj = newObject;
+    }
 
-void ConfigObject::addDouble(const ConfigFieldDescriptor* field, const std::vector<double>& value) {
-    reflection_->addDouble(this, field, value);
-}
-
-void ConfigObject::addBool(const ConfigFieldDescriptor* field, bool value) {
-    reflection_->addBool(this, field, value);
-}
-
-void ConfigObject::addBool(const ConfigFieldDescriptor* field, const std::vector<bool>& value) {
-    reflection_->addBool(this, field, value);
-}
-
-void ConfigObject::addString(const ConfigFieldDescriptor* field, const std::string& value) {
-    reflection_->addString(this, field, value);
-}
-
-void ConfigObject::addString(const ConfigFieldDescriptor* field, const std::vector<std::string>& value) {
-    reflection_->addString(this, field, value);
+    return *obj;
 }
 
 ConfigObject* ConfigObject::addObject(const ConfigFieldDescriptor* field) {
-    return reflection_->addObject(this, field);
+    std::vector<ConfigObject*>* repeated =
+        mutableRaw<std::vector<ConfigObject*> >(field);
+
+    // We must allocate a new object.
+    const ConfigObject* prototype =
+        ConfigObject::defaultObject(field->className);
+
+    if (NULL == prototype) {
+        LOG_ERROR << "can not find such object "
+                  << field->className;
+
+        return NULL;
+    }
+
+    ConfigObject* newObject = prototype->create();
+    repeated->push_back(newObject);
+
+    return newObject;
+}
+
+ConfigObject* ConfigObject::addObject(const ConfigFieldDescriptor* field,
+                                      const std::string& key) {
+    if (key.empty()) {
+        LOG_ERROR << "can not add an empty key to the map.";
+        return NULL;
+    }
+
+    std::map<std::string, ConfigObject*>* repeated =
+        mutableRaw<std::map<std::string, ConfigObject*> >(field);
+
+    // We must allocate a new object.
+    const ConfigObject* prototype =
+        ConfigObject::defaultObject(field->className);
+
+    if (NULL == prototype) {
+        LOG_ERROR << "can not find such object "
+                  << field->className;
+
+        return NULL;
+    }
+
+    ConfigObject* newObject = prototype->create();
+    newObject->setName(key);
+    repeated->insert(std::make_pair(key, newObject));
+
+    return newObject;
 }
 
 }

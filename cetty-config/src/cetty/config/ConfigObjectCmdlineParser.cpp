@@ -35,22 +35,22 @@ static int parseField(const ConfigFieldDescriptor* field,
                       const ConfigCenter::CmdlineTrie& cmdline,
                       ConfigObject* object) {
 
-    if (field->repeated) {
+    if (field->repeatedType == ConfigFieldDescriptor::LIST) {
         switch (field->type) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
-            object->addInt32(field, option.as<std::vector<int> >());
+            object->add(field, option.as<std::vector<int> >());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT64:
-            object->addInt64(field, option.as<std::vector<int64_t> >());
+            object->add(field, option.as<std::vector<int64_t> >());
             break;
 
         case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-            object->addDouble(field, option.as<std::vector<double> >());
+            object->add(field, option.as<std::vector<double> >());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_STRING:
-            object->addString(field, option.as<std::vector<std::string> >());
+            object->add(field, option.as<std::vector<std::string> >());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:
@@ -66,19 +66,19 @@ static int parseField(const ConfigFieldDescriptor* field,
     else {
         switch (field->type) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
-            object->setInt32(field, option.as<int>());
+            object->set(field, option.as<int>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT64:
-            object->setInt64(field, option.as<int64_t>());
+            object->set(field, option.as<int64_t>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-            object->setDouble(field, option.as<double>());
+            object->set(field, option.as<double>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_STRING:
-            object->setString(field, option.as<std::string>());
+            object->set(field, option.as<std::string>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:

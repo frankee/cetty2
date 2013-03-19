@@ -35,10 +35,18 @@ class Message;
 }
 
 namespace cetty {
+namespace config {
+class ConfigObject;
+class ConfigFieldDescriptor;
+}
+}
+
+namespace cetty {
 namespace protobuf {
 namespace service {
 
 using namespace google::protobuf;
+using namespace cetty::config;
 
 class ProtobufUtil {
 public:
@@ -109,6 +117,13 @@ public:
 
     static FieldValue getMessageFieldValue(const Message& message,
                                            const std::string& name);
+
+    static bool mergeObject(const ConfigObject& config, Message* message);
+
+    static bool mergeField(const ConfigFieldDescriptor* configField,
+                           const ConfigObject& config,
+                           const FieldDescriptor* field,
+                           Message* message);
 
     static void logHandler(google::protobuf::LogLevel level,
                            const char* filename,

@@ -4,9 +4,6 @@
     <Filter Include="slave">
       <UniqueIdentifier>{e55ca1a4-acc9-49c8-9ce4-e13a115f114d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="proto">
-      <UniqueIdentifier>{06d73cb6-0cae-4637-ae1f-bafd048dbbc1}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\zurg\Util.cpp" />
@@ -64,15 +61,15 @@
     <ClInclude Include="..\..\..\include\cetty\zurg\slave\SlaveServiceImpl.h">
       <Filter>slave</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\zurg\slave\ZurgSlave.h">
-      <Filter>slave</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\zurg\slave\slave.proto">
       <Filter>slave</Filter>
     </None>
     <None Include="..\..\..\include\cetty\zurg\slave\slave_service.proto">
+      <Filter>slave</Filter>
+    </None>
+    <None Include="..\..\..\include\cetty\zurg\slave\SlaveServiceConfig.proto">
       <Filter>slave</Filter>
     </None>
   </ItemGroup>

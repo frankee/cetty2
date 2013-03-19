@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <map>
 #include <vector>
 #include <string>
 #include <boost/noncopyable.hpp>
@@ -31,11 +32,11 @@ class ConfigObject;
     public:\
         DescriptorRegister##Object() {\
             ::cetty::config::ConfigObject::addDescriptor(\
-                                        new ::cetty::config::ConfigObjectDescriptor(\
-                                                new Object,\
-                                                fieldCnt,\
-                                                field,\
-                                                ##__VA_ARGS__));\
+                    new ::cetty::config::ConfigObjectDescriptor(\
+                            new Object,\
+                            fieldCnt,\
+                            field,\
+                            ##__VA_ARGS__));\
         }\
     };\
     static DescriptorRegister##Object descriptorRegister##Object;
@@ -43,42 +44,73 @@ class ConfigObject;
 
 #define CETTY_CONFIG_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-                              #FIELD,\
-                              #CPP_TYPE\
-                             )\
-     
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            false)
+
+#define CETTY_CONFIG_OPTIONAL_FIELD(TYPE, FIELD, CPP_TYPE) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            true)
+
 #define CETTY_CONFIG_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
-                              #FIELD,\
-                              #CLASS\
-                             )\
-     
-#define CETTY_CONFIG_REPEATED_FIELD(TYPE, FIELD, CPP_TYPE) \
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::NO_REPEATED,\
+            false)
+
+#define CETTY_CONFIG_LIST_FIELD(TYPE, FIELD, CPP_TYPE) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
-                              #FIELD,\
-                              #CPP_TYPE,\
-                              true\
-                             )\
-     
-#define CETTY_CONFIG_REPEATED_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::LIST,\
+            false)
+
+#define CETTY_CONFIG_LIST_OBJECT_FIELD(TYPE, FIELD, CLASS) \
     new ::cetty::config::ConfigFieldDescriptor(\
-                              static_cast<int>(reinterpret_cast<const char*>(\
-                                      &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
-                              ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
-                              #FIELD,\
-                              #CLASS,\
-                              true\
-                             )\
-     
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::LIST,\
+            false)
+
+#define CETTY_CONFIG_MAP_FIELD(TYPE, FIELD, CPP_TYPE) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_##CPP_TYPE,\
+            #FIELD,\
+            #CPP_TYPE,\
+            ::cetty::config::ConfigFieldDescriptor::MAP,\
+            false)
+
+#define CETTY_CONFIG_MAP_OBJECT_FIELD(TYPE, FIELD, CLASS) \
+    new ::cetty::config::ConfigFieldDescriptor(\
+            static_cast<int>(reinterpret_cast<const char*>(\
+                             &reinterpret_cast<const TYPE*>(16)->FIELD) - reinterpret_cast<const char*>(16)),\
+            ::cetty::config::ConfigFieldDescriptor::CPPTYPE_OBJECT,\
+            #FIELD,\
+            #CLASS,\
+            ::cetty::config::ConfigFieldDescriptor::MAP,\
+            false)
 
 class ConfigFieldDescriptor {
 public:
@@ -96,10 +128,17 @@ public:
         MAX_CPPTYPE         = 10,    // Constant useful for defining lookup tables
     };
 
-    bool repeated;
+    enum RepeatedType {
+        NO_REPEATED = 0,
+        LIST        = 1,
+        MAP         = 2
+    };
 
-    int offset;
-    int type;
+    bool optional;
+    int  offset;
+    int  type;
+    int  repeatedType;
+
     std::string name;
     std::string className;
 
@@ -107,13 +146,17 @@ public:
                           int type,
                           const char* name,
                           const char* className,
-                          bool repeated = false)
-        : repeated(repeated),
+                          int repeatedType,
+                          bool optional)
+        : optional(optional),
           offset(offset),
           type(type),
+          repeatedType(repeatedType),
           name(name),
           className(className) {
     }
+
+    std::string toString() const;
 };
 
 typedef ConfigFieldDescriptor const* ConstConfigFieldDescriptorPtr;
@@ -122,6 +165,8 @@ class ConfigObjectDescriptor : private boost::noncopyable {
 public:
     typedef std::vector<ConstConfigFieldDescriptorPtr> FieldDescriptors;
     typedef FieldDescriptors::const_iterator ConstIterator;
+
+    typedef std::map<std::string, ConstConfigFieldDescriptorPtr> FieldDescriptorMap;
 
 public:
     ConfigObjectDescriptor(ConfigObject* defaultInstance,
@@ -140,11 +185,13 @@ public:
 
     int fieldCnt() const;
     ConstConfigFieldDescriptorPtr field(int index) const;
+    ConstConfigFieldDescriptorPtr field(const std::string& name) const;
 
     bool hasField(const std::string& name) const;
 
 private:
     FieldDescriptors fields_;
+    FieldDescriptorMap fieldMap_;
     ConfigObject* defaultInstance_;
 };
 
@@ -174,14 +221,18 @@ ConstConfigFieldDescriptorPtr ConfigObjectDescriptor::field(int index) const {
 }
 
 inline
-bool ConfigObjectDescriptor::hasField(const std::string& name) const {
-    for (std::size_t i = 0; i < fields_.size(); ++i) {
-        if (fields_[i]->name == name) {
-            return true;
-        }
+ConstConfigFieldDescriptorPtr
+ConfigObjectDescriptor::field(const std::string& name) const {
+    FieldDescriptorMap::const_iterator itr = fieldMap_.find(name);
+    if (itr != fieldMap_.end()) {
+        return itr->second;
     }
+    return NULL;
+}
 
-    return false;
+inline
+bool ConfigObjectDescriptor::hasField(const std::string& name) const {
+    return fieldMap_.find(name) != fieldMap_.end();
 }
 
 }

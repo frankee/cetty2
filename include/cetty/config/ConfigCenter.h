@@ -90,6 +90,7 @@ inline
 void ConfigCenter::addOptions(const boost::program_options::options_description& desc) {
     description_.add(desc);
 }
+
 }
 }
 

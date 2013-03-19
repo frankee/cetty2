@@ -142,10 +142,6 @@ void FileGenerator::GenerateHeader(io::Printer* printer) {
     printer->Print("#include <cetty/config/ConfigObject.h>\n"
                    "#include <cetty/config/ConfigDescriptor.h>\n");
 
-    if (file_->name() != "cetty/config/KeyValuePair.proto") {
-        printer->Print("#include <cetty/config/KeyValuePair.cnf.h>\n\n");
-    }
-
     for (int i = 0; i < file_->dependency_count(); i++) {
         const std::string& dependency = file_->dependency(i)->name();
 

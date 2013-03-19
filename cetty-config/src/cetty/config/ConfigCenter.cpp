@@ -22,6 +22,7 @@
 #include <cetty/logging/LoggerHelper.h>
 
 #include <cetty/config/ConfigObject.h>
+#include <cetty/config/ConfigDescriptor.h>
 #include <cetty/config/ConfigFileImporter.h>
 
 namespace cetty {

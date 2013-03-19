@@ -24,12 +24,16 @@
 #include <cetty/logging/Logger.h>
 #include <cetty/logging/LogLevel.h>
 
+#include <cetty/config/ConfigObject.h>
+#include <cetty/config/ConfigDescriptor.h>
+
 namespace cetty {
 namespace protobuf {
 namespace service {
 
 using namespace google::protobuf;
 using namespace cetty::logging;
+using namespace cetty::config;
 
 ProtobufUtil::FieldValue ProtobufUtil::getMessageFieldValue(const Message& message,
         const std::string& name) {
@@ -176,6 +180,123 @@ void ProtobufUtil::logHandler(google::protobuf::LogLevel level,
            logLevel).stream() << "Protobuf - " << message;
     //}
 }
+
+bool ProtobufUtil::mergeObject(const ConfigObject& config, Message* message) {
+    const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
+    const ConfigObjectDescriptor* configDescriptor = config.descriptor();
+
+    int fieldCnt = descriptor->field_count();
+
+    for (int i = 0; i < fieldCnt; ++i) {
+        const google::protobuf::FieldDescriptor* field = descriptor->field(i);
+        const ConfigFieldDescriptor* configField =
+            configDescriptor->field(field->camelcase_name());
+
+        if (configField && config.has(configField)) {
+            if (mergeField(configField, config, field, message) < 0) {
+                return false;
+            }
+        }
+    }
+}
+
+bool ProtobufUtil::mergeField(const ConfigFieldDescriptor* configField, const ConfigObject& config, const FieldDescriptor* field, Message* message) {
+    const google::protobuf::Reflection* reflection = message->GetReflection();
+    const FieldDescriptor::CppType& type = field->cpp_type();
+    int configType = configField->type;
+
+    bool repeated = field->is_repeated();
+    int  repeatedType = configField->repeatedType;
+
+    if (type == FieldDescriptor::CPPTYPE_BOOL && type == configType) {
+        if (repeated) {
+            if (repeatedType == ConfigFieldDescriptor::LIST) {
+
+            }
+            else if (repeatedType == ConfigFieldDescriptor::MAP) {
+
+            }
+        }
+        else {
+            if (repeatedType == ConfigFieldDescriptor::NO_REPEATED) {
+                reflection->SetInt32(message,
+                    field,
+                    config.get<bool>(configField));
+            }
+        }
+    }
+    else if (type == FieldDescriptor::CPPTYPE_INT32 && type == configType) {
+        if (repeated) {
+            if (repeatedType == ConfigFieldDescriptor::LIST) {
+                const std::vector<int>& values = config.get<std::vector<int> >(configField);
+
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    reflection->AddInt32(message, field, values[i]);
+                }
+            }
+            else if (repeatedType == ConfigFieldDescriptor::MAP) {
+                const std::map<std::string, int>& values =
+                    config.get<std::map<std::string, int> >(configField);
+                std::map<std::string, int>::const_iterator itr = values.begin();
+
+                for (; itr != values.end(); ++itr) {
+                    reflection->AddInt32(message, field, itr->second);
+                }
+            }
+        }
+        else {
+            if (repeatedType == ConfigFieldDescriptor::NO_REPEATED) {
+                reflection->SetInt32(message,
+                    field,
+                    config.get<int>(configField));
+            }
+        }
+    }
+    else if (type == FieldDescriptor::CPPTYPE_MESSAGE && type == configType) {
+        if (repeated) {
+            if (repeatedType == ConfigFieldDescriptor::LIST) {
+                const std::vector<ConfigObject*>& values =
+                    config.get<std::vector<ConfigObject*> >(configField);
+
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    Message* msg = reflection->AddMessage(message, field);
+
+                    if (!mergeObject(*values[i], msg)) {
+                        return false;
+                    }
+                }
+            }
+            else if (repeatedType == ConfigFieldDescriptor::MAP) {
+                const std::map<std::string, ConfigObject*>& values =
+                    config.get<std::map<std::string, ConfigObject*> >(configField);
+                std::map<std::string, ConfigObject*>::const_iterator itr =
+                    values.begin();
+
+                for (; itr != values.end(); ++itr) {
+                    Message* msg = reflection->AddMessage(message, field);
+
+                    if (!mergeObject(*itr->second, msg)) {
+                        return false;
+                    }
+                }
+            }
+            else {
+                Message* msg = reflection->AddMessage(message, field);
+                return mergeObject(*config.get<ConfigObject*>(configField), msg);
+            }
+        }
+        else {
+            if (repeatedType == ConfigFieldDescriptor::NO_REPEATED) {
+                Message* msg = reflection->MutableMessage(message, field);
+                return mergeObject(*config.get<ConfigObject*>(configField), msg);
+            }
+        }
+    }
+
+    return 0;
+}
+
+
 
 static uint32_t adler32Check(const uint8_t* buffer, int bufferSize) {
     return static_cast<uint32_t>(
