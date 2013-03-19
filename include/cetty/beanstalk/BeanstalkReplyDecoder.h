@@ -32,9 +32,8 @@ public:
 
 public:
     enum State {
-        READ_INITIAL,
-        READ_BULK,
-        READ_MULTI_BULK
+        FIRST_LINE,
+        SECOND_LINE
     };
 
 public:
@@ -44,37 +43,24 @@ public:
     void registerTo(Context& ctx) { decoder.registerTo(ctx); }
 
 private:
-    void init() {
-        checkPoint = decoder.checkPointInvoker();
-
-        decoder.setInitialState(READ_INITIAL);
-        decoder.setDecoder(boost::bind(&BeanstalkReplyDecoder::decode,
-                                        this,
-                                        _1,
-                                        _2,
-                                        _3));
-    }
+    void init();
 
     BeanstalkReplyPtr decode(ChannelHandlerContext& ctx,
                              const ReplayingDecoderBufferPtr& buffer,
                              int state);
 
-    void fail(ChannelHandlerContext& ctx, long frameLength);
-
-    /**
-     * Returns the number of bytes between the readerIndex of the haystack and
-     * the first "\r\n" found in the haystack.  -1 is returned if no "\r\n" is
-     * found in the haystack.
-     */
     int indexOf(const StringPiece& bytes, int offset);
+
+    void getResponse(StringPiece &bytes, std::string *response);
+    void getInt(StringPiece &bytes, int *value, int offset);
+    void getData(StringPiece &bytes, std::string *data, int offset);
 
     BeanstalkReplyPtr reset();
 
 private:
-
-    BeanstalkReplyPtr reply;
-
+    int dataLength;
     Decoder decoder;
+    BeanstalkReplyPtr reply;
     CheckPointInvoker checkPoint;
 };
 

@@ -23,6 +23,9 @@ namespace cetty {
 namespace beanstalk {
 namespace protocol {
 
+#define DEFAULT_PRIORITY 1024
+#define DEFAULT_TTR 60
+
 using namespace cetty::buffer;
 using namespace cetty::util;
 

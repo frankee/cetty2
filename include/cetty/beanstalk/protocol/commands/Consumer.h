@@ -13,7 +13,7 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
+namespace commands {
 
 /**
 * Reserves the next job in the queue. This function is blocking until a job becomes available in
@@ -49,6 +49,10 @@ BeanstalkCommandPtr reserve(int timeout);
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
 BeanstalkCommandPtr peekReady();
+BeanstalkCommandPtr peekDelayed();
+BeanstalkCommandPtr peekBuried();
+
+BeanstalkCommandPtr peek(int id);
 
 /**
 * The delete command removes a job from the server entirely. It is normally used by the client
@@ -59,7 +63,11 @@ BeanstalkCommandPtr peekReady();
 *
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
-BeanstalkCommandPtr del(unsigned int jobId);
+BeanstalkCommandPtr del(int jobId);
+
+BeanstalkCommandPtr release(int id,
+		                    int priority =  DEFAULT_PRIORITY,
+		                    int delay = 0);
 
 /**
 * The bury command puts a job into the "buried" state. Buried jobs are put into a FIFO linked
@@ -72,9 +80,10 @@ BeanstalkCommandPtr del(unsigned int jobId);
 * @throws ServerException With status NOT_FOUND if the job was not found on the server
 * @throws ServerException With reason BAD_FORMAT on unexpected server response
 */
-BeanstalkCommandPtr bury(unsigned int jobId, int priority = 10);
+BeanstalkCommandPtr bury(int jobId, int priority = 10);
 
-BeanstalkCommandPtr kick(unsigned int bound);
+BeanstalkCommandPtr kick(int bound);
+BeanstalkCommandPtr kickJob(int id);
 
 /**
  * The "watch" command adds the named tube to the watch list for the current connection. A reserve
@@ -95,6 +104,20 @@ BeanstalkCommandPtr watch(const std::string &tube);
  * @throws ServerException With reason BAD_FORMAT on unexpected server response
  */
 BeanstalkCommandPtr listTubes();
+
+BeanstalkCommandPtr touch(int id);
+BeanstalkCommandPtr ignore(const std::string &tubeName);
+
+BeanstalkCommandPtr quit();
+
+BeanstalkCommandPtr statsJob(int id);
+BeanstalkCommandPtr statsTube(const std::string &tube);
+BeanstalkCommandPtr stats();
+
+BeanstalkCommandPtr listTubeUsed();
+BeanstalkCommandPtr listTubesWatched();
+
+BeanstalkCommandPtr pauseTube(const std::string &tube, int delay);
 
 }
 }

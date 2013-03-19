@@ -13,10 +13,7 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
-
-#define DEFAULT_PRIORITY 1024
-#define DEFAULT_TTR 60
+namespace commands {
 
 /**
 * Adds a job consisting of a string to the server
