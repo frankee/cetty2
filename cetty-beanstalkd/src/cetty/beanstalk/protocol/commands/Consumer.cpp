@@ -10,7 +10,7 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
+namespace commands {
 
 BeanstalkCommandPtr reserve() {
 	BeanstalkCommandPtr command = new BeanstalkCommand("reserve");

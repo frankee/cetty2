@@ -15,6 +15,7 @@
 
 #include <boost/variant.hpp>
 #include <vector>
+#include <map>
 
 namespace cetty {
 namespace beanstalk {
@@ -44,14 +45,8 @@ public:
     int getResponseType(const std::string &response);
 
 public:
-    static const int INSERTED;
-    static const int BURIED;
-    static const int USING;
-    static const int RESERVED;
-    static const int WATCHING;
-    static const int KICKED;
-    static const int FOUND;
-    static const int OK;
+
+    enum {INSERTED, BURIED, USING, RESERVED, WATCHING, KICKED, FOUND, OK};
 
 private:
     static const std::map<std::string, int> &getReplyMap();

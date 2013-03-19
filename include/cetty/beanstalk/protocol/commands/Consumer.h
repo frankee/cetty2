@@ -13,7 +13,7 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
+namespace commands {
 
 /**
 * Reserves the next job in the queue. This function is blocking until a job becomes available in

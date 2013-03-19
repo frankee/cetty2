@@ -6,9 +6,9 @@ AUX_SOURCE_DIRECTORY(cetty/beanstalk BEANSTALK_DIR)
 AUX_SOURCE_DIRECTORY(cetty/beanstalk/protocol BEANSTALK_PROTOCOL_DIR)
 AUX_SOURCE_DIRECTORY(cetty/redis/beanstalk/commands BEANSTALK_PROTOCOL_COMMANDS_DIR)
 
-SET(redis_sources ${BEANSTALK_DIR} ${BEANSTALK_PROTOCOL_DIR} ${BEANSTALK_PROTOCOL_COMMANDS_DIR})
+SET(beanstalk_sources ${BEANSTALK_DIR} ${BEANSTALK_PROTOCOL_DIR} ${BEANSTALK_PROTOCOL_COMMANDS_DIR})
 				  
-SET(beanstalk_lib beanstalk-redis)
+SET(beanstalk_lib cetty-beanstalk)
 
 cxx_static_library(${beanstalk_lib} ${beanstalk_sources})
 

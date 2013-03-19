@@ -6,6 +6,7 @@
  */
 
 #include <cetty/beanstalk/BeanstalkReplyDecoder.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace beanstalk {
@@ -38,6 +39,8 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 	}
 
 
+	int id = -1, pos = -1, count = -1;
+	std::string data, temp;
 	if (FIRST_LINE == state) {
         std::string response;
         getResponse(bytes, &response);
@@ -48,28 +51,28 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 
         switch (replyCode) {
         case BeanstalkReply::INSERTED:
-        	int id = -1;
+        	id = -1;
             getInt(bytes, &id, 8);
             reply->setId(id);
             break;
 
         case BeanstalkReply::BURIED:
-            int id = -1;
+            id = -1;
             getInt(bytes, &id, 6);
             reply->setId(id);
             break;
 
         case BeanstalkReply::USING:
-        	std::string data;
         	getData(bytes, &data, 5);
         	reply->setValue(data);
         	break;
 
         case BeanstalkReply::RESERVED:
         case BeanstalkReply::FOUND:
-        	int id = -1, pos = -1;
-        	std::string temp(bytes.c_str());
+        	id = -1;
+        	pos = -1;
 
+        	temp.assign(bytes.c_str());
         	pos = temp.find(' ', 0);
         	getInt(bytes, &id, pos);
 
@@ -101,8 +104,8 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 
         case BeanstalkReply::WATCHING:
         case BeanstalkReply::KICKED:
-        	int count = -1, pos = -1;
-        	std::string temp(bytes.c_str());
+        	pos = -1, count = -1;
+        	temp.assign(bytes.c_str());
         	pos = temp.find(' ', 0);
 
         	getInt(bytes, &count, pos);
@@ -166,7 +169,8 @@ void BeanstalkReplyDecoder::getInt(StringPiece &bytes,
 
     if (i ==j) return;
 
-    *value = StringUtil::strto32(StringPiece(&bytes[i], j - i));
+    std::string temp(bytes.data(), j - i);
+    *value = StringUtil::strto32(temp);
 }
 
 void BeanstalkReplyDecoder::getData(StringPiece &bytes,
