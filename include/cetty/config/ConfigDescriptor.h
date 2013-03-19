@@ -155,6 +155,8 @@ public:
           name(name),
           className(className) {
     }
+
+    std::string toString() const;
 };
 
 typedef ConfigFieldDescriptor const* ConstConfigFieldDescriptorPtr;

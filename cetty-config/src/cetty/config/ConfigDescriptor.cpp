@@ -19,6 +19,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <boost/assert.hpp>
+#include <cetty/util/StringUtil.h>
 #include <cetty/config/ConfigObject.h>
 
 namespace cetty {
@@ -76,6 +77,12 @@ ConfigObjectDescriptor::~ConfigObjectDescriptor() {
 
 const std::string& ConfigObjectDescriptor::className() const {
     return defaultInstance_->className();
+}
+
+std::string ConfigFieldDescriptor::toString() const {
+    std::string tmp;
+    StringUtil::printf(&tmp, "field: %s(%s)", name.c_str(), className.c_str());
+    return tmp;
 }
 
 }

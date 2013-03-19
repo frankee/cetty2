@@ -227,13 +227,13 @@ GenerateClassDefinition(io::Printer* printer) {
                 case FieldDescriptor::CPPTYPE_MESSAGE:
                     if (isNestType(descriptor_, field)) {
                         printer->Print(
-                            "std::map<std::string,  $class_name$*> $field_name$;\n",
+                            "std::map<std::string, $class_name$*> $field_name$;\n",
                             "class_name", field->message_type()->name(),
                             "field_name", field->camelcase_name());
                     }
                     else {
                         printer->Print(
-                            "std::map<std::string,  $class_name$*> $field_name$;\n",
+                            "std::map<std::string, $class_name$*> $field_name$;\n",
                             "class_name", ClassName(field->message_type(), true),
                             "field_name", field->camelcase_name());
                     }
@@ -616,6 +616,7 @@ GenerateStructors(io::Printer* printer) {
                         ",\n    $name$(0)",
                         "name", field->camelcase_name());
                 }
+
                 break;
 
             case FieldDescriptor::CPPTYPE_DOUBLE:
@@ -653,7 +654,7 @@ GenerateStructors(io::Printer* printer) {
                         ",\n    $name$()",
                         "name", field->camelcase_name());
                 }
-                
+
                 break;
             }
 

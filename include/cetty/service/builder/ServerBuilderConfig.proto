@@ -10,17 +10,14 @@ message ServerConfig {
 
 message ServerBuilderConfig {
 	message Server {
-		//option (config_message_options).coded = "{host}:{port}";
+		//option (config_message_options).template = "{host}:{port}";
 		
-		optional string host = 1 [
-		default = "127.0.0.1",
-		 (config_options).note = "# If you want you can bind a single interface, if the bind option is not \n# specified all the interfaces will listen for incoming connections.",
-	  (config_options).commented = true
-		];
+		// #If you want you can bind a single interface, if the bind option is not
+		// #specified all the interfaces will listen for incoming connections.
+		optional string host = 1 [ default = "127.0.0.1", (config_options).commented = true];
 		
-		required int32  port = 2 [
-			(config_options).note = "# Accept connections on the specified port."
-		];
+		// #Accept connections on the specified port.
+		required int32  port = 2;
 		
 		optional ServerConfig config = 3;
 	}
@@ -38,28 +35,31 @@ message ServerBuilderConfig {
 		optional string  level = 2;
 	}
 	
+	// # By default cetty does not run as a daemon. Use 'true' if you need it.
+	// # Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.
 	required bool deamonize = 1 [
-		(config_options).note = "# By default cetty does not run as a daemon. Use 'true' if you need it.\n# Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.",
 		(config_options).commented = true,
-		(config_options).cmd   = "deamon",
+		(config_options).cmd       = "deamon",
 		(config_options).short_cmd = "d"];
 		
+	// # When running daemonized, Redis writes a pid file in /var/run/redis.pid by
+	// # default. You can specify a custom pid file location here.
     optional string pidfile = 2 [
 		default = "/var/run/xxx.pid",
-		(config_options).note = "# When running daemonized, Redis writes a pid file in /var/run/redis.pid by\n# default. You can specify a custom pid file location here.",
         (config_options).commented = true
 	];
 	
-    repeated Server servers = 3 [
-		(config_options).default = "[{\"http\", \"\", 8080}, {\"rpc\", null, 18080}]"
-	];
-
-    optional int32 parentThreadCount = 4;
-    optional int32  childThreadCount = 5;
-    optional int32           backlog = 6;
+    required int32 parent_thread_count = 4 [default = 1];
+    required int32  child_thread_count = 5 [default = 0];
+    required int32             backlog = 6 [default = 4096];
     
-	optional Logger logger = 7;
+	optional Logger   logger = 7;
 
-    optional Limit limit = 8;
+    optional Limit     limit = 8;
     optional Timeout timeout = 9;
+
+    repeated Server servers  = 10 [
+		(config_options).map = true,
+		(config_options).default = "{{http:\":8080\"}, {rpc:\":18080\"}}"
+	];
 }

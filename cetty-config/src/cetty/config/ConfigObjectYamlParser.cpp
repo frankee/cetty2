@@ -147,7 +147,6 @@ int parseField(const ConfigFieldDescriptor* field,
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                ConfigObject* obj = object->addObject(field);
 
                 // case-1
                 // items:
@@ -159,15 +158,18 @@ int parseField(const ConfigFieldDescriptor* field,
                 // items:
                 //   - field1 : value
                 //     field2 : value
-
                 const std::string& objectName = itr->begin()->first.Scalar();
+                ConfigObject* obj = object->addObject(field);
 
-                if (!objectName.empty() && !obj->descriptor()->hasField(objectName)) {
-                    obj->setName(objectName);
-                    return parseConfigObject(itr->begin()->second, obj);
-                }
-                else { // case-2
-                    return parseConfigObject(*itr, obj);
+                if (obj) {
+                    if (!objectName.empty()
+                            && !obj->descriptor()->hasField(objectName)) { //case-1
+                        obj->setName(objectName);
+                        return parseConfigObject(itr->begin()->second, obj);
+                    }
+                    else { // case-2
+                        return parseConfigObject(*itr, obj);
+                    }
                 }
 
                 break;
@@ -207,19 +209,32 @@ int parseField(const ConfigFieldDescriptor* field,
                 break;
 
             case ConfigFieldDescriptor::CPPTYPE_OBJECT:
-                ConfigObject* obj = object->addObject(field, itr->first.Scalar());
-
                 // case-1
                 // items:
-                //   - objectName :
-                //       field1 : value
-                //       field2 : value
+                //   objectName :
+                //     field1 : value
+                //     field2 : value
                 //
                 // case-2
                 // items:
-                //   - field1 : value
+                // - objectName :
+                //     field1 : value
                 //     field2 : value
-                return parseConfigObject(itr->second, obj);
+                ConfigObject* obj = NULL;
+
+                // case-1
+                obj = object->addObject(field, itr->first.Scalar());
+
+                if (obj) {
+                    return parseConfigObject(itr->second, obj);
+                }
+                else { // case-2
+                    obj = object->addObject(field, itr->begin()->first.Scalar());
+
+                    if (obj) {
+                        return parseConfigObject(itr->begin()->second, obj);
+                    }
+                }
 
                 break;
             }
