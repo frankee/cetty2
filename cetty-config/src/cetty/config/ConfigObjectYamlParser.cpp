@@ -17,8 +17,6 @@
 #include <yaml-cpp/yaml.h>
 #include <cetty/config/ConfigObject.h>
 #include <cetty/config/ConfigDescriptor.h>
-#include <cetty/config/ConfigReflection.h>
-#include <cetty/config/KeyValuePair.cnf.h>
 
 #include <cetty/logging/LoggerHelper.h>
 

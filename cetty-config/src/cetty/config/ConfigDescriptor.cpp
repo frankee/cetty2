@@ -40,7 +40,7 @@ ConfigObjectDescriptor::ConfigObjectDescriptor(ConfigObject* defaultInstance,
     va_start(valist, descriptor);
 
     fields_.push_back(descriptor);
-    fieldMap_.insert(descriptor->name, descriptor);
+    fieldMap_.insert(std::make_pair(descriptor->name, descriptor));
 
     for (int i = 1; i < count; ++i) {
         ConstConfigFieldDescriptorPtr field
@@ -51,7 +51,7 @@ ConfigObjectDescriptor::ConfigObjectDescriptor(ConfigObject* defaultInstance,
         }
 
         fields_.push_back(field);
-        fieldMap_.insert(field->name, field);
+        fieldMap_.insert(std::make_pair(field->name, field));
     }
 
     va_end(valist);

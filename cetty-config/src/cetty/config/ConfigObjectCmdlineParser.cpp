@@ -35,7 +35,7 @@ static int parseField(const ConfigFieldDescriptor* field,
                       const ConfigCenter::CmdlineTrie& cmdline,
                       ConfigObject* object) {
 
-    if (field->repeated) {
+    if (field->repeatedType == ConfigFieldDescriptor::LIST) {
         switch (field->type) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
             object->addInt32(field, option.as<std::vector<int> >());
