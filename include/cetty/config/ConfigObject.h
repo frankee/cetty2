@@ -278,6 +278,11 @@ void ConfigObject::clearRepeatedField<std::map<std::string, ConfigObject*> >(
     std::map<std::string, ConfigObject*>* raw =
         mutableRaw<std::map<std::string, ConfigObject*> >(field);
     BOOST_ASSERT(raw);
+    if (raw->empty()) {
+        //FIXME: always be empty.
+        return;
+    }
+
     std::map<std::string, ConfigObject*>::iterator itr = raw->begin();
 
     for (; itr != raw->end(); ++itr) {

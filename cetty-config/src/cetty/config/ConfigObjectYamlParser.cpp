@@ -165,10 +165,14 @@ int parseField(const ConfigFieldDescriptor* field,
                     if (!objectName.empty()
                             && !obj->descriptor()->hasField(objectName)) { //case-1
                         obj->setName(objectName);
-                        return parseConfigObject(itr->begin()->second, obj);
+                        if (!parseConfigObject(itr->begin()->second, obj)) {
+                            return false;
+                        }
                     }
                     else { // case-2
-                        return parseConfigObject(*itr, obj);
+                        if (!parseConfigObject(*itr, obj)) {
+                            return false;
+                        }
                     }
                 }
 
@@ -226,13 +230,17 @@ int parseField(const ConfigFieldDescriptor* field,
                 obj = object->addObject(field, itr->first.Scalar());
 
                 if (obj) {
-                    return parseConfigObject(itr->second, obj);
+                    if (!parseConfigObject(itr->second, obj)) {
+                        return false;
+                    }
                 }
                 else { // case-2
                     obj = object->addObject(field, itr->begin()->first.Scalar());
 
                     if (obj) {
-                        return parseConfigObject(itr->begin()->second, obj);
+                        if (!parseConfigObject(itr->begin()->second, obj)) {
+                            return false;
+                        }
                     }
                 }
 
