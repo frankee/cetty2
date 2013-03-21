@@ -75,6 +75,7 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
         	temp.assign(bytes.c_str());
         	pos = temp.find(' ', 0);
         	getInt(bytes, &id, pos);
+        	reply->setId(id);
 
             pos = temp.find(' ', pos + 1);
             getInt(bytes, &dataLength, pos);
@@ -169,7 +170,7 @@ void BeanstalkReplyDecoder::getInt(StringPiece &bytes,
 
     if (i ==j) return;
 
-    std::string temp(bytes.data(), j - i);
+    std::string temp(bytes.c_str() + i, j - i);
     *value = StringUtil::strto32(temp);
 }
 
