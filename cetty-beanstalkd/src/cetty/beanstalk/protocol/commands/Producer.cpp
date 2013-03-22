@@ -10,12 +10,12 @@
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
-namespace command {
+namespace commands {
 
 BeanstalkCommandPtr put(const std::string &data,
-		                int pri = DEFAULT_PRIORITY,
-		                int delay = 0,
-		                int ttr = DEFAULT_TTR) {
+		                int pri,
+		                int delay,
+		                int ttr) {
 	BeanstalkCommandPtr command(new BeanstalkCommand("put"));
 
     *command << "put " << pri << " " << delay

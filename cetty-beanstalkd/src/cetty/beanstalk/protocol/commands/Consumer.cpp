@@ -35,15 +35,15 @@ BeanstalkCommandPtr del(int jobId) {
 }
 
 BeanstalkCommandPtr release(int id,
-		                    int priority =  DEFAULT_PRIORITY,
-		                    int delay = 0) {
+		                    int priority,
+		                    int delay) {
 	BeanstalkCommandPtr command = new BeanstalkCommand("release");
     *command << "release " << id << " " << priority << " " << delay << "\r\n";
 
     return command;
 }
 
-BeanstalkCommandPtr bury(int jobId, int priority = 10) {
+BeanstalkCommandPtr bury(int jobId, int priority) {
 	BeanstalkCommandPtr command = new BeanstalkCommand("bury");
     *command << "bury " << jobId << " " << priority << "\r\n";
 
