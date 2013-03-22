@@ -229,8 +229,9 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
                                       boost::asio::ip::tcp::resolver::iterator endpointIterator,
                                       const ChannelFuturePtr& cf) {
     if (!error) {
-        LOG_INFO << "channel connected to the remote server %s, firing connected event."
-                 << remoteAddress().toString();
+        LOG_INFO << "channel connected to the remote server "
+                 << remoteAddress().toString()
+                 << ", firing connected event.";
         
         setActived();
         cf->setSuccess();
@@ -390,7 +391,7 @@ void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
         //         }
 
     }
-    catch (const std::exception& t) {
+    catch (const std::exception& e) {
         //future.setFailure(t);
         //pipeline().fireExceptionCaught(t);
         closeIfClosed();

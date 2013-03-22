@@ -14,7 +14,7 @@ message ServerBuilderConfig {
 		
 		// #If you want you can bind a single interface, if the bind option is not
 		// #specified all the interfaces will listen for incoming connections.
-		optional string host = 1 [ default = "127.0.0.1", (config_options).commented = true];
+		optional string host = 1 [ (config_options).commented = true];
 		
 		// #Accept connections on the specified port.
 		required int32  port = 2;

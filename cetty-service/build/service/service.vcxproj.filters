@@ -90,4 +90,9 @@
       <Filter>service\builder</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.proto">
+      <Filter>service\builder</Filter>
+    </None>
+  </ItemGroup>
 </Project>

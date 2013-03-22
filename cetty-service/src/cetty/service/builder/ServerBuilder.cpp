@@ -167,7 +167,7 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
                  port);
 }
 
-cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
+ChannelPtr ServerBuilder::build(const std::string& name,
         const ChannelOptions& options,
         const ChannelOptions& childOptions,
         const ChildInitializer& childInitializer,
@@ -206,7 +206,7 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
     return build(bootstrap, host, port);
 }
 
-cetty::channel::ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
+ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
         const std::string& host,
         int port) {
     ChannelFuturePtr future;

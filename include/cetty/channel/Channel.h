@@ -479,12 +479,12 @@ void Channel::setInitializer(const Channel::Initializer& initializer) {
 
 inline
 bool Channel::isOpen() const {
-    return state_ == Channel::CHANNEL_OPENED;
+    return state_ == CHANNEL_OPENED || state_ == CHANNEL_ACTIVED;
 }
 
 inline
 bool Channel::isActive() const {
-    return state_ == Channel::CHANNEL_ACTIVED;
+    return state_ == CHANNEL_ACTIVED;
 }
 
 inline
