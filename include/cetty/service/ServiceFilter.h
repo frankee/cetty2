@@ -133,6 +133,16 @@ public:
         responseFilter_ = filter;
     }
 
+    InboundTransfer& inboundTransfer() {
+        BOOST_ASSERT(inboundTransfer_);
+        return *inboundTransfer_;
+    }
+
+    OutboundTransfer& outboundTransfer() {
+        BOOST_ASSERT(outboundTransfer_);
+        return *outboundTransfer_;
+    }
+
 private:
     void messageUpdated(ChannelHandlerContext& ctx) {
         bool notify = false;

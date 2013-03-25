@@ -109,7 +109,7 @@ ChannelBufferPtr HttpPackageEncoder::encode(ChannelHandlerContext& ctx,
 
         ChannelBufferPtr content = response->content();
 
-        if (!content->readable()) {
+        if (!content || !content->readable()) {
             return header; // no content
         }
         else {

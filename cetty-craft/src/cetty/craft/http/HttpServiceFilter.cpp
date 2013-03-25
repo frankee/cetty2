@@ -58,6 +58,10 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
         HttpResponsePtr response = new HttpResponse(
             request->version(),
             HttpResponseStatus::BAD_REQUEST);
+
+        ChannelFuturePtr future = ctx.newFuture();
+        filter_.outboundTransfer().write(response, future);
+        future->addListener(ChannelFutureListener::CLOSE);
     }
 
     return msg;

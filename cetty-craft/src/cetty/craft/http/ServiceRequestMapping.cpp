@@ -338,7 +338,13 @@ bool ServiceRequestMapping::parseMessage(const StringPiece& value,
     ProtobufParser* parser = ProtobufParser::getParser("json");
 
     if (parser) {
-        return parser->parse(value.c_str(), value.size(), message) == 0;
+        try {
+            return parser->parse(value.c_str(), value.size(), message) == 0;
+        }
+        catch (const std::exception& e) {
+            LOG_ERROR << "parse message has error: " << e.what();
+            return false;
+        }
     }
 
     return true;
