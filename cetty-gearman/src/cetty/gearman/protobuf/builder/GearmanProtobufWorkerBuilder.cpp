@@ -45,20 +45,33 @@ bool intializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
     pipeline.addLast<GearmanProtobufWorkerFilter::HandlerPtr>("gearmanProtobufFilter",
-        GearmanProtobufWorkerFilter::HandlerPtr(new GearmanProtobufWorkerFilter));
+            GearmanProtobufWorkerFilter::HandlerPtr(new GearmanProtobufWorkerFilter));
 
     pipeline.addLast<ProtobufServiceMessageHandler::HandlerPtr>("protobufMessageHandler",
-        ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
+            ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
 
     return true;
 }
 
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder() {
+    builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
 }
 
 GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(int threadCnt)
     : builder_(threadCnt) {
-        builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
+    builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
+}
+
+GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(
+    const EventLoopPtr& eventLoop)
+    : builder_(eventLoop) {
+    builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
+}
+
+GearmanProtobufWorkerBuilder::GearmanProtobufWorkerBuilder(
+    const EventLoopPoolPtr& eventLoopPool)
+    : builder_(eventLoopPool) {
+    builder_.setAdditionalInitializer(boost::bind(&intializeChannel, _1));
 }
 
 GearmanProtobufWorkerBuilder& GearmanProtobufWorkerBuilder::registerService(

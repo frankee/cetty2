@@ -38,24 +38,66 @@ public:
     GearmanProtobufClientBuilder(int threadCnt);
     GearmanProtobufClientBuilder(const EventLoopPtr& eventLoop);
     GearmanProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool);
-    
+
     ~GearmanProtobufClientBuilder() {}
 
-    GearmanProtobufClientBuilder& addConnection(const std::string& host, int port) {
-        builder_.addConnection(host, port, 1);
-        return *this;
-    }
+    GearmanProtobufClientBuilder& addConnection(const std::string& host, int port);
 
-    ChannelPtr build() {
-        return builder_.build();
-    }
+    bool background() const;
+
+    GearmanProtobufClientBuilder& setBackground(bool background);
+
+    const std::string& uniqueKey() const;
+
+    // uniqueId = key + id
+    // if the key is empty, will not use the unique id
+    GearmanProtobufClientBuilder& setUniqueKey(const std::string& key);
+
+    ChannelPtr build();
 
 private:
     void init();
+    bool initializeChannel(const ChannelPtr& channel);
 
 private:
+    bool init_;
+    bool background_;
+    std::string uniqueKey_;
+
     Builder builder_;
 };
+
+inline
+GearmanProtobufClientBuilder& GearmanProtobufClientBuilder::addConnection(
+    const std::string& host,
+    int port) {
+    builder_.addConnection(host, port, 1);
+    return *this;
+}
+
+inline
+bool GearmanProtobufClientBuilder::background() const {
+    return background_;
+}
+
+inline
+GearmanProtobufClientBuilder& GearmanProtobufClientBuilder::setBackground(
+    bool background) {
+    background_ = background;
+    return *this;
+}
+
+inline
+const std::string& GearmanProtobufClientBuilder::uniqueKey() const {
+    return uniqueKey_;
+}
+
+inline
+GearmanProtobufClientBuilder& GearmanProtobufClientBuilder::setUniqueKey(
+    const std::string& key) {
+    uniqueKey_ = key;
+    return *this;
+}
 
 }
 }

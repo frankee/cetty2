@@ -43,7 +43,6 @@ public:
     void setCantdo(const std::string& cantdo);
     void resetAbilities();
     
-    void preSleep();
     void grabJob();
     void grabUniqueJob();
 

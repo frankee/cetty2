@@ -31,11 +31,20 @@ using namespace cetty::channel;
 using namespace cetty::handler::codec;
 using namespace cetty::gearman::protocol;
 
-GearmanWorkerBuilder::GearmanWorkerBuilder() {
+GearmanWorkerBuilder::GearmanWorkerBuilder()
+    : pool_(new AsioServicePool(1)) {
 }
 
 GearmanWorkerBuilder::GearmanWorkerBuilder(int threadCnt)
     : pool_(new AsioServicePool(threadCnt)) {
+}
+
+GearmanWorkerBuilder::GearmanWorkerBuilder(const EventLoopPtr& eventLoop)
+    : loop_(eventLoop) {
+}
+
+GearmanWorkerBuilder::GearmanWorkerBuilder(const EventLoopPoolPtr& eventLoopPool)
+    : pool_(eventLoopPool) {
 }
 
 GearmanWorkerBuilder& GearmanWorkerBuilder::buildWorkers() {
@@ -45,6 +54,9 @@ GearmanWorkerBuilder& GearmanWorkerBuilder::buildWorkers() {
         for (; itr != pool_->end(); ++itr) {
             buildWorker(*itr);
         }
+    }
+    else if (loop_) {
+        buildWorker(loop_);
     }
 
     return *this;

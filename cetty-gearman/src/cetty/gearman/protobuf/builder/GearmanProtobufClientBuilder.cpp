@@ -34,48 +34,73 @@ using namespace cetty::gearman::protocol;
 using namespace cetty::protobuf::service;
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder()
-    : builder_() {
+    : init_(false),
+      background_(false),
+      builder_() {
     init();
 }
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder(int threadCnt)
-    : builder_(threadCnt) {
+    : init_(false),
+      background_(false),
+      builder_(threadCnt) {
     init();
 }
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder(
     const EventLoopPoolPtr& eventLoopPool)
-    : builder_(eventLoopPool) {
+    : init_(false),
+      background_(false),
+      builder_(eventLoopPool) {
     init();
 }
 
 GearmanProtobufClientBuilder::GearmanProtobufClientBuilder(
     const EventLoopPtr& eventLoop)
-    :  builder_(eventLoop) {
+    :  init_(false),
+       background_(false),
+       builder_(eventLoop) {
     init();
 }
 
-bool initializeChannel(const ChannelPtr& channel) {
+bool GearmanProtobufClientBuilder::initializeChannel(const ChannelPtr& channel) {
     ChannelPipeline& pipeline = channel->pipeline();
 
     pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
-        LengthFieldBasedFrameDecoder::HandlerPtr(
-        new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
+            LengthFieldBasedFrameDecoder::HandlerPtr(
+                new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
 
     pipeline.addLast<GearmanMessageCodec::HandlerPtr>("gearmanCodec",
-        GearmanMessageCodec::HandlerPtr(new GearmanMessageCodec));
+            GearmanMessageCodec::HandlerPtr(new GearmanMessageCodec));
 
     pipeline.addLast<GearmanClientHandler::HandlerPtr>("gearmanClient",
-        GearmanClientHandler::HandlerPtr(new GearmanClientHandler));
+            GearmanClientHandler::HandlerPtr(new GearmanClientHandler));
+
+    GearmanProtobufClientFilter::HandlerPtr filter(
+        new GearmanProtobufClientFilter);
+
+    filter->setBackground(background_);
+    filter->setUniqueKey(uniqueKey_);
 
     pipeline.addLast<GearmanProtobufClientFilter::HandlerPtr>("gearmanFilter",
-        GearmanProtobufClientFilter::HandlerPtr(new GearmanProtobufClientFilter));
+            filter);
 
     return true;
 }
 
 void GearmanProtobufClientBuilder::init() {
-    builder_.setClientInitializer(boost::bind(&initializeChannel, _1));
+    if (!init_) {
+        builder_.setClientInitializer(boost::bind(
+                                          &GearmanProtobufClientBuilder::initializeChannel,
+                                          this,
+                                          _1));
+
+        init_ = true;
+    }
+}
+
+cetty::channel::ChannelPtr GearmanProtobufClientBuilder::build() {
+    return builder_.build();
 }
 
 }

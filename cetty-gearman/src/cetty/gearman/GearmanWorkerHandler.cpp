@@ -16,7 +16,6 @@
 #include <cetty/gearman/GearmanWorkerHandler.h>
 
 #include <string>
-#include <iostream>
 
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelHandlerContext.h>
@@ -239,6 +238,7 @@ void GearmanWorkerHandler::channelActive(ChannelHandlerContext& ctx) {
         registerFunction(itr->first, ctx);
     }
 
+    LOG_INFO << "channel active, beginning to grab job.";
     grabJob(ctx);
 }
 

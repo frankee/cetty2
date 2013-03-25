@@ -34,24 +34,20 @@ using namespace cetty::gearman::protocol;
 
 class GearmanWorkerBuilder : private boost::noncopyable {
 public:
-    typedef boost::function1<GearmanMessagePtr,
-        const GearmanMessagePtr&> WorkFunctor;
+    typedef boost::function<GearmanMessagePtr(const GearmanMessagePtr&)> WorkFunctor;
 
 public:
     GearmanWorkerBuilder();
     GearmanWorkerBuilder(int threadCnt);
+    GearmanWorkerBuilder(const EventLoopPtr& eventLoop);
+    GearmanWorkerBuilder(const EventLoopPoolPtr& eventLoopPool);
 
-    GearmanWorkerBuilder& addConnection(const std::string& host, int port) {
-        connections_.push_back(Connection(host, port, 1));
-        return *this;
-    }
+    GearmanWorkerBuilder& addConnection(const std::string& host, int port);
 
     GearmanWorkerBuilder& registerWorker(const std::string& functionName,
-        const WorkFunctor& worker);
+                                         const WorkFunctor& worker);
 
-    void setAdditionalInitializer(const Channel::Initializer& initializer) {
-        additionalInitializer_ = initializer;
-    }
+    void setAdditionalInitializer(const Channel::Initializer& initializer);
 
     GearmanWorkerBuilder& buildWorkers();
 
@@ -73,6 +69,20 @@ private:
     std::vector<Connection> connections_;
     std::vector<GearmanWorkerPtr> workers_;
 };
+
+inline
+GearmanWorkerBuilder& GearmanWorkerBuilder::addConnection(
+    const std::string& host,
+    int port) {
+    connections_.push_back(Connection(host, port, 1));
+    return *this;
+}
+
+inline
+void GearmanWorkerBuilder::setAdditionalInitializer(
+    const Channel::Initializer& initializer) {
+    additionalInitializer_ = initializer;
+}
 
 }
 }

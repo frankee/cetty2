@@ -35,6 +35,8 @@ public:
 public:
     GearmanProtobufWorkerBuilder();
     GearmanProtobufWorkerBuilder(int threadCnt);
+    GearmanProtobufWorkerBuilder(const EventLoopPtr& eventLoop);
+    GearmanProtobufWorkerBuilder(const EventLoopPoolPtr& eventLoopPool);
 
     GearmanProtobufWorkerBuilder& addConnection(const std::string& host, int port);
     GearmanProtobufWorkerBuilder& registerService(const ProtobufServicePtr& service);

@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include <cetty/util/StringUtil.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/gearman/protocol/GearmanMessage.h>
 #include <cetty/gearman/protocol/commands/Client.h>
@@ -29,13 +30,15 @@ namespace cetty {
 namespace gearman {
 namespace protobuf {
 
+using namespace cetty::util;
 using namespace cetty::channel;
 using namespace cetty::buffer;
 using namespace cetty::gearman::protobuf;
 using namespace cetty::protobuf::service;
 using namespace cetty::protobuf::service::handler;
 
-GearmanProtobufClientFilter::GearmanProtobufClientFilter() {
+GearmanProtobufClientFilter::GearmanProtobufClientFilter()
+    : background_(false) {
     filter_.setRequestFilter(boost::bind(&GearmanProtobufClientFilter::filterRequest,
                                          this,
                                          _1,
@@ -45,7 +48,6 @@ GearmanProtobufClientFilter::GearmanProtobufClientFilter() {
                                           _1,
                                           _2,
                                           _3));
-
 }
 
 GearmanProtobufClientFilter::~GearmanProtobufClientFilter() {
@@ -62,7 +64,28 @@ GearmanMessagePtr GearmanProtobufClientFilter::filterRequest(
 
     //encode the protobufServiceMessage and set it to GearmanMessage
     MessageCodec::encodeMessage(req, buffer);
-    return commands::submitJobMessage(method, "12345", buffer);
+
+    if (background_) {
+        return commands::submitJobBGMessage(method,
+                                            getUniqueId(req->id()),
+                                            buffer);
+    }
+    else {
+        return commands::submitJobMessage(method,
+                                          getUniqueId(req->id()),
+                                          buffer);
+    }
+}
+
+const std::string& GearmanProtobufClientFilter::getUniqueId(int64_t id) {
+    if (uniqueKey_.empty()) {
+        return uniqueKey_;
+    }
+    else {
+        uniqueId_ = uniqueKey_;
+        StringUtil::numtostr(id, &uniqueId_);
+        return uniqueId_;
+    }
 }
 
 ProtobufServiceMessagePtr GearmanProtobufClientFilter::filterResponse(

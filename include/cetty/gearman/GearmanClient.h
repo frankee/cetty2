@@ -43,19 +43,22 @@ public:
     virtual ~GearmanClient() {}
 
     GearmanServiceFuturePtr submitJob(const std::string& functionName,
-                                      const std::string& uniqueId,
+                                      const ChannelBufferPtr& payload);
+
+    GearmanServiceFuturePtr submitJob(const std::string& functionName,
                                       const ChannelBufferPtr& payload,
+                                      const std::string& uniqueId,
                                       Priority priority,
                                       bool background);
 
     GearmanServiceFuturePtr submitJob(const std::string& functionName,
-                                      const std::string& uniqueId,
                                       const ChannelBufferPtr& payload,
+                                      const std::string& uniqueId,
                                       const boost::posix_time::time_duration& later);
 
     GearmanServiceFuturePtr submitJob(const std::string& functionName,
-                                      const std::string& uniqueId,
                                       const ChannelBufferPtr& payload,
+                                      const std::string& uniqueId,
                                       const boost::posix_time::ptime& time);
 
     GearmanServiceFuturePtr getStatus(const std::string& jobId);
@@ -63,13 +66,16 @@ public:
     GearmanServiceFuturePtr setOption(const std::string& key,
                                       const std::string& value);
 
-    const ChannelPtr& channel() const {
-        return channel_;
-    }
+    const ChannelPtr& channel() const;
 
 private:
     ChannelPtr channel_;
 };
+
+inline
+const ChannelPtr& GearmanClient::channel() const {
+    return channel_;
+}
 
 }
 }

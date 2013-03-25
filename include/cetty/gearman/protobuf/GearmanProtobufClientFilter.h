@@ -49,6 +49,24 @@ public:
         filter_.registerTo(ctx);
     }
 
+    bool background() const {
+        return background_;
+    }
+
+    void setBackground(bool background) {
+        background_ = background;
+    }
+
+    const std::string& uniqueKey() const {
+        return uniqueKey_;
+    }
+
+    // uniqueId = key + id
+    // if the key is empty, will not use the unique id
+    void setUniqueKey(const std::string& key) {
+        uniqueKey_ = key;
+    }
+
 private:
     GearmanMessagePtr filterRequest(ChannelHandlerContext& ctx,
                                     const ProtobufServiceMessagePtr& req);
@@ -57,7 +75,13 @@ private:
             const ProtobufServiceMessagePtr& req,
             const GearmanMessagePtr& rep);
 
+    const std::string& getUniqueId(int64_t id);
+
 private:
+    bool background_;
+    std::string uniqueKey_;
+    std::string uniqueId_;
+
     Filter filter_;
 };
 

@@ -30,13 +30,38 @@ GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
                              const Channel::Initializer& initializer,
                              const Connections& connections)
     : connectionPool_(connections,
-                     (int)connections.size(),
-                     (int)connections.size()) {
+                      eventLoop,
+                     static_cast<int>(connections.size()),
+                     static_cast<int>(connections.size())) {
     connectionPool_.setChannelInitializer(initializer);
     connectionPool_.start();
 }
 
 GearmanWorker::~GearmanWorker() {
+}
+
+void GearmanWorker::setCando(const std::string& cando) {
+
+}
+
+void GearmanWorker::setCando(const std::string& cando, int64_t timeout) {
+
+}
+
+void GearmanWorker::setCantdo(const std::string& cantdo) {
+
+}
+
+void GearmanWorker::resetAbilities() {
+
+}
+
+void GearmanWorker::grabJob() {
+
+}
+
+void GearmanWorker::grabUniqueJob() {
+
 }
 
 }
