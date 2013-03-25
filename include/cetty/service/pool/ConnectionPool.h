@@ -26,6 +26,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/EventLoopPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/bootstrap/ClientBootstrap.h>
 
@@ -43,6 +44,8 @@ public:
 
 public:
     ConnectionPool(const Connections& connections);
+    ConnectionPool(const Connections& connections,
+        const EventLoopPtr& eventLoop); 
 
     virtual ~ConnectionPool();
 

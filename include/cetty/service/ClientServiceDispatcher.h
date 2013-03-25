@@ -97,7 +97,7 @@ public:
         : id_(0),
           eventLoop_(eventLoop),
           initializer_(initializer),
-          pool_(connections) {
+          pool_(connections, eventLoop) {
         pool_.setChannelInitializer(boost::bind(&Self::initializeClientChannel,
                                                 this,
                                                 _1));

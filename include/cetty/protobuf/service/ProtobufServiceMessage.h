@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <boost/scoped_ptr.hpp>
 #include <cetty/util/ReferenceCounter.h>
 #include <cetty/protobuf/service/ProtobufServiceFuture.h>
 #include <cetty/protobuf/service/ProtobufServiceMessagePtr.h>
@@ -67,7 +68,7 @@ public:
 
     const ServiceMessage& serviceMessage() const;
     ServiceMessage* mutableServiceMessage() {
-        return message_;
+        return message_.get();
     }
 
     const MessagePtr& payload() const {
@@ -91,7 +92,7 @@ private:
     ProtobufServiceMessage& operator=(const ProtobufServiceMessage&);
 
 private:
-    ServiceMessage* message_;
+    boost::scoped_ptr<ServiceMessage> message_;
     MessagePtr payload_;
 };
 

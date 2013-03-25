@@ -39,8 +39,23 @@ WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
       highWatermark_(highWatermark) {
 }
 
-WatermarkConnectionPool::~WatermarkConnectionPool() {
+WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
+        const EventLoopPtr& eventLoop)
+    : ConnectionPool(connections, eventLoop),
+      lowWatermark_(1),
+      highWatermark_(0xffff) {
+}
 
+WatermarkConnectionPool::WatermarkConnectionPool(const Connections& connections,
+        const EventLoopPtr& eventLoop,
+        int lowWatermark,
+        int highWatermark)
+    : ConnectionPool(connections, eventLoop),
+      lowWatermark_(lowWatermark),
+      highWatermark_(highWatermark) {
+}
+
+WatermarkConnectionPool::~WatermarkConnectionPool() {
 }
 
 void WatermarkConnectionPool::start() {

@@ -39,6 +39,14 @@ class WatermarkConnectionPool : public ConnectionPool {
 public:
     WatermarkConnectionPool(const Connections& connections);
     WatermarkConnectionPool(const Connections& connections,
+                            const EventLoopPtr& eventLoop);
+
+    WatermarkConnectionPool(const Connections& connections,
+                            int lowWatermark,
+                            int highWatermark);
+
+    WatermarkConnectionPool(const Connections& connections,
+                            const EventLoopPtr& eventLoop,
                             int lowWatermark,
                             int highWatermark);
 
@@ -56,14 +64,14 @@ private:
     int maxWaiters_;
     int lowWatermark_;
     int highWatermark_;
-    
+
 };
 
 inline int WatermarkConnectionPool::setLowWatermark(int lowWatermark) {
     this->lowWatermark_ = lowWatermark;
     return 0;
 }
-    
+
 inline int WatermarkConnectionPool::setHighWatermark(int hightWatermark) {
     this->highWatermark_ = highWatermark_;
     return 0;

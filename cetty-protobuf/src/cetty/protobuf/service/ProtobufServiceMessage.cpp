@@ -25,17 +25,20 @@ namespace service {
 using namespace cetty::protobuf::service;
 
 ProtobufServiceMessage::ProtobufServiceMessage()
-    : message_(new ServiceMessage), payload_() {
+    : message_(new ServiceMessage),
+      payload_() {
 
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type)
-    : message_(new ServiceMessage), payload_() {
+    : message_(new ServiceMessage),
+      payload_() {
     message_->set_type(MessageType(type));
 }
 
 ProtobufServiceMessage::ProtobufServiceMessage(int type, int64_t id)
-    : message_(new ServiceMessage), payload_() {
+    : message_(new ServiceMessage),
+      payload_() {
     message_->set_type(MessageType(type));
     message_->set_id(id);
 }
@@ -43,7 +46,8 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type, int64_t id)
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         int64_t id,
         const MessagePtr& payload)
-    : message_(new ServiceMessage), payload_(payload) {
+    : message_(new ServiceMessage),
+      payload_(payload) {
     message_->set_type(MessageType(type));
     message_->set_id(id);
 }
@@ -51,7 +55,8 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
 ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method)
-    : message_(new ServiceMessage), payload_() {
+    : message_(new ServiceMessage),
+      payload_() {
     message_->set_type(MessageType(type));
     message_->set_service(service);
     message_->set_method(method);
@@ -61,7 +66,8 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method,
         const MessagePtr& payload)
-    : message_(new ServiceMessage), payload_(payload) {
+    : message_(new ServiceMessage),
+      payload_(payload) {
     message_->set_type(MessageType(type));
     message_->set_service(service);
     message_->set_method(method);
@@ -72,7 +78,8 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
         const std::string& service,
         const std::string& method,
         const MessagePtr& payload)
-    : message_(new ServiceMessage), payload_(payload) {
+    : message_(new ServiceMessage),
+      payload_(payload) {
     message_->set_type(static_cast<MessageType>(type));
     message_->set_id(id);
     message_->set_service(service);
@@ -80,10 +87,6 @@ ProtobufServiceMessage::ProtobufServiceMessage(int type,
 }
 
 ProtobufServiceMessage::~ProtobufServiceMessage() {
-    if (message_) {
-        delete message_;
-    }
-
     if (payload_) {
         delete payload_;
     }

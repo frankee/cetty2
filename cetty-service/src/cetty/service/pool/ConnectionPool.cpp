@@ -34,8 +34,14 @@ ConnectionPool::ConnectionPool(const Connections& connections)
       connecting_(false) {
 }
 
-ConnectionPool::~ConnectionPool() {
+ConnectionPool::ConnectionPool(const Connections& connections,
+                               const EventLoopPtr& eventLoop)
+    : connections_(connections),
+      bootstrap_(eventLoop),
+      connecting_(false) {
+}
 
+ConnectionPool::~ConnectionPool() {
 }
 
 ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
