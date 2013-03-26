@@ -42,7 +42,7 @@ TimeoutPtr AsioService::runAt(const boost::posix_time::ptime& timestamp,
                                            this,
                                            boost::asio::placeholders::error,
                                            handler,
-                                           boost::cref(timeout)));
+                                           timeout));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers_.push_back(timeout);
@@ -64,7 +64,7 @@ TimeoutPtr AsioService::runAfter(int64_t millisecond,
                                            this,
                                            boost::asio::placeholders::error,
                                            handler,
-                                           boost::cref(timeout)));
+                                           timeout));
 
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers_.push_back(timeout);
@@ -87,7 +87,7 @@ TimeoutPtr AsioService::runEvery(int64_t millisecond,
                                            boost::asio::placeholders::error,
                                            handler,
                                            millisecond,
-                                           boost::cref(timeout)));
+                                           timeout));
         timeout->setState(AsioDeadlineTimeout::TIMER_ACTIVE);
         timers_.push_back(timeout);
         return boost::static_pointer_cast<Timeout>(timeout);
