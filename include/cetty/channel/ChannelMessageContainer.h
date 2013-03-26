@@ -60,7 +60,7 @@ public:
     }
 
     void setEventLoop(const EventLoopPtr& eventLoop) {
-        LOG_WARN << "void type, should not setEventLoop";
+        // NOOP
     }
 };
 
@@ -80,7 +80,7 @@ public:
     }
 
     void setEventLoop(const EventLoopPtr& eventLoop) {
-        LOG_WARN << "void type, should not setEventLoop";
+        // NOOP
     }
 };
 
@@ -124,8 +124,9 @@ public:
                 buffer->writeBytes(buffer_);
                 buffer_ = buffer;
 
-                LOG_INFO << "setting the ChannelBufferContaner to accumulated, "
-                         "but the container is not empty, then transfer the data first.";
+                LOG_INFO << "setting the ChannelBufferContaner to accumulated,"
+                            " but the container is not empty, then transfer the"
+                            " data first.";
             }
             else {
                 buffer_ = buffer;
@@ -188,10 +189,9 @@ public:
             messageQueue_.push_back(message);
         }
         else {
-            eventLoop_->post(boost::bind(
-                                 &Container::addMessage,
-                                 this,
-                                 message));
+            eventLoop_->post(boost::bind(&Container::addMessage,
+                                         this,
+                                         message));
         }
     }
 
@@ -213,14 +213,17 @@ private:
 };
 
 template<> inline
-void ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage(const ChannelBufferPtr& message) {
+void ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage(
+    const ChannelBufferPtr& message) {
     if (eventLoop_->inLoopThread()) {
         messageQueue_.push_back(message);
     }
     else {
-        eventLoop_->post(boost::bind(&ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage,
-                                     this,
-                                     message->copy()));
+        eventLoop_->post(
+            boost::bind(
+                &ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>::addMessage,
+                this,
+                message->copy()));
     }
 }
 
