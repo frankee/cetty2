@@ -96,6 +96,7 @@
     <ClCompile Include="..\..\src\cetty\bootstrap\ServerUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBuffer.cpp" />
     <ClCompile Include="..\..\src\cetty\buffer\ChannelBufferUtil.cpp" />
+    <ClCompile Include="..\..\src\cetty\channel\asio\AsioDeadlineTimeout.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioServerSocketChannel.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioServerSocketChannelConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioService.cpp" />

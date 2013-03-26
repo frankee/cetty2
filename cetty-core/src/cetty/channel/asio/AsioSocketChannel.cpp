@@ -156,6 +156,10 @@ const InetAddress& AsioSocketChannel::remoteAddress() const {
 void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
     if (!error) {
+        LOG_INFO << "channel has read "
+                 << bytes_transferred
+                 << " bytes, fire message updated event.";
+
         readBuffer_->offsetWriterIndex(bytes_transferred);
 
         pipeline().addInboundChannelBuffer(readBuffer_);
@@ -164,6 +168,9 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         beginRead();
     }
     else {
+        LOG_WARN << "channel read error, code:" << error.value()
+                 << " message: " << error.message();
+
         isReading_ = false;
 
         if (isOpen()) {
@@ -177,6 +184,10 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
 void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
                                     size_t bytes_transferred) {
     if (!error) {
+        LOG_DEBUG << "write buffer successfully with "
+                  << bytes_transferred
+                  << " bytes.";
+
         writeQueue_->peek().setSuccess();
         writeQueue_->popup();
 
@@ -185,17 +196,15 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         }
     }
     else {
-        if (!writeQueue_->empty()) {
-            std::string msg;
-            StringUtil::printf(&msg, "write buffer failed, message:%s code:%d",
-                               error.message().c_str(),
-                               error.value());
+        ChannelException e(error.message(), error.value());
 
-            writeQueue_->peek().setFailure(RuntimeException(msg));
+        while (!writeQueue_->empty()) {
+            writeQueue_->peek().setFailure(e);
             writeQueue_->popup();
-
-            LOG_ERROR << msg;
         }
+
+        LOG_ERROR << "write buffer failed, code: " << error.value()
+                  << "message: " << error.message();
 
         close(newVoidFuture());
     }
@@ -232,7 +241,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
         LOG_INFO << "channel connected to the remote server "
                  << remoteAddress().toString()
                  << ", firing connected event.";
-        
+
         setActived();
         cf->setSuccess();
 
@@ -401,8 +410,6 @@ void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
 void AsioSocketChannel::beginRead() {
     int size;
     char* buf = readBuffer_->writableBytes(&size);
-    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : "
-             << size;
 
     // auto increment the capacity.
     if (size < 128) {
@@ -412,6 +419,9 @@ void AsioSocketChannel::beginRead() {
 
         buf = readBuffer_->writableBytes(&size);
     }
+
+    LOG_INFO << "AsioSocketChannel begin to async read, with the the buffer size : "
+             << size;
 
     tcpSocket_.async_read_some(
         boost::asio::buffer(buf, size),
@@ -473,7 +483,8 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     const ChannelBufferPtr& buffer = bufferContainer_->getMessages();
 
     if (!isActive()) {
-        LOG_WARN << "sending the msg, but the socket is disconnected, clean up write buffer.";
+        LOG_WARN << "sending the msg, but the socket is disconnected,"
+                    " clean up write buffer, then close channel.";
         cleanUpWriteBuffer();
 
         if (future) {
@@ -507,7 +518,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                                  this,
                                                  boost::asio::placeholders::error,
                                                  boost::asio::placeholders::bytes_transferred)));
-        LOG_WARN << "write a gathering buffer to the socket, may slow down the system.";
+        LOG_WARN << "async_write a gathering buffer to the socket, may slow down the system.";
     }
     else {
         boost::asio::async_write(tcpSocket_,
@@ -517,7 +528,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                                  this,
                                                  boost::asio::placeholders::error,
                                                  boost::asio::placeholders::bytes_transferred)));
-        LOG_INFO << "write a buffer to the socket";
+        LOG_INFO << "async_write a buffer to the socket";
     }
 }
 

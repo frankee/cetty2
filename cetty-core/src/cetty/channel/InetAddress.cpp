@@ -21,6 +21,8 @@
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 
+#include <cetty/logging/LoggerHelper.h>
+
 namespace cetty {
 namespace channel {
 
@@ -45,19 +47,22 @@ InetAddress::InetAddress(int family, uint16_t port)
 
 InetAddress::InetAddress(const std::string& addr, uint16_t port)
     : port_(port),
+      family_(FAMILY_IPv4),
       host_(addr) {
 }
 
 InetAddress::InetAddress(const std::string& addr, const std::string& port)
     : host_(addr),
+      family_(FAMILY_IPv4),
       service_(port) {
 }
 
-InetAddress::InetAddress(const std::string& hostAndPort) {
-    BOOST_ASSERT(!hostAndPort.empty());
-
+InetAddress::InetAddress(const std::string& hostAndPort)
+    : port_(0),
+      family_(FAMILY_NONE) {
     if (hostAndPort.empty()) {
-        throw InvalidArgumentException("has no host and port information.");
+        LOG_WARN << "hostAndPort should not be empty.";
+        return;
     }
 
     std::string host;
@@ -70,33 +75,53 @@ InetAddress::InetAddress(const std::string& hostAndPort) {
 
         while (it != end && *it != ']') { host += *it++; }
 
-        if (it == end) { throw InvalidArgumentException("Malformed IPv6 address"); }
+        if (it == end) {
+            LOG_WARN << "Malformed IPv6 address: " << hostAndPort;
+            return;
+        }
 
         ++it;
+
+        family_ = FAMILY_IPv6;
     }
     else {
-        while (it != end && *it != ':') { host += *it++; }
+        while (it != end && *it != ':') {
+            host += *it++;
+        }
+
+        family_ = FAMILY_IPv4;
     }
 
     if (it != end && *it == ':') {
         ++it;
 
-        while (it != end) { port += *it++; }
+        while (it != end) {
+            port += *it++;
+        }
     }
     else {
-        throw InvalidArgumentException("Missing port number");
+        LOG_WARN << "Missing port number " << hostAndPort;
+        family_ = FAMILY_NONE;
+        return;
     }
 
     if (port[0] >= '0' && port[0] <= '9') {
         int p = StringUtil::strto32(port);
 
         if (p > 0 && p < 0xFFFF) {
-            //init(host, p);
-            return;
+            port_ = p;
+            host_ = host;
         }
+        else {
+            LOG_WARN << "port number " << p << " > 65536";
+            family_ = FAMILY_NONE;
+        }
+
+        return;
     }
 
-    //init(host, port);
+    service_ = port;
+    host_ = host;
 }
 
 InetAddress::InetAddress(const InetAddress& addr)
@@ -134,6 +159,9 @@ bool InetAddress::operator!=(const InetAddress& addr) const {
 }
 
 void InetAddress::swap(InetAddress& addr) {
+    InetAddress tmp(*this);
+    *this = addr;
+    addr = tmp;
 }
 
 std::string InetAddress::toString() const {

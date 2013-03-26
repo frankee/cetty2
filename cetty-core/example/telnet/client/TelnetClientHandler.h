@@ -56,7 +56,7 @@ public:
 
     virtual void exceptionCaught(ChannelHandlerContext& ctx,
         const ChannelException& e) {
-        LOG_WARN << "Unexpected exception (" << e.getMessage() << ") from inbound.";
+        LOG_WARN << "Unexpected exception (" << e.message() << ") from inbound.";
         ctx.close();
     }
 };

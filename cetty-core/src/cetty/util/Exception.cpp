@@ -38,46 +38,49 @@
 namespace cetty {
 namespace util {
 
-Exception::Exception(int code): nested(0), code(code) {}
+Exception::Exception(int code)
+    : code_(code),
+      nested_(NULL) {
+}
 
 Exception::Exception(const std::string& msg, int code)
-    : message(msg), nested(0), code(code) {}
+    : message_(msg), nested_(0), code_(code) {}
 
 Exception::Exception(const std::string& msg, const std::string& arg, int code)
-    : message(msg), nested(0), code(code) {
+    : message_(msg), nested_(0), code_(code) {
     if (!arg.empty()) {
-        message.append(": ");
-        message.append(arg);
+        message_.append(": ");
+        message_.append(arg);
     }
 }
 
 Exception::Exception(const std::string& msg, const Exception& nested, int code)
-    : message(msg), nested(nested.clone()), code(code) {
+    : message_(msg), nested_(nested.clone()), code_(code) {
 }
 
 Exception::Exception(const Exception& exc) :
     std::exception(exc),
-    message(exc.message),
-    code(exc.code) {
-    nested = exc.nested ? exc.nested->clone() : 0;
+    message_(exc.message_),
+    code_(exc.code_) {
+    nested_ = exc.nested_ ? exc.nested_->clone() : 0;
 }
 
 Exception::~Exception() throw() {
-    if (nested) {
-        delete nested;
+    if (nested_) {
+        delete nested_;
     }
 }
 
 Exception& Exception::operator = (const Exception& exc) {
     if (&exc != this) {
-        if (nested) {
-            delete nested;
-            nested = NULL;
+        if (nested_) {
+            delete nested_;
+            nested_ = NULL;
         }
 
-        message = exc.message;
-        nested  = exc.nested ? exc.nested->clone() : 0;
-        code    = exc.code;
+        message_ = exc.message_;
+        nested_  = exc.nested_ ? exc.nested_->clone() : 0;
+        code_    = exc.code_;
     }
 
     return *this;
@@ -95,12 +98,12 @@ const char* Exception::what() const throw() {
     return name();
 }
 
-std::string Exception::getDisplayText() const {
+std::string Exception::displayText() const {
     std::string txt = name();
 
-    if (!message.empty()) {
+    if (!message_.empty()) {
         txt.append(": ");
-        txt.append(message);
+        txt.append(message_);
     }
 
     return txt;
@@ -108,9 +111,9 @@ std::string Exception::getDisplayText() const {
 
 void Exception::extendedMessage(const std::string& arg) {
     if (!arg.empty()) {
-        if (!message.empty()) { message.append(": "); }
+        if (!message_.empty()) { message_.append(": "); }
 
-        message.append(arg);
+        message_.append(arg);
     }
 }
 

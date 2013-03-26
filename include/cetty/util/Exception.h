@@ -45,7 +45,6 @@
 namespace cetty {
 namespace util {
 
-
 /**
  * This is the base class for all exceptions defined
  * in the cetty class library.
@@ -102,22 +101,22 @@ public:
      * Returns a pointer to the nested exception, or
      * null if no nested exception exists.
      */
-    const Exception* getNested() const { return nested; }
+    const Exception* nested() const { return nested_; }
 
     /**
      * Returns the message text.
      */
-    const std::string& getMessage() const { return message; }
+    const std::string& message() const { return message_; }
 
     /**
      * Returns the exception code if defined.
      */
-    int getCode() const { return code; }
+    int code() const { return code_; }
 
     /**
      * Returns a string consisting of the message name and the message text.
      */
-    std::string getDisplayText() const;
+    std::string displayText() const;
 
     /**
      * Creates an exact copy of the exception.
@@ -140,7 +139,7 @@ protected:
     Exception(int code = 0);
 
     void setMessage(const std::string& msg) {
-        message = msg;
+        message_ = msg;
     }
 
     /**
@@ -149,9 +148,9 @@ protected:
     void extendedMessage(const std::string& arg);
 
 private:
-    std::string message;
-    Exception*  nested;
-    int         code;
+    int         code_;
+    std::string message_;
+    Exception*  nested_;
 };
 
 

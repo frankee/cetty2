@@ -60,7 +60,7 @@ void LoggingHandler::exceptionCaught(ChannelHandlerContext& ctx,
         Logger("loggerHander", 0, level_).stream()
                 << ctx.channel()->toString()
                 << " EXCEPTION: "
-                << cause.getMessage();
+                << cause.message();
     }
 }
 

@@ -515,7 +515,7 @@ void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {
     }
     catch (const Exception& e) {
         LOG_WARN << "An exception ("
-                 << e.getMessage()
+                 << e.message()
                  << ") thrown by ChannelFutureListener.";
     }
 }
@@ -532,7 +532,7 @@ void DefaultChannelFuture::notifyProgressListener(const ProgressedCallback& l,
     }
     catch (const Exception& e) {
         LOG_WARN << "An exception ("
-                 << e.getMessage()
+                 << e.message()
                  << ") thrown by ChannelFutureListener.";
     }
 }

@@ -86,6 +86,8 @@ private:
 private:
     bool initialized_;
     int lastChildId_;
+    int addressFamily_;
+
     AsioServicePtr ioService_;
 
     boost::asio::ip::tcp::acceptor acceptor_;
@@ -96,9 +98,6 @@ private:
     ChildChannels childChannels_;
 
     ReusableChildChannels reusableChildChannels_;
-
-    int addressFamily;
-    mutable InetAddress localAddress;
 };
 
 }

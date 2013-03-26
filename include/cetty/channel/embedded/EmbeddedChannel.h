@@ -182,7 +182,7 @@ private:
         }
 
         lastException_ = NULL;
-        throw ChannelException(t->what(), t->getCode());
+        throw ChannelException(t->what(), t->code());
     }
 
     virtual void doInitialize() {

@@ -26,12 +26,14 @@ namespace util {
 class Adler32 {
 public:
     static int adler32(const std::string& str);
-    static int adler32(const char* buf, int len) {
-        return adler32(1, buf, len);
-    }
-
+    static int adler32(const char* buf, int len);
     static int adler32(int adler, const char* buf, int len);
 };
+
+inline
+int Adler32::adler32(const char* buf, int len) {
+    return adler32(1, buf, len);
+}
 
 }
 }

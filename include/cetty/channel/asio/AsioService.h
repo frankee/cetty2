@@ -38,9 +38,7 @@ namespace asio {
  */
 class AsioService : public cetty::channel::EventLoop {
 public:
-    AsioService(const EventLoopPoolPtr& pool)
-        : EventLoop(pool) {
-    }
+    AsioService(const EventLoopPoolPtr& pool);
 
     boost::asio::io_service& service();
 
@@ -68,6 +66,7 @@ private:
                                     const AsioDeadlineTimeoutPtr& timeout);
 
 private:
+    int timerId_;
     boost::asio::io_service ioService_;
     std::list<AsioDeadlineTimeoutPtr> timers_;
 };

@@ -408,13 +408,13 @@ std::string ChannelPipeline::toString() const {
 }
 
 void ChannelPipeline::notifyHandlerException(const Exception& e) {
-    if (e.getNested()) {
+    if (e.nested()) {
         LOG_WARN << "exception was thrown by a user handler"
                  "while handling an exception ( ... )";
         return;
     }
 
-    ChannelPipelineException pe(e.getMessage(), e.getCode());
+    ChannelPipelineException pe(e.message(), e.code());
     fireExceptionCaught(pe);
 }
 

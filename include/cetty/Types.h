@@ -61,9 +61,9 @@ static const int64_t  MAX_INT64 = CETTY_LONGLONG(0x7FFFFFFFFFFFFFFF);
 static const int64_t  MIN_INT64 = -MAX_INT64 - 1;
 static const uint64_t MAX_UINT64 = CETTY_ULONGLONG(0xFFFFFFFFFFFFFFFF);
 
-// #ifdef MUDUO_STD_STRING
+// #ifdef CETTY_USE_STD_STRING
 // typedef std::string String;
-// #else  // !MUDUO_STD_STRING
+// #else  // !CETTY_USE_STD_STRING
 // typedef __gnu_cxx::__sso_string String;
 // #end
 

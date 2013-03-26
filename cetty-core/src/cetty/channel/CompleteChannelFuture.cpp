@@ -46,7 +46,7 @@ ChannelFuturePtr CompleteChannelFuture::addListener(
     }
     catch (const Exception& e) {
         LOG_WARN << "An exception ("
-                 << e.getMessage()
+                 << e.message()
                  << ") thrown by ChannelFutureListener.";
     }
 
@@ -64,7 +64,7 @@ ChannelFuturePtr CompleteChannelFuture::addProgressListener(
     }
     catch (const Exception& e) {
         LOG_WARN << "An exception ("
-                 << e.getMessage()
+                 << e.message()
                  << ") thrown by ChannelFutureListener.";
     }
 

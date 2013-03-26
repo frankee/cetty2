@@ -103,11 +103,13 @@ AsioServicePool::AsioServicePool(int threadCnt)
     // exit until they are explicitly stopped.
     for (int i = 0; i < size(); ++i) {
         appendLoopHolder(new AsioServiceHolder(
-                         new AsioService(shared_from_this())));
+                             new AsioService(shared_from_this())));
     }
 
     // automatic start
     if (!isSingleThread()) {
+        LOG_INFO << "automatic start the " << size() << " event loops in thread";
+
         // Create a pool of threads to run all of the io_services.
         for (std::size_t i = 0; i < size(); ++i) {
             AsioServiceHolder* holder =
@@ -123,6 +125,8 @@ AsioServicePool::AsioServicePool(int threadCnt)
         setStarted(true);
     }
     else {
+        LOG_INFO << "the event loop pool is main thread mode, will start later.";
+
         AsioServiceHolder* holder =
             down_cast<AsioServiceHolder*>(loopHolderAt(0));
 
@@ -134,7 +138,7 @@ AsioServicePool::AsioServicePool(int threadCnt)
 
 bool AsioServicePool::start() {
     if (!isStarted() && isSingleThread()) {
-        LOG_INFO << "AsioServciePool running in main thread mode.";
+        LOG_INFO << "start the AsioServciePool in main thread mode.";
 
         if (runIOservice(down_cast<AsioServiceHolder*>(loopHolderAt(0))) < 0) {
             LOG_ERROR << "AsioServicePool run the main thread service error.";
@@ -199,7 +203,7 @@ int AsioServicePool::runIOservice(AsioServiceHolder* holder) {
         return -1;
     }
 
-    LOG_INFO << "runIOservice OK, and " << opCount << "handlers that were executed.";
+    LOG_INFO << "runIOservice completed, and " << opCount << "handlers that were executed.";
     return opCount;
 }
 

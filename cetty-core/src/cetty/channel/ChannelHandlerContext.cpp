@@ -130,11 +130,11 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's channelOpen() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -200,11 +200,11 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's channelInactive() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -270,11 +270,11 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's channelActive() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -347,21 +347,21 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's "
                       "exceptionCaught() method while handling the following exception:"
-                      << cause.getDisplayText();
+                      << cause.displayText();
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's "
                       "exceptionCaught() method while handling the following exception:"
-                      << cause.getDisplayText();
+                      << cause.displayText();
         }
         catch (...) {
             LOG_ERROR << "An unknown exception was thrown by a user handler's "
                       "exceptionCaught() method while handling the following exception:"
-                      << cause.getDisplayText();
+                      << cause.displayText();
         }
     }
     else {
@@ -423,11 +423,11 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's userEventTriggered() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -494,11 +494,11 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's messageUpdated() method";
 
-            notifyHandlerException(ChannelPipelineException(e.getMessage(),
-                                   e.getCode()));
+            notifyHandlerException(ChannelPipelineException(e.message(),
+                                   e.code()));
             clearInboundChannelBuffer(ctx);
         }
         catch (const std::exception& e) {
@@ -579,11 +579,11 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's bind() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -668,11 +668,11 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's connect() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -758,11 +758,11 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's disconnect() method";
 
-            notifyHandlerException(ChannelPipelineException(e.getMessage(),
-                                   e.getCode()));
+            notifyHandlerException(ChannelPipelineException(e.message(),
+                                   e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -839,11 +839,11 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's close() method";
 
             notifyHandlerException(
-                ChannelPipelineException(e.getMessage(), e.getCode()));
+                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -921,11 +921,11 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
             }
         }
         catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.getDisplayText()
+            LOG_ERROR << "An exception (" << e.displayText()
                       << ") was thrown by a user handler's flush() method";
 
-            notifyHandlerException(ChannelPipelineException(e.getMessage(),
-                                   e.getCode()));
+            notifyHandlerException(ChannelPipelineException(e.message(),
+                                   e.code()));
             clearOutboundChannelBuffer(ctx);
         }
         catch (const std::exception& e) {

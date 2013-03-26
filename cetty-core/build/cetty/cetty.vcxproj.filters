@@ -329,6 +329,9 @@
     <ClCompile Include="..\..\src\cetty\bootstrap\ServerUtil.cpp">
       <Filter>bootstrap</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\channel\asio\AsioDeadlineTimeout.cpp">
+      <Filter>channel\asio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">

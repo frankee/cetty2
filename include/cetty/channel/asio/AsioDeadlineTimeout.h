@@ -22,13 +22,17 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/placeholders.hpp>
 
+#include <cetty/util/CurrentThread.h>
 #include <cetty/channel/Timeout.h>
 
 namespace cetty {
 namespace channel {
 namespace asio {
 
+using namespace cetty::util;
 using namespace cetty::channel;
+
+class AsioService;
 
 class AsioDeadlineTimeout : public cetty::channel::Timeout {
 public:
@@ -40,51 +44,67 @@ public:
     };
 
 public:
-    AsioDeadlineTimeout(boost::asio::io_service& ioService,
-                        const boost::posix_time::ptime& timestamp)
-        : deadlineTimer_(ioService, timestamp) {
-    }
+    AsioDeadlineTimeout(AsioService& service,
+                        int id,
+                        const boost::posix_time::ptime& timestamp);
 
-    AsioDeadlineTimeout(boost::asio::io_service& ioService,
-                        int64_t delay)
-        : deadlineTimer_(ioService, boost::posix_time::milliseconds(delay)) {
-    }
+    AsioDeadlineTimeout(AsioService& service,
+                        int id,
+                        int64_t delay);
 
-    virtual ~AsioDeadlineTimeout() {
+    virtual ~AsioDeadlineTimeout();
 
-    }
+    virtual bool isExpired() const;
+    virtual bool isCancelled() const;
+    virtual bool isActived() const;
 
-    virtual bool isExpired() const { return state_ == TIMER_EXPIRED; }
-    virtual bool isCancelled() const { return state_ == TIMER_CANCELLED; }
-    virtual bool isActived() const { return state_ == TIMER_ACTIVE; }
+    virtual void cancel();
 
-    virtual void cancel() {
-        boost::system::error_code code;
-        deadlineTimer_.cancel(code);
+    virtual boost::int64_t expiresFromNow() const;
 
-        if (code) {
+    boost::asio::deadline_timer& timer();
 
-        }
-    }
+    int id() const;
 
-    virtual boost::int64_t expiresFromNow() const {
-        return deadlineTimer_.expires_from_now().total_milliseconds();
-    }
+    int state() const;
+    void setState(int state);
 
-    boost::asio::deadline_timer& timer() {
-        return deadlineTimer_;
-    }
-
-    void setState(int state) {
-        state_ = state;
-    }
+    const ThreadId& threadId() const;
 
 private:
+    int id_;
     int state_;
+    ThreadId threadId_;
+
     boost::asio::deadline_timer deadlineTimer_;
 };
 
 typedef boost::intrusive_ptr<AsioDeadlineTimeout> AsioDeadlineTimeoutPtr;
+
+inline
+boost::asio::deadline_timer& AsioDeadlineTimeout::timer() {
+    return deadlineTimer_;
+}
+
+inline
+int AsioDeadlineTimeout::id() const {
+    return id_;
+}
+
+inline
+    int AsioDeadlineTimeout::state() const {
+        return state_;
+}
+
+inline
+void AsioDeadlineTimeout::setState(int state) {
+    state_ = state;
+}
+
+inline
+const ThreadId& AsioDeadlineTimeout::threadId() const {
+    return threadId_;
+}
 
 }
 }
