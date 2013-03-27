@@ -227,7 +227,7 @@ ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
 }
 
 int ServerBuilder::init() {
-    if (config_.deamonize && boost::get<bool>(config_.deamonize)) {
+    if (config_.deamonize) {
         ServerUtil::daemonize();
     }
 

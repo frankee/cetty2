@@ -29,5 +29,12 @@ const ChannelPtr& NullChannel::instance() {
     return nullChannel;
 }
 
+NullChannel::NullChannel()
+    : Channel(ChannelPtr(), EventLoopPtr()) {
+}
+
+NullChannel::~NullChannel() {
+}
+
 }
 }

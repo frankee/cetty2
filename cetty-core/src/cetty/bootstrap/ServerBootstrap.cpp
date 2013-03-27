@@ -184,7 +184,7 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
     ChannelPtr channel = newChannel();
 
     if (!channel) {
-        LOG_INFO << "Server channel factory failed to create a new channel.";
+        LOG_WARN << "Server channel factory failed to create a new channel.";
         return NullChannel::instance()->newFailedFuture(
                    ChannelException("Failed to create a new channel."));
     }
@@ -197,7 +197,6 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
     channel->open();
 
     if (channel->isOpen()) {
-        LOG_INFO << "Opened the AsioServerSocketChannel.";
         insertChannel(channel->id(), channel);
     }
 

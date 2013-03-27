@@ -111,7 +111,7 @@ AsioServicePool::AsioServicePool(int threadCnt)
         LOG_INFO << "automatic start the " << size() << " event loops in thread";
 
         // Create a pool of threads to run all of the io_services.
-        for (std::size_t i = 0; i < size(); ++i) {
+        for (int i = 0; i < size(); ++i) {
             AsioServiceHolder* holder =
                 down_cast<AsioServiceHolder*>(loopHolderAt(i));
 

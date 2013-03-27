@@ -54,7 +54,7 @@ Channel::Channel(int id,
 }
 
 Channel::~Channel() {
-    LOG_DEBUG << "Channel dctr";
+    LOG_DEBUG << "Channel " << toString() << " dctr";
 
     if (pipeline_) {
         delete pipeline_;

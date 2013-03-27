@@ -24,11 +24,8 @@ namespace channel {
 
 class NullChannel : public Channel {
 public:
-    NullChannel()
-        : Channel(ChannelPtr(), EventLoopPtr()) {
-    }
-
-    virtual ~NullChannel() {}
+    NullChannel();
+    virtual ~NullChannel();
 
     virtual std::string toString() const;
 

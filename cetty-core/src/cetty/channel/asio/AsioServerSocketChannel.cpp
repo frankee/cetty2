@@ -44,7 +44,7 @@ AsioServerSocketChannel::AsioServerSocketChannel(
     boost::system::error_code ec;
 
     if (addressFamily_ == InetAddress::FAMILY_IPv4) {
-        LOG_INFO << "the server channel (acceptor) opened in IPV4 mode default.";
+        LOG_INFO << "server channel (acceptor) opened in IPV4 mode default.";
         acceptor_.open(boost::asio::ip::tcp::v4(), ec);
 
         if (ec) {

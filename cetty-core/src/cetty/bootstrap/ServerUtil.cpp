@@ -80,7 +80,12 @@ void ServerUtil::daemonize() {
 }
 
 void ServerUtil::createPidFile(const std::string& pidfile) {
-    if (pidfile.empty()) { return; }
+    if (pidfile.empty()) {
+        LOG_WARN << "pidfile is empty, do not create pid file";
+        return;
+    }
+
+    LOG_INFO << "create the pid file " << pidfile;
 
     /* Try to write the pid file in a best-effort way. */
     FILE* fp = fopen(pidfile.c_str(), "w");
