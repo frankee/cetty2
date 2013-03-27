@@ -10,16 +10,15 @@ message ConfigMessageOptions {
 }
 
 message ConfigFieldOptions {
-	optional string default = 1; // default value for encoded message string
+    // default value for encoded message string
+	optional string default = 1;
+	
+	// repeated field using std::map not std::vector
 	optional bool       map = 2;
 	
-	// for conf file
-	optional string    note = 20;
-	optional bool commented = 21;
-	
 	// for cmdline
-	optional string       cmd = 40;
-	optional string short_cmd = 41;
+	optional string       cmd = 20;
+	optional string short_cmd = 21;
 }
 
 extend google.protobuf.FieldOptions {

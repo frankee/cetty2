@@ -306,7 +306,6 @@ void ServerBuilder::waitingForExit() {
 }
 
 ServerBuilder& ServerBuilder::buildAll() {
-    std::size_t j = config_.servers.size();
     std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
         config_.servers.begin();
     for (; itr != config_.servers.end(); ++itr) {
