@@ -171,8 +171,8 @@ public:
 
     virtual ~ServerBootstrap() {}
 
-    bool deamonize() const;
-    ServerBootstrap& setDeamonize(bool deamon);
+    bool daemonize() const;
+    ServerBootstrap& setDaemonize(bool daemon);
 
     const std::string pidFileName() const;
     ServerBootstrap& setPidFileName(const std::string& fileName);
@@ -272,7 +272,7 @@ private:
     bool initServerChannel(const ChannelPtr& channel);
 
 private:
-    bool deamonize_;
+    bool daemonized_;
     std::string pidFile_;
 
     EventLoopPoolPtr childPool_;
@@ -283,13 +283,13 @@ private:
 };
 
 inline
-bool ServerBootstrap::deamonize() const {
-    return deamonize_;
+bool ServerBootstrap::daemonize() const {
+    return daemonized_;
 }
 
 inline
-ServerBootstrap& ServerBootstrap::setDeamonize(bool deamon) {
-    deamonize_ = deamon;
+ServerBootstrap& ServerBootstrap::setDaemonize(bool deamon) {
+    daemonized_ = deamon;
     return *this;
 }
 

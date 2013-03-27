@@ -114,13 +114,13 @@ private:
 };
 
 ServerBootstrap::ServerBootstrap()
-    : deamonize_(false),
+    : daemonized_(false),
       parentHandler_() {
 }
 
 ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool)
     : Bootstrap<ServerBootstrap>(pool),
-      deamonize_(false),
+      daemonized_(false),
       parentHandler_() {
     setChildEventLoopPool(pool);
 }
@@ -128,7 +128,7 @@ ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool)
 ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent,
                                  const EventLoopPoolPtr& child)
     : Bootstrap<ServerBootstrap>(parent),
-      deamonize_(false),
+      daemonized_(false),
       parentHandler_() {
     if (child) {
         setChildEventLoopPool(child);
@@ -140,7 +140,7 @@ ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent,
 }
 
 ServerBootstrap::ServerBootstrap(int parentThreadCnt, int childThreadCnt)
-    : deamonize_(false),
+    : daemonized_(false),
       parentHandler_() {
     setParentEventLoopPool(new AsioServicePool(parentThreadCnt));
 
@@ -261,7 +261,7 @@ ChannelPtr ServerBootstrap::newChannel() {
 void ServerBootstrap::waitingForExit() {
     const Channels& serverChannels = channels();
 
-    if (deamonize_) {
+    if (daemonized_) {
         ServerUtil::createPidFile(pidFile_);
 
         Channels::const_iterator itr = serverChannels.begin();

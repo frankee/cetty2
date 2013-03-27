@@ -181,7 +181,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     ServerBootstrap* bootstrap = new ServerBootstrap(
         parentEventLoopPool_,
         childEventLoopPool_);
-
+    
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
     if (childOptions.empty()) {
@@ -202,6 +202,8 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     else {
         LOG_WARN << "childInitializer is empty, channel will not work fine.";
     }
+
+    bootstrap->setDaemonize(config_.deamonize);
 
     return build(bootstrap, host, port);
 }
@@ -266,8 +268,12 @@ void ServerBuilder::waitingForExit() {
         ServerUtil::createPidFile(config_.pidfile.c_str());
 
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
-            BOOST_ASSERT(itr->second && "Bootstrap should not be NULL.");
-            itr->second->waitingForExit();
+            ServerBootstrap::Channels& channels = itr->second->channels();
+            ServerBootstrap::Channels::iterator channelItr = channels.begin();
+
+            for (; channelItr != channels.end(); ++channelItr) {
+                channelItr->second->closeFuture()->awaitUninterruptibly();
+            }
         }
     }
     else {
