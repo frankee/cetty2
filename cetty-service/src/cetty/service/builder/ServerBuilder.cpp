@@ -266,11 +266,8 @@ void ServerBuilder::waitingForExit() {
         ServerUtil::createPidFile(config_.pidfile.c_str());
 
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
-            ServerBootstrap::Channels& channels = itr->second->channels();
-
-            for (std::size_t i = 0; i < channels.size(); ++i) {
-                channels[i]->closeFuture()->awaitUninterruptibly();
-            }
+            BOOST_ASSERT(itr->second && "Bootstrap should not be NULL.");
+            itr->second->waitingForExit();
         }
     }
     else {
