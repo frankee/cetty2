@@ -8,30 +8,30 @@
 #include <cetty/beanstalk/BeanstalkClientBuilder.h>
 
 #include <cetty/beanstalk/protocol/BeanstalkReply.h>
-#include <cetty/beanstalk/BeanstalkReplyDecoder.h>
 #include <cetty/beanstalk/BeanstalkCommandEncoder.h>
+#include <cetty/beanstalk/BeanstalkReplyDecoder.h>
 #include <cetty/channel/ChannelPipeline.h>
 
 namespace cetty {
 namespace beanstalk {
 
 BeanstalkClientBuilder::BeanstalkClientBuilder()
-    : builder_() {
+    : builder() {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(int threadCnt)
-    : builder_(threadCnt) {
+    : builder(threadCnt) {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(const EventLoopPtr& eventLoop)
-    : builder_(eventLoop) {
+    : builder(eventLoop) {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : builder_(eventLoopPool) {
+    : builder(eventLoopPool) {
     init();
 }
 
@@ -48,7 +48,7 @@ bool initializeChannel(const ChannelPtr& channel) {
 }
 
 void BeanstalkClientBuilder::init() {
-	builder_.setClientInitializer(boost::bind(initializeChannel, _1));
+	builder.setClientInitializer(boost::bind(initializeChannel, _1));
 }
 
 

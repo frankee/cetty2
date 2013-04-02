@@ -18,8 +18,8 @@ BeanstalkCommand& BeanstalkCommand::append(const char* param, int size) {
         return *this;
     }
 
-     buffer->writeBytes(param, size);
-     return *this;
+    buffer->writeBytes(param, size);
+    return *this;
 }
 
 

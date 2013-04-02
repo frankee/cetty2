@@ -38,7 +38,6 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(
 	    return reset();
 	}
 
-
 	int id = -1, pos = -1, count = -1;
 	std::string data, temp;
 	if (FIRST_LINE == state) {
@@ -138,6 +137,12 @@ void BeanstalkReplyDecoder::getResponse(StringPiece &bytes,
     int pos = temp.find(' ', 0);
     if(pos != std::string::npos) {
     	response->assign(temp.c_str(), pos);
+    	return;
+    }
+
+    pos = temp.find('\r', 0);
+    if(pos != std::string::npos) {
+    	response->assign(temp.c_str(), pos);
     }
 }
 
@@ -170,8 +175,7 @@ void BeanstalkReplyDecoder::getInt(StringPiece &bytes,
 
     if (i ==j) return;
 
-    std::string temp(bytes.c_str() + i, j - i);
-    *value = StringUtil::strto32(temp);
+    *value = StringUtil::strto32(bytes.substr(i, j - i));
 }
 
 void BeanstalkReplyDecoder::getData(StringPiece &bytes,

@@ -29,18 +29,18 @@ public:
     BeanstalkClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
     void addConnection(const std::string& host, int port, int limit = 1) {
-        builder_.addConnection(host, port, limit);
+        builder.addConnection(host, port, limit);
     }
 
     ChannelPtr build() {
-        return builder_.build();
+        return builder.build();
     }
 
 private:
     void init();
 
 private:
-    ClientBuilderType builder_;
+    ClientBuilderType builder;
 };
 
 }

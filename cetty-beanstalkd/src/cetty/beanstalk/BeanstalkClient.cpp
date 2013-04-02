@@ -5,9 +5,9 @@
  *      Author: chenhl
  */
 
-#include <cetty/beanstalk/BeanstalkClient.h>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/service/ClientService.h>
+#include <cetty/beanstalk/BeanstalkClient.h>
 
 namespace cetty {
 namespace beanstalk {
