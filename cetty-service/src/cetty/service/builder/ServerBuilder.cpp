@@ -203,7 +203,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         LOG_WARN << "childInitializer is empty, channel will not work fine.";
     }
 
-    bootstrap->setDaemonize(config_.deamonize);
+    bootstrap->setDaemonize(config_.daemonize);
 
     return build(bootstrap, host, port);
 }
@@ -229,7 +229,7 @@ ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
 }
 
 int ServerBuilder::init() {
-    if (config_.deamonize) {
+    if (config_.daemonize) {
         ServerUtil::daemonize();
     }
 
@@ -264,7 +264,7 @@ void ServerBuilder::shutdown() {
 void ServerBuilder::waitingForExit() {
     ServerBootstraps::iterator itr;
 
-    if (config_.deamonize) {
+    if (config_.daemonize) {
         ServerUtil::createPidFile(config_.pidfile.c_str());
 
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
@@ -306,7 +306,6 @@ void ServerBuilder::waitingForExit() {
 }
 
 ServerBuilder& ServerBuilder::buildAll() {
-    std::size_t j = config_.servers.size();
     std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
         config_.servers.begin();
     for (; itr != config_.servers.end(); ++itr) {

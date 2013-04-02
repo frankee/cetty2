@@ -12,11 +12,12 @@ message ServerBuilderConfig {
 	message Server {
 		//option (config_message_options).template = "{host}:{port}";
 		
-		// #If you want you can bind a single interface, if the bind option is not
-		// #specified all the interfaces will listen for incoming connections.
-		optional string host = 1 [ (config_options).commented = true];
+		// # If you want you can bind a single interface, if the bind option is not
+		// # specified all the interfaces will listen for incoming connections.
+		// # host: 
+		optional string host = 1;
 		
-		// #Accept connections on the specified port.
+		// # Accept connections on the specified port.
 		required int32  port = 2;
 		
 		optional ServerConfig config = 3;
@@ -37,17 +38,15 @@ message ServerBuilderConfig {
 	
 	// # By default cetty does not run as a daemon. Use 'true' if you need it.
 	// # Note that cetty will write a pid file in /var/run/xxx.pid when daemonized.
-	required bool deamonize = 1 [
-		(config_options).commented = true,
-		(config_options).cmd       = "deamon",
+	// # daemonize : true
+	required bool daemonize = 1 [
+		(config_options).cmd       = "daemon",
 		(config_options).short_cmd = "d"];
-		
-	// # When running daemonized, Redis writes a pid file in /var/run/redis.pid by
-	// # default. You can specify a custom pid file location here.
-    optional string pidfile = 2 [
-		default = "/var/run/xxx.pid",
-        (config_options).commented = true
-	];
+
+	// # When running daemonized, Cetty does not write a pid file by 
+	// # default. You can specify a pid file location here if needed.
+	// # pidfile: /var/run/your.pid
+    optional string pidfile = 2;
 	
     required int32 parent_thread_count = 4 [default = 1];
     required int32  child_thread_count = 5 [default = 0];
@@ -58,6 +57,14 @@ message ServerBuilderConfig {
     optional Limit     limit = 8;
     optional Timeout timeout = 9;
 
+	// # examples like:
+	// # servers:
+	// #   your-server-app:
+	// #     port: 8080
+	// #     host: 192.168.1.188
+	// #   another-server-app:
+	// #     port: 8888
+	// # 
     repeated Server servers  = 10 [
 		(config_options).map = true,
 		(config_options).default = "{{http:\":8080\"}, {rpc:\":18080\"}}"
