@@ -70,13 +70,14 @@ protected:
     virtual bool doDisconnect();
     virtual bool doClose();
 
-    virtual void doInitialize();
+    virtual void doPreOpen();
 
 private:
     void accept();
     void handleAccept(const boost::system::error_code& error,
                       const AsioSocketChannelPtr& channel);
 
+    AsioSocketChannelPtr createChild();
     void handleChildClosed(const ChannelFuture& future);
 
 private:

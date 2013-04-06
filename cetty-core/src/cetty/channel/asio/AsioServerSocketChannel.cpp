@@ -64,31 +64,8 @@ AsioServerSocketChannel::AsioServerSocketChannel(
 AsioServerSocketChannel::~AsioServerSocketChannel() {
 }
 
-// const InetAddress& AsioServerSocketChannel::getLocalAddress() const {
-//     if (localAddress != InetAddress::NULL_ADDRESS) {
-//         return localAddress;
-//     }
-//
-//     boost::system::error_code ec;
-//     boost::asio::ip::tcp::endpoint endpoint = acceptor_.local_endpoint(ec);
-//
-//     if (ec) {
-//         return InetAddress::NULL_ADDRESS;
-//     }
-//
-//     localAddress = InetAddress(
-//                        new AsioTcpInetAddressImpl(ioService_->service(),
-//                                endpoint));
-//
-//     return localAddress;
-// }
-
 bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
-    std::string host = localAddress.host();
-
-    if (host.empty()) {
-        host = "0.0.0.0";
-    }
+    const std::string& host = localAddress.host();
 
     boost::system::error_code ec;
     boost::asio::ip::tcp::endpoint ep(
@@ -99,9 +76,10 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         acceptor_.close(ec);
 
         if (ec) {
-            LOG_ERROR << "close the acceptor before change ip family, but skip it.";
+            LOG_ERROR << "failed to close the acceptor before change ip family,"
+                      " but skip it.";
         }
-        
+
         acceptor_.open(ep.protocol(), ec);
 
         if (!ec) {
@@ -112,10 +90,21 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
             doClose();
             return false;
         }
-    }
 
-    socketConfig_.setReuseAddress(acceptor_);
-    socketConfig_.setReceiveBufferSize(acceptor_);
+        const boost::optional<bool>& isReuseAddress =
+            socketConfig_.isReuseAddress();
+
+        if (isReuseAddress) {
+            socketConfig_.setReuseAddress(*isReuseAddress);
+        }
+
+        const boost::optional<int>& receiveBufferSize =
+            socketConfig_.receiveBufferSize();
+
+        if (receiveBufferSize) {
+            socketConfig_.setReceiveBufferSize(*receiveBufferSize);
+        }
+    }
 
     acceptor_.bind(ep, ec);
 
@@ -126,7 +115,7 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         return false;
     }
 
-    const boost::optional<int> backlog = socketConfig_.backlog();
+    const boost::optional<int>& backlog = socketConfig_.backlog();
 
     if (backlog) {
         acceptor_.listen(*backlog, ec);
@@ -140,6 +129,16 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
                   << localAddress.toString();
         doClose();
         return false;
+    }
+
+    // initialize the reserved child channels, for speeding up accepting
+    if (socketConfig_.reservedChildCount()) {
+        int reservedChildCount = *socketConfig_.reservedChildCount();
+
+        while (reservedChildCount > 0) {
+            reusableChildChannels_.push_back(createChild());
+            --reservedChildCount;
+        }
     }
 
     accept();
@@ -164,25 +163,20 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         }
     }
 
-    LOG_INFO << "server channel has bind to " << localAddress.toString();
+    LOG_INFO << "server channel " << toString()
+             << " has bound to "  << localAddress.toString();
     return true;
 }
 
 void AsioServerSocketChannel::accept() {
-    LOG_INFO << "server channel begin to accepting socket.";
-
-    const AsioServicePtr& ioService = childServicePool_->nextService();
-
-    AsioSocketChannelPtr c(new AsioSocketChannel(++lastChildId_,
-                           shared_from_this(),
-                           ioService));
-
+    AsioSocketChannelPtr c = createChild();
     acceptor_.async_accept(c->tcpSocket(),
                            makeCustomAllocHandler(acceptAllocator_,
                                    boost::bind(&AsioServerSocketChannel::handleAccept,
                                            this,
                                            boost::asio::placeholders::error,
                                            c)));
+    LOG_INFO << "server channel " << toString() << " begin to accepting socket.";
 }
 
 void AsioServerSocketChannel::handleAccept(const boost::system::error_code& error,
@@ -191,38 +185,24 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
 
     if (!error) {
         ChannelPtr acceptedChannel = boost::static_pointer_cast<Channel>(channel);
+
         // create the socket add it to the buffer and fire the event
         pipeline().addInboundChannelMessage<ChannelPtr>(acceptedChannel);
         pipeline().fireMessageUpdated();
 
-        LOG_INFO << "accepted a new channel, and firing the Channel Open Event.";
-        channel->open();
-
         childChannels_.insert(std::make_pair(channel->id(), channel));
-
         channel->closeFuture()->addListener(boost::bind(
                                                 &AsioServerSocketChannel::handleChildClosed,
                                                 this,
                                                 _1),
                                             100);
-
+        channel->open();
         channel->setActived();
+        LOG_INFO << "accepted a new channel " << channel->toString();
+
         channel->beginRead();
 
-        AsioSocketChannelPtr newChannel;
-
-        if (!reusableChildChannels_.empty()) {
-            newChannel = reusableChildChannels_.front();
-            reusableChildChannels_.pop_front();
-        }
-        else {
-            const AsioServicePtr& ioService = childServicePool_->nextService();
-            newChannel = AsioSocketChannelPtr(new AsioSocketChannel(
-                                                  ++lastChildId_,
-                                                  shared_from_this(),
-                                                  ioService));
-        }
-
+        AsioSocketChannelPtr newChannel = createChild();
         acceptor_.async_accept(newChannel->tcpSocket(),
                                makeCustomAllocHandler(acceptAllocator_,
                                        boost::bind(
@@ -298,7 +278,7 @@ void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
     }
 }
 
-void AsioServerSocketChannel::doInitialize() {
+void AsioServerSocketChannel::doPreOpen() {
     if (!initialized_) {
         Channel::config().setOptionSetCallback(boost::bind(
                 &AsioServerSocketChannelConfig::setOption,
@@ -306,9 +286,25 @@ void AsioServerSocketChannel::doInitialize() {
                 _1,
                 _2));
 
-        pipeline().setHead<AsioServerSocketChannel*>("bridge", this);
+        pipeline().setHead<AsioServerSocketChannel*>("head", this);
 
         initialized_ = true;
+    }
+}
+
+AsioSocketChannelPtr AsioServerSocketChannel::createChild() {
+    if (!reusableChildChannels_.empty()) {
+        AsioSocketChannelPtr newChannel = reusableChildChannels_.front();
+        reusableChildChannels_.pop_front();
+
+        return newChannel;
+    }
+    else {
+        const AsioServicePtr& ioService = childServicePool_->nextService();
+        return AsioSocketChannelPtr(
+                   new AsioSocketChannel(++lastChildId_,
+                                         shared_from_this(),
+                                         ioService));
     }
 }
 

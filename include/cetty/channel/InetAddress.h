@@ -150,11 +150,6 @@ void swap(InetAddress& a1, InetAddress& a2) {
 }
 
 inline
-const std::string& InetAddress::host() const {
-    return host_;
-}
-
-inline
 int InetAddress::port() const {
     return port_;
 }

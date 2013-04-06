@@ -50,116 +50,61 @@ class AsioSocketChannel;
 class AsioWriteOperation {
 public:
     const static int  MAX_BUFFER_COUNT = 8;
+
     typedef boost::asio::mutable_buffer AsioBuffer;
     typedef cetty::util::TruncatableArray<AsioBuffer, MAX_BUFFER_COUNT> AsioBufferArray;
 
 public:
-    AsioWriteOperation()  {}
+    AsioWriteOperation();
+    AsioWriteOperation(const ChannelBufferPtr& buffer,
+                       const ChannelFuturePtr& f);
 
-    AsioWriteOperation(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f)
-        : byteSize(0), channelBuffer(buffer), future(f) {
-        GatheringBuffer gathering;
-        buffer->slice(&gathering);
-
-        byteSize = gathering.bytesCount();
-
-        if (needCompactBuffers(gathering)) {
-            channelBuffer = buffer->readBytes();
-            char* bytes = (char*)channelBuffer->readableBytes((int*)NULL);
-            buffers[buffers.truncatedCnt++] = AsioBuffer(bytes, byteSize);
-        }
-        else {
-            for (int i = 0, j = gathering.blockCount(); i < j; ++i) {
-                const StringPiece& bytes = gathering.at(i);
-                buffers[buffers.truncatedCnt++] =
-                    AsioBuffer((char*)bytes.data(), bytes.size());
-            }
-        }
-    }
-
-    AsioWriteOperation(const AsioWriteOperation& op)
-        : byteSize(op.byteSize),
-          buffers(op.buffers),
-          channelBuffer(op.channelBuffer),
-          future(op.future) {
-    }
-
-    AsioWriteOperation& operator=(const AsioWriteOperation& op) {
-        byteSize = op.byteSize;
-        buffers = op.buffers;
-        channelBuffer = op.channelBuffer;
-        future = op.future;
-        return *this;
-    }
+    AsioWriteOperation(const AsioWriteOperation& op);
+    AsioWriteOperation& operator=(const AsioWriteOperation& op);
 
     ~AsioWriteOperation() {}
 
-    int writeBufferSize() const {
-        return byteSize;
-    }
+    int writeBufferSize() const;
 
-    bool isMultiBuffers() const {
-        return buffers.truncatedCnt > 1;
-    }
+    bool isMultiBuffers() const;
+    bool isSingleBuffer() const;
 
-    AsioBuffer& getAsioBuffer() {
-        return buffers[0];
-    }
-    AsioBufferArray& getAsioBufferArray() {
-        return buffers;
-    }
+    AsioBuffer& asioBuffer();
+    AsioBufferArray& asioBufferArray();
 
-    bool setSuccess() {
-        return future ? future->setSuccess() : false;
-    }
-    bool setFailure(const Exception& cause) {
-        return future ? future->setFailure(cause) : false;
-    }
+    bool setSuccess();
+    bool setFailure(const Exception& cause);
 
 private:
-    bool needCompactBuffers(const GatheringBuffer& gathering) {
-        return gathering.blockCount() > 1;
-    }
+    bool needCompactBuffers(const GatheringBuffer& gathering);
 
 private:
-    int byteSize;
-    AsioBufferArray buffers;
+    int byteSize_;
+    AsioBufferArray buffers_;
 
-    ChannelBufferPtr channelBuffer;
-    ChannelFuturePtr    future;
+    ChannelFuturePtr future_;
+    ChannelBufferPtr channelBuffer_;
 };
 
 // no need ensure the thread safe.
 class AsioWriteOperationQueue {
 public:
-    AsioWriteOperationQueue(AsioSocketChannel& channel)
-        : channel_(channel),
-        writeBufferSize_(0) {
-    }
+    AsioWriteOperationQueue(AsioSocketChannel& channel);
 
     ~AsioWriteOperationQueue() {}
 
-    bool  empty() const { return ops_.empty(); }
-    size_t size() const { return ops_.size(); }
+    bool  empty() const;
+    std::size_t size() const;
 
-    AsioWriteOperation& peek() {
-        return ops_.front();
-    }
+    AsioWriteOperation& front();
 
-    void popup() {
-        minusWriteBufferSize(ops_.front().writeBufferSize());
-        ops_.pop_front();
-    }
+    void popFront();
 
-    AsioWriteOperation& offer(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f) {
-        ops_.push_back(AsioWriteOperation(buffer, f));
-        plusWriteBufferSize(ops_.back().writeBufferSize());
-        return ops_.back();
-    }
+    AsioWriteOperation& offer(const ChannelBufferPtr& buffer, const ChannelFuturePtr& f);
 
-    int getWriteBufferSize() const {
-        return writeBufferSize_;
-    }
+    AsioWriteOperation& offer(const AsioWriteOperation& operation);
+
+    int writeBufferSize() const;
 
 private:
     void plusWriteBufferSize(int messageSize);
@@ -171,6 +116,87 @@ private:
     int writeBufferSize_;
     std::deque<AsioWriteOperation> ops_;
 };
+
+inline
+int AsioWriteOperation::writeBufferSize() const {
+    return byteSize_;
+}
+
+inline
+bool AsioWriteOperation::isMultiBuffers() const {
+    return buffers_.truncatedCnt > 1;
+}
+
+inline
+bool AsioWriteOperation::isSingleBuffer() const {
+    return buffers_.truncatedCnt == 1;
+}
+
+inline
+AsioWriteOperation::AsioBuffer& AsioWriteOperation::asioBuffer() {
+    return buffers_[0];
+}
+
+inline
+AsioWriteOperation::AsioBufferArray& AsioWriteOperation::asioBufferArray() {
+    return buffers_;
+}
+
+inline
+bool AsioWriteOperation::setSuccess() {
+    return future_ ? future_->setSuccess() : false;
+}
+
+inline
+bool AsioWriteOperation::setFailure(const Exception& cause) {
+    return future_ ? future_->setFailure(cause) : false;
+}
+
+inline
+bool AsioWriteOperation::needCompactBuffers(const GatheringBuffer& gathering) {
+    return gathering.blockCount() > 1;
+}
+
+inline
+bool AsioWriteOperationQueue::empty() const {
+    return ops_.empty();
+}
+
+inline
+size_t AsioWriteOperationQueue::size() const {
+    return ops_.size();
+}
+
+inline
+int AsioWriteOperationQueue::writeBufferSize() const {
+    return writeBufferSize_;
+}
+
+inline
+AsioWriteOperation& AsioWriteOperationQueue::front() {
+    return ops_.front();
+}
+
+inline
+void AsioWriteOperationQueue::popFront() {
+    minusWriteBufferSize(ops_.front().writeBufferSize());
+    ops_.pop_front();
+}
+
+inline
+AsioWriteOperation& AsioWriteOperationQueue::offer(const ChannelBufferPtr& buffer,
+        const ChannelFuturePtr& f) {
+    ops_.push_back(AsioWriteOperation(buffer, f));
+    plusWriteBufferSize(ops_.back().writeBufferSize());
+    return ops_.back();
+}
+
+inline
+AsioWriteOperation& AsioWriteOperationQueue::offer(const AsioWriteOperation& operation) {
+    ops_.push_back(operation);
+    plusWriteBufferSize(ops_.back().writeBufferSize());
+    return ops_.back();
+}
 
 }
 }

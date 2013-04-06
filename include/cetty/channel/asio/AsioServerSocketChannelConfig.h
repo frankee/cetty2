@@ -25,6 +25,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <cetty/channel/ChannelOption.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
@@ -41,7 +42,7 @@ public:
     ~AsioServerSocketChannelConfig();
 
     bool setOption(const ChannelOption& option,
-                           const ChannelOption::Variant& value);
+                   const ChannelOption::Variant& value);
 
     const boost::optional<bool>& isReuseAddress() const;
     void setReuseAddress(bool reuseAddress);
@@ -49,28 +50,68 @@ public:
     const boost::optional<int>& receiveBufferSize() const;
     void setReceiveBufferSize(int receiveBufferSize);
 
-    void setPerformancePreferences(int connectionTime,
-        int latency,
-        int bandwidth);
-
     const boost::optional<int>& backlog() const;
     void setBacklog(int backlog);
 
-    void apply();
+    const boost::optional<int>& reservedChildCount() const;
+    void setReservedChildCount(int count);
 
-    bool isReuseAddress(tcp::acceptor& acceptor) const;
-    void setReuseAddress(tcp::acceptor& acceptor);
+private:
+    template<typename Option, typename Value>
+    bool applyOptionToAcceptor(const ChannelOption& key, Value value) {
+        boost::system::error_code ec;
+        acceptor_.set_option(Option(value), ec);
 
-    int receiveBufferSize(tcp::acceptor& acceptor) const;
-    void setReceiveBufferSize(tcp::acceptor& acceptor);
+        if (ec) {
+            LOG_ERROR << "failed to set " << key.name()
+                << " " << value
+                << " to acceptor, code: " << ec.value()
+                << " message: " << ec.message();
+            return false;
+        }
+        else {
+            LOG_INFO << "has set " << key.name()
+                << " " << value << " to acceptor";
+            return true;
+        }
+    }
+
+    template<typename Option, typename Value>
+    void updateOptionFromAcceptor(const ChannelOption& key, Value* value) const {
+        BOOST_ASSERT(value);
+
+        boost::system::error_code ec;
+        Option option;
+        acceptor_.get_option(option, ec);
+
+        if (!ec) {
+            *value = option.value();
+        }
+        else {
+            LOG_ERROR << "fail to get " << key.name()
+                << " option from acceptor, code: " << ec.value()
+                << " message: " << ec.message();
+        }
+    }
 
 private:
     tcp::acceptor& acceptor_;
 
     mutable boost::optional<bool> reuseAddress_;
-    mutable boost::optional<int>  receiveBufferSize_;
     mutable boost::optional<int>  backlog_;
+    mutable boost::optional<int>  receiveBufferSize_;
+    mutable boost::optional<int>  reservedChildCount_;
 };
+
+inline
+const boost::optional<int>& AsioServerSocketChannelConfig::backlog() const {
+    return backlog_;
+}
+
+inline
+const boost::optional<int>& AsioServerSocketChannelConfig::reservedChildCount() const {
+    return reservedChildCount_;
+}
 
 }
 }

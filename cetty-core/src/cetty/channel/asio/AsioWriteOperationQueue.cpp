@@ -16,6 +16,7 @@
 
 #include <cetty/channel/asio/AsioWriteOperationQueue.h>
 
+#include <boost/assert.hpp>
 #include <boost/asio/buffer.hpp>
 
 #include <cetty/buffer/ChannelBuffer.h>
@@ -30,32 +31,67 @@ namespace asio {
 using namespace cetty::channel;
 using namespace cetty::buffer;
 
-void AsioWriteOperationQueue::plusWriteBufferSize(int messageSize) {
-    writeBufferSize_ += messageSize;
+AsioWriteOperation::AsioWriteOperation()
+    : byteSize_() {
+}
 
-#if 0
-    int highWaterMark = channel.config.getWriteBufferHighWaterMark();
+AsioWriteOperation::AsioWriteOperation(const ChannelBufferPtr& buffer,
+                                       const ChannelFuturePtr& f)
+    : byteSize_(0),
+      channelBuffer_(buffer),
+      future_(f) {
+    GatheringBuffer gathering;
+    buffer->slice(&gathering);
 
-    if (writeBufferSize >= highWaterMark) {
-        if (writeBufferSize - messageSize < highWaterMark) {
-            channel.handleAtHighWaterMark();
+    byteSize_ = gathering.bytesCount();
+
+    if (needCompactBuffers(gathering)) {
+        channelBuffer_ = buffer->readBytes();
+        int byteSize;
+        char* bytes = const_cast<char*>(
+                          channelBuffer_->readableBytes(&byteSize));
+
+        BOOST_ASSERT(byteSize == byteSize_ &&
+                     "buffer size should be same after compact");
+
+        buffers_[buffers_.truncatedCnt++] = AsioBuffer(bytes, byteSize_);
+    }
+    else {
+        for (int i = 0, j = gathering.blockCount(); i < j; ++i) {
+            const StringPiece& bytes = gathering.at(i);
+            buffers_[buffers_.truncatedCnt++] =
+                AsioBuffer(const_cast<char*>(bytes.data()), bytes.size());
         }
     }
-#endif
+}
+
+AsioWriteOperation::AsioWriteOperation(const AsioWriteOperation& op)
+    : byteSize_(op.byteSize_),
+      buffers_(op.buffers_),
+      channelBuffer_(op.channelBuffer_),
+      future_(op.future_) {
+
+}
+
+AsioWriteOperation& AsioWriteOperation::operator=(const AsioWriteOperation& op) {
+    byteSize_ = op.byteSize_;
+    buffers_ = op.buffers_;
+    channelBuffer_ = op.channelBuffer_;
+    future_ = op.future_;
+    return *this;
+}
+
+AsioWriteOperationQueue::AsioWriteOperationQueue(AsioSocketChannel& channel)
+    : channel_(channel),
+      writeBufferSize_(0) {
+}
+
+void AsioWriteOperationQueue::plusWriteBufferSize(int messageSize) {
+    writeBufferSize_ += messageSize;
 }
 
 void AsioWriteOperationQueue::minusWriteBufferSize(int messageSize) {
     writeBufferSize_ -= messageSize;
-
-#if 0
-    int lowWaterMark = channel.config.getWriteBufferLowWaterMark();
-
-    if (writeBufferSize == 0 || writeBufferSize < lowWaterMark) {
-        if (writeBufferSize + messageSize >= lowWaterMark) {
-            channel.handleAtLowWaterMark();
-        }
-    }
-#endif
 }
 
 }

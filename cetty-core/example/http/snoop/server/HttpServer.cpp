@@ -47,7 +47,7 @@ int main(int argc, const char* argv[]) {
 
     ChannelInitializer2<HttpServerCodec, HttpRequestHandler> initializer;
 
-    bootstrap.setOption(ChannelOption::CO_TCP_NODELAY, true)
+    bootstrap.setChildOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096)
     .setChildInitializer(boost::bind<bool>(initializer, _1));

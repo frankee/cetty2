@@ -43,25 +43,37 @@ Exception::Exception(int code)
       nested_(NULL) {
 }
 
-Exception::Exception(const std::string& msg, int code)
-    : message_(msg), nested_(0), code_(code) {}
+Exception::Exception(const std::string& msg,
+                     int code)
+    : message_(msg),
+      nested_(0),
+      code_(code) {
+}
 
-Exception::Exception(const std::string& msg, const std::string& arg, int code)
-    : message_(msg), nested_(0), code_(code) {
+Exception::Exception(const std::string& msg,
+                     const std::string& arg,
+                     int code)
+    : message_(msg),
+      nested_(),
+      code_(code) {
     if (!arg.empty()) {
         message_.append(": ");
         message_.append(arg);
     }
 }
 
-Exception::Exception(const std::string& msg, const Exception& nested, int code)
-    : message_(msg), nested_(nested.clone()), code_(code) {
+Exception::Exception(const std::string& msg,
+                     const Exception& nested,
+                     int code)
+    : message_(msg),
+      nested_(nested.clone()),
+      code_(code) {
 }
 
-Exception::Exception(const Exception& exc) :
-    std::exception(exc),
-    message_(exc.message_),
-    code_(exc.code_) {
+Exception::Exception(const Exception& exc)
+    : std::exception(exc),
+      message_(exc.message_),
+      code_(exc.code_) {
     nested_ = exc.nested_ ? exc.nested_->clone() : 0;
 }
 

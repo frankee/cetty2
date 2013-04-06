@@ -62,6 +62,7 @@ using namespace cetty::channel;
  *
  * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  */
+
 class AsioSocketChannelConfig : private boost::noncopyable {
 public:
     typedef boost::asio::ip::tcp::socket TcpSocket;
@@ -70,66 +71,152 @@ public:
     AsioSocketChannelConfig(TcpSocket& socket);
 
     bool setOption(const ChannelOption& option,
-                           const ChannelOption::Variant& value);
+                   const ChannelOption::Variant& value);
+
+    const boost::optional<int>& sendBufferSize() const;
+    void setSendBufferSize(int sendBufferSize);
 
     const boost::optional<int>& receiveBufferSize() const;
-    const boost::optional<int>& sendBufferSize() const;
+    void setReceiveBufferSize(int receiveBufferSize);
+
     const boost::optional<int>& soLinger() const;
+    void setSoLinger(int soLinger);
 
     const boost::optional<bool>& isKeepAlive() const;
-    const boost::optional<bool>& isReuseAddress() const;
-    const boost::optional<bool>& isTcpNoDelay() const;
-
     void setKeepAlive(bool keepAlive);
-    void setPerformancePreferences(int connectionTime,
-        int latency,
-        int bandwidth);
 
-    void setReceiveBufferSize(int receiveBufferSize);
+    const boost::optional<bool>& isReuseAddress() const;
     void setReuseAddress(bool reuseAddress);
-    void setSendBufferSize(int sendBufferSize);
-    void setSoLinger(int soLinger);
+
+    const boost::optional<bool>& isTcpNoDelay() const;
     void setTcpNoDelay(bool tcpNoDelay);
 
-    int writeBufferHighWaterMark() const;
-    void setWriteBufferHighWaterMark(int writeBufferHighWaterMark);
+    const boost::optional<int>& sendBufferHighWaterMark() const;
+    void setSendBufferHighWaterMark(int bufferHighWaterMark);
 
     /**
      * Gets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    int writeBufferLowWaterMark() const;
+    const boost::optional<int>& sendBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_SNDLOWAT</tt></a> option.
      */
-    void setWriteBufferLowWaterMark(int writeBufferLowWaterMark);
+    void setSendBufferLowWaterMark(int bufferLowWaterMark);
+
+    const boost::optional<int>& receiveBufferHighWaterMark() const;
+    void setReceiveBufferHighWaterMark(int bufferHighWaterMark);
 
     /**
      * Gets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    int receiveBufferLowWaterMark() const;
+    const boost::optional<int>& receiveBufferLowWaterMark() const;
 
     /**
      * Sets the <a><tt>SO_RCVLOWAT</tt></a> option.
      */
-    void setReceiveBufferLowWaterMark(int receiveBufferLowWaterMark);
+    void setReceiveBufferLowWaterMark(int bufferLowWaterMark);
 
 private:
-    static const int DEFAULT_WRITE_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
-    static const int DEFAULT_WRITE_BUFFER_LOW_WATERMARK  = 2 * 1024;
+    template<typename Option>
+    void setSocketOption(const ChannelOption& key,
+                         bool src,
+                         boost::optional<bool>* dest) {
+        BOOST_ASSERT(dest);
+        boost::optional<bool>& value = *dest;
+
+        if (value && *value == src) {
+            LOG_WARN << "the new " << key.name()
+                     << " is same with the old, need not set";
+            return;
+        }
+
+        if (socket_.is_open() && applyOptionToSocket<Option>(key, src)) {
+            value = src;
+        }
+    }
+
+    template<typename Option>
+    void setSocketOption(const ChannelOption& key,
+                         int src,
+                         boost::optional<int>* dest) {
+        BOOST_ASSERT(dest);
+        boost::optional<int>& value = *dest;
+
+        if (value && *value == src) {
+            LOG_WARN << "the new " << key.name()
+                     << " is same with the old, need not set";
+            return;
+        }
+
+        if (src > 0) {
+            if (socket_.is_open() && applyOptionToSocket<Option>(key, src)) {
+                *dest = src;
+            }
+        }
+        else {
+            LOG_WARN << "the " << key.name() << " " << src
+                     << " should not be negative";
+        }
+    }
+
+    template<typename Option, typename Value>
+    bool applyOptionToSocket(const ChannelOption& key, Value value) {
+        boost::system::error_code ec;
+        socket_.set_option(Option(value), ec);
+
+        if (ec) {
+            LOG_ERROR << "failed to set " << key.name()
+                      << " " << value
+                      << " to socket, code: " << ec.value()
+                      << " message: " << ec.message();
+            return false;
+        }
+        else {
+            LOG_INFO << "has set " << key.name()
+                     << " " << value << " to socket";
+            return true;
+        }
+    }
+
+    template<typename Option, typename Value>
+    void updateOptionFromSocket(const ChannelOption& key, Value* value) const {
+        BOOST_ASSERT(value);
+
+        boost::system::error_code ec;
+        Option option;
+        socket_.get_option(option, ec);
+
+        if (!ec) {
+            *value = option.value();
+        }
+        else {
+            LOG_ERROR << "fail to get " << key.name()
+                      << " option from socket, code: " << ec.value()
+                      << " message: " << ec.message();
+        }
+    }
+
+private:
+    static const int DEFAULT_SEND_BUFFER_LOW_WATERMARK  = 2 * 1024;
+    static const int DEFAULT_SEND_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
 
 private:
     TcpSocket& socket_;
 
-    mutable int writeBufferLowWaterMark_;
-    mutable int writeBufferHighWaterMark_;
-
     mutable boost::optional<bool> keepAlive_;
-    mutable boost::optional<bool> reuseAddress_;
     mutable boost::optional<bool> tcpNoDelay_;
-    mutable boost::optional<int>  receiveBufferSize_;
-    mutable boost::optional<int>  sendBufferSize_;
+    mutable boost::optional<bool> reuseAddress_;
+
     mutable boost::optional<int>  soLinger_;
+    mutable boost::optional<int>  sendBufferSize_;
+    mutable boost::optional<int>  receiveBufferSize_;
+
+    mutable boost::optional<int> sendBufferLowWaterMark_;
+    mutable boost::optional<int> sendBufferHighWaterMark_;
+
+    mutable boost::optional<int> receiveBufferLowWaterMark_;
+    mutable boost::optional<int> receiveBufferHighWaterMark_;
 };
 
 }

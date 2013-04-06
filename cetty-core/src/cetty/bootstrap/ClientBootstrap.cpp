@@ -78,11 +78,10 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
     }
 
     ch->setInitializer(initializer_);
+    ch->open();
 
     // Set the options.
     ch->config().setOptions(channelOptions());
-
-    ch->open();
 
     insertChannel(ch->id(), ch);
 
@@ -122,7 +121,6 @@ ChannelPtr ClientBootstrap::newChannel() {
 }
 
 void ClientBootstrap::waitingForExit() {
-    //shutdown();
     Channels& clientChannels = channels();
     Channels::const_iterator itr = clientChannels.begin();
     for (; itr != clientChannels.end(); ++itr) {

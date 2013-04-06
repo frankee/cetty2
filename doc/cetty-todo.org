@@ -3,6 +3,7 @@ cetty-doto
 * cetty-core
 ** channel
 	1，future增加线程不安全类型（服务器端）
+        2, 增加AsioSocketChannel对于网络带宽小的情况下,异步发送的写缓冲存在积压,在连接断开后,可以释放所有的写缓冲.
 
 *** channelpipeline
 	1. 异常、错误处理机制，fireexception应该从 inboundinvoker独立出来，

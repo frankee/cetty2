@@ -27,40 +27,37 @@ using namespace cetty::util;
 void ChannelConfig::setOptions(const ChannelOptions& options) {
     ChannelOptions::ConstIterator itr = options.begin();
 
-    while (itr != options.end()) {
-        if (callback_ && callback_(itr->first, itr->second)) {
-        }
-        else {
-            setOption(itr->first, itr->second);
-        }
-
-        ++itr;
+    for (; itr != options.end(); ++itr) {
+        setOption(itr->first, itr->second);
     }
 }
 
 bool ChannelConfig::setOption(const ChannelOption& option,
                               const ChannelOption::Variant& value) {
     try {
-        if (option == ChannelOption::CONNECT_TIMEOUT_MILLIS) {
-            setConnectTimeout(boost::get<int>(value));
-        }
-        else {
-            return false;
+        if (!callback_ || !callback_(option, value)) {
+            if (option == ChannelOption::CO_CONNECT_TIMEOUT_MILLIS) {
+                setConnectTimeout(boost::get<int>(value));
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
     catch (const std::exception& e) {
-        throw InvalidArgumentException(e.what());
+        LOG_ERROR << "failed to set the value of " << option.name()
+                  << ", message: " << e.what();
+        return false;
     }
 }
 
 void ChannelConfig::setConnectTimeout(int connectTimeoutMillis) {
-    if (connectTimeoutMillis < 0) {
+    if (connectTimeoutMillis > 0) {
+        connectTimeoutMillis_ = connectTimeoutMillis;
+    }
+    else {
         LOG_WARN << "connectTimeoutMillis is negative, using default.";
     }
-
-    connectTimeoutMillis_ = connectTimeoutMillis;
 }
 
 }

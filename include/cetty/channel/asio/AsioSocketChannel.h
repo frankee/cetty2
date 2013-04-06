@@ -28,6 +28,7 @@
 #include <boost/detail/atomic_count.hpp>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 #include <cetty/channel/ChannelPipeline.h>
@@ -85,28 +86,23 @@ public:
     void registerTo(Context& context);
 
 private:
+    // template methods
     virtual bool doBind(const InetAddress& localAddress);
     virtual bool doDisconnect();
     virtual bool doClose();
+    bool doConnect(const InetAddress& remoteAddress,
+                   const InetAddress& localAddress,
+                   const ChannelFuturePtr& connectFuture);
 
-    virtual void doInitialize();
+    virtual void doPreOpen();
+    virtual void doPreActive();
 
     void doConnect(ChannelHandlerContext& ctx,
                    const InetAddress& remoteAddress,
                    const InetAddress& localAddress,
                    const ChannelFuturePtr& future);
 
-    void handleConnectTimeout();
-    void handleConnectFailed();
-    void handleConnectSuccess();
-
-    void doConnect(const InetAddress& remoteAddress,
-                   const InetAddress& localAddress,
-                   const ChannelFuturePtr& connectFuture);
-
     void doFlush(ChannelHandlerContext& ctx, const ChannelFuturePtr& future);
-
-    void beginRead();
 
     void handleRead(const boost::system::error_code& error,
                     size_t bytes_transferred);
@@ -122,10 +118,14 @@ private:
                        boost::asio::ip::tcp::resolver::iterator itr,
                        const ChannelFuturePtr& cf);
 
-    void cleanUpWriteBuffer();
+    void handleConnectTimeout(const ChannelFuturePtr& future);
+
+    void beginRead();
 
     void connectFailed(const ChannelFuturePtr& connectFuture,
                        const ChannelException& e);
+
+    void cleanUpWriteBuffer();
 
 private:
     friend class AsioWriteOperationQueue;
@@ -134,17 +134,21 @@ private:
 private:
     bool isReading_;
     bool isWriting_;
+    bool isConnecting_;
     bool initialized_;
     int  highWaterMarkCounter_;
 
     AsioServicePtr  ioService_;
     boost::asio::ip::tcp::socket tcpSocket_;
+    boost::asio::ip::tcp::resolver resolver_;
 
     ChannelBufferPtr readBuffer_;
-    ChannelBufferContainer* bufferContainer_;
+    ChannelBufferContainer* writeBufferContainer_;
     boost::scoped_ptr<AsioWriteOperationQueue> writeQueue_;
 
     AsioSocketChannelConfig socketConfig_;
+
+    TimeoutPtr connectTimeout_;
 
     AsioHandlerAllocator<int> readAllocator_;
     AsioHandlerAllocator<int> writeAllocator_;

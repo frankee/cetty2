@@ -343,11 +343,14 @@ protected:
             const ChannelPtr& parent,
             const EventLoopPtr& eventLoop);
 
+    // do the real job in the channel implement
     virtual bool doBind(const InetAddress& localAddress) = 0;
     virtual bool doDisconnect() = 0;
     virtual bool doClose() = 0;
 
-    virtual void doInitialize() {}
+    // hooks before channel state change
+    virtual void doPreOpen() {}
+    virtual void doPreActive() {}
     virtual void doPreClose() {} // NOOP by default
 
     void closeIfClosed();
@@ -376,6 +379,8 @@ protected:
 
 private:
     void allocateId();
+    void processFailure(const std::string& message,
+                        const ChannelFuturePtr& future);
 
 private:
     void doBind(ChannelHandlerContext& ctx,

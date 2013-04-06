@@ -26,45 +26,49 @@ namespace cetty {
 namespace channel {
 namespace asio {
 
+using namespace boost::asio::ip;
 using namespace cetty::channel;
 using namespace cetty::util;
 
 AsioSocketChannelConfig::AsioSocketChannelConfig(TcpSocket& socket)
     : socket_(socket),
-      writeBufferLowWaterMark_(0),
-      writeBufferHighWaterMark_(DEFAULT_WRITE_BUFFER_HIGH_WATERMARK) {
+      sendBufferLowWaterMark_(0),
+      sendBufferHighWaterMark_(DEFAULT_SEND_BUFFER_HIGH_WATERMARK) {
 }
 
 bool AsioSocketChannelConfig::setOption(const ChannelOption& option,
                                         const ChannelOption::Variant& value) {
-    if (option == ChannelOption::CO_SO_RCVBUF) {
+
+    if (option == ChannelOption::CO_TCP_NODELAY) {
+        setTcpNoDelay(boost::get<bool>(value));
+    }
+    else if (option == ChannelOption::CO_SO_LINGER) {
+        setSoLinger(boost::get<int>(value));
+    }
+    else if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
     }
     else if (option == ChannelOption::CO_SO_SNDBUF) {
         setSendBufferSize(boost::get<int>(value));
     }
-    else if (option == ChannelOption::CO_TCP_NODELAY) {
-        setTcpNoDelay(boost::get<bool>(value));
+    else if (option == ChannelOption::CO_SO_REUSEADDR) {
+        setReuseAddress(boost::get<bool>(value));
     }
     else if (option == ChannelOption::CO_SO_KEEPALIVE) {
         setKeepAlive(boost::get<bool>(value));
     }
-    else if (option == ChannelOption::CO_SO_REUSEADDR) {
-        setReuseAddress(boost::get<bool>(value));
+    else if (option == ChannelOption::CO_SO_SNDLOWAT) {
+        setSendBufferLowWaterMark(boost::get<int>(value));
     }
-    else if (option == ChannelOption::CO_SO_LINGER) {
-        setSoLinger(boost::get<int>(value));
+    else if (option == ChannelOption::CO_SO_RCVLOWAT) {
+        setReceiveBufferLowWaterMark(boost::get<int>(value));
     }
-
-#if 0
-    else if (key == "writeBufferLowWaterMark") {
-        setWriteBufferLowWaterMark(ConversionUtil::toInt(value));
+    else if (option == ChannelOption::CO_SNDHIGHWAT) {
+        setSendBufferHighWaterMark(boost::get<int>(value));
     }
-    else if (key == "receiveBufferLowWaterMark") {
-        setReceiveBufferLowWaterMark(ConversionUtil::toInt(value));
+    else if (option == ChannelOption::CO_RCVHIGHWAT) {
+        setReceiveBufferHighWaterMark(boost::get<int>(value));
     }
-
-#endif
     else {
         return false;
     }
@@ -76,242 +80,226 @@ const boost::optional<int>& AsioSocketChannelConfig::receiveBufferSize() const {
     if (receiveBufferSize_) {
         return receiveBufferSize_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::receive_buffer_size, boost::optional<int> >(
+                ChannelOption::CO_SO_RCVBUF, &receiveBufferSize_);
+        }
 
-    try {
-        boost::asio::ip::tcp::socket::receive_buffer_size option;
-        this->socket_.get_option(option);
-        this->receiveBufferSize_ = option.value();
+        return receiveBufferSize_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-
-    return receiveBufferSize_;
 }
 
 const boost::optional<int>& AsioSocketChannelConfig::sendBufferSize() const {
     if (sendBufferSize_) {
         return sendBufferSize_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::send_buffer_size, boost::optional<int> >(
+                ChannelOption::CO_SO_SNDBUF, &sendBufferSize_);
+        }
 
-    try {
-        boost::asio::ip::tcp::socket::send_buffer_size option;
-        this->socket_.get_option(option);
-        sendBufferSize_ = option.value();
+        return sendBufferSize_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-
-    return sendBufferSize_;
 }
 
 const boost::optional<int>& AsioSocketChannelConfig::soLinger() const {
     if (soLinger_) {
         return soLinger_;
     }
+    else {
+        if (socket_.is_open()) {
+            boost::system::error_code ec;
+            tcp::socket::linger option;
+            socket_.get_option(option, ec);
 
-    try {
-        boost::asio::ip::tcp::socket::linger option;
-        this->socket_.get_option(option);
-        this->soLinger_ = option.enabled() ? 0 : option.timeout();
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+            if (!ec) {
+                soLinger_ = option.enabled() ? 0 : option.timeout();
+            }
+            else {
+                LOG_ERROR << "fail to get SO_LINGER option from socket, code: "
+                          << ec.value()
+                          << " message: " << ec.message();
+            }
+        }
 
-    return soLinger_;
+        return soLinger_;
+    }
 }
 
 const boost::optional<bool>& AsioSocketChannelConfig::isKeepAlive() const {
-    if (this->isKeepAlive()) {
-        return this->isKeepAlive();
+    if (keepAlive_) {
+        return keepAlive_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::keep_alive, boost::optional<bool> >(
+                ChannelOption::CO_SO_KEEPALIVE, &keepAlive_);
+        }
 
-    try {
-        boost::asio::ip::tcp::socket::keep_alive option;
-        this->socket_.get_option(option);
-        this->keepAlive_ = option.value();
+        return keepAlive_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-
-    return this->keepAlive_;
 }
 
 const boost::optional<bool>& AsioSocketChannelConfig::isReuseAddress() const {
-    if (this->reuseAddress_) {
-        return this->reuseAddress_;
+    if (reuseAddress_) {
+        return reuseAddress_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::reuse_address, boost::optional<bool> >(
+                ChannelOption::CO_SO_REUSEADDR, &reuseAddress_);
+        }
 
-    try {
-        boost::asio::ip::tcp::socket::reuse_address option;
-        this->socket_.get_option(option);
-        this->reuseAddress_ = option.value();
+        return reuseAddress_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-
-    return this->reuseAddress_;
 }
 
 const boost::optional<bool>& AsioSocketChannelConfig::isTcpNoDelay() const {
     if (tcpNoDelay_) {
         return tcpNoDelay_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::no_delay, boost::optional<bool> >(
+                ChannelOption::CO_TCP_NODELAY, &tcpNoDelay_);
+        }
 
-    try {
-        boost::asio::ip::tcp::no_delay option;
-        this->socket_.get_option(option);
-        tcpNoDelay_ = option.value();
+        return tcpNoDelay_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-
-    return tcpNoDelay_;
 }
 
 void AsioSocketChannelConfig::setKeepAlive(bool keepAlive) {
-    try {
-        this->keepAlive_ = keepAlive;
-
-        boost::asio::ip::tcp::socket::keep_alive option(keepAlive);
-        this->socket_.set_option(option);
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-}
-
-void AsioSocketChannelConfig::setPerformancePreferences(int connectionTime,
-        int latency,
-        int bandwidth) {
+    setSocketOption<tcp::socket::keep_alive>(ChannelOption::CO_SO_KEEPALIVE,
+            keepAlive,
+            &keepAlive_);
 }
 
 void AsioSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) {
-    try {
-        boost::asio::ip::tcp::socket::receive_buffer_size option(receiveBufferSize);
-        this->socket_.set_option(option);
-        this->receiveBufferSize_ = receiveBufferSize;
-
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+    setSocketOption<tcp::socket::receive_buffer_size>(ChannelOption::CO_SO_RCVBUF,
+            receiveBufferSize,
+            &receiveBufferSize_);
 }
 
 void AsioSocketChannelConfig::setReuseAddress(bool reuseAddress) {
-    try {
-        boost::asio::ip::tcp::socket::reuse_address option(reuseAddress);
-        this->socket_.set_option(option);
-        this->reuseAddress_ = reuseAddress;
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+    setSocketOption<tcp::socket::reuse_address>(ChannelOption::CO_SO_REUSEADDR,
+            reuseAddress,
+            &reuseAddress_);
 }
 
 void AsioSocketChannelConfig::setSendBufferSize(int sendBufferSize) {
-    try {
-        boost::asio::ip::tcp::socket::send_buffer_size option(sendBufferSize);
-        this->socket_.set_option(option);
-        this->sendBufferSize_ = sendBufferSize;
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+    setSocketOption<tcp::socket::send_buffer_size>(ChannelOption::CO_SO_SNDBUF,
+            sendBufferSize,
+            &sendBufferSize_);
 }
 
 void AsioSocketChannelConfig::setSoLinger(int soLinger) {
-    try {
-        boost::asio::ip::tcp::socket::linger option;
+    if (soLinger_ && *soLinger_ == soLinger) {
+        LOG_WARN << "the new SO_LINGER is same with the old, need not set";
+        return;
+    }
+
+    if (socket_.is_open()) {
+        boost::system::error_code ec;
+        tcp::socket::linger option;
 
         if (soLinger > 0) {
             option.enabled(true);
             option.timeout(soLinger);
         }
+        else {
+            option.enabled(false);
+        }
 
-        this->socket_.set_option(option);
-        this->soLinger_ = soLinger;
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
+        socket_.set_option(option, ec);
+
+        if (!ec) {
+            soLinger_ = soLinger;
+            LOG_INFO << "has set SO_LINGER " << soLinger << " to socket";
+        }
+        else {
+            LOG_ERROR << "failed to set SO_LINGER " << soLinger
+                      << " to socket, code: " << ec.value()
+                      << " message: " << ec.message();
+        }
     }
 }
 
 void AsioSocketChannelConfig::setTcpNoDelay(bool tcpNoDelay) {
-    try {
-        boost::asio::ip::tcp::no_delay option(tcpNoDelay);
-        this->socket_.set_option(option);
-        this->tcpNoDelay_ = tcpNoDelay;
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+    setSocketOption<tcp::no_delay>(ChannelOption::CO_TCP_NODELAY,
+                                   tcpNoDelay,
+                                   &tcpNoDelay_);
 }
 
-void AsioSocketChannelConfig::setWriteBufferLowWaterMark(int writeBufferLowWaterMark) {
-    try {
-        boost::asio::ip::tcp::socket::send_low_watermark option(writeBufferLowWaterMark);
-        this->socket_.set_option(option);
-
-        this->writeBufferLowWaterMark_ = writeBufferLowWaterMark;
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
+void AsioSocketChannelConfig::setSendBufferLowWaterMark(int sendBufferLowWaterMark) {
+    setSocketOption<tcp::socket::send_low_watermark>(ChannelOption::CO_SO_SNDLOWAT,
+            sendBufferLowWaterMark,
+            &sendBufferLowWaterMark_);
 }
 
-int AsioSocketChannelConfig::writeBufferLowWaterMark() const {
-    if (writeBufferLowWaterMark_ == 0) {
-        try {
-            boost::asio::ip::tcp::socket::send_low_watermark option;
-            this->socket_.get_option(option);
-            writeBufferLowWaterMark_ = option.value();
-        }
-        catch (const boost::system::system_error& e) {
-            //it will throw an exception in windows XP.
-            //however, we do not care the exception, just set default value.
-            writeBufferLowWaterMark_ = DEFAULT_WRITE_BUFFER_LOW_WATERMARK;
-            //throw ChannelException(e.what(), e.code().value());
-
-            LOG_ERROR << "getWriteBufferLowWaterMark has error";
-        }
+const boost::optional<int>& AsioSocketChannelConfig::sendBufferLowWaterMark() const {
+    if (sendBufferLowWaterMark_) {
+        return sendBufferLowWaterMark_;
     }
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::send_low_watermark>(
+                ChannelOption::CO_SO_SNDLOWAT,
+                &sendBufferLowWaterMark_);
+        }
 
-    return writeBufferLowWaterMark_;
+        return sendBufferLowWaterMark_;
+    }
 }
 
 void AsioSocketChannelConfig::setReceiveBufferLowWaterMark(int receiveBufferLowWaterMark) {
-    try {
-        boost::asio::ip::tcp::socket::receive_low_watermark option(receiveBufferLowWaterMark);
-        this->socket_.set_option(option);
+    setSocketOption<tcp::socket::send_low_watermark>(ChannelOption::CO_SO_RCVLOWAT,
+            receiveBufferLowWaterMark,
+            &receiveBufferLowWaterMark_);
+}
+
+const boost::optional<int>& AsioSocketChannelConfig::receiveBufferLowWaterMark() const {
+    if (receiveBufferLowWaterMark_) {
+        return receiveBufferLowWaterMark_;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
+    else {
+        if (socket_.is_open()) {
+            updateOptionFromSocket<tcp::socket::receive_low_watermark>(
+                ChannelOption::CO_SO_RCVLOWAT,
+                &receiveBufferLowWaterMark_);
+        }
+
+        return receiveBufferLowWaterMark_;
     }
 }
 
-int AsioSocketChannelConfig::receiveBufferLowWaterMark() const {
-    try {
-        boost::asio::ip::tcp::socket::receive_low_watermark option;
-        this->socket_.get_option(option);
-        return option.value();
+const boost::optional<int>& AsioSocketChannelConfig::sendBufferHighWaterMark() const {
+    return sendBufferHighWaterMark_;
+}
+
+void AsioSocketChannelConfig::setSendBufferHighWaterMark(int bufferHighWaterMark) {
+    if (bufferHighWaterMark > 0) {
+        sendBufferHighWaterMark_ = bufferHighWaterMark;
     }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
+    else {
+        LOG_WARN << "the SNDHIGHWAT " << bufferHighWaterMark
+                 << " should not be negative";
     }
 }
 
-int AsioSocketChannelConfig::writeBufferHighWaterMark() const {
-    return writeBufferHighWaterMark_;
+const boost::optional<int>& AsioSocketChannelConfig::receiveBufferHighWaterMark() const {
+    return receiveBufferHighWaterMark_;
 }
 
-void AsioSocketChannelConfig::setWriteBufferHighWaterMark(int writeBufferHighWaterMark) {
-    this->writeBufferHighWaterMark_ = writeBufferHighWaterMark;
+void AsioSocketChannelConfig::setReceiveBufferHighWaterMark(int bufferHighWaterMark) {
+    if (bufferHighWaterMark > 0) {
+        receiveBufferHighWaterMark_ = bufferHighWaterMark;
+    }
+    else {
+        LOG_WARN << "the RCVHIGHWAT " << bufferHighWaterMark
+                 << " should not be negative";
+    }
 }
 
 }

@@ -69,6 +69,10 @@
       <AdditionalLibraryDirectories>../../lib/win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
     </Lib>
+    <PreBuildEvent>
+      <Command>cd ..
+proto_gen.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

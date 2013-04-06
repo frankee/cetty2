@@ -30,6 +30,9 @@ using namespace cetty::util;
 
 const InetAddress InetAddress::NULL_ADDRESS;
 
+static const std::string ANY_IPV4 = "0.0.0.0";
+static const std::string ANY_IPV6 = "0.0.0.0";
+
 InetAddress::InetAddress()
     : port_(0),
       family_(FAMILY_NONE) {
@@ -164,13 +167,24 @@ void InetAddress::swap(InetAddress& addr) {
     addr = tmp;
 }
 
-std::string InetAddress::toString() const {
-    std::string buf = host_;
-
-    if (host_.empty()) {
-        buf = "0.0.0.0";
+const std::string& InetAddress::host() const {
+    if (!host_.empty()) {
+        return host_;
     }
-    
+    else if (family_ == FAMILY_IPv4) {
+        return ANY_IPV4;
+    }
+    else if (family_ == FAMILY_IPv6) {
+        return ANY_IPV6;
+    }
+    else {
+        return host_;
+    }
+}
+
+std::string InetAddress::toString() const {
+    std::string buf = host();
+
     if (port_ > 0) {
         StringUtil::printf(&buf, ":%d", port_);
     }
@@ -178,7 +192,7 @@ std::string InetAddress::toString() const {
         StringUtil::printf(&buf, ":%s", service_.c_str());
     }
     else {
-        buf = "NULL_ADDRESS";
+        buf = "INVALID_ADDRESS";
     }
     
     return buf;

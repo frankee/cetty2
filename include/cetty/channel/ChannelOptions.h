@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <boost/noncopyable.hpp>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/channel/ChannelOption.h>
 
@@ -33,35 +34,69 @@ public:
 public:
     ChannelOptions() {}
 
-    bool empty() const { return options_.empty(); }
+    bool empty() const;
 
-    Iterator begin() { return options_.begin(); }
-    Iterator end() { return options_.end(); }
+    Iterator begin();
+    Iterator end();
 
-    ConstIterator begin() const { return options_.begin(); }
-    ConstIterator end() const { return options_.end(); }
+    ConstIterator begin() const;
+    ConstIterator end() const;
 
-    ConstIterator find(const ChannelOption& option) { return options_.find(option); }
+    ConstIterator find(const ChannelOption& option);
 
     ChannelOptions& setOption(const ChannelOption& option,
-                              const ChannelOption::Variant& value) {
-        if (value.empty()) {
-            options_.erase(option);
-            LOG_WARN << "setOption, the key ("
-                     << option.name()
-                     << ") is empty value, remove from the options.";
-        }
-        else {
-            LOG_INFO << "set Option, the key is " << option.name();
-            options_.insert(std::make_pair(option, value));
-        }
-
-        return *this;
-    }
+                              const ChannelOption::Variant& value);
 
 private:
     OptionsMap options_;
 };
+
+inline
+bool ChannelOptions::empty() const {
+    return options_.empty();
+}
+
+inline
+ChannelOptions::Iterator ChannelOptions::begin() {
+    return options_.begin();
+}
+
+inline
+ChannelOptions::Iterator ChannelOptions::end() {
+    return options_.end();
+}
+
+inline
+ChannelOptions::ConstIterator ChannelOptions::begin() const {
+    return options_.begin();
+}
+
+inline
+ChannelOptions::ConstIterator ChannelOptions::end() const {
+    return options_.end();
+}
+
+inline
+ChannelOptions::ConstIterator ChannelOptions::find(const ChannelOption& option) {
+    return options_.find(option);
+}
+
+inline
+ChannelOptions& ChannelOptions::setOption(const ChannelOption& option,
+        const ChannelOption::Variant& value) {
+    if (value.empty()) {
+        options_.erase(option);
+        LOG_WARN << "setOption, the key ("
+                 << option.name()
+                 << ") is empty value, remove from the options.";
+    }
+    else {
+        LOG_INFO << "set Option, the key is " << option.name();
+        options_.insert(std::make_pair(option, value));
+    }
+
+    return *this;
+}
 
 }
 }

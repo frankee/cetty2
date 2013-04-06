@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    Logger::logLevel(LogLevel::INFO);
+    Logger::logLevel(LogLevel::DEBUG);
     ChannelInitializer1<EchoServerHandler> initializer("echo");
 
     ServerBootstrap bootstrap(threadCount);

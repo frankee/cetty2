@@ -185,7 +185,7 @@ private:
         throw ChannelException(t->what(), t->code());
     }
 
-    virtual void doInitialize() {
+    virtual void doPreOpen() {
         ChannelPipeline& pipeline = Channel::pipeline();
 
         pipeline.addLast<ThisChannel*>("inboundOut",

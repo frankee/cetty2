@@ -69,7 +69,7 @@ private:
     bool doDisconnect() { return true; }
     bool doClose() { return true; }
 
-    void doInitialize() {
+    void doPreOpen() {
         pipeline().setHead(new Context("dispatcher", this));
     }
 

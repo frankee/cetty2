@@ -92,6 +92,7 @@ public:
             }
 
             child->setInitializer(bootstrap_.childInitializer());
+            child->open();
 
             const ChannelOptions& childOptions =
                 bootstrap_.childOptions();
@@ -197,14 +198,22 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
     channel->open();
 
     if (channel->isOpen()) {
+        // Set the options.
+        channel->config().setOptions(channelOptions());
+
         insertChannel(channel->id(), channel);
+
+        ChannelFuturePtr future = channel->newFuture();
+        channel->bind(localAddress, future)->addListener(
+            ChannelFutureListener::CLOSE_ON_FAILURE);
+
+        return future;
     }
-
-    ChannelFuturePtr future = channel->newFuture();
-    channel->bind(localAddress, future)->addListener(
-        ChannelFutureListener::CLOSE_ON_FAILURE);
-
-    return future;
+    else {
+        LOG_WARN << "failed to open a server channel.";
+        return NullChannel::instance()->newFailedFuture(
+            ChannelException("failed to open a server channel"));
+    }
 }
 
 void ServerBootstrap::shutdown() {

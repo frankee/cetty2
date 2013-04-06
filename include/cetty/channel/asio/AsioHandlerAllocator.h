@@ -67,7 +67,7 @@ private:
 };
 
 // Wrapper class template for handler objects to allow handler memory
-// allocation to be customised. Calls to operator() are forwarded to the
+// allocation to be customized. Calls to operator() are forwarded to the
 // encapsulated handler.
 template <typename Handler, typename CounterT>
 class AsioCustomAllocHandler {

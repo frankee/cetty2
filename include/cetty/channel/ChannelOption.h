@@ -78,7 +78,8 @@ public:
     static ChannelOption parseFrom(const std::string& name);
 
 public:
-    static const ChannelOption CONNECT_TIMEOUT_MILLIS;
+    static const ChannelOption CO_CONNECT_TIMEOUT_MILLIS;
+    static const ChannelOption CO_RESERVED_CHILD_COUNT;
 
     static const ChannelOption CO_SO_BROADCAST;
     static const ChannelOption CO_SO_KEEPALIVE;
@@ -89,6 +90,9 @@ public:
     static const ChannelOption CO_SO_BACKLOG;
     static const ChannelOption CO_SO_SNDLOWAT;
     static const ChannelOption CO_SO_RCVLOWAT;
+
+    static const ChannelOption CO_SNDHIGHWAT;
+    static const ChannelOption CO_RCVHIGHWAT;
 
     static const ChannelOption CO_IP_TOS;
     static const ChannelOption CO_IP_MULTICAST_ADDR;

@@ -5,7 +5,23 @@ import "cetty/config/config_options.proto";
 option (config_file_options).config_file_name = "";
 option (config_file_options).source_file_name = "";
 
-message ServerConfig {
+message ServerChannelConfig {
+	message ChildChannelConfig {
+		required bool is_keep_alive = 1;
+		required bool is_reuse_address = 2;
+		required bool is_tcp_no_delay = 3;
+		
+		required int32 so_linger = 5;
+		required int32 send_buffer_size = 6;
+		required int32 receive_buffer_size = 7;
+	}
+	
+	required bool         reuse_address = 1;
+	required int32             back_log = 2;
+	required int32  receive_buffer_size = 3;
+	required int32 reserved_child_count = 4;
+	
+	optional ChildChannelConfig   child = 10;
 }
 
 message ServerBuilderConfig {
@@ -20,7 +36,7 @@ message ServerBuilderConfig {
 		// # Accept connections on the specified port.
 		required int32  port = 2;
 		
-		optional ServerConfig config = 3;
+		optional ServerChannelConfig config = 3;
 	}
 	
 	message Limit {
@@ -56,6 +72,8 @@ message ServerBuilderConfig {
 
     optional Limit     limit = 8;
     optional Timeout timeout = 9;
+	
+	optional ServerChannelConfig channel_config = 10;
 
 	// # examples like:
 	// # servers:
@@ -65,7 +83,7 @@ message ServerBuilderConfig {
 	// #   another-server-app:
 	// #     port: 8888
 	// # 
-    repeated Server servers  = 10 [
+    repeated Server servers  = 11 [
 		(config_options).map = true,
 		(config_options).default = "{{http:\":8080\"}, {rpc:\":18080\"}}"
 	];

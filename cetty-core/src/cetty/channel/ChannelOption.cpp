@@ -39,7 +39,8 @@ const ValueChecker<std::vector<int> > ChannelOption::INT_VECTOR_VALUE_CHECKER;
 
 static const SctpInitMaxStreamsChecker SCTP_INIT_MAXSTREAMS_CHECKER;
 
-const ChannelOption ChannelOption::CONNECT_TIMEOUT_MILLIS("CONNECT_TIMEOUT_MILLIS", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_CONNECT_TIMEOUT_MILLIS("CONNECT_TIMEOUT_MILLIS", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_RESERVED_CHILD_COUNT("RESERVED_CHILD_COUNT", &INT_VALUE_CHECKER);
 
 const ChannelOption  ChannelOption::CO_SO_BROADCAST("SO_BROADCAST", &BOOL_VALUE_CHECKER);
 const ChannelOption  ChannelOption::CO_SO_KEEPALIVE("SO_KEEPALIVE", &BOOL_VALUE_CHECKER);
@@ -48,6 +49,11 @@ const ChannelOption  ChannelOption::CO_SO_RCVBUF("SO_RCVBUF", &INT_VALUE_CHECKER
 const ChannelOption  ChannelOption::CO_SO_REUSEADDR("SO_REUSEADDR", &BOOL_VALUE_CHECKER);
 const ChannelOption  ChannelOption::CO_SO_LINGER("SO_LINGER", &INT_VALUE_CHECKER);
 const ChannelOption  ChannelOption::CO_SO_BACKLOG("SO_BACKLOG", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_SO_SNDLOWAT("SO_SNDLOWAT", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_SO_RCVLOWAT("SO_RCVLOWAT", &INT_VALUE_CHECKER);
+
+const ChannelOption ChannelOption::CO_SNDHIGHWAT("SNDHIGHWAT", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_RCVHIGHWAT("RCVHIGHWAT", &INT_VALUE_CHECKER);
 
 const ChannelOption  ChannelOption::CO_IP_TOS("IP_TOS", &INT_VALUE_CHECKER);
 const ChannelOption  ChannelOption::CO_IP_MULTICAST_ADDR("IP_MULTICAST_ADDR", &STRING_VALUE_CHECKER);

@@ -22,18 +22,18 @@
 #include <cetty/channel/ChannelException.h>
 #include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace channel {
 namespace asio {
 
-using namespace cetty::util;
 using namespace boost::asio::ip;
+using namespace cetty::util;
 
 AsioServerSocketChannelConfig::AsioServerSocketChannelConfig(
     tcp::acceptor& acceptor)
-    : acceptor_(acceptor),
-    reuseAddress_(true) {
+    : acceptor_(acceptor) {
 }
 
 AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
@@ -41,10 +41,6 @@ AsioServerSocketChannelConfig::~AsioServerSocketChannelConfig() {
 
 bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         const ChannelOption::Variant& value) {
-    //if (DefaultChannelConfig::setOption(option, value)) {
-    //    return true;
-    //}
-
     if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
     }
@@ -52,7 +48,10 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         setReuseAddress(boost::get<bool>(value));
     }
     else if (option == ChannelOption::CO_SO_BACKLOG) {
-        setBacklog(StringUtil::strto32(boost::get<std::string>(value)));
+        setBacklog(boost::get<int>(value));
+    }
+    else if (option == ChannelOption::CO_RESERVED_CHILD_COUNT) {
+        setReservedChildCount(boost::get<int>(value));
     }
     else {
         return false;
@@ -61,46 +60,31 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
     return true;
 }
 
-const boost::optional<bool>& AsioServerSocketChannelConfig::isReuseAddress() const {
+const boost::optional<bool>&
+AsioServerSocketChannelConfig::isReuseAddress() const {
     if (reuseAddress_) {
         return reuseAddress_;
     }
 
-    if (this->acceptor_.is_open()) {
-        reuseAddress_ = isReuseAddress(this->acceptor_);
+    if (acceptor_.is_open()) {
+        updateOptionFromAcceptor<tcp::acceptor::reuse_address, boost::optional<bool> >(
+            ChannelOption::CO_SO_REUSEADDR, &reuseAddress_);
     }
 
     return reuseAddress_;
 }
 
-bool AsioServerSocketChannelConfig::isReuseAddress(tcp::acceptor& acceptor) const {
-    try {
-        tcp::acceptor::reuse_address option;
-        acceptor.get_option(option);
-        return option.value();
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-}
-
 void AsioServerSocketChannelConfig::setReuseAddress(bool reuseAddress) {
-    this->reuseAddress_ = reuseAddress;
-
-    if (this->acceptor_.is_open()) {
-        setReuseAddress(this->acceptor_);
+    if (reuseAddress_ && *reuseAddress_ == reuseAddress) {
+        LOG_WARN << "the new ReuseAddress option is same with the old, need not set";
+        return;
     }
-}
 
-void AsioServerSocketChannelConfig::setReuseAddress(tcp::acceptor& acceptor) {
-    if (reuseAddress_ && boost::get<bool>(reuseAddress_)) {
-        boost::system::error_code error;
-        tcp::acceptor::reuse_address option(*reuseAddress_);
-        acceptor.set_option(option, error);
-
-        if (error) {
-            ChannelException(error.message(), error.value());
-        }
+    if (acceptor_.is_open() &&
+            applyOptionToAcceptor<tcp::acceptor::reuse_address, bool>(
+                ChannelOption::CO_SO_REUSEADDR,
+                reuseAddress)) {
+        reuseAddress_ = reuseAddress;
     }
 }
 
@@ -110,62 +94,52 @@ AsioServerSocketChannelConfig::receiveBufferSize() const {
         return receiveBufferSize_;
     }
 
-    if (this->acceptor_.is_open()) {
-        this->receiveBufferSize_ = receiveBufferSize(this->acceptor_);
+    if (acceptor_.is_open()) {
+        updateOptionFromAcceptor<tcp::acceptor::receive_buffer_size, boost::optional<int> >(
+            ChannelOption::CO_SO_RCVBUF, &receiveBufferSize_);
     }
 
     return receiveBufferSize_;
 }
 
-int AsioServerSocketChannelConfig::receiveBufferSize(tcp::acceptor& acceptor) const {
-    try {
-        tcp::acceptor::receive_buffer_size option;
-        acceptor.get_option(option);
-        return option.value();
-    }
-    catch (const boost::system::system_error& e) {
-        throw ChannelException(e.what(), e.code().value());
-    }
-}
-
 void AsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) {
+    if (receiveBufferSize_ && *receiveBufferSize_ == receiveBufferSize) {
+        LOG_WARN << "the new receiveBufferSize is same with the old, need not set";
+        return;
+    }
+
     if (receiveBufferSize > 0) {
-        this->receiveBufferSize_ = receiveBufferSize;
-
-        if (this->acceptor_.is_open()) {
-            setReceiveBufferSize(this->acceptor_);
+        if (acceptor_.is_open() &&
+                applyOptionToAcceptor<tcp::acceptor::receive_buffer_size>(
+                    ChannelOption::CO_SO_RCVBUF,
+                    receiveBufferSize)) {
+            receiveBufferSize_ = receiveBufferSize;
         }
     }
-}
-
-void AsioServerSocketChannelConfig::setReceiveBufferSize(tcp::acceptor& acceptor) {
-    if (receiveBufferSize_ && boost::get<int>(receiveBufferSize_) > 0) {
-        boost::system::error_code error;
-        tcp::acceptor::receive_buffer_size option(*receiveBufferSize_);
-        acceptor.set_option(option, error);
-
-        if (error) {
-            throw ChannelException(error.message(), error.value());
-        }
+    else {
+        LOG_WARN << "the receiveBufferSize " << receiveBufferSize
+                 << " should not be negative";
     }
-}
-
-void AsioServerSocketChannelConfig::setPerformancePreferences(int connectionTime,
-        int latency,
-        int bandwidth) {
-    //socket.setPerformancePreferences(connectionTime, latency, bandwidth);
-}
-
-const boost::optional<int>& AsioServerSocketChannelConfig::backlog() const {
-    return this->backlog_;
 }
 
 void AsioServerSocketChannelConfig::setBacklog(int backlog) {
-    if (backlog < 0) {
-        throw InvalidArgumentException("backlog: is less then zero");
+    if (backlog > 0) {
+        backlog_ = backlog;
     }
+    else {
+        LOG_WARN << "backlog " << backlog
+                 << " should not less then zero, will not set";
+    }
+}
 
-    this->backlog_ = backlog;
+void AsioServerSocketChannelConfig::setReservedChildCount(int count) {
+    if (count > 0) {
+        reservedChildCount_ = count;
+    }
+    else {
+        LOG_WARN << "reservedChildCount " << count
+                 << " should not be negative, will not set";
+    }
 }
 
 }

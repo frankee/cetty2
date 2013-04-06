@@ -62,6 +62,11 @@ Channel::~Channel() {
 }
 
 void Channel::open() {
+    if (isOpen()) {
+        LOG_WARN << "channel " << toString() << " is already open";
+        return;
+    }
+
     ChannelPtr self = shared_from_this();
 
     if (!succeededFuture_) { // Once have been opened
@@ -77,8 +82,9 @@ void Channel::open() {
         closeFuture_.reset(new DefaultChannelFuture(self, false));
     }
 
-    doInitialize();
+    doPreOpen();
 
+    strVal_.clear();
     state_ = CHANNEL_OPENED;
     pipeline_->fireChannelOpen();
 }
@@ -125,13 +131,6 @@ int Channel::compareTo(const ChannelPtr& c) const {
 }
 
 std::string Channel::toString() const {
-    bool active = isActive();
-
-    if (!active) {
-        strVal_.empty();
-        return strVal_;
-    }
-
     if (!strVal_.empty()) {
         return strVal_;
     }
@@ -166,6 +165,13 @@ void Channel::doBind(ChannelHandlerContext& ctx,
                      const InetAddress& localAddress,
                      const ChannelFuturePtr& future) {
     if (!isOpen()) {
+        std::string msg;
+        StringUtil::printf(&msg,
+                           "should not binding to %s when this channel has not open yet.",
+                           localAddress.toString().c_str());
+
+        LOG_ERROR << toString() << msg;
+        future->setFailure(ChannelException(msg));
         return;
     }
 
@@ -177,36 +183,45 @@ void Channel::doBind(ChannelHandlerContext& ctx,
             future->setSuccess();
         }
         else {
-            LOG_WARN << "unable binding to " << localAddress.toString();
-            future->setFailure(ChannelException("unable binding"));
-            closeIfClosed();
+            processFailure(StringUtil::printf(
+                               "unable bind to %s",
+                               localAddress.toString().c_str()),
+                           future);
         }
     }
     catch (const std::exception& e) {
-        LOG_DEBUG << "exception happened : " << e.what()
-                  << ", when binding to " << localAddress.toString();
-
-        //future->setFailure(e);
-        //channel.pipeline->fireExceptionCaught(t);
-        closeIfClosed();
+        processFailure(StringUtil::printf(
+                           "exception happened: %s,  when binding to %s",
+                           e.what(),
+                           localAddress.toString().c_str()),
+                       future);
     }
 }
 
 void Channel::doDisconnect(ChannelHandlerContext& ctx,
                            const ChannelFuturePtr& future) {
-    try {
-        if (isActive()) {
+    if (isActive()) {
+        try {
             if (doDisconnect()) {
                 pipeline_->fireChannelInactive();
             }
+            else {
+                processFailure(StringUtil::printf(
+                                   "disconnect failed from %s",
+                                   remoteAddress().toString().c_str()),
+                               future);
+            }
         }
-        else {
-            future->setSuccess();
+        catch (const std::exception& e) {
+            processFailure(StringUtil::printf(
+                               "exception happened: %s,  when disconnect from %s",
+                               e.what(),
+                               remoteAddress().toString().c_str()),
+                           future);
         }
     }
-    catch (const std::exception& e) {
-        //future.setFailure(t);
-        closeIfClosed();
+    else {
+        future->setSuccess();
     }
 
     state_ = CHANNEL_INACTIVED;
@@ -223,20 +238,20 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 future->setSuccess();
 
                 if (wasActive) {
-                    //LOG_INFO(logger, "closed the socket channel, finally firing channel closed event.");
+                    LOG_INFO << toString() << " closed successfully.";
                     pipeline_->fireChannelInactive();
                 }
             }
+            else {
+                processFailure("close failed", future);
+            }
         }
         catch (const std::exception& e) {
-            //future->setFailure(t);
+            processFailure(StringUtil::printf(
+                               "exception happened: %s,  when closing.",
+                               e.what()),
+                           future);
         }
-
-        //if (closedChannelException != null) {
-        //    closedChannelException = new ClosedChannelException();
-        //}
-
-        //notifyFlushFutures(closedChannelException);
     }
     else {
         // Closed already.
@@ -251,12 +266,22 @@ void Channel::closeIfClosed() {
         return;
     }
 
-    //close(voidFuture());
+    close(newVoidFuture());
 }
 
 void Channel::setActived() {
     state_ = CHANNEL_ACTIVED;
     pipeline_->fireChannelActive();
+}
+
+void Channel::processFailure(const std::string& message,
+                             const ChannelFuturePtr& future) {
+    LOG_ERROR << toString() << message;
+
+    ChannelException exception(message);
+    future->setFailure(exception);
+    pipeline_->fireExceptionCaught(exception);
+    closeIfClosed();
 }
 
 }

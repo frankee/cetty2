@@ -73,6 +73,8 @@ namespace channel {
  */
 class ChannelConfig : private boost::noncopyable {
 public:
+    // if has set the option return true what ever has set successfully,
+    // otherwise return false, means has not set the option.
     typedef boost::function<bool (const ChannelOption&,
                                   const ChannelOption::Variant&)> OptionSetCallback;
 

@@ -3,7 +3,37 @@
 
 #include <cetty/logging/Logger.h>
 
-#undef LOG_ERROR
+#if defined(LOG)
+    #undef LOG
+#endif
+
+#if defined(LOG_FATAL)
+    #undef LOG_FATAL
+#endif
+
+#if defined(LOG_SYSFATAL)
+    #undef LOG_SYSFATAL
+#endif
+
+#if defined(LOG_ERROR)
+    #undef LOG_ERROR
+#endif
+
+#if defined(LOG_WARN)
+    #undef LOG_WARN
+#endif
+
+#if defined(LOG_INFO)
+    #undef LOG_INFO
+#endif
+
+#if defined(LOG_DEBUG)
+    #undef LOG_DEBUG
+#endif
+
+#if defined(LOG_TRACE)
+    #undef LOG_TRACE
+#endif
 
 #define LOG(level) \
     ::cetty::logging::Logger(__FILE__, __LINE__, level).stream()
