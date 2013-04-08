@@ -144,6 +144,7 @@ int InetAddress::family() const {
     return family_;
 }
 
+inline
 bool InetAddress::empty() const {
     return !((family_ != InetAddress::FAMILY_NONE) ||
              (port_ > 0) ||
