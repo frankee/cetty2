@@ -38,8 +38,8 @@ AsioWriteOperation::AsioWriteOperation()
 AsioWriteOperation::AsioWriteOperation(const ChannelBufferPtr& buffer,
                                        const ChannelFuturePtr& f)
     : byteSize_(0),
-      channelBuffer_(buffer),
-      future_(f) {
+      future_(f),
+      channelBuffer_(buffer) {
     GatheringBuffer gathering;
     buffer->slice(&gathering);
 
@@ -68,9 +68,8 @@ AsioWriteOperation::AsioWriteOperation(const ChannelBufferPtr& buffer,
 AsioWriteOperation::AsioWriteOperation(const AsioWriteOperation& op)
     : byteSize_(op.byteSize_),
       buffers_(op.buffers_),
-      channelBuffer_(op.channelBuffer_),
-      future_(op.future_) {
-
+      future_(op.future_),
+      channelBuffer_(op.channelBuffer_) {
 }
 
 AsioWriteOperation& AsioWriteOperation::operator=(const AsioWriteOperation& op) {

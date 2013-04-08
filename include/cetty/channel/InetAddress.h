@@ -40,7 +40,7 @@ public:
         FAMILY_IPv6
     };
 
-    static const InetAddress NULL_ADDRESS;
+    static const InetAddress EMPTY;
 
 public:
     InetAddress();
@@ -51,7 +51,7 @@ public:
     InetAddress(int family);
 
 
-    InetAddress(int family, uint16_t port);
+    InetAddress(int family, int port);
 
     /**
      * Creates a InetAddress from an IP address and a port number.
@@ -59,19 +59,7 @@ public:
      * The IP address must either be a domain name, or it must
      * be in dotted decimal (IPv4) or hex string (IPv6) format.
      */
-    InetAddress(const std::string& host, uint16_t port);
-
-    /**
-     * Creates a InetAddress from an IP address and a
-     * service name or port number.
-     *
-     * The IP address must either be a domain name, or it must
-     * be in dotted decimal (IPv4) or hex string (IPv6) format.
-     *
-     * The given port must either be a decimal port number, or
-     * a service name.
-     */
-    InetAddress(const std::string& host, const std::string& port);
+    InetAddress(const std::string& host, int port);
 
     /**
      * Creates a InetAddress from an IP address or host name and a
@@ -96,11 +84,7 @@ public:
      */
     InetAddress& operator=(const InetAddress& addr);
 
-    //bool operator!() const;
-
-    operator bool() const {
-        return !empty();
-    }
+    operator bool() const;
 
     bool operator ==(const InetAddress& addr) const;
     bool operator !=(const InetAddress& addr) const;
@@ -128,9 +112,7 @@ public:
     /**
      * return the InetAddress is not a NULL_ADDRESS.
      */
-    bool empty() const {
-        return host_.empty() && service_.empty() && port_ == 0 && family_ == FAMILY_NONE;
-    }
+    bool empty() const;
 
     /**
      * Returns a string representation of the address.
@@ -138,15 +120,18 @@ public:
     std::string toString() const;
 
 private:
+    bool checkPort(int port);
+    bool checkFamily(int family);
+
+private:
     int port_;
     int family_;
     std::string host_;
-    std::string service_;
 };
 
 inline
-void swap(InetAddress& a1, InetAddress& a2) {
-    a1.swap(a2);
+InetAddress::operator bool() const {
+    return !empty();
 }
 
 inline
@@ -157,6 +142,17 @@ int InetAddress::port() const {
 inline
 int InetAddress::family() const {
     return family_;
+}
+
+bool InetAddress::empty() const {
+    return !((family_ != InetAddress::FAMILY_NONE) ||
+             (port_ > 0) ||
+             (!host_.empty() && port_ > 0));
+}
+
+inline
+void swap(InetAddress& a1, InetAddress& a2) {
+    a1.swap(a2);
 }
 
 }

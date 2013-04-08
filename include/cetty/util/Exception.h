@@ -138,9 +138,7 @@ public:
 protected:
     Exception(int code = 0);
 
-    void setMessage(const std::string& msg) {
-        message_ = msg;
-    }
+    void setMessage(const std::string& msg);
 
     /**
      * Sets the extended message for the exception.
@@ -153,6 +151,10 @@ private:
     Exception*  nested_;
 };
 
+inline
+void Exception::setMessage(const std::string& msg) {
+    message_ = msg;
+}
 
 //
 // Macros for quickly declaring and implementing exception classes.

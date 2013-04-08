@@ -28,7 +28,7 @@ namespace channel {
 
 using namespace cetty::util;
 
-const InetAddress InetAddress::NULL_ADDRESS;
+const InetAddress InetAddress::EMPTY;
 
 static const std::string ANY_IPV4 = "0.0.0.0";
 static const std::string ANY_IPV6 = "0.0.0.0";
@@ -41,23 +41,35 @@ InetAddress::InetAddress()
 InetAddress::InetAddress(int family)
     : port_(0),
       family_(family) {
+    if (!checkFamily(family)) {
+        family_ = FAMILY_NONE;
+    }
 }
 
-InetAddress::InetAddress(int family, uint16_t port)
+InetAddress::InetAddress(int family, int port)
     : port_(port),
       family_(family) {
+    if (!checkFamily(family) || !checkPort(port)) {
+        port_ = 0;
+        family_ = FAMILY_NONE;
+    }
 }
 
-InetAddress::InetAddress(const std::string& addr, uint16_t port)
+InetAddress::InetAddress(const std::string& addr, int port)
     : port_(port),
       family_(FAMILY_IPv4),
       host_(addr) {
-}
 
-InetAddress::InetAddress(const std::string& addr, const std::string& port)
-    : host_(addr),
-      family_(FAMILY_IPv4),
-      service_(port) {
+    if (!checkPort(port)) {
+        port_ = 0;
+        family_ = FAMILY_NONE;
+        host_.clear();
+        return;
+    }
+
+    if (!addr.empty() && addr.find(':') != addr.npos) {
+        family_ = FAMILY_IPv6;
+    }
 }
 
 InetAddress::InetAddress(const std::string& hostAndPort)
@@ -103,7 +115,7 @@ InetAddress::InetAddress(const std::string& hostAndPort)
         }
     }
     else {
-        LOG_WARN << "Missing port number " << hostAndPort;
+        LOG_ERROR << "Missing port number " << hostAndPort;
         family_ = FAMILY_NONE;
         return;
     }
@@ -111,36 +123,33 @@ InetAddress::InetAddress(const std::string& hostAndPort)
     if (port[0] >= '0' && port[0] <= '9') {
         int p = StringUtil::strto32(port);
 
-        if (p > 0 && p < 0xFFFF) {
+        if (checkPort(p)) {
             port_ = p;
             host_ = host;
         }
         else {
-            LOG_WARN << "port number " << p << " > 65536";
             family_ = FAMILY_NONE;
         }
-
-        return;
     }
+    else {
+        LOG_ERROR << "InetAddress does not support service ("
+                  << port << ") as port";
 
-    service_ = port;
-    host_ = host;
+        family_ = FAMILY_NONE;
+    }
 }
 
 InetAddress::InetAddress(const InetAddress& addr)
     : port_(addr.port_),
       family_(addr.family_),
-      host_(addr.host_),
-      service_(addr.service_) {
+      host_(addr.host_) {
 }
 
 InetAddress& InetAddress::operator = (const InetAddress& addr) {
     if (&addr != this) {
         port_ = addr.port_;
         family_ = addr.family_;
-
         host_ = addr.host_;
-        service_ = addr.service_;
     }
 
     return *this;
@@ -153,8 +162,7 @@ bool InetAddress::operator==(const InetAddress& addr) const {
 
     return port_ == addr.port_ &&
            family_ == addr.family_ &&
-           host_ == addr.host_ &&
-           service_ == addr.service_;
+           host_ == addr.host_;
 }
 
 bool InetAddress::operator!=(const InetAddress& addr) const {
@@ -188,14 +196,31 @@ std::string InetAddress::toString() const {
     if (port_ > 0) {
         StringUtil::printf(&buf, ":%d", port_);
     }
-    else if (!service_.empty()){
-        StringUtil::printf(&buf, ":%s", service_.c_str());
+    else {
+        buf = "EMPTY_ADDRESS";
+    }
+
+    return buf;
+}
+
+bool InetAddress::checkFamily(int family) {
+    if (family == FAMILY_IPv4 || family == FAMILY_IPv6) {
+        return true;
     }
     else {
-        buf = "INVALID_ADDRESS";
+        LOG_ERROR << "family: " << family << " is illegal";
+        return false;
     }
-    
-    return buf;
+}
+
+bool InetAddress::checkPort(int port) {
+    if (port > 0 && port < 0xFFFF) {
+        return true;
+    }
+    else {
+        LOG_ERROR << "port : " << port << " is illegal";
+        return false;
+    }
 }
 
 }

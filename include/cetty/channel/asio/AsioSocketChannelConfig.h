@@ -198,10 +198,6 @@ private:
     }
 
 private:
-    static const int DEFAULT_SEND_BUFFER_LOW_WATERMARK  = 2 * 1024;
-    static const int DEFAULT_SEND_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
-
-private:
     TcpSocket& socket_;
 
     mutable boost::optional<bool> keepAlive_;

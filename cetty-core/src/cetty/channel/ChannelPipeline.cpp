@@ -579,7 +579,7 @@ const ChannelFuturePtr& ChannelPipeline::bind(const InetAddress& localAddress,
 
 ChannelFuturePtr ChannelPipeline::connect(const InetAddress& remoteAddress) {
     return connect(remoteAddress,
-                   InetAddress::NULL_ADDRESS,
+                   InetAddress::EMPTY,
                    channel_.lock()->newFuture());
 }
 
@@ -593,7 +593,7 @@ ChannelFuturePtr ChannelPipeline::connect(const InetAddress& remoteAddress,
 const ChannelFuturePtr& ChannelPipeline::connect(const InetAddress& remoteAddress,
         const ChannelFuturePtr& future) {
     return connect(remoteAddress,
-                   InetAddress::NULL_ADDRESS,
+                   InetAddress::EMPTY,
                    future);
 }
 

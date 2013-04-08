@@ -176,8 +176,6 @@ void Channel::doBind(ChannelHandlerContext& ctx,
     }
 
     try {
-        bool wasActive = isActive();
-
         if (doBind(localAddress)) {
             setActived();
             future->setSuccess();

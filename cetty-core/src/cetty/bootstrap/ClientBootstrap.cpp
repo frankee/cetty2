@@ -58,7 +58,7 @@ ClientBootstrap::ClientBootstrap(int threadCnt) {
 }
 
 ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remoteAddress) {
-    return connect(remoteAddress, InetAddress::NULL_ADDRESS);
+    return connect(remoteAddress, InetAddress::EMPTY);
 }
 
 ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,

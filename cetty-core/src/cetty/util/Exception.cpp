@@ -46,16 +46,16 @@ Exception::Exception(int code)
 Exception::Exception(const std::string& msg,
                      int code)
     : message_(msg),
-      nested_(0),
-      code_(code) {
+      code_(code),
+      nested_(NULL) {
 }
 
 Exception::Exception(const std::string& msg,
                      const std::string& arg,
                      int code)
     : message_(msg),
-      nested_(),
-      code_(code) {
+      code_(code),
+      nested_(NULL) {
     if (!arg.empty()) {
         message_.append(": ");
         message_.append(arg);
@@ -66,8 +66,8 @@ Exception::Exception(const std::string& msg,
                      const Exception& nested,
                      int code)
     : message_(msg),
-      nested_(nested.clone()),
-      code_(code) {
+      code_(code),
+      nested_(nested.clone()) {
 }
 
 Exception::Exception(const Exception& exc)

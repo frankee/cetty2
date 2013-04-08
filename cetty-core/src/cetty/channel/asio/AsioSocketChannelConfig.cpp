@@ -30,6 +30,9 @@ using namespace boost::asio::ip;
 using namespace cetty::channel;
 using namespace cetty::util;
 
+static const int DEFAULT_SEND_BUFFER_LOW_WATERMARK  = 2 * 1024;
+static const int DEFAULT_SEND_BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
+
 AsioSocketChannelConfig::AsioSocketChannelConfig(TcpSocket& socket)
     : socket_(socket),
       sendBufferLowWaterMark_(0),
