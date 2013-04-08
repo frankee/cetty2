@@ -262,11 +262,14 @@ void ServerBuilder::shutdown() {
 }
 
 void ServerBuilder::waitingForExit() {
-    ServerBootstraps::iterator itr;
+    if (bootstraps_.empty()) {
+        LOG_INFO << "has no setting about servers, bye!";
+        return;
+    }
 
     if (config_.daemonize) {
         ServerUtil::createPidFile(config_.pidfile.c_str());
-
+        ServerBootstraps::iterator itr;
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             ServerBootstrap::Channels& channels = itr->second->channels();
             ServerBootstrap::Channels::iterator channelItr = channels.begin();
@@ -278,7 +281,7 @@ void ServerBuilder::waitingForExit() {
     }
     else {
         printf("Servers: \n");
-
+        ServerBootstraps::iterator itr;
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             ServerBootstrap::Channels& channels = itr->second->channels();
             ServerBootstrap::Channels::const_iterator itr = channels.begin();
