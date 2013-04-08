@@ -36,7 +36,9 @@ public:
 }
 
 int main(int argc, char* argv[]) {
-    ConfigCenter::instance().load(argc, argv);
+    if (!ConfigCenter::instance().load(argc, argv)) {
+        return -1;
+    }
 
     CraftServerBuilder()
         .registerService(new echo::EchoServiceImpl)

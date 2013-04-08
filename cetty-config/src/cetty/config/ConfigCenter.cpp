@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <yaml-cpp/yaml.h>
+#include <boost/filesystem.hpp>
 
 #include <cetty/logging/LoggerHelper.h>
 
@@ -76,17 +77,17 @@ bool ConfigCenter::load(int argc, char* argv[]) {
             slashPos = program.find_last_of('\\');
         }
 
+        if (slashPos != program.npos) {
+            program = program.substr(slashPos + 1);
+        }
+
         std::string::size_type dotPos = program.find_last_of('.');
 
         if (dotPos != program.npos) {
-            // dot is not in the path, make sure dot is file name suffix.
-            if (!(slashPos != program.npos && dotPos < slashPos)) {
-                program = program.substr(0, dotPos);
-            }
+            program = program.substr(0, dotPos);
         }
 
         program += ".conf";
-        LOG_INFO << "no command line parameter, using default " << program;
 
         std::vector<std::string> candidateFiles;
         candidateFiles.push_back(program);
@@ -95,14 +96,19 @@ bool ConfigCenter::load(int argc, char* argv[]) {
         // /opt/your_folder/bin  /opt/your_folder/etc(or conf)
         candidateFiles.push_back(std::string("../etc/") + program);
         candidateFiles.push_back(std::string("../conf/") + program);
+        candidateFiles.push_back(std::string("/usr/local/etc/") + program);
 
         for (std::size_t i = 0; i < candidateFiles.size(); ++i) {
             if (boost::filesystem::exists(
                         boost::filesystem::path(candidateFiles[i]))) {
+                LOG_INFO << "not specify the conf parameter,"
+                         " auto load the configure file: "
+                         << candidateFiles[i];
                 return loadFromFile(candidateFiles[i]);
             }
         }
 
+        std::cout << description_ << "\n";
         return false;
     }
 
@@ -119,6 +125,7 @@ bool ConfigCenter::load(const char* str) {
     }
     catch (const std::exception& e) {
         LOG_ERROR << "parse the yaml configure file error:" << e.what();
+        return false;
     }
 
     if (!root_) {
@@ -135,7 +142,7 @@ bool ConfigCenter::load(const std::string& str) {
 bool ConfigCenter::loadFromFile(const std::string& file) {
     root_ = parseFromFile(file);
 
-    if (!root_) {
+    if (!root_ || root_.IsNull()) {
         return false;
     }
 
@@ -160,7 +167,9 @@ YAML::Node ConfigCenter::parseFromFile(const std::string& file) {
                 mergeNode(node, &root);
             }
             catch (const std::exception& e) {
-                LOG_ERROR << "parse the yaml configure file error: " << e.what();
+                LOG_ERROR << "parse the yaml configure file error: "
+                          << e.what();
+                return YAML::Node();
             }
         }
     }
@@ -302,7 +311,7 @@ bool ConfigCenter::configureFromFile(const std::string& file,
         LOG_ERROR << "parse the yaml configure file error: " << e.what();
     }
 
-    if (!root) {
+    if (!root || root.IsNull()) {
         return false;
     }
 

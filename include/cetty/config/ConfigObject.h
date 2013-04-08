@@ -268,6 +268,7 @@ void ConfigObject::clearRepeatedField<std::vector<ConfigObject*> >(
             delete raw->at(i);
         }
 
+        // FIXME: segment fault here
         raw->clear();
     }
 }
