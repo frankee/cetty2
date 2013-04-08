@@ -27,7 +27,7 @@ public:
 
 public:
     BeanstalkCommandEncoder() {
-        encoder_.setEncoder(boost::bind(&BeanstalkCommandEncoder::encode,
+        encoder.setEncoder(boost::bind(&BeanstalkCommandEncoder::encode,
                                         this,
                                         _1,
                                         _2,
@@ -37,7 +37,7 @@ public:
     ~BeanstalkCommandEncoder() {}
 
     void registerTo(Context& ctx) {
-        encoder_.registerTo(ctx);
+        encoder.registerTo(ctx);
     }
 
 private:
@@ -48,7 +48,7 @@ private:
     }
 
 private:
-    Encoder encoder_;
+    Encoder encoder;
 };
 
 }
