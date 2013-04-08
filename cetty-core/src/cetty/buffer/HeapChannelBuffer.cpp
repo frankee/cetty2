@@ -175,7 +175,7 @@ int16_t HeapChannelBuffer::getShort(int index) const {
         throw RangeException(StringUtil::printf("getShort with %d", index));
     }
 
-    return (int16_t)((buf[index] << 8) | (buf[index + 1] & 0xFF));
+    return static_cast<int16_t>((buf[index] << 8) | (buf[index + 1] & 0xFF));
 }
 
 int32_t HeapChannelBuffer::getInt(int index) const {
@@ -198,14 +198,14 @@ int64_t HeapChannelBuffer::getLong(int index) const {
         throw RangeException(StringUtil::printf("getLong with %d", index));
     }
 
-    return (((int64_t) buf[index]   & 0xff) << 56) |
-           (((int64_t) buf[index+1] & 0xff) << 48) |
-           (((int64_t) buf[index+2] & 0xff) << 40) |
-           (((int64_t) buf[index+3] & 0xff) << 32) |
-           (((int64_t) buf[index+4] & 0xff) << 24) |
-           (((int64_t) buf[index+5] & 0xff) << 16) |
-           (((int64_t) buf[index+6] & 0xff) <<  8) |
-           (((int64_t) buf[index+7] & 0xff) <<  0);
+    return ((static_cast<int64_t>(buf[index])  & 0xff) << 56) |
+           ((static_cast<int64_t>(buf[index+1]) & 0xff) << 48) |
+           ((static_cast<int64_t>(buf[index+2]) & 0xff) << 40) |
+           ((static_cast<int64_t>(buf[index+3]) & 0xff) << 32) |
+           ((static_cast<int64_t>(buf[index+4]) & 0xff) << 24) |
+           ((static_cast<int64_t>(buf[index+5]) & 0xff) << 16) |
+           ((static_cast<int64_t>(buf[index+6]) & 0xff) <<  8) |
+           ((static_cast<int64_t>(buf[index+7]) & 0xff) <<  0);
 }
 
 int HeapChannelBuffer::getBytes(int index, const ChannelBufferPtr& dst, int dstIndex, int length) const {
@@ -245,7 +245,7 @@ int HeapChannelBuffer::getBytes(int index, char* dst, int length) const {
 
 int HeapChannelBuffer::getBytes(int index, OutputStream* out, int length) const {
     if (out) {
-        return out->write((const int8_t*)buf, index, length);
+        return out->write(reinterpret_cast<const int8_t*>(buf), index, length);
     }
 
     return 0;
@@ -258,7 +258,7 @@ int HeapChannelBuffer::setByte(int index, int value) {
         throw RangeException(StringUtil::printf("setByte with %d", index));
     }
 
-    buf[index] = (char)value;
+    buf[index] = static_cast<char>(value);
     return 1;
 }
 
@@ -269,8 +269,8 @@ int HeapChannelBuffer::setShort(int index, int value) {
         throw RangeException(StringUtil::printf("setShort with %d", index));
     }
 
-    buf[index  ] = (int8_t)(value >> 8);
-    buf[index+1] = (int8_t)(value >> 0);
+    buf[index  ] = static_cast<int8_t>(value >> 8);
+    buf[index+1] = static_cast<int8_t>(value >> 0);
 
     return 2;
 }
@@ -282,10 +282,10 @@ int HeapChannelBuffer::setInt(int index, int value) {
         throw RangeException(StringUtil::printf("setInt with %d", index));
     }
 
-    buf[index  ] = (int8_t)(value >> 24);
-    buf[index+1] = (int8_t)(value >> 16);
-    buf[index+2] = (int8_t)(value >> 8);
-    buf[index+3] = (int8_t)(value >> 0);
+    buf[index  ] = static_cast<int8_t>(value >> 24);
+    buf[index+1] = static_cast<int8_t>(value >> 16);
+    buf[index+2] = static_cast<int8_t>(value >> 8);
+    buf[index+3] = static_cast<int8_t>(value >> 0);
 
     return 4;
 }
@@ -296,14 +296,14 @@ int HeapChannelBuffer::setLong(int index, int64_t value) {
         return 0;
     }
 
-    buf[index  ] = (int8_t)(value >> 56);
-    buf[index+1] = (int8_t)(value >> 48);
-    buf[index+2] = (int8_t)(value >> 40);
-    buf[index+3] = (int8_t)(value >> 32);
-    buf[index+4] = (int8_t)(value >> 24);
-    buf[index+5] = (int8_t)(value >> 16);
-    buf[index+6] = (int8_t)(value >>  8);
-    buf[index+7] = (int8_t)(value >>  0);
+    buf[index  ] = static_cast<int8_t>(value >> 56);
+    buf[index+1] = static_cast<int8_t>(value >> 48);
+    buf[index+2] = static_cast<int8_t>(value >> 40);
+    buf[index+3] = static_cast<int8_t>(value >> 32);
+    buf[index+4] = static_cast<int8_t>(value >> 24);
+    buf[index+5] = static_cast<int8_t>(value >> 16);
+    buf[index+6] = static_cast<int8_t>(value >>  8);
+    buf[index+7] = static_cast<int8_t>(value >>  0);
 
     return 8;
 }

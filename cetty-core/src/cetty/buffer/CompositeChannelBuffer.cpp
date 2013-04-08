@@ -117,10 +117,12 @@ int16_t CompositeChannelBuffer::getShort(int index) const {
         return components[componentId]->getShort(index - indices[componentId]);
     }
     else if (order() == ByteOrder::BIG) {
-        return (int16_t)(((getByte(index) & 0xff) << 8) | (getByte(index + 1) & 0xff));
+        return static_cast<int16_t>(((getByte(index) & 0xff) << 8) |
+            (getByte(index + 1) & 0xff));
     }
     else {
-        return (int16_t)((getByte(index) & 0xff) | ((getByte(index + 1) & 0xff) << 8));
+        return static_cast<int16_t>((getByte(index) & 0xff) |
+            ((getByte(index + 1) & 0xff) << 8));
     }
 }
 
@@ -145,10 +147,11 @@ int64_t CompositeChannelBuffer::getLong(int index) const {
         return components[componentId]->getLong(index - indices[componentId]);
     }
     else if (order() == ByteOrder::BIG) {
-        return (((int64_t)getInt(index) & 0xffffffffL) << 32) | (getInt(index + 4) & 0xffffffffL);
+        return ((static_cast<int64_t>(getInt(index)) & 0xffffffffL) << 32) | (getInt(index + 4) & 0xffffffffL);
     }
     else {
-        return (getInt(index) & 0xFFFFFFFFL) | (((int64_t)getInt(index + 4) & 0xFFFFFFFFL) << 32);
+        return (getInt(index) & 0xFFFFFFFFL) |
+            ((static_cast<int64_t>(getInt(index + 4)) & 0xFFFFFFFFL) << 32);
     }
 }
 
@@ -278,12 +281,12 @@ int CompositeChannelBuffer::setLong(int index, int64_t value) {
         return components[componentId]->setLong(index - indices[componentId], value);
     }
     else if (order() == ByteOrder::BIG) {
-        setInt(index, (int)(value >> 32));
-        setInt(index + 4, (int) value);
+        setInt(index, static_cast<int>(value >> 32));
+        setInt(index + 4, static_cast<int>(value));
     }
     else {
-        setInt(index    , (int) value);
-        setInt(index + 4, (int)(value >> 32));
+        setInt(index, static_cast<int>(value));
+        setInt(index + 4, static_cast<int>(value >> 32));
     }
 
     return 8;
@@ -443,7 +446,7 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
         for (i = 0, j = components.size(); i < j; ++i) {
             if (components[i]->readable()) {
                 components[i]->readableBytes(&arry);
-                gatheringBuffer->append((char*)arry.data(), arry.length());
+                gatheringBuffer->append(const_cast<char*>(arry.data()), arry.length());
             }
         }
     }
@@ -453,7 +456,7 @@ int CompositeChannelBuffer::slice(int index, int length, GatheringBuffer* gather
         for (i = 0, j = decomposeds.size(); i < j; ++i) {
             if (decomposeds[i]->readable()) {
                 decomposeds[i]->readableBytes(&arry);
-                gatheringBuffer->append((char*)arry.data(), arry.length());
+                gatheringBuffer->append(const_cast<char*>(arry.data()), arry.length());
             }
         }
     }

@@ -269,8 +269,8 @@ int ChannelBufferUtil::swapInt(int value) {
 }
 
 int64_t ChannelBufferUtil::swapLong(int64_t value) {
-    return ((int64_t)(swapInt((int32_t)value)) << 32) |
-           (swapInt((int32_t)(value >> 32)) & 0xffffffffL);
+    return (static_cast<int64_t>(swapInt((int32_t)value)) << 32) |
+           (swapInt(static_cast<int32_t>(value >> 32)) & 0xffffffffL);
 }
 
 int ChannelBufferUtil::firstIndexOf(const ConstChannelBufferPtr& buffer,

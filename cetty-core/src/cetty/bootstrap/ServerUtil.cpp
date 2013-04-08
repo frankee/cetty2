@@ -91,7 +91,7 @@ void ServerUtil::createPidFile(const std::string& pidfile) {
     FILE* fp = fopen(pidfile.c_str(), "w");
 
     if (fp) {
-        fprintf(fp,"%d\n",(int)getpid());
+        fprintf(fp,"%d\n", static_cast<int>(getpid()));
         fclose(fp);
     }
 }

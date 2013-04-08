@@ -38,7 +38,7 @@ public:
      * underline memory block count.
      */
     int blockCount() const {
-        return (int)buffers.size();
+        return static_cast<int>(buffers.size());
     }
 
     /**

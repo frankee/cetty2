@@ -84,7 +84,7 @@ protected:
     }
 
     boost::intrusive_ptr<T> selfptr() {
-        return boost::intrusive_ptr<T>((T*)this, false);
+        return boost::intrusive_ptr<T>(static_cast<T const*>(this), false);
     }
 
 private:

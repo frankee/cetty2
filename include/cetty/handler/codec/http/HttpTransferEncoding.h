@@ -83,7 +83,7 @@ public:
           single_(rhs.single_) {}
 
     HttpTransferEncoding& operator=(const HttpTransferEncoding& rhs) {
-        Enum<HttpTransferEncoding>::operator =(rhs);
+        cetty::util::Enum<HttpTransferEncoding>::operator =(rhs);
         single_ = rhs.single_;
         return *this;
     }

@@ -231,7 +231,7 @@ int ChannelBuffer::ensureWritableBytes(int minWritableBytes, bool force) {
 }
 
 uint8_t ChannelBuffer::getUnsignedByte(int index) const {
-    return (uint8_t)(getByte(index) & 0xFF);
+    return static_cast<uint8_t>(getByte(index) & 0xFF);
 }
 
 uint16_t ChannelBuffer::getUnsignedShort(int index) const {
@@ -411,7 +411,7 @@ int8_t ChannelBuffer::readByte() {
 }
 
 uint8_t ChannelBuffer::readUnsignedByte() {
-    return (uint8_t)(readByte() & 0xFF);
+    return static_cast<uint8_t>(readByte() & 0xFF);
 }
 
 int16_t ChannelBuffer::readShort() {

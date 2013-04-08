@@ -301,11 +301,11 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
         break;
 
     case 4:
-        frameLength = (int)in->getUnsignedInt(actualLengthFieldOffset);
+        frameLength = static_cast<int>(in->getUnsignedInt(actualLengthFieldOffset));
         break;
 
     case 8:
-        frameLength = (int)in->getLong(actualLengthFieldOffset);
+        frameLength = static_cast<int>(in->getLong(actualLengthFieldOffset));
         break;
 
     default:
@@ -339,14 +339,12 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
     }
 
     // never overflows because it's less than maxFrameLength
-    int frameLengthInt = (int) frameLength;
-
-    if (in->readableBytes() < frameLengthInt) {
+    if (in->readableBytes() < frameLength) {
         return ChannelBufferPtr();
     }
 
-    if (initialBytesToStrip_ > frameLengthInt) {
-        in->skipBytes(frameLengthInt);
+    if (initialBytesToStrip_ > frameLength) {
+        in->skipBytes(frameLength);
         std::string msg;
         StringUtil::printf(&msg,
                            "Adjusted frame length (%d) is less than initialBytesToStrip: %d",
@@ -358,7 +356,7 @@ ChannelBufferPtr LengthFieldBasedFrameDecoder::decode(ChannelHandlerContext& ctx
 
     // extract frame
     int readerIndex = in->readerIndex();
-    int actualFrameLength = frameLengthInt - initialBytesToStrip_ - checksumFieldLength_;
+    int actualFrameLength = frameLength - initialBytesToStrip_ - checksumFieldLength_;
     ChannelBufferPtr frame = extractFrame(in, readerIndex, actualFrameLength);
     in->readerIndex(readerIndex + actualFrameLength + checksumFieldLength_);
     return frame;
