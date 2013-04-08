@@ -25,22 +25,22 @@
 namespace cetty {
 namespace logging {
 
-cetty::logging::LogLevel Logger::level = LogLevel::DEBUG;
+cetty::logging::LogLevel Logger::level_ = LogLevel::DEBUG;
 
 Logger::Logger(SourceFile file, int line)
-    : message(LogLevel::INFO, file.data, line) {
+    : message_(LogLevel::INFO, file.data(), line) {
 }
 
 Logger::Logger(SourceFile file, int line, LogLevel level)
-    : message(level, file.data, line) {
+    : message_(level, file.data(), line) {
 }
 
 Logger::Logger(SourceFile file, int line, const char* func, LogLevel level)
-    : message(level, file.data, line, func) {
+    : message_(level, file.data(), line, func) {
 }
 
 Logger::Logger(SourceFile file, int line, bool toAbort)
-    : message(toAbort ? LogLevel::FATAL : LogLevel::ERROR, file.data, line) {
+    : message_(toAbort ? LogLevel::FATAL : LogLevel::ERROR, file.data(), line) {
 }
 
 #if defined(WIN32) && defined(DEBUG)
@@ -48,8 +48,8 @@ Logger::Logger(SourceFile file, int line, bool toAbort)
 #endif
 
 Logger::~Logger() {
-    if (message.finish()) {
-        const char* buffer = message.getBuffer();
+    if (message_.finish()) {
+        const char* buffer = message_.buffer();
 
 #if defined(WIN32) && defined(DEBUG)
         std::wstring out;
@@ -58,7 +58,7 @@ Logger::~Logger() {
 #else
         std::fwrite(buffer, strlen(buffer), 1, stderr);
 #endif
-        if (message.getLevel() == LogLevel::FATAL) {
+        if (message_.level() == LogLevel::FATAL) {
             std::fflush(stderr);
         }
     }

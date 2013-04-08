@@ -21,51 +21,55 @@
 namespace cetty {
 namespace logging {
 
-LogMessage::LogMessage(const LogLevel& level, const char* source, int line)
-    : level(level),
-      line(line),
-      source(source),
-      func(""),
-      stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
+using namespace cetty::util;
+
+LogMessage::LogMessage(const LogLevel& level,
+                       const char* source,
+                       int line)
+    : line_(line),
+      source_(source),
+      function_(""),
+      level_(level),
+      stream_(static_cast<char*>(buffer_), MAX_LOG_MESSAGE_LEN) {
 
     if (level < Logger::logLevel()) {
         return;
     }
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(buffer_, 0, sizeof(buffer_));
 
-    timestamp = boost::posix_time::microsec_clock::universal_time();
-    tid = boost::this_thread::get_id();
+    timestamp_ = boost::posix_time::microsec_clock::universal_time();
+    tid_ = CurrentThread::id();
 
     Logger::getFormatter().formatFirst(*this);
 }
 
 LogMessage::LogMessage(const LogLevel& level, const char* source, int line, const char* func)
-    : level(level),
-      line(line),
-      source(source),
-      func(func),
-      stream((char*)buffer, MAX_LOG_MESSAGE_LEN) {
+    : line_(line),
+      source_(source),
+      function_(func),
+      level_(level),
+      stream_(static_cast<char*>(buffer_), MAX_LOG_MESSAGE_LEN) {
 
     if (level < Logger::logLevel()) {
         return;
     }
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(buffer_, 0, sizeof(buffer_));
 
-    timestamp = boost::posix_time::microsec_clock::universal_time();
-    tid = boost::this_thread::get_id();
+    timestamp_ = boost::posix_time::microsec_clock::universal_time();
+    tid_ = CurrentThread::id();
 
     Logger::getFormatter().formatFirst(*this);
 }
 
 bool LogMessage::finish() {
-    if (level < Logger::logLevel()) {
+    if (level_ < Logger::logLevel()) {
         return false;
     }
 
     Logger::getFormatter().formatLast(*this);
-    stream << "\n";
+    stream_ << "\n";
 
     return true;
 }

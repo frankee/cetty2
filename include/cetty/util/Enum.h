@@ -23,10 +23,14 @@ namespace util {
 template<typename SubT>
 class Enum {
 public:
-    Enum(const Enum& rhs) : v(rhs.v) {}
-    Enum& operator=(const Enum& rhs) { v = rhs.v; return *this; }
+    Enum(const Enum& rhs) : value_(rhs.value_) {}
+    Enum& operator=(const Enum& rhs) { value_ = rhs.value_; return *this; }
 
 public:
+    int value() const {
+        return value_;
+    }
+
     friend bool operator==(const SubT& lhs, const SubT& rhs) {
         return lhs.value() == rhs.value();
     }
@@ -51,13 +55,13 @@ public:
         return lhs.value() >= rhs.value();
     }
 
-    int value() const { return v; }
-
 protected:
-    Enum(int i) : v(i) {}
+    Enum(int i)
+        : value_(i) {
+    }
 
-protected:
-    int v;
+private:
+    int value_;
 };
 
 }

@@ -25,19 +25,21 @@ const ByteOrder ByteOrder::LITTLE = 1;
 ByteOrder ByteOrder::nativeOrder() {
     static const char tmp[2] = {0x01, 0x02};
 
-    if (*((const short*)tmp) == 0x0102) {
+    if (*(reinterpret_cast<const short*>(tmp)) == 0x0102) {
         return BIG;
     }
-
-    return LITTLE;
+    else {
+        return LITTLE;
+    }
 }
 
 std::string ByteOrder::toString() const {
-    if (v == BIG.v) {
+    if (value() == BIG.value()) {
         return "BIG_ENDIAN";
     }
-
-    return "LITTLE_ENDIAN";
+    else {
+        return "LITTLE_ENDIAN";
+    }
 }
 
 }

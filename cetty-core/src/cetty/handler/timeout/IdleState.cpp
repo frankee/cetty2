@@ -25,7 +25,7 @@ const IdleState IdleState::WRITER_IDLE = 2;
 const IdleState IdleState::ALL_IDLE    = 4;
 
 std::string IdleState::toString() const {
-    switch (v) {
+    switch (value()) {
     case 1:
         return "READER_IDLE";
 

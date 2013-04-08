@@ -64,11 +64,11 @@ public:
     }
 
     boost::intrusive_ptr<T> shared_from_this() {
-        return boost::intrusive_ptr<T>((T*)this);
+        return boost::intrusive_ptr<T>(static_cast<T*>(this));
     }
 
     boost::intrusive_ptr<T const> shared_from_this() const {
-        return boost::intrusive_ptr<T const>((T const*)this);
+        return boost::intrusive_ptr<T const>(static_cast<T const*>(this));
     }
 
     int refcount() const {

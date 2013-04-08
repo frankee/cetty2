@@ -157,11 +157,11 @@ public:
         while (*astr != '\0') {
             if (*bstr == '\0') { return 1; }
 
-            int ac = *(unsigned char*)astr;
+            int ac = *reinterpret_cast<const unsigned char*>(astr);
 
             if (ac >= 'A' && ac <= 'Z') { ac += 'a' - 'A'; }
 
-            int bc = *(unsigned char*)bstr;
+            int bc = *reinterpret_cast<const unsigned char*>(bstr);
 
             if (bc >= 'A' && bc <= 'Z') { bc += 'a' - 'A'; }
 

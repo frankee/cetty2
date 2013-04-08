@@ -40,7 +40,7 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
     std::string::const_iterator it  = pattern.begin();
     std::string::const_iterator end = pattern.end();
 
-    boost::posix_time::ptime timeStamp = msg.getTimeStamp();
+    boost::posix_time::ptime timeStamp = msg.timeStamp();
     boost::posix_time::ptime::date_type date = timeStamp.date();
     boost::posix_time::time_duration time = timeStamp.time_of_day();
 
@@ -48,45 +48,45 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
         if (*it == '%') {
             if (++it != end) {
                 switch (*it) {
-                case 'l': msg.getStream() << msg.getLevel().toInt(); break;
+                case 'l': msg.stream() << msg.level().toInt(); break;
 
-                case 'L': msg.getStream() << msg.getLevel().toString(); break;
+                case 'L': msg.stream() << msg.level().toString(); break;
 
-                case 'p': msg.getStream() << msg.getLevel().toString().at(0); break;
+                case 'p': msg.stream() << msg.level().toString().at(0); break;
 
                 //case 'P': NumberFormatter::append(text, msg.getPid()); break;
 
-                case 'T': msg.getStream() << msg.getThreadId(); break;
+                case 'T': msg.stream() << msg.threadId(); break;
 
                 //case 'N': text.append(Environment::nodeName()); break;
 
-                case 's': msg.getStream() << msg.getSourceFile() ? msg.getSourceFile() : ""; break;
+                case 's': msg.stream() << msg.sourceFile() ? msg.sourceFile() : ""; break;
 
-                case 'n': msg.getStream() << msg.getSouceLine(); break;
+                case 'n': msg.stream() << msg.souceLine(); break;
 
-                case 'f': msg.getStream() << msg.getFunction() ? msg.getFunction() : ""; break;
+                case 'f': msg.stream() << msg.function() ? msg.function() : ""; break;
 
-                case 'w': msg.getStream() << date.day_of_week().as_short_string(); break;
+                case 'w': msg.stream() << date.day_of_week().as_short_string(); break;
 
-                case 'W': msg.getStream() << date.day_of_week().as_long_string(); break;
+                case 'W': msg.stream() << date.day_of_week().as_long_string(); break;
 
-                case 'b': msg.getStream() << date.month().as_short_string(); break;
+                case 'b': msg.stream() << date.month().as_short_string(); break;
 
-                case 'B': msg.getStream() << date.month().as_long_string(); break;
+                case 'B': msg.stream() << date.month().as_long_string(); break;
 
-                case 'd': msg.getStream() << date.day().as_number(); break;
+                case 'd': msg.stream() << date.day().as_number(); break;
 
-                case 'D': msg.getStream() << date.day().as_number(); break;
+                case 'D': msg.stream() << date.day().as_number(); break;
 
-                case 'm': msg.getStream() << date.month().as_number(); break;
+                case 'm': msg.stream() << date.month().as_number(); break;
 
-                case 'O': msg.getStream() << date.month().as_number(); break;
+                case 'O': msg.stream() << date.month().as_number(); break;
 
-                case 'Y': msg.getStream() << date.year(); break;
+                case 'Y': msg.stream() << date.year(); break;
 
-                case 'y': msg.getStream() << date.year(); break;
+                case 'y': msg.stream() << date.year(); break;
 
-                case 'H': msg.getStream() << time.hours(); break;
+                case 'H': msg.stream() << time.hours(); break;
 
                     //case 'h': NumberFormatter::append0(text, dateTime.hourAMPM(), 2); break;
 
@@ -94,11 +94,11 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
 
                     //case 'A': text.append(dateTime.isAM() ? "AM" : "PM"); break;
 
-                case 'M': msg.getStream() << time.minutes(); break;
+                case 'M': msg.stream() << time.minutes(); break;
 
-                case 'S': msg.getStream() << time.seconds(); break;
+                case 'S': msg.stream() << time.seconds(); break;
 
-                case 'i': msg.getStream() << time.fractional_seconds(); break;
+                case 'i': msg.stream() << time.fractional_seconds(); break;
 
                     //case 'c': NumberFormatter::append(text, dateTime.millisecond()/100); break;
 
@@ -106,9 +106,9 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
 
                     //case 'z': text.append(DateTimeFormatter::tzdISO(_localTime ? Timezone::tzd() : DateTimeFormatter::UTC)); break;
 
-                case 'Z': msg.getStream() << timeStamp.zone_abbrev(); break;
+                case 'Z': msg.stream() << timeStamp.zone_abbrev(); break;
 
-                case 'E': msg.getStream() << (timeStamp - epoch).total_seconds(); break;
+                case 'E': msg.stream() << (timeStamp - epoch).total_seconds(); break;
 #if 0
 
                 case '[': {
@@ -130,14 +130,14 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
 
 #endif
 
-                default: msg.getStream() << *it;
+                default: msg.stream() << *it;
                 }
 
                 ++it;
             }
         }
         else {
-            msg.getStream() << *it++;
+            msg.stream() << *it++;
         }
     }
 }

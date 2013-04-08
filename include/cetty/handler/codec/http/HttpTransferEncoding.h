@@ -83,7 +83,7 @@ public:
           single_(rhs.single_) {}
 
     HttpTransferEncoding& operator=(const HttpTransferEncoding& rhs) {
-        v = rhs.v;
+        Enum<HttpTransferEncoding>::operator =(rhs);
         single_ = rhs.single_;
         return *this;
     }

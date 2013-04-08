@@ -41,7 +41,7 @@ static const std::string LOG_LEVLE_STRS[] = {
 };
 
 const std::string& LogLevel::toString() const {
-    return LOG_LEVLE_STRS[this->v];
+    return LOG_LEVLE_STRS[value()];
 }
 
 LogLevel LogLevel::parseFrom(const std::string& level) {

@@ -31,7 +31,7 @@ static const std::string SINGLE_STR = "SINGLE";
 static const std::string UNKNOWN_TYPE = "UNKNOWN_TYPE";
 
 std::string HttpTransferEncoding::toString() const {
-    switch (v) {
+    switch (value()) {
     case 0: return CHUNKED_STR;
     case 1: return STREAMED_STR;
     case 2: return SINGLE_STR;

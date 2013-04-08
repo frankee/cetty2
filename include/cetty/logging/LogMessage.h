@@ -31,9 +31,13 @@
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
 #include <cetty/logging/LogLevel.h>
+#include <cetty/util/Process.h>
+#include <cetty/util/CurrentThread.h>
 
 namespace cetty {
 namespace logging {
+
+using namespace cetty::util;
 
 class LogMessage {
 public:
@@ -47,41 +51,45 @@ public:
     static const std::size_t MAX_LOG_MESSAGE_LEN = 1024 * 8;
 
 public:
-    LogMessage(const LogLevel& level, const char* source, int line);
+    LogMessage(const LogLevel& level,
+               const char* source,
+               int line);
 
-    LogMessage(const LogLevel& level, const char* source, int line, const char* func);
+    LogMessage(const LogLevel& level,
+               const char* source,
+               int line,
+               const char* func);
 
     bool finish();
 
 public:
-    Stream& getStream() { return stream; }
-    const char* getBuffer() const { return buffer; }
+    Stream& stream() { return stream_; }
+    const char* buffer() const { return buffer_; }
 
-    const LogLevel& getLevel() const { return level; }
-    const boost::posix_time::ptime& getTimeStamp() const { return timestamp; }
-    const boost::thread::id& getThreadId() const { return tid; }
+    const LogLevel& level() const { return level_; }
+    const ThreadId& threadId() const { return tid_; }
+    const boost::posix_time::ptime& timeStamp() const { return timestamp_; }
 
-    const char* getSourceFile() const { return source; }
-    const char* getFunction() const { return func; }
-    int getSouceLine() const { return line; }
+    const char* sourceFile() const { return source_; }
+    const char* function() const { return function_; }
+    int souceLine() const { return line_; }
 
 private:
     //static int64_t messageCounter[];
 
 private:
-    LogLevel level;
+    int line_;
+    const char* source_;
+    const char* function_;
 
-    boost::posix_time::ptime timestamp;
+    ThreadId tid_;
+    Process::PID pid_;
 
-    int pid;
-    boost::thread::id tid;
+    LogLevel level_;
+    boost::posix_time::ptime timestamp_;
 
-    int line;
-    const char* source;
-    const char* func;
-
-    char buffer[MAX_LOG_MESSAGE_LEN];
-    Stream stream;
+    char buffer_[MAX_LOG_MESSAGE_LEN];
+    Stream stream_;
 };
 
 // This class is used to explicitly ignore values in the conditional

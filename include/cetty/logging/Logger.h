@@ -31,22 +31,26 @@ public:
     public:
         template<int N>
         inline SourceFile(const char(&arr)[N])
-            : data(arr),
-            size(N-1) {
-                const char* slash = strrchr(data, '\\');
+            : data_(arr),
+              size_(N-1) {
+            const char* slash = strrchr(data_, '\\');
 
-                if (slash) {
-                    data = slash + 1;
-                    size -= static_cast<int>(data - arr);
-                }
+            if (slash) {
+                data_ = slash + 1;
+                size_ -= static_cast<int>(data_ - arr);
+            }
         }
 
         SourceFile(const char* data, int size)
-            : data(data), size(size) {
+            : data_(data), size_(size) {
         }
 
-        const char* data;
-        int size;
+        int size() const { return size_; }
+        const char* data() const { return data_; }
+
+    private:
+        const char* data_;
+        int size_;
     };
 
 public:
@@ -56,30 +60,30 @@ public:
     Logger(SourceFile file, int line, bool toAbort);
     ~Logger();
 
-    LogMessage::Stream& stream() { return message.getStream(); }
+    LogMessage::Stream& stream() { return message_.stream(); }
 
 public:
     static const LogPatternFormatter& getFormatter() {
-    	static LogPatternFormatter *formatter = new LogPatternFormatter();
+        static LogPatternFormatter* formatter = new LogPatternFormatter();
 
         return *formatter;
     }
 
     static bool isEnabled(const LogLevel& level) {
-        return level >= Logger::level;
+        return level >= Logger::level_;
     }
 
     static LogLevel logLevel() {
-        return level;
+        return level_;
     }
     static void logLevel(LogLevel level) {
-        Logger::level = level;
+        Logger::level_ = level;
     }
 
 private:
-    LogMessage message;
+    LogMessage message_;
 
-    static LogLevel level;
+    static LogLevel level_;
     // static LogPatternFormatter formatter;
 };
 

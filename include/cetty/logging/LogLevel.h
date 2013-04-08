@@ -52,15 +52,19 @@ public:
 public:
     const std::string& toString() const;
 
-    int toInt() const {
-        return v;
-    }
+    int toInt() const;
 
     static LogLevel parseFrom(const std::string& level);
 
 private:
-    LogLevel(int value) : cetty::util::Enum<LogLevel>(value) {}
+    LogLevel(int v)
+        : cetty::util::Enum<LogLevel>(v) {}
 };
+
+inline
+int LogLevel::toInt() const {
+    return value();
+}
 
 }
 }
