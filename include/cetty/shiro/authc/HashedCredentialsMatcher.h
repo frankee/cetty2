@@ -21,8 +21,7 @@
 #include <string>
 
 #include <cetty/shiro/authc/CredentialsMatcher.h>
-#include <cetty/shiro/authc/HashedCredentialsMatcherConfig.h>
-
+#include <cetty/shiro/authc/HashedCredentialsMatcherConfig.cnf.h>
 
 namespace cetty {
 namespace shiro {

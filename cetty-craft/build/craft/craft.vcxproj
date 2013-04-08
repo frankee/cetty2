@@ -20,7 +20,7 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapping.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\security\AccessController.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h" />
-    <ClInclude Include="..\..\..\include\cetty\craft\security\ValidateFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ParameterValidateFilter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp" />

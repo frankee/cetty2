@@ -41,8 +41,6 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\AuthorizingRealmPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\Realm.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\realm\SqlRealm.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\realm\SqlRealmConfig.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManagerConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\SecurityManager.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\RedisSessionDAO.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\session\Session.h" />
@@ -73,14 +71,12 @@
     <ClCompile Include="..\..\src\cetty\shiro\realm\Realm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\realm\SqlRealm.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\SecurityManager.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\SecurityManagerConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\RedisSessionDAO.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\Session.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionDAO.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionIdGenerator.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionManager.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\session\SessionValidationScheduler.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\util\SecurityUtils.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3DE1111F-B927-483B-AD82-385EF564E967}</ProjectGuid>

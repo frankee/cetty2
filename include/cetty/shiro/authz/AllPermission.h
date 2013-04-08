@@ -1,5 +1,6 @@
 #if !defined(CETTY_SHIRO_AUTHZ_ALLPERMISSION_H)
 #define CETTY_SHIRO_AUTHZ_ALLPERMISSION_H
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file

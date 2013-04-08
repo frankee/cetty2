@@ -16,8 +16,8 @@ namespace cetty {
 namespace shiro {
 namespace authz {
 
+using namespace cetty::config;
 using namespace cetty::shiro::realm;
-using namespace cetty::shiro::authz;
 
 const std::string Authorizer::ALL_PERMISSION = "all_permission";
 const std::string Authorizer::WILDCARD_PERMISSION = "wildcard_permission";

@@ -19,17 +19,15 @@
  * under the License.
  */
 
-#include <cetty/util/ReferenceCounter.h>
 #include <string>
+#include <cetty/util/ReferenceCounter.h>
+#include <cetty/shiro/authz/PermissionPtr.h>
 
 namespace cetty {
 namespace shiro {
 namespace authz {
 
 using namespace cetty::util;
-
-class Permission;
-typedef boost::intrusive_ptr<Permission> PermissionPtr;
 
 /**
  * A Permission represents the ability to perform an action or access a resource.  A Permission is the most
@@ -43,7 +41,8 @@ typedef boost::intrusive_ptr<Permission> PermissionPtr;
  */
 class Permission : public ReferenceCounter<Permission, int> {
 public:
-    Permission(const std::string &strPermission): strPermission(strPermission){}
+    Permission(const std::string &strPermission)
+        : strPermission(strPermission) {}
 
     virtual ~Permission() {}
 
@@ -65,7 +64,7 @@ public:
      */
     virtual bool implies(const PermissionPtr& p) = 0;
 
-    virtual const std::string& stringPermission() const{
+    virtual const std::string& stringPermission() const {
         return strPermission;
     }
 

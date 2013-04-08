@@ -38,8 +38,6 @@ namespace shiro {
 using namespace cetty::shiro::authc;
 using namespace cetty::shiro::authz;
 using namespace cetty::shiro::session;
-using namespace cetty::shiro;
-
 
 /**
  * A {@code SecurityManager} executes all security operations across a single application.

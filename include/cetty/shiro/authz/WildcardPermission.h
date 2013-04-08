@@ -20,7 +20,6 @@
  */
 
 #include <vector>
-
 #include <cetty/shiro/authz/Permission.h>
 
 namespace cetty {

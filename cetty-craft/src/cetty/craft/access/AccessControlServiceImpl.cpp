@@ -85,12 +85,12 @@ void AccessControlServiceImpl::onLogin(int code,
         else {
             // Login success but no session
             // todo add dealing code
-        } // if(sessionPtr)
+        }
     }
     else {
         // Login failed
         // todo add dealing code
-    } // if(!code)
+    }
 
     done(response);
 }
