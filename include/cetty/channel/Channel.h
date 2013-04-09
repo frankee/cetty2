@@ -419,6 +419,7 @@ private:
     InetAddress remoteAddress_;
 
     /** Cache for the string representation of this channel */
+    mutable bool strValActive_;
     mutable std::string strVal_;
 };
 

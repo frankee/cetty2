@@ -38,7 +38,8 @@ Channel::Channel(const ChannelPtr& parent,
       state_(CHANNEL_INIT),
       parent_(parent),
       eventLoop_(eventLoop),
-      pipeline_() {
+      pipeline_(),
+      strValActive_(false) {
     allocateId();
 }
 
@@ -49,7 +50,8 @@ Channel::Channel(int id,
       state_(CHANNEL_INIT),
       parent_(parent),
       eventLoop_(eventLoop),
-      pipeline_() {
+      pipeline_(),
+      strValActive_(false) {
     allocateId();
 }
 
@@ -94,7 +96,9 @@ ChannelFuturePtr Channel::close() {
         return pipeline_->close();
     }
     else {
-        LOG_INFO << "close the channel, but the pipeline has detached.";
+        LOG_INFO << "close the channel "
+                 << toString()
+                 << ", but the pipeline has detached.";
         return closeFuture_;
     }
 }
@@ -131,7 +135,9 @@ int Channel::compareTo(const ChannelPtr& c) const {
 }
 
 std::string Channel::toString() const {
-    if (!strVal_.empty()) {
+    bool active = isActive();
+
+    if (strValActive_ == active && !strVal_.empty()) {
         return strVal_;
     }
 
@@ -139,25 +145,34 @@ std::string Channel::toString() const {
     const InetAddress& remote = remoteAddress();
 
     if (remote) {
-        if (!parent()) { // server channel or client channel
-            StringUtil::printf(&strVal_, "[id: 0x%08x, %s => %s]", id(),
+        if (!parent()) { // client channel
+            StringUtil::printf(&strVal_,
+                               "[id: 0x%08x, %s %s %s]",
+                               id(),
+                               active ? "=>" : ":>",
                                local.toString().c_str(),
                                remote.toString().c_str());
         }
         else { // connection channel
-            StringUtil::printf(&strVal_, "[id: 0x%08x, %s => %s]", id(),
+            StringUtil::printf(&strVal_,
+                               "[id: 0x%08x, %s %s %s]",
+                               id(),
+                               active ? "=>" : ":>",
                                remote.toString().c_str(),
                                local.toString().c_str());
         }
     }
     else if (local) {
-        StringUtil::printf(&strVal_, "[id: 0x%08x, %s]", id(),
+        StringUtil::printf(&strVal_,
+                           "[id: 0x%08x, %s]",
+                           id(),
                            local.toString().c_str());
     }
     else {
         StringUtil::printf(&strVal_, "[id: 0x%08x]", id());
     }
 
+    strValActive_ = active;
     return strVal_;
 }
 
@@ -236,7 +251,8 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 future->setSuccess();
 
                 if (wasActive) {
-                    LOG_INFO << toString() << " closed successfully.";
+                    LOG_INFO << "channel " << toString() 
+                             << " closed successfully.";
                     pipeline_->fireChannelInactive();
                 }
             }

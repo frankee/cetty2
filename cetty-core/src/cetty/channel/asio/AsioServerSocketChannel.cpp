@@ -176,7 +176,8 @@ void AsioServerSocketChannel::accept() {
                                            this,
                                            boost::asio::placeholders::error,
                                            c)));
-    LOG_INFO << "server channel " << toString() << " begin to accepting socket.";
+    LOG_INFO << "server channel " << toString()
+             << " begin to accepting socket.";
 }
 
 void AsioServerSocketChannel::handleAccept(const boost::system::error_code& error,
@@ -198,7 +199,8 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                             100);
         channel->open();
         channel->setActived();
-        LOG_INFO << "accepted a new channel " << channel->toString();
+        LOG_INFO << "server channel " << toString()
+                 << "accepted a new channel " << channel->toString();
 
         channel->beginRead();
 
@@ -212,7 +214,8 @@ void AsioServerSocketChannel::handleAccept(const boost::system::error_code& erro
                                            newChannel)));
     }
     else {
-        LOG_ERROR << "Failed to accept a connection any more. ErrorCode: "
+        LOG_ERROR << "server channel " << toString()
+                  << "failed to accept a connection any more. ErrorCode: "
                   << error.value()
                   << ", Message: " << error.message();
     }
@@ -225,7 +228,8 @@ bool AsioServerSocketChannel::doClose() {
         acceptor_.close(error);
 
         if (error) {
-            LOG_ERROR << "failed to close acceptor, error:"
+            LOG_ERROR << "server channel" << toString()
+                      << " failed to close acceptor, error:"
                       << error.value() << ":" << error.message();
         }
     }

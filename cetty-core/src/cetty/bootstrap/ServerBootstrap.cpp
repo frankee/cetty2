@@ -133,7 +133,7 @@ ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent,
       parentHandler_() {
     if (child) {
         setChildEventLoopPool(child);
-        LOG_WARN << "set null EventLoopPool to child, using parent.";
+        LOG_INFO << "set null EventLoopPool to child, using parent.";
     }
     else {
         setChildEventLoopPool(parent);
