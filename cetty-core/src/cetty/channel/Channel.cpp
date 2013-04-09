@@ -96,7 +96,7 @@ ChannelFuturePtr Channel::close() {
         return pipeline_->close();
     }
     else {
-        LOG_INFO << "close the channel "
+        LOG_WARN << "close the channel "
                  << toString()
                  << ", but the pipeline has detached.";
         return closeFuture_;

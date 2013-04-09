@@ -321,9 +321,12 @@ void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
         if (!next) {
             hasNextChannelActiveHandler_ = false;
 
-            LOG_WARN << "An exceptionCaught() event was fired, and it reached at the end of the "
-                     "pipeline.  It usually means the last inbound handler in the pipeline did not "
-                     "handle the exception.";
+            LOG_WARN << "An exception(" << cause.displayText()
+                     << ") event was fired, and it reached at the end of the pipeline."
+                     " It usually means the last inbound handler in the pipeline did not "
+                     "handle the exception, will close the channel.";
+
+            channel_.lock()->close(newVoidFuture());
         }
     }
 }
@@ -734,7 +737,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr
 const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
 
-    // TODO: for connectless, like UDP.
+    // TODO: for connect less, like UDP.
     // Translate disconnect to close if the channel has no notion of disconnect-reconnect.
     // So far, UDP/IP is the only transport that has such behavior.
     //if (!ctx.channel().hasDisconnect()) {
@@ -960,7 +963,7 @@ ChannelFuturePtr ChannelHandlerContext::newFuture() {
         return new DefaultChannelFuture(channel_, false);
     }
     else {
-        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        LOG_ERROR << "the channel in context has been destroyed, may not happened.";
         return new DefaultChannelFuture(NullChannel::instance(), false);
     }
 }
@@ -974,7 +977,7 @@ ChannelFuturePtr ChannelHandlerContext::newSucceededFuture() {
         return channel_.lock()->newSucceededFuture();
     }
     else {
-        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        LOG_ERROR << "the channel in context has been destroyed, may not happened.";
         return NullChannel::instance()->newSucceededFuture();
     }
 }
@@ -984,7 +987,7 @@ ChannelFuturePtr ChannelHandlerContext::newFailedFuture(const ChannelException& 
         return channel_.lock()->newFailedFuture(cause);
     }
     else {
-        LOG_ERROR << "the channel in context has been destroied, may not happend.";
+        LOG_ERROR << "the channel in context has been destroyed, may not happened.";
         return NullChannel::instance()->newFailedFuture(cause);
     }
 }
