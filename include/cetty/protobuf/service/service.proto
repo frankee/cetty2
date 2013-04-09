@@ -6,34 +6,34 @@ option java_package = "io.cetty.protobuf.service";
 option java_outer_classname = "ServiceProto";
 
 enum MessageType {
-  REQUEST  = 1;
-  RESPONSE = 2;
-  ERROR    = 3;
+    REQUEST  = 1;
+    RESPONSE = 2;
+    ERROR    = 3;
 }
 
 enum ErrorCode {
-  NO_ERROR         = 0;
-  WRONG_PROTO      = 1;
-  NO_SERVICE       = 2;
-  NO_METHOD        = 3;
-  INVALID_REQUEST  = 4;
-  INVALID_RESPONSE = 5;
+    NO_ERROR         = 0;
+    WRONG_PROTO      = 1;
+    NO_SERVICE       = 2;
+    NO_METHOD        = 3;
+    INVALID_REQUEST  = 4;
+    INVALID_RESPONSE = 5;
 }
 
 message ServiceMessage {
-  required MessageType type = 1;
-  required fixed64       id = 2;
+    required MessageType type = 1;
+    required fixed64       id = 2;
 
-  optional string   service = 3;
-  optional string    method = 4;
-  
-  optional ErrorCode  error = 5;
-  
-  optional string  request_encoding = 6; // request may be encode with zlib
-  optional string response_encoding = 7; // response may be encode with zlib
-  
-  optional bytes    request = 8;
-  optional bytes   response = 9;
+    optional string   service = 3;
+    optional string    method = 4;
+
+    optional ErrorCode  error = 5;
+
+    optional string  request_encoding = 6; // request may be encode with zlib
+    optional string response_encoding = 7; // response may be encode with zlib
+
+    optional bytes    request = 8;
+    optional bytes   response = 9;
 }
 
 message Empty {

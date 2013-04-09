@@ -45,17 +45,26 @@ public:
 
     virtual ~ServerBuilder();
 
-    ServerBuilder& registerServer(const std::string& name,
-                        const ChildInitializer& childInitializer);
+    /**
+     *
+     */
+    ServerBuilder& registerServerPrototype(const std::string& name,
+                                           const ChildInitializer& childInitializer);
 
-    ServerBuilder& registerServer(const std::string& name,
-                        const ChannelOptions& options,
-                        const ChannelOptions& childOptions,
-                        const ChildInitializer& childInitializer);
+    /**
+     *
+     */
+    ServerBuilder& registerServerPrototype(const std::string& name,
+                                           const ChannelOptions& options,
+                                           const ChannelOptions& childOptions,
+                                           const ChildInitializer& childInitializer);
 
+    /**
+     *
+     */
     ServerBuilder& setOptions(const std::string& name,
-                    const ChannelOptions& options,
-                    const ChannelOptions& childOptions);
+                              const ChannelOptions& options,
+                              const ChannelOptions& childOptions);
 
     ChannelPtr build(const std::string& name, int port);
 
@@ -89,12 +98,23 @@ public:
 
     void waitingForExit();
 
+    /**
+     *
+     */
     const ServerBuilderConfig& config() const;
+
+    /**
+     *
+     */
     const EventLoopPoolPtr& parentPool() const;
+
+    /**
+     *
+     */
     const EventLoopPoolPtr& childPool() const;
 
 private:
-    int init();
+    void init();
     void shutdown();
 
     ChannelPtr build(const ServerBootstrapPtr& bootstrap,
@@ -105,6 +125,7 @@ private:
     typedef std::map<std::string, ServerBootstrapPtr> ServerBootstraps;
 
 private:
+    bool init_;
     ServerBuilderConfig config_;
 
     EventLoopPoolPtr parentEventLoopPool_;

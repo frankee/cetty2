@@ -62,7 +62,7 @@ CraftServerBuilder::~CraftServerBuilder() {
 CraftServerBuilder& CraftServerBuilder::registerService(const ProtobufServicePtr& service) {
     builder_.registerService(service);
 
-    //intialize the maping.
+    //initialize the mapping.
     ServiceRequestMapping::instance();
     ServiceResponseMapping::instance();
 
@@ -96,8 +96,7 @@ bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
 }
 
 void CraftServerBuilder::init() {
-
-    builder_.serverBuilder().registerServer(PROTOBUF_SERVICE_HTTP,
+    builder_.serverBuilder().registerServerPrototype(PROTOBUF_SERVICE_HTTP,
                                             boost::bind(&CraftServerBuilder::initializeChildChannel,
                                                     this,
                                                     _1));

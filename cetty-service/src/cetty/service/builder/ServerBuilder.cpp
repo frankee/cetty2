@@ -35,13 +35,16 @@ using namespace cetty::service;
 using namespace cetty::config;
 using namespace cetty::logging;
 
-ServerBuilder::ServerBuilder() {
+ServerBuilder::ServerBuilder()
+    : init_(false) {
     ConfigCenter::instance().configure(&config_);
     init();
 }
 
-ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
+ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt)
+    : init_(false) {
     ConfigCenter::instance().configure(&config_);
+
     config_.parentThreadCount = parentThreadCnt;
     config_.childThreadCount = childThreadCnt;
     init();
@@ -50,19 +53,24 @@ ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt) {
 ServerBuilder::~ServerBuilder() {
 }
 
-ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+ServerBuilder& ServerBuilder::registerServerPrototype(const std::string& name,
         const ChildInitializer& childInitializer) {
     ChannelOptions empty;
-    return registerServer(name,
+    return registerServerPrototype(name,
                           empty,
                           empty,
                           childInitializer);
 }
 
-ServerBuilder& ServerBuilder::registerServer(const std::string& name,
+ServerBuilder& ServerBuilder::registerServerPrototype(const std::string& name,
         const ChannelOptions& options,
         const ChannelOptions& childOptions,
         const ChildInitializer& childInitializer) {
+    if (!init_) {
+        LOG_WARN << "initialized failed, CAN NOT register server";
+        return *this;
+    }
+
     if (name.empty()) {
         LOG_WARN << "name is empty, can not register the server.";
         return *this;
@@ -98,20 +106,24 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
     ServerBootstraps::const_iterator itr = bootstraps_.find(name);
 
     if (itr != bootstraps_.end()) {
-        itr->second->setChannelOptions(options);
-        itr->second->setChildOptions(childOptions);
+        if (!options.empty()) {
+            itr->second->setChannelOptions(options);
+        }
+
+        if (!childOptions.empty()) {
+            itr->second->setChildOptions(childOptions);
+        }
     }
     else {
-        LOG_WARN << "can not find the server: "
-                 << name
+        LOG_WARN << "can not find the server: " << name
                  << ", do nothing.";
     }
 
     return *this;
 }
 
-cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
-        int port) {
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                int port) {
     return build(name, std::string(), port);
 }
 
@@ -154,11 +166,11 @@ ChannelPtr ServerBuilder::build(const std::string& name,
                  port);
 }
 
-cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
-        const ChannelOptions& options,
-        const ChannelOptions& childOptions,
-        const ChildInitializer& childInitializer,
-        int port) {
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                const ChannelOptions& options,
+                                const ChannelOptions& childOptions,
+                                const ChildInitializer& childInitializer,
+                                int port) {
     return build(name,
                  options,
                  childOptions,
@@ -168,20 +180,24 @@ cetty::channel::ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-        const ChannelOptions& options,
-        const ChannelOptions& childOptions,
-        const ChildInitializer& childInitializer,
-        const std::string& host,
-        int port) {
+                                const ChannelOptions& options,
+                                const ChannelOptions& childOptions,
+                                const ChildInitializer& childInitializer,
+                                const std::string& host,
+                                int port) {
     if (name.empty()) {
-        LOG_WARN << "parameter error, empty name or invalid address.";
+        LOG_WARN << "parameter error, name should not be empty.";
         return ChannelPtr();
+    }
+
+    if (bootstraps_.find(name) != bootstraps_.end()) {
+        LOG_WARN << "the " << name << " server type has already registered, ";
     }
 
     ServerBootstrap* bootstrap = new ServerBootstrap(
         parentEventLoopPool_,
         childEventLoopPool_);
-    
+
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
     if (childOptions.empty()) {
@@ -191,7 +207,6 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     if (options.empty()) {
         //bootstrap->setChannelOption(ChannelOption::CO_SO_LINGER, 0);
         //bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
-        bootstrap->setChannelOption(ChannelOption::CO_TCP_NODELAY, true);
         bootstrap->setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096);
         bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
@@ -201,6 +216,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
     else {
         LOG_WARN << "childInitializer is empty, channel will not work fine.";
+        return ChannelPtr();
     }
 
     bootstrap->setDaemonize(config_.daemonize);
@@ -209,8 +225,8 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
-        const std::string& host,
-        int port) {
+                                const std::string& host,
+                                int port) {
     ChannelFuturePtr future;
 
     if (host.empty()) {
@@ -228,7 +244,12 @@ ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
     }
 }
 
-int ServerBuilder::init() {
+void ServerBuilder::init() {
+    if (config_.servers.empty()) {
+        LOG_WARN << "has not set any servers, fail to init";
+        return;
+    }
+
     if (config_.daemonize) {
         ServerUtil::daemonize();
     }
@@ -250,7 +271,7 @@ int ServerBuilder::init() {
         Logger::logLevel(LogLevel::parseFrom(config_.logger->level));
     }
 
-    return 0;
+    init_ = true;
 }
 
 void ServerBuilder::shutdown() {
@@ -263,13 +284,14 @@ void ServerBuilder::shutdown() {
 
 void ServerBuilder::waitingForExit() {
     if (bootstraps_.empty()) {
-        LOG_INFO << "has no setting about servers, bye!";
+        LOG_INFO << "there is no any servers, bye!";
         return;
     }
 
     if (config_.daemonize) {
         ServerUtil::createPidFile(config_.pidfile.c_str());
         ServerBootstraps::iterator itr;
+
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             ServerBootstrap::Channels& channels = itr->second->channels();
             ServerBootstrap::Channels::iterator channelItr = channels.begin();
@@ -282,9 +304,11 @@ void ServerBuilder::waitingForExit() {
     else {
         printf("Servers: \n");
         ServerBootstraps::iterator itr;
+
         for (itr = bootstraps_.begin(); itr != bootstraps_.end(); ++itr) {
             ServerBootstrap::Channels& channels = itr->second->channels();
             ServerBootstrap::Channels::const_iterator itr = channels.begin();
+
             for (; itr != channels.end(); ++itr) {
                 printf("    Channel ID: %d has bind to %s\n",
                        itr->first,
@@ -311,6 +335,7 @@ void ServerBuilder::waitingForExit() {
 ServerBuilder& ServerBuilder::buildAll() {
     std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
         config_.servers.begin();
+
     for (; itr != config_.servers.end(); ++itr) {
         const std::string& name = itr->first;
         const ServerBuilderConfig::Server* server = itr->second;
@@ -322,8 +347,8 @@ ServerBuilder& ServerBuilder::buildAll() {
 
         if (!server) {
             LOG_WARN << "config the server: "
-                << name
-                << " has no config item, will skip it.";
+                     << name
+                     << " has no config item, will skip it.";
         }
 
         if (server->port <= 0) {

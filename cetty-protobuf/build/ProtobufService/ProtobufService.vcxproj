@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\src\cetty\protobuf\service\service.pb.cc" />
     <ClCompile Include="..\..\src\cetty\protobuf\service\service_options.pb.cc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\protobuf\service\service.proto" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F0FE3882-462B-48CC-8AB7-8363E8F20BE8}</ProjectGuid>
     <RootNamespace>ProtobufService</RootNamespace>

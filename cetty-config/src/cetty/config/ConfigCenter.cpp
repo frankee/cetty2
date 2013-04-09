@@ -259,12 +259,12 @@ bool ConfigCenter::configure(const std::string& name,
     YAML::Node node = root_[name];
     bool result = false;
 
-    if (node) {
+    if (node && !node.IsNull()) {
         result = parseConfigObject(node, object);
     }
 
     if (cmdlineTrie_.countPrefix(name) > 0) {
-        result = parseConfigObject(vm_, cmdlineTrie_, object);
+        result = result || parseConfigObject(vm_, cmdlineTrie_, object);
     }
 
     return result;

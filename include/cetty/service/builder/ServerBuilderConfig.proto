@@ -2,26 +2,21 @@ package cetty.service.builder;
 
 import "cetty/config/config_options.proto";
 
-option (config_file_options).config_file_name = "";
-option (config_file_options).source_file_name = "";
-
 message ServerChannelConfig {
-	message ChildChannelConfig {
-		required bool is_keep_alive = 1;
-		required bool is_reuse_address = 2;
-		required bool is_tcp_no_delay = 3;
-		
-		required int32 so_linger = 5;
-		required int32 send_buffer_size = 6;
-		required int32 receive_buffer_size = 7;
-	}
-	
-	required bool         reuse_address = 1;
-	required int32             back_log = 2;
+	required bool         reuse_address = 1 [default = true];
+	required int32             back_log = 2 [default = 0];
 	required int32  receive_buffer_size = 3;
-	required int32 reserved_child_count = 4;
-	
-	optional ChildChannelConfig   child = 10;
+	required int32 reserved_child_count = 8;
+}
+
+message ChildChannelConfig {
+	required bool    is_keep_alive = 1;
+	required bool is_reuse_address = 2;
+	required bool  is_tcp_no_delay = 3;
+		
+	required int32           so_linger = 5;
+	required int32    send_buffer_size = 6;
+	required int32 receive_buffer_size = 7;
 }
 
 message ServerBuilderConfig {
@@ -36,15 +31,16 @@ message ServerBuilderConfig {
 		// # Accept connections on the specified port.
 		required int32  port = 2;
 		
-		optional ServerChannelConfig config = 3;
+		optional ServerChannelConfig server_channel = 3;
+        optional ChildChannelConfig   child_channel = 4;
 	}
 	
 	message Limit {
-		required int32 maxConcurrentRequests = 1 [default=10000];
+		required int32 max_concurrent_requests = 1 [default=10000];
 	}
 	
 	message Timeout {
-		required int32 hostConnectionMaxIdleTime = 1[default=1800];
+		required int32 connection_timeout = 1 [default=1800];
 	}
 	
 	message Logger {
@@ -66,14 +62,17 @@ message ServerBuilderConfig {
 	
     required int32 parent_thread_count = 4 [default = 1];
     required int32  child_thread_count = 5 [default = 0];
-    required int32             backlog = 6 [default = 4096];
     
 	optional Logger   logger = 7;
 
     optional Limit     limit = 8;
     optional Timeout timeout = 9;
 	
-	optional ServerChannelConfig channel_config = 10;
+    // # default config for all server channels
+	optional ServerChannelConfig server_channel = 10;
+
+    // # default config for all child channels
+    optional ChildChannelConfig   child_channel = 11;
 
 	// # examples like:
 	// # servers:
@@ -83,7 +82,7 @@ message ServerBuilderConfig {
 	// #   another-server-app:
 	// #     port: 8888
 	// # 
-    repeated Server servers  = 11 [
+    repeated Server servers  = 20 [
 		(config_options).map = true,
 		(config_options).default = "{{http:\":8080\"}, {rpc:\":18080\"}}"
 	];

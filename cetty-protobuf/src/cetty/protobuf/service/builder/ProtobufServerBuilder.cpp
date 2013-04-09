@@ -96,7 +96,7 @@ ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
 }
 
 void ProtobufServerBuilder::init() {
-    builder_.registerServer(PROTOBUF_SERVICE_RPC,
+    builder_.registerServerPrototype(PROTOBUF_SERVICE_RPC,
                    boost::bind(&ProtobufServerBuilder::initializeChannel,
                                this,
                                _1));

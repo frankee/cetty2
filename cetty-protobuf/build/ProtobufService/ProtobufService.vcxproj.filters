@@ -108,4 +108,9 @@
       <Filter>protobuf</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\protobuf\service\service.proto">
+      <Filter>protobuf</Filter>
+    </None>
+  </ItemGroup>
 </Project>

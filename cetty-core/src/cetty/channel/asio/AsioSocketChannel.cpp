@@ -373,7 +373,7 @@ void AsioSocketChannel::beginRead() {
     }
 
     LOG_INFO << "channel" << toString()
-             << " begin to async read, with the the buffer size "
+             << " begin to read asynchronously, with the the buffer size "
              << size << " Bytes";
 
     tcpSocket_.async_read_some(
@@ -499,7 +499,6 @@ void AsioSocketChannel::connectFailed(const ChannelFuturePtr& connectFuture,
 
     connectFuture->setFailure(e);
     pipeline().fireExceptionCaught(e);
-    //closeIfClosed();
     doClose();
 }
 
