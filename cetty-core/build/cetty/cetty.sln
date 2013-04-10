@@ -81,11 +81,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "craft", "..\..\..\cetty-cra
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "startup", "..\..\..\cetty-craft\build\startup\startup.vcxproj", "{C69120B2-A181-4455-B0CE-2BDC58B2B557}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotoc", "..\..\..\..\thirdparty\protobuf-2.4.1\vsprojects\libprotoc.vcxproj", "{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AccessControlServer", "..\..\..\cetty-craft\build\access\AccessControlServer.vcxproj", "{06DDCB99-EF84-4267-8EB9-6D2FF6730305}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotobuf", "..\..\..\..\thirdparty\protobuf-2.4.1\vsprojects\libprotobuf.vcxproj", "{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GearmanTest", "..\..\..\cetty-gearman\build\GearmanTest\GearmanTest.vcxproj", "{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}"
 EndProject
@@ -123,7 +119,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TelnetServer", "..\telnet\T
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memcached", "..\..\..\cetty-memcached\build\memcached\Memcached.vcxproj", "{4E884AF4-B887-470E-A89B-76261E66C3B5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml", "..\..\..\..\thirdparty\yaml-cpp\yaml.vcxproj", "{DC1A14A7-047C-4151-97F5-AED607FE1EE8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "beanstalk", "..\..\..\cetty-beanstalk\build\beanstalk\beanstalk.vcxproj", "{964F7977-1735-4811-B980-C5A2A08B83BD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BeanstalkClient", "..\..\..\cetty-beanstalk\build\BeanstalkClient\BeanstalkClient.vcxproj", "{5D7C2010-A763-46A8-90C2-BA11970F10E0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{964F7977-1735-4811-B980-C5A2A08B83BD} = {964F7977-1735-4811-B980-C5A2A08B83BD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -223,18 +224,10 @@ Global
 		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Debug|Win32.Build.0 = Debug|Win32
 		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Release|Win32.ActiveCfg = Release|Win32
 		{C69120B2-A181-4455-B0CE-2BDC58B2B557}.Release|Win32.Build.0 = Release|Win32
-		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.Build.0 = Debug|Win32
-		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.ActiveCfg = Release|Win32
-		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Release|Win32.Build.0 = Release|Win32
 		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Debug|Win32.ActiveCfg = Debug|Win32
 		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Debug|Win32.Build.0 = Debug|Win32
 		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Release|Win32.ActiveCfg = Release|Win32
 		{06DDCB99-EF84-4267-8EB9-6D2FF6730305}.Release|Win32.Build.0 = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.Build.0 = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.ActiveCfg = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.Build.0 = Release|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Debug|Win32.Build.0 = Debug|Win32
 		{9FF0D922-9268-40B4-B01A-1C3CF13EF28D}.Release|Win32.ActiveCfg = Release|Win32
@@ -287,10 +280,14 @@ Global
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Debug|Win32.Build.0 = Debug|Win32
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.ActiveCfg = Release|Win32
 		{4E884AF4-B887-470E-A89B-76261E66C3B5}.Release|Win32.Build.0 = Release|Win32
-		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Debug|Win32.Build.0 = Debug|Win32
-		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Release|Win32.ActiveCfg = Release|Win32
-		{DC1A14A7-047C-4151-97F5-AED607FE1EE8}.Release|Win32.Build.0 = Release|Win32
+		{964F7977-1735-4811-B980-C5A2A08B83BD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{964F7977-1735-4811-B980-C5A2A08B83BD}.Debug|Win32.Build.0 = Debug|Win32
+		{964F7977-1735-4811-B980-C5A2A08B83BD}.Release|Win32.ActiveCfg = Release|Win32
+		{964F7977-1735-4811-B980-C5A2A08B83BD}.Release|Win32.Build.0 = Release|Win32
+		{5D7C2010-A763-46A8-90C2-BA11970F10E0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5D7C2010-A763-46A8-90C2-BA11970F10E0}.Debug|Win32.Build.0 = Debug|Win32
+		{5D7C2010-A763-46A8-90C2-BA11970F10E0}.Release|Win32.ActiveCfg = Release|Win32
+		{5D7C2010-A763-46A8-90C2-BA11970F10E0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

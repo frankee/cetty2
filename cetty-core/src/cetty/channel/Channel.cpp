@@ -141,6 +141,7 @@ std::string Channel::toString() const {
         return strVal_;
     }
 
+    strVal_.clear();
     const InetAddress& local = localAddress();
     const InetAddress& remote = remoteAddress();
 
@@ -149,16 +150,16 @@ std::string Channel::toString() const {
             StringUtil::printf(&strVal_,
                                "[id: 0x%08x, %s %s %s]",
                                id(),
-                               active ? "=>" : ":>",
                                local.toString().c_str(),
+                               active ? "=>" : ":>",
                                remote.toString().c_str());
         }
         else { // connection channel
             StringUtil::printf(&strVal_,
                                "[id: 0x%08x, %s %s %s]",
                                id(),
-                               active ? "=>" : ":>",
                                remote.toString().c_str(),
+                               active ? "=>" : ":>",
                                local.toString().c_str());
         }
     }
@@ -251,7 +252,7 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 future->setSuccess();
 
                 if (wasActive) {
-                    LOG_INFO << "channel " << toString() 
+                    LOG_INFO << "channel " << toString()
                              << " closed successfully.";
                     pipeline_->fireChannelInactive();
                 }
@@ -285,6 +286,7 @@ void Channel::closeIfClosed() {
 
 void Channel::setActived() {
     state_ = CHANNEL_ACTIVED;
+    doPreActive();
     pipeline_->fireChannelActive();
 }
 

@@ -1,5 +1,5 @@
-#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H)
-#define CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H
+#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDENCODER_H)
+#define CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDENCODER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -16,34 +16,38 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *      Author: chenhl
+ */
 
 #include <cetty/handler/codec/MessageToBufferEncoder.h>
-#include <cetty/redis/protocol/RedisCommand.h>
+#include <cetty/beanstalk/protocol/BeanstalkCommand.h>
 
 namespace cetty {
-namespace redis {
+namespace beanstalk {
 namespace protocol {
 
 using namespace cetty::channel;
 using namespace cetty::handler::codec;
+using namespace cetty::beanstalk::protocol;
 
-class RedisCommandEncoder : private boost::noncopyable {
+class BeanstalkCommandEncoder : private boost::noncopyable {
 public:
-    typedef MessageToBufferEncoder<RedisCommandEncoder, RedisCommandPtr> Encoder;
+    typedef MessageToBufferEncoder<BeanstalkCommandEncoder, BeanstalkCommandPtr> Encoder;
     typedef Encoder::Context Context;
     typedef Encoder::Handler Handler;
     typedef Encoder::HandlerPtr HandlerPtr;
 
 public:
-    RedisCommandEncoder() {
-        encoder_.setEncoder(boost::bind(&RedisCommandEncoder::encode,
-                                        this,
-                                        _1,
-                                        _2,
-                                        _3));
+    BeanstalkCommandEncoder() {
+        encoder_.setEncoder(boost::bind(&BeanstalkCommandEncoder::encode,
+                                       this,
+                                       _1,
+                                       _2,
+                                       _3));
     }
 
-    ~RedisCommandEncoder() {}
+    ~BeanstalkCommandEncoder() {}
 
     void registerTo(Context& ctx) {
         encoder_.registerTo(ctx);
@@ -51,7 +55,7 @@ public:
 
 private:
     ChannelBufferPtr encode(ChannelHandlerContext& ctx,
-                            const RedisCommandPtr& msg,
+                            const BeanstalkCommandPtr& msg,
                             const ChannelBufferPtr& out) {
         return msg->buffer();
     }
@@ -64,7 +68,7 @@ private:
 }
 }
 
-#endif //#if !defined(CETTY_REDIS_PROTOCOL_REDISCOMMANDENCODER_H)
+#endif //#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDENCODER_H)
 
 // Local Variables:
 // mode: c++

@@ -46,72 +46,50 @@ public:
     static const RedisReplyType STATUS;
     static const RedisReplyType ERROR;
 
+public:
+    const std::string& name() const {
+        return name_;
+    }
+
 private:
-    RedisReplyType(int value) : cetty::util::Enum<RedisReplyType>(value) {}
+    RedisReplyType(int value, const std::string& name)
+        : cetty::util::Enum<RedisReplyType>(value),
+          name_(name) {
+    }
+
+private:
+    std::string name_;
 };
 
-class RedisReply : public ReferenceCounter<RedisReply> {
+class RedisReply : public ReferenceCounter<RedisReply, int> {
 public:
-    RedisReply() : type(RedisReplyType::NIL) {}
+    RedisReply();
 
-    void setType(const RedisReplyType& type) {
-        this->type = type;
-    }
-    const RedisReplyType& getType() const {
-        return this->type;
-    }
+    const RedisReplyType& type() const;
 
-    void setValue(int64_t integer) {
-        value = integer;
-    }
+    void setType(const RedisReplyType& type);
 
-    void setValue(const StringPiece& StringPiece) {
-        value = StringPiece;
-    }
+    void setValue(int64_t integer);
 
-    void setValue(const std::vector<StringPiece>& StringPieces) {
-        value = StringPieces;
-    }
+    void setValue(const StringPiece& StringPiece);
 
-    int64_t getInteger() const;
+    void setValue(const std::vector<StringPiece>& StringPieces);
 
-    StringPiece getString() const {
-        if (type == RedisReplyType::STRING) {
-            return boost::get<StringPiece>(value);
-        }
+    int64_t integerValue() const;
 
-        return StringPiece();
-    }
+    StringPiece stringValue() const;
 
-    StringPiece getStatus() const {
-        if (type == RedisReplyType::STATUS) {
-            return boost::get<StringPiece>(value);
-        }
+    StringPiece status() const;
 
-        return StringPiece();
-    }
+    StringPiece error() const;
 
-    StringPiece getError() const {
-        if (type == RedisReplyType::ERROR) {
-            return boost::get<StringPiece>(value);
-        }
+    bool isNil() const;
 
-        return StringPiece();
-    }
+    const std::vector<StringPiece>& array() const;
 
-    bool isNil() const {
-        return type == RedisReplyType::NIL;
-    }
+    std::vector<StringPiece>* mutableArray();
 
-    const std::vector<StringPiece>& getArray() const {
-        if (type == RedisReplyType::ARRAY) {
-            return boost::get<std::vector<StringPiece> >(value);
-        }
-
-        return EMPTY_STRING_PIECES;
-    }
-
-    std::vector<StringPiece>* getMutableArray();
+    std::string toString() const;
 
 private:
     typedef boost::variant<int64_t,
@@ -119,12 +97,83 @@ private:
             std::vector<StringPiece> > Value;
 
 private:
-    RedisReplyType  type;
-    Value value;
+    RedisReplyType  type_;
+    Value value_;
 
 private:
     static const std::vector<StringPiece> EMPTY_STRING_PIECES;
 };
+
+inline
+RedisReply::RedisReply()
+    : type_(RedisReplyType::NIL) {
+}
+
+inline
+const RedisReplyType& RedisReply::type() const {
+    return type_;
+}
+
+inline
+void RedisReply::setType(const RedisReplyType& type) {
+    type_ = type;
+}
+
+inline
+void RedisReply::setValue(int64_t integer) {
+    value_ = integer;
+}
+
+inline
+void RedisReply::setValue(const StringPiece& StringPiece) {
+    value_ = StringPiece;
+}
+
+inline
+void RedisReply::setValue(const std::vector<StringPiece>& StringPieces) {
+    value_ = StringPieces;
+}
+
+inline
+StringPiece RedisReply::stringValue() const {
+    if (type_ == RedisReplyType::STRING) {
+        return boost::get<StringPiece>(value_);
+    }
+
+    return StringPiece();
+}
+
+inline
+StringPiece RedisReply::status() const {
+    if (type_ == RedisReplyType::STATUS) {
+        return boost::get<StringPiece>(value_);
+    }
+
+    return StringPiece();
+}
+
+inline
+StringPiece RedisReply::error() const {
+    if (type_ == RedisReplyType::ERROR) {
+        return boost::get<StringPiece>(value_);
+    }
+
+    return StringPiece();
+}
+
+inline
+bool RedisReply::isNil() const {
+    return type_ == RedisReplyType::NIL;
+}
+
+inline
+const std::vector<StringPiece>& RedisReply::array() const {
+    if (type_ == RedisReplyType::ARRAY) {
+        return boost::get<std::vector<StringPiece> >(value_);
+    }
+
+    return EMPTY_STRING_PIECES;
+}
 
 }
 }

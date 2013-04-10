@@ -40,69 +40,78 @@ using namespace cetty::channel;
 using namespace cetty::redis::protocol;
 using namespace cetty::redis::protocol::commands;
 
-void dummySetCallback(const RedisServiceFuture& future,
-                      const RedisReplyPtr& reply) {
-    LOG_DEBUG << "redis replied the set command";
-}
-
 void RedisClient::statusCallBack(const RedisServiceFuture& future,
-                    const RedisReplyPtr& reply,
-                    const RedisClient::StatusCallBack& callback) {
-    if (!reply) {
-        callback(-1);
+                                 const RedisReplyPtr& reply,
+                                 const RedisClient::StatusCallBack& callback) {
+    if (callback) {
+        if (!reply) {
+            callback(-1);
+        }
+        else if (reply->type() == RedisReplyType::STATUS) {
+            callback(0);
+        }
+        else if (reply->type() == RedisReplyType::ERROR) {
+            callback(-1);
+        }
     }
-    else if (reply->getType() == RedisReplyType::STATUS) {
-        callback(0);
-    }
-    else if (reply->getType() == RedisReplyType::ERROR) {
-        callback(-1);
-    }
-}
-
-void integerCallBack(const RedisReplyPtr& reply,
-                     const RedisClient::StatusCallBack& callback) {
-    if (!reply) {
-        callback(-1);
-    }
-    else if (reply->getType() == RedisReplyType::INTEGER) {
-        callback(0);
-    }
-    else if (reply->getType() == RedisReplyType::STATUS) {
-        callback(0);
-    }
-    else if (reply->getType() == RedisReplyType::ERROR) {
-        callback(-1);
+    else {
+        if (!reply) {
+            LOG_DEBUG << "redis replied: " << reply->toString();
+        }
+        else {
+            LOG_DEBUG << "has not set callback and no replay from redis";
+        }
     }
 }
 
 void RedisClient::bulkCallBack(const RedisServiceFuture& future,
-                  const RedisReplyPtr& reply,
-                  const RedisClient::BulkCallBack& callback) {
-    if (!reply) {
-        callback(-1, StringPiece());
+                               const RedisReplyPtr& reply,
+                               const RedisClient::BulkCallBack& callback) {
+    if (callback) {
+        if (!reply) {
+            callback(-1, StringPiece());
+        }
+        else if (reply->type() == RedisReplyType::NIL) {
+            callback(-1, StringPiece());
+        }
+        else if (reply->type() == RedisReplyType::STATUS) {
+            callback(0, reply->status());
+        }
+        else if (reply->type() == RedisReplyType::STRING) {
+            callback(0, reply->stringValue());
+        }
     }
-    else if (reply->getType() == RedisReplyType::NIL) {
-        callback(-1, StringPiece());
-    }
-    else if (reply->getType() == RedisReplyType::STATUS) {
-        callback(0, reply->getStatus());
-    }
-    else if (reply->getType() == RedisReplyType::STRING) {
-        callback(0, reply->getString());
+    else {
+        if (!reply) {
+            LOG_DEBUG << "redis replied: " << reply->toString();
+        }
+        else {
+            LOG_DEBUG << "has not set callback and no replay from redis";
+        }
     }
 }
 
 void RedisClient::multiBulkCallBack(const RedisServiceFuture& future,
                                     const RedisReplyPtr& reply,
                                     const MultiBulkCallBack& callback) {
-    if (!reply) {
-        callback(-1, std::vector<StringPiece>());
+    if (callback) {
+        if (!reply) {
+            callback(-1, std::vector<StringPiece>());
+        }
+        else if (reply->type() == RedisReplyType::NIL) {
+            callback(-1, std::vector<StringPiece>());
+        }
+        else if (reply->type() == RedisReplyType::ARRAY) {
+            callback(0, reply->array());
+        }
     }
-    else if (reply->getType() == RedisReplyType::NIL) {
-        callback(-1, std::vector<StringPiece>());
-    }
-    else if (reply->getType() == RedisReplyType::ARRAY) {
-        callback(0, reply->getArray());
+    else {
+        if (!reply) {
+            LOG_DEBUG << "redis replied: " << reply->toString();
+        }
+        else {
+            LOG_DEBUG << "has not set callback and no replay from redis";
+        }
     }
 }
 
@@ -113,35 +122,55 @@ void RedisClient::request(const RedisCommandPtr& command,
 
 void RedisClient::set(const std::string& key, const StringPiece& value) {
     RedisServiceFuturePtr future(
-        new RedisServiceFuture(boost::bind(dummySetCallback, _1, _2)));
+        new RedisServiceFuture(boost::bind(
+                                   &RedisClient::statusCallBack,
+                                   _1,
+                                   _2,
+                                   StatusCallBack())));
 
     request(stringsCommandSet(key, value), future);
 }
 
 void RedisClient::get(const std::string& key, const BulkCallBack& callback) {
     RedisServiceFuturePtr future(new RedisServiceFuture(
-        boost::bind(&RedisClient::bulkCallBack, _1, _2, callback)));
+                                     boost::bind(
+                                         &RedisClient::bulkCallBack,
+                                         _1,
+                                         _2,
+                                         callback)));
 
     request(stringsCommandGet(key), future);
 }
 
 void RedisClient::del(const std::string& key) {
     RedisServiceFuturePtr future(
-        new RedisServiceFuture(boost::bind(dummySetCallback, _1, _2)));
+        new RedisServiceFuture(boost::bind(
+                                   &RedisClient::statusCallBack,
+                                   _1,
+                                   _2,
+                                   StatusCallBack())));
 
     request(keysCommandDel(key), future);
 }
 
 void RedisClient::beginTransaction(const StatusCallBack& callback) {
-    RedisServiceFuturePtr future(new RedisServiceFuture(
-        boost::bind(&RedisClient::statusCallBack, _1, _2, callback)));
+    RedisServiceFuturePtr future(
+        new RedisServiceFuture(boost::bind(
+                                   &RedisClient::statusCallBack,
+                                   _1,
+                                   _2,
+                                   callback)));
 
     request(transactionsCommandMulti(), future);
 }
 
 void RedisClient::commitTransaction(const StatusCallBack& callback) {
-    RedisServiceFuturePtr future(new RedisServiceFuture(
-        boost::bind(&RedisClient::statusCallBack, _1, _2, callback)));
+    RedisServiceFuturePtr future(
+        new RedisServiceFuture(boost::bind(
+                                   &RedisClient::statusCallBack,
+                                   _1,
+                                   _2,
+                                   callback)));
 
     request(transactionsCommandExec(), future);
 }

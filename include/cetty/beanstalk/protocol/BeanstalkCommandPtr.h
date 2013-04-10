@@ -1,5 +1,5 @@
-#if !defined(CETTY_BEANSTALK_BEANSTALKSERVICEFUTURE_H)
-#define CETTY_BEANSTALK_BEANSTALKSERVICEFUTURE_H
+#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDPTR_H)
+#define CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDPTR_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -16,23 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-/*
- *      Author: chenhl
- */
 
-#include <cetty/service/ServiceFuture.h>
-#include <cetty/beanstalk/protocol/BeanstalkReply.h>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cetty {
 namespace beanstalk {
+namespace protocol {
 
-typedef cetty::service::ServiceFuture<protocol::BeanstalkReplyPtr> BeanstalkServiceFuture;
-typedef boost::intrusive_ptr<BeanstalkServiceFuture> BeanstalkServiceFuturePtr;
+class BeanstalkCommand;
+typedef boost::intrusive_ptr<BeanstalkCommand> BeanstalkCommandPtr;
 
 }
 }
+}
 
-#endif //#if !defined(CETTY_BEANSTALK_BEANSTALKSERVICEFUTURE_H)
+#endif //#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMANDPTR_H)
 
 // Local Variables:
 // mode: c++

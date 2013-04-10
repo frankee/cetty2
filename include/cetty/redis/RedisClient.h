@@ -19,6 +19,7 @@
 
 #include <map>
 #include <boost/bind.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <cetty/util/StringPiece.h>
 #include <cetty/channel/ChannelPtr.h>
@@ -35,7 +36,7 @@ using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::redis::protocol;
 
-class RedisClient {
+class RedisClient : private boost::noncopyable {
 public:
     RedisClient(const ChannelPtr& channel)
         : channel_(channel) {}
@@ -43,15 +44,16 @@ public:
     ~RedisClient() {}
 
     typedef boost::function2<void,
-        const RedisServiceFuture&,
-        const RedisReplyPtr&> ReplyCallback;
+            const RedisServiceFuture&,
+            const RedisReplyPtr&> ReplyCallback;
 
     typedef boost::function1<void, int> StatusCallBack;
     typedef boost::function2<void, int, const StringPiece&> BulkCallBack;
     typedef boost::function2<void, int, const std::vector<StringPiece>&> MultiBulkCallBack;
 
 public:
-    void request(const RedisCommandPtr& command, const RedisServiceFuturePtr& future);
+    void request(const RedisCommandPtr& command,
+                 const RedisServiceFuturePtr& future);
 
     // Strings Command
     void set(const std::string& key, const StringPiece& value);
@@ -61,13 +63,18 @@ public:
     void get(const std::string& key, const BulkCallBack& callback);
 
     template<typename Iterator>
-    void get(const Iterator& keyBegin, const Iterator& keyEnd, const MultiBulkCallBack& callback) {
+    void get(const Iterator& keyBegin,
+             const Iterator& keyEnd,
+             const MultiBulkCallBack& callback) {
         RedisCommandPtr command =
-            cetty::redis::protocol::commands::stringsCommandGet<Iterator>(keyBegin, keyEnd);
+            commands::stringsCommandGet<Iterator>(keyBegin, keyEnd);
 
         RedisServiceFuturePtr future(new RedisServiceFuture(
-            boost::bind(&RedisClient::multiBulkCallBack, _1, _2, callback)));
-
+                                         boost::bind(
+                                             &RedisClient::multiBulkCallBack,
+                                             _1,
+                                             _2,
+                                             callback)));
         request(command, future);
     }
 
@@ -94,16 +101,16 @@ public:
 
 private:
     static void statusCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const RedisClient::StatusCallBack& callback);
+                               const RedisReplyPtr& reply,
+                               const RedisClient::StatusCallBack& callback);
 
     static void bulkCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const RedisClient::BulkCallBack& callback);
+                             const RedisReplyPtr& reply,
+                             const RedisClient::BulkCallBack& callback);
 
     static void multiBulkCallBack(const RedisServiceFuture& future,
-        const RedisReplyPtr& reply,
-        const MultiBulkCallBack& callback);
+                                  const RedisReplyPtr& reply,
+                                  const MultiBulkCallBack& callback);
 
 private:
     ChannelPtr channel_;

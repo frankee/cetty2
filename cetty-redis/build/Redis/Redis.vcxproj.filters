@@ -46,6 +46,9 @@
     <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Transactions.cpp">
       <Filter>protocol\commands</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisCommand.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h">

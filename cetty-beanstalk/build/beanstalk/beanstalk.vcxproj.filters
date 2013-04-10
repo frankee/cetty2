@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="builder">
+      <UniqueIdentifier>{efd4bd0c-915d-4bbc-b6c5-570dcceb1d86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol">
+      <UniqueIdentifier>{bc4e7b70-1727-4a01-98b9-5fc577eeb953}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="protocol\commands">
+      <UniqueIdentifier>{9c2b750f-75f9-454e-be56-4d85513a3bfa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cetty\beanstalk\protocol\commands\Consumer.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\beanstalk\protocol\commands\Producer.cpp">
+      <Filter>protocol\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\beanstalk\protocol\BeanstalkCommand.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\beanstalk\protocol\BeanstalkReply.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\beanstalk\protocol\BeanstalkReplyDecoder.cpp">
+      <Filter>protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\beanstalk\BeanstalkClient.cpp" />
+    <ClCompile Include="..\..\src\cetty\beanstalk\builder\BeanstalkClientBuilder.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\builder\BeanstalkClientBuilder.h">
+      <Filter>builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\BeanstalkClient.h" />
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\BeanstalkServiceFuture.h" />
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkCommand.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkCommandEncoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkReply.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkReplyDecoder.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\commands\Consumer.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\commands\Producer.h">
+      <Filter>protocol\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkCommandPtr.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\beanstalk\protocol\BeanstalkReplyPtr.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

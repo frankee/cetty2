@@ -51,7 +51,7 @@ template<typename H,
          VoidMessage,
          VoidMessage,
          ChannelBufferContainer,
-         ChannelMessageContainer<ChannelBufferPtr, MESSAGE_BLOCK>,
+         ChannelMessageContainer<InboundOut, MESSAGE_BLOCK>,
          VoidMessageContainer,
          VoidMessageContainer> >
 class BufferToMessageDecoder : private boost::noncopyable {

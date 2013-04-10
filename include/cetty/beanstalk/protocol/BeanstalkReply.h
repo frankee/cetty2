@@ -1,21 +1,34 @@
+#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKREPLY_H)
+#define CETTY_BEANSTALK_PROTOCOL_BEANSTALKREPLY_H
+
 /*
- * BeantalkReply.h
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
- *  Created on: Mar 11, 2013
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  *      Author: chenhl
  */
 
-#ifndef BEANTALKREPLY_H_
-#define BEANTALKREPLY_H_
+#include <map>
+#include <vector>
+#include <boost/variant.hpp>
 
 #include <cetty/Types.h>
 #include <cetty/util/Enum.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
-
-#include <boost/variant.hpp>
-#include <vector>
-#include <map>
+#include <cetty/beanstalk/protocol/BeanstalkReplyPtr.h>
 
 namespace cetty {
 namespace beanstalk {
@@ -23,55 +36,126 @@ namespace protocol {
 
 using namespace cetty::util;
 
-class BeanstalkReply : public ReferenceCounter<BeanstalkReply> {
+class BeanstalkReplyType : public cetty::util::Enum<BeanstalkReplyType> {
 public:
-	BeanstalkReply():id (-1), count(-1){}
-
-	void setId(int id) { this->id = id; }
-	int getId() { return id; }
-
-	void setCount(int count) { this->count = count; }
-	int getCount() { return count; }
-
-	void setResponse(const std::string &response) {
-		this->response = response;
-	}
-
-	const std::string &getResponse() { return response; }
-
-	void setValue(const std::string &value) { this->value = value; }
-    const std::string &getValue() { return value; }
-
-    int getResponseType(const std::string &response);
+    static const BeanstalkReplyType INSERTED;
+    static const BeanstalkReplyType BURIED;
+    static const BeanstalkReplyType USING;
+    static const BeanstalkReplyType RESERVED;
+    static const BeanstalkReplyType WATCHING;
+    static const BeanstalkReplyType KICKED;
+    static const BeanstalkReplyType FOUND;
+    static const BeanstalkReplyType OK;
+    static const BeanstalkReplyType INVALID;
 
 public:
+    static BeanstalkReplyType parseFrom(const StringPiece& name);
+    static BeanstalkReplyType parseFrom(const std::string& name);
 
-    enum {INSERTED, BURIED, USING, RESERVED, WATCHING, KICKED, FOUND, OK};
+public:
+    const std::string& name() const {
+        return name_;
+    }
 
 private:
-    static const std::map<std::string, int> &getReplyMap();
+    BeanstalkReplyType(int value, const std::string& name)
+        : Enum<BeanstalkReplyType>(value),
+          name_(name) {
+    }
 
 private:
-    static const std::string inserted;
-    static const std::string buried;
-    static const std::string rusing;
-    static const std::string reserved;
-    static const std::string watching;
-    static const std::string kicked;
-    static const std::string found;
-    static const std::string ok;
-
-    int id;
-    int count;
-    std::string response;
-    std::string value;
+    std::string name_;
 };
 
-typedef boost::intrusive_ptr<BeanstalkReply> BeanstalkReplyPtr;
+class BeanstalkReply : public ReferenceCounter<BeanstalkReply, int> {
+public:
+	BeanstalkReply()
+        :id_ (-1),
+        count_(-1),
+        type_(BeanstalkReplyType::INVALID) {
+    }
+
+    int id();
+	void setId(int id);
+	
+    int count();
+	void setCount(int count);
+
+    const BeanstalkReplyType& type() const;
+    void setType(const BeanstalkReplyType& type);
+
+    const StringPiece& data() const;
+    void setData(const StringPiece& data);
+
+    const std::string& tube() const;
+    void setTube(const StringPiece& tube);
+
+    std::string toString() const;
+
+private:
+    int id_;
+    int count_;
+    std::string tube_;
+    StringPiece data_;
+    BeanstalkReplyType type_;
+};
+
+inline
+int BeanstalkReply::id() {
+    return id_;
+}
+
+inline
+void BeanstalkReply::setId(int id) {
+    id_ = id;
+}
+
+inline
+void BeanstalkReply::setCount(int count) {
+    count_ = count;
+}
+
+inline
+int BeanstalkReply::count() {
+    return count_;
+}
+
+inline
+const BeanstalkReplyType& BeanstalkReply::type() const {
+    return type_;
+}
+
+inline
+void BeanstalkReply::setType(const BeanstalkReplyType& type) {
+    type_ = type;
+}
+
+inline
+const StringPiece& BeanstalkReply::data() const {
+    return data_;
+}
+
+inline
+void BeanstalkReply::setData(const StringPiece& data) {
+    data_ = data;
+}
+
+inline
+const std::string& BeanstalkReply::tube() const {
+    return tube_;
+}
+
+inline
+void BeanstalkReply::setTube(const StringPiece& tube) {
+    tube_.assign(tube.c_str(), tube.size());
+}
 
 }
 }
 }
 
+#endif //#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKREPLY_H)
 
-#endif /* BEANTALKREPLY_H_ */
+// Local Variables:
+// mode: c++
+// End:

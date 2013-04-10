@@ -20,117 +20,118 @@
 #include <string>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include <cetty/buffer/ChannelBuffer.h>
-#include <cetty/buffer/Unpooled.h>
 
-#include <cetty/util/StringUtil.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
-
+#include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/logging/LoggerHelper.h>
 #include <cetty/redis/protocol/RedisCommandPtr.h>
 
 namespace cetty {
 namespace redis {
 namespace protocol {
 
-using namespace cetty::buffer;
 using namespace cetty::util;
+using namespace cetty::buffer;
 
 class RedisCommand : public cetty::util::ReferenceCounter<RedisCommand, int> {
 public:
-    RedisCommand(const std::string& name)
-        : paramCnt(0), name(name) {
-        buffer = Unpooled::buffer(512*1024);
-        buffer->setIndex(12, 12);
-        append(name);
-    }
-
+    RedisCommand(const std::string& name);
     ~RedisCommand() {}
 
-    const std::string& getCommandName() const {
-        return this->name;
-    }
+    const std::string& name() const;
 
-    RedisCommand& append(const char* param, int size) {
-        if (NULL == param || size <= 0) {
-            return *this;
-        }
+    RedisCommand& append(const char* param, int size);
 
-        buffer->writeBytes(StringUtil::printf("$%d\r\n", size));
-        buffer->writeBytes(param, size);
-        buffer->writeBytes("\r\n");
+    RedisCommand& append(const std::string& param);
 
-        ++paramCnt;
-        return *this;
-    }
+    RedisCommand& operator<< (const std::string& param);
 
-    RedisCommand& append(const std::string& param) {
-        if (param.empty()) {
-            return *this;
-        }
-
-        buffer->writeBytes(StringUtil::printf("$%d\r\n", param.size()));
-        buffer->writeBytes(param); // binary safe string
-        buffer->writeBytes("\r\n");
-
-        ++paramCnt;
-        return *this;
-    }
-
-    RedisCommand& operator<< (const std::string& param) {
-        return append(param);
-    }
-
-    RedisCommand& operator<< (const StringPiece& param) {
-        return append(param.data(), param.length());
-    }
+    RedisCommand& operator<< (const StringPiece& param);
 
     template <typename T>
-    RedisCommand& operator<<(T const& datum) {
+    RedisCommand& operator<<(T const& datum);
+
+    RedisCommand& operator<<(const std::vector<std::string>& data);
+
+    RedisCommand& operator<<(const std::vector<StringPiece>& data);
+
+    template <typename T>
+    RedisCommand& operator<<(const std::vector<T>& data);
+
+    void done();
+
+    const ChannelBufferPtr& buffer() const;
+
+private:
+    int paramCnt_;
+    std::string name_;
+    ChannelBufferPtr buffer_;
+};
+
+inline
+const std::string& RedisCommand::name() const {
+    return name_;
+}
+
+inline
+RedisCommand& RedisCommand::operator<<(const std::string& param) {
+    return append(param);
+}
+
+inline
+RedisCommand& RedisCommand::operator<<(const StringPiece& param) {
+    return append(param.data(), param.length());
+}
+
+template <typename T> inline
+RedisCommand& RedisCommand::operator<<(T const& datum) {
+    try {
         return append(boost::lexical_cast<std::string>(datum));
     }
-
-    RedisCommand& operator<<(const std::vector<std::string>& data) {
-        for (std::size_t i = 0; i < data.size(); ++i) {
-            append(data[i]);
-        }
-
+    catch (const std::exception& e) {
+        LOG_ERROR << "append data has exception " << e.what();
         return *this;
     }
+}
 
-    RedisCommand& operator<<(const std::vector<StringPiece>& data) {
-        for (std::size_t i = 0; i < data.size(); ++i) {
-            append(data[i].data(), data[i].length());
-        }
-
-        return *this;
+inline
+RedisCommand& RedisCommand::operator<<(const std::vector<std::string>& data) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        append(data[i]);
     }
 
-    template <typename T>
-    RedisCommand& operator<<(const std::vector<T>& data) {
+    return *this;
+}
+
+inline
+RedisCommand& RedisCommand::operator<<(const std::vector<StringPiece>& data) {
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        append(data[i].data(), data[i].length());
+    }
+
+    return *this;
+}
+
+template <typename T> inline
+RedisCommand& RedisCommand::operator<<(const std::vector<T>& data) {
+    try {
         for (std::size_t i = 0; i < data.size(); ++i) {
             append(boost::lexical_cast<std::string>(data[i]));
         }
-
+    }
+    catch (const std::exception& e) {
+        LOG_ERROR << "append data has exception " << e.what();
         return *this;
     }
 
-    void done() {
-        std::string header;
-        StringUtil::printf(&header, "*%d\r\n", paramCnt);
+    return *this;
+}
 
-        BOOST_ASSERT(buffer->aheadWritableBytes() >= (int)header.size());
-
-        buffer->writeBytesAhead(header);
-    }
-
-    const ChannelBufferPtr& getBuffer() const { return buffer; }
-
-private:
-    int paramCnt;
-    std::string name;
-    ChannelBufferPtr buffer;
-};
+inline
+const ChannelBufferPtr& RedisCommand::buffer() const {
+    return buffer_;
+}
 
 }
 }

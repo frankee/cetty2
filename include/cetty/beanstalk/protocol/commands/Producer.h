@@ -1,12 +1,24 @@
+#if !defined(CETTY_BEANSTALK_PROTOCOL_COMMANDS_PRODUCER_H)
+#define CETTY_BEANSTALK_PROTOCOL_COMMANDS_PRODUCER_H
+
 /*
- * Producer.h
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
- *  Created on: Mar 11, 2013
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  *      Author: chenhl
  */
-
-#ifndef PRODUCER_H_
-#define PRODUCER_H_
 
 #include <cetty/beanstalk/protocol/BeanstalkCommand.h>
 
@@ -14,6 +26,9 @@ namespace cetty {
 namespace beanstalk {
 namespace protocol {
 namespace commands {
+
+static const int DEFAULT_PRIORITY = 1024;
+static const int DEFAULT_TTR = 60;
 
 /**
 * Adds a job consisting of a string to the server
@@ -45,6 +60,8 @@ BeanstalkCommandPtr use(const std::string &tubeName);
 }
 }
 
+#endif //#if !defined(CETTY_BEANSTALK_PROTOCOL_COMMANDS_PRODUCER_H)
 
-
-#endif /* PRODUCER_H_ */
+// Local Variables:
+// mode: c++
+// End:

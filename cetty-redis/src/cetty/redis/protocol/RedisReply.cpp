@@ -15,25 +15,24 @@
  */
 
 #include <cetty/redis/protocol/RedisReply.h>
-
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace redis {
 namespace protocol {
 
-const RedisReplyType RedisReplyType::STRING  = 0;
-const RedisReplyType RedisReplyType::ARRAY   = 1;
-const RedisReplyType RedisReplyType::INTEGER = 2;
-const RedisReplyType RedisReplyType::NIL     = 3;
-const RedisReplyType RedisReplyType::STATUS  = 4;
-const RedisReplyType RedisReplyType::ERROR   = 5;
+const RedisReplyType RedisReplyType::STRING(0, "STRING");
+const RedisReplyType RedisReplyType::ARRAY(1, "ARRAY");
+const RedisReplyType RedisReplyType::INTEGER(2, "INTEGER");
+const RedisReplyType RedisReplyType::NIL(3, "NIL");
+const RedisReplyType RedisReplyType::STATUS(4, "STATUS");
+const RedisReplyType RedisReplyType::ERROR(5, "ERROR");
 
 const std::vector<StringPiece> RedisReply::EMPTY_STRING_PIECES;
 
-int64_t RedisReply::getInteger() const {
-    if (type == RedisReplyType::INTEGER) {
-        return boost::get<int64_t>(value);
+int64_t RedisReply::integerValue() const {
+    if (type_ == RedisReplyType::INTEGER) {
+        return boost::get<int64_t>(value_);
     }
     else {
         LOG_WARN << "the RedisReplyMessageType is not integer when getInteger";
@@ -41,16 +40,20 @@ int64_t RedisReply::getInteger() const {
     }
 }
 
-std::vector<StringPiece>* RedisReply::getMutableArray() {
-    if (type == RedisReplyType::ARRAY) {
-        if (value.which() == 0) {
-            value = std::vector<StringPiece>();
+std::vector<StringPiece>* RedisReply::mutableArray() {
+    if (type_ == RedisReplyType::ARRAY) {
+        if (value_.which() == 0) {
+            value_ = std::vector<StringPiece>();
         }
 
-        return boost::get<std::vector<StringPiece> >(&value);
+        return boost::get<std::vector<StringPiece> >(&value_);
     }
 
     return NULL;
+}
+
+std::string RedisReply::toString() const {
+    return type_.name();
 }
 
 }

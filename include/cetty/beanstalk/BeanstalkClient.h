@@ -1,23 +1,34 @@
+#if !defined(CETTY_BEANSTALK_BEANSTALKCLIENT_H)
+#define CETTY_BEANSTALK_BEANSTALKCLIENT_H
+
 /*
- * BeanstalkClient.h
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
- *  Created on: Mar 11, 2013
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  *      Author: chenhl
  */
 
-#ifndef BEANSTALKCLIENT_H_
-#define BEANSTALKCLIENT_H_
-
 #include <map>
 #include <boost/bind.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <cetty/util/StringPiece.h>
 #include <cetty/channel/ChannelPtr.h>
 #include <cetty/beanstalk/BeanstalkServiceFuture.h>
-#include <cetty/beanstalk/protocol/BeanstalkCommand.h>
 #include <cetty/beanstalk/protocol/BeanstalkReply.h>
-#include <cetty/beanstalk/protocol/commands/Producer.h>
-#include <cetty/beanstalk/protocol/commands/Consumer.h>
+#include <cetty/beanstalk/protocol/BeanstalkCommand.h>
 
 namespace cetty {
 namespace beanstalk {
@@ -27,101 +38,90 @@ using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::beanstalk::protocol;
 
-class BeanstalkClient {
+class BeanstalkClient : private boost::noncopyable {
 public:
-	BeanstalkClient(const ChannelPtr& channel)
-        : channel(channel) {}
+    typedef boost::function<void (const BeanstalkReplyPtr&)> ReplyCallback;
+
+public:
+    BeanstalkClient(const ChannelPtr& channel)
+        : channel_(channel) {}
 
     ~BeanstalkClient() {}
 
-    typedef boost::function2<void,
-    		                 const BeanstalkServiceFuture&,
-                             const BeanstalkReplyPtr&> ReplyCallback;
-
-    typedef boost::function1<void, std::string> CommandCallBack;
-    typedef boost::function2<void, std::string, int> IdCallBack;
-    typedef boost::function2<void, std::string, std::string> DataCallBack;
-    typedef boost::function3<void, std::string, int, std::string> IdDataCallBack;
-
 public:
     void request(const BeanstalkCommandPtr& command,
-    		     const BeanstalkServiceFuturePtr& future);
+                 const BeanstalkServiceFuturePtr& future);
+
+    void put(const std::string& data, const ReplyCallback& callback);
 
     void put(const std::string& data,
-    		 int priority,
-    		 int delay,
-    		 int ttr,
-    		 const IdCallBack &callback);
+             int priority,
+             int delay,
+             int ttr,
+             const ReplyCallback& callback);
 
-    void use(const std::string &tubeName,
-    		 const DataCallBack &callback);
+    void use(const std::string& tubeName,
+             const ReplyCallback& callback);
 
-    void reserve(const IdDataCallBack &callback);
-    void reserve(int timeout, const IdDataCallBack &callback);
+    void reserve(const ReplyCallback& callback);
+    void reserve(int timeout, const ReplyCallback& callback);
 
-    void del(int id, const CommandCallBack &callback);
+    void del(int id, const ReplyCallback& callback);
+
+    void release(int id, const ReplyCallback& callback);
 
     void release(int id,
-    		     int priority,
-    		     int delay,
-    		     const CommandCallBack &callback);
+                 int priority,
+                 int delay,
+                 const ReplyCallback& callback);
 
-    void bury(int id, int priority, const CommandCallBack &callback);
+    void bury(int id, const ReplyCallback& callback);
+    void bury(int id, int priority, const ReplyCallback& callback);
 
-    void touch(int id, const CommandCallBack &callback);
+    void touch(int id, const ReplyCallback& callback);
 
-    void watch(const std::string &tube, const IdCallBack &callback);
-    void ignore(const std::string &tube, const IdCallBack &callback);
+    void watch(const std::string& tube, const ReplyCallback& callback);
+    void ignore(const std::string& tube, const ReplyCallback& callback);
 
-    void peek(int id, const IdDataCallBack &callback);
-    void peekReady(const IdDataCallBack &callback);
-    void peekDelayed(const IdDataCallBack &callback);
-    void peekBuried(const IdDataCallBack &callback);
+    void peek(int id, const ReplyCallback& callback);
+    void peekReady(const ReplyCallback& callback);
+    void peekDelayed(const ReplyCallback& callback);
+    void peekBuried(const ReplyCallback& callback);
 
-    void kick(int bound, const IdCallBack &callback);
-    void kickJob(int id, const CommandCallBack &callback);
+    void kick(int bound, const ReplyCallback& callback);
+    void kickJob(int id, const ReplyCallback& callback);
 
-    void statsJob(int id, const DataCallBack &callback);
-    void statsTube(const std::string &tube, const DataCallBack &callback);
-    void stats(const DataCallBack &callback);
+    void statsJob(int id, const ReplyCallback& callback);
+    void statsTube(const std::string& tube, const ReplyCallback& callback);
+    void stats(const ReplyCallback& callback);
 
-    void listTubes(const DataCallBack &callback);
-    void listTubeUsed(const DataCallBack &callback);
-    void listTubesWatched(const DataCallBack &callback);
+    void listTubes(const ReplyCallback& callback);
+    void listUsedTube(const ReplyCallback& callback);
+    void listWatchedTubes(const ReplyCallback& callback);
 
-    void pauseTube(const std::string &tube,
-    		       int delay,
-    		       const CommandCallBack& callback);
+    void pauseTube(const std::string& tube,
+                   const ReplyCallback& callback);
+
+    void pauseTube(const std::string& tube,
+                   int delay,
+                   const ReplyCallback& callback);
 
     void quit();
 
 private:
-    static void commandCallBack(const BeanstalkServiceFuture& future,
-                                const BeanstalkReplyPtr& reply,
-                                const CommandCallBack& callback);
-
-    static void idCallBack(const BeanstalkServiceFuture& future,
-                           const BeanstalkReplyPtr& reply,
-                           const IdCallBack& callback);
-
-    static void countCallBack(const BeanstalkServiceFuture& future,
-                              const BeanstalkReplyPtr& reply,
-                              const IdCallBack& callback);
-
-    static void dataCallBack(const BeanstalkServiceFuture& future,
-                             const BeanstalkReplyPtr& reply,
-                             const DataCallBack& callback);
-
-    static void idDataCallBack(const BeanstalkServiceFuture& future,
-                               const BeanstalkReplyPtr& reply,
-                               const IdDataCallBack& callback);
+    static void internalCallBack(const BeanstalkServiceFuture& future,
+                                 const BeanstalkReplyPtr& reply,
+                                 const ReplyCallback& callback);
 
 private:
-    ChannelPtr channel;
+    ChannelPtr channel_;
 };
 
 }
 }
 
+#endif //#if !defined(CETTY_BEANSTALK_BEANSTALKCLIENT_H)
 
-#endif /* BEANSTALKCLIENT_H_ */
+// Local Variables:
+// mode: c++
+// End:

@@ -153,7 +153,7 @@ public:
         return ((length_ >= x.length_) && (memcmp(ptr_, x.ptr_, x.length_) == 0));
     }
 
-    StringPiece substr(int pos, int cnt = -1) {
+    StringPiece substr(int pos, int cnt = -1) const {
         if (pos < 0 || cnt == 0) {
             return StringPiece();
         }

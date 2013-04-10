@@ -149,7 +149,7 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
                 return reset();
             }
 
-            std::vector<StringPiece>* bulks = reply_->getMutableArray();
+            std::vector<StringPiece>* bulks = reply_->mutableArray();
             BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
             return readMultiBukls(buffer, bytes, bulks);
         }
@@ -167,7 +167,7 @@ RedisReplyPtr RedisReplyMessageDecoder::decode(ChannelHandlerContext& ctx,
         }
     }
     else if (READ_MULTI_BULK == state) {
-        std::vector<StringPiece>* bulks = reply_->getMutableArray();
+        std::vector<StringPiece>* bulks = reply_->mutableArray();
         BOOST_ASSERT(bulks && "RedisReplyMessage getMutableArray exception");
 
         if (bulkSize_ > 0) {

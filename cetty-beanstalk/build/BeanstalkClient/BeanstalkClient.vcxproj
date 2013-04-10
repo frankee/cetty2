@@ -10,42 +10,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\redis\builder\RedisClientBuilder.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Connection.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Hashes.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Keys.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Scripting.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Server.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\SortedSets.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Strings.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\commands\Transactions.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisCommand.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReply.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\protocol\RedisReplyDecoder.cpp" />
-    <ClCompile Include="..\..\src\cetty\redis\RedisClient.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\include\cetty\redis\builder\RedisClientBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Connection.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Hashes.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Keys.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Scripting.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Server.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\SortedSets.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Strings.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\commands\Transactions.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommand.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandEncoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisCommandPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReply.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyDecoder.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\protocol\RedisReplyPtr.h" />
-    <ClInclude Include="..\..\..\include\cetty\redis\RedisClient.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{31D9123D-BD02-4FCD-BB0B-5F4A5C1EE440}</ProjectGuid>
-    <RootNamespace>redis</RootNamespace>
+    <ProjectGuid>{5D7C2010-A763-46A8-90C2-BA11970F10E0}</ProjectGuid>
+    <RootNamespace>BeanstalkClient</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -55,7 +22,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -70,10 +37,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../../lib</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\bin</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
@@ -87,31 +54,33 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../include;../../src;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;BOOST_ALL_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <AdditionalIncludeDirectories>../../src;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../../../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cettyd.lib;configd.lib;serviced.lib;yamld.lib;zlibd.lib;beanstalkd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <AdditionalLibraryDirectories>../../../lib;../../../../thirdparty/_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>../../src;../../../include;../../../../thirdparty/_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -119,16 +88,27 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libtcmalloc_minimal.lib;cetty.lib;config.lib;service.lib;libprotobuf.lib;yaml.lib;ProtobufService.lib;ProtobufSerialization.lib;craft.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../../Thirdparty/_lib;../../../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ForceSymbolReferences>__tcmalloc;%(ForceSymbolReferences)</ForceSymbolReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cetty\cetty.vcxproj">
+      <Project>{5c94f9f3-765c-4614-badc-bcfec0ee4b7b}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\example\beanstalk.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

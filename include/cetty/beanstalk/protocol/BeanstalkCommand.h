@@ -1,79 +1,117 @@
+#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMAND_H)
+#define CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMAND_H
+
 /*
- * BeanstalkCommand.h
+ * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
  *
- *  Created on: Mar 11, 2013
+ * Distributed under under the Apache License, version 2.0 (the "License").
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  *      Author: chenhl
  */
 
-#ifndef BEANSTALKCOMMAND_H_
-#define BEANSTALKCOMMAND_H_
+#include <string>
+#include <cstdlib>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include <cetty/buffer/ChannelBuffer.h>
 #include <cetty/buffer/Unpooled.h>
 #include <cetty/util/StringPiece.h>
 #include <cetty/util/ReferenceCounter.h>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/intrusive_ptr.hpp>
-
-#include <cstdlib>
-#include <string>
+#include <cetty/logging/LoggerHelper.h>
+#include <cetty/beanstalk/protocol/BeanstalkCommandPtr.h>
 
 namespace cetty {
 namespace beanstalk {
 namespace protocol {
 
-#define DEFAULT_PRIORITY 1024
-#define DEFAULT_TTR 60
-
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class BeanstalkCommand : public cetty::util::ReferenceCounter<BeanstalkCommand, int> {
+class BeanstalkCommand : public ReferenceCounter<BeanstalkCommand, int> {
 public:
-	BeanstalkCommand(const std::string& name)
-        :name(name) {
-        buffer = Unpooled::buffer(512*1024);
-        buffer->setIndex(12, 12);
-    }
+	BeanstalkCommand(const std::string& name);
+    BeanstalkCommand(const std::string& name, int initBufferSize);
 
-    ~BeanstalkCommand() {}
+    ~BeanstalkCommand();
 
-    const std::string& getCommandName() const {
-        return this->name;
-    }
+    const std::string& name() const;
 
     BeanstalkCommand& append(const char* param, int size);
     BeanstalkCommand& append(const std::string& param);
 
-    BeanstalkCommand& operator<< (const std::string& param) {
-        return append(param);
-    }
-
-    BeanstalkCommand& operator<< (const StringPiece& param) {
-        return append(param.data(), param.length());
-    }
+    BeanstalkCommand& operator<< (const std::string& param);
+    BeanstalkCommand& operator<< (const StringPiece& param);
 
     template <typename T>
-    BeanstalkCommand& operator<<(T const& datum) {
-        return append(boost::lexical_cast<std::string>(datum));
-    }
+    BeanstalkCommand& operator<<(T const& datum);
 
+    void done();
 
-    void done() { append(terminal); }
-
-    const ChannelBufferPtr& getBuffer() const { return buffer; }
+    const ChannelBufferPtr& buffer() const;
 
 private:
-    static const std::string terminal;
-    std::string name;
-    ChannelBufferPtr buffer;
+    static const std::string terminal_;
+
+private:
+    std::string name_;
+    ChannelBufferPtr buffer_;
 };
 
-typedef boost::intrusive_ptr<BeanstalkCommand> BeanstalkCommandPtr;
+inline
+const std::string& BeanstalkCommand::name() const {
+    return this->name_;
+}
+
+inline
+BeanstalkCommand& BeanstalkCommand::operator<<(const std::string& param) {
+    return append(param);
+}
+
+inline
+BeanstalkCommand& BeanstalkCommand::operator<<(const StringPiece& param) {
+    return append(param.data(), param.length());
+}
+
+template <typename T> inline
+BeanstalkCommand& BeanstalkCommand::operator<<(T const& datum) {
+    try {
+        return append(boost::lexical_cast<std::string>(datum));
+    }
+    catch (const std::exception& e) {
+        LOG_ERROR << "append data has exception " << e.what();
+        return *this;
+    }
+}
+
+inline
+void BeanstalkCommand::done() {
+    append(terminal_);
+}
+
+inline
+const ChannelBufferPtr& BeanstalkCommand::buffer() const {
+    return buffer_;
+}
 
 }
 }
 }
 
-#endif /* BEANSTALKCOMMAND_H_ */
+#endif //#if !defined(CETTY_BEANSTALK_PROTOCOL_BEANSTALKCOMMAND_H)
+
+// Local Variables:
+// mode: c++
+// End:
