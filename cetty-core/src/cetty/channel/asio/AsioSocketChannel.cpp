@@ -410,9 +410,9 @@ bool AsioSocketChannel::doClose() {
         tcpSocket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
 
         if (error) {
-            LOG_ERROR << "channel " << toString()
-                      << "failed to shutdown the tcp socket, code: "
-                      << error.value() << " message: " << error.message();
+            LOG_WARN << "channel " << toString()
+                     << "failed to shutdown the tcp socket, code: "
+                     << error.value() << " message: " << error.message();
         }
     }
 
@@ -439,7 +439,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
 
     if (!isActive()) {
         LOG_ERROR << "channel " << toString()
-                  << "failed to send the msg, because the socket is \
+                  << " failed to send the msg, because the socket is \
                      disconnected, and then close this channel";
 
         if (future) {
@@ -452,8 +452,8 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
 
     isWriting_ = true;
     AsioWriteOperation& operation = writeQueue_->offer(buffer, future);
-
-    if (operation.writeBufferSize() == 0) {
+    int writeBufferSize = operation.writeBufferSize();
+    if (writeBufferSize == 0) {
         LOG_WARN << "channel " << toString()
                  << "write an empty message, do not write to the socket,\
                              just post a handleWrite operation.";
@@ -473,7 +473,8 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                               boost::asio::placeholders::error,
                                               boost::asio::placeholders::bytes_transferred)));
         LOG_INFO << "channel " << toString()
-                 << "write a buffer to the socket asynchronously";
+                 << " write a buffer with" << writeBufferSize
+                 << " bytes to the socket asynchronously";
     }
     else {
         tcpSocket_.async_send(operation.asioBufferArray(),
@@ -483,8 +484,8 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                               boost::asio::placeholders::error,
                                               boost::asio::placeholders::bytes_transferred)));
         LOG_WARN << "channel " << toString()
-                 << "write a gathering buffer to the socket asynchronously,\
-                    may slow down the system.";
+                 << " write a gathering buffer with " << writeBufferSize
+                 << " bytes to the socket asynchronously, may be latency.";
     }
 }
 

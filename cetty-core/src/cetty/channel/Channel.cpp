@@ -148,7 +148,7 @@ std::string Channel::toString() const {
     if (remote) {
         if (!parent()) { // client channel
             StringUtil::printf(&strVal_,
-                               "[id: 0x%08x, %s %s %s]",
+                               "[id: %d, %s %s %s]",
                                id(),
                                local.toString().c_str(),
                                active ? "=>" : ":>",
@@ -156,7 +156,7 @@ std::string Channel::toString() const {
         }
         else { // connection channel
             StringUtil::printf(&strVal_,
-                               "[id: 0x%08x, %s %s %s]",
+                               "[id: %d, %s %s %s]",
                                id(),
                                remote.toString().c_str(),
                                active ? "=>" : ":>",
@@ -165,12 +165,12 @@ std::string Channel::toString() const {
     }
     else if (local) {
         StringUtil::printf(&strVal_,
-                           "[id: 0x%08x, %s]",
+                           "[id: %d, %s]",
                            id(),
                            local.toString().c_str());
     }
     else {
-        StringUtil::printf(&strVal_, "[id: 0x%08x]", id());
+        StringUtil::printf(&strVal_, "[id: %d]", id());
     }
 
     strValActive_ = active;

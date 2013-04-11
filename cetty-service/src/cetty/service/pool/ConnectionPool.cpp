@@ -50,11 +50,11 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
             ChannelFuturePtr future =
                 bootstrap_.connect(connections_[0].host, connections_[0].port);
             callbacks_.push_back(callback);
-
             connecting_ = true;
-
             future->addListener(boost::bind(
-                                    &ConnectionPool::connectedCallback, this, _1));
+                                    &ConnectionPool::connectedCallback,
+                                    this,
+                                    _1));
         }
 
         return ChannelPtr();
@@ -98,7 +98,8 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     }
 }
 
-void ConnectionPool::setChannelInitializer(const Channel::Initializer& initializer) {
+void ConnectionPool::setChannelInitializer(
+    const Channel::Initializer& initializer) {
     bootstrap_.setChannelInitializer(initializer);
 }
 
