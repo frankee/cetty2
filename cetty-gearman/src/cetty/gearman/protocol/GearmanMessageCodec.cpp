@@ -216,7 +216,7 @@ void GearmanMessageCodec::writeParameters(const ChannelBufferPtr& buffer,
 void GearmanMessageCodec::writeParametersAhead(const ChannelBufferPtr& buffer,
         const std::vector<std::string>& parameters,
         bool withZeroPad) {
-    std::size_t j = parameters.size();
+    int j = static_cast<int>(parameters.size());
 
     if (j == 0) {
         return;
@@ -228,7 +228,7 @@ void GearmanMessageCodec::writeParametersAhead(const ChannelBufferPtr& buffer,
 
     buffer->writeBytesAhead(parameters[j - 1]);
 
-    for (std::size_t i = j - 2; i >= 0; --i) {
+    for (int i = j - 2; i >= 0; --i) {
         buffer->writeByteAhead(0);
         buffer->writeBytesAhead(parameters[i]);
     }
