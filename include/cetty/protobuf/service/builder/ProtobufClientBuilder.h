@@ -50,6 +50,14 @@ public:
         return builder_.build();
     }
 
+    const EventLoopPtr& eventLoop() const {
+        return builder_.eventLoop();
+    }
+
+    const EventLoopPoolPtr& eventLoopPool() const {
+        return builder_.eventLoopPool();
+    }
+
 private:
     void init();
     bool initializeChannel(const ChannelPtr& channel);

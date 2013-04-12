@@ -46,57 +46,104 @@ public:
     virtual ~ServerBuilder();
 
     /**
+     * build a server with the prototype, which has registered
      *
+     * @param name
+     * @param port
      */
-    ServerBuilder& registerServerPrototype(const std::string& name,
-                                           const ChildInitializer& childInitializer);
+    ChannelPtr build(const std::string& name, int port);
 
     /**
-     *
+     * build a server with the prototype, which has registered
      */
-    ServerBuilder& registerServerPrototype(const std::string& name,
-                                           const ChannelOptions& options,
-                                           const ChannelOptions& childOptions,
-                                           const ChildInitializer& childInitializer);
+    ChannelPtr build(const std::string& name,
+                     const std::string& host,
+                     int port);
 
     /**
+     * build a server with the prototype, which has registered,
+     * and reset the options.
+     */
+    ChannelPtr build(const std::string& name,
+                     const std::string& host,
+                     int port,
+                     const ChannelOptions& options,
+                     const ChannelOptions& childOptions);
+
+    /**
+     * build a new server channel
+     */
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     int port);
+
+    /**
+     * build a new server channel
+     */
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port);
+
+    /**
+     * build a new server channel
+     */
+    ChannelPtr build(const std::string& name,
+                     const ChildInitializer& childInitializer,
+                     const std::string& host,
+                     int port,
+                     const ChannelOptions& options,
+                     const ChannelOptions& childOptions);
+
+    /**
+     * build all server channels which setting in the configure file.
+     */
+    ServerBuilder& buildAll();
+
+    /**
+     * reset the options of the server prototype
      *
+     * @param name the name of the server prototype
+     * @param options
+     * @param childOptions
      */
     ServerBuilder& setOptions(const std::string& name,
                               const ChannelOptions& options,
                               const ChannelOptions& childOptions);
 
-    ChannelPtr build(const std::string& name, int port);
-
-    ChannelPtr build(const std::string& name,
-                     const std::string& host,
-                     int port);
-
-    ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
-                     int port);
-
-    ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
-                     const std::string& host,
-                     int port);
-
-    ChannelPtr build(const std::string& name,
-                     const ChannelOptions& options,
-                     const ChannelOptions& childOptions,
-                     const ChildInitializer& childInitializer,
-                     int port);
-
-    ChannelPtr build(const std::string& name,
-                     const ChannelOptions& options,
-                     const ChannelOptions& childOptions,
-                     const ChildInitializer& childInitializer,
-                     const std::string& host,
-                     int port);
-
-    ServerBuilder& buildAll();
-
+    /**
+     * Waiting for all the {@link channel}s in the {@link ServerBuilder} to close.
+     */
     void waitingForExit();
+
+    /**
+     *
+     */
+    ServerBuilder& registerPrototype(const std::string& name,
+                                     const ChildInitializer& childInitializer);
+
+    /**
+     *
+     */
+    ServerBuilder& registerPrototype(const std::string& name,
+                                     const ChannelOptions& options,
+                                     const ChannelOptions& childOptions,
+                                     const ChildInitializer& childInitializer);
+
+    /**
+     *
+     */
+    ServerBuilder& setDaemonize(bool daemonize);
+
+    /**
+     *
+     */
+    ServerBuilder& setPidfile(const std::string& filename);
+
+    /**
+     *
+     */
+    ServerBuilderConfig& config();
 
     /**
      *
@@ -106,7 +153,7 @@ public:
     /**
      *
      */
-    const EventLoopPoolPtr& parentPool() const;
+    const EventLoopPoolPtr& pool() const;
 
     /**
      *
@@ -135,12 +182,29 @@ private:
 };
 
 inline
+ServerBuilder& ServerBuilder::setDaemonize(bool daemonize) {
+    config_.daemonize = daemonize;
+    return *this;
+}
+
+inline
+ServerBuilder& ServerBuilder::setPidfile(const std::string& filename) {
+    config_.pidfile = filename;
+    return *this;
+}
+
+inline
+ServerBuilderConfig& ServerBuilder::config() {
+    return config_;
+}
+
+inline
 const ServerBuilderConfig& ServerBuilder::config() const {
     return config_;
 }
 
 inline
-const EventLoopPoolPtr& ServerBuilder::parentPool() const {
+const EventLoopPoolPtr& ServerBuilder::pool() const {
     return parentEventLoopPool_;
 }
 

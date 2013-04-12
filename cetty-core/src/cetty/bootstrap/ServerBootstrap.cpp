@@ -94,9 +94,7 @@ public:
             child->setInitializer(bootstrap_.childInitializer());
             child->open();
 
-            const ChannelOptions& childOptions =
-                bootstrap_.childOptions();
-
+            const ChannelOptions& childOptions = bootstrap_.childOptions();
             ChannelOptions::ConstIterator itr = childOptions.begin();
 
             for (; itr != childOptions.end(); ++itr) {
@@ -115,43 +113,43 @@ private:
 };
 
 ServerBootstrap::ServerBootstrap()
-    : daemonized_(false),
-      parentHandler_() {
+    : daemonized_(false) {
 }
 
 ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool)
     : Bootstrap<ServerBootstrap>(pool),
-      daemonized_(false),
-      parentHandler_() {
+      daemonized_(false) {
     setChildEventLoopPool(pool);
 }
 
-ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& parent,
+ServerBootstrap::ServerBootstrap(const EventLoopPoolPtr& pool,
                                  const EventLoopPoolPtr& child)
-    : Bootstrap<ServerBootstrap>(parent),
-      daemonized_(false),
-      parentHandler_() {
+    : Bootstrap<ServerBootstrap>(pool),
+      daemonized_(false) {
     if (child) {
         setChildEventLoopPool(child);
         LOG_INFO << "set null EventLoopPool to child, using parent.";
     }
     else {
-        setChildEventLoopPool(parent);
+        setChildEventLoopPool(pool);
     }
 }
 
 ServerBootstrap::ServerBootstrap(int parentThreadCnt, int childThreadCnt)
-    : daemonized_(false),
-      parentHandler_() {
-    setParentEventLoopPool(new AsioServicePool(parentThreadCnt));
+    : daemonized_(false) {
+    setEventLoopPool(new AsioServicePool(parentThreadCnt));
 
     if (childThreadCnt > 0) {
         setChildEventLoopPool(new AsioServicePool(childThreadCnt));
     }
 }
 
-ServerBootstrap& ServerBootstrap::setParentEventLoopPool(
-    const EventLoopPoolPtr& pool) {
+ServerBootstrap::~ServerBootstrap() {
+}
+
+ServerBootstrap& ServerBootstrap::setEventLoopPool(const EventLoopPoolPtr& pool) {
+    Bootstrap<ServerBootstrap>::setEventLoopPool(pool);
+
     if (pool) {
         if (!childPool_) {
             childPool_ = pool;
@@ -160,9 +158,6 @@ ServerBootstrap& ServerBootstrap::setParentEventLoopPool(
         }
 
         Bootstrap<ServerBootstrap>::setEventLoopPool(pool);
-    }
-    else {
-        LOG_WARN << "setting the NULL EventLoopPool, skip it";
     }
 
     return *this;
@@ -199,7 +194,7 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
 
     if (channel->isOpen()) {
         // Set the options.
-        channel->config().setOptions(channelOptions());
+        channel->config().setOptions(options());
 
         insertChannel(channel->id(), channel);
 
@@ -228,10 +223,6 @@ void ServerBootstrap::shutdown() {
     childPool_->waitingForStop();
 
     clearChannels();
-
-    if (parentHandler_) {
-        delete parentHandler_;
-    }
 }
 
 bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
@@ -240,8 +231,8 @@ bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
     pipeline.addLast<Acceptor>("acceptor",
                                Acceptor::Ptr(new Acceptor(*this)));
 
-    if (parentHandler_) {
-        pipeline.addLast(parentHandler_);
+    if (handler()) {
+        pipeline.addLast(handler());
     }
 
     return true;

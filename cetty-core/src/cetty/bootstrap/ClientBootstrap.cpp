@@ -44,8 +44,8 @@ ClientBootstrap::ClientBootstrap(const EventLoopPoolPtr& pool)
     : Bootstrap<ClientBootstrap>(pool) {
 }
 
-ClientBootstrap::ClientBootstrap(const EventLoopPtr& eventLoop)
-    : eventLoop_(eventLoop) {
+ClientBootstrap::ClientBootstrap(const EventLoopPtr& loop)
+    : eventLoop_(loop) {
 }
 
 ClientBootstrap::ClientBootstrap(int threadCnt) {
@@ -81,7 +81,7 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
     ch->open();
 
     // Set the options.
-    ch->config().setOptions(channelOptions());
+    ch->config().setOptions(options());
 
     insertChannel(ch->id(), ch);
 

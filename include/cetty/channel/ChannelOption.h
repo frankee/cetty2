@@ -54,8 +54,15 @@ public:
 
 class ChannelOption {
 public:
-    typedef boost::variant<int, bool, std::string, std::vector<int> > Variant;
+    class Null { public: Null() {} };
+    typedef boost::variant<Null, int, bool, std::string, std::vector<int> > Variant;
     typedef std::map<ChannelOption, Variant> Options;
+
+public:
+    /**
+     *
+     */
+    static const Variant EMPTY_VALUE;
 
 public:
     ChannelOption(const std::string& name,
@@ -75,6 +82,15 @@ public:
 
     const std::string& name() const;
 
+public:
+    /**
+     * test the {@link ChannelOption::Variant} is empty.
+     */
+    static bool empty(const ChannelOption::Variant& option);
+    
+    /**
+     * parse the ChannelOption from the given name.
+     */
     static ChannelOption parseFrom(const std::string& name);
 
 public:
@@ -148,6 +164,11 @@ bool ChannelOption::operator==(const ChannelOption& option) const {
 inline
 const std::string& ChannelOption::name() const {
     return name_;
+}
+
+inline
+bool ChannelOption::empty(const ChannelOption::Variant& option) {
+    return option.which() == 0;
 }
 
 }

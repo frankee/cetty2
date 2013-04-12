@@ -473,7 +473,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                               boost::asio::placeholders::error,
                                               boost::asio::placeholders::bytes_transferred)));
         LOG_INFO << "channel " << toString()
-                 << " write a buffer with" << writeBufferSize
+                 << " write a buffer with " << writeBufferSize
                  << " bytes to the socket asynchronously";
     }
     else {

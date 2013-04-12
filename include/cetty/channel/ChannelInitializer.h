@@ -35,7 +35,7 @@ public:
 
 public:
     ChannelInitializer1()
-        : name_("auto1") {
+        : name_("_auto1") {
     }
 
     ChannelInitializer1(const std::string& name)
@@ -84,18 +84,13 @@ public:
     typedef typename ChannelHandlerWrapper<T2>::HandlerPtr Handler2Ptr;
     typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
 
-    enum {
-        ARG_HANDLER1,
-        ARG_HANDLER2
-    };
-
 public:
     ChannelInitializer2() {}
 
     bool operator()(const ChannelPtr& channel) {
         ChannelPipeline& pipeline = channel->pipeline();
-        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
-        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
+        pipeline.addLast<Handler1Ptr>("_auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("_auto2", Handler2Ptr(new Handler2));
         return true;
     }
 };
@@ -120,9 +115,9 @@ public:
 
     bool operator()(const ChannelPtr& channel) {
         ChannelPipeline& pipeline = channel->pipeline();
-        pipeline.addLast<Handler1Ptr>("auto1", Handler1Ptr(new Handler1));
-        pipeline.addLast<Handler2Ptr>("auto2", Handler2Ptr(new Handler2));
-        pipeline.addLast<Handler3Ptr>("auto3", Handler3Ptr(new Handler3));
+        pipeline.addLast<Handler1Ptr>("_auto1", Handler1Ptr(new Handler1));
+        pipeline.addLast<Handler2Ptr>("_auto2", Handler2Ptr(new Handler2));
+        pipeline.addLast<Handler3Ptr>("_auto3", Handler3Ptr(new Handler3));
         return true;
     }
 };

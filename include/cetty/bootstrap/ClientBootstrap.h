@@ -121,84 +121,74 @@ using namespace cetty::channel;
 class ClientBootstrap : public Bootstrap<ClientBootstrap> {
 public:
     /**
-     * Creates a new instance with no {@link ChannelFactory} set.
-     * {@link #setFactory(ChannelFactory)} must be called before any I/O
-     * operation is requested.
+     *
      */
     ClientBootstrap();
-    ClientBootstrap(const EventLoopPtr& eventLoop);
+    ClientBootstrap(const EventLoopPtr& loop);
     ClientBootstrap(const EventLoopPoolPtr& pool);
 
     ClientBootstrap(int threadCnt);
 
     virtual ~ClientBootstrap() {}
 
+    /**
+     * return the {@link InetAddress} of the remote peer.
+     */
     const InetAddress& remoteAddress() const;
 
+    /**
+     * The {@link InetAddress} to connect to once the {@link #connect()} method
+     * is called.
+     */
     ClientBootstrap& setRemoteAddress(const InetAddress& address);
-    ClientBootstrap& setRemoteAddress(const std::string& host, int port);
-
-    const Channel::Initializer& channelInitializer() const;
-
-    ClientBootstrap& setChannelInitializer(
-        const Channel::Initializer& initializer);
-
-    ChannelFuturePtr connect();
 
     /**
-     * Attempts a new connection with the current <tt>"remoteAddress"</tt> and
-     * <tt>"localAddress"</tt> option.  If the <tt>"localAddress"</tt> option is
-     * not set, the local address of a new channel is determined automatically.
-     * This method is similar to the following code:
+     * @see {@link #remoteAddress(const InetAddress&)}
+     */
+    ClientBootstrap& setRemoteAddress(const std::string& host, int port);
+
+    /**
      *
-     * <pre>
-     * {@link ClientBootstrap} b = ...;
-     * b.connect(b.getOption("remoteAddress"), b.getOption("localAddress"));
-     * </pre>
+     */
+    const Channel::Initializer& channelInitializer() const;
+
+    /**
+     *
+     */
+    ClientBootstrap& setInitializer(const Channel::Initializer& initializer);
+
+    /**
+     * Connect a {@link Channel} to the remote peer.
      *
      * @return a future object which notifies when this connection attempt
      *         succeeds or fails
+     */
+    ChannelFuturePtr connect();
+
+    /**
+     * Connect a {@link Channel} to the remote peer.
      *
-     * @throws IllegalStateException
-     *         if <tt>"remoteAddress"</tt> option was not set
-     * @throws ChannelPipelineException
-     *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
-     *            failed to create a new {@link ChannelPipeline}
+     * @return a future object which notifies when this connection attempt
+     *         succeeds or fails
      */
     ChannelFuturePtr connect(const std::string& host, int port);
 
     /**
-     * Attempts a new connection with the specified <tt>remoteAddress</tt> and
-     * the current <tt>"localAddress"</tt> option. If the <tt>"localAddress"</tt>
-     * option is not set, the local address of a new channel is determined
-     * automatically.  This method is identical with the following code:
-     *
-     * <pre>
-     * {@link ClientBootstrap} b = ...;
-     * b.connect(remoteAddress, b.getOption("localAddress"));
-     * </pre>
+     * Connect a {@link Channel} to the remote peer.
      *
      * @return a future object which notifies when this connection attempt
      *         succeeds or fails
-     *
-     * @throws ChannelPipelineException
-     *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
-     *            failed to create a new {@link ChannelPipeline}
      */
     ChannelFuturePtr connect(const InetAddress& remoteAddress);
 
     /**
      * Attempts a new connection with the specified <tt>remoteAddress</tt> and
      * the specified <tt>localAddress</tt>.  If the specified local address is
-     * <tt>null</tt>, the local address of a new channel is determined
+     * <tt>empty</tt>, the local address of a new channel is determined
      * automatically.
      *
      * @return a future object which notifies when this connection attempt
      *         succeeds or fails
-     *
-     * @throws ChannelPipelineException
-     *         if this bootstrap's {@link #setPipelineFactory(ChannelPipelineFactory) pipelineFactory}
-     *            failed to create a new {@link ChannelPipeline}
      */
     ChannelFuturePtr connect(const InetAddress& remote, const InetAddress& local);
 
@@ -234,7 +224,7 @@ const InetAddress& ClientBootstrap::remoteAddress() const {
 }
 
 inline
-ClientBootstrap& ClientBootstrap::setChannelInitializer(
+ClientBootstrap& ClientBootstrap::setInitializer(
     const Channel::Initializer& initializer) {
     initializer_ = initializer;
     return *this;

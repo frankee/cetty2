@@ -21,7 +21,7 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 #include <map>
-
+#include <boost/scoped_ptr.hpp>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -60,7 +60,7 @@ public:
     virtual ~Bootstrap() {}
 
     /**
-     *
+     * return the local address which is bind to.
      */
     const InetAddress& localAddress() const;
 
@@ -75,90 +75,101 @@ public:
     T& setLocalAddress(const std::string& host, int port);
 
     /**
-     *
+     * The {@link InetAddress} which is used to bind the local "end" to.
      */
     T& setLocalAddress(const InetAddress& localAddress);
 
+
     /**
-     *
+     * Return the {@link EventLoopPool} which is belong to.
      */
     const EventLoopPoolPtr& eventLoopPool() const;
 
     /**
-     *
+     * The {@link EventLoopPool} which is used to handle all the events for the to-be-creates
+     * {@link Channel}
      */
-    T& setEventLoopPool(const EventLoopPoolPtr& pool);
+    virtual T& setEventLoopPool(const EventLoopPoolPtr& pool);
 
     /**
-     * Returns the options which configures a new {@link Channel} and its
-     * child {@link Channel}s.  The names of the child {@link Channel} options
-     * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
+     * Returns the options which configures a new {@link Channel}.
      */
-    ChannelOptions& channelOptions();
+    ChannelOptions& options();
 
     /**
-     * Returns the options which configures a new {@link Channel} and its
-     * child {@link Channel}s.  The names of the child {@link Channel} options
-     * are prefixed with <tt>"child."</tt> (e.g. <tt>"child.keepAlive"</tt>).
+     * Returns the options which configures a new {@link Channel}.
      */
-    const ChannelOptions& channelOptions() const;
+    const ChannelOptions& options() const;
 
     /**
-     * Returns the value of the option with the specified key.  To retrieve
-     * the option value of a child {@link Channel}, prefixed <tt>"child."</tt>
-     * to the option name (e.g. <tt>"child.keepAlive"</tt>).
+     * Returns the value of the option with the specified key.
      *
      * @param key  the option name
      *
      * @return the option value if the option is found.
-     *         <tt>empty boost::any</tt> otherwise.
-     */
-    ChannelOption::Variant channelOption(const ChannelOption& option) const;
-
-    /**
-     * Sets the options which configures a new {@link Channel} and its child
-     * {@link Channel}s.  To set the options of a child {@link Channel}, prefixed
-     * <tt>"child."</tt> to the option name (e.g. <tt>"child.keepAlive"</tt>).
-     */
-    T& setChannelOptions(const ChannelOptions& options);
-
-    /**
-     * Sets an option with the specified key and value.  If there's already
-     * an option with the same key, it is replaced with the new value.  If the
-     * specified value is <tt>empty boost::any</tt>, an existing option with
-     * the specified key is removed.  To set the option value of a child
-     * {@link Channel}, prepend <tt>"child."</tt> to the option name
-     * (e.g. <tt>"child.keepAlive"</tt>).
+     *         <tt>an empty ChannelOption::Variant</tt> otherwise.
      *
-     * @param key    the option name
-     * @param value  the option value
+     * @remark check the {@link ChannelOption::Variant} is empty, using ChannelOption::empty()
      */
-    T& setChannelOption(const ChannelOption& option,
-                        const ChannelOption::Variant& value);
+    ChannelOption::Variant option(const ChannelOption& key) const;
 
+    /**
+     * Sets the options which configures a new {@link Channel}.
+     */
+    T& setOptions(const ChannelOptions& options);
+
+    /**
+     * Allow to specify a {@link ChannelOption} which is used for the
+     * {@link Channel} instances once they got created.
+     * Use {@code ChannelOption::EMPTY_VALUE} to remove a previous set {@link ChannelOption}.
+     *
+     * @param key      the option name
+     * @param value    the option value
+     */
+    T& setOption(const ChannelOption& key,
+                 const ChannelOption::Variant& value);
+
+    /**
+     * the {@link ChannelHandler} to use for serving the requests.
+     */
+    template<typename Handler>
+    T& setHandler(
+        const typename ChannelHandlerWrapper<Handler>::HandlerPtr& handler) {
+        handler_.reset(
+            new typename ChannelHandlerWrapper<Handler>::Handler::Context(
+                "_user",
+                handler));
+
+        return castThis();
+    }
+
+    /**
+     * return the channels which has created.
+     */
     Channels& channels();
     const Channels& channels() const;
 
     /**
-     * Shutdown the {@link AbstractBootstrap} and the {@link EventLoopGroup} which is
-     * used by it. Only call this if you don't share the {@link EventLoopGroup}
-     * between different {@link AbstractBootstrap}'s.
+     * Shutdown the {@link Bootstrap} and the {@link EventLoopPool} which is
+     * used by it. Only call this if you don't share the {@link EventLoopPool}
+     * between different {@link Bootstrap}'s.
      */
     virtual void shutdown() = 0;
 
+    /**
+     * Waiting for all the {@link channel}s in the {@link Bootstrap} to close.
+     */
     virtual void waitingForExit() = 0;
 
 protected:
-    /**
-     * Creates a new instance with no {@link ChannelFactory} set.
-     * {@link #setFactory(ChannelFactory)} must be called at once before any
-     * I/O operation is requested.
-     */
-    Bootstrap() {}
+    Bootstrap() {
+    }
 
     Bootstrap(const EventLoopPoolPtr& pool)
         : eventLoopPool_(pool) {
     }
+
+    ChannelHandlerContext* handler();
 
     void insertChannel(int id, const ChannelPtr& channel);
     void removeChannel(int id);
@@ -173,6 +184,7 @@ private:
     ChannelOptions options_;
     InetAddress    localAddress_;
     EventLoopPoolPtr eventLoopPool_;
+    boost::scoped_ptr<ChannelHandlerContext> handler_;
 
     Channels channels_;
 };
@@ -217,26 +229,32 @@ const EventLoopPoolPtr& Bootstrap<T>::eventLoopPool() const {
 
 template<typename T> inline
 T& Bootstrap<T>::setEventLoopPool(const EventLoopPoolPtr& pool) {
-    eventLoopPool_ = pool;
+    if (pool) {
+        eventLoopPool_ = pool;
+    }
+    else {
+        LOG_WARN << "setting the NULL EventLoopPool, skip it";
+    }
+
     return castThis();
 }
 
 template<typename T> inline
-ChannelOptions& Bootstrap<T>::channelOptions() {
+ChannelOptions& Bootstrap<T>::options() {
     return options_;
 }
 
 template<typename T> inline
-const ChannelOptions& Bootstrap<T>::channelOptions() const {
+const ChannelOptions& Bootstrap<T>::options() const {
     return options_;
 }
 
 template<typename T> inline
-ChannelOption::Variant Bootstrap<T>::channelOption(const ChannelOption& option) const {
-    ChannelOptions::ConstIterator itr = options_.find(option);
+ChannelOption::Variant Bootstrap<T>::option(const ChannelOption& key) const {
+    ChannelOptions::ConstIterator itr = options_.find(key);
 
     if (itr == options_.end()) {
-        LOG_WARN << "can not get the option of " << option.name();
+        LOG_WARN << "can not get the option of " << key.name();
         return ChannelOption::Variant();
     }
 
@@ -244,7 +262,7 @@ ChannelOption::Variant Bootstrap<T>::channelOption(const ChannelOption& option) 
 }
 
 template<typename T> inline
-T& Bootstrap<T>::setChannelOptions(const ChannelOptions& options) {
+T& Bootstrap<T>::setOptions(const ChannelOptions& options) {
     LOG_INFO << "set options using map, will reset the original options.";
     options_ = options;
 
@@ -252,25 +270,28 @@ T& Bootstrap<T>::setChannelOptions(const ChannelOptions& options) {
 }
 
 template<typename T> inline
-T& Bootstrap<T>::setChannelOption(const ChannelOption& option,
-                                  const ChannelOption::Variant& value) {
+T& Bootstrap<T>::setOption(const ChannelOption& key,
+                           const ChannelOption::Variant& value) {
     options_.setOption(option, value);
     return castThis();
 }
 
-template<typename T>
+template<typename T> inline
+ChannelHandlerContext* Bootstrap<T>::handler() {
+    return handler_.get();
+}
+
+template<typename T> inline
 void Bootstrap<T>::clearChannels() {
     channels_.clear();
 }
 
-
-template<typename T>
+template<typename T> inline
 void cetty::bootstrap::Bootstrap<T>::removeChannel(int id) {
     channels_.erase(id);
 }
 
-
-template<typename T>
+template<typename T> inline
 void cetty::bootstrap::Bootstrap<T>::insertChannel(int id, const ChannelPtr& channel) {
     channels_.insert(std::make_pair(id, channel));
 }

@@ -96,7 +96,7 @@ bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
 }
 
 void CraftServerBuilder::init() {
-    builder_.serverBuilder().registerServerPrototype(PROTOBUF_SERVICE_HTTP,
+    builder_.serverBuilder().registerPrototype(PROTOBUF_SERVICE_HTTP,
                                             boost::bind(&CraftServerBuilder::initializeChildChannel,
                                                     this,
                                                     _1));

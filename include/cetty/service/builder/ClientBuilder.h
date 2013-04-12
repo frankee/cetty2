@@ -82,7 +82,15 @@ public:
     }
 
     const EventLoopPtr& eventLoop() const {
-        return eventLoop_;
+        if (eventLoop_) {
+            return eventLoop_;
+        }
+        else if (!eventLoopPool_->empty()) {
+            return *eventLoopPool_->begin();
+        }
+        else {
+            return eventLoop_;
+        }
     }
 
     const EventLoopPoolPtr& eventLoopPool() const {

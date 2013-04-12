@@ -36,9 +36,9 @@ int main(int argc, char* argv[]) {
     ServerBootstrap bootstrap(threadCount);
 
     bootstrap.setChildInitializer(boost::bind<bool>(initializer, _1))
-        .setChannelOption(ChannelOption::CO_TCP_NODELAY, true)
-        .setChannelOption(ChannelOption::CO_SO_REUSEADDR, true)
-        .setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096)
+        .setOption(ChannelOption::CO_TCP_NODELAY, true)
+        .setOption(ChannelOption::CO_SO_REUSEADDR, true)
+        .setOption(ChannelOption::CO_SO_BACKLOG, 4096)
         .bind(1980)->await();
 
     bootstrap.waitingForExit();

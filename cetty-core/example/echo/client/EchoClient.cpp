@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     ChannelInitializer1<EchoClientHandler> initializer;
 
     // Set up the pipeline factory.
-    bootstrap.setChannelInitializer(
+    bootstrap.setInitializer(
         boost::bind<bool>(initializer, _1, firstMessageSize));
 
     for (int i = 0; i < clientCount; ++i) {

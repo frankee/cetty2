@@ -100,7 +100,7 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
 
 void ConnectionPool::setChannelInitializer(
     const Channel::Initializer& initializer) {
-    bootstrap_.setChannelInitializer(initializer);
+    bootstrap_.setInitializer(initializer);
 }
 
 }

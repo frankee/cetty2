@@ -157,53 +157,50 @@ using namespace cetty::channel;
 
 class ServerBootstrap : public Bootstrap<ServerBootstrap> {
 public:
-    /**
-     * Creates a new instance with no {@link ChannelFactory} set.
-     * {@link #setFactory(ChannelFactory)} must be called before any I/O
-     * operation is requested.
-     */
     ServerBootstrap();
     ServerBootstrap(int parentThreadCnt, int childThreadCnt = 0);
 
     ServerBootstrap(const EventLoopPoolPtr& pool);
-    ServerBootstrap(const EventLoopPoolPtr& parent,
+    ServerBootstrap(const EventLoopPoolPtr& pool,
                     const EventLoopPoolPtr& child);
 
-    virtual ~ServerBootstrap() {}
+    virtual ~ServerBootstrap();
 
+    /**
+     *
+     */
     bool daemonize() const;
     ServerBootstrap& setDaemonize(bool daemon);
 
+    /**
+     *
+     */
     const std::string pidFileName() const;
     ServerBootstrap& setPidFileName(const std::string& fileName);
 
-    const EventLoopPoolPtr& parentLoopPool() const;
-    const EventLoopPoolPtr& childLoopPool() const;
-
     /**
-     * Set the {@link EventLoopGroup} for the parent (acceptor) and the child (client). These
-     * {@link EventLoopGroup}'s are used to handle all the events and IO for {@link SocketChannel} and
-     * {@link Channel}'s.
+     *
      */
-    ServerBootstrap& setParentEventLoopPool(const EventLoopPoolPtr& pool);
+    const EventLoopPoolPtr& childLoopPool() const;
     ServerBootstrap& setChildEventLoopPool(const EventLoopPoolPtr& pool);
 
-    template<typename T>
-    ServerBootstrap& setParentHandler(
-        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        if (parentHandler_) {
-            delete parentHandler_;
-        }
+    /**
+     * Set the {@link EventLoopPool} for the parent (acceptor) and the child (client). These
+     * {@link EventLoopPool}'s are used to handle all the events and IO for {@link SocketChannel} and
+     * {@link Channel}'s.
+     */
+    virtual ServerBootstrap& setEventLoopPool(const EventLoopPoolPtr& pool);
 
-        parentHandler_ =
-            new typename ChannelHandlerWrapper<T>::Handler::Context("parent", handler);
-
-        return *this;
-    }
-
+    /**
+     *
+     */
     const ChannelOptions& childOptions() const;
 
+    /**
+     *
+     */
     ServerBootstrap& setChildOptions(const ChannelOptions& options);
+
     /**
      * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they get created
      * (after the acceptor accepted the {@link Channel}). Use a value of <code>null</code> to remove a previous set
@@ -212,13 +209,34 @@ public:
     ServerBootstrap& setChildOption(const ChannelOption& option,
                                     const ChannelOption::Variant& value);
 
+    /**
+     * Return the {@link Channel::Initializer} which set for the child {@link Channel}.
+     */
     const Channel::Initializer& childInitializer() const;
 
     /**
-     * Set the {@link ChannelHandler} which is used to server the request for the {@link Channel}'s.
+     * Set the {@link Channel::Initializer} which is used to initialize the {@link Channel}
+     * after the acceptor accepted.
      */
     ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer);
 
+    /**
+     * Set the {@link ChannelHandler} which is used to serve the request for the {@link Channel}'s.
+     */
+    template<typename T>
+    ServerBootstrap& setChildHandler(
+        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        childHandler_.reset(
+            new typename ChannelHandlerWrapper<T>::Handler::Context(
+                "_user",
+                handler));
+
+        return *this;
+    }
+
+    /**
+     *
+     */
     ChannelFuturePtr bind();
 
     /**
@@ -262,7 +280,9 @@ public:
      */
     ChannelFuturePtr bind(const InetAddress& localAddress);
 
+
     virtual void shutdown();
+
 
     virtual void waitingForExit();
 
@@ -278,8 +298,7 @@ private:
     EventLoopPoolPtr childPool_;
     ChannelOptions childOptions_;
     Channel::Initializer childInitializer_;
-
-    ChannelHandlerContext* parentHandler_;
+    boost::scoped_ptr<ChannelHandlerContext> childHandler_;
 };
 
 inline
@@ -302,11 +321,6 @@ inline
 ServerBootstrap& ServerBootstrap::setPidFileName(const std::string& fileName) {
     pidFile_ = fileName;
     return *this;
-}
-
-inline
-const EventLoopPoolPtr& ServerBootstrap::parentLoopPool() const {
-    return eventLoopPool();
 }
 
 inline

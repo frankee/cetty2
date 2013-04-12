@@ -16,6 +16,7 @@
 
 #include <cetty/service/builder/ServerBuilder.h>
 
+#include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelPipeline.h>
 #include <cetty/channel/asio/AsioServicePool.h>
 #include <cetty/bootstrap/ServerUtil.h>
@@ -53,16 +54,16 @@ ServerBuilder::ServerBuilder(int parentThreadCnt, int childThreadCnt)
 ServerBuilder::~ServerBuilder() {
 }
 
-ServerBuilder& ServerBuilder::registerServerPrototype(const std::string& name,
+ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         const ChildInitializer& childInitializer) {
     ChannelOptions empty;
-    return registerServerPrototype(name,
-                          empty,
-                          empty,
-                          childInitializer);
+    return registerPrototype(name,
+                                   empty,
+                                   empty,
+                                   childInitializer);
 }
 
-ServerBuilder& ServerBuilder::registerServerPrototype(const std::string& name,
+ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         const ChannelOptions& options,
         const ChannelOptions& childOptions,
         const ChildInitializer& childInitializer) {
@@ -88,7 +89,7 @@ ServerBuilder& ServerBuilder::registerServerPrototype(const std::string& name,
     bootstrap->setChildInitializer(childInitializer);
 
     if (!options.empty()) {
-        bootstrap->setChannelOptions(options);
+        bootstrap->setOptions(options);
     }
 
     if (!childOptions.empty()) {
@@ -130,6 +131,15 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const std::string& host,
                                 int port) {
+    ChannelOptions empty;
+    return build(name, host, port, empty, empty);
+}
+
+ChannelPtr ServerBuilder::build(const std::string& name,
+                                const std::string& host,
+                                int port,
+                                const ChannelOptions& options,
+                                const ChannelOptions& childOptions) {
     ServerBootstraps::const_iterator itr = bootstraps_.find(name);
 
     if (itr == bootstraps_.end()) {
@@ -137,7 +147,15 @@ ChannelPtr ServerBuilder::build(const std::string& name,
                  << name
                  << " in builder registers, should registerServer first.";
 
-        return ChannelPtr();
+        return NullChannel::instance();
+    }
+
+    if (!options.empty()) {
+        itr->second->setChannelOptions(options);
+    }
+
+    if (!childOptions.empty()) {
+        itr->second->setChildOptions(childOptions);
     }
 
     return build(itr->second, host, port);
@@ -146,48 +164,37 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 int port) {
+    ChannelOptions empty;
     return build(name,
-                 ChannelOptions(),
-                 ChannelOptions(),
                  initializer,
                  std::string(),
-                 port);
+                 port,
+                 empty,
+                 empty);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const ChildInitializer& initializer,
                                 const std::string& host,
                                 int port) {
+    ChannelOptions empty;
     return build(name,
-                 ChannelOptions(),
-                 ChannelOptions(),
                  initializer,
                  host,
-                 port);
+                 port,
+                 empty,
+                 empty);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelOptions& options,
-                                const ChannelOptions& childOptions,
-                                const ChildInitializer& childInitializer,
-                                int port) {
-    return build(name,
-                 options,
-                 childOptions,
-                 childInitializer,
-                 std::string(),
-                 port);
-}
-
-ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChannelOptions& options,
-                                const ChannelOptions& childOptions,
                                 const ChildInitializer& childInitializer,
                                 const std::string& host,
-                                int port) {
+                                int port,
+                                const ChannelOptions& options,
+                                const ChannelOptions& childOptions) {
     if (name.empty()) {
         LOG_WARN << "parameter error, name should not be empty.";
-        return ChannelPtr();
+        return NullChannel::instance();
     }
 
     if (bootstraps_.find(name) != bootstraps_.end()) {
@@ -207,8 +214,8 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     if (options.empty()) {
         //bootstrap->setChannelOption(ChannelOption::CO_SO_LINGER, 0);
         //bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
-        bootstrap->setChannelOption(ChannelOption::CO_SO_BACKLOG, 4096);
-        bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
 
     if (childInitializer) {
@@ -216,7 +223,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
     else {
         LOG_WARN << "childInitializer is empty, channel will not work fine.";
-        return ChannelPtr();
+        return NullChannel::instance();
     }
 
     bootstrap->setDaemonize(config_.daemonize);

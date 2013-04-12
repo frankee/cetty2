@@ -113,7 +113,7 @@ const ServerBuilderConfig& ProtobufServerBuilder::config() const {
 
 inline
 const EventLoopPoolPtr& ProtobufServerBuilder::parentPool() const {
-    return builder_.parentPool();
+    return builder_.pool();
 }
 
 inline

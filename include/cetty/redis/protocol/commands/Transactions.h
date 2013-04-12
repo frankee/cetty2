@@ -18,15 +18,12 @@
  */
 
 #include <string>
-#include <cetty/util/StringPiece.h>
 #include <cetty/redis/protocol/RedisCommand.h>
 
 namespace cetty {
 namespace redis {
 namespace protocol {
 namespace commands {
-
-using namespace cetty::redis;
 
 RedisCommandPtr transactionsCommandDiscard();
 RedisCommandPtr transactionsCommandExec();
