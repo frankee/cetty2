@@ -272,7 +272,7 @@ T& Bootstrap<T>::setOptions(const ChannelOptions& options) {
 template<typename T> inline
 T& Bootstrap<T>::setOption(const ChannelOption& key,
                            const ChannelOption::Variant& value) {
-    options_.setOption(option, value);
+    options_.setOption(key, value);
     return castThis();
 }
 

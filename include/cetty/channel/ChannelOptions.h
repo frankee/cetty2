@@ -42,7 +42,7 @@ public:
     ConstIterator begin() const;
     ConstIterator end() const;
 
-    ConstIterator find(const ChannelOption& option);
+    ConstIterator find(const ChannelOption& option) const;
 
     ChannelOptions& setOption(const ChannelOption& option,
                               const ChannelOption::Variant& value);
@@ -77,22 +77,22 @@ ChannelOptions::ConstIterator ChannelOptions::end() const {
 }
 
 inline
-ChannelOptions::ConstIterator ChannelOptions::find(const ChannelOption& option) {
-    return options_.find(option);
+ChannelOptions::ConstIterator ChannelOptions::find(const ChannelOption& key) const {
+    return options_.find(key);
 }
 
 inline
-ChannelOptions& ChannelOptions::setOption(const ChannelOption& option,
+ChannelOptions& ChannelOptions::setOption(const ChannelOption& key,
         const ChannelOption::Variant& value) {
     if (value.empty()) {
-        options_.erase(option);
+        options_.erase(key);
         LOG_WARN << "setOption, the key ("
-                 << option.name()
+                 << key.name()
                  << ") is empty value, remove from the options.";
     }
     else {
-        LOG_INFO << "set Option, the key is " << option.name();
-        options_.insert(std::make_pair(option, value));
+        LOG_INFO << "set Option, the key is " << key.name();
+        options_.insert(std::make_pair(key, value));
     }
 
     return *this;
