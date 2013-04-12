@@ -18,6 +18,7 @@
 #include <string>
 
 #include <cetty/channel/Channel.h>
+#include <cetty/channel/Timeout.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 #include <cetty/channel/InetAddress.h>
 #include <cetty/buffer/Unpooled.h>
@@ -114,9 +115,19 @@ void GearmanWorkerHandler::registerFunction(const std::string& functionName,
 void GearmanWorkerHandler::grabJob(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = commands::grabJobMessage();
 
+    if (timeout_) {
+        timeout_->cancel();
+    }
+
     if (outboundTransfer_->unfoldAndAdd(msg)) {
         ctx.flush();
     }
+
+    // prevent the connection close by the gearman.
+    timeout_ = ctx.eventLoop()->runAfter(120000,
+                                         boost::bind(&GearmanWorkerHandler::jobCheck,
+                                                 this,
+                                                 boost::ref(ctx)));
 }
 
 void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
@@ -129,10 +140,26 @@ void GearmanWorkerHandler::grabJobUnique(ChannelHandlerContext& ctx) {
 
 void GearmanWorkerHandler::preSleep(ChannelHandlerContext& ctx) {
     GearmanMessagePtr msg = commands::preSleepMessage();
+    
+    if (timeout_) {
+        timeout_->cancel();
+    }
 
     if (outboundTransfer_->unfoldAndAdd(msg)) {
         ctx.flush();
     }
+
+    // prevent the connection close by the gearman.
+    timeout_ = ctx.eventLoop()->runAfter(120000,
+                                         boost::bind(
+                                                 &GearmanWorkerHandler::jobCheck,
+                                                 this,
+                                                 boost::ref(ctx)));
+}
+
+void GearmanWorkerHandler::jobCheck(ChannelHandlerContext& ctx) {
+    timeout_.reset();
+    grabJob(ctx);
 }
 
 void GearmanWorkerHandler::messageReceived(ChannelHandlerContext& ctx) {

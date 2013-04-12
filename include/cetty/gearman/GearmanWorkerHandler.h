@@ -22,6 +22,7 @@
 #include <boost/function.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <cetty/channel/ChannelPtr.h>
+#include <cetty/channel/TimeoutPtr.h>
 #include <cetty/channel/ChannelMessageHandler.h>
 #include <cetty/gearman/protocol/GearmanMessagePtr.h>
 
@@ -87,6 +88,8 @@ private:
     void grabJob(ChannelHandlerContext& ctx);
     void grabJobUnique(ChannelHandlerContext& ctx);
 
+    void jobCheck(ChannelHandlerContext& ctx);
+
 private:
     typedef std::map<std::string, GrabJobCallback> CallbackMap;
 
@@ -96,6 +99,8 @@ private:
     int maxGrabIdleCount_;
 
     CallbackMap workerFunctors_;
+
+    TimeoutPtr timeout_;
 
     InboundTransfer* inboundTransfer_;
     InboundContainer* inboundContainer_;
