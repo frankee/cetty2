@@ -56,7 +56,9 @@ ProtobufClientBuilder::ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPo
 
 void ProtobufClientBuilder::init() {
     builder_.setClientInitializer(
-        boost::bind(&ProtobufClientBuilder::initializeChannel, this, _1));
+        boost::bind(&ProtobufClientBuilder::initializeChannel,
+                    this,
+                    _1));
 }
 
 bool ProtobufClientBuilder::initializeChannel(const ChannelPtr& channel) {
@@ -65,28 +67,28 @@ bool ProtobufClientBuilder::initializeChannel(const ChannelPtr& channel) {
     pipeline.addLast<LengthFieldBasedFrameDecoder::Handler>(
         "frameDecoder",
         LengthFieldBasedFrameDecoder::HandlerPtr(new LengthFieldBasedFrameDecoder(
-        16 * 1024 * 1024,
-        0,
-        4,
-        0,
-        4,
-        4,
-        ProtobufUtil::adler32Checksum)));
+                    16 * 1024 * 1024,
+                    0,
+                    4,
+                    0,
+                    4,
+                    4,
+                    ProtobufUtil::adler32Checksum)));
 
     pipeline.addLast<LengthFieldPrepender::Handler>(
         "frameEncoder",
         LengthFieldPrepender::HandlerPtr(new LengthFieldPrepender(
-        4,
-        4,
-        ProtobufUtil::adler32Checksum)));
+                4,
+                4,
+                ProtobufUtil::adler32Checksum)));
 
     pipeline.addLast<ProtobufServiceMessageCodec::Handler>(
         "protobufCodec",
         ProtobufServiceMessageCodec::HandlerPtr(new ProtobufServiceMessageCodec));
 
-//     pipeline.addLast<ProtobufServiceMessageHandler>(
-//         "messageHandler",
-//         ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
+    //     pipeline.addLast<ProtobufServiceMessageHandler>(
+    //         "messageHandler",
+    //         ProtobufServiceMessageHandler::HandlerPtr(new ProtobufServiceMessageHandler));
 
     return true;
 }

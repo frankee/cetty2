@@ -45,7 +45,7 @@ public:
 public:
     ConnectionPool(const Connections& connections);
     ConnectionPool(const Connections& connections,
-        const EventLoopPtr& eventLoop); 
+                   const EventLoopPtr& eventLoop);
 
     virtual ~ConnectionPool();
 
@@ -61,7 +61,7 @@ public:
 
     void close() {}
 
-//protected:
+    //protected:
     void connectedCallback(const ChannelFuture& future);
 
 protected:
@@ -80,7 +80,7 @@ protected:
 private:
     bool connecting_;
     std::deque<ConnectedCallback> callbacks_;
-    
+
     boost::ptr_map<int, ChannelConnection> channels_;
 };
 

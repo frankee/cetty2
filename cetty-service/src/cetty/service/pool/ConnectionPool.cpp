@@ -45,7 +45,11 @@ ConnectionPool::~ConnectionPool() {
 }
 
 ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
-    if (channels_.empty()) {
+    //FIXME: channels_ is not thread safe
+    if (channels_.empty() ||
+            !channels_.begin()->second->channel->isActive()) {
+        channels_.clear();
+
         if (!connecting_) {
             ChannelFuturePtr future =
                 bootstrap_.connect(connections_[0].host, connections_[0].port);
@@ -64,11 +68,13 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
     }
 }
 
-cetty::channel::ChannelPtr ConnectionPool::getChannel() {
-    if (!channels_.empty()) {
+ChannelPtr ConnectionPool::getChannel() {
+    if (!channels_.empty() &&
+            channels_.begin()->second->channel->isActive()) {
         return channels_.begin()->second->channel;
     }
 
+    channels_.clear();
     return ChannelPtr();
 }
 
