@@ -65,7 +65,7 @@ void RedisCommand::done() {
     std::string header;
     StringUtil::printf(&header, "*%d\r\n", paramCnt_);
 
-    BOOST_ASSERT(buffer_->aheadWritableBytes() >= (int)header.size());
+    BOOST_ASSERT(buffer_->aheadWritableBytes() >= static_cast<int>(header.size()));
 
     buffer_->writeBytesAhead(header);
 }

@@ -108,7 +108,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
                                    req->method(),
                                    response));
 
-    context_->outboundTransfer()->write(message, ctx.newFuture());
+    context_->outboundTransfer()->write(message, ctx.newVoidFuture());
 }
 
 }

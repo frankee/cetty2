@@ -133,7 +133,10 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         pipeline().addInboundChannelBuffer(readBuffer_);
         pipeline().fireMessageUpdated();
 
-        beginRead();
+        // channel may be closed when error happed in the message process
+        if (isActive()) {
+            beginRead();
+        }
     }
     else {
         LOG_ERROR << "channel " << toString()

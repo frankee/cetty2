@@ -381,7 +381,7 @@ public:
                   const std::string& name,
                   const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         return addAfter(baseName,
-                      new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                        new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
     template<typename T>
@@ -390,7 +390,7 @@ public:
                   const EventLoopPtr& loop,
                   const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
         return addAfter(baseName,
-                      new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
+                        new typename ChannelHandlerWrapper<T>::Handler::Context(name, loop, handler));
     }
 
     /**
@@ -493,9 +493,9 @@ public:
 
     template<typename T>
     void setHead(const std::string& name,
-        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-            return setHead(
-                new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
+                 const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
+        return setHead(
+                   new typename ChannelHandlerWrapper<T>::Handler::Context(name, handler));
     }
 
 public:
@@ -543,6 +543,7 @@ public:
         if (head_) {
             return head_->nextInboundMessageContainer<T>(head_);
         }
+
         return NULL;
     }
 
@@ -560,6 +561,7 @@ public:
         if (tail_) {
             return tail_->nextOutboundMessageContainer<T>(tail_);
         }
+
         return NULL;
     }
 
@@ -703,7 +705,7 @@ private:
     ChannelWeakPtr channel_;
     EventLoopPtr eventLoop_;
     ChannelFuturePtr voidFuture_;
-    
+
     ChannelHandlerContext* head_;
     ChannelHandlerContext* tail_;
 };
@@ -719,10 +721,9 @@ const EventLoopPtr& ChannelPipeline::eventLoop() const {
 }
 
 inline
-    const ChannelFuturePtr& ChannelPipeline::voidFuture() const {
-        return voidFuture_;
+const ChannelFuturePtr& ChannelPipeline::voidFuture() const {
+    return voidFuture_;
 }
-    
 
 }
 }

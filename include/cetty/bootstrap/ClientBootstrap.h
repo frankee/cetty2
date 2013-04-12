@@ -150,7 +150,7 @@ public:
     /**
      *
      */
-    const Channel::Initializer& channelInitializer() const;
+    const Channel::Initializer& initializer() const;
 
     /**
      *
@@ -231,7 +231,7 @@ ClientBootstrap& ClientBootstrap::setInitializer(
 }
 
 inline
-const Channel::Initializer& ClientBootstrap::channelInitializer() const {
+const Channel::Initializer& ClientBootstrap::initializer() const {
     return initializer_;
 }
 
