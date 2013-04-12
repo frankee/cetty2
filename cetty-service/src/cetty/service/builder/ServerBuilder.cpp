@@ -108,7 +108,7 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
 
     if (itr != bootstraps_.end()) {
         if (!options.empty()) {
-            itr->second->setChannelOptions(options);
+            itr->second->setOptions(options);
         }
 
         if (!childOptions.empty()) {
@@ -151,7 +151,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     if (!options.empty()) {
-        itr->second->setChannelOptions(options);
+        itr->second->setOptions(options);
     }
 
     if (!childOptions.empty()) {
