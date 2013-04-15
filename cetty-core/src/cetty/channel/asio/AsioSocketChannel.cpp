@@ -442,8 +442,8 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
 
     if (!isActive()) {
         LOG_ERROR << "channel " << toString()
-                  << " failed to send the msg, because the socket is \
-                     disconnected, and then close this channel";
+                  << " failed to send the msg, because the socket is"
+                     " disconnected, and then close this channel.";
 
         if (future) {
             future->setFailure(ChannelException("Channel is not active."));
