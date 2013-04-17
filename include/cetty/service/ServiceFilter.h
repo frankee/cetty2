@@ -27,26 +27,26 @@ namespace service {
 using namespace cetty::channel;
 
 /**
-*  A Filter acts as a decorator/transformer of a service. It may apply
-* transformations to the input and output of that service:
-*
-*           (*  MyService  *)
-* [ReqIn -> (ReqOut -> RepIn) -> RepOut]
-*
-* For example, you may have a POJO service that takes Strings and
-* parses them as Ints.  If you want to expose this as a Network
-* Service via Thrift, it is nice to isolate the protocol handling
-* from the business rules. Hence you might have a Filter that
-* converts back and forth between Thrift structs. Again, your service
-* deals with POJOs:
-*
-* [ThriftIn -> (String  ->  Int) -> ThriftOut]
-*
-* Thus, a Filter[A, B, C, D] converts a Service[C, D] to a Service[A, B].
-* In other words, it converts a Service[ReqOut, RepIn] to a
-* Service[ReqIn, RepOut].
-*
-*/
+ *  A Filter acts as a decorator/transformer of a service. It may apply
+ * transformations to the input and output of that service:
+ *
+ *           (*  MyService  *)
+ * [ReqIn -> (ReqOut -> RepIn) -> RepOut]
+ *
+ * For example, you may have a POJO service that takes Strings and
+ * parses them as Ints.  If you want to expose this as a Network
+ * Service via Thrift, it is nice to isolate the protocol handling
+ * from the business rules. Hence you might have a Filter that
+ * converts back and forth between Thrift structs. Again, your service
+ * deals with POJOs:
+ *
+ * [ThriftIn -> (String  ->  Int) -> ThriftOut]
+ *
+ * Thus, a Filter[A, B, C, D] converts a Service[C, D] to a Service[A, B].
+ * In other words, it converts a Service[ReqOut, RepIn] to a
+ * Service[ReqIn, RepOut].
+ *
+ */
 
 template<typename H,
          typename RequestIn,
@@ -82,7 +82,9 @@ public:
     typedef typename Context::Handler Handler;
     typedef typename Context::HandlerPtr HandlerPtr;
 
-    typedef boost::function<RequestOut(ChannelHandlerContext&, RequestIn const&)> RequestFilter;
+    typedef boost::function<RequestOut(ChannelHandlerContext&,
+                                       RequestIn const&)> RequestFilter;
+
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
                                         RequestIn const&,
                                         ResponseIn const&,
@@ -98,9 +100,9 @@ public:
 
     ServiceFilter(const RequestFilter& requestFilter,
                   const ResponseFilter& responseFilter)
-                  : requestFilter_(requestFilter),
-                  responseFilter_(responseFilter),
-                  inboundTransfer_(),
+        : requestFilter_(requestFilter),
+          responseFilter_(responseFilter),
+          inboundTransfer_(),
           outboundTransfer_(),
           inboundContainer_(),
           outboundContainer_() {
@@ -145,12 +147,13 @@ public:
 
 private:
     void messageUpdated(ChannelHandlerContext& ctx) {
+        BOOST_ASSERT(inboundContainer_ && inboundTransfer_ &&
+                     "ServiceFilter has not registered.");
         bool notify = false;
         InboundQueue& queue = inboundContainer_->getMessages();
 
         while (!queue.empty()) {
             RequestIn& req = queue.front();
-            reqs_.push_back(req);
             RequestOut oreq = requestFilter_(ctx, req);
 
             if (!oreq) {
@@ -162,6 +165,7 @@ private:
             }
 
             if (inboundTransfer_->unfoldAndAdd(oreq)) {
+                reqs_.push_back(req);
                 notify = true;
             }
 
@@ -175,6 +179,8 @@ private:
 
     void flush(ChannelHandlerContext& ctx,
                const ChannelFuturePtr& future) {
+        BOOST_ASSERT(outboundContainer_ && outboundTransfer_ &&
+                     "ServiceFilter has not registered.");
 
         OutboundQueue& queue = outboundContainer_->getMessages();
 
@@ -185,8 +191,7 @@ private:
             reqs_.pop_front();
 
             if (!orep) {
-                LOG_ERROR << "serviceFilter filterResponse has an empty result, "
-                          "skip it, user handler should replace an error message if needed.";
+                LOG_ERROR << "serviceFilter filterResponse should not give an empty result";
 
                 queue.pop_front();
                 continue;

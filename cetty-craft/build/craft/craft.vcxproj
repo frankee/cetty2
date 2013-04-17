@@ -13,7 +13,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftServerBuilder.h" />
-    <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\craft.pb.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\HttpServiceFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceRequestMapping.h" />
@@ -23,7 +22,6 @@
     <ClInclude Include="..\..\..\include\cetty\craft\security\ParameterValidateFilter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftClientBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftServerBuilder.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\craft.pb.cc" />

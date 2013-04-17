@@ -33,8 +33,8 @@ const ReadTimeoutException ReadTimeoutHandler::EXCEPTION("ReadTimeout");
 
 ReadTimeoutHandler::ReadTimeoutHandler(int timeoutSeconds)
     : closed_(true),
-state_(0),
-    timeoutMillis_(timeoutSeconds * 1000) {
+      state_(0),
+      timeoutMillis_(timeoutSeconds * 1000) {
     if (timeoutSeconds <= 0) {
         timeoutMillis_ = 0;
     }
@@ -42,29 +42,34 @@ state_(0),
 
 ReadTimeoutHandler::ReadTimeoutHandler(const Duration& timeout)
     : closed_(true),
-state_(0),
-    timeoutMillis_(timeout.total_milliseconds()) {
+      state_(0),
+      timeoutMillis_(timeout.total_milliseconds()) {
     if (timeoutMillis_ <= 0) {
         timeoutMillis_ = 0;
     }
 }
 
 void ReadTimeoutHandler::registerTo(Context& ctx) {
-    ctx.setBeforeAddCallback(boost::bind(&ReadTimeoutHandler::beforeAdd,
-        this,
-        _1));
-    ctx.setBeforeRemoveCallback(boost::bind(&ReadTimeoutHandler::beforeRemove,
-        this,
-        _1));
-    ctx.setChannelActiveCallback(boost::bind(&ReadTimeoutHandler::channelActive,
-        this,
-        _1));
-    ctx.setChannelInactiveCallback(boost::bind(&ReadTimeoutHandler::channelInactive,
-        this,
-        _1));
-    ctx.setChannelMessageUpdatedCallback(boost::bind(&ReadTimeoutHandler::messageUpdated,
-        this,
-        _1));
+    ctx.setBeforeAddCallback(boost::bind(
+                                 &ReadTimeoutHandler::beforeAdd,
+                                 this,
+                                 _1));
+    ctx.setBeforeRemoveCallback(boost::bind(
+                                    &ReadTimeoutHandler::beforeRemove,
+                                    this,
+                                    _1));
+    ctx.setChannelActiveCallback(boost::bind(
+                                     &ReadTimeoutHandler::channelActive,
+                                     this,
+                                     _1));
+    ctx.setChannelInactiveCallback(boost::bind(
+                                       &ReadTimeoutHandler::channelInactive,
+                                       this,
+                                       _1));
+    ctx.setChannelMessageUpdatedCallback(boost::bind(
+            &ReadTimeoutHandler::messageUpdated,
+            this,
+            _1));
 }
 
 void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
@@ -79,9 +84,9 @@ void ReadTimeoutHandler::initialize(ChannelHandlerContext& ctx) {
 
     if (!timerCallback_) {
         timerCallback_ = boost::bind(
-                              &ReadTimeoutHandler::handleReadTimeout,
-                              this,
-                              boost::ref(ctx));
+                             &ReadTimeoutHandler::handleReadTimeout,
+                             this,
+                             boost::ref(ctx));
     }
 
     lastReadTime_ = boost::get_system_time();

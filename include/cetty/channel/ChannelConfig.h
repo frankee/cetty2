@@ -79,10 +79,8 @@ public:
                                   const ChannelOption::Variant&)> OptionSetCallback;
 
 public:
-    ChannelConfig()
-        : connectTimeoutMillis_(10000/*ms*/) {}
-
-    ~ChannelConfig() {}
+    ChannelConfig();
+    ~ChannelConfig();
 
     /**
      * Sets the configuration properties from the specified map.
@@ -133,13 +131,28 @@ public:
      * @param connectTimeoutMillis the connect timeout in milliseconds.
      *                             <tt>0</tt> to disable.
      */
-    void setConnectTimeout(int connectTimeoutMillis);
+    ChannelConfig& setConnectTimeout(int connectTimeoutMillis);
 
-    const OptionSetCallback& optionSetCallback() const;
+    /**
+     * Returns {@code true} if and only if {@link ChannelHandlerContext#read()} will be invoked automatically so that
+     * a user application doesn't need to call it at all. The default value is {@code true}.
+     */
+    bool autoRead();
 
-    void setOptionSetCallback(const OptionSetCallback& callback);
+    /**
+     * Sets if {@link ChannelHandlerContext#read()} will be invoked automatically so that a user application doesn't
+     * need to call it at all. The default value is {@code true}.
+     */
+    ChannelConfig& setAutoRead(bool autoRead);
+
+    /**
+     * Sets the callback which will be invoked when {@link #setOption} or {@link #setOptions} called.
+     * Clear the callback when setting an empty {@link OptionSetCallback}.
+     */
+    ChannelConfig& setOptionSetCallback(const OptionSetCallback& callback);
 
 private:
+    bool autoRead_;
     int connectTimeoutMillis_; // 10 seconds
     OptionSetCallback callback_;
 };
@@ -150,14 +163,21 @@ int ChannelConfig::connectTimeout() const {
 }
 
 inline
-const ChannelConfig::OptionSetCallback& ChannelConfig::optionSetCallback() const {
-    return callback_;
+bool ChannelConfig::autoRead() {
+    return autoRead_;
 }
 
 inline
-void ChannelConfig::setOptionSetCallback(
+ChannelConfig& ChannelConfig::setAutoRead(bool autoRead) {
+    autoRead_ = autoRead;
+    return *this;
+}
+
+inline
+ChannelConfig& ChannelConfig::setOptionSetCallback(
     const ChannelConfig::OptionSetCallback& callback) {
     callback_ = callback;
+    return *this;
 }
 
 }

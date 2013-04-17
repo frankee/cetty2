@@ -26,7 +26,7 @@
 
 #include <cetty/Types.h>
 #include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/ChannelStateHandler.h>
 
 namespace cetty {
 namespace handler {
@@ -130,7 +130,7 @@ public:
 
     typedef boost::function2<void, ChannelHandlerContext&, const IdleStateEvent&> IdleEventCallback;
 
-    typedef ChannelHandler<IdleStateHandler>::Context Context;
+    typedef ChannelStateHandler<IdleStateHandler>::Context Context;
 
 public:
     /**

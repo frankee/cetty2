@@ -2,17 +2,17 @@
 #define CETTY_CHANNEL_CHANNELPIPELINE_H
 
 /*
- * Copyright 2009 Red Hat, Inc.
+ * Copyright 2012 The Netty Project
  *
- * Red Hat licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations
  * under the License.
  */
@@ -50,7 +50,7 @@ class ChannelPipelineException;
 
 /**
  * A list of {@link ChannelHandler}s which handles or intercepts
- * {@link ChannelEvent}s of a {@link Channel}.  {@link ChannelPipeline}
+ * inbound and outbount operations of a {@link Channel}.  {@link ChannelPipeline}
  * implements an advanced form of the
  * <a href="http://java.sun.com/blueprints/corej2eepatterns/Patterns/InterceptingFilter.html">Intercepting
  * Filter</a> pattern to give a user full control over how an event is handled
@@ -58,111 +58,106 @@ class ChannelPipelineException;
  *
  * <h3>Creation of a pipeline</h3>
  *
- * For each new channel, a new pipeline must be created and attached to the
+ * For each new channel, a new pipeline iscreated and attached to the
  * channel.  Once attached, the coupling between the channel and the pipeline
  * is permanent; the channel cannot attach another pipeline to it nor detach
- * the current pipeline from it.
+ * the current pipeline from it. All of this is handled for you and you not need
+ * to take care of this.
  * <p>
- * The recommended way to create a new pipeline is to use the helper methods in
- * {@link Channels} rather than calling an individual implementation's
- * constructor:
- * <pre>
- * import static org.jboss.netty.channel.{@link Channels}.*;
- * {@link ChannelPipeline} pipeline = pipeline(); // same with Channels.pipeline()
- * </pre>
+ *
  *
  * <h3>How an event flows in a pipeline</h3>
  *
- * The following diagram describes how {@link ChannelEvent}s are processed by
+ * The following diagram describes how I/O is processed by
  * {@link ChannelHandler}s in a {@link ChannelPipeline} typically.
- * A {@link ChannelEvent} can be handled by either a {@link ChannelUpstreamHandler}
- * or a {@link ChannelDownstreamHandler} and be forwarded to the closest
- * handler by calling {@link ChannelHandlerContext#sendUpstream(ChannelEvent)}
- * or {@link ChannelHandlerContext#sendDownstream(ChannelEvent)}.  The meaning
- * of the event is interpreted somewhat differently depending on whether it is
- * going upstream or going downstream. Please refer to {@link ChannelEvent} for
- * more information.
+ * A I/O-operation can be handled by either a {@link ChannelInboundHandler}
+ * or a {@link ChannelOutboundHandler} and be forwarded to the closest
+ * handler by calling either one of the methods defined in the
+ * {@link ChannelInboundInvoker} interface for inbound I/O or by one
+ * of the methods defined in the {@link ChannelOutboundInvoker} interface
+ * for outbound I/O. {@link ChannelPipeline} extends both of them.
+ *
  * <pre>
- *                                       I/O Request
- *                                     via {@link Channel} or
- *                                 {@link ChannelHandlerContext}
- *                                           |
- *  +----------------------------------------+---------------+
- *  |                  ChannelPipeline       |               |
- *  |                                       \|/              |
- *  |  +----------------------+  +-----------+------------+  |
- *  |  | Upstream Handler  N  |  | Downstream Handler  1  |  |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |            /|\                         |               |
- *  |             |                         \|/              |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |  | Upstream Handler N-1 |  | Downstream Handler  2  |  |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |            /|\                         .               |
- *  |             .                          .               |
- *  |     [ sendUpstream() ]        [ sendDownstream() ]     |
- *  |     [ + INBOUND data ]        [ + OUTBOUND data  ]     |
- *  |             .                          .               |
- *  |             .                         \|/              |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |  | Upstream Handler  2  |  | Downstream Handler M-1 |  |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |            /|\                         |               |
- *  |             |                         \|/              |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |  | Upstream Handler  1  |  | Downstream Handler  M  |  |
- *  |  +----------+-----------+  +-----------+------------+  |
- *  |            /|\                         |               |
- *  +-------------+--------------------------+---------------+
- *                |                         \|/
- *  +-------------+--------------------------+---------------+
- *  |             |                          |               |
- *  |     [ Socket.read() ]          [ Socket.write() ]      |
- *  |                                                        |
- *  |  Cetty Internal I/O Threads (Transport Implementation) |
- *  +--------------------------------------------------------+
+ *                                                  I/O Request
+ *                                             via {@link Channel} or
+ *                                         {@link ChannelHandlerContext}
+ *                                                       |
+ *  +----------------------------------------------------+-----------------+
+ *  |                           ChannelPipeline          |                 |
+ *  |                                                   \|/                |
+ *  |    +----------------------+            +-----------+------------+    |
+ *  |    | Inbound Handler  N   |            | Outbound Handler  1    |    |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |              /|\                                   |                 |
+ *  |               |                                   \|/                |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |    | Inbound Handler N-1  |            |   Outbound Handler  2  |    |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |              /|\                                   .                 |
+ *  |               .                                    .                 |
+ *  | [{@link ChannelInboundInvoker}]   [{@link ChannelOutboundInvoker}()] |
+ *  |        [ method call]                    [method call]               |
+ *  |               .                                    .                 |
+ *  |               .                                   \|/                |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |    | Inbound Handler  2   |            | Outbound Handler M-1   |    |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |              /|\                                   |                 |
+ *  |               |                                   \|/                |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |    | Inbound Handler  1   |            | Outbound Handler  M    |    |
+ *  |    +----------+-----------+            +-----------+------------+    |
+ *  |              /|\                                   |                 |
+ *  +---------------+------------------------------------+-----------------+
+ *                  |                                   \|/
+ *  +---------------+------------------------------------+-----------------+
+ *  |               |                                    |                 |
+ *  |       [ Socket.read() ]                     [ Socket.write() ]       |
+ *  |                                                                      |
+ *  |  Netty Internal I/O Threads (Transport Implementation)               |
+ *  +----------------------------------------------------------------------+
  * </pre>
- * An upstream event is handled by the upstream handlers in the bottom-up
- * direction as shown on the left side of the diagram.  An upstream handler
+ * An inbound event is handled by the inbound handlers in the bottom-up
+ * direction as shown on the left side of the diagram.  An inbound handler
  * usually handles the inbound data generated by the I/O thread on the bottom
  * of the diagram.  The inbound data is often read from a remote peer via the
  * actual input operation such as {@link InputStream#read(byte[])}.
- * If an upstream event goes beyond the top upstream handler, it is discarded
+ * If an inbound event goes beyond the top inbound handler, it is discarded
  * silently.
  * <p>
- * A downstream event is handled by the downstream handler in the top-down
- * direction as shown on the right side of the diagram.  A downstream handler
+ * A outbound event is handled by the outbound handler in the top-down
+ * direction as shown on the right side of the diagram.  A outbound handler
  * usually generates or transforms the outbound traffic such as write requests.
- * If a downstream event goes beyond the bottom downstream handler, it is
+ * If a outbound event goes beyond the bottom outbound handler, it is
  * handled by an I/O thread associated with the {@link Channel}. The I/O thread
  * often performs the actual output operation such as {@link OutputStream#write(byte[])}.
  * <p>
  * For example, let us assume that we created the following pipeline:
  * <pre>
- * {@link ChannelPipeline} p = {@link Channels}.pipeline();
- * p.addLast("1", new UpstreamHandlerA());
- * p.addLast("2", new UpstreamHandlerB());
- * p.addLast("3", new DownstreamHandlerA());
- * p.addLast("4", new DownstreamHandlerB());
- * p.addLast("5", new UpstreamHandlerX());
+ * {@link ChannelPipeline} p = ...;
+ * p.addLast("1", new InboundHandlerA());
+ * p.addLast("2", new InboundHandlerB());
+ * p.addLast("3", new OutboundHandlerA());
+ * p.addLast("4", new OutboundHandlerB());
+ * p.addLast("5", new InboundOutboundHandlerX());
  * </pre>
- * In the example above, the class whose name starts with <tt>Upstream</tt> means
- * it is an upstream handler.  The class whose name starts with
- * <tt>Downstream</tt> means it is a downstream handler.
+ * In the example above, the class whose name starts with {@code Inbound} means
+ * it is an inbound handler.  The class whose name starts with
+ * {@code Outbound} means it is a outbound handler.
  * <p>
  * In the given example configuration, the handler evaluation order is 1, 2, 3,
- * 4, 5 when an event goes upstream.  When an event goes downstream, the order
+ * 4, 5 when an event goes inbound.  When an event goes outbound, the order
  * is 5, 4, 3, 2, 1.  On top of this principle, {@link ChannelPipeline} skips
  * the evaluation of certain handlers to shorten the stack depth:
  * <ul>
- * <li>3 and 4 don't implement {@link ChannelUpstreamHandler}, and therefore the
- *     actual evaluation order of an upstream event will be: 1, 2, and 5.</li>
- * <li>1, 2, and 5 don't implement {@link ChannelDownstreamHandler}, and
- *     therefore the actual evaluation order of a downstream event will be:
+ * <li>3 and 4 don't implement {@link ChannelInboundHandler}, and therefore the
+ *     actual evaluation order of an inbound event will be: 1, 2, and 5.</li>
+ * <li>1, 2, and 5 don't implement {@link ChannelOutboundHandler}, and
+ *     therefore the actual evaluation order of a outbound event will be:
  *     4 and 3.</li>
- * <li>If 5 extended {@link SimpleChannelHandler} which implements both
- *     {@link ChannelUpstreamHandler} and {@link ChannelDownstreamHandler}, the
- *     evaluation order of an upstream and a downstream event could be 125 and
+ * <li>If 5 implements both
+ *     {@link ChannelInboundHandler} and {@link ChannelOutboundHandler}, the
+ *     evaluation order of an inbound and a outbound event could be 125 and
  *     543 respectively.</li>
  * </ul>
  *
@@ -175,10 +170,10 @@ class ChannelPipelineException;
  * the complexity and characteristics of the protocol and business logic:
  *
  * <ol>
- * <li>Protocol Decoder - translates binary data (e.g. {@link ChannelBuffer})
+ * <li>Protocol Decoder - translates binary data (e.g. {@link ByteBuf})
  *                        into a Java object.</li>
  * <li>Protocol Encoder - translates a Java object into binary data.</li>
- * <li>{@link ExecutionHandler} - applies a thread model.</li>
+ * <li><tt>ExecutionHandler</tt> - applies a thread model.</li>
  * <li>Business Logic Handler - performs the actual business logic
  *                              (e.g. database access).</li>
  * </ol>
@@ -186,62 +181,37 @@ class ChannelPipelineException;
  * and it could be represented as shown in the following example:
  *
  * <pre>
- * {@link ChannelPipeline} pipeline = {@link Channels#pipeline() Channels.pipeline()};
+ * {@link ChannelPipeline} pipeline = ...;
  * pipeline.addLast("decoder", new MyProtocolDecoder());
  * pipeline.addLast("encoder", new MyProtocolEncoder());
- * pipeline.addLast("executor", new {@link ExecutionHandler}(new {@link OrderedMemoryAwareThreadPoolExecutor}(16, 1048576, 1048576)));
+ * pipeline.addLast("executor", new ExecutionHandler(...));
  * pipeline.addLast("handler", new MyBusinessLogicHandler());
  * </pre>
  *
  * <h3>Thread safety</h3>
  * <p>
  * A {@link ChannelHandler} can be added or removed at any time because a
- * {@link ChannelPipeline} is thread safe.  For example, you can insert a
- * {@link SslHandler} when sensitive information is about to be exchanged,
+ * {@link ChannelPipeline} is thread safe.  For example, you can insert an
+ * encryption handler when sensitive information is about to be exchanged,
  * and remove it after the exchange.
- *
- * <h3>Pitfall</h3>
- * <p>
- * Due to the internal implementation detail of the current default
- * {@link ChannelPipeline}, the following code does not work as expected if
- * <tt>FirstHandler</tt> is the last handler in the pipeline:
- * <pre>
- * public class FirstHandler extends {@link SimpleChannelUpstreamHandler} {
- *
- *     public void messageReceived({@link ChannelHandlerContext} ctx, {@link MessageEvent} e) {
- *         // Remove this handler from the pipeline,
- *         ctx.getPipeline().remove(this);
- *         // And let SecondHandler handle the current event.
- *         ctx.getPipeline().addLast("2nd", new SecondHandler());
- *         ctx.sendUpstream(e);
- *     }
- * }
- * </pre>
- * To implement the expected behavior, you have to add <tt>SecondHandler</tt>
- * before the removal or make sure there is at least one more handler between
- * <tt>FirstHandler</tt> and <tt>SecondHandler</tt>.
- *
- *
- * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- *
- * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
- *
- * @apiviz.landmark
- * @apiviz.composedOf org.jboss.netty.channel.ChannelHandlerContext
- * @apiviz.owns       org.jboss.netty.channel.ChannelHandler
- * @apiviz.uses       org.jboss.netty.channel.ChannelSink - - sends events downstream
  */
 class ChannelPipeline : private boost::noncopyable {
 public:
-    /**
-     * Creates a new empty pipeline.
-     */
     ChannelPipeline(const ChannelPtr& channel);
-
     ~ChannelPipeline();
 
+    /**
+     * Returns the {@link Channel} that this pipeline is attached to.
+     *
+     * @return the channel.
+     */
     ChannelPtr channel() const;
 
+    /**
+     * Returns the {@link EventLoopPtr} that this pipeline is attached to.
+     *
+     * @return the EventLoopPtr, which is the same as the Channel's.
+     */
     const EventLoopPtr& eventLoop() const;
 
 public:
@@ -407,7 +377,24 @@ public:
     void remove(const std::string& name);
 
     /**
+     * Removes the specified {@link ChannelHandler} from this pipeline
+     * and transfer the content of its {@link Buf} to the next
+     * {@link ChannelHandler} in the {@link ChannelPipeline}.
+     *
+     * @param  handler          the {@link ChannelHandler} to remove
+     *
+     * @throws NoSuchElementException
+     *         if there's no such handler in this pipeline
+     * @throws NullPointerException
+     *         if the specified handler is {@code null}
+     */
+    void removeAndForward(const std::string& name);
+
+    /**
      * Removes the first {@link ChannelHandler} in this pipeline.
+     *
+     * All the remaining content in the {@link Buf) (if any) of the {@link ChannelHandler}
+     * will be discarded.
      *
      * @return the removed handler
      *
@@ -418,6 +405,9 @@ public:
 
     /**
      * Removes the last {@link ChannelHandler} in this pipeline.
+     *
+     * All the remaining content in the {@link Buf) (if any) of the {@link ChannelHandler}
+     * will be discarded.
      *
      * @return the removed handler
      *
@@ -430,14 +420,23 @@ public:
      * Replaces the specified {@link ChannelHandler} with a new handler in
      * this pipeline.
      *
+     * All the remaining content in the {@link Buf) (if any) of the {@link ChannelHandler}
+     * will be discarded.
+     *
+     * @param  oldHandler   the {@link ChannelHandler} to be replaced
+     * @param  newName      the name under which the replacement should be added
+     * @param  newHandler   the {@link ChannelHandler} which is used as replacement
+     *
+     * @return itself
+     *
      * @throws NoSuchElementException
      *         if the specified old handler does not exist in this pipeline
-     * @throws InvalidArgumentException
+     * @throws IllegalArgumentException
      *         if a handler with the specified new name already exists in this
      *         pipeline, except for the handler to be replaced
      * @throws NullPointerException
      *         if the specified old handler, new name, or new handler is
-     *         <tt>NULL</tt>
+     *         {@code null}
      */
     bool replace(const std::string& name, ChannelHandlerContext* context);
 
@@ -459,9 +458,33 @@ public:
     }
 
     /**
-     * Returns the first {@link ChannelHandler} in this pipeline.
+     * Replaces the specified {@link ChannelHandler} with a new handler in
+     * this pipeline and transfer the content of its {@link Buf} to the next
+     * {@link ChannelHandler} in the {@link ChannelPipeline}.
      *
-     * @return the first handler.  <tt>NULL</tt> if this pipeline is empty.
+     * @param  oldHandler    the {@link ChannelHandler} to be replaced
+     * @param  newName       the name under which the replacement should be added
+     * @param  newHandler    the {@link ChannelHandler} which is used as replacement
+     *
+     * @return itself
+
+     * @throws NoSuchElementException
+     *         if the specified old handler does not exist in this pipeline
+     * @throws IllegalArgumentException
+     *         if a handler with the specified new name already exists in this
+     *         pipeline, except for the handler to be replaced
+     * @throws NullPointerException
+     *         if the specified old handler, new name, or new handler is
+     *         {@code null}
+     */
+    void replaceAndForward(const std::string& baseName,
+        const std::string& newName,
+        ChannelHandlerContext* context);
+
+    /**
+     * Returns the context of the first {@link ChannelHandler} in this pipeline.
+     *
+     * @return the context of the first handler.  {@code null} if this pipeline is empty.
      */
     ChannelHandlerContext* first() const;
 
@@ -470,9 +493,9 @@ public:
     }
 
     /**
-     * Returns the last {@link ChannelHandler} in this pipeline.
+     * Returns the context of the last {@link ChannelHandler} in this pipeline.
      *
-     * @return the last handler.  <tt>NULL</tt> if this pipeline is empty.
+     * @return the context of the last handler.  {@code null} if this pipeline is empty.
      */
     ChannelHandlerContext* last() const;
 
@@ -481,11 +504,11 @@ public:
     }
 
     /**
-     * Returns the {@link ChannelHandler} with the specified name in this
-     * pipeline.
+     * Returns the context object of the {@link ChannelHandler} with the
+     * specified name in this pipeline.
      *
-     * @return the handler with the specified name.
-     *         <tt>NULL</tt> if there's no such handler in this pipeline.
+     * @return the context object of the handler with the specified name.
+     *         {@code null} if there's no such handler in this pipeline.
      */
     ChannelHandlerContext* find(const std::string& name) const;
 
@@ -529,6 +552,14 @@ public:
 
 #if (DATA_PROCESS_BOCK || 1)
 
+    /**
+     * Return the bound {@link MessageBuf} of the first {@link ChannelInboundMessageHandler} in the
+     * {@link ChannelPipeline}. If no {@link ChannelInboundMessageHandler} exists in the {@link ChannelPipeline}
+     * it will throw a {@link UnsupportedOperationException}.
+     * <p/>
+     * This method can only be called from within the event-loop, otherwise it will throw an
+     * {@link IllegalStateException}.
+     */
     template<class T, int MessageT>
     ChannelMessageContainer<T, MessageT>* inboundMessageContainer() {
         if (head_) {
@@ -538,6 +569,14 @@ public:
         return NULL;
     }
 
+        /**
+     * Return the bound {@link ByteBuf} of the first {@link ChannelInboundByteHandler} in the
+     * {@link ChannelPipeline}. If no {@link ChannelInboundByteHandler} exists in the {@link ChannelPipeline}
+     * it will throw a {@link UnsupportedOperationException}.
+     * <p/>
+     * This method can only be called from within the event-loop, otherwise it will throw an
+     * {@link IllegalStateException}.
+     */
     template<class T>
     T* inboundMessageContainer() {
         if (head_) {
@@ -547,6 +586,14 @@ public:
         return NULL;
     }
 
+    /**
+     * Return the bound {@link MessageBuf} of the first {@link ChannelOutboundMessageHandler} in the
+     * {@link ChannelPipeline}. If no {@link ChannelOutboundMessageHandler} exists in the {@link ChannelPipeline}
+     * it will throw a {@link UnsupportedOperationException}.
+     * <p/>
+     * This method can only be called from within the event-loop, otherwise it will throw an
+     * {@link IllegalStateException}.
+     */
     template<class T, int MessageT>
     ChannelMessageContainer<T, MessageT>* outboundMessageContainer() {
         if (tail_) {
@@ -556,6 +603,14 @@ public:
         return NULL;
     }
 
+    /**
+     * Return the bound {@link MessageBuf} of the first {@link ChannelOutboundMessageHandler} in the
+     * {@link ChannelPipeline}. If no {@link ChannelOutboundMessageHandler} exists in the {@link ChannelPipeline}
+     * it will throw a {@link UnsupportedOperationException}.
+     * <p/>
+     * This method can only be called from within the event-loop, otherwise it will throw an
+     * {@link IllegalStateException}.
+     */
     template<class T>
     T* outboundMessageContainer() {
         if (tail_) {
@@ -627,12 +682,50 @@ public:
         return addOutboundMessage<ChannelBufferPtr, MESSAGE_STREAM>(buffer);
     }
 
+    /**
+     * Request to write a message via this ChannelOutboundInvoker and notify the {@link ChannelFuture}
+     * once the operation completes, either because the operation was successful or because of an error.
+     *
+     * If you want to write a {@link FileRegion} use {@link #sendFile(FileRegion)}.
+     * <p>
+     * Be aware that the write could be only partially successful as the message may need to get encoded before write it
+     * to the remote peer. In such cases the {@link ChannelFuture} will be failed with a
+     * {@link IncompleteFlushException}. In such cases you may want to call {@link #flush(ChannelPromise)} or
+     * {@link #flush()} to flush the rest of the data or just close the connection via {@link #close(ChannelPromise)}
+     * or {@link #close()} if it is not possible to recover.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the message added to the outbound buffer of the next {@link ChannelOutboundHandler}
+     * and the {@link ChannelOperationHandler#flush(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     template<typename T, int MessageT>
     ChannelFuturePtr write(const T& message) {
         ChannelFuturePtr f = newFuture();
         return write<T, MessageT>(message, f);
     }
 
+    /**
+     * Request to write a message via this ChannelOutboundInvoker and notify the {@link ChannelFuture}
+     * once the operation completes, either because the operation was successful or because of an error.
+     *
+     * If you want to write a {@link FileRegion} use {@link #sendFile(FileRegion)}.
+     * <p>
+     * Be aware that the write could be only partially successful as the message may need to get encoded before write it
+     * to the remote peer. In such cases the {@link ChannelFuture} will be failed with a
+     * {@link IncompleteFlushException}. In such cases you may want to call {@link #flush(ChannelPromise)} or
+     * {@link #flush()} to flush the rest of the data or just close the connection via {@link #close(ChannelPromise)}
+     * or {@link #close()} if it is not possible to recover.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the message added to the outbound buffer of the next {@link ChannelOutboundHandler}
+     * and the {@link ChannelOperationHandler#flush(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     template<typename T, int MessageT>
     const ChannelFuturePtr& write(const T& message, const ChannelFuturePtr& future) {
         if (addOutboundMessage<T, MessageT>(message)) {

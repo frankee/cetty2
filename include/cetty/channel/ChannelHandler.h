@@ -25,15 +25,6 @@ namespace channel {
 template<typename T>
 class ChannelHandler {
 public:
-    typedef ChannelMessageHandlerContext<T,
-            VoidMessage,
-            VoidMessage,
-            VoidMessage,
-            VoidMessage,
-            VoidMessageContainer,
-            VoidMessageContainer,
-            VoidMessageContainer,
-            VoidMessageContainer> Context;
 };
 
 }

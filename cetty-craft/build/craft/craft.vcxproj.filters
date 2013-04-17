@@ -21,9 +21,6 @@
     <ClInclude Include="..\..\..\include\cetty\craft\builder\CraftClientBuilder.h">
       <Filter>builder</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\craft\builder\RestHttpClientBuilder.h">
-      <Filter>builder</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\craft\craft.pb.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h">
       <Filter>security</Filter>
@@ -49,9 +46,6 @@
       <Filter>builder</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftClientBuilder.cpp">
-      <Filter>builder</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cetty\craft\builder\RestHttpClientBuilder.cpp">
       <Filter>builder</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\craft\craft.pb.cc" />

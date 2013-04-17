@@ -53,14 +53,15 @@ class ChannelSink;
  * A channel provides a user:
  * <ul>
  * <li>the current state of the channel (e.g. is it open? is it connected?),</li>
- * <li>the {@link ChannelConfig configuration parameters} of the channel (e.g. receive buffer size),</li>
+ * <li>the {@linkplain ChannelConfig configuration parameters} of the channel (e.g. receive buffer size),</li>
  * <li>the I/O operations that the channel supports (e.g. read, write, connect, and bind), and</li>
- * <li>the {@link ChannelPipeline} which handles all {@link ChannelEvent I/O events and requests} associated with the channel.</li>
+ * <li>the {@link ChannelPipeline} which handles all I/O events and requests
+ *     associated with the channel.</li>
  * </ul>
  *
  * <h3>All I/O operations are asynchronous.</h3>
  * <p>
- * All I/O operations in Cetty are asynchronous.  It means any I/O calls will
+ * All I/O operations in Netty are asynchronous.  It means any I/O calls will
  * return immediately with no guarantee that the requested I/O operation has
  * been completed at the end of the call.  Instead, you will be returned with
  * a {@link ChannelFuture} instance which will notify you when the requested I/O
@@ -68,10 +69,10 @@ class ChannelSink;
  *
  * <h3>Channels are hierarchical</h3>
  * <p>
- * A {@link Channel} can have a @link #getParent() parent@endlink depending on
+ * A {@link Channel} can have a {@linkplain #parent() parent} depending on
  * how it was created.  For instance, a {@link SocketChannel}, that was accepted
  * by {@link ServerSocketChannel}, will return the {@link ServerSocketChannel}
- * as its parent on {@link #getParent()}.
+ * as its parent on {@link #parent()}.
  * <p>
  * The semantics of the hierarchical structure depends on the transport
  * implementation where the {@link Channel} belongs to.  For example, you could
@@ -83,44 +84,8 @@ class ChannelSink;
  * <p>
  * Some transports exposes additional operations that is specific to the
  * transport.  Down-cast the {@link Channel} to sub-type to invoke such
- * operations.  For example, with the I/O datagram transport, multicast
+ * operations.  For example, with the old I/O datagram transport, multicast
  * join / leave operations are provided by {@link DatagramChannel}.
- *
- * <h3>InterestOps</h3>
- * <p>
- * A {@link Channel} has a property called {@link #getInterestOps() interestOps}.
- * It is represented as a <a href="http://en.wikipedia.org/wiki/Bit_field">bit
- * field</a> which is composed of the two flags.
- * <ul>
- * <li>{@link #OP_READ} - If set, a message sent by a remote peer will be read
- *     immediately.  If unset, the message from the remote peer will not be read
- *     until the {@link #OP_READ} flag is set again (i.e. read suspension).</li>
- * <li>{@link #OP_WRITE} - If set, a write request will not be sent to a remote
- *     peer until the {@link #OP_WRITE} flag is cleared and the write request
- *     will be pending in a queue.  If unset, the write request will be flushed
- *     out as soon as possible from the queue.</li>
- * <li>{@link #OP_READ_WRITE} - This is a combination of {@link #OP_READ} and
- *     {@link #OP_WRITE}, which means only write requests are suspended.</li>
- * <li>{@link #OP_NONE} - This is a combination of (NOT {@link #OP_READ}) and
- *     (NOT {@link #OP_WRITE}), which means only read operation is suspended.</li>
- * </ul>
- * </p><p>
- * You can set or clear the {@link #OP_READ} flag to suspend and resume read
- * operation via {@link #setReadable(bool)}.
- * </p><p>
- * Please note that you cannot suspend or resume write operation just like you
- * can set or clear {@link #OP_READ}. The {@link #OP_WRITE} flag is read only
- * and provided simply as a mean to tell you if the size of pending write
- * requests exceeded a certain threshold or not so that you don't issue too many
- * pending writes. For example, the asio implimented socket transport uses the
- * <tt>writeBufferLowWaterMark</tt> and <tt>writeBufferHighWaterMark</tt>
- * properties in {@link AsioSocketChannelConfig} to determine when to set or
- * clear the {@link #OP_WRITE} flag.
- * </p>
- *
- *
- * @author <a href="http://gleamynode.net/">Trustin Lee</a>
- * @author <a href="mailto:frankee.zhou@gmail.com">Frankee Zhou</a>
  *
  * @dot
  * strict digraph {
@@ -143,12 +108,12 @@ public:
     virtual ~Channel();
 
     /**
-     * Returns the unique integer ID of this channel.
+     * Returns the unique integer ID of this channel. The returned value MUST be non {@code null}.
      */
     int id() const;
 
     /**
-     *
+     * Return the {@link EventLoop} this {@link Channel} was registered too.
      */
     const EventLoopPtr& eventLoop() const;
 
@@ -156,7 +121,7 @@ public:
      * Returns the parent of this channel.
      *
      * @return the parent channel.
-     *         <tt>NULL</tt> if this channel does not have a parent channel.
+     *         {@code null} if this channel does not have a parent channel.
      */
     const ChannelPtr& parent() const;
 
@@ -177,18 +142,14 @@ public:
     ChannelPipeline& pipeline();
 
     /**
-     * Returns <tt>true</tt> if and only if this channel is open.
+     * Returns {@code true} if the {@link Channel} is open an may get active later
      */
     bool isOpen() const;
 
     /**
-     * Returns <tt>true</tt> if this channel is bound to a
-     * {@link #getLocalAddress() local address} or connected to a
-     * {@link #getRemoteAddress() remote address}.
+     * Return {@code true} if the {@link Channel} is active and so connected.
      */
     bool isActive() const;
-
-    void setActived();
 
     /**
      * Returns the local address where this channel is bound to.
@@ -213,21 +174,32 @@ public:
      */
     const InetAddress& remoteAddress() const;
 
+    /**
+     * Return a new {@link ChannelFuture}.
+     */
     ChannelFuturePtr newFuture();
 
+    /**
+     * Return a {@link VoidChannelFuture}. This method always return the same instance.
+     */
     ChannelFuturePtr newVoidFuture();
 
+    /**
+     * Create a new {@link ChannelFuture} which is marked as failed already. So {@link Future#isSuccess()}
+     * will return {@code false}. All {@link FutureListener} added to it will be notified directly. Also
+     * every call of blocking methods will just return without blocking.
+     */
     ChannelFuturePtr newFailedFuture(const Exception& e);
 
     /**
-     * Returns the {@link ChannelFuture  ChannelFuturePtr} which is already succeeded.
-     * This method always returns the same future instance, which is cached
-     * for easy use.
+     * Create a new {@link ChannelFuture} which is marked as successes already. So {@link ChannelFuture#isSuccess()}
+     * will return {@code true}. All {@link FutureListener} added to it will be notified directly. Also
+     * every call of blocking methods will just return without blocking.
      */
     ChannelFuturePtr newSucceededFuture();
 
     /**
-     * Returns the {@link ChannelFuture  ChannelFuturePtr} which will be notified when this
+     * Returns the {@link ChannelFuture} which will be notified when this
      * channel is closed.  This method always returns the same future instance.
      */
     const ChannelFuturePtr& closeFuture();
@@ -239,16 +211,42 @@ public:
 public:
     void open();
 
+    /**
+     * Bind the {@link SocketAddress} to the {@link Channel} of the {@link ChannelPromise} and notify
+     * it once its done.
+     */
     ChannelFuturePtr bind(const InetAddress& localAddress);
 
     ChannelFuturePtr connect(const InetAddress& remoteAddress);
 
+    /**
+         * Connect the {@link Channel} of the given {@link ChannelFuture} with the given remote {@link SocketAddress}.
+         * If a specific local {@link SocketAddress} should be used it need to be given as argument. Otherwise just
+         * pass {@code null} to it.
+         *
+         * The {@link ChannelPromise} will get notified once the connect operation was complete.
+         */
     ChannelFuturePtr connect(const InetAddress& remoteAddress,
                              const InetAddress& localAddress);
 
+    /**
+         * Disconnect the {@link Channel} of the {@link ChannelFuture} and notify the {@link ChannelPromise} once the
+         * operation was complete.
+         */
     ChannelFuturePtr disconnect();
 
+    /**
+         * Close the {@link Channel} of the {@link ChannelPromise} and notify the {@link ChannelPromise} once the
+         * operation was complete.
+         */
     ChannelFuturePtr close();
+
+    /**
+         * Closes the {@link Channel} immediately without firing any events.  Probably only useful
+         * when registration attempt failed.
+         */
+        void closeForcibly();
+
     ChannelFuturePtr flush();
 
     const ChannelFuturePtr& bind(const InetAddress& localAddress,
@@ -354,6 +352,11 @@ protected:
     virtual void doPreClose() {} // NOOP by default
 
     void closeIfClosed();
+
+    /**
+     * Set the Channel to active state.
+     */
+    void setActived();
 
     void setLocalAddress(const InetAddress& local);
     void setRemoteAddress(const InetAddress& remote);

@@ -43,6 +43,7 @@ static const SctpInitMaxStreamsChecker SCTP_INIT_MAXSTREAMS_CHECKER;
 
 const ChannelOption ChannelOption::CO_CONNECT_TIMEOUT_MILLIS("CONNECT_TIMEOUT_MILLIS", &INT_VALUE_CHECKER);
 const ChannelOption ChannelOption::CO_RESERVED_CHILD_COUNT("RESERVED_CHILD_COUNT", &INT_VALUE_CHECKER);
+const ChannelOption ChannelOption::CO_AUTO_READ("AUTO_READ", &BOOL_VALUE_CHECKER);
 
 const ChannelOption  ChannelOption::CO_SO_BROADCAST("SO_BROADCAST", &BOOL_VALUE_CHECKER);
 const ChannelOption  ChannelOption::CO_SO_KEEPALIVE("SO_KEEPALIVE", &BOOL_VALUE_CHECKER);

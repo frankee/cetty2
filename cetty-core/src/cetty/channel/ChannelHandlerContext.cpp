@@ -32,30 +32,9 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name)
     : name_(name),
       next_(),
       prev_(),
-      hasNextUserEventHandler_(true),
-      hasNextMessageUpdatedHandler_(true),
-      hasNextChannelOpenHandler_(true),
-      hasNextChannelActiveHandler_(true),
-      hasNextChannelInactiveHandler_(true),
-      hasNextChannelExceptionHandler_(true),
-      hasPrevBindHandler_(true),
-      hasPrevConnectHandler_(true),
-      hasPrevDisconnectHandler_(true),
-      hasPrevCloseHandler_(true),
-      hasPrevFlushHandler_(true),
-      nextUserEventHandler_(),
-      nextMessageUpdatedHandler_(),
-      nextChannelOpenHandler_(),
-      nextChannelActiveHandler_(),
-      nextChannelInactiveHandler_(),
-      nextChannelExceptionHandler_(),
-      prevBindHandler_(),
-      prevConnectHandler_(),
-      prevDisconnectHandler_(),
-      prevCloseHandler_(),
-      prevFlushHandler_(),
-      pipeline_(),
-      eventLoop_() {
+      eventLoop_(),
+      pipeline_() {
+    resetNeighbourContexts();
 }
 
 ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
@@ -63,52 +42,34 @@ ChannelHandlerContext::ChannelHandlerContext(const std::string& name,
     : name_(name),
       next_(),
       prev_(),
-      hasNextUserEventHandler_(true),
-      hasNextMessageUpdatedHandler_(true),
-      hasNextChannelOpenHandler_(true),
-      hasNextChannelActiveHandler_(true),
-      hasNextChannelInactiveHandler_(true),
-      hasNextChannelExceptionHandler_(true),
-      hasPrevBindHandler_(true),
-      hasPrevConnectHandler_(true),
-      hasPrevDisconnectHandler_(true),
-      hasPrevCloseHandler_(true),
-      hasPrevFlushHandler_(true),
-      nextUserEventHandler_(),
-      nextMessageUpdatedHandler_(),
-      nextChannelOpenHandler_(),
-      nextChannelActiveHandler_(),
-      nextChannelInactiveHandler_(),
-      nextChannelExceptionHandler_(),
-      prevBindHandler_(),
-      prevConnectHandler_(),
-      prevDisconnectHandler_(),
-      prevCloseHandler_(),
-      prevFlushHandler_(),
-      pipeline_(),
-      eventLoop_(eventLoop) {
+      eventLoop_(eventLoop),
+      pipeline_() {
+    resetNeighbourContexts();
 }
 
 void ChannelHandlerContext::fireChannelOpen() {
-    if (nextChannelOpenHandler_) {
-        fireChannelOpen(*nextChannelOpenHandler_);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_OPEN];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_OPEN];
+
+    if (nextCtx) {
+        fireChannelOpen(*nextCtx);
         return;
     }
 
-    if (hasNextChannelOpenHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->channelOpenCallback_) {
-                nextChannelOpenHandler_ = next;
-                fireChannelOpen(*next);
+                nextCtx = next;
+                fireChannelOpen(*nextCtx);
                 break;
             }
 
             next = next->next_;
         }
 
-        hasNextChannelOpenHandler_ = (next != NULL);
+        hasNext = (next != NULL);
     }
 }
 
@@ -119,7 +80,8 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
                 ctx.channelOpenCallback_(ctx);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextChannelOpenHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_OPEN];
 
                 if (next) {
                     next->channelOpenCallback_(*next);
@@ -129,26 +91,12 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's channelOpen() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's channelOpen() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " channelOpen() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle channelOpen"));
         }
     }
     else {
@@ -160,17 +108,20 @@ void ChannelHandlerContext::fireChannelOpen(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelInactive() {
-    if (nextChannelInactiveHandler_) {
-        fireChannelInactive(*nextChannelInactiveHandler_);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_INACTIVE];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_INACTIVE];
+
+    if (nextCtx) {
+        fireChannelInactive(*nextCtx);
         return;
     }
 
-    if (hasNextChannelInactiveHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->channelInactiveCallback_) {
-                nextChannelInactiveHandler_ = next;
+                nextCtx = next;
                 fireChannelInactive(*next);
                 break;
             }
@@ -178,7 +129,7 @@ void ChannelHandlerContext::fireChannelInactive() {
             next = next->next_;
         }
 
-        hasNextChannelInactiveHandler_ = (next != NULL);
+        hasNext = (next != NULL);
     }
 }
 
@@ -189,7 +140,8 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
                 ctx.channelInactiveCallback_(ctx);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextChannelInactiveHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_INACTIVE];
 
                 if (next) {
                     next->channelInactiveCallback_(*next);
@@ -199,26 +151,12 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's channelInactive() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's channelInactive() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " channelInactive() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle channelInactive"));
         }
     }
     else {
@@ -230,17 +168,20 @@ void ChannelHandlerContext::fireChannelInactive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireChannelActive() {
-    if (nextChannelActiveHandler_) {
-        fireChannelActive(*nextChannelActiveHandler_);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_ACTIVE];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_ACTIVE];
+
+    if (nextCtx) {
+        fireChannelActive(*nextCtx);
         return;
     }
 
-    if (hasNextChannelActiveHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->channelActiveCallback_) {
-                nextChannelActiveHandler_ = next;
+                nextCtx = next;
                 fireChannelActive(*next);
                 break;
             }
@@ -248,7 +189,7 @@ void ChannelHandlerContext::fireChannelActive() {
             next = next->next_;
         }
 
-        hasNextChannelActiveHandler_ = (next != NULL);
+        hasNext = (next != NULL);
     }
 }
 
@@ -259,7 +200,8 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
                 ctx.channelActiveCallback_(ctx);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextChannelActiveHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_ACTIVE];
 
                 if (next) {
                     next->channelActiveCallback_(*next);
@@ -269,26 +211,12 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's channelActive() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's channelActive() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " channelActive() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle channelActive"));
         }
     }
     else {
@@ -300,17 +228,20 @@ void ChannelHandlerContext::fireChannelActive(ChannelHandlerContext& ctx) {
 }
 
 void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
-    if (nextChannelExceptionHandler_) {
-        fireExceptionCaught(*nextChannelExceptionHandler_, cause);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_EXCEPTION];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_EXCEPTION];
+
+    if (nextCtx) {
+        fireExceptionCaught(*nextCtx, cause);
         return;
     }
 
-    if (hasNextChannelExceptionHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->exceptionCallback_) {
-                nextChannelExceptionHandler_ = next;
+                nextCtx = next;
                 fireExceptionCaught(*next, cause);
                 break;
             }
@@ -319,7 +250,7 @@ void ChannelHandlerContext::fireExceptionCaught(const ChannelException& cause) {
         }
 
         if (!next) {
-            hasNextChannelActiveHandler_ = false;
+            hasNext = false;
 
             LOG_WARN << "An exception(" << cause.displayText()
                      << ") event was fired, and it reached at the end of the pipeline."
@@ -339,7 +270,8 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
                 ctx.exceptionCallback_(ctx, cause);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextChannelExceptionHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_EXCEPTION];
 
                 if (next) {
                     next->exceptionCallback_(*next, cause);
@@ -349,20 +281,9 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's "
-                      "exceptionCaught() method while handling the following exception:"
-                      << cause.displayText();
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's "
-                      "exceptionCaught() method while handling the following exception:"
-                      << cause.displayText();
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's "
                       "exceptionCaught() method while handling the following exception:"
                       << cause.displayText();
         }
@@ -379,17 +300,20 @@ void ChannelHandlerContext::fireExceptionCaught(ChannelHandlerContext& ctx,
 }
 
 void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
-    if (nextUserEventHandler_) {
-        fireUserEventTriggered(*nextUserEventHandler_, evt);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_USR_EVENT];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_USR_EVENT];
+
+    if (nextCtx) {
+        fireUserEventTriggered(*nextCtx, evt);
         return;
     }
 
-    if (hasNextUserEventHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->userEventCallback_) {
-                nextUserEventHandler_ = next;
+                nextCtx = next;
                 fireUserEventTriggered(*next, evt);
                 break;
             }
@@ -398,7 +322,7 @@ void ChannelHandlerContext::fireUserEventTriggered(const boost::any& evt) {
         }
 
         if (!next) {
-            hasNextUserEventHandler_ = false;
+            hasNext = false;
 
             LOG_WARN << "An user event was fired, and it reached at the end of the "
                      "pipeline.  It usually means the last inbound handler in the pipeline did not "
@@ -415,7 +339,8 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
                 ctx.userEventCallback_(ctx, evt);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextUserEventHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_USR_EVENT];
 
                 if (next) {
                     next->userEventCallback_(*next, evt);
@@ -425,26 +350,12 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's userEventTriggered() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's userEventTriggered() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " userEventTriggered() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle userEventTriggered"));
         }
     }
     else {
@@ -457,17 +368,20 @@ void ChannelHandlerContext::fireUserEventTriggered(ChannelHandlerContext& ctx,
 }
 
 void ChannelHandlerContext::fireMessageUpdated() {
-    if (nextMessageUpdatedHandler_) {
-        fireMessageUpdated(*nextMessageUpdatedHandler_);
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_MESSAGE_UPDATED];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_MESSAGE_UPDATED];
+
+    if (nextCtx) {
+        fireMessageUpdated(*nextCtx);
         return;
     }
 
-    if (hasNextMessageUpdatedHandler_) {
+    if (hasNext) {
         ChannelHandlerContext* next = next_;
 
         while (next) {
             if (next->channelMessageUpdatedCallback_) {
-                nextMessageUpdatedHandler_ = next;
+                nextCtx = next;
                 fireMessageUpdated(*next);
                 break;
             }
@@ -475,7 +389,7 @@ void ChannelHandlerContext::fireMessageUpdated() {
             next = next->next_;
         }
 
-        hasNextMessageUpdatedHandler_ = (next != NULL);
+        hasNext = (next != NULL);
     }
 }
 
@@ -486,7 +400,8 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
                 ctx.channelMessageUpdatedCallback_(ctx);
             }
             else {
-                ChannelHandlerContext* next = ctx.nextMessageUpdatedHandler_;
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_MESSAGE_UPDATED];
 
                 if (next) {
                     next->channelMessageUpdatedCallback_(*next);
@@ -496,27 +411,11 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's messageUpdated() method";
-
-            notifyHandlerException(ChannelPipelineException(e.message(),
-                                   e.code()));
-            clearInboundChannelBuffer(ctx);
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's messageUpdated() method";
 
             notifyHandlerException(ChannelPipelineException(e.what()));
-            clearInboundChannelBuffer(ctx);
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " messageUpdated() method";
-
-            notifyHandlerException(ChannelPipelineException(
-                                       "unknown exception from handle messageUpdated"));
             clearInboundChannelBuffer(ctx);
         }
     }
@@ -528,19 +427,79 @@ void ChannelHandlerContext::fireMessageUpdated(ChannelHandlerContext& ctx) {
     }
 }
 
-const ChannelFuturePtr& ChannelHandlerContext::bind(const InetAddress& localAddress,
-        const ChannelFuturePtr& future) {
+void ChannelHandlerContext::fireChannelReadSuspended() {
+    bool& hasNext = hasNeighbourEventHandler_[EVT_CHANNEL_READ_SUSPENDED];
+    ChannelHandlerContext*& nextCtx = neighbourEventHandler_[EVT_CHANNEL_READ_SUSPENDED];
 
-    if (prevBindHandler_) {
-        return bind(*prevBindHandler_, localAddress, future);
+    if (nextCtx) {
+        fireChannelReadSuspended(*nextCtx);
+        return;
     }
 
-    if (hasPrevBindHandler_) {
+    if (hasNext) {
+        ChannelHandlerContext* next = next_;
+
+        while (next) {
+            if (next->channelReadSuspendedCallback_) {
+                nextCtx = next;
+                fireChannelReadSuspended(*next);
+                break;
+            }
+
+            next = next->next_;
+        }
+
+        hasNext = (next != NULL);
+    }
+}
+
+void ChannelHandlerContext::fireChannelReadSuspended(ChannelHandlerContext& ctx) {
+    if (ctx.eventLoop_->inLoopThread()) {
+        try {
+            if (ctx.channelReadSuspendedCallback_) {
+                ctx.channelReadSuspendedCallback_(ctx);
+            }
+            else {
+                ChannelHandlerContext* next =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_READ_SUSPENDED];
+
+                if (next) {
+                    next->channelReadSuspendedCallback_(*next);
+                }
+                else {
+                    ctx.fireChannelReadSuspended();
+                }
+            }
+        }
+        catch (const std::exception& e) {
+            LOG_ERROR << "An exception (" << e.what()
+                << ") was thrown by a user handler's ChannelReadSuspended() method";
+
+            notifyHandlerException(ChannelPipelineException(e.what()));
+        }
+    }
+    else {
+        ctx.eventLoop_->post(
+            boost::bind(&ChannelHandlerContext::fireChannelReadSuspended,
+            this,
+            boost::ref(ctx)));
+    }
+}
+
+const ChannelFuturePtr& ChannelHandlerContext::bind(const InetAddress& localAddress,
+        const ChannelFuturePtr& future) {
+            bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_BIND];
+            ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_BIND];
+    if (preCtx) {
+        return bind(*preCtx, localAddress, future);
+    }
+
+    if (hasPre) {
         ChannelHandlerContext* prev = prev_;
 
         while (prev) {
             if (prev->bindFunctor_) {
-                prevBindHandler_ = prev;
+                preCtx = prev;
                 return bind(*prev, localAddress, future);
             }
 
@@ -548,7 +507,7 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(const InetAddress& localAddr
         }
 
         if (!prev) {
-            hasPrevBindHandler_ = false;
+            hasPre = false;
             LOG_ERROR << "has no handler to handle to bind";
         }
     }
@@ -571,7 +530,8 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
                 ctx.bindFunctor_(ctx, localAddress, future);
             }
             else {
-                ChannelHandlerContext* prev = ctx.prevBindHandler_;
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_BIND];
 
                 if (prev) {
                     prev->bindFunctor_(*prev, localAddress, future);
@@ -581,26 +541,12 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's bind() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's bind() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " bind() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle bind"));
         }
     }
     else {
@@ -618,16 +564,18 @@ const ChannelFuturePtr& ChannelHandlerContext::bind(ChannelHandlerContext& ctx,
 const ChannelFuturePtr& ChannelHandlerContext::connect(const InetAddress& remoteAddress,
         const InetAddress& localAddress,
         const ChannelFuturePtr& future) {
-    if (prevConnectHandler_) {
-        return connect(*prevConnectHandler_, remoteAddress, localAddress, future);
+            bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_CONNECT];
+            ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_CONNECT];
+    if (preCtx) {
+        return connect(*preCtx, remoteAddress, localAddress, future);
     }
 
-    if (hasPrevConnectHandler_) {
+    if (hasPre) {
         ChannelHandlerContext* prev = prev_;
 
         while (prev) {
             if (prev->connectFunctor_) {
-                prevConnectHandler_ = prev;
+                preCtx = prev;
                 return connect(*prev, remoteAddress, localAddress, future);
             }
 
@@ -635,7 +583,7 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(const InetAddress& remote
         }
 
         if (!prev) {
-            hasPrevConnectHandler_ = false;
+            hasPre = false;
             LOG_ERROR << "has no handler to handle to connect";
         }
     }
@@ -657,25 +605,27 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
     if (ctx.eventLoop_->inLoopThread()) {
         try {
             if (ctx.connectFunctor_) {
-                ctx.connectFunctor_(ctx, remoteAddress, localAddress, future);
+                ctx.connectFunctor_(ctx,
+                    remoteAddress,
+                    localAddress,
+                    future);
             }
             else {
-                ChannelHandlerContext* prev = ctx.prevConnectHandler_;
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_CONNECT];
 
                 if (prev) {
-                    prev->connectFunctor_(*prev, remoteAddress, localAddress, future);
+                    prev->connectFunctor_(*prev,
+                        remoteAddress,
+                        localAddress,
+                        future);
                 }
                 else {
-                    ctx.connect(remoteAddress, localAddress, future);
+                    ctx.connect(remoteAddress,
+                        localAddress,
+                        future);
                 }
             }
-        }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's connect() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
         }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
@@ -683,13 +633,6 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " connect() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle connect"));
         }
     }
     else {
@@ -705,17 +648,20 @@ const ChannelFuturePtr& ChannelHandlerContext::connect(ChannelHandlerContext& ct
     return future;
 }
 
-const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr& future) {
-    if (prevDisconnectHandler_) {
-        return disconnect(*prevDisconnectHandler_, future);
+const ChannelFuturePtr& ChannelHandlerContext::disconnect(
+    const ChannelFuturePtr& future) {
+    bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_DISCONNECT];
+    ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_DISCONNECT];
+    if (preCtx) {
+        return disconnect(*preCtx, future);
     }
 
-    if (hasPrevDisconnectHandler_) {
+    if (hasPre) {
         ChannelHandlerContext* prev = prev_;
 
         while (prev) {
             if (prev->disconnectFunctor_) {
-                prevDisconnectHandler_ = prev;
+                preCtx = prev;
                 return disconnect(*prev, future);
             }
 
@@ -723,7 +669,7 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(const ChannelFuturePtr
         }
 
         if (!prev) {
-            hasPrevDisconnectHandler_ = false;
+            hasPre = false;
             LOG_ERROR << "has no handler to handle to disconnect";
         }
     }
@@ -750,7 +696,8 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
                 ctx.disconnectFunctor_(ctx, future);
             }
             else {
-                ChannelHandlerContext* prev = ctx.prevDisconnectHandler_;
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_DISCONNECT];
 
                 if (prev) {
                     prev->disconnectFunctor_(*prev,future);
@@ -760,25 +707,11 @@ const ChannelFuturePtr& ChannelHandlerContext::disconnect(ChannelHandlerContext&
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's disconnect() method";
-
-            notifyHandlerException(ChannelPipelineException(e.message(),
-                                   e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's disconnect() method";
 
             notifyHandlerException(ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " disconnect() method";
-
-            notifyHandlerException(ChannelPipelineException(
-                                       "unknown exception from handle disconnect"));
         }
     }
     else {
@@ -797,16 +730,19 @@ const ChannelFuturePtr& ChannelHandlerContext::close() {
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& future) {
-    if (prevCloseHandler_) {
-        return close(*prevCloseHandler_, future);
+    bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_CLOSE];
+    ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_CLOSE];
+
+    if (preCtx) {
+        return close(*preCtx, future);
     }
 
-    if (hasPrevCloseHandler_) {
+    if (hasPre) {
         ChannelHandlerContext* prev = prev_;
 
         while (prev) {
             if (prev->closeFunctor_) {
-                prevCloseHandler_ = prev;
+                preCtx = prev;
                 return close(*prev, future);
             }
 
@@ -814,7 +750,7 @@ const ChannelFuturePtr& ChannelHandlerContext::close(const ChannelFuturePtr& fut
         }
 
         if (!prev) {
-            hasPrevCloseHandler_ = false;
+            hasPre = false;
             LOG_ERROR << "has no handler to handle to close";
         }
     }
@@ -831,7 +767,8 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
                 ctx.closeFunctor_(ctx, future);
             }
             else {
-                ChannelHandlerContext* prev = ctx.prevCloseHandler_;
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_CLOSE];
 
                 if (prev) {
                     prev->closeFunctor_(*prev, future);
@@ -841,26 +778,12 @@ const ChannelFuturePtr& ChannelHandlerContext::close(ChannelHandlerContext& ctx,
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's close() method";
-
-            notifyHandlerException(
-                ChannelPipelineException(e.message(), e.code()));
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's close() method";
 
             notifyHandlerException(
                 ChannelPipelineException(e.what()));
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " close() method";
-
-            notifyHandlerException(
-                ChannelPipelineException("unknown exception from handle close"));
         }
     }
     else {
@@ -879,16 +802,19 @@ const ChannelFuturePtr& ChannelHandlerContext::flush() {
 }
 
 const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& future) {
-    if (prevFlushHandler_) {
-        return flush(*prevFlushHandler_, future);
+    bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_FLUSH];
+    ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_FLUSH];
+
+    if (preCtx) {
+        return flush(*preCtx, future);
     }
 
-    if (hasPrevFlushHandler_) {
+    if (hasPre) {
         ChannelHandlerContext* prev = prev_;
 
         while (prev) {
             if (prev->flushFunctor_) {
-                prevFlushHandler_ = prev;
+                preCtx = prev;
                 return flush(*prev, future);
             }
 
@@ -896,7 +822,7 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(const ChannelFuturePtr& fut
         }
 
         if (!prev) {
-            hasPrevFlushHandler_ = false;
+            hasPre = false;
             LOG_ERROR << "has no handler to handle to flush";
         }
     }
@@ -913,7 +839,8 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
                 ctx.flushFunctor_(ctx, future);
             }
             else {
-                ChannelHandlerContext* prev = ctx.prevFlushHandler_;
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_FLUSH];
 
                 if (prev) {
                     prev->flushFunctor_(*prev, future);
@@ -923,27 +850,11 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
                 }
             }
         }
-        catch (const Exception& e) {
-            LOG_ERROR << "An exception (" << e.displayText()
-                      << ") was thrown by a user handler's flush() method";
-
-            notifyHandlerException(ChannelPipelineException(e.message(),
-                                   e.code()));
-            clearOutboundChannelBuffer(ctx);
-        }
         catch (const std::exception& e) {
             LOG_ERROR << "An exception (" << e.what()
                       << ") was thrown by a user handler's flush() method";
 
             notifyHandlerException(ChannelPipelineException(e.what()));
-            clearOutboundChannelBuffer(ctx);
-        }
-        catch (...) {
-            LOG_ERROR << "An unknown exception was thrown by a user handler's"
-                      " flush() method";
-
-            notifyHandlerException(ChannelPipelineException(
-                                       "unknown exception from handle flush"));
             clearOutboundChannelBuffer(ctx);
         }
     }
@@ -956,6 +867,66 @@ const ChannelFuturePtr& ChannelHandlerContext::flush(ChannelHandlerContext& ctx,
     }
 
     return future;
+}
+
+void ChannelHandlerContext::read() {
+    bool& hasPre = hasNeighbourEventHandler_[EVT_CHANNEL_READ];
+    ChannelHandlerContext*& preCtx = neighbourEventHandler_[EVT_CHANNEL_READ];
+
+    if (preCtx) {
+        return read(*preCtx);
+    }
+
+    if (hasPre) {
+        ChannelHandlerContext* prev = prev_;
+
+        while (prev) {
+            if (prev->readFunctor_) {
+                preCtx = prev;
+                return read(*prev);
+            }
+
+            prev = prev->prev_;
+        }
+
+        if (!prev) {
+            hasPre = false;
+            LOG_ERROR << "has no handler to handle to flush";
+        }
+    }
+}
+
+void ChannelHandlerContext::read(ChannelHandlerContext& ctx) {
+    if (ctx.eventLoop_->inLoopThread()) {
+        try {
+            if (ctx.readFunctor_) {
+                ctx.readFunctor_(ctx);
+            }
+            else {
+                ChannelHandlerContext* prev =
+                    ctx.neighbourEventHandler_[EVT_CHANNEL_READ];
+
+                if (prev) {
+                    prev->readFunctor_(*prev);
+                }
+                else {
+                    ctx.read();
+                }
+            }
+        }
+        catch (const std::exception& e) {
+            LOG_ERROR << "An exception (" << e.what()
+                << ") was thrown by a user handler's flush() method";
+
+            notifyHandlerException(ChannelPipelineException(e.what()));
+        }
+    }
+    else {
+        ctx.eventLoop_->post(
+            boost::bind(&ChannelHandlerContext::read,
+            this,
+            boost::ref(ctx)));
+    }
 }
 
 ChannelFuturePtr ChannelHandlerContext::newFuture() {
@@ -1030,6 +1001,10 @@ void ChannelHandlerContext::initialize(ChannelPipeline* pipeline) {
     if (!eventLoop_) {
         eventLoop_ = pipeline_->eventLoop();
     }
+}
+
+void ChannelHandlerContext::onPipelineChanged() {
+    resetNeighbourContexts();
 }
 
 }

@@ -96,6 +96,7 @@ public:
 public:
     static const ChannelOption CO_CONNECT_TIMEOUT_MILLIS;
     static const ChannelOption CO_RESERVED_CHILD_COUNT;
+    static const ChannelOption CO_AUTO_READ;
 
     static const ChannelOption CO_SO_BROADCAST;
     static const ChannelOption CO_SO_KEEPALIVE;

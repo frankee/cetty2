@@ -25,7 +25,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/ChannelStateHandler.h>
 #include <cetty/handler/timeout/ReadTimeoutException.h>
 
 
@@ -86,7 +86,7 @@ public:
 
     typedef boost::function<void (ChannelHandlerContext&)> ReadTimeoutCallback;
 
-    typedef ChannelHandler<ReadTimeoutHandler>::Context Context;
+    typedef ChannelStateHandler<ReadTimeoutHandler>::Context Context;
 
 public:
     /**

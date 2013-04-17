@@ -210,6 +210,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioSocketChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\asio\AsioWriteOperationQueue.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\Channel.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelStateHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\InetAddress.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandler.h" />

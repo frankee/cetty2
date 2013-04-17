@@ -873,5 +873,8 @@
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ServerUtil.h">
       <Filter>bootstrap</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelStateHandler.h">
+      <Filter>channel</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

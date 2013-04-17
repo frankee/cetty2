@@ -24,7 +24,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 #include <cetty/channel/TimeoutPtr.h>
-#include <cetty/channel/ChannelHandler.h>
+#include <cetty/channel/ChannelStateHandler.h>
 #include <cetty/channel/ChannelFutureListener.h>
 
 #include <cetty/handler/timeout/WriteTimeoutException.h>
@@ -85,7 +85,7 @@ public:
 
     typedef boost::function<void (ChannelHandlerContext&)> WriteTimeoutCallback;
 
-    typedef ChannelHandler<WriteTimeoutHandler>::Context Context;
+    typedef ChannelStateHandler<WriteTimeoutHandler>::Context Context;
 
 public:
     /**

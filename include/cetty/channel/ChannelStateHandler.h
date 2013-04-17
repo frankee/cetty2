@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H)
-#define CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H
+#if !defined(CETTY_CHANNEL_CHANNELSTATEHANDLER_H)
+#define CETTY_CHANNEL_CHANNELSTATEHANDLER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -17,34 +17,49 @@
  * under the License.
  */
 
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
 namespace cetty {
 namespace channel {
 
-template<typename H>
-class ChannelInboudBufferHandler {
+/**
+ * ChannelHandler which only process the event
+ *
+ * <code>
+ *      class EventHandler {
+ *      public:
+ *            typedef ChannelStateHandler<EventHandler>::Context Context;
+ *      public:
+ *            void registTo() {
+ *            }
+ *
+ *            void channelActived(Context& ctx) {
+ *            }
+ *      }
+ * </code>
+ */
+template<typename T>
+class ChannelStateHandler {
 public:
-    typedef ChannelMessageHandlerContext<H,
-            ChannelBufferPtr,
+    typedef ChannelMessageHandlerContext<T,
             VoidMessage,
             VoidMessage,
-            ChannelBufferPtr,
-            ChannelBufferContainer,
+            VoidMessage,
+            VoidMessage,
             VoidMessageContainer,
             VoidMessageContainer,
-            ChannelBufferContainer> Context;
+            VoidMessageContainer,
+            VoidMessageContainer> Context;
 
-    typedef ChannelBufferContainer InboundContainer;
-    typedef ChannelMessageTransfer<ChannelBufferPtr,
-            ChannelBufferContainer,
-            TRANSFER_OUTBOUND> OutboundTransfer;
+    //typedef ChannelHandlerWrapper<T>::Handler Handler;
+    //typedef ChannelHandlerWrapper<T>::HandlerPtr HandlerPtr;
 };
 
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELINBOUNDBUFFERHANDLER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELSTATEHANDLER_H)
 
 // Local Variables:
 // mode: c++

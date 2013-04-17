@@ -24,6 +24,14 @@ namespace channel {
 
 using namespace cetty::util;
 
+ChannelConfig::ChannelConfig()
+    : autoRead_(true),
+      connectTimeoutMillis_(10000/*ms*/) {
+}
+
+ChannelConfig::~ChannelConfig() {
+}
+
 void ChannelConfig::setOptions(const ChannelOptions& options) {
     ChannelOptions::ConstIterator itr = options.begin();
 
@@ -40,6 +48,10 @@ bool ChannelConfig::setOption(const ChannelOption& option,
                 setConnectTimeout(boost::get<int>(value));
                 return true;
             }
+            else if (option == ChannelOption::CO_AUTO_READ) {
+                setAutoRead(boost::get<bool>(value));
+                return true;
+            }
         }
 
         return false;
@@ -51,13 +63,15 @@ bool ChannelConfig::setOption(const ChannelOption& option,
     }
 }
 
-void ChannelConfig::setConnectTimeout(int connectTimeoutMillis) {
+ChannelConfig& ChannelConfig::setConnectTimeout(int connectTimeoutMillis) {
     if (connectTimeoutMillis > 0) {
         connectTimeoutMillis_ = connectTimeoutMillis;
     }
     else {
         LOG_WARN << "connectTimeoutMillis is negative, using default.";
     }
+
+    return *this;
 }
 
 }
