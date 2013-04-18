@@ -79,6 +79,7 @@ private:
                     Message* message);
 
     bool getValues(const HttpRequestPtr& request,
+                   const ServiceMethod& method,
                    const CraftFieldOptions& options,
                    std::vector<StringPiece>* values);
 

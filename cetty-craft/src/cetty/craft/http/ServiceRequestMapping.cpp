@@ -47,10 +47,14 @@ using namespace cetty::protobuf::serialization;
 static boost::thread_specific_ptr<boost::smatch> regexResultPtr;
 
 class ServiceMethod {
+private:
+    typedef std::map<std::string, int> PathParams;
+
 public:
     ServiceMethod()
         : descriptor_(),
-          httpMethod_("GET") {
+          httpMethod_("GET"),
+          uriPath_() {
     }
 
     bool init(const std::string& path, const MethodDescriptor* descriptor) {
@@ -79,13 +83,15 @@ public:
             return false;
         }
 
+        uriPath_ = &request->uri().getPath();
+
         if (regex_.empty()) {
-            return request->uri().getPath().compare(path_) == 0;
+            return uriPath_->compare(path_) == 0;
         }
         else {
             boost::smatch& result = getRegexResult();
 
-            if (boost::regex_match(request->uri().getPath(),
+            if (boost::regex_match(*uriPath_,
                                    result,
                                    regex_,
                                    boost::match_extra)) {
@@ -107,18 +113,19 @@ public:
         return descriptor_->full_name();
     }
 
-    std::string pathParamValue(const std::string& name) const {
-        std::map<std::string, int>::const_iterator itr = params_.find(name);
+    StringPiece pathParamValue(const std::string& name) const {
+        PathParams::const_iterator itr = params_.find(name);
 
         if (itr != params_.end()) {
             const boost::smatch& result = getRegexResult();
 
             if (itr->second < static_cast<int>(result.size())) {
-                return result[itr->second];
+                return StringPiece(*uriPath_).substr(result.position(itr->second),
+                                                     result.length(itr->second));
             }
         }
 
-        return std::string();
+        return StringPiece();
     }
 
 private:
@@ -196,7 +203,9 @@ private:
     std::string path_;
 
     boost::regex regex_;
-    std::map<std::string, int> params_;
+    PathParams params_;
+
+    const std::string* uriPath_;
 
     // parsed data.
     std::string service_;
@@ -374,7 +383,7 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
 
     std::vector<StringPiece> values;
 
-    if (!getValues(request, options, &values)) {
+    if (!getValues(request, method, options, &values)) {
         return false;
     }
 
@@ -446,11 +455,11 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
                 break;
 
             case  google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-                reflection->SetDouble(message, field, StringUtil::strtof(value.c_str()));
+                reflection->SetDouble(message, field, StringUtil::strtof(value.as_string()));
                 break;
 
             case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-                reflection->SetString(message, field, value.c_str());
+                reflection->SetString(message, field, value.as_string());
                 break;
 
             default:
@@ -469,6 +478,7 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
 }
 
 bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
+                                      const ServiceMethod& method,
                                       const CraftFieldOptions& options,
                                       std::vector<StringPiece>* values) {
     if (NULL == values) {
@@ -476,7 +486,11 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
     }
 
     if (options.has_path_param()) {
-
+        StringPiece value = method.pathParamValue(options.path_param());
+        if (!value.empty()) {
+            values->push_back(value);
+            return true;
+        }
     }
     else if (options.has_query_param()) {
         const NameValueCollection& nameValues = request->queryParameters();
