@@ -138,7 +138,7 @@ int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
 
             case FIELD_NUM_ERROR:
                 error = ProtobufCodec::decodeVarint(buffer);
-                serviceMessage->set_error((ErrorCode)error);
+                serviceMessage->set_error(static_cast<ErrorCode>(error));
                 break;
 
             case FIELD_NUM_REQUEST:

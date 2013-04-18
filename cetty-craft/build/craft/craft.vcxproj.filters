@@ -22,9 +22,6 @@
       <Filter>builder</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\craft\craft.pb.h" />
-    <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h">
-      <Filter>security</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\craft\security\AccessController.h">
       <Filter>security</Filter>
     </ClInclude>
@@ -34,7 +31,13 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapping.h">
       <Filter>http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\craft\security\ParameterValidateFilter.h">
+    <ClInclude Include="..\..\..\include\cetty\craft\security\HttpSignatureValidator.h">
+      <Filter>security</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ProtobufParameterValidator.h">
+      <Filter>security</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ProtobufSignatureValidator.h">
       <Filter>security</Filter>
     </ClInclude>
   </ItemGroup>

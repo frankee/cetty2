@@ -18,8 +18,9 @@
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceRequestMapping.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\http\ServiceResponseMapping.h" />
     <ClInclude Include="..\..\..\include\cetty\craft\security\AccessController.h" />
-    <ClInclude Include="..\..\..\include\cetty\craft\security\SignatureValidateFilter.h" />
-    <ClInclude Include="..\..\..\include\cetty\craft\security\ParameterValidateFilter.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\HttpSignatureValidator.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ProtobufParameterValidator.h" />
+    <ClInclude Include="..\..\..\include\cetty\craft\security\ProtobufSignatureValidator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cetty\craft\builder\CraftClientBuilder.cpp" />

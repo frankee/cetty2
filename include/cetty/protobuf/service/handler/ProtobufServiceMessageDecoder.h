@@ -41,10 +41,9 @@ public:
 
 public:
     ProtobufServiceMessageDecoder()
-        : decoder_(boost::bind(
-        MessageCodec::decode,
-        _1,
-        _2)) {
+        : decoder_(boost::bind(MessageCodec::decode,
+                               _1,
+                               _2)) {
     }
 
     ~ProtobufServiceMessageDecoder() {

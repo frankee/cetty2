@@ -18,7 +18,7 @@
  */
 
 #include <deque>
-#include <cetty/handler/codec/MessageToMessageCodec.h>
+#include <cetty/channel/ChannelMessageHandlerContext.h>
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
@@ -82,9 +82,30 @@ public:
     typedef typename Context::Handler Handler;
     typedef typename Context::HandlerPtr HandlerPtr;
 
+    /**
+     * Get called in the {@link #messageUpdated} when received RequestIn.
+     * Filter the message of RequestIn type to the message of RequestOut Type.
+     * 
+     * Return the empty RequestOut when error happened, and the filter handler
+     * should write out the error message of ResponseOut Type.
+     *
+     * <code>
+     * RequestOut myFilter(ChannelHandlerContext& ctx, const RequestIn& req) {
+     *     //do filter ...
+     *     if (hasError) {
+     *           ResponseOut error;
+     *           ChannelFuturePtr future = ctx.newFuture();
+     *           outboundTransfer().write(error, future);
+     *     }
+     * }
+     * </code>
+     */
     typedef boost::function<RequestOut(ChannelHandlerContext&,
                                        RequestIn const&)> RequestFilter;
 
+    /**
+     *
+     */
     typedef boost::function<ResponseOut(ChannelHandlerContext&,
                                         RequestIn const&,
                                         ResponseIn const&,
@@ -147,8 +168,9 @@ public:
 
 private:
     void messageUpdated(ChannelHandlerContext& ctx) {
-        BOOST_ASSERT(inboundContainer_ && inboundTransfer_ &&
-                     "ServiceFilter has not registered.");
+        BOOST_ASSERT(inboundContainer_ && inboundTransfer_ && "ServiceFilter has not registered.");
+        BOOST_ASSERT(requestFilter_ && "HAS NOT set the request filter handler");
+
         bool notify = false;
         InboundQueue& queue = inboundContainer_->getMessages();
 
@@ -179,8 +201,8 @@ private:
 
     void flush(ChannelHandlerContext& ctx,
                const ChannelFuturePtr& future) {
-        BOOST_ASSERT(outboundContainer_ && outboundTransfer_ &&
-                     "ServiceFilter has not registered.");
+        BOOST_ASSERT(outboundContainer_ && outboundTransfer_ && "ServiceFilter has not registered.");
+        BOOST_ASSERT(responseFilter_ && "HAS NOT set the request filter handler");
 
         OutboundQueue& queue = outboundContainer_->getMessages();
 
