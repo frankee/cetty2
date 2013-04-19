@@ -31,22 +31,22 @@ namespace builder {
 using namespace cetty::beanstalk::protocol;
 
 BeanstalkClientBuilder::BeanstalkClientBuilder()
-    : builder() {
+    : builder_() {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(int threadCnt)
-    : builder(threadCnt) {
+    : builder_(threadCnt) {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(const EventLoopPtr& eventLoop)
-    : builder(eventLoop) {
+    : builder_(eventLoop) {
     init();
 }
 
 BeanstalkClientBuilder::BeanstalkClientBuilder(const EventLoopPoolPtr& eventLoopPool)
-    : builder(eventLoopPool) {
+    : builder_(eventLoopPool) {
     init();
 }
 
@@ -63,7 +63,7 @@ bool initializeChannel(const ChannelPtr& channel) {
 }
 
 void BeanstalkClientBuilder::init() {
-    builder.setClientInitializer(boost::bind(initializeChannel, _1));
+    builder_.setClientInitializer(boost::bind(initializeChannel, _1));
 }
 
 }

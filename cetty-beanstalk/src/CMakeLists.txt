@@ -3,10 +3,11 @@
 # cetty can be compiled by a user aggressive about warnings.
 
 AUX_SOURCE_DIRECTORY(cetty/beanstalk BEANSTALK_DIR)
+AUX_SOURCE_DIRECTORY(cetty/beanstalk/builder BEANSTALK_BUILDER_DIR)
 AUX_SOURCE_DIRECTORY(cetty/beanstalk/protocol BEANSTALK_PROTOCOL_DIR)
 AUX_SOURCE_DIRECTORY(cetty/beanstalk/protocol/commands BEANSTALK_PROTOCOL_COMMANDS_DIR)
 
-SET(beanstalk_sources ${BEANSTALK_DIR} ${BEANSTALK_PROTOCOL_DIR} ${BEANSTALK_PROTOCOL_COMMANDS_DIR})
+SET(beanstalk_sources ${BEANSTALK_DIR} ${BEANSTALK_BUILDER_DIR} ${BEANSTALK_PROTOCOL_DIR} ${BEANSTALK_PROTOCOL_COMMANDS_DIR})
 				  
 SET(beanstalk_lib cetty-beanstalk)
 
