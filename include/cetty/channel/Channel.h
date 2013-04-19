@@ -108,7 +108,7 @@ public:
     virtual ~Channel();
 
     /**
-     * Returns the unique integer ID of this channel. The returned value MUST be non {@code null}.
+     * Returns the unique integer ID of this channel.
      */
     int id() const;
 
@@ -121,7 +121,7 @@ public:
      * Returns the parent of this channel.
      *
      * @return the parent channel.
-     *         {@code null} if this channel does not have a parent channel.
+     *         empty {@linek ChanelPtr} if this channel does not have a parent channel.
      */
     const ChannelPtr& parent() const;
 
@@ -142,7 +142,7 @@ public:
     ChannelPipeline& pipeline();
 
     /**
-     * Returns {@code true} if the {@link Channel} is open an may get active later
+     * Returns {@code true} if the {@link Channel} is open and may get active later
      */
     bool isOpen() const;
 
@@ -175,6 +175,16 @@ public:
     const InetAddress& remoteAddress() const;
 
     /**
+     * Returns the Initializer.
+     */
+    const Initializer& initializer() const;
+
+    /**
+     * Set the {@link Initializer} to the channel, take action before the channel open.
+     */
+    void setInitializer(const Initializer& initializer);
+
+    /**
      * Return a new {@link ChannelFuture}.
      */
     ChannelFuturePtr newFuture();
@@ -204,76 +214,223 @@ public:
      */
     const ChannelFuturePtr& closeFuture();
 
-    const Initializer& initializer() const;
-
-    void setInitializer(const Initializer& initializer);
-
 public:
+    /**
+     * Open the {@link Channel}, do the initialize with the {@link Initializer}
+     * and then do call {@link #doPreOpen}, then fire ChannelOpen to the {@link ChannelPipeline}.
+     *
+     * If the {@link Channel} once close before, will only not reinitialize with the {@link Initializer}.
+     */
     void open();
 
     /**
-     * Bind the {@link SocketAddress} to the {@link Channel} of the {@link ChannelPromise} and notify
-     * it once its done.
+     * Request to bind to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
+     * completes, either because the operation was successful or because of an error.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#bind(ChannelHandlerContext, SocketAddress, ChannelPromise)} method
+     * called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
      */
     ChannelFuturePtr bind(const InetAddress& localAddress);
 
+    /**
+     * Request to connect to the given {@link InetAddress} and notify the {@link ChannelFuture} once the operation
+     * completes, either because the operation was successful or because of an error.
+     * <p>
+     * If the connection fails because of a connection timeout, the {@link ChannelFuture} will get failed with
+     * a {@link ConnectTimeoutException}. If it fails because of connection refused a {@link ConnectException}
+     * will be used.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#connect(ChannelHandlerContext, SocketAddress, SocketAddress, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     ChannelFuturePtr connect(const InetAddress& remoteAddress);
 
     /**
-         * Connect the {@link Channel} of the given {@link ChannelFuture} with the given remote {@link SocketAddress}.
-         * If a specific local {@link SocketAddress} should be used it need to be given as argument. Otherwise just
-         * pass {@code null} to it.
-         *
-         * The {@link ChannelPromise} will get notified once the connect operation was complete.
-         */
+     * Request to connect to the given {@link SocketAddress} while bind to the localAddress and notify the
+     * {@link ChannelFuture} once the operation completes, either because the operation was successful or because of
+     * an error.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#connect(ChannelHandlerContext, SocketAddress, SocketAddress, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     ChannelFuturePtr connect(const InetAddress& remoteAddress,
                              const InetAddress& localAddress);
 
     /**
-         * Disconnect the {@link Channel} of the {@link ChannelFuture} and notify the {@link ChannelPromise} once the
-         * operation was complete.
-         */
+     * Request to disconnect from the remote peer and notify the {@link ChannelFuture} once the operation completes,
+     * either because the operation was successful or because of an error.
+     * <p>
+     * This will result in having the
+     * {@link ChannelHandlerContext::DisconnectFunctor}
+     * callback called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     ChannelFuturePtr disconnect();
 
     /**
-         * Close the {@link Channel} of the {@link ChannelPromise} and notify the {@link ChannelPromise} once the
-         * operation was complete.
-         */
+     * Request to close this ChannelOutboundInvoker and notify the {@link ChannelFuture} once the operation completes,
+     * either because the operation was successful or because of
+     * an error.
+     *
+     * After it is closed it is not possible to reuse it again.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#close(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     ChannelFuturePtr close();
 
     /**
-     * Closes the {@link Channel} immediately without firing any events.  Probably only useful
-     * when registration attempt failed.
+     * Request to flush all pending data which belongs to this ChannelOutboundInvoker and notify the
+     * {@link ChannelFuture} once the operation completes, either because the operation was successful or because of
+     * an error.
+     * <p>
+     * Be aware that the flush could be only partially successful. In such cases the {@link ChannelFuture} will be
+     * failed with an {@link IncompleteFlushException}. So if you are interested to know if it was partial successful
+     * you need to check if the returned {@link ChannelFuture#cause()} returns an instance of
+     * {@link IncompleteFlushException}. In such cases you may want to call {@link #flush(ChannelPromise)} or
+     * {@link #flush()} to flush the rest of the data or just close the connection via {@link #close(ChannelPromise)} or
+     * {@link #close()}  if it is not possible to recover.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#flush(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
      */
-    void closeForcibly();
-
     ChannelFuturePtr flush();
 
+    /**
+     * Request to bind to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
+     * completes, either because the operation was successful or because of an error.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#bind(ChannelHandlerContext, SocketAddress, ChannelPromise)} method
+     * called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     const ChannelFuturePtr& bind(const InetAddress& localAddress,
                                  const ChannelFuturePtr& future);
 
+    /**
+     * Request to connect to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
+     * completes, either because the operation was successful or because of an error.
+     *
+     * The given {@link ChannelFuture} will be notified.
+     *
+     * <p>
+     * If the connection fails because of a connection timeout, the {@link ChannelFuture} will get failed with
+     * a {@link ConnectTimeoutException}. If it fails because of connection refused a {@link ConnectException}
+     * will be used.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#connect(ChannelHandlerContext, SocketAddress, SocketAddress, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
                                     const ChannelFuturePtr& future);
 
+    /**
+     * Request to connect to the given {@link SocketAddress} while bind to the localAddress and notify the
+     * {@link ChannelFuture} once the operation completes, either because the operation was successful or because of
+     * an error.
+     *
+     * The given {@link ChannelPromise} will be notified and also returned.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#connect(ChannelHandlerContext, SocketAddress, SocketAddress, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     const ChannelFuturePtr& connect(const InetAddress& remoteAddress,
                                     const InetAddress& localAddress,
                                     const ChannelFuturePtr& future);
 
+    /**
+     * Request to discconect from the remote peer and notify the {@link ChannelFuture} once the operation completes,
+     * either because the operation was successful or because of an error.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#disconnect(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     const ChannelFuturePtr& disconnect(const ChannelFuturePtr& future);
+
+    /**
+     * Request to close this ChannelOutboundInvoker and notify the {@link ChannelFuture} once the operation completes,
+     * either because the operation was successful or because of
+     * an error.
+     *
+     * After it is closed it is not possible to reuse it again.
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#close(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     const ChannelFuturePtr& close(const ChannelFuturePtr& future);
 
+    /**
+     * Request to flush all pending data which belongs to this ChannelOutboundInvoker and notify the
+     * {@link ChannelFuture} once the operation completes, either because the operation was successful or because of
+     * an error.
+     * <p>
+     * Be aware that the flush could be only partially successful. In such cases the {@link ChannelFuture} will be
+     * failed with an {@link IncompleteFlushException}. So if you are interested to know if it was partial successful
+     * you need to check if the returned {@link ChannelFuture#cause()} returns an instance of
+     * {@link IncompleteFlushException}. In such cases you may want to call {@link #flush(ChannelPromise)} or
+     * {@link #flush()} to flush the rest of the data or just close the connection via {@link #close(ChannelPromise)} or
+     * {@link #close()}  if it is not possible to recover.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#flush(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     *
+     */
     const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
 
+    /**
+     * Request to Read data from the {@link Channel} into the first inbound buffer, triggers an
+     * {@link ChannelStateHandler#inboundBufferUpdated(ChannelHandlerContext) inboundBufferUpdated} event if data was
+     * read, and triggers an
+     * {@link ChannelStateHandler#channelReadSuspended(ChannelHandlerContext) channelReadSuspended} event so the
+     * handler can decide to continue reading.  If there's a pending read operation already, this method does nothing.
+     * <p>
+     * This will result in having the
+     * {@link ChannelOperationHandler#read(ChannelHandlerContext)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
+     */
     void read();
-
-    template<typename Container>
-    Container* inboundMessageContainer() {
-        return pipeline_->inboundMessageContainer<Container>();
-    }
 
     template<typename Container>
     Container* outboundMessageContainer() {
         return pipeline_->outboundMessageContainer<Container>();
+    }
+
+    template<typename Message>
+    bool addOutboundChannelMessage(const Message& message) {
+        return pipeline_->addOutboundChannelMessage<Message>(message);
+    }
+
+    bool addOutboundChannelBuffer(const ChannelBufferPtr& buffer) {
+        return pipeline_->addOutboundChannelBuffer(buffer);
     }
 
     /**
@@ -291,6 +448,25 @@ public:
      * @return the {@link ChannelFuture ChannelFuturePtr} which will be notified when the
      *         write request succeeds or fails
      *
+     */
+    /**
+     * Request to write a message via this ChannelOutboundInvoker and notify the {@link ChannelFuture}
+     * once the operation completes, either because the operation was successful or because of an error.
+     *
+     * If you want to write a {@link FileRegion} use {@link #sendFile(FileRegion)}.
+     * <p>
+     * Be aware that the write could be only partially successful as the message may need to get encoded before write it
+     * to the remote peer. In such cases the {@link ChannelFuture} will be failed with a
+     * {@link IncompleteFlushException}. In such cases you may want to call {@link #flush(ChannelPromise)} or
+     * {@link #flush()} to flush the rest of the data or just close the connection via {@link #close(ChannelPromise)}
+     * or {@link #close()} if it is not possible to recover.
+     *
+     * The given {@link ChannelPromise} will be notified.
+     * <p>
+     * This will result in having the message added to the outbound buffer of the next {@link ChannelOutboundHandler}
+     * and the {@link ChannelOperationHandler#flush(ChannelHandlerContext, ChannelPromise)}
+     * method called of the next {@link ChannelOperationHandler} contained in the  {@link ChannelPipeline} of the
+     * {@link Channel}.
      */
     template<typename T>
     ChannelFuturePtr writeMessage(const T& message);
@@ -324,10 +500,6 @@ protected:
      *
      * @param parent
      *        the parent of this channel. <tt>NULL</tt> if there's no parent.
-     * @param factory
-     *        the factory which created this channel
-     * @param pipeline
-     *        the pipeline which is going to be attached to this channel
      * @param sink
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
@@ -341,8 +513,6 @@ protected:
      *
      * @param parent
      *        the parent of this channel. <tt>NULL</tt> if there's no parent.
-     * @param factory
-     *        the factory which created this channel
      * @param pipeline
      *        the pipeline which is going to be attached to this channel
      * @param sink
@@ -366,11 +536,18 @@ protected:
     void closeIfClosed();
 
     /**
-     * Set the Channel to active state.
+     * (Internal use only) Set the Channel to active state.
      */
     void setActived();
 
+    /**
+     * (Internal use only) Set the Channel to active state.
+     */
     void setLocalAddress(const InetAddress& local);
+
+    /**
+     * (Internal use only) Set the Channel to active state.
+     */
     void setRemoteAddress(const InetAddress& remote);
 
     template<typename C>

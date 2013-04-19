@@ -147,7 +147,7 @@ public:
         return &outboundTransfer_;
     }
 
-    virtual void initialize(ChannelPipeline* pipeline) {
+    virtual void initialize(const ChannelPipeline& pipeline) {
         ChannelHandlerContext::initialize(pipeline);
         inboundContainer_.setEventLoop(eventLoop());
         outboundContainer_.setEventLoop(eventLoop());
