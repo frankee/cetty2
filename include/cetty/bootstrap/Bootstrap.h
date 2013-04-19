@@ -79,7 +79,6 @@ public:
      */
     T& setLocalAddress(const InetAddress& localAddress);
 
-
     /**
      * Return the {@link EventLoopPool} which is belong to.
      */
@@ -130,20 +129,6 @@ public:
                  const ChannelOption::Variant& value);
 
     /**
-     * the {@link ChannelHandler} to use for serving the requests.
-     */
-    template<typename Handler>
-    T& setHandler(
-        const typename ChannelHandlerWrapper<Handler>::HandlerPtr& handler) {
-        handler_.reset(
-            new typename ChannelHandlerWrapper<Handler>::Handler::Context(
-                "_user",
-                handler));
-
-        return castThis();
-    }
-
-    /**
      * return the channels which has created.
      */
     Channels& channels();
@@ -169,8 +154,6 @@ protected:
         : eventLoopPool_(pool) {
     }
 
-    ChannelHandlerContext* handler();
-
     void insertChannel(int id, const ChannelPtr& channel);
     void removeChannel(int id);
     void clearChannels();
@@ -184,7 +167,6 @@ private:
     ChannelOptions options_;
     InetAddress    localAddress_;
     EventLoopPoolPtr eventLoopPool_;
-    boost::scoped_ptr<ChannelHandlerContext> handler_;
 
     Channels channels_;
 };
@@ -274,11 +256,6 @@ T& Bootstrap<T>::setOption(const ChannelOption& key,
                            const ChannelOption::Variant& value) {
     options_.setOption(key, value);
     return castThis();
-}
-
-template<typename T> inline
-ChannelHandlerContext* Bootstrap<T>::handler() {
-    return handler_.get();
 }
 
 template<typename T> inline

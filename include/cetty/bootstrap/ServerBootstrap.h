@@ -221,20 +221,6 @@ public:
     ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer);
 
     /**
-     * Set the {@link ChannelHandler} which is used to serve the request for the {@link Channel}'s.
-     */
-    template<typename T>
-    ServerBootstrap& setChildHandler(
-        const typename ChannelHandlerWrapper<T>::HandlerPtr& handler) {
-        childHandler_.reset(
-            new typename ChannelHandlerWrapper<T>::Handler::Context(
-                "_user",
-                handler));
-
-        return *this;
-    }
-
-    /**
      *
      */
     ChannelFuturePtr bind();
@@ -298,7 +284,6 @@ private:
     EventLoopPoolPtr childPool_;
     ChannelOptions childOptions_;
     Channel::Initializer childInitializer_;
-    boost::scoped_ptr<ChannelHandlerContext> childHandler_;
 };
 
 inline

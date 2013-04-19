@@ -231,10 +231,6 @@ bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
     pipeline.addLast<Acceptor>("acceptor",
                                Acceptor::Ptr(new Acceptor(*this)));
 
-    if (handler()) {
-        pipeline.addLast(handler());
-    }
-
     return true;
 }
 
