@@ -21,9 +21,15 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
+#include <cetty/channel/ChannelHandlerWrapper.h>
 #include <cetty/channel/ChannelHandlerContext.h>
 
+using namespace cetty::channel;
+
 class HexDumpProxyFrontendHandler : private boost::noncopyable {
+public:
+    typedef ChannelHandlerWrapper<HexDumpProxyFrontendHandler>::HandlerPtr Ptr;
+
 public:
     HexDumpProxyFrontendHandler(const std::string& remoteHost,
                                 int remotePort)
@@ -31,7 +37,8 @@ public:
           remoteHost(remoteHost) {
     }
 
-    virtual void channelActive(ChannelHandlerContext& ctx) {
+private:
+    void channelActive(ChannelHandlerContext& ctx) {
         // TODO: Suspend incoming traffic until connected to the remote host.
         //       Currently, we just keep the inbound traffic in the client channel's outbound buffer.
         const ChannelPtr& inboundChannel = ctx.channel();
@@ -51,7 +58,7 @@ public:
                           _1));
     }
 
-    virtual void messageReceived(ChannelHandlerContext& ctx,
+    void messageReceived(ChannelHandlerContext& ctx,
                                  const ChannelBufferPtr& in) {
         ByteBuf out = outboundChannel.outboundByteBuffer();
         out.discardReadBytes();
@@ -63,13 +70,13 @@ public:
         }
     }
 
-    virtual void channelInactive(ChannelHandlerContext& ctx) {
+    void channelInactive(ChannelHandlerContext& ctx) {
         if (outboundChannel) {
             closeOnFlush(outboundChannel);
         }
     }
 
-    virtual void exceptionCaught(ChannelHandlerContext& ctx,
+    void exceptionCaught(ChannelHandlerContext& ctx,
                                  const ChannelException& cause) {
         //cause.printStackTrace();
         closeOnFlush(ctx.channel());

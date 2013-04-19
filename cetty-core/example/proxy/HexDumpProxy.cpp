@@ -18,9 +18,6 @@
  * Distributed under under the Apache License, version 2.0 (the "License").
  */
 
-#include <cetty/channel/ChannelPipelines.h>
-#include <cetty/channel/asio/AsioServerSocketChannelFactory.h>
-#include <cetty/channel/asio/AsioClientSocketChannelFactory.h>
 #include <cetty/bootstrap/ServerBootstrap.h>
 
 #include <cetty/util/StringUtil.h>
@@ -30,13 +27,24 @@
 using namespace cetty::bootstrap;
 using namespace cetty::util;
 using namespace cetty::channel;
-using namespace cetty::channel::socket::asio;
+using namespace cetty::handler::logging;
 
 /**
  * @author <a href="http://www.jboss.org/netty/">The Netty Project</a>
  * @author <a href="http://gleamynode.net/">Trustin Lee</a>
  * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $
  */
+
+bool initializeChannel(const ChannelPtr& channel,
+                       const std::string& host,
+                       int port) {
+    channel->pipeline().addLast<LoggingHandler::Ptr>("log",
+            LoggingHandler::Ptr(new LoggingHandler(LogLevel.INFO)));
+
+    channel->pipeline().addLast<HexDumpProxyFrontendHandler::Ptr>("proxy",
+            HexDumpProxyFrontendHandler::Ptr(
+                new HexDumpProxyFrontendHandler(host, port)));
+}
 
 int main(int argc, char* argv[]) {
     // Validate command line options.
@@ -48,43 +56,23 @@ int main(int argc, char* argv[]) {
     }
 
     // Parse command line options.
-    int localPort = (int)StringUtil::atoi(argv[1]);
+    int localPort = StringUtil::strto32(argv[1]);
+    int remotePort = StringUtil::strto32(argv[3]);
     std::string remoteHost = argv[2];
-    int remotePort = (int)StringUtil::atoi(argv[3]);
 
-    printf("Proxying *:%d to %s:%d ...\n", localPort, remoteHost.c_str(), remotePort);
+    printf("Proxying *:%d to %s:%d ...\n",
+           localPort,
+           remoteHost.c_str(),
+           remotePort);
 
-    // Configure the bootstrap.
+    ServerBootstrap sb(1);
 
-    ServerBootstrap sb(
-        ChannelFactoryPtr(new AsioServerSocketChannelFactory()));
+    sb.setChildInitializer(boost::bind(initializeChannel,
+                                       remoteHost,
+                                       remotePort))
+    .setChildOption(ChannelOption::CO_AUTO_READ, false)
+    .bind(localPort)->await();
 
-    // Set up the event pipeline factory.
-    ChannelFactoryPtr cf =
-        ChannelFactoryPtr(new AsioClientSocketChannelFactory());
-
-    sb.setPipeline(
-        ChannelPipelines::pipeline(
-        new LoggingHandler(LogLevel::INFO),
-        new HexDumpProxyFrontendHandler(remoteHost, remotePort)));
-
-    // Start up the server.
-    ChannelFuturePtr f = sb.bind(localPort)->await();
-
-    printf("Server is running...\n");
-    printf("To quit server, press 'q'.\n");
-
-    char input;
-
-    do {
-        input = getchar();
-
-        if (input == 'q') {
-            f->channel()->closeFuture()->awaitUninterruptibly();
-            return 0;
-        }
-    }
-    while (true);
-
-    return -1;
+    sb.waitingForExit();
+    return 0;
 }

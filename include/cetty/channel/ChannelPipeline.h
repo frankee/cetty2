@@ -522,14 +522,17 @@ public:
     }
 
 public:
-    void fireChannelOpen();
-    void fireChannelActive();
-    void fireChannelInactive();
+    ChannelPipeline& fireChannelOpen();
+    ChannelPipeline& fireChannelActive();
+    ChannelPipeline& fireChannelInactive();
 
-    void fireMessageUpdated();
+    ChannelPipeline& fireMessageUpdated();
+    ChannelPipeline& fireChannelReadSuspended();
 
-    void fireUserEventTriggered(const boost::any& evt);
-    void fireExceptionCaught(const ChannelException& cause);
+    ChannelPipeline& fireUserEventTriggered(const boost::any& evt);
+    ChannelPipeline& fireExceptionCaught(const ChannelException& cause);
+
+    void read();
 
     ChannelFuturePtr bind(const InetAddress& localAddress);
     ChannelFuturePtr connect(const InetAddress& remoteAddress);

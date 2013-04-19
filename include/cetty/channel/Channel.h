@@ -242,10 +242,10 @@ public:
     ChannelFuturePtr close();
 
     /**
-         * Closes the {@link Channel} immediately without firing any events.  Probably only useful
-         * when registration attempt failed.
-         */
-        void closeForcibly();
+     * Closes the {@link Channel} immediately without firing any events.  Probably only useful
+     * when registration attempt failed.
+     */
+    void closeForcibly();
 
     ChannelFuturePtr flush();
 
@@ -263,6 +263,18 @@ public:
     const ChannelFuturePtr& close(const ChannelFuturePtr& future);
 
     const ChannelFuturePtr& flush(const ChannelFuturePtr& future);
+
+    void read();
+
+    template<typename Container>
+    Container* inboundMessageContainer() {
+        return pipeline_->inboundMessageContainer<Container>();
+    }
+
+    template<typename Container>
+    Container* outboundMessageContainer() {
+        return pipeline_->outboundMessageContainer<Container>();
+    }
 
     /**
      * Sends a message to this channel asynchronously.    If this channel was
@@ -565,6 +577,11 @@ ChannelFuturePtr Channel::flush() {
 inline
 const ChannelFuturePtr& Channel::flush(const ChannelFuturePtr& future) {
     return pipeline_->flush(future);
+}
+
+inline
+void Channel::read() {
+    pipeline_->read();
 }
 
 template<typename T> inline

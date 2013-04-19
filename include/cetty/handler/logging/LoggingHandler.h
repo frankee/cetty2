@@ -51,6 +51,8 @@ public:
             VoidMessageContainer,
             VoidMessageContainer> Context;
 
+    typedef Context::HandlerPtr Ptr;
+
 public:
     /**
      * Creates a new instance whose logger name is the fully qualified class

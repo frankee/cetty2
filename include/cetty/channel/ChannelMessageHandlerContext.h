@@ -49,15 +49,39 @@ public:
     typedef typename ChannelHandlerWrapper<H>::HandlerPtr HandlerPtr;
     typedef typename ChannelHandlerWrapper<H>::StoredHandlerPtr StoredHandlerPtr;
 
-    typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
-
     typedef InboundInContainer InboundContainer;
     typedef InboundOutContainer NextInboundContainer;
     typedef OutboundInContainer OutboundContainer;
     typedef OutboundOutContainer NextOutboundContainer;
 
-    typedef ChannelMessageTransfer<InboundOut, InboundOutContainer, TRANSFER_INBOUND> InboundTransfer;
-    typedef ChannelMessageTransfer<OutboundOut, OutboundOutContainer, TRANSFER_OUTBOUND> OutboundTransfer;
+    typedef ChannelMessageTransfer<InboundOut,
+            InboundOutContainer,
+            TRANSFER_INBOUND> InboundTransfer;
+
+    typedef ChannelMessageTransfer<OutboundOut,
+            OutboundOutContainer,
+            TRANSFER_OUTBOUND> OutboundTransfer;
+
+    /**
+     * Handler是能够注册callback及functor的对象（即这些callback及funcotor的容器）
+     * 
+     * 默认情况下，当需要把Handler至于Context容器内时，Context会自动调用Handler的registerTo的方法，
+     * 即，Handler需要有一个registerTo的成员方法。
+     * 当提供的Handler没有RegisterTo的成员方法，或是该Handler需要同时置于两个即两个以上的Context，且不同的Context注册不同的信号处理器，
+     * 可以在初始化时提供注册的callback，由Context调用该callback。
+     * 采用这样的方式，Handler可以是用户指定的任意的对象，并不需要强制继承任何预定的ChannelHandler（like netty）
+     *
+     * Get called when the Context initialized with the handler, handler should
+     * set the callbacks or the functors to the context.
+     * 
+     * <code>
+     * void registerFunctions(const HandlerPtr& handler, Context& ctx) {
+     *
+     * }
+     *  
+     * </code>
+     */
+    typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
 
 public:
     ChannelMessageHandlerContext(const std::string& name,
@@ -107,33 +131,35 @@ public:
         }
     }
 
-    InboundInContainer* inboundContainer() {
+    InboundContainer* inboundContainer() {
         return &inboundContainer_;
     }
 
-    OutboundInContainer* outboundContainer() {
+    OutboundContainer* outboundContainer() {
         return &outboundContainer_;
     }
 
     InboundTransfer* inboundTransfer() {
         return &inboundTransfer_;
     }
+
     OutboundTransfer* outboundTransfer() {
         return &outboundTransfer_;
-    }
-
-    virtual boost::any getInboundMessageContainer() {
-        return boost::any(&inboundContainer_);
-    }
-
-    virtual boost::any getOutboundMessageContainer() {
-        return boost::any(&outboundContainer_);
     }
 
     virtual void initialize(ChannelPipeline* pipeline) {
         ChannelHandlerContext::initialize(pipeline);
         inboundContainer_.setEventLoop(eventLoop());
         outboundContainer_.setEventLoop(eventLoop());
+    }
+
+private:
+    virtual boost::any getInboundMessageContainer() {
+        return boost::any(&inboundContainer_);
+    }
+
+    virtual boost::any getOutboundMessageContainer() {
+        return boost::any(&outboundContainer_);
     }
 
     virtual void onPipelineChanged() {
@@ -224,6 +250,13 @@ public:
         }
     }
 
+    VoidMessageContainer* inboundContainer() { return NULL; }
+    VoidMessageContainer* outboundContainer() { return NULL; }
+
+    InboundTransfer* inboundTransfer() { return NULL; }
+    OutboundTransfer* outboundTransfer() { return NULL; }
+
+private:
     virtual boost::any getInboundMessageContainer() {
         return boost::any();
     }
@@ -231,12 +264,6 @@ public:
     virtual boost::any getOutboundMessageContainer() {
         return boost::any();
     }
-
-    VoidMessageContainer* inboundContainer() { return NULL; }
-    VoidMessageContainer* outboundContainer() { return NULL; }
-
-    InboundTransfer* inboundTransfer() { return NULL; }
-    OutboundTransfer* outboundTransfer() { return NULL; }
 
 private:
     StoredHandlerPtr handler_;

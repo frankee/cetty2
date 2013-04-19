@@ -284,7 +284,7 @@ public:
     /**
      * use for {@link ChannelPipeline} to initialize this Context when add a new ChannelHandler.
      */
-    virtual void initialize(ChannelPipeline* pipeline);
+    virtual void initialize(const ChannelPipeline& pipeline);
 
     /**
      * Returns the {@link Channel} that the {@link ChannelPipeline} belongs to.
@@ -346,11 +346,6 @@ public:
 
 public:
     /**
-     * return the inbound message container of the context.
-     */
-    virtual boost::any getInboundMessageContainer() = 0;
-    
-    /**
      *
      */
     template<class T>
@@ -393,11 +388,6 @@ public:
 
         return NULL;
     }
-
-    /**
-     *
-     */
-    virtual boost::any getOutboundMessageContainer() = 0;
 
     /**
      *
@@ -708,6 +698,16 @@ protected:
     ChannelHandlerContext(const std::string& name,
                           const EventLoopPtr& eventLoop);
 
+    /**
+     * return the inbound message container of the context.
+     */
+    virtual boost::any getInboundMessageContainer() = 0;
+
+    /**
+     *
+     */
+    virtual boost::any getOutboundMessageContainer() = 0;
+
     virtual void onPipelineChanged();
 
 private:
@@ -769,7 +769,7 @@ private:
 
     EventLoopPtr eventLoop_;
     ChannelWeakPtr channel_;
-    ChannelPipeline* pipeline_;
+    const ChannelPipeline* pipeline_;
 };
 
 inline

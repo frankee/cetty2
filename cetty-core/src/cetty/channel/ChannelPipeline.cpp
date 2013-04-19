@@ -91,7 +91,7 @@ void ChannelPipeline::setHead(ChannelHandlerContext* ctx) {
             DummyHandler::HandlerPtr(new DummyHandler));
     }
 
-    newHead->initialize(this);
+    newHead->initialize(*this);
 
     if (head_) {
         ChannelHandlerContext* headNext = head_->next();
@@ -126,7 +126,7 @@ bool ChannelPipeline::addFirst(ChannelHandlerContext* context) {
         return false;
     }
 
-    context->initialize(this);
+    context->initialize(*this);
     callBeforeAdd(context);
 
     ChannelHandlerContext* nextCtx = head_->next();
@@ -159,7 +159,7 @@ bool ChannelPipeline::addLast(ChannelHandlerContext* context) {
         return false;
     }
 
-    context->initialize(this);
+    context->initialize(*this);
     callBeforeAdd(context);
 
     ChannelHandlerContext* oldTail = tail_;
@@ -196,7 +196,7 @@ bool ChannelPipeline::addBefore(const std::string& name, ChannelHandlerContext* 
         return false;
     }
 
-    context->initialize(this);
+    context->initialize(*this);
     callBeforeAdd(context);
 
     ctx->prev()->setNext(context);
@@ -232,7 +232,7 @@ bool ChannelPipeline::addAfter(const std::string& name, ChannelHandlerContext* c
         return false;
     }
 
-    context->initialize(this);
+    context->initialize(*this);
     callBeforeAdd(context);
 
     ctx->next()->setPrev(context);
@@ -314,7 +314,7 @@ bool ChannelPipeline::replace(const std::string& name, ChannelHandlerContext* co
     ChannelHandlerContext* prev = ctx->prev();
     ChannelHandlerContext* next = ctx->next();
 
-    context->initialize(this);
+    context->initialize(*this);
     callBeforeRemove(ctx);
     callBeforeAdd(context);
 
@@ -491,16 +491,18 @@ bool ChannelPipeline::callAfterRemove(ChannelHandlerContext* ctx) {
     return false;
 }
 
-void ChannelPipeline::fireChannelOpen() {
+ChannelPipeline& ChannelPipeline::fireChannelOpen() {
     if (!head_->channelOpenCallback()) {
         head_->fireChannelOpen();
     }
     else {
         head_->fireChannelOpen(*head_);
     }
+
+    return *this;
 }
 
-void ChannelPipeline::fireChannelActive() {
+ChannelPipeline& ChannelPipeline::fireChannelActive() {
     firedChannelActive_ = true;
 
     if (!head_->channelActiveCallback()) {
@@ -515,9 +517,11 @@ void ChannelPipeline::fireChannelActive() {
 
         head_->fireMessageUpdated(*head_);
     }
+
+    return *this;
 }
 
-void ChannelPipeline::fireChannelInactive() {
+ChannelPipeline& ChannelPipeline::fireChannelInactive() {
     // Some implementations such as EmbeddedChannel can trigger inboundBufferUpdated()
     // after deactivation, so it's safe not to revert the firedChannelActive flag here.
     // Also, all known transports never get re-activated.
@@ -528,27 +532,33 @@ void ChannelPipeline::fireChannelInactive() {
     else {
         head_->fireChannelInactive(*head_);
     }
+
+    return *this;
 }
 
-void ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
+ChannelPipeline& ChannelPipeline::fireExceptionCaught(const ChannelException& cause) {
     if (!head_->exceptionCallback()) {
         head_->fireExceptionCaught(cause);
     }
     else {
         head_->fireExceptionCaught(*head_, cause);
     }
+
+    return *this;
 }
 
-void ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
+ChannelPipeline& ChannelPipeline::fireUserEventTriggered(const boost::any& evt) {
     if (!head_->userEventCallback()) {
         head_->fireUserEventTriggered(evt);
     }
     else {
         head_->fireUserEventTriggered(*head_, evt);
     }
+
+    return *this;
 }
 
-void ChannelPipeline::fireMessageUpdated() {
+ChannelPipeline& ChannelPipeline::fireMessageUpdated() {
     //     if (!firedChannelActive_) {
     //         fireMessageUpdatedOnActivation_ = true;
     //         return;
@@ -558,6 +568,32 @@ void ChannelPipeline::fireMessageUpdated() {
     }
     else {
         head_->fireMessageUpdated(*head_);
+    }
+
+    return *this;
+}
+
+ChannelPipeline& ChannelPipeline::fireChannelReadSuspended() {
+    if (!head_->channelReadSuspendedCallback()) {
+        head_->fireChannelReadSuspended();
+    }
+    else {
+        head_->fireChannelReadSuspended(*head_);
+    }
+
+    if (channel_.lock()->config().autoRead()) {
+        read();
+    }
+
+    return *this;
+}
+
+void ChannelPipeline::read() {
+    if (tail_) {
+        return tail_->read(*tail_);
+    }
+    else {
+        LOG_ERROR << "has no handler to handle to read";
     }
 }
 

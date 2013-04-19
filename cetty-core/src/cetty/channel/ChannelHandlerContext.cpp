@@ -994,12 +994,12 @@ void ChannelHandlerContext::clearInboundChannelBuffer(ChannelHandlerContext& ctx
     }
 }
 
-void ChannelHandlerContext::initialize(ChannelPipeline* pipeline) {
-    pipeline_ = pipeline;
-    channel_ = pipeline_->channel();
+void ChannelHandlerContext::initialize(const ChannelPipeline& pipeline) {
+    pipeline_ = &pipeline;
+    channel_ = pipeline.channel();
 
     if (!eventLoop_) {
-        eventLoop_ = pipeline_->eventLoop();
+        eventLoop_ = pipeline.eventLoop();
     }
 }
 

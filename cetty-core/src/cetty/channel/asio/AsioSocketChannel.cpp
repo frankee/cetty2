@@ -135,7 +135,12 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
 
         // channel may be closed when error happed in the message process
         if (isActive()) {
-            beginRead();
+            if (config().autoRead()) {
+                beginRead();
+            }
+            else {
+                pipeline().fireChannelReadSuspended();
+            }
         }
     }
     else {
@@ -227,7 +232,12 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
         LOG_INFO << "channel " << toString()
                  << "connected, firing connection event.";
 
-        beginRead();
+        if (config().autoRead()) {
+            beginRead();
+        }
+        else {
+            pipeline().fireChannelReadSuspended();
+        }
     }
     else if (endpointIterator != boost::asio::ip::tcp::resolver::iterator()) {
         LOG_INFO << "resolved more than one address, try to connect the next address.";
@@ -443,7 +453,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     if (!isActive()) {
         LOG_ERROR << "channel " << toString()
                   << " failed to send the msg, because the socket is"
-                     " disconnected, and then close this channel.";
+                  " disconnected, and then close this channel.";
 
         if (future) {
             future->setFailure(ChannelException("Channel is not active."));
@@ -456,6 +466,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     isWriting_ = true;
     AsioWriteOperation& operation = writeQueue_->offer(buffer, future);
     int writeBufferSize = operation.writeBufferSize();
+
     if (writeBufferSize == 0) {
         LOG_WARN << "channel " << toString()
                  << "write an empty message, do not write to the socket,\
@@ -580,6 +591,10 @@ void AsioSocketChannel::registerTo(Context& context) {
                                 this,
                                 _1,
                                 _2));
+
+    context.setReadFunctor(boost::bind(
+                               &AsioSocketChannel::beginRead,
+                               this));
 }
 
 void AsioSocketChannel::handleConnectTimeout(const ChannelFuturePtr& future) {

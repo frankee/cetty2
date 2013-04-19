@@ -222,8 +222,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageContainer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHeadLinkContext.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTailLinkContext.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTransfer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOptions.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelOutboundBufferHandler.h" />
