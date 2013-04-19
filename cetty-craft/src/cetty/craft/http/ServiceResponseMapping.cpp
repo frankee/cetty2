@@ -83,6 +83,11 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         }
     }
 
+    const std::string& uri = req->getUriString();
+    if (uri.find_last_of(".png") != uri.npos) {
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
+    }
+
     // Decide whether to close the connection or not.
     bool keepAlive = req->keepAlive();
 
