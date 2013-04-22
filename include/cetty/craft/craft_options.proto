@@ -29,6 +29,8 @@ message CraftFieldOptions {
 	optional int32   decimal_min = 51;
 	optional int32   decimal_max = 52;
 	optional string      pattern = 53;
+	
+	optional string    raw_field = 60;
 }
 
 message CraftEnumOptions {
@@ -58,6 +60,8 @@ message CraftMessageOptions {
 	
 	optional string    xml_header = 40;
 	optional string      xml_root = 41;
+	
+	optional string     raw_field = 60;
 }
 
 message CraftMethodOptions {

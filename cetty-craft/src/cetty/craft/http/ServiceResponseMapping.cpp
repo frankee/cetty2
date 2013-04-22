@@ -84,6 +84,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
     }
 
     const std::string& uri = req->getUriString();
+
     if (uri.find_last_of(".png") != uri.npos) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
     }
@@ -115,6 +116,38 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
     ChannelBufferPtr content;
     const CraftMessageOptions& options =
         message.GetDescriptor()->options().GetExtension(craft_message_options);
+
+    if (options.has_raw_field()) {
+        const FieldDescriptor* field =
+            message.GetDescriptor()->FindFieldByName(options.raw_field());
+        const Reflection* reflection = message.GetReflection();
+
+        const CraftFieldOptions& fieldOptions =
+            field->options().GetExtension(craft_options);
+
+        BOOST_ASSERT(field);
+
+        if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+            const Message& msg = reflection->GetMessage(message, field);
+
+            if (fieldOptions.has_raw_field()) {
+                const FieldDescriptor* fieldfield =
+                    msg.GetDescriptor()->FindFieldByName(fieldOptions.raw_field());
+                const Reflection* fieldReflection = msg.GetReflection();
+
+                const std::string& fieldContent =
+                    fieldReflection->GetStringReference(msg, fieldfield, NULL);
+
+                content = Unpooled::buffer(fieldContent.size(),
+                                           RESERVED_AHEAD_WRITE_SIZE);
+                response->setContent(content);
+                return;
+            }
+        }
+        else {
+
+        }
+    }
 
     ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(producer);
 
