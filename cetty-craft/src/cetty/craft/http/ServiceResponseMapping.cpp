@@ -140,6 +140,7 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
 
                 content = Unpooled::buffer(fieldContent.size(),
                                            RESERVED_AHEAD_WRITE_SIZE);
+                content->writeBytes(fieldContent);
                 response->setContent(content);
                 return;
             }
