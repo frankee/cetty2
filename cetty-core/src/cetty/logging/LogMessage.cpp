@@ -32,7 +32,7 @@ LogMessage::LogMessage(const LogLevel& level,
       level_(level),
       stream_(static_cast<char*>(buffer_), MAX_LOG_MESSAGE_LEN) {
 
-    if (level < Logger::logLevel()) {
+    if (level < Logger::level()) {
         return;
     }
 
@@ -41,7 +41,7 @@ LogMessage::LogMessage(const LogLevel& level,
     timestamp_ = boost::posix_time::microsec_clock::universal_time();
     tid_ = CurrentThread::id();
 
-    Logger::getFormatter().formatFirst(*this);
+    Logger::patternFormatter().formatFirst(*this);
 }
 
 LogMessage::LogMessage(const LogLevel& level, const char* source, int line, const char* func)
@@ -51,7 +51,7 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line, cons
       level_(level),
       stream_(static_cast<char*>(buffer_), MAX_LOG_MESSAGE_LEN) {
 
-    if (level < Logger::logLevel()) {
+    if (level < Logger::level()) {
         return;
     }
 
@@ -60,15 +60,15 @@ LogMessage::LogMessage(const LogLevel& level, const char* source, int line, cons
     timestamp_ = boost::posix_time::microsec_clock::universal_time();
     tid_ = CurrentThread::id();
 
-    Logger::getFormatter().formatFirst(*this);
+    Logger::patternFormatter().formatFirst(*this);
 }
 
 bool LogMessage::finish() {
-    if (level_ < Logger::logLevel()) {
+    if (level_ < Logger::level()) {
         return false;
     }
 
-    Logger::getFormatter().formatLast(*this);
+    Logger::patternFormatter().formatLast(*this);
     stream_ << "\n";
 
     return true;

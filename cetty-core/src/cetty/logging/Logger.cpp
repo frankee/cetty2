@@ -19,13 +19,15 @@
 #include <cstdio>
 #include <cstdlib>
 
-
 #include <cetty/util/StringUtil.h>
+#include <cetty/logging/LogConsoleSink.h>
 
 namespace cetty {
 namespace logging {
 
-cetty::logging::LogLevel Logger::level_ = LogLevel::DEBUG;
+LogLevel Logger::level_ = LogLevel::DEBUG;
+LogPatternFormatter* Logger::formatter = NULL;
+std::vector<LogSinkPtr> Logger::sinks_;
 
 Logger::Logger(SourceFile file, int line)
     : message_(LogLevel::INFO, file.data(), line) {
@@ -43,24 +45,27 @@ Logger::Logger(SourceFile file, int line, bool toAbort)
     : message_(toAbort ? LogLevel::FATAL : LogLevel::ERROR, file.data(), line) {
 }
 
-#if defined(WIN32) && defined(DEBUG)
-    #include <windows.h>
-#endif
-
 Logger::~Logger() {
-    if (message_.finish()) {
-        const char* buffer = message_.buffer();
+    if (sinks_.empty()) {
+        sinks_.push_back(new LogConsoleSink);
+    }
 
-#if defined(WIN32) && defined(DEBUG)
-        std::wstring out;
-        ::cetty::util::StringUtil::utftoucs(buffer, &out);
-        OutputDebugString(out.c_str());
-#else
-        std::fwrite(buffer, strlen(buffer), 1, stderr);
-#endif
-        if (message_.level() == LogLevel::FATAL) {
-            std::fflush(stderr);
+    if (message_.finish()) {
+        bool needFlush = message_.level() == LogLevel::FATAL;
+        std::size_t j = sinks_.size();
+        for (std::size_t i = 0; i < j; ++i) {
+            sinks_[i]->sink(message_);
+            
+            if (needFlush) {
+                sinks_[i]->flush();
+            }
         }
+    }
+}
+
+void Logger::addLogSink(const LogSinkPtr& sink) {
+    if (sink) {
+        sinks_.push_back(sink);
     }
 }
 

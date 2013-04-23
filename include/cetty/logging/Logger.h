@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <cetty/logging/LogSink.h>
 #include <cetty/logging/LogLevel.h>
 #include <cetty/logging/LogMessage.h>
 #include <cetty/logging/LogPatternFormatter.h>
@@ -63,29 +64,55 @@ public:
     LogMessage::Stream& stream() { return message_.stream(); }
 
 public:
-    static const LogPatternFormatter& getFormatter() {
-        static LogPatternFormatter* formatter = new LogPatternFormatter();
+    static const LogLevel& level();
+    static void setLevel(const LogLevel& level);
 
-        return *formatter;
-    }
+    static bool isEnabled(const LogLevel& level);
 
-    static bool isEnabled(const LogLevel& level) {
-        return level >= Logger::level_;
-    }
+    static const LogPatternFormatter& patternFormatter();
+    static void setPatternFormatter(const std::string& format);
 
-    static LogLevel logLevel() {
-        return level_;
-    }
-    static void logLevel(LogLevel level) {
-        Logger::level_ = level;
-    }
+    static void addLogSink(const LogSinkPtr& sink);
 
 private:
     LogMessage message_;
 
     static LogLevel level_;
-    // static LogPatternFormatter formatter;
+    static LogPatternFormatter* formatter;
+    static std::vector<LogSinkPtr> sinks_;
 };
+
+inline
+const LogLevel& Logger::level() {
+    return level_;
+}
+
+inline
+void Logger::setLevel(const LogLevel& level) {
+    Logger::level_ = level;
+}
+
+inline
+bool Logger::isEnabled(const LogLevel& level) {
+    return level >= Logger::level_;
+}
+
+inline
+const LogPatternFormatter& Logger::patternFormatter() {
+    if (!formatter) {
+        formatter = new LogPatternFormatter();    
+    }
+
+    return *formatter;
+}
+
+inline
+void Logger::setPatternFormatter(const std::string& format) {
+    if (formatter) {
+        delete formatter;
+    }
+    formatter = new LogPatternFormatter(format);
+}
 
 }
 }
