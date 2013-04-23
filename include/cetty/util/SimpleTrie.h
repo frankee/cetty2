@@ -37,7 +37,10 @@ public:
     SimpleTrieNode* references[MAX_CHAR_COUNT];
     T* data;
 
-    SimpleTrieNode() : words(0), prefixes(0), data(NULL) {
+    SimpleTrieNode()
+        : words(0),
+          prefixes(0),
+          data(NULL) {
         std::memset(references, 0, sizeof(references));
     }
 

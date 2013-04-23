@@ -175,9 +175,12 @@
     <ClCompile Include="..\..\src\cetty\handler\timeout\TimeoutException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutHandler.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogConsoleSink.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogSink.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogWin32DebugSink.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Adler32.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Base64.cpp" />
     <ClCompile Include="..\..\src\cetty\util\CurrentThread.cpp" />
@@ -220,7 +223,7 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundBufferHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageFilter.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelInboundMessageHandler.h" />
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInitializer.h" />
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineInitializer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageContainer.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandler.h" />
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageHandlerContext.h" />
@@ -321,6 +324,7 @@
     <ClInclude Include="..\..\..\include\cetty\handler\timeout\TimeoutException.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutException.h" />
     <ClInclude Include="..\..\..\include\cetty\handler\timeout\WriteTimeoutHandler.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogConsoleSink.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogFileSink.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\Logger.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LoggerHelper.h" />
@@ -329,6 +333,8 @@
     <ClInclude Include="..\..\..\include\cetty\logging\LogPatternFormatter.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogScribeSink.h" />
     <ClInclude Include="..\..\..\include\cetty\logging\LogSink.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogSinkPtr.h" />
+    <ClInclude Include="..\..\..\include\cetty\logging\LogWin32DebugSink.h" />
     <ClInclude Include="..\..\..\include\cetty\Platform.h" />
     <ClInclude Include="..\..\..\include\cetty\PlatformWin32.h" />
     <ClInclude Include="..\..\..\include\cetty\Types.h" />

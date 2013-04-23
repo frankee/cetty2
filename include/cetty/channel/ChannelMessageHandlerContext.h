@@ -64,7 +64,7 @@ public:
 
     /**
      * Handler是能够注册callback及functor的对象（即这些callback及funcotor的容器）
-     * 
+     *
      * 默认情况下，当需要把Handler至于Context容器内时，Context会自动调用Handler的registerTo的方法，
      * 即，Handler需要有一个registerTo的成员方法。
      * 当提供的Handler没有RegisterTo的成员方法，或是该Handler需要同时置于两个即两个以上的Context，且不同的Context注册不同的信号处理器，
@@ -73,12 +73,12 @@ public:
      *
      * Get called when the Context initialized with the handler, handler should
      * set the callbacks or the functors to the context.
-     * 
+     *
      * <code>
      * void registerFunctions(const HandlerPtr& handler, Context& ctx) {
      *
      * }
-     *  
+     *
      * </code>
      */
     typedef boost::function<void (HandlerPtr const&, Context&)> RegisterCallback;
@@ -88,6 +88,17 @@ public:
                                  const HandlerPtr& handler)
         : ChannelHandlerContext(name),
           handler_(handler),
+          inboundTransfer_(*this),
+          outboundTransfer_(*this) {
+        if (handler) {
+            handler->registerTo(*this);
+        }
+    }
+
+    ChannelMessageHandlerContext(const std::string& name,
+                                 const HandlerPtr& handler,
+                                 const EventLoopPtr& eventLoop)
+        : ChannelHandlerContext(name, eventLoop),
           inboundTransfer_(*this),
           outboundTransfer_(*this) {
         if (handler) {
@@ -108,20 +119,9 @@ public:
     }
 
     ChannelMessageHandlerContext(const std::string& name,
-                                 const EventLoopPtr& eventLoop,
-                                 const HandlerPtr& handler)
-        : ChannelHandlerContext(name, eventLoop),
-          inboundTransfer_(*this),
-          outboundTransfer_(*this) {
-        if (handler) {
-            handler->registerTo(*this);
-        }
-    }
-
-    ChannelMessageHandlerContext(const std::string& name,
                                  const HandlerPtr& handler,
-                                 const EventLoopPtr& eventLoop,
-                                 const RegisterCallback& registerCallback)
+                                 const RegisterCallback& registerCallback,
+                                 const EventLoopPtr& eventLoop)
         : ChannelHandlerContext(name, eventLoop),
           handler_(handler),
           inboundTransfer_(*this),

@@ -73,9 +73,7 @@ ChannelPtr CraftServerBuilder::buildHttp(int port) {
     return builder_.serverBuilder().build(PROTOBUF_SERVICE_HTTP, port);
 }
 
-bool CraftServerBuilder::initializeChildChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool CraftServerBuilder::initializeChildChannel(ChannelPipeline& pipeline) {
     //if (ssl) {
     //}
 

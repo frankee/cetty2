@@ -40,7 +40,7 @@ using namespace cetty::protobuf::service;
 
 class ProtobufServerBuilder : private boost::noncopyable {
 public:
-    typedef ServerBuilder::ChildInitializer ChildInitializer;
+    typedef ServerBuilder::PipelineInitializer PipelineInitializer;
 
 public:
     ProtobufServerBuilder();
@@ -51,11 +51,11 @@ public:
     ProtobufServerBuilder& registerService(const ProtobufServicePtr& service);
 
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childPipelineInitializer,
                      int port);
 
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childPipelineInitializer,
                      const std::string& host,
                      int port);
 
@@ -74,7 +74,7 @@ public:
 
 private:
     void init();
-    bool initializeChannel(const ChannelPtr& channel);
+    bool initializeChannel(ChannelPipeline& pipeline);
 
 private:
     ServerBuilder builder_;
@@ -82,17 +82,17 @@ private:
 
 inline
 ChannelPtr ProtobufServerBuilder::build(const std::string& name,
-                                        const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                        const ProtobufServerBuilder::PipelineInitializer& childPipelineInitializer,
                                         int port) {
-    return builder_.build(name, childInitializer, port);
+    return builder_.build(name, childPipelineInitializer, port);
 }
 
 inline
 ChannelPtr ProtobufServerBuilder::build(const std::string& name,
-                                        const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                        const ProtobufServerBuilder::PipelineInitializer& childPipelineInitializer,
                                         const std::string& host,
                                         int port) {
-    return builder_.build(name, childInitializer, host, port);
+    return builder_.build(name, childPipelineInitializer, host, port);
 }
 
 inline

@@ -212,13 +212,13 @@ public:
     /**
      * Return the {@link Channel::Initializer} which set for the child {@link Channel}.
      */
-    const Channel::Initializer& childInitializer() const;
+    const PipelineInitializer& childInitializer() const;
 
     /**
      * Set the {@link Channel::Initializer} which is used to initialize the {@link Channel}
      * after the acceptor accepted.
      */
-    ServerBootstrap& setChildInitializer(const Channel::Initializer& initializer);
+    ServerBootstrap& setChildInitializer(const PipelineInitializer& initializer);
 
     /**
      *
@@ -266,16 +266,14 @@ public:
      */
     ChannelFuturePtr bind(const InetAddress& localAddress);
 
-
     virtual void shutdown();
-
 
     virtual void waitingForExit();
 
 private:
     ChannelPtr newChannel();
 
-    bool initServerChannel(const ChannelPtr& channel);
+    bool initServerChannel(ChannelPipeline& pipeline);
 
 private:
     bool daemonized_;
@@ -283,7 +281,7 @@ private:
 
     EventLoopPoolPtr childPool_;
     ChannelOptions childOptions_;
-    Channel::Initializer childInitializer_;
+    PipelineInitializer childInitializer_;
 };
 
 inline
@@ -332,7 +330,7 @@ const EventLoopPoolPtr& ServerBootstrap::childLoopPool() const {
 }
 
 inline
-const Channel::Initializer& ServerBootstrap::childInitializer() const {
+const ServerBootstrap::PipelineInitializer& ServerBootstrap::childInitializer() const {
     return childInitializer_;
 }
 
@@ -343,7 +341,8 @@ ServerBootstrap& ServerBootstrap::setChildEventLoopPool(const EventLoopPoolPtr& 
 }
 
 inline
-ServerBootstrap& ServerBootstrap::setChildInitializer(const Channel::Initializer& initializer) {
+ServerBootstrap& ServerBootstrap::setChildInitializer(
+    const ServerBootstrap::PipelineInitializer& initializer) {
     childInitializer_ = initializer;
     return *this;
 }

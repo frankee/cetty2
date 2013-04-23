@@ -124,12 +124,12 @@ int AsioWriteOperation::writeBufferSize() const {
 
 inline
 bool AsioWriteOperation::isMultiBuffers() const {
-    return buffers_.truncatedCnt > 1;
+    return buffers_.truncatedSize() > 1;
 }
 
 inline
 bool AsioWriteOperation::isSingleBuffer() const {
-    return buffers_.truncatedCnt == 1;
+    return buffers_.truncatedSize() == 1;
 }
 
 inline

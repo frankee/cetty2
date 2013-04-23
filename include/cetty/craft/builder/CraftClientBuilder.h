@@ -33,7 +33,7 @@ public:
     CraftClientBuilder(const EventLoopPtr& eventLoop);
     CraftClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
-    void setServiceInitializer(const Channel::Initializer& initializer) {
+    void setServiceInitializer(const Channel::PipelineInitializer& initializer) {
         builder_.setServiceInitializer(initializer);
     }
 

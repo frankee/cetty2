@@ -77,7 +77,13 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
                    ChannelException("Failed to create a new channel."));
     }
 
-    ch->setInitializer(initializer_);
+    if (!initializer()) {
+        LOG_INFO << "has not set channel pipeline initializer.";
+        return NullChannel::instance()->newFailedFuture(
+            ChannelException("has not set channel pipeline initializer."));
+    }
+
+    ch->setInitializer(initializer());
     ch->open();
 
     // Set the options.

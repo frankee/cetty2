@@ -50,9 +50,7 @@ BeanstalkClientBuilder::BeanstalkClientBuilder(const EventLoopPoolPtr& eventLoop
     init();
 }
 
-bool initializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool initializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<BeanstalkCommandEncoder::HandlerPtr>("beanstalkEncoder",
             BeanstalkCommandEncoder::HandlerPtr(new BeanstalkCommandEncoder));
 

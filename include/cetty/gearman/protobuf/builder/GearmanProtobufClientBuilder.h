@@ -57,7 +57,7 @@ public:
 
 private:
     void init();
-    bool initializeChannel(const ChannelPtr& channel);
+    bool initializeChannel(ChannelPipeline& pipeline);
 
 private:
     bool init_;

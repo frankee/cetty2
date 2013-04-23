@@ -26,6 +26,11 @@ public:
     SmallFile(const StringPiece& filename);
     ~SmallFile();
 
+    int readToString(std::string* content,
+                     int64_t* fileSize,
+                     int64_t* modifyTime,
+                     int64_t* createTime);
+
     // return errno
     int readToString(int maxSize,
                      std::string* content,
@@ -36,9 +41,15 @@ public:
     // return errno
     int readToBuffer(int* size);
 
-    const char* buffer() const { return buf; }
+    const char* buffer() const;
 
     // read the file content, returns errno if error happens.
+    static int readFile(const StringPiece& filename,
+                        std::string* content,
+                        int64_t* fileSize = NULL,
+                        int64_t* modifyTime = NULL,
+                        int64_t* createTime = NULL);
+
     static int readFile(const StringPiece& filename,
                         int maxSize,
                         std::string* content,
@@ -50,12 +61,43 @@ private:
     static const int MAX_BUFFER_SIZE = 65536;
 
 private:
-    int fd;
-    int err;
-    FILE* file;
+    int fd_;
+    int err_;
+    FILE* file_;
 
-    char buf[MAX_BUFFER_SIZE];
+    char buf_[MAX_BUFFER_SIZE];
 };
+
+inline
+const char* SmallFile::buffer() const {
+    return buf_;
+}
+
+inline
+int SmallFile::readToString(std::string* content,
+                            int64_t* fileSize,
+                            int64_t* modifyTime,
+                            int64_t* createTime) {
+    return readToString(MAX_BUFFER_SIZE,
+                        content,
+                        fileSize,
+                        modifyTime,
+                        createTime);
+}
+
+inline
+int SmallFile::readFile(const StringPiece& filename,
+                        std::string* content,
+                        int64_t* fileSize,
+                        int64_t* modifyTime,
+                        int64_t* createTime) {
+    return readFile(filename,
+                    MAX_BUFFER_SIZE,
+                    content,
+                    fileSize,
+                    modifyTime,
+                    createTime);
+}
 
 }
 }

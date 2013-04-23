@@ -40,23 +40,23 @@ namespace channel {
 using namespace cetty::buffer;
 using namespace cetty::util;
 
-class DummyHandler : private boost::noncopyable {
+class NullChannelHandlerContext : public ChannelHandlerContext {
 public:
-    typedef ChannelMessageHandlerContext<DummyHandler,
-            VoidMessage,
-            VoidMessage,
-            VoidMessage,
-            VoidMessage,
-            VoidMessageContainer,
-            VoidMessageContainer,
-            VoidMessageContainer,
-            VoidMessageContainer> Context;
+    NullChannelHandlerContext()
+        : ChannelHandlerContext("_null") {
+    }
 
-    typedef ChannelHandlerWrapper<DummyHandler>::Handler Handler;
-    typedef ChannelHandlerWrapper<DummyHandler>::HandlerPtr HandlerPtr;
+    virtual ~NullChannelHandlerContext() {
+    }
 
-public:
-    void registerTo(Context& ctx) {}
+protected:
+    virtual boost::any getInboundMessageContainer() {
+        return boost::any();
+    }
+
+    virtual boost::any getOutboundMessageContainer() {
+        return boost::any();
+    }
 };
 
 ChannelPipeline::ChannelPipeline(const ChannelPtr& channel)
@@ -67,9 +67,7 @@ ChannelPipeline::ChannelPipeline(const ChannelPtr& channel)
       head_(),
       tail_() {
 
-    head_ = tail_ = new DummyHandler::Context("dummyHeader",
-            DummyHandler::HandlerPtr(new DummyHandler));
-
+    head_ = tail_ = new NullChannelHandlerContext;
     voidFuture_ = new VoidChannelFuture(channel_);
 }
 
@@ -87,8 +85,7 @@ void ChannelPipeline::setHead(ChannelHandlerContext* ctx) {
     ChannelHandlerContext* newHead = ctx;
 
     if (!newHead) {
-        newHead = new DummyHandler::Context("dummyHeader",
-            DummyHandler::HandlerPtr(new DummyHandler));
+        newHead = new NullChannelHandlerContext;
     }
 
     newHead->initialize(*this);

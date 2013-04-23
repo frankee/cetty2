@@ -80,9 +80,7 @@ GearmanWorkerBuilder& GearmanWorkerBuilder::registerWorker(const std::string& fu
     return *this;
 }
 
-bool GearmanWorkerBuilder::initializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool GearmanWorkerBuilder::initializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
             LengthFieldBasedFrameDecoder::HandlerPtr(
                 new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));
@@ -101,7 +99,7 @@ bool GearmanWorkerBuilder::initializeChannel(const ChannelPtr& channel) {
             worker);
 
     if (additionalInitializer_) {
-        return additionalInitializer_(channel);
+        return additionalInitializer_(pipeline);
     }
 
     return true;

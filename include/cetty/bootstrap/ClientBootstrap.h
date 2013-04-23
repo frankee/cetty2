@@ -147,15 +147,7 @@ public:
      */
     ClientBootstrap& setRemoteAddress(const std::string& host, int port);
 
-    /**
-     *
-     */
-    const Channel::Initializer& initializer() const;
 
-    /**
-     *
-     */
-    ClientBootstrap& setInitializer(const Channel::Initializer& initializer);
 
     /**
      * Connect a {@link Channel} to the remote peer.
@@ -202,7 +194,6 @@ private:
 private:
     EventLoopPtr eventLoop_;
     InetAddress remoteAddress_;
-    Channel::Initializer initializer_;
 };
 
 inline
@@ -221,18 +212,6 @@ ClientBootstrap& ClientBootstrap::setRemoteAddress(const std::string& host,
 inline
 const InetAddress& ClientBootstrap::remoteAddress() const {
     return remoteAddress_;
-}
-
-inline
-ClientBootstrap& ClientBootstrap::setInitializer(
-    const Channel::Initializer& initializer) {
-    initializer_ = initializer;
-    return *this;
-}
-
-inline
-const Channel::Initializer& ClientBootstrap::initializer() const {
-    return initializer_;
 }
 
 inline

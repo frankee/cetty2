@@ -54,13 +54,13 @@ AsioWriteOperation::AsioWriteOperation(const ChannelBufferPtr& buffer,
         BOOST_ASSERT(byteSize == byteSize_ &&
                      "buffer size should be same after compact");
 
-        buffers_[buffers_.truncatedCnt++] = AsioBuffer(bytes, byteSize_);
+        buffers_.push_back(AsioBuffer(bytes, byteSize_));
     }
     else {
         for (int i = 0, j = gathering.blockCount(); i < j; ++i) {
             const StringPiece& bytes = gathering.at(i);
-            buffers_[buffers_.truncatedCnt++] =
-                AsioBuffer(const_cast<char*>(bytes.data()), bytes.size());
+            buffers_.push_back(
+                AsioBuffer(const_cast<char*>(bytes.data()), bytes.size()));
         }
     }
 }

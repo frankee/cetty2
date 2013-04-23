@@ -37,7 +37,7 @@ using namespace cetty::protobuf::service::builder;
 
 class CraftServerBuilder : private boost::noncopyable {
 public:
-    typedef ServerBuilder::ChildInitializer ChildInitializer;
+    typedef ChannelPipeline::Initializer PipelineInitializer;
 
 public:
     CraftServerBuilder();
@@ -48,11 +48,11 @@ public:
     CraftServerBuilder& registerService(const ProtobufServicePtr& service);
 
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childInitializer,
                      int port);
 
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childInitializer,
                      const std::string& host,
                      int port);
 
@@ -72,7 +72,7 @@ public:
 
 private:
     void init();
-    bool initializeChildChannel(const ChannelPtr& channel);
+    bool initializeChildChannel(ChannelPipeline& pipeline);
 
 private:
     ProtobufServerBuilder builder_;
@@ -80,14 +80,14 @@ private:
 
 inline
 ChannelPtr CraftServerBuilder::build(const std::string& name,
-                                     const ProtobufServerBuilder::ChildInitializer& childInitializer,
+                                     const ProtobufServerBuilder::PipelineInitializer& childInitializer,
                                      int port) {
     return builder_.build(name, childInitializer, port);
 }
 
 inline
 ChannelPtr CraftServerBuilder::build(const std::string& name,
-                                     const CraftServerBuilder::ChildInitializer& childInitializer,
+                                     const CraftServerBuilder::PipelineInitializer& childInitializer,
                                      const std::string& host,
                                      int port) {
     return builder_.build(name, childInitializer, host, port);

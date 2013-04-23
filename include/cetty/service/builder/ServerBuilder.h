@@ -37,7 +37,7 @@ using namespace cetty::config;
 
 class ServerBuilder : private boost::noncopyable {
 public:
-    typedef Channel::Initializer ChildInitializer;
+    typedef Channel::PipelineInitializer PipelineInitializer;
 
 public:
     ServerBuilder();
@@ -74,14 +74,14 @@ public:
      * build a new server channel
      */
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childPipelineInitializer,
                      int port);
 
     /**
      * build a new server channel
      */
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childPipelineInitializer,
                      const std::string& host,
                      int port);
 
@@ -89,7 +89,7 @@ public:
      * build a new server channel
      */
     ChannelPtr build(const std::string& name,
-                     const ChildInitializer& childInitializer,
+                     const PipelineInitializer& childPipelineInitializer,
                      const std::string& host,
                      int port,
                      const ChannelOptions& options,
@@ -120,7 +120,7 @@ public:
      *
      */
     ServerBuilder& registerPrototype(const std::string& name,
-                                     const ChildInitializer& childInitializer);
+                                     const PipelineInitializer& childPipelineInitializer);
 
     /**
      *
@@ -128,7 +128,7 @@ public:
     ServerBuilder& registerPrototype(const std::string& name,
                                      const ChannelOptions& options,
                                      const ChannelOptions& childOptions,
-                                     const ChildInitializer& childInitializer);
+                                     const PipelineInitializer& childPipelineInitializer);
 
     /**
      *

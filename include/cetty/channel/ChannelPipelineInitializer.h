@@ -1,5 +1,5 @@
-#if !defined(CETTY_CHANNEL_CHANNELINITIALIZER_H)
-#define CETTY_CHANNEL_CHANNELINITIALIZER_H
+#if !defined(CETTY_CHANNEL_CHANNELPIPELINEINITIALIZER_H)
+#define CETTY_CHANNEL_CHANNELPIPELINEINITIALIZER_H
 
 /*
  * Copyright (c) 2010-2012 frankee zhou (frankee.zhou at gmail dot com)
@@ -27,44 +27,40 @@ namespace cetty {
 namespace channel {
 
 template<typename T>
-class ChannelInitializer1 {
+class ChannelPipelineInitializer1 {
 public:
     typedef typename ChannelHandlerWrapper<T>::Handler Handler;
     typedef typename ChannelHandlerWrapper<T>::HandlerPtr HandlerPtr;
     typedef typename ChannelHandlerWrapper<T>::Handler::Context Context;
 
 public:
-    ChannelInitializer1()
+    ChannelPipelineInitializer1()
         : name_("_auto1") {
     }
 
-    ChannelInitializer1(const std::string& name)
+    ChannelPipelineInitializer1(const std::string& name)
         : name_(name) {
     }
 
-    bool operator()(const ChannelPtr& channel) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline) {
         pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler));
         return true;
     }
 
     template<typename Arg1>
-    bool operator()(const ChannelPtr& channel, Arg1 arg1) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline, Arg1 arg1) {
         pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1)));
         return true;
     }
 
     template<typename Arg1, typename Arg2>
-    bool operator()(const ChannelPtr& channel, Arg1 arg1, Arg2 arg2) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline, Arg1 arg1, Arg2 arg2) {
         pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1, arg2)));
         return true;
     }
 
     template<typename Arg1, typename Arg2, typename Arg3>
-    bool operator()(const ChannelPtr& channel, Arg1 arg1, Arg2 arg2, Arg3 arg3) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline, Arg1 arg1, Arg2 arg2, Arg3 arg3) {
         pipeline.addLast<HandlerPtr>(name_, HandlerPtr(new Handler(arg1, arg2, arg3)));
         return true;
     }
@@ -74,7 +70,7 @@ private:
 };
 
 template<typename T1, typename T2>
-class ChannelInitializer2 {
+class ChannelPipelineInitializer2 {
 public:
     typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
     typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
@@ -85,10 +81,9 @@ public:
     typedef typename ChannelHandlerWrapper<T2>::Handler::Context Context2;
 
 public:
-    ChannelInitializer2() {}
+    ChannelPipelineInitializer2() {}
 
-    bool operator()(const ChannelPtr& channel) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline) {
         pipeline.addLast<Handler1Ptr>("_auto1", Handler1Ptr(new Handler1));
         pipeline.addLast<Handler2Ptr>("_auto2", Handler2Ptr(new Handler2));
         return true;
@@ -96,7 +91,7 @@ public:
 };
 
 template<typename T1, typename T2, typename T3>
-class ChannelInitializer3 {
+class ChannelPipelineInitializer3 {
 public:
     typedef typename ChannelHandlerWrapper<T1>::Handler Handler1;
     typedef typename ChannelHandlerWrapper<T1>::HandlerPtr Handler1Ptr;
@@ -111,10 +106,9 @@ public:
     typedef typename ChannelHandlerWrapper<T3>::Handler::Context Context3;
 
 public:
-    ChannelInitializer3() {}
+    ChannelPipelineInitializer3() {}
 
-    bool operator()(const ChannelPtr& channel) {
-        ChannelPipeline& pipeline = channel->pipeline();
+    bool operator()(ChannelPipeline& pipeline) {
         pipeline.addLast<Handler1Ptr>("_auto1", Handler1Ptr(new Handler1));
         pipeline.addLast<Handler2Ptr>("_auto2", Handler2Ptr(new Handler2));
         pipeline.addLast<Handler3Ptr>("_auto3", Handler3Ptr(new Handler3));
@@ -125,7 +119,7 @@ public:
 }
 }
 
-#endif //#if !defined(CETTY_CHANNEL_CHANNELINITIALIZER_H)
+#endif //#if !defined(CETTY_CHANNEL_CHANNELPIPELINEINITIALIZER_H)
 
 // Local Variables:
 // mode: c++

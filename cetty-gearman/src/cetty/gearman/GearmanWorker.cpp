@@ -27,13 +27,13 @@ using namespace cetty::service;
 using namespace cetty::service::pool;
 
 GearmanWorker::GearmanWorker(const EventLoopPtr& eventLoop,
-                             const Channel::Initializer& initializer,
+                             const PipelineInitializer& initializer,
                              const Connections& connections)
     : connectionPool_(connections,
                       eventLoop,
                      static_cast<int>(connections.size()),
                      static_cast<int>(connections.size())) {
-    connectionPool_.setChannelInitializer(initializer);
+    connectionPool_.setInitializer(initializer);
     connectionPool_.start();
 }
 

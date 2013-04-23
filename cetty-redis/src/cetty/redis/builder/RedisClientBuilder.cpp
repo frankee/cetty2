@@ -47,9 +47,7 @@ RedisClientBuilder::RedisClientBuilder(const EventLoopPoolPtr& eventLoopPool)
     init();
 }
 
-bool initializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool initializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<RedisCommandEncoder::HandlerPtr>("redisEncoder",
         RedisCommandEncoder::HandlerPtr(new RedisCommandEncoder));
 

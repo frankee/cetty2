@@ -77,7 +77,7 @@ void Channel::open() {
         closeFuture_ = new DefaultChannelFuture(self, false);
 
         if (initializer_) {
-            initializer_(self);
+            initializer_(*pipeline_);
         }
     }
     else {

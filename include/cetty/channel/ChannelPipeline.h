@@ -26,6 +26,7 @@
 #include <string>
 #include <boost/any.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <cetty/channel/ChannelPtr.h>
@@ -196,6 +197,9 @@ class ChannelPipelineException;
  * and remove it after the exchange.
  */
 class ChannelPipeline : private boost::noncopyable {
+public:
+    typedef boost::function<bool (ChannelPipeline&)> Initializer;
+
 public:
     ChannelPipeline(const ChannelPtr& channel);
     ~ChannelPipeline();

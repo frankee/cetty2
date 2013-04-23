@@ -51,9 +51,7 @@ GearmanClientBuilder::GearmanClientBuilder(const EventLoopPtr& eventLoop)
     init();
 }
 
-bool initializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool initializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<LengthFieldBasedFrameDecoder::HandlerPtr>("frameDecoder",
         LengthFieldBasedFrameDecoder::HandlerPtr(
         new LengthFieldBasedFrameDecoder(16 * 1024 * 1024, 8, 4, 0, 4)));

@@ -6,7 +6,7 @@
 
 #include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelPipelineInitializer.h>
 
 #include <cetty/bootstrap/ServerBootstrap.h>
 
@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    Logger::logLevel(LogLevel::DEBUG);
-    ChannelInitializer1<EchoServerHandler> initializer("echo");
+    Logger::setLevel(LogLevel::DEBUG);
+    ChannelPipelineInitializer1<EchoServerHandler> initializer("echo");
 
     ServerBootstrap bootstrap(threadCount);
 

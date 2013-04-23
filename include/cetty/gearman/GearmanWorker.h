@@ -18,7 +18,6 @@
  */
 
 #include <cetty/util/ReferenceCounter.h>
-#include <cetty/channel/asio/AsioServicePoolPtr.h>
 #include <cetty/service/Connection.h>
 #include <cetty/service/pool/WatermarkConnectionPool.h>
 #include <cetty/gearman/GearmanWorkerPtr.h>
@@ -26,13 +25,17 @@
 namespace cetty {
 namespace gearman {
 
+using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::service::pool;
 
 class GearmanWorker : public cetty::util::ReferenceCounter<GearmanWorker, int> {
 public:
+    typedef ChannelPipeline::Initializer PipelineInitializer;
+
+public:
     GearmanWorker(const EventLoopPtr& eventLoop,
-                  const Channel::Initializer& initializer,
+                  const PipelineInitializer& initializer,
                   const Connections& connections);
 
     virtual ~GearmanWorker();

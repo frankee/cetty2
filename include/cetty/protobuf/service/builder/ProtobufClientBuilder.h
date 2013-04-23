@@ -38,7 +38,7 @@ public:
     ProtobufClientBuilder(const EventLoopPtr& eventLoop);
     ProtobufClientBuilder(const EventLoopPoolPtr& eventLoopPool);
 
-    void setServiceInitializer(const Channel::Initializer& initializer) {
+    void setServiceInitializer(const Channel::PipelineInitializer& initializer) {
         builder_.setServiceInitializer(initializer);
     }
 
@@ -60,7 +60,7 @@ public:
 
 private:
     void init();
-    bool initializeChannel(const ChannelPtr& channel);
+    bool initializeChannel(ChannelPipeline& pipeline);
 
 private:
     ClientBuilderType builder_;

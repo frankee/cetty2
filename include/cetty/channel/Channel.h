@@ -102,7 +102,7 @@ class ChannelSink;
 
 class Channel : public boost::enable_shared_from_this<Channel> {
 public:
-    typedef boost::function<bool (ChannelPtr const&)> Initializer;
+    typedef ChannelPipeline::Initializer PipelineInitializer;
 
 public:
     virtual ~Channel();
@@ -177,12 +177,12 @@ public:
     /**
      * Returns the Initializer.
      */
-    const Initializer& initializer() const;
+    const PipelineInitializer& initializer() const;
 
     /**
      * Set the {@link Initializer} to the channel, take action before the channel open.
      */
-    void setInitializer(const Initializer& initializer);
+    void setInitializer(const PipelineInitializer& initializer);
 
     /**
      * Return a new {@link ChannelFuture}.
@@ -601,8 +601,8 @@ private:
     EventLoopPtr eventLoop_;
 
     ChannelConfig config_;
-    Initializer initializer_;
     ChannelPipeline* pipeline_;
+    PipelineInitializer initializer_;
 
     ChannelFuturePtr succeededFuture_;
     ChannelFuturePtr closeFuture_;
@@ -666,12 +666,12 @@ void Channel::setRemoteAddress(const InetAddress& remote) {
 }
 
 inline
-const Channel::Initializer& Channel::initializer() const {
+const Channel::PipelineInitializer& Channel::initializer() const {
     return initializer_;
 }
 
 inline
-void Channel::setInitializer(const Channel::Initializer& initializer) {
+void Channel::setInitializer(const Channel::PipelineInitializer& initializer) {
     initializer_ = initializer;
 }
 

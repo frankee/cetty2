@@ -61,9 +61,7 @@ void ProtobufClientBuilder::init() {
                     _1));
 }
 
-bool ProtobufClientBuilder::initializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool ProtobufClientBuilder::initializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<LengthFieldBasedFrameDecoder::Handler>(
         "frameDecoder",
         LengthFieldBasedFrameDecoder::HandlerPtr(new LengthFieldBasedFrameDecoder(

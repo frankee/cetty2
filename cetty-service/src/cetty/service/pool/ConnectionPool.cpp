@@ -104,8 +104,7 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     }
 }
 
-void ConnectionPool::setChannelInitializer(
-    const Channel::Initializer& initializer) {
+void ConnectionPool::setInitializer(const ChannelPipelineInitializer& initializer) {
     bootstrap_.setInitializer(initializer);
 }
 

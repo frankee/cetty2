@@ -25,10 +25,10 @@
 #include <cetty/channel/InetAddress.h>
 #include <cetty/channel/NullChannel.h>
 #include <cetty/channel/ChannelConfig.h>
-#include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelException.h>
 #include <cetty/channel/ChannelFutureListener.h>
+#include <cetty/channel/ChannelPipelineInitializer.h>
 #include <cetty/channel/ChannelMessageHandlerContext.h>
 
 #include <cetty/util/Exception.h>
@@ -225,9 +225,7 @@ void ServerBootstrap::shutdown() {
     clearChannels();
 }
 
-bool ServerBootstrap::initServerChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool ServerBootstrap::initServerChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<Acceptor>("acceptor",
                                Acceptor::Ptr(new Acceptor(*this)));
 

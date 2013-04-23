@@ -41,6 +41,7 @@ using namespace cetty::bootstrap;
 class ConnectionPool : private boost::noncopyable {
 public:
     typedef boost::function1<void, const ChannelPtr&> ConnectedCallback;
+    typedef ChannelPipeline::Initializer ChannelPipelineInitializer;
 
 public:
     ConnectionPool(const Connections& connections);
@@ -57,7 +58,7 @@ public:
         return bootstrap_;
     }
 
-    void setChannelInitializer(const Channel::Initializer& initializer);
+    void setInitializer(const ChannelPipelineInitializer& initializer);
 
     void close() {}
 

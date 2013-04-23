@@ -332,6 +332,15 @@
     <ClCompile Include="..\..\src\cetty\channel\asio\AsioDeadlineTimeout.cpp">
       <Filter>channel\asio</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogWin32DebugSink.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogConsoleSink.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogSink.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">
@@ -535,9 +544,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\logging\Logger.h">
       <Filter>logging</Filter>
     </ClInclude>
@@ -637,9 +643,6 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\VoidMessage.h">
-      <Filter>channel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelInitializer.h">
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerWrapper.h">
@@ -875,6 +878,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelMessageTailLinkContext.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipelineInitializer.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogConsoleSink.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogWin32DebugSink.h">
+      <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\logging\LogSinkPtr.h">
+      <Filter>logging</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

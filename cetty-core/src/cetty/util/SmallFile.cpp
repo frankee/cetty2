@@ -15,22 +15,25 @@
 #include <sys/stat.h>
 #include <boost/static_assert.hpp>
 #include <boost/implicit_cast.hpp>
+#include <cetty/Platform.h>
 #include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace util {
 
-#if defined(_WIN32)
+#if defined(CETTY_OS_FAMILY_WINDOWS)
 
 SmallFile::SmallFile(const StringPiece& filename)
-    : fd(0), err(0), file(0) {
-    buf[0] = '\0';
-    file = std::fopen(filename.data(), "rb");
+    : fd_(0),
+      err_(0),
+      file_(0) {
+    buf_[0] = '\0';
+    file_ = std::fopen(filename.c_str(), "rb");
 }
 
 SmallFile::~SmallFile() {
-    if (file) {
-        std::fclose(file);
+    if (file_) {
+        std::fclose(file_);
     }
 }
 
@@ -40,16 +43,18 @@ int SmallFile::readToString(int maxSize,
                             int64_t* fileSize,
                             int64_t* modifyTime,
                             int64_t* createTime) {
-    assert(content != NULL);
-    if (fd >= 0) {
-        content->clear();
+    assert(content != NULL && maxSize > 0);
 
-        while (content->size() < (size_t)maxSize) {
-            size_t toRead = std::min((size_t)maxSize - content->size(), sizeof(buf));
-            size_t n = std::fread(buf, toRead, 1, file);
+    if (fd_ >= 0) {
+        content->clear();
+        std::size_t max = static_cast<std::size_t>(maxSize);
+
+        while (content->size() < max) {
+            std::size_t toRead = std::min(max - content->size(), sizeof(buf_));
+            std::size_t n = std::fread(buf_, toRead, 1, file_);
 
             if (n > 0) {
-                content->append(buf, n);
+                content->append(buf_, n);
             }
             else {
                 break;
@@ -61,8 +66,8 @@ int SmallFile::readToString(int maxSize,
 }
 
 int SmallFile::readToBuffer(int* size) {
-    if (file) {
-        std::size_t n = std::fread(buf, sizeof(buf) - 1, 1, file);
+    if (file_) {
+        std::size_t n = std::fread(buf_, sizeof(buf_) - 1, 1, file_);
 
         if (size) {
             *size = static_cast<int>(n);
@@ -75,36 +80,36 @@ int SmallFile::readToBuffer(int* size) {
 #else
 
 SmallFile::SmallFile(const StringPiece& filename)
-    : fd(::open(filename.c_str(), O_RDONLY)),
-      err(0),
-      file(0) {
-    buf[0] = '\0';
+    : fd_(::open(filename.c_str(), O_RDONLY)),
+      err_(0),
+      file_(0) {
+    buf_[0] = '\0';
 
-    if (fd < 0) {
+    if (fd_ < 0) {
         LOG_DEBUG << "open filename.data() failed.";
-        err = errno;
+        err_ = errno;
     }
 }
 
 SmallFile::~SmallFile() {
-    if (fd >= 0) {
-        ::close(fd); // FIXME: check EINTR
+    if (fd_ >= 0) {
+        ::close(fd_); // FIXME: check EINTR
     }
 }
 
 int SmallFile::readToBuffer(int* size) {
     int err = err;
 
-    if (fd >= 0) {
-    	fsync(fd);
-        ssize_t n = ::pread(fd, buf, sizeof(buf)-1, 0);
+    if (fd_ >= 0) {
+        fsync(fd_);
+        ssize_t n = ::pread(fd_, buf_, sizeof(buf_)-1, 0);
 
         if (n >= 0) {
             if (size) {
                 *size = static_cast<int>(n);
             }
 
-            buf[n] = '\0';
+            buf_[n] = '\0';
         }
         else {
             err = errno;
@@ -124,13 +129,13 @@ int SmallFile::readToString(int maxSize,
     assert(content != NULL);
     int err = err;
 
-    if (fd >= 0) {
+    if (fd_ >= 0) {
         content->clear();
 
         if (fileSize) {
             struct stat statbuf;
 
-            if (::fstat(fd, &statbuf) == 0) {
+            if (::fstat(fd_, &statbuf) == 0) {
                 if (S_ISREG(statbuf.st_mode)) {
                     *fileSize = statbuf.st_size;
                     content->reserve(static_cast<int>(std::min(boost::implicit_cast<int64_t>(maxSize), *fileSize)));
@@ -153,11 +158,11 @@ int SmallFile::readToString(int maxSize,
         }
 
         while (content->size() < (size_t)maxSize) {
-            size_t toRead = std::min((size_t)maxSize - content->size(), sizeof(buf));
-            ssize_t n = ::read(fd, buf, toRead);
+            size_t toRead = std::min((size_t)maxSize - content->size(), sizeof(buf_));
+            ssize_t n = ::read(fd_, buf_, toRead);
 
             if (n > 0) {
-                content->append(buf, n);
+                content->append(buf_, n);
             }
             else {
                 if (n < 0) {

@@ -20,7 +20,7 @@
 
 
 #include <cetty/bootstrap/ServerBootstrap.h>
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelPipelineInitializer.h>
 
 #include "DiscardServerHandler.h"
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         threadCount = atoi(argv[1]);
     }
 
-    ChannelInitializer1<DiscardServerHandler> initializer("discard");
+    ChannelPipelineInitializer1<DiscardServerHandler> initializer("discard");
 
     ServerBootstrap bootstrap(threadCount);
 

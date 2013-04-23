@@ -46,7 +46,7 @@ public:
 
 public:
     ClientService(const EventLoopPtr& eventLoop,
-                  const Initializer& initializer,
+                  const PipelineInitializer& initializer,
                   const Connections& connections)
         : Channel(ChannelPtr(), eventLoop),
           eventLoop_(eventLoop),

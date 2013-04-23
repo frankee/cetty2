@@ -41,6 +41,7 @@ class ClientBuilder : private boost::noncopyable {
 public:
     typedef ClientBuilder<Request, Response> Self;
     typedef ClientService<Request, Response> ServiceChannel;
+    typedef ChannelPipeline::Initializer PipelineInitializer;
 
 public:
     ClientBuilder()
@@ -58,11 +59,11 @@ public:
 
     virtual ~ClientBuilder() {}
 
-    void setServiceInitializer(const Channel::Initializer& initializer) {
+    void setServiceInitializer(const PipelineInitializer& initializer) {
         serviceInitializer_ = initializer;
     }
 
-    void setClientInitializer(const Channel::Initializer& initializer) {
+    void setClientInitializer(const PipelineInitializer& initializer) {
         clientInitializer_ = initializer;
     }
 
@@ -122,8 +123,8 @@ private:
     EventLoopPtr eventLoop_;
     EventLoopPoolPtr eventLoopPool_;
 
-    Channel::Initializer clientInitializer_;
-    Channel::Initializer serviceInitializer_;
+    PipelineInitializer clientInitializer_;
+    PipelineInitializer serviceInitializer_;
 
     ClientChannels clientChannels_;
 };

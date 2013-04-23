@@ -55,18 +55,18 @@ ServerBuilder::~ServerBuilder() {
 }
 
 ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
-        const ChildInitializer& childInitializer) {
+        const PipelineInitializer& childPipelineInitializer) {
     ChannelOptions empty;
     return registerPrototype(name,
                                    empty,
                                    empty,
-                                   childInitializer);
+                                   childPipelineInitializer);
 }
 
 ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         const ChannelOptions& options,
         const ChannelOptions& childOptions,
-        const ChildInitializer& childInitializer) {
+        const PipelineInitializer& childPipelineInitializer) {
     if (!init_) {
         LOG_WARN << "initialized failed, CAN NOT register server";
         return *this;
@@ -77,8 +77,8 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         return *this;
     }
 
-    if (!childInitializer) {
-        LOG_WARN << "childInitializer is empty, can not register the server.";
+    if (!childPipelineInitializer) {
+        LOG_WARN << "childPipelineInitializer is empty, can not register the server.";
         return *this;
     }
 
@@ -86,7 +86,7 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         parentEventLoopPool_,
         childEventLoopPool_);
 
-    bootstrap->setChildInitializer(childInitializer);
+    bootstrap->setInitializer(childPipelineInitializer);
 
     if (!options.empty()) {
         bootstrap->setOptions(options);
@@ -162,7 +162,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChildInitializer& initializer,
+                                const PipelineInitializer& initializer,
                                 int port) {
     ChannelOptions empty;
     return build(name,
@@ -174,7 +174,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChildInitializer& initializer,
+                                const PipelineInitializer& initializer,
                                 const std::string& host,
                                 int port) {
     ChannelOptions empty;
@@ -187,7 +187,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
-                                const ChildInitializer& childInitializer,
+                                const PipelineInitializer& childPipelineInitializer,
                                 const std::string& host,
                                 int port,
                                 const ChannelOptions& options,
@@ -218,11 +218,11 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
 
-    if (childInitializer) {
-        bootstrap->setChildInitializer(childInitializer);
+    if (childPipelineInitializer) {
+        bootstrap->setInitializer(childPipelineInitializer);
     }
     else {
-        LOG_WARN << "childInitializer is empty, channel will not work fine.";
+        LOG_WARN << "childPipelineInitializer is empty, channel will not work fine.";
         return NullChannel::instance();
     }
 
@@ -275,7 +275,7 @@ void ServerBuilder::init() {
     }
 
     if (config_.logger) {
-        Logger::logLevel(LogLevel::parseFrom(config_.logger->level));
+        Logger::setLevel(LogLevel::parseFrom(config_.logger->level));
     }
 
     init_ = true;

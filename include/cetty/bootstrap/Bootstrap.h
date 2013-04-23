@@ -29,6 +29,7 @@
 #include <cetty/channel/InetAddress.h>
 #include <cetty/channel/EventLoopPool.h>
 #include <cetty/channel/ChannelOptions.h>
+#include <cetty/channel/ChannelPipeline.h>
 
 namespace cetty {
 namespace bootstrap {
@@ -55,6 +56,7 @@ template<typename T>
 class Bootstrap : public cetty::util::ReferenceCounter<T> {
 public:
     typedef std::map<int, ChannelPtr> Channels;
+    typedef ChannelPipeline::Initializer PipelineInitializer;
 
 public:
     virtual ~Bootstrap() {}
@@ -89,6 +91,16 @@ public:
      * {@link Channel}
      */
     virtual T& setEventLoopPool(const EventLoopPoolPtr& pool);
+
+    /**
+     *
+     */
+    const PipelineInitializer& initializer() const;
+
+    /**
+     *
+     */
+    T& setInitializer(const PipelineInitializer& initializer);
 
     /**
      * Returns the options which configures a new {@link Channel}.
@@ -167,6 +179,7 @@ private:
     ChannelOptions options_;
     InetAddress    localAddress_;
     EventLoopPoolPtr eventLoopPool_;
+    PipelineInitializer initializer_;
 
     Channels channels_;
 };
@@ -219,6 +232,18 @@ T& Bootstrap<T>::setEventLoopPool(const EventLoopPoolPtr& pool) {
     }
 
     return castThis();
+}
+
+template<typename T> inline
+T& Bootstrap<T>::setInitializer(
+    const typename Bootstrap<T>::PipelineInitializer& initializer) {
+    initializer_ = initializer;
+    return castThis();
+}
+
+template<typename T> inline
+const typename Bootstrap<T>::PipelineInitializer& Bootstrap<T>::initializer() const {
+    return initializer_;
 }
 
 template<typename T> inline

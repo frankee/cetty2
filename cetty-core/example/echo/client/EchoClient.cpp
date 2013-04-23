@@ -7,7 +7,7 @@
 
 #include <cetty/bootstrap/ClientBootstrap.h>
 #include <cetty/channel/ChannelPipeline.h>
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelPipelineInitializer.h>
 #include <cetty/channel/InetAddress.h>
 #include <cetty/channel/ChannelFuture.h>
 
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     // Configure the client.
     ClientBootstrap bootstrap(ioThreadCount);
-    ChannelInitializer1<EchoClientHandler> initializer;
+    ChannelPipelineInitializer1<EchoClientHandler> initializer;
 
     // Set up the pipeline factory.
     bootstrap.setInitializer(

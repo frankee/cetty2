@@ -21,7 +21,7 @@
 #include <cetty/bootstrap/ServerBootstrap.h>
 #include <cetty/bootstrap/asio/AsioServerBootstrap.h>
 
-#include <cetty/channel/ChannelInitializer.h>
+#include <cetty/channel/ChannelPipelineInitializer.h>
 #include <cetty/handler/codec/http/HttpServerCodec.h>
 #include <cetty/handler/codec/http/HttpChunkAggregator.h>
 #include "HttpRequestHandler.h"
@@ -43,14 +43,15 @@ using namespace cetty::handler::codec::http;
 
 int main(int argc, const char* argv[]) {
     // Configure the server.
-    AsioServerBootstrap bootstrap(0);
+    ServerBootstrap bootstrap(0);
 
-    ChannelInitializer2<HttpServerCodec, HttpRequestHandler> initializer;
+    ChannelPipelineInitializer2<HttpServerCodec, HttpRequestHandler> initializer;
 
     bootstrap.setChildOption(ChannelOption::CO_TCP_NODELAY, true)
     .setOption(ChannelOption::CO_SO_REUSEADDR, true)
     .setOption(ChannelOption::CO_SO_BACKLOG, 4096)
-    .setChildInitializer(boost::bind<bool>(initializer, _1));
+    .setChildInitializer(boost::bind<bool>(initializer, _1))
+    .bind(8080)->await();
 
-    bootstrap.bind(8080);
+    bootstrap.waitingForExit();
 };

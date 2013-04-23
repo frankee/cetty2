@@ -41,9 +41,7 @@ using namespace cetty::handler::codec;
 using namespace cetty::protobuf::service::handler;
 using namespace cetty::gearman::protocol;
 
-bool intializeChannel(const ChannelPtr& channel) {
-    ChannelPipeline& pipeline = channel->pipeline();
-
+bool intializeChannel(ChannelPipeline& pipeline) {
     pipeline.addLast<GearmanProtobufWorkerFilter::HandlerPtr>("gearmanProtobufFilter",
             GearmanProtobufWorkerFilter::HandlerPtr(new GearmanProtobufWorkerFilter));
 

@@ -188,11 +188,6 @@ void EventLoopPool::setStarted(bool started) {
     started_ = started;
 }
 
-inline
-void EventLoopPool::insertLoop(const ThreadId& id, const EventLoopPtr& loop) {
-    allEventLoops_.insert(std::make_pair(id, loop));
-}
-
 }
 }
 

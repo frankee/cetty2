@@ -93,12 +93,12 @@ public:
 public:
     ClientServiceDispatcher(const EventLoopPtr& eventLoop,
                             const Connections& connections,
-                            const Channel::Initializer& initializer)
+                            const Channel::PipelineInitializer& initializer)
         : id_(0),
           eventLoop_(eventLoop),
           initializer_(initializer),
           pool_(connections, eventLoop) {
-        pool_.setChannelInitializer(boost::bind(&Self::initializeClientChannel,
+        pool_.setInitializer(boost::bind(&Self::initializeClientChannel,
                                                 this,
                                                 _1));
     }
@@ -141,12 +141,12 @@ private:
         }
     }
 
-    bool initializeClientChannel(const ChannelPtr& channel) {
-        if (initializer_ && !initializer_(channel)) {
+    bool initializeClientChannel(ChannelPipeline& pipeline) {
+        if (initializer_ && !initializer_(pipeline)) {
             return false;
         }
 
-        channel->pipeline().addLast(RequestBridge::newContext(channel_));
+        pipeline.addLast(RequestBridge::newContext(channel_));
         return true;
     }
 
@@ -270,7 +270,7 @@ private:
     int64_t id_;
     ChannelWeakPtr channel_;
     EventLoopPtr eventLoop_;
-    Channel::Initializer initializer_;
+    Channel::PipelineInitializer initializer_;
 
     ConnectionPool pool_;
 

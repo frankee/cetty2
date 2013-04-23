@@ -28,12 +28,14 @@ namespace cetty {
 namespace gearman {
 namespace builder {
 
+    using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman::protocol;
 
 class GearmanWorkerBuilder : private boost::noncopyable {
 public:
+    typedef ChannelPipeline::Initializer PipelineInitializer;
     typedef boost::function<GearmanMessagePtr(const GearmanMessagePtr&)> WorkFunctor;
 
 public:
@@ -47,7 +49,7 @@ public:
     GearmanWorkerBuilder& registerWorker(const std::string& functionName,
                                          const WorkFunctor& worker);
 
-    void setAdditionalInitializer(const Channel::Initializer& initializer);
+    void setAdditionalInitializer(const PipelineInitializer& initializer);
 
     GearmanWorkerBuilder& buildWorkers();
 
@@ -55,7 +57,7 @@ public:
 
 private:
     void buildWorker(const EventLoopPtr& eventLoop);
-    bool initializeChannel(const ChannelPtr& channel);
+    bool initializeChannel(ChannelPipeline& pipeline);
 
 private:
     typedef std::map<std::string, WorkFunctor> WorkFunctors;
@@ -64,7 +66,7 @@ private:
     EventLoopPtr loop_;
     EventLoopPoolPtr pool_;
     WorkFunctors workFunctors_;
-    Channel::Initializer additionalInitializer_;
+    PipelineInitializer additionalInitializer_;
 
     std::vector<Connection> connections_;
     std::vector<GearmanWorkerPtr> workers_;
@@ -80,7 +82,7 @@ GearmanWorkerBuilder& GearmanWorkerBuilder::addConnection(
 
 inline
 void GearmanWorkerBuilder::setAdditionalInitializer(
-    const Channel::Initializer& initializer) {
+    const PipelineInitializer& initializer) {
     additionalInitializer_ = initializer;
 }
 

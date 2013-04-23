@@ -68,5 +68,9 @@ EventLoopPool::EventLoopPool(int ioThreadCount)
 EventLoopPool::~EventLoopPool() {
 }
 
+void EventLoopPool::insertLoop(const ThreadId& id, const EventLoopPtr& loop) {
+    allEventLoops_.insert(std::make_pair(id, loop));
+}
+
 }
 }

@@ -317,11 +317,28 @@ public:
      */
     const std::string& name() const;
 
+    /**
+     * Returns the next of the {@link ChannelHandlerContext} in the
+     * {@link ChannelPipeline}, return NULL if in the end.
+     */
     ChannelHandlerContext* next() const;
+
+    /**
+     * Returns the previous of the {@link ChannelHandlerContext} in the
+     * {@link ChannelPipeline}, return NULL if in the begin.
+     */
     ChannelHandlerContext* prev() const;
 
+    /**
+     * Sets the next of the {@link ChannelHandlerContext} in the
+     * {@link ChannelPipeline}, Only Used the by {@link ChannelPipeline}.
+     */
     void setNext(ChannelHandlerContext* ctx);
 
+    /**
+     * Sets the previous of the {@link ChannelHandlerContext} in the
+     * {@link ChannelPipeline}, Only Used the by {@link ChannelPipeline}.
+     */
     void setPrev(ChannelHandlerContext* ctx);
 
     /**
@@ -334,9 +351,28 @@ public:
      */
     ChannelHandlerContext* nextInboundContext() const;
 
+    /**
+     * Return a new {@link ChannelFuture}.
+     */
     ChannelFuturePtr newFuture();
+
+    /**
+     * Return a {@link VoidChannelFuture}. This method always return the same instance.
+     */
     ChannelFuturePtr newVoidFuture();
+
+    /**
+     * Create a new {@link ChannelFuture} which is marked as successes already. So {@link ChannelFuture#isSuccess()}
+     * will return {@code true}. All {@link FutureListener} added to it will be notified directly. Also
+     * every call of blocking methods will just return without blocking.
+     */
     ChannelFuturePtr newSucceededFuture();
+
+    /**
+     * Create a new {@link ChannelFuture} which is marked as failed already. So {@link Future#isSuccess()}
+     * will return {@code false}. All {@link FutureListener} added to it will be notified directly. Also
+     * every call of blocking methods will just return without blocking.
+     */
     ChannelFuturePtr newFailedFuture(const ChannelException& cause);
 
     /**
@@ -539,7 +575,7 @@ public:
      * Triggers an {@link ChannelStateHandler#channelReadSuspended(ChannelHandlerContext) channelReadSuspended}
      * event to the next {@link ChannelHandler} in the {@link ChannelPipeline}.
      *
-     * @remark If the channel option is autoread, then this event will not triggered.
+     * @remark If the channel AUTO_READ option is true, then this event will not triggered.
      */
     void fireChannelReadSuspended();
 
@@ -708,6 +744,9 @@ protected:
      */
     virtual boost::any getOutboundMessageContainer() = 0;
 
+    /**
+     *
+     */
     virtual void onPipelineChanged();
 
 private:
