@@ -28,7 +28,7 @@ namespace logging {
 
 class LogSink : public cetty::util::ReferenceCounter<LogSink> {
 public:
-    virtual~ LogSink();
+    virtual~ LogSink() {}
 
     void sink(const LogMessage& msg) {
         if (enabled(msg)) {
