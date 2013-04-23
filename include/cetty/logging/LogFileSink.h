@@ -37,10 +37,17 @@ public:
     };
 
 public:
+
+    LogFileSink(RollingSchedule schedule,
+    		    int bufferSize,
+    		    int rollSize,
+    		    const std::string &baseName,
+    		    const std::string &extension);
+
     // Get the current LOG file size.
     // The returned value is approximate since some
     // logged data may not have been flushed to disk yet.
-    void int64_t logSize() const;
+    int64_t logSize() const;
 
     /**
      * specifies output file base name.
@@ -80,6 +87,21 @@ public:
     int maxRollingBackups() const;
     LogFileSink& setMaxRollingBackups(int backups);
 
+private:
+    std::string &getLogFileName();
+
+private:
+    const static int DEFAULT_BUFFER_SIZE;
+
+    FILE* fp_;
+    char *buffer_;
+    RollingSchedule schedule_;
+    int bufferSize_;
+    int rollSize_;
+
+    std::string baseName_;
+    std::string extension_;
+    std::string fileName_;
 };
 
 }
