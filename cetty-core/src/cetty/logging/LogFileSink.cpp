@@ -16,13 +16,22 @@ LogFileSink::LogFileSink(RollingSchedule schedule,
      baseName_(baseName),
      extension_(baseName) {
 
-
 	if(bufferSize_ <= 0) {
 		bufferSize_ = DEFAULT_BUFFER_SIZE;
 	}
 	buffer_ = new char[bufferSize_];
 
+    rollFile();
+}
 
+void LogFileSink::rollFile() {
+
+}
+
+void LogFileSink::GenerateLogFileName() {
+    fileName_.append(baseName_);
+    if (fileName_[fileName_.size() - 1] != '\' ||
+        fileName_[fileName_.size() - 1] != '/')
 }
 
 

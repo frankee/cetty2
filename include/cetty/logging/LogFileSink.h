@@ -88,7 +88,8 @@ public:
     LogFileSink& setMaxRollingBackups(int backups);
 
 private:
-    std::string &getLogFileName();
+    void rollFile();
+    void GenerateLogFileName();
 
 private:
     const static int DEFAULT_BUFFER_SIZE;
