@@ -150,15 +150,11 @@ ngx_tcp_upstream_create(ngx_tcp_session_t *s)
 void
 ngx_tcp_upstream_init(ngx_tcp_session_t *s)
 {
-    ngx_str_t                      *host;
-    ngx_uint_t                      i;
     ngx_connection_t               *c;
     ngx_tcp_cleanup_t              *cln;
-    ngx_resolver_ctx_t             *ctx, temp;
     ngx_tcp_upstream_t             *u;
     ngx_tcp_core_srv_conf_t        *cscf;
-    ngx_tcp_upstream_srv_conf_t    *uscf, **uscfp;
-    ngx_tcp_upstream_main_conf_t   *umcf;
+    ngx_tcp_upstream_srv_conf_t    *uscf;
 
     c = s->connection;
 
@@ -186,85 +182,11 @@ ngx_tcp_upstream_init(ngx_tcp_session_t *s)
 		s->upstream_cleanup = 1;
 		cln->handler = ngx_tcp_upstream_cleanup;
 		cln->data = s;
-
-		 // u->cleanup = &cln->handler;
     }
 
     if (u->resolved == NULL) {
-
         uscf = u->conf->upstream;
-
     }
-    /*else {
-
-        // TODO: support variable in the proxy_pass
-        if (u->resolved->sockaddr) {
-
-            if (ngx_tcp_upstream_create_round_robin_peer(s, u->resolved)
-                != NGX_OK)
-            {
-                ngx_tcp_finalize_session(s);
-                return;
-            }
-
-            ngx_tcp_upstream_connect(s, u);
-
-            return;
-        }
-
-        host = &u->resolved->host;
-
-        umcf = ngx_tcp_get_module_main_conf(s, ngx_tcp_upstream_module);
-
-        uscfp = umcf->upstreams.elts;
-
-        for (i = 0; i < umcf->upstreams.nelts; i++) {
-
-            uscf = uscfp[i];
-
-            if (uscf->host.len == host->len
-                && ((uscf->port == 0 && u->resolved->no_port)
-                    || uscf->port == u->resolved->port)
-                && ngx_memcmp(uscf->host.data, host->data, host->len) == 0)
-            {
-                goto found;
-            }
-        }
-
-        temp.name = *host;
-
-        ctx = ngx_resolve_start(cscf->resolver, &temp);
-        if (ctx == NULL) {
-            ngx_tcp_finalize_session(s);
-            return;
-        }
-
-        if (ctx == NGX_NO_RESOLVER) {
-            ngx_log_error(NGX_LOG_ERR, c->log, 0,
-                         "no resolver defined to resolve %V", host);
-            ngx_tcp_finalize_session(s);
-            return;
-        }
-
-        ctx->name = *host;
-        ctx->type = NGX_RESOLVE_A;
-        ctx->handler = ngx_tcp_upstream_resolve_handler;
-        ctx->data = s;
-        ctx->timeout = cscf->resolver_timeout;
-
-        u->resolved->ctx = ctx;
-
-        if (ngx_resolve_name(ctx) != NGX_OK) {
-            u->resolved->ctx = NULL;
-            ngx_tcp_finalize_session(s);
-            return;
-        }
-
-        return;
-    }
-*/
-
-found:
 
     if (uscf->peer.init(s, uscf) != NGX_OK) {
         ngx_tcp_finalize_session(s);
