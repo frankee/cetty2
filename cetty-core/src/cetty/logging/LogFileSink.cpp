@@ -25,7 +25,7 @@ LogFileSink::LogFileSink(bool immediateFlush,
      bufferSize_(bufferSize),
      rollSize_(rollSize),
      baseName_(baseName),
-     extension_(baseName) {
+     extension_(extension) {
 
 	setImmediateFlush(immediateFlush);
 
@@ -85,6 +85,7 @@ void LogFileSink::rollFile() {
 }
 
 void LogFileSink::generateLogFileName() {
+	fileName_.clear();
     fileName_.append(baseName_);
 
     // tudo make sure file separator
@@ -95,13 +96,15 @@ void LogFileSink::generateLogFileName() {
 
     time_t now = time(NULL);
     gmtime_r(&now, &tm);
-    strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &tm);
+    strftime(timebuf, sizeof timebuf, "%Y%m%d-%H%M%S", &tm);
     fileName_.append(timebuf);
 
-    //snprintf(pidbuf, sizeof pidbuf, ".%d", boost::lexical_cast<std::string>(get_id()));
-    //fileName_.append(pidbuf);
-    fileName_.append(boost::lexical_cast<std::string>(get_id()));
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    sprintf(timebuf, ":%d", tv.tv_usec);
+    fileName_.append(timebuf);
 
+    // fileName_.append(boost::lexical_cast<std::string>(get_id()));
     fileName_.append(".log");
     fileName_.append(".");
     fileName_.append(extension_);
@@ -114,6 +117,7 @@ int64_t LogFileSink::logSize() const{
 	if (fp) {
 		fseek(fp, 0L, SEEK_END);
 		size = ftell(fp);
+		fseek(fp, 0L, SEEK_SET);
 		fclose(fp);
 	}
 
