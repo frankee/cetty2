@@ -184,9 +184,7 @@ ngx_tcp_upstream_init(ngx_tcp_session_t *s)
 		cln->data = s;
     }
 
-    if (u->resolved == NULL) {
-        uscf = u->conf->upstream;
-    }
+    uscf = u->conf->upstream;
 
     if (uscf->peer.init(s, uscf) != NGX_OK) {
         ngx_tcp_finalize_session(s);
