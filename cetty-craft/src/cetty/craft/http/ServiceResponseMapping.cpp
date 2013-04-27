@@ -87,7 +87,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
 
     const std::string& uri = req->getUriString();
 
-    if (uri.find_last_of(".png") != uri.npos) {
+    if (uri.find(".png") != uri.npos) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
     }
 
