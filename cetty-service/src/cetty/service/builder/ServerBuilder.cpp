@@ -86,7 +86,7 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         parentEventLoopPool_,
         childEventLoopPool_);
 
-    bootstrap->setInitializer(childPipelineInitializer);
+    bootstrap->setChildInitializer(childPipelineInitializer);
 
     if (!options.empty()) {
         bootstrap->setOptions(options);
