@@ -209,7 +209,6 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 
     if (childOptions.empty()) {
         bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-        bootstrap->setChildOption(ChannelOption::CO_SO_SNDBUF, 2*1024*1024);
     }
 
     if (options.empty()) {
