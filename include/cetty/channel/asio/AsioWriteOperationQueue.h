@@ -65,8 +65,8 @@ public:
     ~AsioWriteOperation() {}
 
     int writeBufferSize() const;
+    bool writtenBufferSize(int size);
 
-    bool isMultiBuffers() const;
     bool isSingleBuffer() const;
 
     AsioBuffer& asioBuffer();
@@ -123,8 +123,9 @@ int AsioWriteOperation::writeBufferSize() const {
 }
 
 inline
-bool AsioWriteOperation::isMultiBuffers() const {
-    return buffers_.truncatedSize() > 1;
+bool AsioWriteOperation::writtenBufferSize(int size) {
+    byteSize_ -= size;
+    return byteSize_ == 0;
 }
 
 inline
