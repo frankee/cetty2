@@ -208,12 +208,11 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
     if (childOptions.empty()) {
-        //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setChildOption(ChannelOption::CO_SO_SNDBUF, 2*1024*1024);
     }
 
     if (options.empty()) {
-        //bootstrap->setChannelOption(ChannelOption::CO_SO_LINGER, 0);
-        //bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
         bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
         bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
