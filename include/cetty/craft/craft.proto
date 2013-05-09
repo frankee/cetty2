@@ -96,7 +96,7 @@ message ResponseHeader {
 	optional string         data_kind = 10; //Response
 	optional string              etag = 11;
 	
-	# date formatted RFC 3339
+	// date formatted RFC 3339
 	optional string      data_updated = 12; //Response
 	
 	optional int32 		   item_count = 20; //Response
