@@ -55,6 +55,7 @@ void SlaveServiceImpl::init() {
         request->set_redirect_stdout(application->redirectStdout);
         request->set_redirect_stderr(application->redirectStderr);
         request->set_auto_recover(application->autoRecover);
+        request->set_log_file(application->logFile);
 
         for(std::size_t j; j < application->args.size(); ++ j){
         	request->add_args(application->args.at(j));

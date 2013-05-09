@@ -11,6 +11,7 @@ message SlaveServiceConfig {
           repeated string          envs = 5;
           required bool redirect_stdout = 7 [default = true];
           required bool redirect_stderr = 8 [default = true];
+          optional string      log_file = 9;
 
           required bool    auto_recover = 20 [default = true];
     }
