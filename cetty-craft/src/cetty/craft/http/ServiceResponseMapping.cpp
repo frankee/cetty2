@@ -149,9 +149,18 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
         }
     }
 
-    ProtobufFormatter* formatter = ProtobufFormatter::getFormatter(producer);
+    ProtobufFormatter* formatter = NULL;
+
+    if (!producer.empty()) {
+        formatter = ProtobufFormatter::getFormatter(producer);
+    }
+    else {
+        formatter = ProtobufFormatter::getFormatter("json");
+    }
 
     if (!formatter) {
+        LOG_ERROR << "CAN't found the formatter: " << producer;
+        return;
         //
         //response->setStatus(HttpResponseStatus::NOT_FOUND);
     }
