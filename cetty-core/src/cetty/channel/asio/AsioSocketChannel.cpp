@@ -162,13 +162,23 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         LOG_DEBUG << "channel " << toString()
                   << " written buffer with " << bytes_transferred << " bytes.";
         AsioWriteOperation& op = writeQueue_->front();
-        if (op.writtenBufferSize(bytes_transferred)) {
-            op.setSuccess();
-            writeQueue_->popFront();
 
-            if (writeQueue_->empty()) {
-                isWriting_ = false;
-            }
+        if (op.hasWrittenAllBuffer(bytes_transferred)) {
+            op.setSuccess();
+        }
+        else {
+            LOG_WARN << "failed to write all the " << op.writeBufferSize()
+                     << " bytes, just written " << bytes_transferred
+                     << " bytes";
+
+            ChannelException e("can not write all the buffer");
+            op.setFailure(e);
+        }
+
+        writeQueue_->popFront();
+
+        if (writeQueue_->empty()) {
+            isWriting_ = false;
         }
     }
     else {

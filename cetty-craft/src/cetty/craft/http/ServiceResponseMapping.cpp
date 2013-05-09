@@ -56,7 +56,8 @@ ServiceResponseMapping::ServiceResponseMapping() {
 
 HttpResponsePtr ServiceResponseMapping::toHttpResponse(
     const HttpRequestPtr& req,
-    const ProtobufServiceMessagePtr& message) {
+    const ProtobufServiceMessagePtr& message,
+    const std::string& format) {
 
     HttpResponsePtr response(new HttpResponse(HttpVersion::HTTP_1_1,
                              HttpResponseStatus::OK));
@@ -66,14 +67,12 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
 
     const Message* paylod = message->payload();
 
-    std::string producer = "json";
-
     if (paylod) {
-        setHttpContent(*paylod, producer, response);
+        setHttpContent(*paylod, format, response);
     }
 
     // for jsonp
-    if (producer.compare("json") == 0) {
+    if (format.compare("json") == 0) {
         std::string jquery = req->queryParameters().get("jsoncallback");
 
         if (!jquery.empty()) {
@@ -82,12 +81,9 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
             response->content()->writeByte(')');
         }
 
-        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/x-javascript");
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "text/javascript");
     }
-
-    const std::string& uri = req->getUriString();
-
-    if (uri.find(".png") != uri.npos) {
+    else if (format.compare("png") == 0) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }

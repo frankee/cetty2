@@ -7,61 +7,117 @@ option java_package = "io.cetty.craft";
 option java_outer_classname = "CraftProto";
 
 enum Lang {
-	option (craft_enum_options).query_param="lang";
-	
-	en_US = 0;
+    option (craft_enum_options).query_param="lang";
+
+    en_US = 0;
     zh_CN = 1;
     zh_TW = 2;
 }
 
 message KeyValue {
-	option (craft_message_options).text_pattern = "{key:}={value:}";
-	
-	optional string   key = 1;
-	optional string value = 2;
+    option (craft_message_options).text_pattern = "{key:}={value:}";
+
+    optional string   key = 1;
+    optional string value = 2;
 }
 
 message Status {
-	message DetailError {
-		optional string    code = 1;
-		optional string message = 2;
-	}
-	
-	optional int32   http_status = 1 [default = 200];
+    message DetailError {
+        optional string    code = 1;
+        optional string message = 2;
+		optional string  domain = 3;
+    }
+
+    optional int32   http_status = 1 [default = 200];
     optional int32          code = 2 [default = 0];
     optional string      message = 3;
-	optional string    more_info = 4;
+    optional string    more_info = 4;
+	optional string  send_report = 5;
 	
-	repeated DetailError  errors = 9;
+    repeated DetailError  errors = 9;
 }
 
 message Session {
-	optional string   id = 1[
-		(craft_options).cookie_param = "id"
-	];
-	
-	optional string user = 2;
+    optional string   id = 1[
+        (craft_options).cookie_param = "id"
+    ];
+
+    optional string user = 2;
 }
 
 message Authority {
-	optional Session  session = 1;
-	
-    optional string       key = 2;
-	
+    optional Session  session = 1;
+
+    optional string       key = 2; //as the appkey
+
     optional string signature = 3 [
-		(craft_options).query_param = "sig"
+        (craft_options).query_param = "sign"
+    ];
+
+    optional string        ip =  8;
+    optional string      host =  9; // non-ip
+    optional string     agent = 10;
+}
+
+message RequestHeader {
+	optional int32 api_version = 1 [
+        (craft_options).path_param = "version"
+    ];
+	
+	optional string    context = 2 [
+		(craft_options).path_param = "jsoncallback"
 	];
 
-	optional string        ip = 8;
-	optional string      host = 9; // non-ip
+	optional string     locale = 3 [
+		(craft_options).query_param = "locale"
+	];
+	
+	optional Session  session = 10;
+    optional string       key = 12; //as the appkey
+	
+    optional string signature = 13 [
+        (craft_options).query_param = "sign"
+    ];
+
+    optional string        ip =  17;
+    optional string      host =  18; // non-ip
+    optional string     agent =  19;
+	
+	optional int32 		  start_index = 22; //Request & Response
+	optional int32 	   items_per_page = 23; //Request & Response
+	optional int32 		   page_index = 24; //Request & Response
+}
+
+message ResponseHeader {
+	optional int32 api_version = 1;
+	optional string    context = 2;
+	optional string     locale = 3;
+	
+	optional string         data_kind = 10; //Response
+	optional string              etag = 11;
+	
+	# date formatted RFC 3339
+	optional string      data_updated = 12; //Response
+	
+	optional int32 		   item_count = 20; //Response
+	optional int32 current_item_count = 21; //Response
+	optional int32 		  start_index = 22; //Request & Response
+	optional int32 	   items_per_page = 23; //Request & Response
+	optional int32 		   page_index = 24; //Request & Response
+	optional int32 		   page_count = 25; //Response
+
+	optional string 	    next_link = 30; //Response
+	optional string     previous_link = 31; //Response
+	optional string         self_link = 32; //Response
+	optional string         edit_link = 33; //Response
 }
 
 message ErrorResponse {
-	optional Status status = 1;
+    optional Status status = 1;
 }
 
 message Encoding {
-	optional string   type = 1;
-	optional bytes content = 2;
+    optional string   type = 1;
+    optional bytes content = 2;
 }
 

@@ -58,7 +58,8 @@ public:
 public:
     void registerConsumer(const std::string& name, const Consumer& consumer);
 
-    ProtobufServiceMessagePtr toProtobufMessage(const HttpRequestPtr& request);
+    ProtobufServiceMessagePtr toProtobufMessage(const HttpRequestPtr& request,
+            std::string* format);
 
 private:
     ServiceRequestMapping();

@@ -46,7 +46,8 @@ public:
 
 public:
     HttpResponsePtr toHttpResponse(const HttpRequestPtr& req,
-                                   const ProtobufServiceMessagePtr& message);
+                                   const ProtobufServiceMessagePtr& message,
+                                   const std::string& format);
 
 private:
     ServiceResponseMapping();
