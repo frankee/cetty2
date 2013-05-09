@@ -58,9 +58,9 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         const PipelineInitializer& childPipelineInitializer) {
     ChannelOptions empty;
     return registerPrototype(name,
-                                   empty,
-                                   empty,
-                                   childPipelineInitializer);
+                             empty,
+                             empty,
+                             childPipelineInitializer);
 }
 
 ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
@@ -150,15 +150,24 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return NullChannel::instance();
     }
 
+    const ServerBootstrapPtr& bootstrap = itr->second;
+
     if (!options.empty()) {
-        itr->second->setOptions(options);
+        bootstrap->setOptions(options);
+    }
+    else {
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
 
     if (!childOptions.empty()) {
-        itr->second->setChildOptions(childOptions);
+        bootstrap->setChildOptions(childOptions);
+    }
+    else {
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     }
 
-    return build(itr->second, host, port);
+    return build(bootstrap, host, port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -207,13 +216,19 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-    if (childOptions.empty()) {
-        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+    if (!options.empty()) {
+        bootstrap->setOptions(options);
     }
-
-    if (options.empty()) {
+    else {
         bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
         bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    }
+
+    if (!childOptions.empty()) {
+        bootstrap->setChildOptions(childOptions);
+    }
+    else {
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     }
 
     if (childPipelineInitializer) {
