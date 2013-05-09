@@ -124,7 +124,6 @@ static void
 ngx_tcp_proxy_init_session(ngx_tcp_session_t *s) 
 {
     ngx_connection_t             *c;
-    ngx_tcp_proxy_loc_conf_t     *plcf;
     ngx_tcp_proxy_srv_conf_t     *pscf;
     ngx_tcp_core_srv_conf_t      *cscf;
 

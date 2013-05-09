@@ -39,20 +39,12 @@ float getSeconds(const struct timeval& tv) {
     return static_cast<float>(seconds);
 }
 
-/**
- * @brief Create a file and return file description
- *     If #toFile is true, open a file consist of #prefix.pid.#postfix
- *  (create if not exist) for reading and writing, else open "/dev/null".
- * @param toFile Hint if use a normal file
- */
-int redirect(bool toFile, const std::string& prefix, const char* postfix) {
+
+int redirect(bool toFile, const std::string& logFile) {
     int fd = -1;
 
     if (toFile) {
-        char buf[256];
-        ::snprintf(buf, sizeof buf, "%s.%d.%s", prefix.c_str(),
-                   cetty::util::Process::id(), postfix);
-        fd = ::open(buf, O_WRONLY | O_CREAT, 0644);
+    	fd = ::open(logFile.c_str(), O_WRONLY | O_CREAT, 0644);
     }
     else {
         fd = ::open("/dev/null", O_WRONLY | O_CREAT, 0644);
@@ -132,6 +124,7 @@ Process::Process(const AddApplicationRequestPtr& appRequest,
     request->set_max_stderr(0);
     request->set_timeout(-1);
     request->set_max_memory_mb(appRequest->max_memory_mb());
+    request->set_logfile(appRequest->log_file());
 
     request_ = request;
 }
@@ -169,14 +162,14 @@ int Process::start() {
         int stdoutFd = -1;
         int stderrFd = -1;
 
-        std::string startTimeStr = to_iso_string(startTime_);
-        stdoutFd = redirect(redirectStdout_,
-                            request_->cwd() + "/" + STDOUT_PREFIX_,
-                            startTimeStr.c_str());
 
-        stderrFd = redirect(redirectStderr_,
-                            request_->cwd() + "/" + STDERR_PREFIX_,
-                            startTimeStr.c_str());
+        std::string logFile = request_->logfile();
+        if (logFile.empty()) {
+        	logFile.append("stdlog");
+        }
+
+        stdoutFd = redirect(redirectStdout_, request_->cwd() + "/" + logFile);
+        stderrFd = redirect(redirectStderr_, request_->cwd() + "/" + logFile);
 
         execChild(execError, stdoutFd, stderrFd);
     }

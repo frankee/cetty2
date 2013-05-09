@@ -87,6 +87,7 @@ message RunCommandRequest {
   optional int32    max_stderr = 7 [default = 1048576];
   optional int32       timeout = 8 [default = 3000];
   optional int32 max_memory_mb = 9 [default = 32768];
+  optional string      logFile = 10;
 }
 
 message RunCommandResponse {
@@ -136,6 +137,7 @@ message AddApplicationRequest {
   required string    slave_name = 9;
   optional int32  max_memory_mb = 10 [default = 32768];
   optional string       comment = 11;
+  optional string      log_file = 12;
 
   repeated string     md5sum_files = 20;
   repeated string expected_md5sums = 21;
