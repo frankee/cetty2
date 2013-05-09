@@ -43,15 +43,23 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         const ChannelOption::Variant& value) {
     if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *receiveBufferSize();
     }
     else if (option == ChannelOption::CO_SO_REUSEADDR) {
         setReuseAddress(boost::get<bool>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *isReuseAddress();
     }
     else if (option == ChannelOption::CO_SO_BACKLOG) {
         setBacklog(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *backlog();
     }
     else if (option == ChannelOption::CO_RESERVED_CHILD_COUNT) {
         setReservedChildCount(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *reservedChildCount();
     }
     else {
         return false;

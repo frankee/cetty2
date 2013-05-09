@@ -46,10 +46,16 @@ bool ChannelConfig::setOption(const ChannelOption& option,
         if (!callback_ || !callback_(option, value)) {
             if (option == ChannelOption::CO_CONNECT_TIMEOUT_MILLIS) {
                 setConnectTimeout(boost::get<int>(value));
+                LOG_INFO << "has set the "
+                         << option.name()
+                         << " to " << connectTimeout();
                 return true;
             }
             else if (option == ChannelOption::CO_AUTO_READ) {
                 setAutoRead(boost::get<bool>(value));
+                LOG_INFO << "has set the "
+                         << option.name()
+                         << " to " << autoRead();
                 return true;
             }
         }

@@ -44,33 +44,53 @@ bool AsioSocketChannelConfig::setOption(const ChannelOption& option,
 
     if (option == ChannelOption::CO_TCP_NODELAY) {
         setTcpNoDelay(boost::get<bool>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *isTcpNoDelay();
     }
     else if (option == ChannelOption::CO_SO_LINGER) {
         setSoLinger(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *soLinger();
     }
     else if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *receiveBufferSize();
     }
     else if (option == ChannelOption::CO_SO_SNDBUF) {
         setSendBufferSize(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *sendBufferSize();
     }
     else if (option == ChannelOption::CO_SO_REUSEADDR) {
         setReuseAddress(boost::get<bool>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *isReuseAddress();
     }
     else if (option == ChannelOption::CO_SO_KEEPALIVE) {
         setKeepAlive(boost::get<bool>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *isKeepAlive();
     }
     else if (option == ChannelOption::CO_SO_SNDLOWAT) {
         setSendBufferLowWaterMark(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *sendBufferLowWaterMark();
     }
     else if (option == ChannelOption::CO_SO_RCVLOWAT) {
         setReceiveBufferLowWaterMark(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *receiveBufferLowWaterMark();
     }
     else if (option == ChannelOption::CO_SNDHIGHWAT) {
         setSendBufferHighWaterMark(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *sendBufferHighWaterMark();
     }
     else if (option == ChannelOption::CO_RCVHIGHWAT) {
         setReceiveBufferHighWaterMark(boost::get<int>(value));
+        LOG_INFO << "has set the " << option.name()
+                 << " to " << *receiveBufferSize();
     }
     else {
         return false;
