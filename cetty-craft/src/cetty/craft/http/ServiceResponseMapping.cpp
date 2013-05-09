@@ -81,12 +81,15 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
             response->content()->writeBytesAhead(jquery);
             response->content()->writeByte(')');
         }
+
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/x-javascript");
     }
 
     const std::string& uri = req->getUriString();
 
-    if (uri.find_last_of(".png") != uri.npos) {
+    if (uri.find(".png") != uri.npos) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
+        response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }
 
     // Decide whether to close the connection or not.

@@ -126,7 +126,7 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
                                    size_t bytes_transferred) {
     if (!error) {
         LOG_INFO << "channel" << toString()
-                 << "has read " << bytes_transferred << " bytes";
+                 << " has read " << bytes_transferred << " bytes";
 
         readBuffer_->offsetWriterIndex(bytes_transferred);
 
@@ -161,12 +161,14 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
     if (!error) {
         LOG_DEBUG << "channel " << toString()
                   << " written buffer with " << bytes_transferred << " bytes.";
+        AsioWriteOperation& op = writeQueue_->front();
+        if (op.writtenBufferSize(bytes_transferred)) {
+            op.setSuccess();
+            writeQueue_->popFront();
 
-        writeQueue_->front().setSuccess();
-        writeQueue_->popFront();
-
-        if (writeQueue_->empty()) {
-            isWriting_ = false;
+            if (writeQueue_->empty()) {
+                isWriting_ = false;
+            }
         }
     }
     else {
@@ -201,7 +203,7 @@ void AsioSocketChannel::handleResolve(const boost::system::error_code& error,
                         cf));
 
         LOG_INFO << "channel " << toString()
-                 << "resolved the remote address to "
+                 << " resolved the remote address to "
                  << endpoint
                  << ", and begin to connect asynchronously";
     }
@@ -230,7 +232,7 @@ void AsioSocketChannel::handleConnect(const boost::system::error_code& error,
         cf->setSuccess();
 
         LOG_INFO << "channel " << toString()
-                 << "connected, firing connection event.";
+                 << " connected, firing connection event.";
 
         if (config().autoRead()) {
             beginRead();
@@ -379,7 +381,7 @@ void AsioSocketChannel::beginRead() {
     if (size < MIN_READER_BUFFER_SIZE) {
         if (!readBuffer_->ensureWritableBytes(4096, true)) {
             LOG_ERROR << "channel " << toString()
-                      << "failed to get more writable bytes for read buffer";
+                      << " failed to get more writable bytes for read buffer";
         }
 
         buf = readBuffer_->writableBytes(&size);
@@ -424,7 +426,7 @@ bool AsioSocketChannel::doClose() {
 
         if (error) {
             LOG_WARN << "channel " << toString()
-                     << "failed to shutdown the tcp socket, code: "
+                     << " failed to shutdown the tcp socket, code: "
                      << error.value() << " message: " << error.message();
         }
     }
@@ -433,7 +435,7 @@ bool AsioSocketChannel::doClose() {
 
     if (error) {
         LOG_ERROR << "channel " << toString()
-                  << "failed to close the tcp socket, code: "
+                  << " failed to close the tcp socket, code: "
                   << error.value() << " message: " << error.message();
     }
 
@@ -469,7 +471,7 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
 
     if (writeBufferSize == 0) {
         LOG_WARN << "channel " << toString()
-                 << "write an empty message, do not write to the socket,\
+                 << " write an empty message, do not write to the socket,\
                              just post a handleWrite operation.";
         ioService_->service().post(boost::bind(
                                        &AsioSocketChannel::handleWrite,
@@ -554,22 +556,22 @@ void AsioSocketChannel::doPreActive() {
                 }
                 else {
                     LOG_WARN << "channel " << toString()
-                             << "failed to get the host part of the local address";
+                             << " failed to get the host part of the local address";
                 }
             }
             else {
                 LOG_WARN << "channel " << toString()
-                         << "failed to get the local address";
+                         << " failed to get the local address";
             }
         }
         else {
             LOG_WARN << "channel " << toString()
-                     << "failed to get the host part of the remote address";
+                     << " failed to get the host part of the remote address";
         }
     }
     else {
         LOG_WARN << "channel " << toString()
-                 << "failed to get the remote address";
+                 << " failed to get the remote address";
     }
 }
 

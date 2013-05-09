@@ -86,7 +86,7 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         parentEventLoopPool_,
         childEventLoopPool_);
 
-    bootstrap->setInitializer(childPipelineInitializer);
+    bootstrap->setChildInitializer(childPipelineInitializer);
 
     if (!options.empty()) {
         bootstrap->setOptions(options);
@@ -208,12 +208,10 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
     if (childOptions.empty()) {
-        //bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
     }
 
     if (options.empty()) {
-        //bootstrap->setChannelOption(ChannelOption::CO_SO_LINGER, 0);
-        //bootstrap->setChannelOption(ChannelOption::CO_SO_REUSEADDR, true);
         bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
         bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
     }
