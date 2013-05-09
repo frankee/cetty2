@@ -88,13 +88,7 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
 
     bootstrap->setChildInitializer(childPipelineInitializer);
 
-    if (!options.empty()) {
-        bootstrap->setOptions(options);
-    }
-
-    if (!childOptions.empty()) {
-        bootstrap->setChildOptions(childOptions);
-    }
+    setOptions(bootstrap, options, childOptions);
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
@@ -121,6 +115,25 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
     }
 
     return *this;
+}
+
+void ServerBuilder::setOptions(const ServerBootstrapPtr& bootstrap,
+                               const ChannelOptions& options,
+                               const ChannelOptions& childOptions) {
+    if (!options.empty()) {
+        bootstrap->setOptions(options);
+    }
+    else {
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    }
+
+    if (!childOptions.empty()) {
+        bootstrap->setChildOptions(childOptions);
+    }
+    else {
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+    }
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -151,22 +164,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     const ServerBootstrapPtr& bootstrap = itr->second;
-
-    if (!options.empty()) {
-        bootstrap->setOptions(options);
-    }
-    else {
-        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    }
-
-    if (!childOptions.empty()) {
-        bootstrap->setChildOptions(childOptions);
-    }
-    else {
-        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    }
-
+    setOptions(bootstrap, options, childOptions);
     return build(bootstrap, host, port);
 }
 
@@ -216,20 +214,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-    if (!options.empty()) {
-        bootstrap->setOptions(options);
-    }
-    else {
-        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    }
-
-    if (!childOptions.empty()) {
-        bootstrap->setChildOptions(childOptions);
-    }
-    else {
-        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    }
+    setOptions(bootstrap, options, childOptions);
 
     if (childPipelineInitializer) {
         bootstrap->setInitializer(childPipelineInitializer);

@@ -43,23 +43,15 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
         const ChannelOption::Variant& value) {
     if (option == ChannelOption::CO_SO_RCVBUF) {
         setReceiveBufferSize(boost::get<int>(value));
-        LOG_INFO << "has set the " << option.name()
-                 << " to " << *receiveBufferSize();
     }
     else if (option == ChannelOption::CO_SO_REUSEADDR) {
         setReuseAddress(boost::get<bool>(value));
-        LOG_INFO << "has set the " << option.name()
-                 << " to " << *isReuseAddress();
     }
     else if (option == ChannelOption::CO_SO_BACKLOG) {
         setBacklog(boost::get<int>(value));
-        LOG_INFO << "has set the " << option.name()
-                 << " to " << *backlog();
     }
     else if (option == ChannelOption::CO_RESERVED_CHILD_COUNT) {
         setReservedChildCount(boost::get<int>(value));
-        LOG_INFO << "has set the " << option.name()
-                 << " to " << *reservedChildCount();
     }
     else {
         return false;
@@ -133,6 +125,7 @@ void AsioServerSocketChannelConfig::setReceiveBufferSize(int receiveBufferSize) 
 void AsioServerSocketChannelConfig::setBacklog(int backlog) {
     if (backlog > 0) {
         backlog_ = backlog;
+        LOG_INFO << "has set the backlog to " << backlog;
     }
     else {
         LOG_WARN << "backlog " << backlog
@@ -143,6 +136,7 @@ void AsioServerSocketChannelConfig::setBacklog(int backlog) {
 void AsioServerSocketChannelConfig::setReservedChildCount(int count) {
     if (count > 0) {
         reservedChildCount_ = count;
+        LOG_INFO << "has set the reservedChildCount to " << count;
     }
     else {
         LOG_WARN << "reservedChildCount " << count
