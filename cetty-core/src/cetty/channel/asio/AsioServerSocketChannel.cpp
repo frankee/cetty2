@@ -39,7 +39,7 @@ AsioServerSocketChannel::AsioServerSocketChannel(
       addressFamily_(InetAddress::FAMILY_IPv4),
       ioService_(boost::dynamic_pointer_cast<AsioService>(eventLoop)),
       acceptor_(boost::dynamic_pointer_cast<AsioService>(eventLoop)->service()),
-      socketConfig_(acceptor_),
+      serverConfig_(acceptor_),
       childServicePool_(boost::dynamic_pointer_cast<AsioServicePool>(childEventLoopPool)) {
     boost::system::error_code ec;
 
@@ -92,17 +92,17 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         }
 
         const boost::optional<bool>& isReuseAddress =
-            socketConfig_.isReuseAddress();
+            serverConfig_.isReuseAddress();
 
         if (isReuseAddress) {
-            socketConfig_.setReuseAddress(*isReuseAddress);
+            serverConfig_.setReuseAddress(*isReuseAddress);
         }
 
         const boost::optional<int>& receiveBufferSize =
-            socketConfig_.receiveBufferSize();
+            serverConfig_.receiveBufferSize();
 
         if (receiveBufferSize) {
-            socketConfig_.setReceiveBufferSize(*receiveBufferSize);
+            serverConfig_.setReceiveBufferSize(*receiveBufferSize);
         }
     }
 
@@ -115,7 +115,7 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
         return false;
     }
 
-    const boost::optional<int>& backlog = socketConfig_.backlog();
+    const boost::optional<int>& backlog = serverConfig_.backlog();
 
     if (backlog) {
         acceptor_.listen(*backlog, ec);
@@ -132,8 +132,8 @@ bool AsioServerSocketChannel::doBind(const InetAddress& localAddress) {
     }
 
     // initialize the reserved child channels, for speeding up accepting
-    if (socketConfig_.reservedChildCount()) {
-        int reservedChildCount = *socketConfig_.reservedChildCount();
+    if (serverConfig_.reservedChildCount()) {
+        int reservedChildCount = *serverConfig_.reservedChildCount();
 
         while (reservedChildCount > 0) {
             reusableChildChannels_.push_back(createChild());
@@ -271,8 +271,11 @@ void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
         }
 
 #endif
-
-        reusableChildChannels_.push_back(itr->second);
+        const boost::optional<bool>& reuseChild = serverConfig_.isReuseChild();
+        if (reuseChild && *reuseChild) {
+            reusableChildChannels_.push_back(itr->second);
+        }
+        
         childChannels_.erase(itr);
     }
     else {
@@ -286,7 +289,7 @@ void AsioServerSocketChannel::doPreOpen() {
     if (!initialized_) {
         Channel::config().setOptionSetCallback(boost::bind(
                 &AsioServerSocketChannelConfig::setOption,
-                &socketConfig_,
+                &serverConfig_,
                 _1,
                 _2));
 

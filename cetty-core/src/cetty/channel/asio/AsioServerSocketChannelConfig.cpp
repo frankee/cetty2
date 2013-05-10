@@ -50,6 +50,9 @@ bool AsioServerSocketChannelConfig::setOption(const ChannelOption& option,
     else if (option == ChannelOption::CO_SO_BACKLOG) {
         setBacklog(boost::get<int>(value));
     }
+    else if (option == ChannelOption::CO_REUSE_CHILD) {
+        setReuseChild(boost::get<bool>(value));
+    }
     else if (option == ChannelOption::CO_RESERVED_CHILD_COUNT) {
         setReservedChildCount(boost::get<int>(value));
     }
@@ -130,6 +133,15 @@ void AsioServerSocketChannelConfig::setBacklog(int backlog) {
     else {
         LOG_WARN << "backlog " << backlog
                  << " should not less then zero, will not set";
+    }
+}
+
+void AsioServerSocketChannelConfig::setReuseChild(bool reuseChild) {
+    reuseChild_ = reuseChild;
+
+    if (!reuseChild) {
+        LOG_INFO << "set disable to reuse child,"
+                 " so the RESERVED_CHILD_COUNT option will not take action.";
     }
 }
 

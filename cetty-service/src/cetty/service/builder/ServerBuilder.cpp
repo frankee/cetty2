@@ -373,7 +373,49 @@ ServerBuilder& ServerBuilder::buildAll() {
             continue;
         }
 
-        //TODO setting the options
+        const ServerBootstrapPtr& bootstrap = itr->second;
+        const ServerChannelConfig* serverConfig = server->serverChannel;
+        const ChildChannelConfig* childConfig = server->childChannel;
+
+        if (serverConfig) {
+            bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR,
+                                 serverConfig->reuseAddress)
+            .setOption(ChannelOption::CO_SO_BACKLOG,
+                       serverConfig->backLog)
+            .setOption(ChannelOption::CO_REUSE_CHILD,
+                       serverConfig->reuseChild)
+            .setOption(ChannelOption::CO_RESERVED_CHILD_COUNT,
+                       serverConfig->reservedChildCount);
+
+            if (serverConfig->receiveBufferSize) {
+                bootstrap->setOption(ChannelOption::CO_SO_RCVBUF,
+                                     *serverConfig->receiveBufferSize);
+            }
+        }
+
+        if (childConfig) {
+            bootstrap->setChildOption(ChannelOption::CO_SO_KEEPALIVE,
+                                      childConfig->isKeepAlive)
+            .setChildOption(ChannelOption::CO_SO_REUSEADDR,
+                            childConfig->isReuseAddress)
+            .setChildOption(ChannelOption::CO_TCP_NODELAY,
+                            childConfig->isTcpNoDelay);
+
+            if (childConfig->soLinger) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_LINGER,
+                                          childConfig->soLinger);
+            }
+
+            if (childConfig->sendBufferSize) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_SNDBUF,
+                                          childConfig->sendBufferSize);
+            }
+
+            if (childConfig->receiveBufferSize) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_RCVBUF,
+                                          childConfig->receiveBufferSize);
+            }
+        }
 
         build(itr->second, server->host, server->port);
     }

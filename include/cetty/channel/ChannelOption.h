@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <boost/variant.hpp>
+#include <cetty/util/Enum.h>
 
 namespace cetty {
 namespace channel {
@@ -52,9 +53,9 @@ public:
     }
 };
 
-class ChannelOption {
+class ChannelOption : public cetty::util::Enum<ChannelOption> {
 public:
-    class Null { public: Null() {} };
+class Null { public: Null() {} };
     typedef boost::variant<Null, int, bool, std::string, std::vector<int> > Variant;
     typedef std::map<ChannelOption, Variant> Options;
 
@@ -65,18 +66,13 @@ public:
     static const Variant EMPTY_VALUE;
 
 public:
-    ChannelOption(const std::string& name,
-                  const boost::static_visitor<bool>* checker)
-        : name_(name),
-          checker_(checker) {
-    }
+    ChannelOption(int id,
+                  const std::string& name,
+                  const boost::static_visitor<bool>* checker);
 
     ChannelOption(const ChannelOption& option);
 
     ChannelOption& operator=(const ChannelOption& option);
-
-    bool operator<(const ChannelOption& option) const;
-    bool operator==(const ChannelOption& option) const;
 
     bool validate(const Variant& value) const;
 
@@ -87,14 +83,10 @@ public:
      * test the {@link ChannelOption::Variant} is empty.
      */
     static bool empty(const ChannelOption::Variant& option);
-    
-    /**
-     * parse the ChannelOption from the given name.
-     */
-    static ChannelOption parseFrom(const std::string& name);
 
 public:
     static const ChannelOption CO_CONNECT_TIMEOUT_MILLIS;
+    static const ChannelOption CO_REUSE_CHILD;
     static const ChannelOption CO_RESERVED_CHILD_COUNT;
     static const ChannelOption CO_AUTO_READ;
 
@@ -141,6 +133,7 @@ private:
 
 inline
 ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
+    cetty::util::Enum<ChannelOption>::operator=(option);
     name_ = option.name_;
     checker_ = option.checker_;
     return *this;
@@ -148,18 +141,9 @@ ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
 
 inline
 ChannelOption::ChannelOption(const ChannelOption& option)
-    : name_(option.name_),
+    : cetty::util::Enum<ChannelOption>(option),
+      name_(option.name_),
       checker_(option.checker_) {
-}
-
-inline
-bool ChannelOption::operator<(const ChannelOption& option) const {
-    return name_ < option.name_;
-}
-
-inline
-bool ChannelOption::operator==(const ChannelOption& option) const {
-    return name_ == option.name_;
 }
 
 inline
