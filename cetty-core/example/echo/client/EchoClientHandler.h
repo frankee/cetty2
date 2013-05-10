@@ -73,11 +73,11 @@ public:
     }
 
 private:
-    int firstMessageSize;
-    int transferredBytes;
+    int firstMessageSize_;
+    int transferredBytes_;
 
     InboundContainer* container_;
     OutboundTransfer* transfer_;
 
-    ChannelBufferPtr firstMessage;
+    ChannelBufferPtr firstMessage_;
 };

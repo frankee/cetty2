@@ -250,11 +250,6 @@ ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
 }
 
 void ServerBuilder::init() {
-    if (config_.servers.empty()) {
-        LOG_WARN << "has not set any servers, fail to init";
-        return;
-    }
-
     if (config_.daemonize) {
         ServerUtil::daemonize();
     }
@@ -417,7 +412,7 @@ ServerBuilder& ServerBuilder::buildAll() {
             }
         }
 
-        build(itr->second, server->host, server->port);
+        build(bootstrap, server->host, server->port);
     }
 
     return *this;
