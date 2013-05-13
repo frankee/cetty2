@@ -246,8 +246,6 @@ bool AsioServerSocketChannel::doClose() {
         }
     }
 
-    closeFuture()->setSuccess();
-
     return true;
 }
 

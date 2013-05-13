@@ -449,9 +449,6 @@ bool AsioSocketChannel::doClose() {
                   << error.value() << " message: " << error.message();
     }
 
-    // FIXME: add failed result to close future?
-    closeFuture()->setSuccess();
-
     return true;
 }
 
