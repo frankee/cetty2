@@ -489,23 +489,25 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
     }
 
     if (operation.isSingleBuffer()) {
-        tcpSocket_.async_send(const_buffers_1(operation.asioBuffer()),
-                              makeCustomAllocHandler(writeAllocator_,
-                                      boost::bind(&AsioSocketChannel::handleWrite,
-                                              this,
-                                              boost::asio::placeholders::error,
-                                              boost::asio::placeholders::bytes_transferred)));
+        boost::asio::async_write(tcpSocket_,
+                                 const_buffers_1(operation.asioBuffer()),
+                                 makeCustomAllocHandler(writeAllocator_,
+                                         boost::bind(&AsioSocketChannel::handleWrite,
+                                                 this,
+                                                 boost::asio::placeholders::error,
+                                                 boost::asio::placeholders::bytes_transferred)));
         LOG_INFO << "channel " << toString()
                  << " write a buffer with " << writeBufferSize
                  << " bytes to the socket asynchronously";
     }
     else {
-        tcpSocket_.async_send(operation.asioBufferArray(),
-                              makeCustomAllocHandler(writeAllocator_,
-                                      boost::bind(&AsioSocketChannel::handleWrite,
-                                              this,
-                                              boost::asio::placeholders::error,
-                                              boost::asio::placeholders::bytes_transferred)));
+        boost::asio::async_write(tcpSocket_,
+                                 operation.asioBufferArray(),
+                                 makeCustomAllocHandler(writeAllocator_,
+                                         boost::bind(&AsioSocketChannel::handleWrite,
+                                                 this,
+                                                 boost::asio::placeholders::error,
+                                                 boost::asio::placeholders::bytes_transferred)));
         LOG_WARN << "channel " << toString()
                  << " write a gathering buffer with " << writeBufferSize
                  << " bytes to the socket asynchronously, may be latency.";
