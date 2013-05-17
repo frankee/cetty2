@@ -387,6 +387,9 @@ ServerBuilder& ServerBuilder::buildAll() {
                                      *serverConfig->receiveBufferSize);
             }
         }
+        else {
+            bootstrap->setOption(ChannelOption::CO_REUSE_CHILD, true);
+        }
 
         if (childConfig) {
             bootstrap->setChildOption(ChannelOption::CO_SO_KEEPALIVE,
