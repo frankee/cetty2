@@ -1,6 +1,8 @@
 #include <cetty/logging/LogFileSink.h>
 
 #include <boost/thread.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <ctime>
 
@@ -8,6 +10,7 @@ namespace cetty {
 namespace logging {
 
 using namespace boost::this_thread;
+using namespace boost::posix_time;
 
 const int LogFileSink::DEFAULT_BUFFER_SIZE = 10 * 1024;
 const int LogFileSink::DAILY_CYCLE = 24 * 60 * 60;
@@ -89,19 +92,19 @@ void LogFileSink::generateLogFileName() {
     fileName_.append(baseName_);
 
     // tudo make sure file separator
-
     char timebuf[32];
     char pidbuf[32];
-    struct tm tm;
 
     time_t now = time(NULL);
-    gmtime_r(&now, &tm);
-    strftime(timebuf, sizeof timebuf, "%Y%m%d-%H%M%S", &tm);
+    struct tm *tm = gmtime(&now);
+    strftime(timebuf, sizeof timebuf, "%Y%m%d-%H%M%S", tm);
     fileName_.append(timebuf);
 
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    sprintf(timebuf, ":%d", tv.tv_usec);
+    ptime epoch(boost::gregorian::date(1970,1,1));
+    ptime pnow = microsec_clock::local_time();
+    time_duration::tick_type x = (pnow - epoch).total_nanoseconds();
+
+    sprintf(timebuf, ":%d", x);
     fileName_.append(timebuf);
 
     // fileName_.append(boost::lexical_cast<std::string>(get_id()));

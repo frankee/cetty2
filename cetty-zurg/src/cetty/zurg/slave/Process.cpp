@@ -162,7 +162,6 @@ int Process::start() {
         int stdoutFd = -1;
         int stderrFd = -1;
 
-
         std::string logFile = request_->logfile();
         if (logFile.empty()) {
         	logFile.append("stdlog");
