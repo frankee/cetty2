@@ -53,6 +53,9 @@ public:
     const boost::optional<int>& backlog() const;
     void setBacklog(int backlog);
 
+    const boost::optional<bool>& isReuseChild() const;
+    void setReuseChild(bool reuseChild);
+
     const boost::optional<int>& reservedChildCount() const;
     void setReservedChildCount(int count);
 
@@ -100,12 +103,19 @@ private:
     mutable boost::optional<bool> reuseAddress_;
     mutable boost::optional<int>  backlog_;
     mutable boost::optional<int>  receiveBufferSize_;
+
+    mutable boost::optional<bool> reuseChild_;
     mutable boost::optional<int>  reservedChildCount_;
 };
 
 inline
 const boost::optional<int>& AsioServerSocketChannelConfig::backlog() const {
     return backlog_;
+}
+
+inline
+const boost::optional<bool>& AsioServerSocketChannelConfig::isReuseChild() const {
+    return reuseChild_;
 }
 
 inline

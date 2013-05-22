@@ -232,7 +232,8 @@ ServiceRequestMapping::~ServiceRequestMapping() {
 }
 
 ProtobufServiceMessagePtr ServiceRequestMapping::toProtobufMessage(
-    const HttpRequestPtr& request) {
+    const HttpRequestPtr& request,
+    std::string* format) {
     ServiceMethod* method = route(request);
 
     if (method) {
@@ -251,6 +252,12 @@ ProtobufServiceMessagePtr ServiceRequestMapping::toProtobufMessage(
                                                    method->serviceName(),
                                                    method->methodName()));
                     message->setPayload(req);
+
+                    StringPiece value = method->pathParamValue("format");
+                    if (format && !value.empty()) {
+                        format->assign(value.c_str(), value.size());
+                    }
+
                     return message;
                 }
                 else {

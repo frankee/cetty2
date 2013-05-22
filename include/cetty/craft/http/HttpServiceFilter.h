@@ -68,6 +68,7 @@ private:
 
 private:
     Filter filter_;
+    std::deque<std::string> formats_;
 };
 
 }

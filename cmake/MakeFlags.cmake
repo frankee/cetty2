@@ -76,11 +76,11 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     # -DVALGRIND
     -D_FILE_OFFSET_BITS=64
     -Wall
-    #-Wextra
+    -Wextra
     #-Werror
     -Wconversion
     -Wno-unused-parameter
-    #-Wold-style-cast
+    -Wold-style-cast
     -Woverloaded-virtual
     -Wpointer-arith
     #-Wshadow

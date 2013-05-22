@@ -58,9 +58,9 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
         const PipelineInitializer& childPipelineInitializer) {
     ChannelOptions empty;
     return registerPrototype(name,
-                                   empty,
-                                   empty,
-                                   childPipelineInitializer);
+                             empty,
+                             empty,
+                             childPipelineInitializer);
 }
 
 ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
@@ -88,13 +88,7 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
 
     bootstrap->setChildInitializer(childPipelineInitializer);
 
-    if (!options.empty()) {
-        bootstrap->setOptions(options);
-    }
-
-    if (!childOptions.empty()) {
-        bootstrap->setChildOptions(childOptions);
-    }
+    setOptions(bootstrap, options, childOptions);
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
@@ -121,6 +115,25 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
     }
 
     return *this;
+}
+
+void ServerBuilder::setOptions(const ServerBootstrapPtr& bootstrap,
+                               const ChannelOptions& options,
+                               const ChannelOptions& childOptions) {
+    if (!options.empty()) {
+        bootstrap->setOptions(options);
+    }
+    else {
+        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
+        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
+    }
+
+    if (!childOptions.empty()) {
+        bootstrap->setChildOptions(childOptions);
+    }
+    else {
+        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
+    }
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -150,15 +163,9 @@ ChannelPtr ServerBuilder::build(const std::string& name,
         return NullChannel::instance();
     }
 
-    if (!options.empty()) {
-        itr->second->setOptions(options);
-    }
-
-    if (!childOptions.empty()) {
-        itr->second->setChildOptions(childOptions);
-    }
-
-    return build(itr->second, host, port);
+    const ServerBootstrapPtr& bootstrap = itr->second;
+    setOptions(bootstrap, options, childOptions);
+    return build(bootstrap, host, port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -207,14 +214,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-    if (childOptions.empty()) {
-        bootstrap->setChildOption(ChannelOption::CO_TCP_NODELAY, true);
-    }
-
-    if (options.empty()) {
-        bootstrap->setOption(ChannelOption::CO_SO_BACKLOG, 4096);
-        bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR, true);
-    }
+    setOptions(bootstrap, options, childOptions);
 
     if (childPipelineInitializer) {
         bootstrap->setInitializer(childPipelineInitializer);
@@ -250,11 +250,6 @@ ChannelPtr ServerBuilder::build(const ServerBootstrapPtr& bootstrap,
 }
 
 void ServerBuilder::init() {
-    if (config_.servers.empty()) {
-        LOG_WARN << "has not set any servers, fail to init";
-        return;
-    }
-
     if (config_.daemonize) {
         ServerUtil::daemonize();
     }
@@ -373,9 +368,54 @@ ServerBuilder& ServerBuilder::buildAll() {
             continue;
         }
 
-        //TODO setting the options
+        const ServerBootstrapPtr& bootstrap = itr->second;
+        const ServerChannelConfig* serverConfig = server->serverChannel;
+        const ChildChannelConfig* childConfig = server->childChannel;
 
-        build(itr->second, server->host, server->port);
+        if (serverConfig) {
+            bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR,
+                                 serverConfig->reuseAddress)
+            .setOption(ChannelOption::CO_SO_BACKLOG,
+                       serverConfig->backLog)
+            .setOption(ChannelOption::CO_REUSE_CHILD,
+                       serverConfig->reuseChild)
+            .setOption(ChannelOption::CO_RESERVED_CHILD_COUNT,
+                       serverConfig->reservedChildCount);
+
+            if (serverConfig->receiveBufferSize) {
+                bootstrap->setOption(ChannelOption::CO_SO_RCVBUF,
+                                     *serverConfig->receiveBufferSize);
+            }
+        }
+        else {
+            bootstrap->setOption(ChannelOption::CO_REUSE_CHILD, true);
+        }
+
+        if (childConfig) {
+            bootstrap->setChildOption(ChannelOption::CO_SO_KEEPALIVE,
+                                      childConfig->isKeepAlive)
+            .setChildOption(ChannelOption::CO_SO_REUSEADDR,
+                            childConfig->isReuseAddress)
+            .setChildOption(ChannelOption::CO_TCP_NODELAY,
+                            childConfig->isTcpNoDelay);
+
+            if (childConfig->soLinger) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_LINGER,
+                                          childConfig->soLinger);
+            }
+
+            if (childConfig->sendBufferSize) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_SNDBUF,
+                                          childConfig->sendBufferSize);
+            }
+
+            if (childConfig->receiveBufferSize) {
+                bootstrap->setChildOption(ChannelOption::CO_SO_RCVBUF,
+                                          childConfig->receiveBufferSize);
+            }
+        }
+
+        build(bootstrap, server->host, server->port);
     }
 
     return *this;

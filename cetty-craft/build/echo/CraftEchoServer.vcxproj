@@ -113,6 +113,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\example\echo\echo.pb.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\example\echo\echo.proto" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

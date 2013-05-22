@@ -93,7 +93,7 @@ private:
 
     boost::asio::ip::tcp::acceptor acceptor_;
     AsioHandlerAllocator<int> acceptAllocator_;
-    AsioServerSocketChannelConfig socketConfig_;
+    AsioServerSocketChannelConfig serverConfig_;
 
     AsioServicePoolPtr childServicePool_;
     ChildChannels childChannels_;

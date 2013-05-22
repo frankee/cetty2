@@ -168,6 +168,10 @@ private:
                      const std::string& host,
                      int port);
 
+    void setOptions(const ServerBootstrapPtr& bootstrap,
+                    const ChannelOptions& options,
+                    const ChannelOptions& childOptions);
+
 private:
     typedef std::map<std::string, ServerBootstrapPtr> ServerBootstraps;
 

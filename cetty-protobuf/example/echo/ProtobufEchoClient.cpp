@@ -11,33 +11,36 @@ using namespace cetty::protobuf::service::builder;
 
 class EchoClient {
 public:
-    EchoClient(const ChannelPtr& s) : stub(s), count(0) {
-        future = new echo::echoServiceFuture();
-        future->addListener(boost::bind(&EchoClient::replied, this, _1, _2));
+    EchoClient(const ChannelPtr& s) : stub_(s), count_(0) {
+        future_ = new echo::echoServiceFuture();
+        future_->addListener(boost::bind(&EchoClient::replied, this, _1, _2));
+
+        buffer_.resize(1024*1024);
     }
     virtual ~EchoClient() {}
 
     void sendRequest() {
         echo::EchoRequest* request = new echo::EchoRequest;
-        request->set_payload("0123456789ABCDEF");
+        request->set_payload(buffer_);
 
-        stub.echo(request, future);
+        stub_.echo(request, future_);
     }
 
     void replied(const echo::echoServiceFuture& f, const echo::EchoResponsePtr& resp) {
-        ++count;
-        if (count < 10000) {
+        ++count_;
+        if (count_ < 10000) {
             sendRequest();
         }
     }
 
-	echo::EchoService_Stub* getStub() { return &stub; }
+	echo::EchoService_Stub* getStub() { return &stub_; }
 
 private:
-    echo::echoServiceFuturePtr future;
-    echo::EchoService_Stub stub;
+    std::string buffer_;
+    echo::echoServiceFuturePtr future_;
+    echo::EchoService_Stub stub_;
 
-    int count;
+    int count_;
 };
 
 int main(int argc, char* argv[]) {

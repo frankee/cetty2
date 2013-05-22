@@ -14,7 +14,7 @@ ADD_SUBDIRECTORY(src)
 # or specifying the -Dbuild_gtest_samples=ON flag when running cmake.
 #option(BUILD_CETTY_PROTOBUF_EXAMPLES "Build example programs." ON)
 
-if (BUILD_CETTY_PROTOBUF_EXAMPLES)
+#if (BUILD_CETTY_PROTOBUF_EXAMPLES)
 	MESSAGE(STATUS "BUILDING PROTOBUF SAMPLES...")
 	ADD_SUBDIRECTORY(example)
-endif()
+#endif()

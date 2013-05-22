@@ -249,13 +249,16 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
             doPreClose();
 
             if (doClose()) {
-                future->setSuccess();
+                state_ = CHANNEL_INACTIVED;
 
                 if (wasActive) {
                     LOG_INFO << "channel " << toString()
                              << " closed successfully.";
                     pipeline_->fireChannelInactive();
                 }
+
+                future->setSuccess();
+                closeFuture_->setSuccess();
             }
             else {
                 processFailure("close failed", future);

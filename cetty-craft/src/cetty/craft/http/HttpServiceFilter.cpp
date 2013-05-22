@@ -35,26 +35,30 @@ using namespace cetty::protobuf::service;
 
 HttpServiceFilter::HttpServiceFilter() {
     filter_.setRequestFilter(boost::bind(&HttpServiceFilter::filterRequest,
-        this,
-        _1,
-        _2));
+                                         this,
+                                         _1,
+                                         _2));
 
     filter_.setResponseFilter(boost::bind(&HttpServiceFilter::filterResponse,
-        this,
-        _1,
-        _2,
-        _3,
-        _4));
+                                          this,
+                                          _1,
+                                          _2,
+                                          _3,
+                                          _4));
 }
 
 ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
     ChannelHandlerContext& ctx,
-        const HttpPackage& req) {
+    const HttpPackage& req) {
     HttpRequestPtr request = req.httpRequest();
+    std::string format;
     ProtobufServiceMessagePtr msg =
-        ServiceRequestMapping::instance().toProtobufMessage(request);
+        ServiceRequestMapping::instance().toProtobufMessage(request, &format);
 
-    if (!msg) {
+    if (msg) {
+        formats_.push_back(format);
+    }
+    else {
         HttpResponsePtr response = new HttpResponse(
             request->version(),
             HttpResponseStatus::BAD_REQUEST);
@@ -73,7 +77,9 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         const ChannelFuturePtr& future) {
     HttpRequestPtr request = req.httpRequest();
     HttpResponsePtr response =
-        ServiceResponseMapping::instance().toHttpResponse(request, rep);
+        ServiceResponseMapping::instance().toHttpResponse(request,
+                rep,
+                formats_.front());
 
     if (!response) {
         LOG_WARN << "HttpServiceFilter filterResponse has an error.";
@@ -87,6 +93,7 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         future->addListener(ChannelFutureListener::CLOSE);
     }
 
+    formats_.pop_front();
     return response;
 }
 
