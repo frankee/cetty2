@@ -22,6 +22,7 @@
  */
 #include <map>
 #include <boost/scoped_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/ReferenceCounter.h>
 
@@ -146,6 +147,8 @@ public:
     Channels& channels();
     const Channels& channels() const;
 
+    void closeAllChannels();
+
     /**
      * Shutdown the {@link Bootstrap} and the {@link EventLoopPool} which is
      * used by it. Only call this if you don't share the {@link EventLoopPool}
@@ -170,6 +173,8 @@ protected:
     void removeChannel(int id);
     void clearChannels();
 
+    void onChannelClosed(ChannelFuture& future);
+
 private:
     T& castThis() {
         return *(static_cast<T*>(this));
@@ -182,7 +187,22 @@ private:
     PipelineInitializer initializer_;
 
     Channels channels_;
+    boost::mutex channelsLock_;
 };
+
+template<typename T> inline
+void cetty::bootstrap::Bootstrap<T>::closeAllChannels() {
+    Channels channels;
+    {
+        boost::lock_guard<boost::mutex> guard(channelsLock_);
+        channels = channels_;
+    }
+
+    Channels::iterator itr = channels.begin();
+    for (; itr != channels.end(); ++itr) {
+        itr->second->close();
+    }
+}
 
 template<typename T> inline
 typename Bootstrap<T>::Channels& Bootstrap<T>::channels() {
@@ -285,17 +305,26 @@ T& Bootstrap<T>::setOption(const ChannelOption& key,
 
 template<typename T> inline
 void Bootstrap<T>::clearChannels() {
+    boost::lock_guard<boost::mutex> guard(channelsLock_);
     channels_.clear();
 }
 
 template<typename T> inline
 void cetty::bootstrap::Bootstrap<T>::removeChannel(int id) {
+    boost::lock_guard<boost::mutex> guard(channelsLock_);
     channels_.erase(id);
 }
 
 template<typename T> inline
-void cetty::bootstrap::Bootstrap<T>::insertChannel(int id, const ChannelPtr& channel) {
+void cetty::bootstrap::Bootstrap<T>::insertChannel(int id,
+        const ChannelPtr& channel) {
+    boost::lock_guard<boost::mutex> guard(channelsLock_);
     channels_.insert(std::make_pair(id, channel));
+}
+
+template<typename T> inline
+void cetty::bootstrap::Bootstrap<T>::onChannelClosed(ChannelFuture& future) {
+    removeChannel(future.channel()->id());
 }
 
 }

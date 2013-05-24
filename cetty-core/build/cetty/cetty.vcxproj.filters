@@ -341,6 +341,9 @@
     <ClCompile Include="..\..\src\cetty\logging\LogSink.cpp">
       <Filter>logging</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\logging\LogFileSink.cpp">
+      <Filter>logging</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">

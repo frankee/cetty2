@@ -31,6 +31,10 @@ public:
 };
 
 inline
+int Adler32::adler32(const std::string& str) {
+    return adler32(1, str.c_str(), static_cast<int>(str.size()));
+}
+inline
 int Adler32::adler32(const char* buf, int len) {
     return adler32(1, buf, len);
 }

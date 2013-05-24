@@ -58,6 +58,10 @@ Channel::Channel(int id,
 Channel::~Channel() {
     LOG_DEBUG << "Channel " << toString() << " dctr";
 
+    if (isOpen()) {
+        close();
+    }
+
     if (pipeline_) {
         delete pipeline_;
     }
@@ -121,8 +125,8 @@ ChannelFuturePtr Channel::newVoidFuture() {
 
 void Channel::allocateId() {
     if (!id_) {
-        id_ = Adler32::adler32(reinterpret_cast<char const*>(this),
-                               sizeof(this));
+        id_ = Adler32::adler32(
+            StringUtil::hextostr(reinterpret_cast<uint64_t>(this)));
     }
 }
 

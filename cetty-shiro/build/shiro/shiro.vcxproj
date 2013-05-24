@@ -15,14 +15,11 @@
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationInfoPtr.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticationToken.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\Authenticator.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\AuthenticatorConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\CredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialsMatcher.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\HashedCredentialsMatcherConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\SimpleCredentialsMatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authc\WSSE.h" />
-    <ClInclude Include="..\..\..\include\cetty\shiro\authc\WSSEConfig.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AllPermission.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfo.h" />
     <ClInclude Include="..\..\..\include\cetty\shiro\authz\AuthorizationInfoPtr.h" />
@@ -56,11 +53,8 @@
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationInfo.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticationToken.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\Authenticator.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\AuthenticatorConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialMatcher.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\HashedCredentialsMatcherConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authc\WSSE.cpp" />
-    <ClCompile Include="..\..\src\cetty\shiro\authc\WSSEConfig.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\Authorizer.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\authz\WildcardPermission.cpp" />
     <ClCompile Include="..\..\src\cetty\shiro\crypt\DigestEngine.cpp" />

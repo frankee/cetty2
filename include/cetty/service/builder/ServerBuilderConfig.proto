@@ -64,6 +64,10 @@ message ServerBuilderConfig {
 	
     required int32 parent_thread_count = 4 [default = 1];
     required int32  child_thread_count = 5 [default = 0];
+
+    // # If strictBuildAll set true, and if any server channel bind failed,
+    // # the all the channels will failed too. 
+    required bool     strict_build_all = 6 [default = true];
     
 	optional Logger   logger = 7;
 

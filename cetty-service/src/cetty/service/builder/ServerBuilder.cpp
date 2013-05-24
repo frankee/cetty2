@@ -415,7 +415,10 @@ ServerBuilder& ServerBuilder::buildAll() {
             }
         }
 
-        build(bootstrap, server->host, server->port);
+        if (!build(bootstrap, server->host, server->port) && config_.strictBuildAll) {
+            LOG_WARN << "in strictBuildAll mode, will close other server channels.";
+            bootstrap->closeAllChannels();
+        }
     }
 
     return *this;

@@ -80,7 +80,7 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
     if (!initializer()) {
         LOG_INFO << "has not set channel pipeline initializer.";
         return NullChannel::instance()->newFailedFuture(
-            ChannelException("has not set channel pipeline initializer."));
+                   ChannelException("has not set channel pipeline initializer."));
     }
 
     ch->setInitializer(initializer());
@@ -97,6 +97,11 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
         ChannelFuturePtr future = ch->bind(local);
         future->awaitUninterruptibly();
     }
+
+    ch->closeFuture()->addListener(
+        boost::bind(&ClientBootstrap::onChannelClosed,
+                    this,
+                    _1));
 
     // Connect.
     return ch->connect(remote);
@@ -115,7 +120,7 @@ ChannelPtr ClientBootstrap::newChannel() {
     const EventLoopPoolPtr& pool = eventLoopPool();
     const EventLoopPtr& eventLoop =
         pool ? pool->nextLoop() : eventLoop_;
-    
+
     if (boost::dynamic_pointer_cast<AsioService>(eventLoop)) {
         return ChannelPtr(new AsioSocketChannel(eventLoop));
     }
@@ -129,6 +134,7 @@ ChannelPtr ClientBootstrap::newChannel() {
 void ClientBootstrap::waitingForExit() {
     Channels& clientChannels = channels();
     Channels::const_iterator itr = clientChannels.begin();
+
     for (; itr != clientChannels.end(); ++itr) {
         itr->second->closeFuture()->awaitUninterruptibly();
     }

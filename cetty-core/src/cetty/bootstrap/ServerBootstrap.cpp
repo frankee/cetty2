@@ -198,6 +198,11 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
 
         insertChannel(channel->id(), channel);
 
+        channel->closeFuture()->addListener(
+            boost::bind(&ServerBootstrap::onChannelClosed,
+                        this,
+                        _1));
+
         ChannelFuturePtr future = channel->newFuture();
         channel->bind(localAddress, future)->addListener(
             ChannelFutureListener::CLOSE_ON_FAILURE);
@@ -207,7 +212,7 @@ ChannelFuturePtr ServerBootstrap::bind(const InetAddress& localAddress) {
     else {
         LOG_WARN << "failed to open a server channel.";
         return NullChannel::instance()->newFailedFuture(
-            ChannelException("failed to open a server channel"));
+                   ChannelException("failed to open a server channel"));
     }
 }
 

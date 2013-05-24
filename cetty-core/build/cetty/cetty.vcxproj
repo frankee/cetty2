@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutException.cpp" />
     <ClCompile Include="..\..\src\cetty\handler\timeout\WriteTimeoutHandler.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogConsoleSink.cpp" />
+    <ClCompile Include="..\..\src\cetty\logging\LogFileSink.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\Logger.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogMessage.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogPatternFormatter.cpp" />
