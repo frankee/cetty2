@@ -41,13 +41,7 @@ public:
     }
 
 public:
-    static SubT parseFrom(const std::string& name) {
-        Enums::const_iterator itr = enums_.find(name);
-
-        if (itr != enums_.end()) {
-            return *reinterpret_cast<SubT const *>(itr->second);
-        }
-    }
+    static SubT parseFrom(const std::string& name);
 
 public:
     int value() const {
@@ -118,6 +112,15 @@ private:
 
 template<class SubT, int CaseSensitive>
 typename Enum<SubT, CaseSensitive>::Enums Enum<SubT, CaseSensitive>::enums_;
+
+template<class SubT, int CaseSensitive> inline
+SubT Enum<SubT, CaseSensitive>::parseFrom(const std::string& name) {
+    Enums::const_iterator itr = enums_.find(name);
+
+    if (itr != enums_.end()) {
+        return *reinterpret_cast<SubT const *>(itr->second);
+    }
+}
 
 }
 }

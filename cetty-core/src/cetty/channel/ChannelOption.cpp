@@ -20,8 +20,6 @@
 namespace cetty {
 namespace channel {
 
-const ChannelOption::Variant ChannelOption::EMPTY_VALUE;
-
 class SctpInitMaxStreamsChecker : public boost::static_visitor<bool> {
 public:
     bool operator()(const std::vector<int>& value) const {
@@ -40,6 +38,8 @@ const ValueChecker<std::string> ChannelOption::STRING_VALUE_CHECKER;
 const ValueChecker<std::vector<int> > ChannelOption::INT_VECTOR_VALUE_CHECKER;
 
 static const SctpInitMaxStreamsChecker SCTP_INIT_MAXSTREAMS_CHECKER;
+
+const ChannelOption::Variant ChannelOption::EMPTY_VALUE;
 
 const ChannelOption ChannelOption::CO_CONNECT_TIMEOUT_MILLIS(1, "CONNECT_TIMEOUT_MILLIS", &INT_VALUE_CHECKER);
 const ChannelOption ChannelOption::CO_REUSE_CHILD(2, "REUSE_CHILD", &BOOL_VALUE_CHECKER);
