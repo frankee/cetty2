@@ -20,25 +20,9 @@ namespace cetty {
 namespace handler {
 namespace timeout {
 
-const IdleState IdleState::READER_IDLE = 1;
-const IdleState IdleState::WRITER_IDLE = 2;
-const IdleState IdleState::ALL_IDLE    = 4;
-
-std::string IdleState::toString() const {
-    switch (value()) {
-    case 1:
-        return "READER_IDLE";
-
-    case 2:
-        return "WRITER_IDLE";
-
-    case 4:
-        return "ALL_IDLE";
-
-    default:
-        return "UNKNOW";
-    }
-}
+const IdleState IdleState::READER_IDLE(1, "READER_IDLE");
+const IdleState IdleState::WRITER_IDLE(2, "WRITER_IDLE");
+const IdleState IdleState::ALL_IDLE(4, "ALL_IDLE");
 
 }
 }

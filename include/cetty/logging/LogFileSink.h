@@ -25,26 +25,35 @@ namespace logging {
 
 class LogFileSink : public LogSink {
 public:
-    enum RollingSchedule {
-        ROLLING_NONE,
-        ROLLING_FILE_SIZE,   /*basename.1*/
-        ROLLING_MONTHLY,     /*basename.2013-05-07*/
-        ROLLING_WEEKLY,      /*basename.2013-05-07*/
-        ROLLING_TWICE_DAILY, /*basename.2013-05-07*/
-        ROLLING_DAILY,       /*basename.2013-05-07*/
-        ROLLING_HOURLY,      /*basename.2013-05-07.01*/
-        ROLLING_MINUTELY     /*basename.2013-05-07.01.01*/
+    class RollingSchedule : public cetty::util::Enum<RollingSchedule> {
+    public:
+        static RollingSchedule ROLLING_NONE;
+        static RollingSchedule ROLLING_FILE_SIZE;   /*basename.1*/
+        static RollingSchedule ROLLING_MONTHLY;     /*basename.2013-05-07*/
+        static RollingSchedule ROLLING_WEEKLY;      /*basename.2013-05-07*/
+        static RollingSchedule ROLLING_TWICE_DAILY; /*basename.2013-05-07*/
+        static RollingSchedule ROLLING_DAILY;       /*basename.2013-05-07*/
+        static RollingSchedule ROLLING_HOURLY;      /*basename.2013-05-07.01*/
+        static RollingSchedule ROLLING_MINUTELY;     /*basename.2013-05-07.01.01*/
+
+    private:
+        RollingSchedule(int value, const char* name)
+            : cetty::util::Enum<RollingSchedule>(value, name) {
+        }
     };
 
 public:
+    LogFileSink(const std::string& baseName);
 
-    LogFileSink(bool immediateFlush,
-    		    RollingSchedule schedule,
-    		    int bufferSize,
-    		    int rollSize,
-    		    const std::string &baseName,
-    		    const std::string &extension);
+    LogFileSink(const std::string& baseName,
+                const std::string& extension);
 
+    LogFileSink(const std::string& baseName,
+                const std::string& extension,
+                bool immediateFlush,
+                RollingSchedule schedule,
+                int bufferSize,
+                int rollSize);
 
     virtual void doSink(const LogMessage& msg);
     virtual void doFlush();
@@ -57,33 +66,31 @@ public:
     /**
      * specifies output file base name.
      */
-    const std::string& baseName() const { return baseName_; }
-    void setBaseName(const std::string& name) { baseName_ = name; }
+    const std::string& baseName() const;
+    void setBaseName(const std::string& name);
 
-    const std::string& extension() const { return extension_; }
-    void setExtension(const std::string& extension) { extension_ = extension; }
+    const std::string& extension() const;
+    void setExtension(const std::string& extension);
 
     /**
      * Non-zero value of this property sets up buffering of output
      * stream using a buffer of given size.
      */
-    int bufferSize() const { return bufferSize_; }
+    int bufferSize() const;
     void setBufferSize(int bufferSize);
 
     /**
      *
      */
-    const RollingSchedule& rollingSchedule() const { return schedule_; }
-    void setRollingSchedule(const RollingSchedule& schedule) {
-    	schedule_ = schedule;
-    }
+    const RollingSchedule& rollingSchedule() const;
+    void setRollingSchedule(const RollingSchedule& schedule);
 
     /**
      * This property specifies maximal size of output file. The
      * value is in bytes.
      */
-    int maxRollingFileSize() const { return rollSize_; }
-    void setRollingMaxFileSize(int maxFileSize) { rollSize_ = maxFileSize; }
+    int maxRollingFileSize() const;
+    void setRollingMaxFileSize(int maxFileSize);
 
     /**
      * This property limits the number of backup output
@@ -91,19 +98,16 @@ public:
      * (or <tt>log.2013-05-07.01.01</tt>) etc. files
      * will be kept.
      */
-    int maxRollingBackups() const { return 0; }
-    void setMaxRollingBackups(int backups){}
+    int maxRollingBackups() const;
+    void setMaxRollingBackups(int backups);
 
 private:
     void rollFile();
     void generateLogFileName();
 
 private:
-    const static int DEFAULT_BUFFER_SIZE;
-    const static int DAILY_CYCLE;
-
     FILE* fp_;
-    char *buffer_;
+    char* buffer_;
     RollingSchedule schedule_;
 
     int bufferSize_;
@@ -114,6 +118,60 @@ private:
     std::string extension_;
     std::string fileName_;
 };
+
+inline
+const std::string& LogFileSink::baseName() const {
+    return baseName_;
+}
+
+inline
+void LogFileSink::setBaseName(const std::string& name) {
+    baseName_ = name;
+}
+
+inline
+const std::string& LogFileSink::extension() const {
+    return extension_;
+}
+
+inline
+void LogFileSink::setExtension(const std::string& extension) {
+    extension_ = extension;
+}
+
+inline
+int LogFileSink::bufferSize() const {
+    return bufferSize_;
+}
+
+inline
+const LogFileSink::RollingSchedule& LogFileSink::rollingSchedule() const {
+    return schedule_;
+}
+
+inline
+void LogFileSink::setRollingSchedule(const RollingSchedule& schedule) {
+    schedule_ = schedule;
+}
+
+inline
+int LogFileSink::maxRollingFileSize() const {
+    return rollSize_;
+}
+
+inline
+void LogFileSink::setRollingMaxFileSize(int maxFileSize) {
+    rollSize_ = maxFileSize;
+}
+
+inline
+int LogFileSink::maxRollingBackups() const {
+    return 0;
+}
+
+inline
+void LogFileSink::setMaxRollingBackups(int backups) {
+}
 
 }
 }

@@ -49,22 +49,11 @@ public:
     static const LogLevel DEBUG;
     static const LogLevel TRACE;
 
-public:
-    const std::string& toString() const;
-
-    int toInt() const;
-
-    static LogLevel parseFrom(const std::string& level);
-
 private:
-    LogLevel(int v)
-        : cetty::util::Enum<LogLevel>(v) {}
-};
+    LogLevel(int v, const char* name)
+        : cetty::util::Enum<LogLevel>(v, name) {}
 
-inline
-int LogLevel::toInt() const {
-    return value();
-}
+};
 
 }
 }

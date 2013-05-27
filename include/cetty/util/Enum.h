@@ -17,18 +17,45 @@
  * under the License.
  */
 
+#include <map>
+#include <string>
+#include <boost/optional.hpp>
+#include <cetty/Types.h>
+#include <cetty/util/StringUtil.h>
+
 namespace cetty {
 namespace util {
 
-template<typename SubT>
+template<class SubT, int CaseSensitive = 0>
 class Enum {
 public:
-    Enum(const Enum& rhs) : value_(rhs.value_) {}
-    Enum& operator=(const Enum& rhs) { value_ = rhs.value_; return *this; }
+    Enum(const Enum& rhs)
+        : value_(rhs.value_),
+          name_(rhs.name_) {
+    }
+
+    Enum& operator=(const Enum& rhs) {
+        value_ = rhs.value_;
+        name_ = rhs.name_;
+        return *this;
+    }
+
+public:
+    static SubT parseFrom(const std::string& name) {
+        Enums::const_iterator itr = enums_.find(name);
+
+        if (itr != enums_.end()) {
+            return *reinterpret_cast<SubT const *>(itr->second);
+        }
+    }
 
 public:
     int value() const {
         return value_;
+    }
+
+    const char* name() const {
+        return name_;
     }
 
     friend bool operator==(const SubT& lhs, const SubT& rhs) {
@@ -57,12 +84,40 @@ public:
 
 protected:
     Enum(int i)
-        : value_(i) {
+        : value_(i),
+          name_(NULL) {
+    }
+
+    Enum(int i, const char* name)
+        : value_(i),
+          name_(name) {
+        enums_.insert(std::make_pair<std::string, Self const *>(name, this));
     }
 
 private:
+    struct LessThan {
+        bool operator()(const std::string& s1, const std::string& s2) const {
+            if (CaseSensitive) {
+                return s1 < s2;
+            }
+            else {
+                return StringUtil::icompare(s1, s2) < 0;
+            }
+        }
+    };
+
+    typedef Enum<SubT, CaseSensitive> Self;
+    typedef std::map<std::string, Self const*, LessThan> Enums;
+
+    static Enums enums_;
+
+private:
     int value_;
+    const char* name_;
 };
+
+template<class SubT, int CaseSensitive>
+typename Enum<SubT, CaseSensitive>::Enums Enum<SubT, CaseSensitive>::enums_;
 
 }
 }

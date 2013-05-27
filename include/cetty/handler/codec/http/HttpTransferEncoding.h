@@ -74,10 +74,6 @@ public:
     static const HttpTransferEncoding SINGLE;
 
 public:
-    HttpTransferEncoding(int value, bool single)
-        : cetty::util::Enum<HttpTransferEncoding>(value),
-          single_(single) {}
-
     HttpTransferEncoding(const HttpTransferEncoding& rhs)
         : cetty::util::Enum<HttpTransferEncoding>(rhs),
           single_(rhs.single_) {}
@@ -104,7 +100,11 @@ public:
         return single_;
     }
 
-    std::string toString() const;
+private:
+    HttpTransferEncoding(int value, const char* name, bool single)
+        : cetty::util::Enum<HttpTransferEncoding>(value, name),
+        single_(single) {
+    }
 
 private:
     bool single_;

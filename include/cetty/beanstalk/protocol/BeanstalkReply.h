@@ -48,23 +48,10 @@ public:
     static const BeanstalkReplyType OK;
     static const BeanstalkReplyType INVALID;
 
-public:
-    static BeanstalkReplyType parseFrom(const StringPiece& name);
-    static BeanstalkReplyType parseFrom(const std::string& name);
-
-public:
-    const std::string& name() const {
-        return name_;
-    }
-
 private:
-    BeanstalkReplyType(int value, const std::string& name)
-        : Enum<BeanstalkReplyType>(value),
-          name_(name) {
+    BeanstalkReplyType(int value, const char* name)
+        : Enum<BeanstalkReplyType>(value, name) {
     }
-
-private:
-    std::string name_;
 };
 
 class BeanstalkReply : public ReferenceCounter<BeanstalkReply, int> {

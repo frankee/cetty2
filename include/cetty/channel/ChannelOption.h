@@ -55,7 +55,11 @@ public:
 
 class ChannelOption : public cetty::util::Enum<ChannelOption> {
 public:
-class Null { public: Null() {} };
+    class Null {
+    public:
+        Null() {}
+    };
+
     typedef boost::variant<Null, int, bool, std::string, std::vector<int> > Variant;
     typedef std::map<ChannelOption, Variant> Options;
 
@@ -64,25 +68,6 @@ public:
      *
      */
     static const Variant EMPTY_VALUE;
-
-public:
-    ChannelOption(int id,
-                  const std::string& name,
-                  const boost::static_visitor<bool>* checker);
-
-    ChannelOption(const ChannelOption& option);
-
-    ChannelOption& operator=(const ChannelOption& option);
-
-    bool validate(const Variant& value) const;
-
-    const std::string& name() const;
-
-public:
-    /**
-     * test the {@link ChannelOption::Variant} is empty.
-     */
-    static bool empty(const ChannelOption::Variant& option);
 
 public:
     static const ChannelOption CO_CONNECT_TIMEOUT_MILLIS;
@@ -126,15 +111,29 @@ public:
     static const ValueChecker<std::string> STRING_VALUE_CHECKER;
     static const ValueChecker<std::vector<int> > INT_VECTOR_VALUE_CHECKER;
 
+public:
+    ChannelOption(const ChannelOption& option);
+    ChannelOption& operator=(const ChannelOption& option);
+
+    bool validate(const Variant& value) const;
+
+    /**
+     * test the {@link ChannelOption::Variant} is empty.
+     */
+    static bool empty(const ChannelOption::Variant& option);
+
 private:
-    std::string name_;
+    ChannelOption(int id,
+                  const char* name,
+                  const boost::static_visitor<bool>* checker);
+
+private:
     const boost::static_visitor<bool>* checker_;
 };
 
 inline
 ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
     cetty::util::Enum<ChannelOption>::operator=(option);
-    name_ = option.name_;
     checker_ = option.checker_;
     return *this;
 }
@@ -142,13 +141,7 @@ ChannelOption& ChannelOption::operator=(const ChannelOption& option) {
 inline
 ChannelOption::ChannelOption(const ChannelOption& option)
     : cetty::util::Enum<ChannelOption>(option),
-      name_(option.name_),
       checker_(option.checker_) {
-}
-
-inline
-const std::string& ChannelOption::name() const {
-    return name_;
 }
 
 inline

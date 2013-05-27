@@ -42,10 +42,13 @@ public:
      *
      * @return The specified string
      */
-    std::string toString() const;
+    std::string toString() const {
+        return name();
+    }
 
 private:
-    ByteOrder(int value) : cetty::util::Enum<ByteOrder>(value) {}
+    ByteOrder(int value, const char* name)
+        : cetty::util::Enum<ByteOrder>(value, name) {}
 };
 
 }

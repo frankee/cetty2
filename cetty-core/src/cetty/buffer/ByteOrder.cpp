@@ -19,8 +19,8 @@
 namespace cetty {
 namespace buffer {
 
-const ByteOrder ByteOrder::BIG = 0;
-const ByteOrder ByteOrder::LITTLE = 1;
+const ByteOrder ByteOrder::BIG(0, "BIG_ENDIAN");
+const ByteOrder ByteOrder::LITTLE(1, "LITTLE_ENDIAN");
 
 ByteOrder ByteOrder::nativeOrder() {
     static const char tmp[2] = {0x01, 0x02};
@@ -30,15 +30,6 @@ ByteOrder ByteOrder::nativeOrder() {
     }
     else {
         return LITTLE;
-    }
-}
-
-std::string ByteOrder::toString() const {
-    if (value() == BIG.value()) {
-        return "BIG_ENDIAN";
-    }
-    else {
-        return "LITTLE_ENDIAN";
     }
 }
 

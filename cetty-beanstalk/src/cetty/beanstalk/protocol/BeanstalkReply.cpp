@@ -37,45 +37,6 @@ const BeanstalkReplyType BeanstalkReplyType::FOUND(7, "FOUND");
 const BeanstalkReplyType BeanstalkReplyType::OK(8, "OK");
 const BeanstalkReplyType BeanstalkReplyType::INVALID(-1, "INVALID");
 
-BeanstalkReplyType BeanstalkReplyType::parseFrom(const std::string& name) {
-    return parseFrom(StringPiece(name));
-}
-
-BeanstalkReplyType BeanstalkReplyType::parseFrom(const StringPiece& name) {
-    if (!name.empty()) {
-        switch (name[0]) {
-        case 'I':
-            return INSERTED;
-
-        case 'B':
-            return BURIED;
-
-        case 'U':
-            return USING;
-
-        case 'R':
-            return RESERVED;
-
-        case 'W':
-            return WATCHING;
-
-        case 'K':
-            return KICKED;
-
-        case 'F':
-            return FOUND;
-
-        case 'O':
-            return OK;
-
-        default:
-            return INVALID;
-        }
-    }
-
-    return INVALID;
-}
-
 std::string BeanstalkReply::toString() const {
     std::string tmp(type_.name());
 

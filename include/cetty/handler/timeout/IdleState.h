@@ -51,17 +51,9 @@ public:
      */
     static const IdleState ALL_IDLE;
 
-    /**
-     * Get a string describing this enum.
-     * This method returns the string "READER_IDLE" for READER_IDLE,
-     * "WRITER_IDLE" for WRITER_IDLE and "ALL_IDLE" for ALL_IDLE.
-     *
-     * @return The specified string
-     */
-    std::string toString() const;
-
 private:
-    IdleState(int value) : cetty::util::Enum<IdleState>(value) {}
+    IdleState(int value, const char* name)
+        : cetty::util::Enum<IdleState>(value, name) {}
 };
 
 }

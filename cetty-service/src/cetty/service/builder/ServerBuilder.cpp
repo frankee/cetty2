@@ -24,6 +24,7 @@
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/Logger.h>
 #include <cetty/logging/LoggerHelper.h>
+#include <cetty/logging/LogFileSink.h>
 
 namespace cetty {
 namespace service {
@@ -268,7 +269,25 @@ void ServerBuilder::init() {
     }
 
     if (config_.logger) {
-        Logger::setLevel(LogLevel::parseFrom(config_.logger->level));
+        const ServerBuilderConfig::Logger* logger = config_.logger;
+        Logger::setLevel(LogLevel::parseFrom(logger->level));
+
+        if (!logger->partten.empty()) {
+            Logger::setPatternFormatter(logger->partten);
+        }
+
+        const ServerBuilderConfig::LoggerFileSink* fileSink = logger->fileSink;
+
+        if (fileSink) {
+            LogFileSink::RollingSchedule schedule =
+                LogFileSink::RollingSchedule::parseFrom(fileSink->rollingSchedule);
+            LogSinkPtr sink = new LogFileSink(fileSink->baseName,
+                                              fileSink->extention,
+                                              fileSink->immediateFlush,
+                                              schedule,
+                                              fileSink->bufferSize,
+                                              fileSink->rollSize);
+        }
     }
 
     init_ = true;

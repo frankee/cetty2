@@ -21,23 +21,9 @@ namespace handler {
 namespace codec {
 namespace http {
 
-const HttpTransferEncoding HttpTransferEncoding::CHUNKED(0, false);
-const HttpTransferEncoding HttpTransferEncoding::STREAMED(1, false);
-const HttpTransferEncoding HttpTransferEncoding::SINGLE(2, true);
-
-static const std::string CHUNKED_STR = "CHUNKED";
-static const std::string STREAMED_STR = "STREAMED";
-static const std::string SINGLE_STR = "SINGLE";
-static const std::string UNKNOWN_TYPE = "UNKNOWN_TYPE";
-
-std::string HttpTransferEncoding::toString() const {
-    switch (value()) {
-    case 0: return CHUNKED_STR;
-    case 1: return STREAMED_STR;
-    case 2: return SINGLE_STR;
-    default: return UNKNOWN_TYPE;
-    }
-}
+const HttpTransferEncoding HttpTransferEncoding::CHUNKED(0, "CHUNKED", false);
+const HttpTransferEncoding HttpTransferEncoding::STREAMED(1, "STREAMED", false);
+const HttpTransferEncoding HttpTransferEncoding::SINGLE(2, "SINGLE", true);
 
 }
 }

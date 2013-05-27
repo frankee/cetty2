@@ -22,53 +22,12 @@ namespace logging {
 
 using namespace cetty::util;
 
-const LogLevel LogLevel::FATAL(5);
-const LogLevel LogLevel::ERROR(4);
-const LogLevel LogLevel::WARN(3);
-const LogLevel LogLevel::INFO(2);
-const LogLevel LogLevel::DEBUG(1);
-const LogLevel LogLevel::TRACE(0);
-
-static const std::string LOG_LEVLE_STRS[] = {
-    "TRACE",
-    "DEBUG",
-    "INFO",
-    "WARN",
-    "ERROR",
-    "FATAL",
-    "UNKNOWN",
-    ""
-};
-
-const std::string& LogLevel::toString() const {
-    return LOG_LEVLE_STRS[value()];
-}
-
-LogLevel LogLevel::parseFrom(const std::string& level) {
-    int i = 0;
-
-    while (!LOG_LEVLE_STRS[i].empty()) {
-        if (StringUtil::iequals(level, LOG_LEVLE_STRS[i])) {
-            switch (i) {
-            case 0: return TRACE;
-
-            case 1: return DEBUG;
-
-            case 2: return INFO;
-
-            case 3: return WARN;
-
-            case 4: return ERROR;
-
-            case 5: return FATAL;
-            }
-        }
-
-        ++i;
-    }
-
-    return TRACE;
-}
+const LogLevel LogLevel::FATAL(5, "FATAL");
+const LogLevel LogLevel::ERROR(4, "ERROR");
+const LogLevel LogLevel::WARN(3, "WARN");
+const LogLevel LogLevel::INFO(2, "INFO");
+const LogLevel LogLevel::DEBUG(1, "DEBUG");
+const LogLevel LogLevel::TRACE(0, "TRACE");
 
 }
 }

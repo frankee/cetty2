@@ -44,10 +44,22 @@ message ServerBuilderConfig {
 	message Timeout {
 		required int32 connection_timeout = 1 [default=1800];
 	}
+
+    message LoggerFileSink {
+        optional string        base_name = 1;
+        optional string        extention = 2 [default = "log"];
+        required bool     immediateFlush = 3 [default = false];
+        optional string rolling_schedule = 4 [default = "fileSize"];
+        required int32       buffer_size = 5 [default = 16384];
+        required int32         roll_size = 6 [default = 67108864]; //64MB
+    }
 	
 	message Logger {
-		optional string logger = 1;
-		optional string  level = 2;
+		optional string  logger = 1;
+		optional string   level = 2;
+        optional string partten = 3;
+
+        optional LoggerFileSink file_sink = 5;
 	}
 	
 	// # By default cetty does not run as a daemon. Use 'true' if you need it.

@@ -46,19 +46,10 @@ public:
     static const RedisReplyType STATUS;
     static const RedisReplyType ERROR;
 
-public:
-    const std::string& name() const {
-        return name_;
-    }
-
 private:
-    RedisReplyType(int value, const std::string& name)
-        : cetty::util::Enum<RedisReplyType>(value),
-          name_(name) {
+    RedisReplyType(int value, const char* name)
+        : cetty::util::Enum<RedisReplyType>(value, name) {
     }
-
-private:
-    std::string name_;
 };
 
 class RedisReply : public ReferenceCounter<RedisReply, int> {

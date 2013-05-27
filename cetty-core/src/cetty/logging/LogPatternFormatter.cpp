@@ -48,11 +48,11 @@ void LogPatternFormatter::format(LogMessage& msg, const std::string& pattern) co
         if (*it == '%') {
             if (++it != end) {
                 switch (*it) {
-                case 'l': msg.stream() << msg.level().toInt(); break;
+                case 'l': msg.stream() << msg.level().value(); break;
 
-                case 'L': msg.stream() << msg.level().toString(); break;
+                case 'L': msg.stream() << msg.level().name(); break;
 
-                case 'p': msg.stream() << msg.level().toString().at(0); break;
+                case 'p': msg.stream() << msg.level().name()[0]; break;
 
                 //case 'P': NumberFormatter::append(text, msg.getPid()); break;
 

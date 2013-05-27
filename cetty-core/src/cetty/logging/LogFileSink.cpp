@@ -12,15 +12,52 @@ namespace logging {
 using namespace boost::this_thread;
 using namespace boost::posix_time;
 
-const int LogFileSink::DEFAULT_BUFFER_SIZE = 10 * 1024;
-const int LogFileSink::DAILY_CYCLE = 24 * 60 * 60;
+static const int DEFAULT_BUFFER_SIZE = 10 * 1024;
+static const int DEFAULT_ROLL_SIZE = 1024 * 1024 * 128;
+static const int DAILY_CYCLE = 24 * 60 * 60;
 
-LogFileSink::LogFileSink(bool immediateFlush,
-		                 RollingSchedule schedule,
-    		             int bufferSize,
-    		             int rollSize,
-    		             const std::string &baseName,
-    		             const std::string &extension)
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_NONE(0, "none");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_FILE_SIZE(1, "fileSize");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MONTHLY(2, "monthly");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_WEEKLY(3, "weekly");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_TWICE_DAILY(4, "twiceDaily");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_DAILY(5, "daily");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_HOURLY(6, "hourly");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MINUTELY(7, "minutely");
+
+LogFileSink::LogFileSink(const std::string& baseName)
+    :LogSink("LogFileSink"),
+     fp_(NULL),
+     buffer_(NULL),
+     schedule_(RollingSchedule::ROLLING_FILE_SIZE),
+     bufferSize_(DEFAULT_BUFFER_SIZE),
+     rollSize_(DEFAULT_ROLL_SIZE),
+     baseName_(baseName),
+     extension_("log") {
+    buffer_ = new char[bufferSize_];
+    rollFile();
+}
+
+LogFileSink::LogFileSink(const std::string& baseName,
+                         const std::string& extension)
+    :LogSink("LogFileSink"),
+     fp_(NULL),
+     buffer_(NULL),
+     schedule_(RollingSchedule::ROLLING_FILE_SIZE),
+     bufferSize_(DEFAULT_BUFFER_SIZE),
+     rollSize_(DEFAULT_ROLL_SIZE),
+     baseName_(baseName),
+     extension_(extension) {
+    buffer_ = new char[bufferSize_];
+    rollFile();
+}
+
+LogFileSink::LogFileSink(const std::string& baseName,
+                         const std::string& extension,
+                         bool immediateFlush,
+                         RollingSchedule schedule,
+                         int bufferSize,
+                         int rollSize)
     :LogSink("LogFileSink"),
      fp_(NULL),
      buffer_(NULL),
@@ -30,65 +67,69 @@ LogFileSink::LogFileSink(bool immediateFlush,
      baseName_(baseName),
      extension_(extension) {
 
-	setImmediateFlush(immediateFlush);
+    setImmediateFlush(immediateFlush);
 
-	if(bufferSize_ <= 0) {
-		bufferSize_ = DEFAULT_BUFFER_SIZE;
-	}
-	buffer_ = new char[bufferSize_];
+    if (bufferSize_ <= 0) {
+        bufferSize_ = DEFAULT_BUFFER_SIZE;
+    }
+
+    buffer_ = new char[bufferSize_];
 
     rollFile();
 }
 
 void LogFileSink::doSink(const LogMessage& msg) {
-	int64_t size = logSize();
+    int64_t size = logSize();
 
-	if(size > rollSize_) {
-		rollFile();
-	} else {
-		// just for ROLLING_DAILY
-		time_t now = ::time(NULL);
-	    int days = now / DAILY_CYCLE * DAILY_CYCLE;
-	    if (days != lastRollTime_) {
-	    	rollFile();
-	    }
-	}
+    if (size > rollSize_) {
+        rollFile();
+    }
+    else {
+        // just for ROLLING_DAILY
+        time_t now = ::time(NULL);
+        int days = now / DAILY_CYCLE * DAILY_CYCLE;
 
-	const char* buf = msg.buffer();
+        if (days != lastRollTime_) {
+            rollFile();
+        }
+    }
+
+    const char* buf = msg.buffer();
     std::fwrite(buf, strlen(buf), 1, fp_);
 
     int errCode = 0;
     char errBuf[512];
 
     errCode = ferror(fp_);
-    if(errCode) {
-    	fprintf(stderr, "write to file error: %s.", strerror(errCode));
+
+    if (errCode) {
+        fprintf(stderr, "write to file error: %s.", strerror(errCode));
     }
 }
 
 void LogFileSink::doFlush() {
     if (fp_) {
-    	std::fflush(fp_);
+        std::fflush(fp_);
     }
 }
 
 void LogFileSink::rollFile() {
-	// Just for daily cycle
-	time_t now = ::time(NULL);
-	lastRollTime_ = now / DAILY_CYCLE * DAILY_CYCLE;
+    // Just for daily cycle
+    time_t now = ::time(NULL);
+    lastRollTime_ = now / DAILY_CYCLE * DAILY_CYCLE;
 
     generateLogFileName();
 
     if (fp_) {
-    	fclose(fp_);
-    	fp_ = NULL;
+        fclose(fp_);
+        fp_ = NULL;
     }
 
     fp_ = fopen(fileName_.c_str(), "a+");
 }
 
 void LogFileSink::generateLogFileName() {
-	fileName_.clear();
+    fileName_.clear();
     fileName_.append(baseName_);
 
     // tudo make sure file separator
@@ -96,7 +137,7 @@ void LogFileSink::generateLogFileName() {
     char pidbuf[32];
 
     time_t now = time(NULL);
-    struct tm *tm = gmtime(&now);
+    struct tm* tm = gmtime(&now);
     strftime(timebuf, sizeof timebuf, "%Y%m%d-%H%M%S", tm);
     fileName_.append(timebuf);
 
@@ -113,39 +154,40 @@ void LogFileSink::generateLogFileName() {
     fileName_.append(extension_);
 }
 
-int64_t LogFileSink::logSize() const{
-	int64_t size = 0x7fffffffffffffff;
+int64_t LogFileSink::logSize() const {
+    int64_t size = 0x7fffffffffffffff;
 
-	FILE *fp = fopen(fileName_.c_str(), "r");
-	if (fp) {
-		fseek(fp, 0L, SEEK_END);
-		size = ftell(fp);
-		fseek(fp, 0L, SEEK_SET);
-		fclose(fp);
-	}
+    FILE* fp = fopen(fileName_.c_str(), "r");
 
-	return size;
+    if (fp) {
+        fseek(fp, 0L, SEEK_END);
+        size = ftell(fp);
+        fseek(fp, 0L, SEEK_SET);
+        fclose(fp);
+    }
+
+    return size;
 }
 
 void LogFileSink::setBufferSize(int bufferSize) {
-	if (bufferSize_ == bufferSize) return;
+    if (bufferSize_ == bufferSize) {
+        return;
+    }
 
-	if (buffer_) {
-		delete buffer_;
-		buffer_ = NULL;
-	}
+    try {
+        char* buffer = new char[bufferSize];
 
-	try {
-	    buffer_ = new char[bufferSize];
-	    bufferSize_ = bufferSize;
-	}
-	catch (std::bad_alloc &e) {
-		fprintf(stderr, e.what());
-	}
+        if (buffer_) {
+            delete buffer_;
+        }
+
+        buffer_ = buffer;
+        bufferSize_ = bufferSize;
+    }
+    catch (std::bad_alloc& e) {
+        fprintf(stderr, e.what());
+    }
 }
-
-
-
 
 }
 }
