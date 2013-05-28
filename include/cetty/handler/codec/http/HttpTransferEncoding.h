@@ -101,13 +101,9 @@ public:
     }
 
 private:
-    HttpTransferEncoding(int value, const char* name, bool single)
-        : cetty::util::Enum<HttpTransferEncoding>(value, name),
-          single_(single) {
-        if (!defaultEnum()) {
-            setDefaultEnum(new HttpTransferEncoding(-1, "unknown", false));
-        }
-    }
+    HttpTransferEncoding(int value,
+                         const char* name,
+                         bool single);
 
 private:
     bool single_;

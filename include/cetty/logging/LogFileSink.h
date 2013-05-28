@@ -28,13 +28,13 @@ public:
     class RollingSchedule : public cetty::util::Enum<RollingSchedule> {
     public:
         static RollingSchedule ROLLING_NONE;
-        static RollingSchedule ROLLING_FILE_SIZE;   /*basename.1*/
+        static RollingSchedule ROLLING_FILE_SIZE;   /*basename.1.extension*/
         static RollingSchedule ROLLING_MONTHLY;     /*basename.2013-05-07*/
         static RollingSchedule ROLLING_WEEKLY;      /*basename.2013-05-07*/
         static RollingSchedule ROLLING_TWICE_DAILY; /*basename.2013-05-07*/
         static RollingSchedule ROLLING_DAILY;       /*basename.2013-05-07*/
         static RollingSchedule ROLLING_HOURLY;      /*basename.2013-05-07.01*/
-        static RollingSchedule ROLLING_MINUTELY;     /*basename.2013-05-07.01.01*/
+        static RollingSchedule ROLLING_MINUTELY;    /*basename.2013-05-07.01.01*/
 
     private:
         RollingSchedule(int value, const char* name);

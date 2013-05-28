@@ -25,6 +25,16 @@ const HttpTransferEncoding HttpTransferEncoding::CHUNKED(0, "CHUNKED", false);
 const HttpTransferEncoding HttpTransferEncoding::STREAMED(1, "STREAMED", false);
 const HttpTransferEncoding HttpTransferEncoding::SINGLE(2, "SINGLE", true);
 
+HttpTransferEncoding::HttpTransferEncoding(int value,
+        const char* name,
+        bool single)
+    : cetty::util::Enum<HttpTransferEncoding>(value, name),
+      single_(single) {
+    if (needSetDefaultEnum()) {
+        setDefaultEnum(new HttpTransferEncoding(-1, "unknown", false));
+    }
+}
+
 }
 }
 }

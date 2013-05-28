@@ -16,19 +16,19 @@ static const int DEFAULT_BUFFER_SIZE = 10 * 1024;
 static const int DEFAULT_ROLL_SIZE = 1024 * 1024 * 128;
 static const int DAILY_CYCLE = 24 * 60 * 60;
 
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_NONE(0, "none");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_FILE_SIZE(1, "fileSize");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MONTHLY(2, "monthly");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_WEEKLY(3, "weekly");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_TWICE_DAILY(4, "twiceDaily");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_DAILY(5, "daily");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_HOURLY(6, "hourly");
-LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MINUTELY(7, "minutely");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_NONE(0, "NONE");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_FILE_SIZE(1, "FILE_SIZE");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MONTHLY(2, "MONTHLY");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_WEEKLY(3, "WEEKLY");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_TWICE_DAILY(4, "TWICE_DAILY");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_DAILY(5, "DAILY");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_HOURLY(6, "HOURLY");
+LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MINUTELY(7, "MINUTELY");
 
 LogFileSink::RollingSchedule::RollingSchedule(int value, const char* name)
     : cetty::util::Enum<RollingSchedule>(value, name) {
-    if (!defaultEnum()) {
-        setDefaultEnum(new RollingSchedule(-1, "unknown"));
+    if (needSetDefaultEnum()) {
+        setDefaultEnum(new RollingSchedule(-1, "UNKNOWN"));
     }
 }
 

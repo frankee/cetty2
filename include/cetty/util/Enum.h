@@ -26,6 +26,10 @@
 namespace cetty {
 namespace util {
 
+// static const int ENUM_NO_PARSE = 0;
+// static const int ENUM_PARSE_CASE_SENSITIVE = 1;
+// static const int ENUM_PARSE_CASE_INSENSITIVE = 2;
+
 template<class SubT, int CaseSensitive = 0>
 class Enum {
 public:
@@ -101,11 +105,22 @@ protected:
         if (!enums_) {
             enums_ = new Enums;
         }
-        enums_->insert(std::make_pair<std::string, Self const*>(name, this));
+
+        enums_->insert(std::make_pair(name, this));
+
+        if (!CaseSensitive) {
+            (*enums_)[removeUnderLine(name)] = this;
+        }
     }
 
-    const SubT* defaultEnum() const {
-        return defaultEnum_;
+    bool needSetDefaultEnum() {
+        if (hasSetDefaultEnum_) {
+            return false;
+        }
+        else {
+            hasSetDefaultEnum_ = true;
+            return true;
+        }
     }
 
     void setDefaultEnum(const SubT* defaultEnum) {
@@ -114,6 +129,21 @@ protected:
         }
 
         defaultEnum_ = defaultEnum;
+    }
+
+private:
+    std::string removeUnderLine(const char* name) {
+        std::string newName;
+
+        for (std::size_t i = 0; name[i] != '\0'; ++i) {
+            if (name[i] == '_') {
+                continue;
+            }
+
+            newName.append(1, name[i]);
+        }
+
+        return newName;
     }
 
 private:
@@ -132,6 +162,7 @@ private:
     typedef std::map<std::string, Self const*, LessThan> Enums;
 
     static Enums* enums_;
+    static bool hasSetDefaultEnum_;
     static const SubT* defaultEnum_;
 
 private:
@@ -141,6 +172,9 @@ private:
 
 template<class SubT, int CaseSensitive>
 typename Enum<SubT, CaseSensitive>::Enums* Enum<SubT, CaseSensitive>::enums_ = NULL;
+
+template<class SubT, int CaseSensitive>
+bool cetty::util::Enum<SubT, CaseSensitive>::hasSetDefaultEnum_ = false;
 
 template<class SubT, int CaseSensitive>
 const SubT* cetty::util::Enum<SubT, CaseSensitive>::defaultEnum_ = NULL;
