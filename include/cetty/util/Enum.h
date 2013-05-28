@@ -41,6 +41,19 @@ public:
     }
 
 public:
+    /**
+     * convert string to Enum type.
+     *
+     * To enable this function, you should:
+     * 1. using Enum(int i, const char* name)
+     * 2. set default enum, which will be return when failed to parse.
+     *    if (!defaultEnum()) {
+     *        setDefaultEnum(new MyEnum(-1, "unkonwn"));
+     *    }
+     *
+     * CaseSensitive default to 0, means parse the name is case insensitive,
+     * set to 1, make sure the parse will case sensitive.
+     */
     static const SubT& parseFrom(const std::string& name);
 
 public:
