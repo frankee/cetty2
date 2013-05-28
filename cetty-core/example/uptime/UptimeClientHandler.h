@@ -68,7 +68,7 @@ public:
                                     const boost::any& evt) {
         const IdleStateEvent* e = boost::any_cast<IdleStateEvent>(&evt);
 
-        if (e && e->getState() == IdleState::READER_IDLE) {
+        if (e && e->state() == IdleState::READER_IDLE) {
             // The connection was OK but there was no traffic for last period.
             printf("Disconnecting due to no inbound traffic");
             ctx.close();

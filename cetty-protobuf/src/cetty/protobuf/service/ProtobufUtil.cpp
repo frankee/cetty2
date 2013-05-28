@@ -193,7 +193,7 @@ bool ProtobufUtil::mergeObject(const ConfigObject& config, Message* message) {
             configDescriptor->field(field->camelcase_name());
 
         if (configField && config.has(configField)) {
-            if (mergeField(configField, config, field, message) < 0) {
+            if (!mergeField(configField, config, field, message)) {
                 return false;
             }
         }

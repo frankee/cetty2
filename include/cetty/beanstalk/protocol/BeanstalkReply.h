@@ -49,9 +49,7 @@ public:
     static const BeanstalkReplyType INVALID;
 
 private:
-    BeanstalkReplyType(int value, const char* name)
-        : Enum<BeanstalkReplyType>(value, name) {
-    }
+    BeanstalkReplyType(int value, const char* name);
 };
 
 class BeanstalkReply : public ReferenceCounter<BeanstalkReply, int> {

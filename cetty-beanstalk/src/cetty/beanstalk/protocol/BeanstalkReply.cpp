@@ -37,6 +37,13 @@ const BeanstalkReplyType BeanstalkReplyType::FOUND(7, "FOUND");
 const BeanstalkReplyType BeanstalkReplyType::OK(8, "OK");
 const BeanstalkReplyType BeanstalkReplyType::INVALID(-1, "INVALID");
 
+BeanstalkReplyType::BeanstalkReplyType(int value, const char* name)
+    : Enum<BeanstalkReplyType>(value, name) {
+    if (defaultEnum()) {
+        setDefaultEnum(new BeanstalkReplyType(-1, "INVALID"));
+    }
+}
+
 std::string BeanstalkReply::toString() const {
     std::string tmp(type_.name());
 

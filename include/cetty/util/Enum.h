@@ -41,7 +41,7 @@ public:
     }
 
 public:
-    static SubT parseFrom(const std::string& name);
+    static const SubT& parseFrom(const std::string& name);
 
 public:
     int value() const {
@@ -85,7 +85,22 @@ protected:
     Enum(int i, const char* name)
         : value_(i),
           name_(name) {
-        enums_.insert(std::make_pair<std::string, Self const *>(name, this));
+        if (!enums_) {
+            enums_ = new Enums;
+        }
+        enums_->insert(std::make_pair<std::string, Self const*>(name, this));
+    }
+
+    const SubT* defaultEnum() const {
+        return defaultEnum_;
+    }
+
+    void setDefaultEnum(const SubT* defaultEnum) {
+        if (defaultEnum_) {
+            delete defaultEnum_;
+        }
+
+        defaultEnum_ = defaultEnum;
     }
 
 private:
@@ -103,7 +118,8 @@ private:
     typedef Enum<SubT, CaseSensitive> Self;
     typedef std::map<std::string, Self const*, LessThan> Enums;
 
-    static Enums enums_;
+    static Enums* enums_;
+    static const SubT* defaultEnum_;
 
 private:
     int value_;
@@ -111,15 +127,22 @@ private:
 };
 
 template<class SubT, int CaseSensitive>
-typename Enum<SubT, CaseSensitive>::Enums Enum<SubT, CaseSensitive>::enums_;
+typename Enum<SubT, CaseSensitive>::Enums* Enum<SubT, CaseSensitive>::enums_ = NULL;
+
+template<class SubT, int CaseSensitive>
+const SubT* cetty::util::Enum<SubT, CaseSensitive>::defaultEnum_ = NULL;
 
 template<class SubT, int CaseSensitive> inline
-SubT Enum<SubT, CaseSensitive>::parseFrom(const std::string& name) {
-    Enums::const_iterator itr = enums_.find(name);
+const SubT& Enum<SubT, CaseSensitive>::parseFrom(const std::string& name) {
+    BOOST_ASSERT(enums_ && defaultEnum_ && "This Enum does not support parseFrom");
 
-    if (itr != enums_.end()) {
-        return *reinterpret_cast<SubT const *>(itr->second);
+    typename Enums::const_iterator itr = enums_->find(name);
+
+    if (itr != enums_->end()) {
+        return *reinterpret_cast<SubT const*>(itr->second);
     }
+
+    return *defaultEnum_;
 }
 
 }

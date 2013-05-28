@@ -26,7 +26,9 @@ namespace timeout {
 IdleStateEvent::IdleStateEvent(IdleState state,
                                int count,
                                int64_t durationMillis)
-    : state(state), count(count), durationMillis(durationMillis) {
+    : state(state),
+    count(count),
+    durationMillis(durationMillis) {
     if (count < 0) {
         LOG_WARN << "count: " << count <<" (expected: >= 0)";
     }
@@ -40,9 +42,9 @@ IdleStateEvent::IdleStateEvent(IdleState state,
 
 std::string IdleStateEvent::toString() const {
     return cetty::util::StringUtil::printf("%s(%d, %dms)",
-            state.name(),
-            count,
-            durationMillis);
+            state_.name(),
+            count_,
+            durationMillis_);
 }
 
 }

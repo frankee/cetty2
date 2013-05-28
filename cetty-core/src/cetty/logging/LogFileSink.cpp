@@ -25,6 +25,13 @@ LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_DAILY(5, "dai
 LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_HOURLY(6, "hourly");
 LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MINUTELY(7, "minutely");
 
+LogFileSink::RollingSchedule::RollingSchedule(int value, const char* name)
+    : cetty::util::Enum<RollingSchedule>(value, name) {
+    if (!defaultEnum()) {
+        setDefaultEnum(new RollingSchedule(-1, "unknown"));
+    }
+}
+
 LogFileSink::LogFileSink(const std::string& baseName)
     :LogSink("LogFileSink"),
      fp_(NULL),

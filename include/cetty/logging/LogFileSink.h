@@ -37,9 +37,7 @@ public:
         static RollingSchedule ROLLING_MINUTELY;     /*basename.2013-05-07.01.01*/
 
     private:
-        RollingSchedule(int value, const char* name)
-            : cetty::util::Enum<RollingSchedule>(value, name) {
-        }
+        RollingSchedule(int value, const char* name);
     };
 
 public:

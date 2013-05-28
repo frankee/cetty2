@@ -62,7 +62,7 @@ BeanstalkReplyPtr BeanstalkReplyDecoder::decode(ChannelHandlerContext& ctx,
 
         StringPiece typeStr;
         int offset = getStrValue(bytes, 0, &typeStr);
-        BeanstalkReplyType type = BeanstalkReplyType::parseFrom(typeStr);
+        BeanstalkReplyType type = BeanstalkReplyType::parseFrom(typeStr.c_str());
         reply_->setType(type);
 
         int intValue;

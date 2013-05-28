@@ -46,24 +46,24 @@ public:
     /**
      * Returns the detailed idle state.
      */
-    const IdleState& getState() const {
-        return state;
+    const IdleState& state() const {
+        return state_;
     }
 
-    int getCount() const {
-        return count;
+    int count() const {
+        return count_;
     }
 
-    int64_t getDurationMillis() const {
-        return durationMillis;
+    int64_t durationMillis() const {
+        return durationMillis_;
     }
 
     std::string toString() const;
 
 private:
-    IdleState state;
-    int count;
-    int64_t durationMillis;
+    IdleState state_;
+    int count_;
+    int64_t durationMillis_;
 };
 
 }

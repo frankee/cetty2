@@ -50,8 +50,7 @@ public:
     static const LogLevel TRACE;
 
 private:
-    LogLevel(int v, const char* name)
-        : cetty::util::Enum<LogLevel>(v, name) {}
+    LogLevel(int v, const char* name);
 
 };
 

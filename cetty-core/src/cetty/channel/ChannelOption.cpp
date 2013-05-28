@@ -77,10 +77,13 @@ const ChannelOption ChannelOption::CO_SCTP_PRIMARY_ADDR(65, "SCTP_PRIMARY_ADDR",
 const ChannelOption ChannelOption::CO_SCTP_SET_PEER_PRIMARY_ADDR(66, "SCTP_SET_PEER_PRIMARY_ADDR", &STRING_VALUE_CHECKER);
 
 ChannelOption::ChannelOption(int id,
-    const char* name,
-    const boost::static_visitor<bool>* checker)
+                             const char* name,
+                             const boost::static_visitor<bool>* checker)
     : cetty::util::Enum<ChannelOption>(id, name),
-    checker_(checker) {
+      checker_(checker) {
+    if (!defaultEnum()) {
+        setDefaultEnum(new ChannelOption(-1, "unknown", NULL));
+    }
 }
 
 bool ChannelOption::validate(const ChannelOption::Variant& value) const {
