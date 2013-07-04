@@ -25,7 +25,14 @@ namespace buffer {
 
 class ByteOrder : public cetty::util::Enum<ByteOrder> {
 public:
+    /**
+     * BIG_ENDIAN, which name is "BIG_ENDIAN"
+     */
     static const ByteOrder BIG;
+
+    /**
+     * LITTLE_ENDIAN, which name is "LITTLE_ENDIAN"
+     */
     static const ByteOrder LITTLE;
 
     /**
@@ -35,20 +42,8 @@ public:
      */
     static ByteOrder nativeOrder();
 
-    /**
-     * Constructs a string describing this enum.
-     * This method returns the string "BIG_ENDIAN" for BIG_ENDIAN and
-     * "LITTLE_ENDIAN" for LITTLE_ENDIAN.
-     *
-     * @return The specified string
-     */
-    std::string toString() const {
-        return name();
-    }
-
 private:
-    ByteOrder(int value, const char* name)
-        : cetty::util::Enum<ByteOrder>(value, name) {}
+    ByteOrder(int value, const char* name);
 };
 
 }

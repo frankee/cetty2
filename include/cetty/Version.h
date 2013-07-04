@@ -27,6 +27,10 @@
 
 #define CETTY_VERSION 0x000803
 
+#define CETTY_VERSION_MAJOR    ( CETTY_VERSION >> 16 )
+#define CETTY_VERSION_MINOR    ((CETTY_VERSION & 0xff00) >> 8)
+#define CETTY_VERSION_REVISION ( CETTY_VERSION & 0xff )
+
 #endif //#if !defined(CETTY_VERSION_H)
 
 // Local Variables:

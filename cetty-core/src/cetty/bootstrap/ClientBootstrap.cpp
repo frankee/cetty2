@@ -98,10 +98,10 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
         future->awaitUninterruptibly();
     }
 
-    ch->closeFuture()->addListener(
-        boost::bind(&ClientBootstrap::onChannelClosed,
-                    this,
-                    _1));
+//     ch->closeFuture()->addListener(
+//         boost::bind(&ClientBootstrap::onChannelClosed,
+//                     this,
+//                     _1));
 
     // Connect.
     return ch->connect(remote);

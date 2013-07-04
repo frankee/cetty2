@@ -544,9 +544,6 @@
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>buffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\logging\Logger.h">
       <Filter>logging</Filter>
     </ClInclude>
@@ -896,6 +893,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\logging\LogSinkPtr.h">
       <Filter>logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
+      <Filter>channel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -19,8 +19,12 @@
 namespace cetty {
 namespace buffer {
 
-const ByteOrder ByteOrder::BIG(0, "BIG_ENDIAN");
-const ByteOrder ByteOrder::LITTLE(1, "LITTLE_ENDIAN");
+const ByteOrder ByteOrder::BIG(1, "BIG_ENDIAN");
+const ByteOrder ByteOrder::LITTLE(2, "LITTLE_ENDIAN");
+
+ByteOrder::ByteOrder(int value, const char* name)
+    : cetty::util::Enum<ByteOrder>(value, name) {
+}
 
 ByteOrder ByteOrder::nativeOrder() {
     static const char tmp[2] = {0x01, 0x02};

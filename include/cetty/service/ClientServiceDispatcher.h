@@ -94,13 +94,16 @@ public:
     ClientServiceDispatcher(const EventLoopPtr& eventLoop,
                             const Connections& connections,
                             const Channel::PipelineInitializer& initializer)
-        : id_(0),
+        : id_(1),
           eventLoop_(eventLoop),
           initializer_(initializer),
           pool_(connections, eventLoop) {
         pool_.setInitializer(boost::bind(&Self::initializeClientChannel,
-                                                this,
-                                                _1));
+                                         this,
+                                         _1));
+        pool_.setDisconnectedCallback(boost::bind(&Self::onChannelClosed,
+                                      this,
+                                      _1));
     }
 
     void registerTo(Context& ctx) {
@@ -195,7 +198,10 @@ private:
 
                 OutboundOut out;
                 toOutboundOut(request, &out);
-                out->setId(id_++);
+
+                if (out->id() == 0) {
+                    out->setId(id_++);
+                }
 
                 ch->pipeline().addOutboundChannelMessage<OutboundOut>(out);
 
@@ -223,13 +229,34 @@ private:
                                  &Self::connectedCallback,
                                  this,
                                  _1,
-                                 boost::ref(ctx)));
+                                 false));
         }
     }
 
-    void connectedCallback(const ChannelPtr& channel, ChannelHandlerContext& ctx) {
+    void onChannelClosed(const ChannelPtr& channel) {
+        pool_.getChannel(boost::bind(
+                             &Self::connectedCallback,
+                             this,
+                             _1,
+                             true));
+    }
+
+    void connectedCallback(const ChannelPtr& channel,
+                           bool reconnect) {
         BOOST_ASSERT(channel);
         bool notify = false;
+
+        if (reconnect) {
+            std::map<int64_t, OutstandingCallPtr>::iterator itr;
+
+            for (itr = outStandingCalls_.begin(); itr != outStandingCalls_.end(); ++itr) {
+                OutboundOut out;
+                toOutboundOut(itr->second, &out);
+                channel->pipeline().addOutboundChannelMessage<OutboundOut>(out);
+            }
+
+            channel->flush(channel->newVoidFuture());
+        }
 
         while (!bufferingCalls_.empty()) {
             BufferingCall& call = bufferingCalls_.front();
@@ -239,7 +266,10 @@ private:
 
                 OutboundOut out;
                 toOutboundOut(request, &out);
-                out->setId(id_++);
+
+                if (out->id() == 0) {
+                    out->setId(id_++);
+                }
 
                 channel->pipeline().addOutboundChannelMessage<OutboundOut>(out);
 

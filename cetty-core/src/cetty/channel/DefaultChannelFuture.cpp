@@ -496,15 +496,15 @@ void DefaultChannelFuture::notifyListeners() {
 
     if (completedListeners_ && !completedListeners_->empty()) {
         while (!completedListeners_->empty()) {
-            const PriorityCallback& callback = completedListeners_->top();
-            notifyListener(callback.callback);
+            PriorityCallback callback = completedListeners_->top();
             completedListeners_->pop();
+            notifyListener(callback.callback);
         }
     }
 
-    if (progressListeners_) {
-        progressListeners_->clear();
-    }
+//     if (progressListeners_) {
+//         progressListeners_->clear();
+//     }
 }
 
 void DefaultChannelFuture::notifyListener(const CompletedCallback& l) {

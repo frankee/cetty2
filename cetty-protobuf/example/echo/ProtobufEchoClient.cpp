@@ -12,7 +12,7 @@ using namespace cetty::protobuf::service::builder;
 class EchoClient {
 public:
     EchoClient(const ChannelPtr& s) : stub_(s), count_(0) {
-        future_ = new echo::echoServiceFuture();
+        future_ = new echo::EchoServiceFuture();
         future_->addListener(boost::bind(&EchoClient::replied, this, _1, _2));
 
         buffer_.resize(1024*1024);
@@ -26,7 +26,7 @@ public:
         stub_.echo(request, future_);
     }
 
-    void replied(const echo::echoServiceFuture& f, const echo::EchoResponsePtr& resp) {
+    void replied(const echo::EchoServiceFuture& f, const echo::EchoResponsePtr& resp) {
         ++count_;
         if (count_ < 10000) {
             sendRequest();
@@ -37,7 +37,7 @@ public:
 
 private:
     std::string buffer_;
-    echo::echoServiceFuturePtr future_;
+    echo::EchoServiceFuturePtr future_;
     echo::EchoService_Stub stub_;
 
     int count_;

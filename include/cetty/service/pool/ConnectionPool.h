@@ -40,7 +40,8 @@ using namespace cetty::bootstrap;
 
 class ConnectionPool : private boost::noncopyable {
 public:
-    typedef boost::function1<void, const ChannelPtr&> ConnectedCallback;
+    typedef boost::function<void (const ChannelPtr&)> ConnectedCallback;
+    typedef boost::function<void (const ChannelPtr&)> DisconnectedCallback;
     typedef ChannelPipeline::Initializer ChannelPipelineInitializer;
 
 public:
@@ -59,11 +60,16 @@ public:
     }
 
     void setInitializer(const ChannelPipelineInitializer& initializer);
+    
+    void setDisconnectedCallback(const DisconnectedCallback& callback);
 
     void close() {}
 
     //protected:
-    void connectedCallback(const ChannelFuture& future);
+    void connectedCallback(ChannelFuture& future);
+
+private:
+    void onDisconnected(ChannelFuture& future);
 
 protected:
     struct ChannelConnection {
@@ -80,6 +86,7 @@ protected:
 
 private:
     bool connecting_;
+    DisconnectedCallback disconnectedCallback_;
     std::deque<ConnectedCallback> callbacks_;
 
     boost::ptr_map<int, ChannelConnection> channels_;

@@ -78,7 +78,7 @@ ChannelPtr ConnectionPool::getChannel() {
     return ChannelPtr();
 }
 
-void ConnectionPool::connectedCallback(const ChannelFuture& future) {
+void ConnectionPool::connectedCallback(ChannelFuture& future) {
     connecting_ = false;
 
     if (future.isSuccess()) {
@@ -88,6 +88,11 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
         conn->channel = channel;
         int id = channel->id();
         channels_.insert(id, conn);
+
+        channel->closeFuture()->addListener(boost::bind(
+            &ConnectionPool::onDisconnected,
+            this,
+            _1), 200);
 
         while (!callbacks_.empty()) {
             const ConnectedCallback& call = callbacks_.front();
@@ -101,11 +106,28 @@ void ConnectionPool::connectedCallback(const ChannelFuture& future) {
     }
     else {
         //TODO
+        connecting_ = true;
+        ChannelFuturePtr future =
+            bootstrap_.connect(connections_[0].host, connections_[0].port);
+        future->addListener(boost::bind(
+            &ConnectionPool::connectedCallback,
+            this,
+            _1));
     }
 }
 
 void ConnectionPool::setInitializer(const ChannelPipelineInitializer& initializer) {
     bootstrap_.setInitializer(initializer);
+}
+
+void ConnectionPool::setDisconnectedCallback(const DisconnectedCallback& callback) {
+    disconnectedCallback_ = callback;
+}
+
+void ConnectionPool::onDisconnected(ChannelFuture& future) {
+    if (disconnectedCallback_) {
+        disconnectedCallback_(future.channel());
+    }
 }
 
 }
