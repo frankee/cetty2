@@ -247,7 +247,7 @@ private:
         bool notify = false;
 
         if (reconnect) {
-            std::map<int64_t, OutstandingCallPtr>::iterator itr;
+            typename std::map<int64_t, OutstandingCallPtr>::iterator itr;
 
             for (itr = outStandingCalls_.begin(); itr != outStandingCalls_.end(); ++itr) {
                 OutboundOut out;
