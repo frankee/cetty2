@@ -57,8 +57,11 @@ void SlaveServiceImpl::init() {
         request->set_auto_recover(application->autoRecover);
         request->set_log_file(application->logFile);
 
+        std::string args;
         for(std::size_t j; j < application->args.size(); ++ j){
-        	request->add_args(application->args.at(j));
+        	request->add_args(application->args[j]);
+            args += application->args[j];
+            args += " ";
         }
 
         for(std::size_t j = 0; j < application->envs.size(); ++j) {
@@ -68,33 +71,35 @@ void SlaveServiceImpl::init() {
         response = new AddApplicationResponse();
 
         addApplication(request, response, emptyCallback);
-        LOG_INFO << "add application " << name;
+        LOG_INFO << "add application: " << name << " bin: ";
 
         delete request;
         delete response;
 
-        startRequest = new StartApplicationsRequest();
-        startResponse = new StartApplicationsResponse();
-        startRequest->add_names()->assign(name);
-        startApplications(startRequest, startResponse, emptyCallback);
+        if (application->autoStart) {
+            startRequest = new StartApplicationsRequest();
+            startResponse = new StartApplicationsResponse();
+            startRequest->add_names()->assign(name);
+            startApplications(startRequest, startResponse, emptyCallback);
 
-        if(startResponse->status(0).state() == kError){
-        	LOG_ERROR << "start application " << name << " failed";
+            if(startResponse->status(0).state() == kError){
+                LOG_ERROR << "start application " << name << " failed";
 
-        	removeRequest = new RemoveApplicationsRequest();
-        	removeResponse = new RemoveApplicationsResponse();
-            removeRequest->add_name(name);
-            removeApplications(removeRequest, removeResponse, emptyCallback);
+                removeRequest = new RemoveApplicationsRequest();
+                removeResponse = new RemoveApplicationsResponse();
+                removeRequest->add_name(name);
+                removeApplications(removeRequest, removeResponse, emptyCallback);
 
-            delete removeRequest;
-            delete removeResponse;
+                delete removeRequest;
+                delete removeResponse;
+            }
+
+            LOG_INFO << "application [" << name << "] "
+                << startResponse->status(0).message();
+
+            delete startRequest;
+            delete startResponse;
         }
-
-        LOG_INFO << "application [" << name << "] "
-        		 << startResponse->status(0).message();
-
-        delete startRequest;
-        delete startResponse;
 	}
 }
 

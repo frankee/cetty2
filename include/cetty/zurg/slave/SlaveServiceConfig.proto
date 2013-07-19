@@ -13,7 +13,8 @@ message SlaveServiceConfig {
           required bool redirect_stderr = 8 [default = true];
           optional string      log_file = 9;
 
-          required bool    auto_recover = 20 [default = true];
+          required bool      auto_start = 20 [default = true];
+          required bool    auto_recover = 21 [default = true];
     }
 
     optional string          slave_name = 1 [default = "zurg-slave"];
