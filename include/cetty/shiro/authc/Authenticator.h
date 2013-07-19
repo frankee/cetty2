@@ -131,9 +131,9 @@ private:
     AuthenticatorConfig config;
 
     /**
-    * List of realms that will be iterated through when a user authenticates
-    * notice the lifecycle of AuthenticationRealm.
-    */
+     * List of realms that will be iterated through when a user authenticates
+     * notice the lifecycle of AuthenticationRealm.
+     */
     AuthenticatingRealmPtr realm;
 
     /**

@@ -62,10 +62,11 @@ public:
     typedef boost::function3<void, bool, const std::string&, const std::string&> AuthorizeCallback;
 
 public:
+    static SecurityManager& instance();
+
+public:
     SecurityManager();
     virtual ~SecurityManager();
-
-    static SecurityManager& instance();
 
     /// login by user name and password
     void login(const AuthenticationToken& token, const LoginCallback& callback);
@@ -82,7 +83,6 @@ public:
     void isPermitted(const PrincipalCollection& principal,
                      const PermissionPtr& permission,
                      const AuthorizeCallback& callback) const;
-
 
     SessionManager* getSessionManager();
     Authenticator& getAuthenticator();

@@ -45,11 +45,12 @@ class AuthenticationToken;
  * @since 0.1
  */
 
-class CredentialsMatcher{
+class CredentialsMatcher {
 public:
-    virtual bool match(const AuthenticationToken& token, const AuthenticationInfo& info) = 0;
+    virtual ~CredentialsMatcher() {}
 
-    virtual ~CredentialsMatcher(){}
+    virtual bool match(const AuthenticationToken& token,
+                       const AuthenticationInfo& info) = 0;
 };
 
 }
