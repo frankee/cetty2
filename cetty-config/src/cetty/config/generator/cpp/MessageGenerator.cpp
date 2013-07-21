@@ -386,7 +386,7 @@ GenerateClassDefinition(io::Printer* printer) {
 
     printer->Print(vars,
                    "$classname$();\n"
-                   "virtual ~$classname$() {}\n"
+                   "virtual ~$classname$();\n"
                    "\n"
                    "$classname$(const $classname$& from);\n"
                    "\n"
@@ -664,6 +664,12 @@ GenerateStructors(io::Printer* printer) {
     }
 
     printer->Print(" {\n}\n");
+
+    printer->Print(
+        "$classname$::~$classname$() {\n"
+        "   clear();\n"
+        "}\n\n",
+        "classname", classname_);
 
     // Generate the copy constructor.
     printer->Print(

@@ -32,7 +32,6 @@ ConfigObject::ConfigObject(const std::string& name)
 }
 
 ConfigObject::~ConfigObject() {
-    clear();
 }
 
 ConfigObject::ObjectDescriptors& ConfigObject::objectDescriptors() {

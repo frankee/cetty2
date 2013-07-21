@@ -50,8 +50,8 @@ public:
 
     virtual ConfigObject* create() const = 0;
 
-    virtual void clear();
-    virtual void copyFrom(const ConfigObject& from);
+    void clear();
+    void copyFrom(const ConfigObject& from);
 
     // reflections
     void list(std::vector<const ConfigFieldDescriptor*>* fields) const;
@@ -268,7 +268,6 @@ void ConfigObject::clearRepeatedField<std::vector<ConfigObject*> >(
             delete raw->at(i);
         }
 
-        // FIXME: segment fault here
         raw->clear();
     }
 }
@@ -280,7 +279,6 @@ void ConfigObject::clearRepeatedField<std::map<std::string, ConfigObject*> >(
         mutableRaw<std::map<std::string, ConfigObject*> >(field);
     BOOST_ASSERT(raw);
     if (raw->empty()) {
-        //FIXME: always be empty.
         return;
     }
 
