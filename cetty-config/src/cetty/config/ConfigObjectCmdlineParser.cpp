@@ -103,7 +103,7 @@ bool parseConfigObject(const variables_map& vm,
     ConfigObjectDescriptor::ConstIterator itr = descriptor->begin();
 
     if (cmdline.countPrefix(descriptor->className()) == 0) {
-        LOG_INFO << "there is no filed set with cmdline in "
+        LOG_INFO << "there is no field set with cmdline in "
                  << descriptor->className();
 
         return true;

@@ -240,6 +240,7 @@ void ConfigCenter::mergeNode(const YAML::Node& from, YAML::Node* to) {
 
 bool ConfigCenter::configure(ConfigObject* object) const {
     if (!object) {
+        LOG_ERROR << "the configure object should not be NULL";
         return false;
     }
 
