@@ -36,7 +36,7 @@ static int parseField(const ConfigFieldDescriptor* field,
                       ConfigObject* object) {
 
     if (field->repeatedType == ConfigFieldDescriptor::LIST) {
-        switch (field->type) {
+        switch (field->cppType) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
             object->add(field, option.as<std::vector<int> >());
             break;
@@ -64,7 +64,7 @@ static int parseField(const ConfigFieldDescriptor* field,
         }
     }
     else {
-        switch (field->type) {
+        switch (field->cppType) {
         case ConfigFieldDescriptor::CPPTYPE_INT32:
             object->set(field, option.as<int>());
             break;

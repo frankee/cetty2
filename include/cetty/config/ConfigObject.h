@@ -44,8 +44,17 @@ public:
     const ConfigObjectDescriptor* descriptor() const;
 
     const std::string& name() const;
+
+    /**
+     *
+     *
+     */
     void setName(const std::string& name);
 
+    /**
+     * usually is full name of the class, including the namespace,
+     * concatenated with the '.'
+     */
     const std::string& className() const;
 
     virtual ConfigObject* create() const = 0;
@@ -53,26 +62,24 @@ public:
     void clear();
     void copyFrom(const ConfigObject& from);
 
-    // reflections
+    /**
+     * reflections
+     */
     void list(std::vector<const ConfigFieldDescriptor*>* fields) const;
 
     bool has(const ConfigFieldDescriptor* field) const;
 
     template<typename T>
     const T& get(const ConfigFieldDescriptor* field) const {
+        BOOST_ASSERT(field);
         return *constRaw<T>(field);
     }
 
-    //     int getInt(const ConfigFieldDescriptor* field) const;
-    //     int64_t getInt64(const ConfigFieldDescriptor* field) const;
-    //     double getDouble(const ConfigFieldDescriptor* field) const;
-    //     bool getBool(const ConfigFieldDescriptor* field) const;
-    //     const std::string& getString(const ConfigFieldDescriptor* field) const;
-
     template<typename T>
     void set(const ConfigFieldDescriptor* field, const T& value) {
-        BOOST_STATIC_ASSERT(!IsVector<T>::VALUE && !IsMap<T>::VALUE);
-
+        BOOST_STATIC_ASSERT(!IsVector<T>::VALUE &&
+                            !IsMap<T>::VALUE &&
+                            !IsString<T>::VALUE);
         BOOST_ASSERT(field);
 
         if (field->optional) {
@@ -83,12 +90,12 @@ public:
         }
     }
 
-    void set(const ConfigFieldDescriptor* field, const std::string& value) {
+    void ConfigObject::set(const ConfigFieldDescriptor* field, const std::string& value) {
         BOOST_ASSERT(field);
         mutableRaw<std::string>(field)->assign(value);
     }
 
-    void set(const ConfigFieldDescriptor* field, const ConfigObject*& value) {
+    void ConfigObject::set(const ConfigFieldDescriptor* field, const ConfigObject* value) {
         BOOST_ASSERT(field);
 
         if (value) {
@@ -96,9 +103,14 @@ public:
         }
     }
 
+    /**
+     * if is pointer type, using mutableObject
+     * @see mutalbeObject()
+     */
     template<typename T>
     T* mutableField(const ConfigFieldDescriptor* field) {
         BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE);
+        BOOST_ASSERT(field);
         return mutableRaw<T>(field);
     }
 
@@ -106,15 +118,34 @@ public:
 
     template<typename T>
     void add(const ConfigFieldDescriptor* field, const T& value) {
-        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE && !IsMap<T>::VALUE);
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE &&
+                            !IsMap<T>::VALUE &&
+                            !IsVector<T>::VALUE);
+        BOOST_ASSERT(field);
         mutableRaw<std::vector<T> >(field)->push_back(value);
+    }
+
+    template<typename T>
+    void add(const ConfigFieldDescriptor* field, const std::vector<T>& values) {
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE &&
+                            !IsMap<T>::VALUE &&
+                            !IsVector<T>::VALUE);
+        BOOST_ASSERT(field);
+
+        std::vector<T>* fieldValues = mutableRaw<std::vector<T> >(field);
+        fieldValues->insert(fieldValues->end(),
+                            values.begin(),
+                            values.end());
     }
 
     template<typename T>
     void add(const ConfigFieldDescriptor* field,
              const std::string& key,
              const T& value) {
-        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE);
+        BOOST_STATIC_ASSERT(!IsPointer<T>::VALUE &&
+                            !IsMap<T>::VALUE &&
+                            !IsVector<T>::VALUE);
+        BOOST_ASSERT(field);
         mutableRaw<std::map<std::string, T> >(field)->insert(
             std::make_pair(key, value));
     }
@@ -139,14 +170,14 @@ public:
 private:
     template <typename T>
     inline T* mutableRaw(const ConfigFieldDescriptor* field) {
-        BOOST_ASSERT(field);
+        BOOST_ASSERT(field && "mutableRaw field should not be NULL");
         void* ptr = reinterpret_cast<uint8_t*>(this) + field->offset;
         return reinterpret_cast<T*>(ptr);
     }
 
     template <typename T>
     inline const T* constRaw(const ConfigFieldDescriptor* field) const {
-        BOOST_ASSERT(field);
+        BOOST_ASSERT(field && "constRaw field should not be NULL");
         const void* ptr = reinterpret_cast<const uint8_t*>(this) +
                           field->offset;
         return reinterpret_cast<const T*>(ptr);
@@ -154,18 +185,18 @@ private:
 
     template<typename T>
     void copyField(const ConfigFieldDescriptor* field, const ConfigObject& from) {
-        BOOST_ASSERT(field);
+        BOOST_ASSERT(field && "copyField field should not be NULL");
 
         if (field->optional) {
             const boost::optional<T>& value =
                 from.get<boost::optional<T> >(field);
 
             if (value) {
-                set<boost::optional<T> >(field, value);
+                set(field, value);
             }
         }
         else {
-            set<T>(field, from.get<T>(field));
+            set(field, from.get<T>(field));
         }
     }
 
@@ -278,6 +309,7 @@ void ConfigObject::clearRepeatedField<std::map<std::string, ConfigObject*> >(
     std::map<std::string, ConfigObject*>* raw =
         mutableRaw<std::map<std::string, ConfigObject*> >(field);
     BOOST_ASSERT(raw);
+
     if (raw->empty()) {
         return;
     }

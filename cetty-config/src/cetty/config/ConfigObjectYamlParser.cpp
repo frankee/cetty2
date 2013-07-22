@@ -88,33 +88,33 @@ int parseField(const ConfigFieldDescriptor* field,
 
     switch (field->repeatedType) {
     case ConfigFieldDescriptor::NO_REPEATED:
-        switch (field->type) {
+        switch (field->cppType) {
         case ConfigFieldDescriptor::CPPTYPE_BOOL:
             if (node.Scalar() == "true" ||
                     node.Scalar() == "1" ||
                     node.Scalar() == "yes") {
-                object->set<bool>(field, true);
+                object->set(field, true);
             }
             else {
-                object->set<bool>(field, false);
+                object->set(field, false);
             }
 
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT32:
-            object->set<int>(field, node.as<int>());
+            object->set(field, node.as<int>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_INT64:
-            object->set<int64_t>(field, node.as<int64_t>());
+            object->set(field, node.as<int64_t>());
             break;
 
         case  ConfigFieldDescriptor::CPPTYPE_DOUBLE:
-            object->set<double>(field, node.as<double>());
+            object->set(field, node.as<double>());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_STRING:
-            object->set<std::string>(field, node.Scalar());
+            object->set(field, node.Scalar());
             break;
 
         case ConfigFieldDescriptor::CPPTYPE_OBJECT:
@@ -126,7 +126,7 @@ int parseField(const ConfigFieldDescriptor* field,
 
     case ConfigFieldDescriptor::LIST:
         for (; itr != node.end(); ++itr) {
-            switch (field->type) {
+            switch (field->cppType) {
             case ConfigFieldDescriptor::CPPTYPE_BOOL:
                 break;
 
@@ -184,7 +184,7 @@ int parseField(const ConfigFieldDescriptor* field,
 
     case ConfigFieldDescriptor::MAP:
         for (; itr != node.end(); ++itr) {
-            switch (field->type) {
+            switch (field->cppType) {
             case ConfigFieldDescriptor::CPPTYPE_BOOL:
                 break;
 

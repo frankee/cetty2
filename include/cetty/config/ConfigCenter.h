@@ -20,6 +20,7 @@
 #include <string>
 #include <yaml-cpp/node/node.h>
 #include <boost/scoped_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/program_options.hpp>
 #include <cetty/util/SimpleTrie.h>
 
@@ -30,7 +31,7 @@ class ConfigObject;
 
 using namespace cetty::util;
 
-class ConfigCenter {
+class ConfigCenter : private boost::noncopyable {
 public:
     typedef SimpleTrie<std::string> CmdlineTrie;
 
@@ -41,10 +42,24 @@ public:
     ConfigCenter();
     ~ConfigCenter();
 
+    /**
+     * load config from the main's arguments.
+     */
     bool load(int argc, char* argv[]);
 
+    /**
+     * load config from the content of the configure file.
+     */
     bool load(const char* str);
+
+    /**
+     * load config from the content of the configure file.
+     */
     bool load(const std::string& str);
+
+    /**
+     * load config from the configure file.
+     */
     bool loadFromFile(const std::string& file);
 
     bool configure(ConfigObject* object) const;

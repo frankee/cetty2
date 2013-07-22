@@ -18,6 +18,7 @@
  */
 
 #include <map>
+#include <string>
 #include <vector>
 
 namespace cetty {
@@ -60,6 +61,34 @@ struct IsPointer<T*> {
 
 template <typename T>
 struct IsPointer<T const*> {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<typename T>
+struct IsString {
+    enum {
+        VALUE = 0
+    };
+};
+
+template<>
+struct IsString<std::string> {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<>
+struct IsString<std::string &> {
+    enum {
+        VALUE = 1
+    };
+};
+
+template<>
+struct IsString<std::string const &> {
     enum {
         VALUE = 1
     };
@@ -121,10 +150,11 @@ struct IsMap<const std::map<K, V>& > {
     };
 };
 
+/**
+ * Use this struct to determine if a template type is a const type.
+ */
 template <typename T>
-struct IsConst
-        /// Use this struct to determine if a template type is a const type.
-{
+struct IsConst {
     enum {
         VALUE = 0
     };
@@ -146,42 +176,39 @@ struct IsConst<const T> {
     };
 };
 
-
+/**
+ * Use the type wrapper if you want to decouple constness and references from template types.
+ */
 template <typename T>
-struct TypeWrapper
-        /// Use the type wrapper if you want to decouple constness and references from template types.
-{
-    typedef T TYPE;
-    typedef const T CONSTTYPE;
-    typedef T& REFTYPE;
-    typedef const T& CONSTREFTYPE;
+struct TypeWrapper {
+    typedef T Type;
+    typedef const T ConstType;
+    typedef T& RefType;
+    typedef const T& ConstRefType;
 };
-
 
 template <typename T>
 struct TypeWrapper<const T> {
-    typedef T TYPE;
-    typedef const T CONSTTYPE;
-    typedef T& REFTYPE;
-    typedef const T& CONSTREFTYPE;
+    typedef T Type;
+    typedef const T ConstType;
+    typedef T& RefType;
+    typedef const T& ConstRefType;
 };
-
 
 template <typename T>
 struct TypeWrapper<const T&> {
-    typedef T TYPE;
-    typedef const T CONSTTYPE;
-    typedef T& REFTYPE;
-    typedef const T& CONSTREFTYPE;
+    typedef T Type;
+    typedef const T ConstType;
+    typedef T& RefType;
+    typedef const T& ConstRefType;
 };
-
 
 template <typename T>
 struct TypeWrapper<T&> {
-    typedef T TYPE;
-    typedef const T CONSTTYPE;
-    typedef T& REFTYPE;
-    typedef const T& CONSTREFTYPE;
+    typedef T Type;
+    typedef const T ConstType;
+    typedef T& RefType;
+    typedef const T& ConstRefType;
 };
 
 template<bool Condition, typename Then, typename Else>

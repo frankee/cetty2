@@ -21,7 +21,7 @@
 #include <boost/filesystem.hpp>
 
 #include <cetty/logging/LoggerHelper.h>
-
+#include <cetty/util/StringUtil.h>
 #include <cetty/config/ConfigObject.h>
 #include <cetty/config/ConfigDescriptor.h>
 #include <cetty/config/ConfigFileImporter.h>
@@ -30,6 +30,7 @@ namespace cetty {
 namespace config {
 
 using namespace boost::program_options;
+using namespace cetty::util;
 
 ConfigCenter* ConfigCenter::center_ = NULL;
 
@@ -44,7 +45,7 @@ ConfigCenter& ConfigCenter::instance() {
 ConfigCenter::ConfigCenter()
     : argc_(0),
       argv_(NULL),
-      description_("Allowed options") {
+      description_("Mainly options") {
 
     description_.add_options()
     ("help", "produce this help message")
@@ -70,6 +71,7 @@ bool ConfigCenter::load(int argc, char* argv[]) {
     const variable_value& option = vm_["conf"];
 
     if (option.empty()) {
+        std::string path;
         std::string program = argv[0];
         std::string::size_type slashPos = program.find_last_of('/');
 
@@ -78,15 +80,11 @@ bool ConfigCenter::load(int argc, char* argv[]) {
         }
 
         if (slashPos != program.npos) {
+            path = program.substr(0, slashPos + 1);
             program = program.substr(slashPos + 1);
         }
 
-        std::string::size_type dotPos = program.find_last_of('.');
-
-        if (dotPos != program.npos) {
-            program = program.substr(0, dotPos);
-        }
-
+        program = StringUtil::stripSuffixString(program, ".exe");
         program += ".conf";
 
         std::vector<std::string> candidateFiles;
@@ -94,9 +92,8 @@ bool ConfigCenter::load(int argc, char* argv[]) {
 
         // /usr/local/bin  /usr/local/etc(or conf)
         // /opt/your_folder/bin  /opt/your_folder/etc(or conf)
-        candidateFiles.push_back(std::string("../etc/") + program);
-        candidateFiles.push_back(std::string("../conf/") + program);
-        candidateFiles.push_back(std::string("/usr/local/etc/") + program);
+        candidateFiles.push_back(path + std::string("../etc/") + program);
+        candidateFiles.push_back(path + std::string("../conf/") + program);
 
         for (std::size_t i = 0; i < candidateFiles.size(); ++i) {
             if (boost::filesystem::exists(
@@ -108,7 +105,11 @@ bool ConfigCenter::load(int argc, char* argv[]) {
             }
         }
 
-        std::cout << description_ << "\n";
+#if !defined(NDEBUG) || defined(_DEBUG)
+        std::ostringstream stream;
+        description_.print(stream);
+        LOG_DEBUG << "description is " << stream.str();
+#endif
         return false;
     }
 

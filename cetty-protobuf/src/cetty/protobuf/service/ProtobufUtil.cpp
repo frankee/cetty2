@@ -202,13 +202,13 @@ bool ProtobufUtil::mergeObject(const ConfigObject& config, Message* message) {
 
 bool ProtobufUtil::mergeField(const ConfigFieldDescriptor* configField, const ConfigObject& config, const FieldDescriptor* field, Message* message) {
     const google::protobuf::Reflection* reflection = message->GetReflection();
-    const FieldDescriptor::CppType& type = field->cpp_type();
-    int configType = configField->type;
+    const FieldDescriptor::CppType& cppType = field->cpp_type();
+    int configType = configField->cppType;
 
     bool repeated = field->is_repeated();
     int  repeatedType = configField->repeatedType;
 
-    if (type == FieldDescriptor::CPPTYPE_BOOL && type == configType) {
+    if (cppType == FieldDescriptor::CPPTYPE_BOOL && cppType == configType) {
         if (repeated) {
             if (repeatedType == ConfigFieldDescriptor::LIST) {
 
@@ -225,7 +225,7 @@ bool ProtobufUtil::mergeField(const ConfigFieldDescriptor* configField, const Co
             }
         }
     }
-    else if (type == FieldDescriptor::CPPTYPE_INT32 && type == configType) {
+    else if (cppType == FieldDescriptor::CPPTYPE_INT32 && cppType == configType) {
         if (repeated) {
             if (repeatedType == ConfigFieldDescriptor::LIST) {
                 const std::vector<int>& values = config.get<std::vector<int> >(configField);
@@ -252,7 +252,7 @@ bool ProtobufUtil::mergeField(const ConfigFieldDescriptor* configField, const Co
             }
         }
     }
-    else if (type == FieldDescriptor::CPPTYPE_MESSAGE && type == configType) {
+    else if (cppType == FieldDescriptor::CPPTYPE_MESSAGE && cppType == configType) {
         if (repeated) {
             if (repeatedType == ConfigFieldDescriptor::LIST) {
                 const std::vector<ConfigObject*>& values =
