@@ -378,7 +378,7 @@ void AsioSocketChannel::doConnect(ChannelHandlerContext& ctx,
                                       boost::bind(
                                           &AsioSocketChannel::handleConnectTimeout,
                                           this,
-                                          boost::ref(future)));
+                                          future));
         }
     }
 }
