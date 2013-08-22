@@ -145,8 +145,10 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const std::string& host,
                                 int port) {
-    ChannelOptions empty;
-    return build(name, host, port, empty, empty);
+    ChannelOptions options;
+    ChannelOptions childOptions;
+    readOptions(name, &options, &childOptions);
+    return build(name, host, port, options, childOptions);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -172,26 +174,23 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const PipelineInitializer& initializer,
                                 int port) {
-    ChannelOptions empty;
-    return build(name,
-                 initializer,
-                 std::string(),
-                 port,
-                 empty,
-                 empty);
+
+    return build(name, initializer, std::string(), port);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
                                 const PipelineInitializer& initializer,
                                 const std::string& host,
                                 int port) {
-    ChannelOptions empty;
+    ChannelOptions options;
+    ChannelOptions childOptions;
+    readOptions(name, &options, &childOptions);
     return build(name,
                  initializer,
                  host,
                  port,
-                 empty,
-                 empty);
+                 options,
+                 childOptions);
 }
 
 ChannelPtr ServerBuilder::build(const std::string& name,
@@ -388,51 +387,11 @@ ServerBuilder& ServerBuilder::buildAll() {
         }
 
         const ServerBootstrapPtr& bootstrap = itr->second;
-        const ServerChannelConfig* serverConfig = server->serverChannel;
-        const ChildChannelConfig* childConfig = server->childChannel;
 
-        if (serverConfig) {
-            bootstrap->setOption(ChannelOption::CO_SO_REUSEADDR,
-                                 serverConfig->reuseAddress)
-            .setOption(ChannelOption::CO_SO_BACKLOG,
-                       serverConfig->backLog)
-            .setOption(ChannelOption::CO_REUSE_CHILD,
-                       serverConfig->reuseChild)
-            .setOption(ChannelOption::CO_RESERVED_CHILD_COUNT,
-                       serverConfig->reservedChildCount);
-
-            if (serverConfig->receiveBufferSize) {
-                bootstrap->setOption(ChannelOption::CO_SO_RCVBUF,
-                                     *serverConfig->receiveBufferSize);
-            }
-        }
-        else {
-            bootstrap->setOption(ChannelOption::CO_REUSE_CHILD, true);
-        }
-
-        if (childConfig) {
-            bootstrap->setChildOption(ChannelOption::CO_SO_KEEPALIVE,
-                                      childConfig->isKeepAlive)
-            .setChildOption(ChannelOption::CO_SO_REUSEADDR,
-                            childConfig->isReuseAddress)
-            .setChildOption(ChannelOption::CO_TCP_NODELAY,
-                            childConfig->isTcpNoDelay);
-
-            if (childConfig->soLinger) {
-                bootstrap->setChildOption(ChannelOption::CO_SO_LINGER,
-                                          childConfig->soLinger);
-            }
-
-            if (childConfig->sendBufferSize) {
-                bootstrap->setChildOption(ChannelOption::CO_SO_SNDBUF,
-                                          childConfig->sendBufferSize);
-            }
-
-            if (childConfig->receiveBufferSize) {
-                bootstrap->setChildOption(ChannelOption::CO_SO_RCVBUF,
-                                          childConfig->receiveBufferSize);
-            }
-        }
+        ChannelOptions options;
+        ChannelOptions childOptions;
+        readOptions(name, &options, &childOptions);
+        setOptions(bootstrap, options, childOptions);
 
         if (!build(bootstrap, server->host, server->port) && config_.strictBuildAll) {
             LOG_WARN << "in strictBuildAll mode, will close other server channels.";
@@ -441,6 +400,63 @@ ServerBuilder& ServerBuilder::buildAll() {
     }
 
     return *this;
+}
+
+void ServerBuilder::readOptions(const std::string& name,
+                                ChannelOptions* options,
+                                ChannelOptions* childOptions) {
+    std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
+        config_.servers.find(name);
+
+    if (itr == config_.servers.end()) {
+        LOG_WARN << "failed to config options, not found the server: "
+                 << name
+                 << " from the configure file.";
+        return;
+    }
+
+    const ServerChannelConfig* serverConfig = itr->second->serverChannel;
+    const ChildChannelConfig* childConfig = itr->second->childChannel;
+
+    if (options && serverConfig) {
+        options->setOption(ChannelOption::CO_SO_REUSEADDR,
+                           serverConfig->reuseAddress)
+        .setOption(ChannelOption::CO_SO_BACKLOG,
+                   serverConfig->backLog)
+        .setOption(ChannelOption::CO_REUSE_CHILD,
+                   serverConfig->reuseChild)
+        .setOption(ChannelOption::CO_RESERVED_CHILD_COUNT,
+                   serverConfig->reservedChildCount);
+
+        if (serverConfig->receiveBufferSize) {
+            options->setOption(ChannelOption::CO_SO_RCVBUF,
+                               *serverConfig->receiveBufferSize);
+        }
+    }
+
+    if (childOptions && childConfig) {
+        childOptions->setOption(ChannelOption::CO_SO_KEEPALIVE,
+                                childConfig->isKeepAlive)
+        .setOption(ChannelOption::CO_SO_REUSEADDR,
+                   childConfig->isReuseAddress)
+        .setOption(ChannelOption::CO_TCP_NODELAY,
+                   childConfig->isTcpNoDelay);
+
+        if (childConfig->soLinger) {
+            childOptions->setOption(ChannelOption::CO_SO_LINGER,
+                                    childConfig->soLinger);
+        }
+
+        if (childConfig->sendBufferSize) {
+            childOptions->setOption(ChannelOption::CO_SO_SNDBUF,
+                                    childConfig->sendBufferSize);
+        }
+
+        if (childConfig->receiveBufferSize) {
+            childOptions->setOption(ChannelOption::CO_SO_RCVBUF,
+                                    childConfig->receiveBufferSize);
+        }
+    }
 }
 
 }

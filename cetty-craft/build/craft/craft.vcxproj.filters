@@ -63,4 +63,8 @@
     </ClCompile>
     <ClCompile Include="..\..\src\cetty\craft\craft_options.pb.cc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\craft\craft.proto" />
+    <None Include="..\..\..\include\cetty\craft\craft_options.proto" />
+  </ItemGroup>
 </Project>

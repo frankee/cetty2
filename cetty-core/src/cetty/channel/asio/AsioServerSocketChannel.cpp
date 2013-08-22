@@ -270,10 +270,14 @@ void AsioServerSocketChannel::handleChildClosed(const ChannelFuture& future) {
 
 #endif
         const boost::optional<bool>& reuseChild = serverConfig_.isReuseChild();
-        if (reuseChild && *reuseChild) {
+
+        // only if reuseChild set to false, will not recycle the channel.
+        if (!reuseChild || *reuseChild) {
             reusableChildChannels_.push_back(itr->second);
+            LOG_INFO << "the channel: " << ch->id()
+                     << " push to reusable pool.";
         }
-        
+
         childChannels_.erase(itr);
     }
     else {

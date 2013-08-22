@@ -172,6 +172,11 @@ private:
                     const ChannelOptions& options,
                     const ChannelOptions& childOptions);
 
+    // read options from configure file
+    void readOptions(const std::string& name,
+                     ChannelOptions* options,
+                     ChannelOptions* childOptions);
+
 private:
     typedef std::map<std::string, ServerBootstrapPtr> ServerBootstraps;
 

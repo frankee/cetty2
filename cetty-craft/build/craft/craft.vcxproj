@@ -32,6 +32,10 @@
     <ClCompile Include="..\..\src\cetty\craft\http\ServiceResponseMapping.cpp" />
     <ClCompile Include="..\..\src\cetty\craft\security\AccessController.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\craft\craft.proto" />
+    <None Include="..\..\..\include\cetty\craft\craft_options.proto" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E9C725F0-B6CC-4F00-8D3A-58D0D899CAAF}</ProjectGuid>
     <RootNamespace>craft</RootNamespace>
