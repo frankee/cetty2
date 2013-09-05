@@ -89,7 +89,7 @@ bool ProtobufServerBuilder::initializeChannel(ChannelPipeline& pipeline) {
     return true;
 }
 
-ChannelPtr ProtobufServerBuilder::buildRpc(int port) {
+ChannelPtr ProtobufServerBuilder::build(int port) {
     return builder_.build(PROTOBUF_SERVICE_RPC, port);
 }
 

@@ -95,7 +95,7 @@ private:
                    const ChannelFuturePtr& connectFuture);
 
     virtual void doPreOpen();
-    virtual void doPreActive();
+    virtual void doPreFireActive();
 
     void doConnect(ChannelHandlerContext& ctx,
                    const InetAddress& remoteAddress,
@@ -121,6 +121,7 @@ private:
     void handleConnectTimeout(const ChannelFuturePtr& future);
 
     void beginRead();
+    void beginWrite();
 
     void connectFailed(const ChannelFuturePtr& connectFuture,
                        const ChannelException& e);

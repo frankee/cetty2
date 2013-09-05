@@ -89,14 +89,14 @@ ServerBuilder& ServerBuilder::registerPrototype(const std::string& name,
 
     bootstrap->setChildInitializer(childPipelineInitializer);
 
-    setOptions(bootstrap, options, childOptions);
+    setChannelOptions(bootstrap, options, childOptions);
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
     return *this;
 }
 
-ServerBuilder& ServerBuilder::setOptions(const std::string& name,
+ServerBuilder& ServerBuilder::setChannelOptions(const std::string& name,
         const ChannelOptions& options,
         const ChannelOptions& childOptions) {
     ServerBootstraps::const_iterator itr = bootstraps_.find(name);
@@ -118,9 +118,9 @@ ServerBuilder& ServerBuilder::setOptions(const std::string& name,
     return *this;
 }
 
-void ServerBuilder::setOptions(const ServerBootstrapPtr& bootstrap,
-                               const ChannelOptions& options,
-                               const ChannelOptions& childOptions) {
+void ServerBuilder::setChannelOptions(const ServerBootstrapPtr& bootstrap,
+                                      const ChannelOptions& options,
+                                      const ChannelOptions& childOptions) {
     if (!options.empty()) {
         bootstrap->setOptions(options);
     }
@@ -167,7 +167,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
     }
 
     const ServerBootstrapPtr& bootstrap = itr->second;
-    setOptions(bootstrap, options, childOptions);
+    setChannelOptions(bootstrap, options, childOptions);
     return build(bootstrap, host, port);
 }
 
@@ -214,7 +214,7 @@ ChannelPtr ServerBuilder::build(const std::string& name,
 
     bootstraps_.insert(std::make_pair(name, bootstrap));
 
-    setOptions(bootstrap, options, childOptions);
+    setChannelOptions(bootstrap, options, childOptions);
 
     if (childPipelineInitializer) {
         bootstrap->setInitializer(childPipelineInitializer);
@@ -391,7 +391,7 @@ ServerBuilder& ServerBuilder::buildAll() {
         ChannelOptions options;
         ChannelOptions childOptions;
         readOptions(name, &options, &childOptions);
-        setOptions(bootstrap, options, childOptions);
+        setChannelOptions(bootstrap, options, childOptions);
 
         if (!build(bootstrap, server->host, server->port) && config_.strictBuildAll) {
             LOG_WARN << "in strictBuildAll mode, will close other server channels.";

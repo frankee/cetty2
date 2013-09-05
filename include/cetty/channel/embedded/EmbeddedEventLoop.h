@@ -64,6 +64,7 @@ public:
         LOG_WARN << "EmbeddedEventLoop does not support runAfter";
         return TimeoutPtr();
     }
+
     virtual TimeoutPtr runEvery(int64_t millisecond, const Handler& handler) {
         LOG_WARN << "EmbeddedEventLoop does not support runEvery";
         return TimeoutPtr();

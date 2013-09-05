@@ -236,13 +236,14 @@ bool AsioServerSocketChannel::doClose() {
 
     //close all children Channels
     while (!childChannels_.empty()) {
-        const ChannelPtr& child = childChannels_.begin()->second;
+        ChildChannels::const_iterator itr = childChannels_.begin();
+        const ChannelPtr& child = itr->second;
 
         if (child) {
-            child->close(child->closeFuture());
+            child->close(child->newVoidFuture());
         }
         else {
-            childChannels_.erase(childChannels_.begin());
+            childChannels_.erase(itr);
         }
     }
 

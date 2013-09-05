@@ -27,12 +27,6 @@
 #include <cetty/util/TruncatableArray.h>
 
 namespace cetty {
-namespace channel {
-class MessageEvent;
-}
-}
-
-namespace cetty {
 namespace util {
 class Exception;
 }

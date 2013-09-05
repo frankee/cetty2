@@ -21,30 +21,20 @@ public:
     virtual void echo(const ConstEchoRequestPtr& request,
                       const EchoResponsePtr& response,
                       const DoneCallback& done) {
-        EchoResponsePtr rep(response);
-        if (!response) {
-            rep = new EchoResponse;
-        }
-
-        rep->set_payload(request->payload());
+        response->set_payload(request->payload());
         if (done) {
-            done(rep);
+            done(response);
         }
     }
 };
 
 }
 
-//class Test : public boost::enable_shared_from_this2
-
 int main(int argc, char* argv[]) {
     ConfigCenter::instance().load(argc, argv);
     
     ProtobufServerBuilder builder;
-    builder.registerService(new echo::EchoServiceImpl);
-    builder.buildRpc(1980);
-
+    builder.registerService(new echo::EchoServiceImpl).build(1980);
     builder.waitingForExit();
-
     return 0;
 }

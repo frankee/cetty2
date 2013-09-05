@@ -1,8 +1,6 @@
 import "google/protobuf/descriptor.proto";
 
 message ConfigFileOptions {
-	optional string config_file_name = 1;
-	optional string source_file_name = 2;
 }
 
 message ConfigMessageOptions {
@@ -13,7 +11,7 @@ message ConfigFieldOptions {
     // default value for encoded message string
 	optional string default = 1;
 	
-	// repeated field using std::map not std::vector
+	// repeated field using std::map instead of std::vector
 	optional bool       map = 2;
 	
 	// for cmdline

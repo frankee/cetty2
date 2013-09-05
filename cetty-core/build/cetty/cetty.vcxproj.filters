@@ -344,6 +344,9 @@
     <ClCompile Include="..\..\src\cetty\logging\LogFileSink.cpp">
       <Filter>logging</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cetty\util\Uuid.cpp">
+      <Filter>util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelHandlerContext.h">
@@ -896,6 +899,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\channel\ChannelPipeline.h">
       <Filter>channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\Uuid.h">
+      <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

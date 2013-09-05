@@ -101,15 +101,15 @@ public:
     ServerBuilder& buildAll();
 
     /**
-     * reset the options of the server prototype
+     * reset the channel options of the server prototype
      *
      * @param name the name of the server prototype
      * @param options
      * @param childOptions
      */
-    ServerBuilder& setOptions(const std::string& name,
-                              const ChannelOptions& options,
-                              const ChannelOptions& childOptions);
+    ServerBuilder& setChannelOptions(const std::string& name,
+                                     const ChannelOptions& options,
+                                     const ChannelOptions& childOptions);
 
     /**
      * Waiting for all the {@link channel}s in the {@link ServerBuilder} to close.
@@ -131,17 +131,18 @@ public:
                                      const PipelineInitializer& childPipelineInitializer);
 
     /**
-     *
+     * only take affection before build made.
      */
     ServerBuilder& setDaemonize(bool daemonize);
 
     /**
-     *
+     * only take affection before build made.
      */
     ServerBuilder& setPidfile(const std::string& filename);
 
     /**
-     *
+     * any changes, which only before {@link build} made, to the {@link ServerBuilderConfig}
+     * will take affection
      */
     ServerBuilderConfig& config();
 
@@ -168,9 +169,9 @@ private:
                      const std::string& host,
                      int port);
 
-    void setOptions(const ServerBootstrapPtr& bootstrap,
-                    const ChannelOptions& options,
-                    const ChannelOptions& childOptions);
+    void setChannelOptions(const ServerBootstrapPtr& bootstrap,
+                           const ChannelOptions& options,
+                           const ChannelOptions& childOptions);
 
     // read options from configure file
     void readOptions(const std::string& name,

@@ -262,7 +262,7 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 }
 
                 future->setSuccess();
-                closeFuture_->setSuccess();
+                onClosedComplete();
             }
             else {
                 processFailure("close failed", future);
@@ -283,6 +283,10 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
     state_ = CHANNEL_INACTIVED;
 }
 
+void Channel::onClosedComplete() {
+    closeFuture_->setSuccess();
+}
+
 void Channel::closeIfClosed() {
     if (isOpen()) {
         return;
@@ -293,7 +297,7 @@ void Channel::closeIfClosed() {
 
 void Channel::setActived() {
     state_ = CHANNEL_ACTIVED;
-    doPreActive();
+    doPreFireActive();
     pipeline_->fireChannelActive();
 }
 

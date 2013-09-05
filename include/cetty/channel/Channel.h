@@ -121,7 +121,7 @@ public:
      * Returns the parent of this channel.
      *
      * @return the parent channel.
-     *         empty {@linek ChanelPtr} if this channel does not have a parent channel.
+     *         empty {@link ChanelPtr} if this channel does not have a parent channel.
      */
     const ChannelPtr& parent() const;
 
@@ -495,14 +495,20 @@ public:
     virtual std::string toString() const;
 
 protected:
+    enum OperationResult {
+        OP_FAILED   = 0,
+        OP_SUCCESS  = 1,
+        OP_SUCCESS_ = 3,
+    };
+
+protected:
     /**
      * Creates a new instance.
      *
      * @param parent
-     *        the parent of this channel. <tt>NULL</tt> if there's no parent.
-     * @param sink
+     *        the parent of this channel. <tt>ChannelPtr()</tt> if there's no parent.
+     * @param eventLoop
      *        the sink which will receive downstream events from the pipeline
-     *        and send upstream events to the pipeline
      */
     Channel(const ChannelPtr& parent,
             const EventLoopPtr& eventLoop);
@@ -511,10 +517,10 @@ protected:
      * (Internal use only) Creates a new temporary instance with the specified
      * ID.
      *
+     * @param id
+     *        the pipeline which is going to be attached to this channel
      * @param parent
      *        the parent of this channel. <tt>NULL</tt> if there's no parent.
-     * @param pipeline
-     *        the pipeline which is going to be attached to this channel
      * @param sink
      *        the sink which will receive downstream events from the pipeline
      *        and send upstream events to the pipeline
@@ -528,10 +534,28 @@ protected:
     virtual bool doDisconnect() = 0;
     virtual bool doClose() = 0;
 
-    // hooks before channel state change
+    /**
+     * hook before channel open
+     * NOOP by default
+     */
     virtual void doPreOpen() {}
-    virtual void doPreActive() {}
-    virtual void doPreClose() {} // NOOP by default
+
+    /**
+     * hook before channel fireChannelActive
+     * NOOP by default
+     */
+    virtual void doPreFireActive() {}
+
+    /**
+     * hook before channel close
+     * NOOP by default
+     */
+    virtual void doPreClose() {}
+
+    /**
+     * all 
+     */
+    void onClosedComplete();
 
     void closeIfClosed();
 
@@ -541,12 +565,12 @@ protected:
     void setActived();
 
     /**
-     * (Internal use only) Set the Channel to active state.
+     * (Internal use only) Set the local address of the Channel.
      */
     void setLocalAddress(const InetAddress& local);
 
     /**
-     * (Internal use only) Set the Channel to active state.
+     * (Internal use only) Set the remote address of the Channel.
      */
     void setRemoteAddress(const InetAddress& remote);
 
@@ -575,13 +599,25 @@ private:
                         const ChannelFuturePtr& future);
 
 private:
+    /**
+     * handle the bind event at the sink of the pipeline as the
+     * {@link BindFunctor} of the {@link ChannelMessageHandlerContext}.
+     */
     void doBind(ChannelHandlerContext& ctx,
                 const InetAddress& localAddress,
                 const ChannelFuturePtr& future);
 
+    /**
+     * handle the disconnect event at the sink of the pipeline as the
+     * {@link DisconnectFunctor} of the {@link ChannelMessageHandlerContext}.
+     */
     void doDisconnect(ChannelHandlerContext& ctx,
                       const ChannelFuturePtr& future);
 
+    /**
+     * handle the close event at the sink of the pipeline as the
+     * {@link CloseFunctor} of the {@link ChannelMessageHandlerContext}.
+     */
     void doClose(ChannelHandlerContext& ctx,
                  const ChannelFuturePtr& future);
 

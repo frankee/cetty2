@@ -28,7 +28,7 @@ namespace cetty {
 namespace gearman {
 namespace builder {
 
-    using namespace cetty::channel;
+using namespace cetty::channel;
 using namespace cetty::service;
 using namespace cetty::service::builder;
 using namespace cetty::gearman::protocol;

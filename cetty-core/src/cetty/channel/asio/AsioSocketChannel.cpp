@@ -176,12 +176,15 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
         }
 
         writeQueue_->popFront();
+        isWriting_ = false;
 
-        if (writeQueue_->empty()) {
-            isWriting_ = false;
+        if (!writeQueue_->empty()) {
+            beginWrite();
         }
     }
     else {
+        isWriting_ = false;
+
         ChannelException e(error.message(), error.value());
 
         while (!writeQueue_->empty()) {
@@ -419,6 +422,13 @@ bool AsioSocketChannel::doDisconnect() {
     return doClose();
 }
 
+class CallbackStatus {
+public:
+
+private:
+
+};
+
 bool AsioSocketChannel::doClose() {
     if (!isOpen()) {
         LOG_WARN << "channel " << toString()
@@ -454,12 +464,13 @@ bool AsioSocketChannel::doClose() {
 
 void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
                                 const ChannelFuturePtr& future) {
-
     BOOST_ASSERT(writeBufferContainer_);
-
-    const ChannelBufferPtr& buffer = writeBufferContainer_->getMessages();
-
-    if (!isActive()) {
+    if (isActive()) {
+        const ChannelBufferPtr& buffer = writeBufferContainer_->getMessages();
+        writeQueue_->offer(buffer, future);
+        beginWrite();
+    }
+    else {
         LOG_ERROR << "channel " << toString()
                   << " failed to send the msg, because the socket is"
                   " disconnected, and then close this channel.";
@@ -469,48 +480,6 @@ void AsioSocketChannel::doFlush(ChannelHandlerContext& ctx,
         }
 
         doClose();
-        return;
-    }
-
-    isWriting_ = true;
-    AsioWriteOperation& operation = writeQueue_->offer(buffer, future);
-    int writeBufferSize = operation.writeBufferSize();
-
-    if (writeBufferSize == 0) {
-        LOG_WARN << "channel " << toString()
-                 << " write an empty message, do not write to the socket,\
-                             just post a handleWrite operation.";
-        ioService_->service().post(boost::bind(
-                                       &AsioSocketChannel::handleWrite,
-                                       this,
-                                       boost::system::error_code(),
-                                       0));
-        return;
-    }
-
-    if (operation.isSingleBuffer()) {
-        boost::asio::async_write(tcpSocket_,
-                                 const_buffers_1(operation.asioBuffer()),
-                                 makeCustomAllocHandler(writeAllocator_,
-                                         boost::bind(&AsioSocketChannel::handleWrite,
-                                                 this,
-                                                 boost::asio::placeholders::error,
-                                                 boost::asio::placeholders::bytes_transferred)));
-        LOG_INFO << "channel " << toString()
-                 << " write a buffer with " << writeBufferSize
-                 << " bytes to the socket asynchronously";
-    }
-    else {
-        boost::asio::async_write(tcpSocket_,
-                                 operation.asioBufferArray(),
-                                 makeCustomAllocHandler(writeAllocator_,
-                                         boost::bind(&AsioSocketChannel::handleWrite,
-                                                 this,
-                                                 boost::asio::placeholders::error,
-                                                 boost::asio::placeholders::bytes_transferred)));
-        LOG_WARN << "channel " << toString()
-                 << " write a gathering buffer with " << writeBufferSize
-                 << " bytes to the socket asynchronously, may be latency.";
     }
 }
 
@@ -543,7 +512,7 @@ void AsioSocketChannel::doPreOpen() {
     }
 }
 
-void AsioSocketChannel::doPreActive() {
+void AsioSocketChannel::doPreFireActive() {
     boost::system::error_code ec;
     tcp::endpoint endpoint = tcpSocket_.remote_endpoint(ec);
 
@@ -630,6 +599,54 @@ void AsioSocketChannel::cleanUpWriteBuffer() {
         writeQueue_->offer(firstOp);
     }
 }
+
+void AsioSocketChannel::beginWrite() {
+    if (isWriting_) {
+        return;
+    }
+
+    isWriting_ = true;
+    AsioWriteOperation& operation = writeQueue_->front();
+    int writeBufferSize = operation.writeBufferSize();
+
+    if (writeBufferSize == 0) {
+        LOG_WARN << "channel " << toString()
+            << " write an empty message, do not write to the socket,\
+               just post a handleWrite operation.";
+        ioService_->service().post(boost::bind(
+            &AsioSocketChannel::handleWrite,
+            this,
+            boost::system::error_code(),
+            0));
+        return;
+    }
+
+    if (operation.isSingleBuffer()) {
+        boost::asio::async_write(tcpSocket_,
+            const_buffers_1(operation.asioBuffer()),
+            makeCustomAllocHandler(writeAllocator_,
+            boost::bind(&AsioSocketChannel::handleWrite,
+            this,
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred)));
+        LOG_INFO << "channel " << toString()
+            << " write a buffer with " << writeBufferSize
+            << " bytes to the socket asynchronously";
+    }
+    else {
+        boost::asio::async_write(tcpSocket_,
+            operation.asioBufferArray(),
+            makeCustomAllocHandler(writeAllocator_,
+            boost::bind(&AsioSocketChannel::handleWrite,
+            this,
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred)));
+        LOG_WARN << "channel " << toString()
+            << " write a gathering buffer with " << writeBufferSize
+            << " bytes to the socket asynchronously, may be latency.";
+    }
+}
+
 
 }
 }

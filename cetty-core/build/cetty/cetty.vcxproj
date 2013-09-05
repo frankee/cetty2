@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\src\cetty\util\StringUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\util\URI.cpp" />
     <ClCompile Include="..\..\src\cetty\logging\LogLevel.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\Uuid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\cetty\bootstrap\ClientBootstrapPtr.h" />
@@ -352,6 +353,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\StringPiece.h" />
     <ClInclude Include="..\..\..\include\cetty\util\StringUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\Uuid.h" />
     <ClInclude Include="..\..\..\include\cetty\Version.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ByteOrder.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffer.h" />

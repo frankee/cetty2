@@ -50,6 +50,8 @@ public:
 
     ProtobufServerBuilder& registerService(const ProtobufServicePtr& service);
 
+    ChannelPtr build(int port);
+
     ChannelPtr build(const std::string& name,
                      const PipelineInitializer& childPipelineInitializer,
                      int port);
@@ -58,8 +60,6 @@ public:
                      const PipelineInitializer& childPipelineInitializer,
                      const std::string& host,
                      int port);
-
-    ChannelPtr buildRpc(int port);
 
     ProtobufServerBuilder& buildAll();
 
