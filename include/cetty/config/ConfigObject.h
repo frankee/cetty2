@@ -90,12 +90,12 @@ public:
         }
     }
 
-    void ConfigObject::set(const ConfigFieldDescriptor* field, const std::string& value) {
+    void set(const ConfigFieldDescriptor* field, const std::string& value) {
         BOOST_ASSERT(field);
         mutableRaw<std::string>(field)->assign(value);
     }
 
-    void ConfigObject::set(const ConfigFieldDescriptor* field, const ConfigObject* value) {
+    void set(const ConfigFieldDescriptor* field, const ConfigObject* value) {
         BOOST_ASSERT(field);
 
         if (value) {

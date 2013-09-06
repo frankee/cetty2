@@ -236,7 +236,7 @@ bool AsioServerSocketChannel::doClose() {
 
     //close all children Channels
     while (!childChannels_.empty()) {
-        ChildChannels::const_iterator itr = childChannels_.begin();
+        ChildChannels::iterator itr = childChannels_.begin();
         const ChannelPtr& child = itr->second;
 
         if (child) {

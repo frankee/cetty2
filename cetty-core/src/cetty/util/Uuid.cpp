@@ -33,10 +33,12 @@ boost::uuids::random_generator Uuid::rgen_;
 Uuid::Uuid(const char* str) {
     if (str) {
         try {
-            uuid::swap(sgen_(str));
+            uuid u(sgen_(str));
+            uuid::swap(u);
         }
         catch (const std::runtime_error& e) {
-            uuid::swap(nil_uuid());
+            uuid u(nil_uuid());
+            uuid::swap(u);
             LOG_ERROR << "failed to construct the Uuid from "
                       << e.what() << " : "
                       << str;
@@ -49,10 +51,12 @@ Uuid::Uuid(const char* str) {
 
 Uuid::Uuid(const std::string& str) {
     try {
-        uuid::swap(sgen_(str));
+        uuid u(sgen_(str));
+        uuid::swap(u);
     }
     catch (const std::runtime_error& e) {
-        uuid::swap(nil_uuid());
+        uuid u(nil_uuid());
+        uuid::swap(u);
         LOG_ERROR << "failed to construct the Uuid from "
                   << e.what() << " : "
                   << str;

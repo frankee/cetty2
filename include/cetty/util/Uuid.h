@@ -177,3 +177,4 @@ Uuid::operator uuid() const {
 
 
 #endif //#if !defined(CETTY_UTIL_UUID_H)
+
