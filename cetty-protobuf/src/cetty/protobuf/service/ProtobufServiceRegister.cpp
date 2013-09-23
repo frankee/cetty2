@@ -35,9 +35,10 @@ int ProtobufServiceRegister::registerService(const ProtobufServicePtr& service) 
 
     serviceMap_[serviceName] = service;
 
-    ServiceRegisteredCallbacks::iterator callbackItr = callbacks_.begin();
-    for (; callbackItr != callbacks_.end(); ++itr) {
-        (*callbackItr)(service);
+    std::size_t i = 0;
+    std::size_t j = callbacks_.size();
+    for (; i < j; ++i) {
+        callbacks_[i](service);
     }
 
     return 0;

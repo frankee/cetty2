@@ -80,6 +80,8 @@ ngx_tcp_parse_protobuf_msg (ngx_buf_t *buf, ngx_tcp_session_t *s) {
             ngx_tcp_protobuf_read_bytes(&pfmt, s->name.data + s->name.len, fl);
             s->name.data[fl] = '.';
             s->name.len += (fl + 1);
+			ngx_log_error(NGX_LOG_ERR, s->connection->log, 0,
+            			  "Parse protobuf message error");
             mark ++;
             break;
 

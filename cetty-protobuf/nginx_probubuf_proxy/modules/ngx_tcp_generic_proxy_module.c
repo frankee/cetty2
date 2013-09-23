@@ -159,6 +159,102 @@ ngx_tcp_proxy_init_session(ngx_tcp_session_t *s)
     return;
 }
 
+
+static  void
+ngx_tcp_proxy_init_upstream(ngx_tcp_session_t *s, void *conf)
+{
+    ngx_tcp_upstream_t           *u, *upstreams;
+    ngx_tcp_proxy_loc_conf_t     *plcf = conf;
+
+    s->connection->log->action = "ngx_tcp_proxy_init_upstream";
+
+    if (plcf->upstream.upstream == NULL) {
+        ngx_tcp_finalize_session(s);
+        return;
+    }
+
+    if (ngx_tcp_upstream_create(s) != NGX_OK) {
+        ngx_tcp_finalize_session(s);
+        return;
+    }
+
+    upstreams = s->upstreams.elts;
+    s->upstream = &upstreams[s->upstreams.nelts - 1];
+
+    u = s->upstream;
+
+    u->conf = &plcf->upstream;
+    u->proxy_conf = plcf;
+
+    u->name.data = plcf->name.data;
+    u->name.len = plcf->name.len;
+
+    u->write_event_handler = ngx_tcp_upstream_init_proxy_handler;
+    u->read_event_handler = ngx_tcp_upstream_init_proxy_handler;
+
+    ngx_tcp_upstream_init(s);
+
+    return;
+}
+
+
+static void 
+ngx_tcp_upstream_init_proxy_handler(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
+{
+    ngx_connection_t             *c;
+    ngx_tcp_proxy_loc_conf_t     *plcf;
+
+    c = s->connection;
+    c->log->action = "ngx_tcp_upstream_init_proxy_handler";
+
+    ngx_log_debug0(NGX_LOG_DEBUG_TCP, s->connection->log, 0,
+                   "tcp proxy upstream init proxy");
+
+    plcf = u->proxy_conf;
+    if (plcf == NULL) {
+        ngx_tcp_finalize_session(s);
+        return;
+    }
+
+    c = u->peer.connection;
+    if (c->read->timedout || c->write->timedout) {
+        ngx_tcp_upstream_next(s, u, NGX_TCP_UPSTREAM_FT_TIMEOUT);
+        return;
+    }
+
+    if (ngx_tcp_upstream_check_broken_connection(s) != NGX_OK){
+        ngx_tcp_upstream_next(s, u, NGX_TCP_UPSTREAM_FT_ERROR);
+        return;
+    }
+
+    c->read->handler = ngx_tcp_proxy_peer_handler;
+    c->write->handler = ngx_tcp_proxy_handler;
+
+    /**
+     * ngx_add_timer(c->read, plcf->upstream.read_timeout);
+     * ngx_add_timer(c->write, plcf->upstream.send_timeout);
+     */
+
+#if (NGX_TCP_SSL)
+
+    /* 
+     * The ssl connection with client may not trigger the read event again,
+     * So I trigger it in this function.
+     * */
+    if (s->connection->ssl) {
+        ngx_tcp_proxy_handler(s->connection->read); 
+    }
+
+#endif
+
+    if(c->write->ready) {
+    	c->write->handler(c->write);
+    }
+
+    return;
+}
+
+
 static void
 ngx_tcp_proxy_handler(ngx_event_t *ev)
 {
@@ -367,100 +463,6 @@ ngx_tcp_proxy_handler(ngx_event_t *ev)
     }
 }
 
-
-static  void
-ngx_tcp_proxy_init_upstream(ngx_tcp_session_t *s, void *conf)
-{
-    ngx_tcp_upstream_t           *u, *upstreams;
-    ngx_tcp_proxy_loc_conf_t     *plcf = conf;
-
-    s->connection->log->action = "ngx_tcp_proxy_init_upstream";
-
-    if (plcf->upstream.upstream == NULL) {
-        ngx_tcp_finalize_session(s);
-        return;
-    }
-
-    if (ngx_tcp_upstream_create(s) != NGX_OK) {
-        ngx_tcp_finalize_session(s);
-        return;
-    }
-
-    upstreams = s->upstreams.elts;
-    s->upstream = &upstreams[s->upstreams.nelts - 1];
-
-    u = s->upstream;
-
-    u->conf = &plcf->upstream;
-    u->proxy_conf = plcf;
-
-    u->name.data = plcf->name.data;
-    u->name.len = plcf->name.len;
-
-    u->write_event_handler = ngx_tcp_upstream_init_proxy_handler;
-    u->read_event_handler = ngx_tcp_upstream_init_proxy_handler;
-
-    ngx_tcp_upstream_init(s);
-
-    return;
-}
-
-
-static void 
-ngx_tcp_upstream_init_proxy_handler(ngx_tcp_session_t *s, ngx_tcp_upstream_t *u)
-{
-    ngx_connection_t             *c;
-    ngx_tcp_proxy_loc_conf_t     *plcf;
-
-    c = s->connection;
-    c->log->action = "ngx_tcp_upstream_init_proxy_handler";
-
-    ngx_log_debug0(NGX_LOG_DEBUG_TCP, s->connection->log, 0,
-                   "tcp proxy upstream init proxy");
-
-    plcf = u->proxy_conf;
-    if (plcf == NULL) {
-        ngx_tcp_finalize_session(s);
-        return;
-    }
-
-    c = u->peer.connection;
-    if (c->read->timedout || c->write->timedout) {
-        ngx_tcp_upstream_next(s, u, NGX_TCP_UPSTREAM_FT_TIMEOUT);
-        return;
-    }
-
-    if (ngx_tcp_upstream_check_broken_connection(s) != NGX_OK){
-        ngx_tcp_upstream_next(s, u, NGX_TCP_UPSTREAM_FT_ERROR);
-        return;
-    }
-
-    c->read->handler = ngx_tcp_proxy_peer_handler;
-    c->write->handler = ngx_tcp_proxy_handler;
-
-    /**
-     * ngx_add_timer(c->read, plcf->upstream.read_timeout);
-     * ngx_add_timer(c->write, plcf->upstream.send_timeout);
-     */
-
-#if (NGX_TCP_SSL)
-
-    /* 
-     * The ssl connection with client may not trigger the read event again,
-     * So I trigger it in this function.
-     * */
-    if (s->connection->ssl) {
-        ngx_tcp_proxy_handler(s->connection->read); 
-    }
-
-#endif
-
-    if(c->write->ready) {
-    	c->write->handler(c->write);
-    }
-
-    return;
-}
 
 static char *
 ngx_tcp_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) 

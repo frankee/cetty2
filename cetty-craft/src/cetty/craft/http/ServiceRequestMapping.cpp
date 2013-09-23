@@ -527,14 +527,17 @@ void ServiceRequestMapping::onServiceRegistered(const ProtobufServicePtr& servic
 
     for (int i = 0; i < methodCount; ++i) {
         const MethodDescriptor* method = descriptor->method(i);
-        ServiceMethod* serviceMethod = new ServiceMethod;
+        methodName = method->full_name();
 
-        if (serviceMethod->init(path, method)) {
-            methodName = method->full_name();
-            serviceMethods_.insert(methodName, serviceMethod);
-        }
-        else {
-            delete serviceMethod;
+        if (serviceMethods_.find(methodName) == serviceMethods_.end()) {
+            ServiceMethod* serviceMethod = new ServiceMethod;
+
+            if (serviceMethod->init(path, method)) {
+                serviceMethods_.insert(methodName, serviceMethod);
+            }
+            else {
+                delete serviceMethod;
+            }
         }
     }
 }

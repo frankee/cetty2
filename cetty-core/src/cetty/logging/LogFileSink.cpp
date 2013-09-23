@@ -1,10 +1,9 @@
 #include <cetty/logging/LogFileSink.h>
 
+#include <ctime>
 #include <boost/thread.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <ctime>
 
 namespace cetty {
 namespace logging {
@@ -94,7 +93,7 @@ void LogFileSink::doSink(const LogMessage& msg) {
     else {
         // just for ROLLING_DAILY
         time_t now = ::time(NULL);
-        int days = now / DAILY_CYCLE * DAILY_CYCLE;
+        int days = static_cast<int>(now / DAILY_CYCLE * DAILY_CYCLE);
 
         if (days != lastRollTime_) {
             rollFile();
@@ -105,8 +104,6 @@ void LogFileSink::doSink(const LogMessage& msg) {
     std::fwrite(buf, strlen(buf), 1, fp_);
 
     int errCode = 0;
-    char errBuf[512];
-
     errCode = ferror(fp_);
 
     if (errCode) {
@@ -123,7 +120,7 @@ void LogFileSink::doFlush() {
 void LogFileSink::rollFile() {
     // Just for daily cycle
     time_t now = ::time(NULL);
-    lastRollTime_ = now / DAILY_CYCLE * DAILY_CYCLE;
+    lastRollTime_ = static_cast<int>(now / DAILY_CYCLE * DAILY_CYCLE);
 
     generateLogFileName();
 
@@ -139,9 +136,9 @@ void LogFileSink::generateLogFileName() {
     fileName_.clear();
     fileName_.append(baseName_);
 
-    // tudo make sure file separator
+    // TODO make sure file separator
     char timebuf[32];
-    char pidbuf[32];
+    //char pidbuf[32];
 
     time_t now = time(NULL);
     struct tm* tm = gmtime(&now);

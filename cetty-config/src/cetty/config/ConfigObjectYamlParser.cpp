@@ -29,7 +29,7 @@ int parseField(const ConfigFieldDescriptor* field,
 
 bool parseConfigObject(const YAML::Node& node, ConfigObject* object) {
     if (!object) {
-        LOG_ERROR << "parsed object is NULL.";
+        LOG_WARN << "parsed object is NULL, do nothing.";
         return false;
     }
 
@@ -165,7 +165,20 @@ int parseField(const ConfigFieldDescriptor* field,
                     if (!objectName.empty()
                             && !obj->descriptor()->hasField(objectName)) { //case-1
                         obj->setName(objectName);
-                        if (!parseConfigObject(itr->begin()->second, obj)) {
+
+                        const YAML::Node& value = itr->begin()->second;
+
+                        if (itr->size() > 1) {
+                            // case-1, error
+                            // items:
+                            //   - objectName :
+                            //     field1 : value  ~~~ forgot the indentation
+                            //     field2 : value  ~~~ forgot the indentation
+                            LOG_WARN << "do you forgot the indentation of the " << objectName
+                                     << " in the field " << field->className;
+                            return false;
+                        }
+                        else if (!parseConfigObject(itr->begin()->second, obj)) {
                             return false;
                         }
                     }

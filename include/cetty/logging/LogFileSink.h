@@ -87,8 +87,8 @@ public:
      * This property specifies maximal size of output file. The
      * value is in bytes.
      */
-    int maxRollingFileSize() const;
-    void setRollingMaxFileSize(int maxFileSize);
+    int64_t maxRollingFileSize() const;
+    void setRollingMaxFileSize(int64_t maxFileSize);
 
     /**
      * This property limits the number of backup output
@@ -153,12 +153,12 @@ void LogFileSink::setRollingSchedule(const RollingSchedule& schedule) {
 }
 
 inline
-int LogFileSink::maxRollingFileSize() const {
+int64_t LogFileSink::maxRollingFileSize() const {
     return rollSize_;
 }
 
 inline
-void LogFileSink::setRollingMaxFileSize(int maxFileSize) {
+void LogFileSink::setRollingMaxFileSize(int64_t maxFileSize) {
     rollSize_ = maxFileSize;
 }
 

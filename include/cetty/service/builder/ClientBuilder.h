@@ -72,7 +72,26 @@ public:
     }
 
     ChannelPtr build() {
-        ChannelPtr channel = newChannel();
+        return build(connections_);
+    }
+
+    ChannelPtr build(const std::string& connection) {
+        Connections connections;
+        connections.push_back(parseConnection(connection));
+        return build(connections);
+    }
+
+    ChannelPtr build(const std::vector<std::string>& connections) {
+        Connections conns;
+        std::vector<std::string>::const_iterator itr;
+        for (itr = connections.begin(); itr != connections.end(); ++itr) {
+            conns.push_back(Connection(*itr));
+        }
+        return build(conns);
+    }
+
+    ChannelPtr build(const Connections& connections) {
+        ChannelPtr channel = newChannel(connections);
 
         if (serviceInitializer_) {
             channel->setInitializer(serviceInitializer_);
@@ -99,7 +118,7 @@ public:
     }
 
 private:
-    ChannelPtr newChannel() {
+    ChannelPtr newChannel(const Connections& connections) {
         EventLoopPtr loop = eventLoop_;
 
         if (!loop) {
@@ -108,7 +127,7 @@ private:
 
         ChannelPtr channel(new ServiceChannel(loop,
                                              clientInitializer_,
-                                             connections_));
+                                             connections));
 
         clientChannels_.insert(std::make_pair(channel->id(), channel));
         return channel;

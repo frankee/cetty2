@@ -334,27 +334,26 @@ void ServerBuilder::waitingForExit() {
             }
         }
 
-        printf("To quit server, press 'q'.\n");
+        //printf("To quit server, press 'q'.\n");
 
         char input;
 
         do {
             input = getchar();
 
-            if (input == 'q') {
-                shutdown();
-                break;
-            }
+//             if (input == 'q') {
+//                 shutdown();
+//                 break;
+//             }
         }
         while (true);
     }
 }
 
 ServerBuilder& ServerBuilder::buildAll() {
-    std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr =
-        config_.servers.begin();
+    std::map<std::string, ServerBuilderConfig::Server*>::const_iterator itr;
 
-    for (; itr != config_.servers.end(); ++itr) {
+    for (itr = config_.servers.begin(); itr != config_.servers.end(); ++itr) {
         const std::string& name = itr->first;
         const ServerBuilderConfig::Server* server = itr->second;
 

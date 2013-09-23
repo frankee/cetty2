@@ -62,7 +62,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& msg) {
     const ServiceMessage& rpc = msg->serviceMessage();
 
-    if (rpc.type() == cetty::protobuf::service::REQUEST) {
+    if (rpc.type() == cetty::protobuf::service::MSG_REQUEST) {
         const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
 
@@ -89,7 +89,7 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
             printf("has no such service or method.\n");
         }
     }
-    else if (rpc.type() == cetty::protobuf::service::ERROR) {
+    else if (rpc.type() == cetty::protobuf::service::MSG_ERROR) {
     }
     else {
         //ctx.sendUpstream(e);
@@ -102,7 +102,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
         int64_t id) {
 
     ProtobufServiceMessagePtr message(
-        new ProtobufServiceMessage(RESPONSE,
+        new ProtobufServiceMessage(MSG_RESPONSE,
                                    id,
                                    req->service(),
                                    req->method(),

@@ -29,6 +29,9 @@ class Message;
 namespace cetty {
 namespace protobuf {
 namespace service {
+
+class ServiceMessage;
+
 namespace handler {
 
 using namespace cetty::channel;
@@ -40,6 +43,9 @@ public:
 
     static ChannelBufferPtr encode(ChannelHandlerContext& ctx,
                                    const ProtobufServiceMessagePtr& msg);
+
+    static int decodeMessageHead(const ChannelBufferPtr& buffer,
+                                 ServiceMessage* message);
 
     static int decodeMessage(const ChannelBufferPtr& buffer,
                              const ProtobufServiceMessagePtr& message);

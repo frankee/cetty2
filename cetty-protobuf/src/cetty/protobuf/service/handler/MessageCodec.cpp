@@ -52,12 +52,12 @@ int MessageCodec::decodePayload(const ChannelBufferPtr& buffer,
     const std::string& service = serviceMessage.service();
     const std::string& method = serviceMessage.method();
 
-    if (serviceMessage.type() == REQUEST) {
+    if (serviceMessage.type() == MSG_REQUEST) {
         prototype = ProtobufServiceRegister::instance().getRequestPrototype(
                         service,
                         method);
     }
-    else if (serviceMessage.type() == RESPONSE) {
+    else if (serviceMessage.type() == MSG_RESPONSE) {
         prototype = ProtobufServiceRegister::instance().getResponsePrototype(
                         service,
                         method);
@@ -115,7 +115,7 @@ int MessageCodec::decodeMessage(const ChannelBufferPtr& buffer,
             case FIELD_NUM_TYPE:
                 type = ProtobufCodec::decodeVarint(buffer);
 
-                if (type != REQUEST && type != RESPONSE && type != ERROR) {
+                if (type != MSG_REQUEST && type != MSG_RESPONSE && type != MSG_ERROR) {
                     return -1;
                 }
 
@@ -201,7 +201,7 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
 
     encodeProtobuf(serviceMessage, buffer);
 
-    if (serviceMessage.type() == REQUEST) {
+    if (serviceMessage.type() == MSG_REQUEST) {
         int payloadSize = message->payload()->GetCachedSize();
         ProtobufCodec::encodeTag(buffer,
                                  FIELD_NUM_REQUEST,
@@ -210,7 +210,7 @@ void MessageCodec::encodeMessage(const ProtobufServiceMessagePtr& message,
 
         encodeProtobuf(*message->payload(), buffer);
     }
-    else if (serviceMessage.type() == RESPONSE) {
+    else if (serviceMessage.type() == MSG_RESPONSE) {
         int payloadSize = message->payload()->GetCachedSize();
         ProtobufCodec::encodeTag(buffer,
                                  FIELD_NUM_RESPONSE,
@@ -236,6 +236,66 @@ void MessageCodec::encodeProtobuf(const google::protobuf::Message& message,
         reinterpret_cast<google::protobuf::uint8*>(bytes));
 
     buffer->offsetWriterIndex(messageSize);
+}
+
+int MessageCodec::decodeMessageHead(const ChannelBufferPtr& buffer,
+                                    ServiceMessage* message) {
+    BOOST_ASSERT(message);
+    // for "RPC0"
+    buffer->offsetReaderIndex(4);
+
+    while (buffer->readable()) {
+        int wireType = 0;
+        int fieldNum = 0;
+        int fieldLength = 0;
+        int64_t type = 0;
+        int64_t id = 0;
+        int64_t error = 0;
+
+        if (ProtobufCodec::decodeField(buffer, &wireType, &fieldNum, &fieldLength)) {
+            switch (fieldNum) {
+                //involved varint
+            case FIELD_NUM_TYPE:
+                type = ProtobufCodec::decodeVarint(buffer);
+
+                if (type != MSG_REQUEST && type != MSG_RESPONSE && type != MSG_ERROR) {
+                    return -1;
+                }
+
+                message->set_type(static_cast<MessageType>(type));
+                break;
+
+            case FIELD_NUM_ID:
+                id = ProtobufCodec::decodeFixed64(buffer);
+                id = ChannelBufferUtil::swapLong(id);
+                message->set_id(id);
+                break;
+
+            case FIELD_NUM_SERVICE:
+                buffer->readBytes(message->mutable_service(), fieldLength);
+                break;
+
+            case FIELD_NUM_METHOD:
+                buffer->readBytes(message->mutable_method(), fieldLength);
+                break;
+
+            case FIELD_NUM_ERROR:
+                error = ProtobufCodec::decodeVarint(buffer);
+                message->set_error(static_cast<ErrorCode>(error));
+                break;
+
+            case FIELD_NUM_REQUEST:
+            case FIELD_NUM_RESPONSE:
+                buffer->clear();
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
+    return 0;
 }
 
 }

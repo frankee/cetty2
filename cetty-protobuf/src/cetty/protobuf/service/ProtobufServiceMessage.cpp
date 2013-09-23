@@ -94,17 +94,17 @@ ProtobufServiceMessage::~ProtobufServiceMessage() {
 
 bool ProtobufServiceMessage::isRequest() const {
     BOOST_ASSERT(message_ && "message should not be NULL.");
-    return message_->type() == REQUEST;
+    return message_->type() == MSG_REQUEST;
 }
 
 bool ProtobufServiceMessage::isResponse() const {
     BOOST_ASSERT(message_ && "message should not be NULL.");
-    return message_->type() == RESPONSE;
+    return message_->type() == MSG_RESPONSE;
 }
 
 bool ProtobufServiceMessage::isError() const {
     BOOST_ASSERT(message_ && "message should not be NULL.");
-    return message_->type() == ERROR;
+    return message_->type() == MSG_ERROR;
 }
 
 void ProtobufServiceMessage::setType(int type) {

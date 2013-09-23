@@ -19,9 +19,12 @@
 
 #include <string>
 #include <vector>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace service {
+
+using namespace cetty::util;
 
 struct Connection {
     int port;
@@ -29,8 +32,20 @@ struct Connection {
     std::string host;
 
     // format like :  host:port:limited
-    Connection(const std::string& connection) {
+    Connection(const std::string& connection)
+        : port(),
+          limited() {
+        std::vector<std::string> segments;
+        StringUtil::split(connection, ':', &segments);
 
+        if (!segments.empty()) {
+            host = segments.at(0);
+            port = StringUtil::strto32(segments.at(1));
+
+            if (segments.size() > 2) {
+                limited = StringUtil::strto32(segments.at(2));
+            }
+        }
     }
 
     Connection(const std::string& host, int port, int limited)

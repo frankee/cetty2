@@ -1,0 +1,25 @@
+package cetty.shuttle;
+
+import "cetty/config/config_options.proto";
+
+
+message Backend {
+    message Check {
+        required int32 interval = 1 [default = 3000];
+    }
+
+    repeated string servers = 1;
+}
+
+message Location {
+    optional string method  = 1;
+    optional string backend = 2;
+}
+
+message ShuttleConfig {
+    repeated Backend backends   = 1 [
+        (config_options).map = true
+    ];
+
+    repeated Location locations = 2;
+}

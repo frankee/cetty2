@@ -61,7 +61,7 @@ void ProtobufClientServiceAdaptor::doCallMethod(
     }
 
     ProtobufServiceMessagePtr message(
-        new ProtobufServiceMessage(REQUEST,
+        new ProtobufServiceMessage(MSG_REQUEST,
                                    method->service()->full_name(),
                                    method->name(),
                                    (MessagePtr)request));

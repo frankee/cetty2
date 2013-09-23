@@ -39,4 +39,9 @@
       <Filter>config</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\cetty\config\config_options.proto">
+      <Filter>config</Filter>
+    </None>
+  </ItemGroup>
 </Project>
