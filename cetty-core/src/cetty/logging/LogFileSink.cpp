@@ -90,7 +90,7 @@ void LogFileSink::doSink(const LogMessage& msg) {
     if (size > rollSize_) {
         rollFile();
     }
-    else {
+    else if (schedule_ == RollingSchedule::ROLLING_DAILY) {
         // just for ROLLING_DAILY
         time_t now = ::time(NULL);
         int days = static_cast<int>(now / DAILY_CYCLE * DAILY_CYCLE);
@@ -135,27 +135,32 @@ void LogFileSink::rollFile() {
 void LogFileSink::generateLogFileName() {
     fileName_.clear();
     fileName_.append(baseName_);
+    fileName_.append("-");
 
     // TODO make sure file separator
-    char timebuf[32];
-    //char pidbuf[32];
-
+    char timebuf[32] = {'\0'};
     time_t now = time(NULL);
     struct tm* tm = gmtime(&now);
-    strftime(timebuf, sizeof timebuf, "%Y%m%d-%H%M%S", tm);
+    strftime(timebuf, sizeof timebuf, "%Y%m%dT%H%M%S", tm);
     fileName_.append(timebuf);
 
+#if 0
     ptime epoch(boost::gregorian::date(1970,1,1));
     ptime pnow = microsec_clock::local_time();
     time_duration::tick_type x = (pnow - epoch).total_nanoseconds();
 
+    
     sprintf(timebuf, ":%d", x);
     fileName_.append(timebuf);
+#endif
 
-    // fileName_.append(boost::lexical_cast<std::string>(get_id()));
-    fileName_.append(".log");
-    fileName_.append(".");
-    fileName_.append(extension_);
+    if (!extension_.empty()) {
+        fileName_.append(".");
+        fileName_.append(extension_);
+    }
+    else {
+        fileName_.append(".log");
+    }
 }
 
 int64_t LogFileSink::logSize() const {

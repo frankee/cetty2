@@ -286,6 +286,8 @@ void ServerBuilder::init() {
                                               schedule,
                                               fileSink->bufferSize,
                                               fileSink->rollSize);
+
+            Logger::addLogSink(sink);
         }
     }
 
@@ -334,17 +336,17 @@ void ServerBuilder::waitingForExit() {
             }
         }
 
-        //printf("To quit server, press 'q'.\n");
+        printf("To quit server, press 'q'.\n");
 
         char input;
 
         do {
             input = getchar();
 
-//             if (input == 'q') {
-//                 shutdown();
-//                 break;
-//             }
+            if (input == 'q') {
+                shutdown();
+                break;
+            }
         }
         while (true);
     }
