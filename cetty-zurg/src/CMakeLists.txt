@@ -10,7 +10,7 @@ GENERATE_SERVICE_SEPARATE(ZURG_PB_SRCS ZURG_PB_HDRS cetty/zurg/master/master.pro
 message(STATUS "generate source files ${ZURG_PB_SRCS}")
 message(STATUS "generate header files ${ZURG_PB_HDRS}")
 
-GENERATE_CONFIG(ZURG_CONF_SRCS ZURG_CONF_HDRS cetty/shuttle/ShuttleConfig.proto)
+GENERATE_CONFIG(ZURG_CONF_SRCS ZURG_CONF_HDRS cetty/zurg/slave/SlaveServiceConfig.proto)
 
 SET(ZURG_LIB cetty-zurg)
 SET(ZURG_SRCS ${ZURG_DIR} ${ZURG_PB_SRCS} ${ZURG_CONF_SRCS} ${ZURG_SLAVE_DIR} ${ZURG_MASTER_DIR})

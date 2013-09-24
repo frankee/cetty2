@@ -77,7 +77,7 @@ public:
 
     ChannelPtr build(const std::string& connection) {
         Connections connections;
-        connections.push_back(parseConnection(connection));
+        connections.push_back(Connection(connection));
         return build(connections);
     }
 

@@ -14,7 +14,7 @@ SET(SHUTTLE_LIB cetty-shuttle)
 cxx_static_library(${SHUTTLE_LIB} ${SHUTTLE_SOURCES})
 
 SET(SHUTTLE_BIN Shuttle)
-cxx_executable_no_link(${SHUTTLE_BIN} cetty/shuttle/Shuttle)
+cxx_executable_no_link(${SHUTTLE_BIN} cetty/shuttle)
 cxx_link_craft(${SHUTTLE_BIN} ${SHUTTLE_LIB})
 
 install(TARGETS ${SHUTTLE_LIB} DESTINATION lib)
