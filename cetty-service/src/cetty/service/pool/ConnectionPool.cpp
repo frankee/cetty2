@@ -19,6 +19,7 @@
 #include <boost/bind.hpp>
 #include <cetty/channel/Channel.h>
 #include <cetty/channel/ChannelFuture.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace service {
@@ -49,6 +50,10 @@ ChannelPtr ConnectionPool::getChannel(const ConnectedCallback& callback) {
     if (channels_.empty() ||
             !channels_.begin()->second->channel->isActive()) {
         channels_.clear();
+
+        LOG_DEBUG << "pool is empty, try to connect to "
+                  << connections_[0].host
+                  << ":" << connections_[0].port;
 
         if (!connecting_) {
             ChannelFuturePtr future =
@@ -90,9 +95,9 @@ void ConnectionPool::connectedCallback(ChannelFuture& future) {
         channels_.insert(id, conn);
 
         channel->closeFuture()->addListener(boost::bind(
-            &ConnectionPool::onDisconnected,
-            this,
-            _1), 200);
+                                                &ConnectionPool::onDisconnected,
+                                                this,
+                                                _1), 200);
 
         while (!callbacks_.empty()) {
             const ConnectedCallback& call = callbacks_.front();
@@ -110,9 +115,9 @@ void ConnectionPool::connectedCallback(ChannelFuture& future) {
         ChannelFuturePtr future =
             bootstrap_.connect(connections_[0].host, connections_[0].port);
         future->addListener(boost::bind(
-            &ConnectionPool::connectedCallback,
-            this,
-            _1));
+                                &ConnectionPool::connectedCallback,
+                                this,
+                                _1));
     }
 }
 

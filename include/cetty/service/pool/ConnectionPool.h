@@ -60,7 +60,7 @@ public:
     }
 
     void setInitializer(const ChannelPipelineInitializer& initializer);
-    
+
     void setDisconnectedCallback(const DisconnectedCallback& callback);
 
     void close() {}

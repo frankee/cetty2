@@ -61,12 +61,18 @@ void ProtobufProxyHandler::messageReceived(ChannelHandlerContext& ctx,
     const ChannelPtr& ch = ShuttleBackend::getChannel(method);
 
     if (ch) {
+        LOG_INFO << "proxy the method " << method
+                 << " to backend " << ch->remoteAddress().toString();
+
         callMethod<ProtobufProxyMessagePtr, ProtobufProxyMessagePtr>(ch,
                 msg,
                 new ProxyFuture(boost::bind(&ProtobufProxyHandler::onResponse,
                                             this,
                                             _1,
                                             _2)));
+    }
+    else {
+        LOG_WARN << "failed to found the channel for " << method;
     }
 }
 

@@ -22,6 +22,7 @@
 #include <boost/bind.hpp>
 #include <cetty/bootstrap/ClientBootstrap.h>
 
+#include <cetty/logging/LoggerHelper.h>
 #include <cetty/util/MetaProgramming.h>
 
 #include <cetty/channel/ChannelFuture.h>
@@ -219,6 +220,7 @@ private:
             }
         }
         else {
+            LOG_DEBUG << "channel is not ready to flush, buffering the call";
             BufferingCall bufferingCall;
             bufferingCall.calls = queue;
             bufferingCall.future = future;
