@@ -25,7 +25,7 @@ using namespace cetty::config;
 SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop) {
     ConfigCenter::instance().configure(&config_);
     processManager_.reset(new ProcessManager(loop));
-    applicationManager_.reset(new ApplicationManager(processManager_.get()));
+    applicationManager_.reset(new ApplicationManager(*processManager_));
 
     // start all configured applications
     init();
