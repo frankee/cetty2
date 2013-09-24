@@ -61,13 +61,16 @@ bool ShuttleBackend::initializeChannel(ChannelPipeline& pipeline) {
     return true;
 }
 
-void ShuttleBackend::configure(const std::map<std::string, Backend*>& config, const EventLoopPoolPtr& pool) {
+void ShuttleBackend::configure(const std::map<std::string, Backend*>& config,
+                               const EventLoopPoolPtr& pool) {
     EventLoopPool::Iterator itr = pool->begin();
 
     for (; itr != pool->end(); ++itr) {
         ShuttleBackendPtr backend = ShuttleBackendPtr(new ShuttleBackend(*itr));
         backend->configure(config);
-        backends_.insert(std::make_pair((*itr)->threadId(), backend));
+        ThreadId id = (*itr)->threadId();
+        backends_.insert(std::make_pair(id, backend));
+        LOG_DEBUG << "config backend for " << id;
     }
 }
 
@@ -77,18 +80,21 @@ void ShuttleBackend::configure(const std::map<std::string, Backend*>& config) {
     for (itr = config.begin(); itr != config.end(); ++itr) {
         channels_.insert(std::make_pair(itr->first,
                                         builder_.build(itr->second->servers)));
+        LOG_DEBUG << "config the channel in backend for " << itr->first;
     }
 }
 
-
 const ChannelPtr& ShuttleBackend::getChannel(const std::string& method) {
+    ThreadId id = CurrentThread::id();
     std::map<ThreadId, ShuttleBackendPtr>::const_iterator itr =
-        backends_.find(CurrentThread::id());
+        backends_.find(id);
 
     if (itr != backends_.end()) {
         return itr->second->channel(method);
     }
     else {
+        LOG_WARN << "failed to found the channel for " << method
+                 << " in " << id;
         return emptyChannel_;
     }
 }
@@ -100,8 +106,10 @@ const ChannelPtr& ShuttleBackend::channel(const std::string& method) const {
     if (itr != channels_.end()) {
         return itr->second;
     }
-
-    return emptyChannel_;
+    else {
+        LOG_WARN << "failed to found the channel for " << method;
+        return emptyChannel_;
+    }
 }
 
 ShuttleBackend::ShuttleBackend(const EventLoopPtr& loop)
