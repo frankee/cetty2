@@ -25,10 +25,6 @@ ProcessManager::ProcessManager(const EventLoopPtr& loop)
       loop_(loop) {
     ConfigCenter::instance().configure(&config_);
 
-//     if (config_.zombieInterval <= 0) {
-//         config_.zombieInterval = 3000;
-//     }
-
     signals_.add(SIGCHLD);
     signals_.add(SIGTERM);
     signals_.add(SIGQUIT);
@@ -59,34 +55,44 @@ void ProcessManager::runAtExit(pid_t pid, const Callback& cb) {
 }
 
 void ProcessManager::startSignalWait() {
-    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait, this, _1, _2));
+    signals_.async_wait(boost::bind(&ProcessManager::handleSignalWait,
+                                    this,
+                                    _1,
+                                    _2));
 }
 
 void ProcessManager::handleSignalWait(const boost::system::error_code& error, int signal) {
     LOG_INFO << "Receive a signal. [" << signal << "]";
 
     if (!error) {
-    	if(signal == SIGINT || signal == SIGTERM || signal == SIGQUIT){
-    		LOG_INFO << "Terminate all process.";
+        if (signal == SIGINT || signal == SIGTERM || signal == SIGQUIT) {
+            LOG_INFO << "Received signal "
+                     << signal
+                     << " and terminating all process.";
+
             stopAll();
-    	} else if(signal == SIGCHLD){
-			int status = 0;
-			struct rusage resourceUsage;
-			bzero(&resourceUsage, sizeof(resourceUsage));
+        }
+        else if (signal == SIGCHLD) {
+            int status = 0;
+            struct rusage resourceUsage;
+            bzero(&resourceUsage, sizeof(resourceUsage));
 
-			pid_t pid = ::wait4(-1, &status, WNOHANG, &resourceUsage);
+            pid_t pid = ::wait4(-1, &status, WNOHANG, &resourceUsage);
 
-			if (pid > 0) {
-				onExit(pid, status, resourceUsage);
-			} else {
-				LOG_FATAL << "ProcessManager::onChildProcessExit - wait4 ";
-			}
+            if (pid > 0) {
+                onExit(pid, status, resourceUsage);
+            }
+            else {
+                LOG_FATAL << "ProcessManager::onChildProcessExit - wait4 ";
+            }
 
-			startSignalWait();
-    	} else {
-    		LOG_ERROR << "Unexcept signal :" << signal;
-    	}
-    } else {
+            startSignalWait();
+        }
+        else {
+            LOG_ERROR << "Unexceptional signal :" << signal;
+        }
+    }
+    else {
         LOG_WARN << "Waiting the SIGCHLD signal has an error : "
                  << error.value()
                  << " : " << error.message();
@@ -110,7 +116,10 @@ void ProcessManager::onExit(pid_t pid, int status, const struct rusage& resource
     std::map<pid_t, Callback>::iterator it = callbacks_.find(pid);
 
     if (it != callbacks_.end()) {
-        loop_->post(boost::bind(it->second, status, resourceUsage));
+        loop_->post(boost::bind(it->second,
+                                status,
+                                resourceUsage));
+
         callbacks_.erase(it);
     }
     else {

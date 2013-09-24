@@ -13,231 +13,240 @@ option java_package = "io.cetty.zurg.slave";
 option java_outer_classname = "SlaveServiceProto";
 
 message GetHardwareRequest {
-  optional int32 lshw = 1 [default = 0, (craft_options).query_param="lshw"];
+    optional int32 lshw = 1 [
+        default = 0,
+        (craft_options).query_param="lshw"];
 }
 
 message GetHardwareResponse {
-  optional string    lspci = 1;
-  optional string    lscpu = 2;
-  optional string     lshw = 3;
-  optional string ifconfig = 4;
+    optional string    lspci = 1;
+    optional string    lscpu = 2;
+    optional string     lshw = 3;
+    optional string ifconfig = 4;
 }
 
 message GetFileContentRequest {
-  required string file_name = 1 [(craft_options).query_param="f"];
-  optional int32   max_size = 2 [default = 1048576];
-  //optional int64 offset = 3 [default = 0];
+    required string file_name = 1 [(craft_options).query_param="f"];
+    optional int32   max_size = 2 [default = 1048576];
+    optional int32     offset = 3 [default = 0];
 }
 
 message GetFileContentResponse {
-  required int32  error_code = 1;
-  optional bytes     content = 2;
-  optional int64   file_size = 3;
-  optional int64 modify_time = 4;
-  optional int64 create_time = 5;
+    required int32  error_code = 1;
+    optional bytes     content = 2;
+    optional int64   file_size = 3;
+    optional int64 modify_time = 4;
+    optional int64 create_time = 5;
 }
 
 message GetFileChecksumRequest {
-  repeated string files = 1 [(craft_options).query_param="f"];
+    repeated string files = 1 [(craft_options).query_param="f"];
 }
 
 message GetFileChecksumResponse {
-  repeated string md5sums = 1;
+    repeated string md5sums = 1;
 }
 
 message ListProcessesRequest {
-  repeated string include_users = 1;
-  repeated string exclude_users = 2;
-  optional bool        get_load = 3 [default = false, (craft_options).query_param="l"];
+    repeated string include_users = 1;
+    repeated string exclude_users = 2;
+    optional bool        get_load = 3 [
+        default = false,
+        (craft_options).query_param="l"];
 }
 
 message ListProcessesResponse {
 
-  message Process {
-    required int32          pid = 1;
-    required string   proc_stat = 2;
-    required string proc_status = 3;
-    optional string     cmdline = 4;
-    optional string    exe_file = 5;
-  }
+    message Process {
+        required int32          pid = 1;
+        required string   proc_stat = 2;
+        required string proc_status = 3;
+        optional string     cmdline = 4;
+        optional string    exe_file = 5;
+    }
 
-  repeated Process processes = 1;
+    repeated Process processes = 1;
 
-  // load
-  optional string   meminfo = 2;
-  optional string proc_stat = 3;
-  optional string   loadavg = 4;
-  optional string diskstats = 5;
-  optional string   net_dev = 6;
-  optional string   net_tcp = 7;
+    // load
+    optional string   meminfo = 2;
+    optional string proc_stat = 3;
+    optional string   loadavg = 4;
+    optional string diskstats = 5;
+    optional string   net_dev = 6;
+    optional string   net_tcp = 7;
 
-  repeated DiskUsage disk_usage = 8;
+    repeated DiskUsage disk_usage = 8;
 
-  optional string version = 9;
-  optional string cpuinfo = 10;
+    optional string version = 9;
+    optional string cpuinfo = 10;
 }
 
 message RunCommandRequest {
-  required string      command = 1 [(craft_options).query_param="cmd"];
-  optional string          cwd = 2 [default = "/tmp", (craft_options).query_param="cwd"];
-  repeated string         args = 3 [(craft_options).query_param="arg"];
-  repeated string         envs = 4;
-  optional bool      envs_only = 5 [default = false];
-  optional int32    max_stdout = 6 [default = 1048576];
-  optional int32    max_stderr = 7 [default = 1048576];
-  optional int32       timeout = 8 [default = 3000];
-  optional int32 max_memory_mb = 9 [default = 32768];
-  optional string      logFile = 10;
+    required string      command = 1 [(craft_options).query_param="cmd"];
+
+    optional string          cwd = 2 [default = "/tmp", (craft_options).query_param="cwd"];
+    repeated string         args = 3 [(craft_options).query_param="arg"];
+    repeated string         envs = 4;
+
+    optional bool      envs_only = 5 [default = false];
+    optional int32    max_stdout = 6 [default = 1048576];
+    optional int32    max_stderr = 7 [default = 1048576];
+    optional int32       timeout = 8 [default = 3000];
+    optional int32 max_memory_mb = 9 [default = 32768];
+    optional string      logFile = 10;
 }
 
 message RunCommandResponse {
-  required int32       error_code = 1;
-  optional int32              pid = 2;
-  optional int32           status = 3;
-  optional bytes       std_output = 4;
-  optional bytes        std_error = 5;
-  optional string executable_file = 6;
-	// optional int64 ctxsw = 11;
+    required int32       error_code = 1;
+    optional int32              pid = 2;
+    optional int32           status = 3;
+    optional bytes       std_output = 4;
+    optional bytes        std_error = 5;
+    optional string executable_file = 6;
+    // optional int64 ctxsw = 11;
 
-  optional int64    start_time_us = 16;
-  optional int64   finish_time_us = 17;
-  optional float        user_time = 18;
-  optional float      system_time = 19;
-  optional int64 memory_maxrss_kb = 20;
-  
+    optional int64    start_time_us = 16;
+    optional int64   finish_time_us = 17;
+    optional float        user_time = 18;
+    optional float      system_time = 19;
+    optional int64 memory_maxrss_kb = 20;
 
-  optional int32      exit_status = 30 [default = 0];
-  optional int32         signaled = 31 [default = 0];
-  optional bool          coredump = 32 [default = false];
+    optional int32      exit_status = 30 [default = 0];
+    optional int32         signaled = 31 [default = 0];
+    optional bool          coredump = 32 [default = false];
 }
 
 message RunScriptRequest {
-  required bytes            script = 1 [(craft_options).query_param="s"];
-  optional string              cwd = 2 [default = "/tmp", (craft_options).query_param="cwd"];
-  repeated string             args = 3 [(craft_options).query_param="arg"];
-  repeated string             envs = 4;
-  optional bool          envs_only = 5 [default = false];
-  optional int32        max_stdout = 6 [default = 1048576];
-  optional int32        max_stderr = 7 [default = 1048576];
-  optional int32           timeout = 8 [default = 60];
-  optional int32     max_memory_mb = 9 [default = 32768];
-  optional string      interpreter = 10;
-  repeated string interpreter_args = 11;
+    required bytes            script = 1 [(craft_options).query_param="s"];
+
+    optional string              cwd = 2 [default = "/tmp", (craft_options).query_param="cwd"];
+    repeated string             args = 3 [(craft_options).query_param="arg"];
+    repeated string             envs = 4;
+
+    optional bool          envs_only = 5 [default = false];
+    optional int32        max_stdout = 6 [default = 1048576];
+    optional int32        max_stderr = 7 [default = 1048576];
+    optional int32           timeout = 8 [default = 60];
+    optional int32     max_memory_mb = 9 [default = 32768];
+    optional string      interpreter = 10;
+    repeated string interpreter_args = 11;
 }
 
 message AddApplicationRequest {
-  required string          name = 1 [(craft_options).query_param="n"];
-  required string        binary = 2 [(craft_options).query_param="bin"];
-  optional string           cwd = 3 [(craft_options).query_param="cwd"];
-  repeated string          args = 4 [(craft_options).query_param="arg"];
-  repeated string          envs = 5;
-  optional bool       envs_only = 6 [default = false];
-  optional bool redirect_stdout = 7 [default = true, (craft_options).query_param="stdout"];
-  optional bool redirect_stderr = 8 [default = true];
-  required string    slave_name = 9;
-  optional int32  max_memory_mb = 10 [default = 32768];
-  optional string       comment = 11;
-  optional string      log_file = 12;
+    required string          name = 1 [(craft_options).query_param="n"];
+    required string        binary = 2 [(craft_options).query_param="bin"];
+    optional string           cwd = 3 [(craft_options).query_param="cwd"];
+    repeated string          args = 4 [(craft_options).query_param="arg"];
+    repeated string          envs = 5;
 
-  repeated string     md5sum_files = 20;
-  repeated string expected_md5sums = 21;
-  optional bool         md5sum_now = 22;
+    optional bool       envs_only = 6 [default = false];
+    optional bool redirect_stdout = 7 [default = true, (craft_options).query_param="stdout"];
+    optional bool redirect_stderr = 8 [default = true];
+    required string    slave_name = 9;
 
-  optional bool       auto_recover = 30 [default = true];
+    optional int32  max_memory_mb = 10 [default = 32768];
+    optional string       comment = 11;
+    optional string      log_file = 12;
+
+    repeated string     md5sum_files = 20;
+    repeated string expected_md5sums = 21;
+    optional bool         md5sum_now = 22;
+
+    optional bool       auto_recover = 30 [default = true];
 }
 
 message AddApplicationResponse {
-  optional ApplicationStatus           status = 1;
-  optional AddApplicationRequest prev_request = 2;
-  repeated string                     md5sums = 3;
+    optional ApplicationStatus           status = 1;
+    optional AddApplicationRequest prev_request = 2;
+    repeated string                     md5sums = 3;
 }
 
 message StartApplicationsRequest {
-  repeated string names = 1 [(craft_options).query_param="n"];
+    repeated string names = 1 [(craft_options).query_param="n"];
 }
 
 message StartApplicationsResponse {
-  repeated ApplicationStatus status = 1;
+    repeated ApplicationStatus status = 1;
 }
 
 message StopApplicationRequest {
-  required string names = 1 [(craft_options).query_param="n"];
+    required string names = 1 [(craft_options).query_param="n"];
 }
 
 message StopApplicationResponse {
-  required ApplicationStatus status = 1;
+    required ApplicationStatus status = 1;
 }
 
 message ListApplicationsRequest {
-  repeated string names = 1 [(craft_options).query_param="n"];
+    repeated string names = 1 [(craft_options).query_param="n"];
 }
 
 message ListApplicationsResponse {
-  repeated ApplicationStatus status = 1;
+    repeated ApplicationStatus status = 1;
 }
 
 message RemoveApplicationsRequest {
-  repeated string name = 1 [(craft_options).query_param="n"];
+    repeated string name = 1 [(craft_options).query_param="n"];
 }
 
 message RemoveApplicationsResponse {
 }
 
 service SlaveService {
-  option (craft_service_options).path = "/zurg/api";
-  
-  rpc getHardware (GetHardwareRequest) returns (GetHardwareResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/hardware.{format}";
-  };
-  
-  rpc getFileContent (GetFileContentRequest) returns (GetFileContentResponse) {
-    option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/file.{format}";
-  };
-  
-  rpc getFileChecksum (GetFileChecksumRequest) returns (GetFileChecksumResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/file/checksum.{format}";
-  };
-  
-  rpc listProcesses (ListProcessesRequest) returns (ListProcessesResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/processes.{format}";
-  };
-  
-  rpc runCommand (RunCommandRequest) returns (RunCommandResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/command.{format}";
-  };
-  
-  rpc runScript (RunScriptRequest) returns (RunCommandResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/script.{format}";
-  };
-  
-  rpc addApplication (AddApplicationRequest) returns (AddApplicationResponse) {
-	option (craft_method_options).method = "put";
-	option (craft_method_options).path = "/application.{format}";
-  };
-  
-  rpc listApplications (ListApplicationsRequest) returns (ListApplicationsResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/application.{format}";
-  };
-  
-  rpc removeApplications (RemoveApplicationsRequest) returns (RemoveApplicationsResponse) {
-	option (craft_method_options).method = "delete";
-	option (craft_method_options).path = "/application.{format}";
-  };
-  
-  rpc startApplications (StartApplicationsRequest) returns (StartApplicationsResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/applications/start.{format}";
-  };
-  
-  rpc stopApplications (StopApplicationRequest) returns (StopApplicationResponse) {
-	option (craft_method_options).method = "get";
-	option (craft_method_options).path = "/applications/stop.{format}";
-  };
+    option(craft_service_options).path = "/zurg/api";
+
+    rpc getHardware(GetHardwareRequest) returns(GetHardwareResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/hardware.{format}";
+    };
+
+    rpc getFileContent(GetFileContentRequest) returns(GetFileContentResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/file.{format}";
+    };
+
+    rpc getFileChecksum(GetFileChecksumRequest) returns(GetFileChecksumResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/file/checksum.{format}";
+    };
+
+    rpc listProcesses(ListProcessesRequest) returns(ListProcessesResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/processes.{format}";
+    };
+
+    rpc runCommand(RunCommandRequest) returns(RunCommandResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/command.{format}";
+    };
+
+    rpc runScript(RunScriptRequest) returns(RunCommandResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/script.{format}";
+    };
+
+    rpc addApplication(AddApplicationRequest) returns(AddApplicationResponse) {
+        option(craft_method_options).method = "put";
+        option(craft_method_options).path = "/application.{format}";
+    };
+
+    rpc listApplications(ListApplicationsRequest) returns(ListApplicationsResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/application.{format}";
+    };
+
+    rpc removeApplications(RemoveApplicationsRequest) returns(RemoveApplicationsResponse) {
+        option(craft_method_options).method = "delete";
+        option(craft_method_options).path = "/application.{format}";
+    };
+
+    rpc startApplications(StartApplicationsRequest) returns(StartApplicationsResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/applications/start.{format}";
+    };
+
+    rpc stopApplications(StopApplicationRequest) returns(StopApplicationResponse) {
+        option(craft_method_options).method = "get";
+        option(craft_method_options).path = "/applications/stop.{format}";
+    };
 }

@@ -9,8 +9,8 @@
 #define PROCESSMANAGER_H_
 
 #include <map>
-#include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/asio/signal_set.hpp>
 
 #include <cetty/channel/EventLoopPtr.h>
@@ -51,7 +51,11 @@ public:
      * @brief stop all child process and self
      *  Deal with SIGINT SIGTERM SIGQUIT
      */
-    void stopAll(){ if(stopAll_) stopAll_();}
+    void stopAll(){
+        if(stopAll_) {
+            stopAll_();
+        }
+    }
 
     const SlaveServiceConfig& config() const {
         return config_;
@@ -64,11 +68,12 @@ private:
     void onExit(pid_t pid, int status, const struct rusage&);
 
 private:
+    EventLoopPtr loop_;
     SlaveServiceConfig config_;
     boost::asio::signal_set signals_;
-    EventLoopPtr loop_;
-    std::map<pid_t, Callback> callbacks_;
+    
     stopAllCallback stopAll_;
+    std::map<pid_t, Callback> callbacks_;
 };
 
 }

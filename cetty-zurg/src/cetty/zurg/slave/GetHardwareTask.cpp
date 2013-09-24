@@ -40,30 +40,42 @@ void GetHardwareTask::start(SlaveServiceImpl& slave) {
         RunCommandResponsePtr lshwResponse(new RunCommandResponse);
         lshwRequest->set_command("lshw");
         slave.runCommand(lshwRequest,
-        		         lshwResponse,
-                         boost::bind(&GetHardwareTask::lshwDONE, self, _1, lshwRequest));
+                         lshwResponse,
+                         boost::bind(&GetHardwareTask::lshwDONE,
+                                     self,
+                                     _1,
+                                     lshwRequest));
     }
 
     RunCommandRequestPtr lspciRequest(new RunCommandRequest);
     RunCommandResponsePtr lspciResponse(new RunCommandResponse);
     lspciRequest->set_command("lspci");
     slave.runCommand(lspciRequest,
-    		         lspciResponse,
-                     boost::bind(&GetHardwareTask::lspciDONE, self, _1, lspciRequest));
+                     lspciResponse,
+                     boost::bind(&GetHardwareTask::lspciDONE,
+                                 self,
+                                 _1,
+                                 lspciRequest));
 
     RunCommandRequestPtr lscpuRequest(new RunCommandRequest);
     RunCommandResponsePtr lscpuResponse(new RunCommandResponse);
     lscpuRequest->set_command("lscpu");
     slave.runCommand(lscpuRequest,
-    		         lscpuResponse,
-                     boost::bind(&GetHardwareTask::lscpuDONE, self, _1, lscpuRequest));
+                     lscpuResponse,
+                     boost::bind(&GetHardwareTask::lscpuDONE,
+                                 self,
+                                 _1,
+                                 lscpuRequest));
 
     RunCommandRequestPtr ifconfigRequest(new RunCommandRequest);
     RunCommandResponsePtr ifconfigResponse(new RunCommandResponse);
     ifconfigRequest->set_command("/sbin/ifconfig");
     slave.runCommand(ifconfigRequest,
-    		         ifconfigResponse,
-                     boost::bind(&GetHardwareTask::ifconfigDONE, self, _1, ifconfigRequest));
+                     ifconfigResponse,
+                     boost::bind(&GetHardwareTask::ifconfigDONE,
+                                 self,
+                                 _1,
+                                 ifconfigRequest));
 }
 
 void GetHardwareTask::checkAllDone() {

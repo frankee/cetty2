@@ -1,6 +1,7 @@
 #include <cetty/zurg/slave/SlaveServiceImpl.h>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <cetty/util/SmallFile.h>
 #include <cetty/config/ConfigCenter.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -30,87 +31,13 @@ SlaveServiceImpl::SlaveServiceImpl(const EventLoopPtr& loop) {
     init();
 }
 
-void SlaveServiceImpl::init() {
-	AddApplicationRequestPtr request = NULL;
-	AddApplicationResponsePtr response = NULL;
-
-	StartApplicationsRequestPtr startRequest = NULL;
-	StartApplicationsResponsePtr startResponse = NULL;
-
-	RemoveApplicationsRequestPtr removeRequest = NULL;
-	RemoveApplicationsResponsePtr removeResponse = NULL;
-
-	DoneCallback emptyCallback;
-
-	size_t i = 0;
-	for(; i < config_.applications.size(); ++i) {
-        SlaveServiceConfig::Application* application = config_.applications[i];
-		std::string name = application->name;
-
-        request = new AddApplicationRequest();
-        request->set_name(name);
-        request->set_binary(application->binary);
-        request->set_cwd(application->cwd);
-
-        request->set_redirect_stdout(application->redirectStdout);
-        request->set_redirect_stderr(application->redirectStderr);
-        request->set_auto_recover(application->autoRecover);
-        request->set_log_file(application->logFile);
-
-        std::string args;
-        for(std::size_t j; j < application->args.size(); ++ j){
-        	request->add_args(application->args[j]);
-            args += application->args[j];
-            args += " ";
-        }
-
-        for(std::size_t j = 0; j < application->envs.size(); ++j) {
-        	request->add_envs(application->envs.at(j));
-        }
-
-        response = new AddApplicationResponse();
-
-        addApplication(request, response, emptyCallback);
-        LOG_INFO << "add application: " << name << " bin: ";
-
-        delete request;
-        delete response;
-
-        if (application->autoStart) {
-            startRequest = new StartApplicationsRequest();
-            startResponse = new StartApplicationsResponse();
-            startRequest->add_names()->assign(name);
-            startApplications(startRequest, startResponse, emptyCallback);
-
-            if(startResponse->status(0).state() == kError){
-                LOG_ERROR << "start application " << name << " failed";
-
-                removeRequest = new RemoveApplicationsRequest();
-                removeResponse = new RemoveApplicationsResponse();
-                removeRequest->add_name(name);
-                removeApplications(removeRequest, removeResponse, emptyCallback);
-
-                delete removeRequest;
-                delete removeResponse;
-            }
-
-            LOG_INFO << "application [" << name << "] "
-                << startResponse->status(0).message();
-
-            delete startRequest;
-            delete startResponse;
-        }
-	}
-}
-
 SlaveServiceImpl::~SlaveServiceImpl() {
 
 }
 
-void SlaveServiceImpl::getHardware(
-    const ConstGetHardwareRequestPtr& request,
-    const GetHardwareResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::getHardware(const ConstGetHardwareRequestPtr& request,
+                                   const GetHardwareResponsePtr& response,
+                                   const DoneCallback& done) {
 
     LOG_INFO << "SlaveServiceImpl::getHardware - lshw = "
              << request->lshw();
@@ -118,10 +45,9 @@ void SlaveServiceImpl::getHardware(
     GetHardwareTaskPtr task(new GetHardwareTask(request, response, done, *this));
 }
 
-void SlaveServiceImpl::getFileContent(
-    const ConstGetFileContentRequestPtr& request,
-    const GetFileContentResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::getFileContent(const ConstGetFileContentRequestPtr& request,
+                                      const GetFileContentResponsePtr& response,
+                                      const DoneCallback& done) {
 
     LOG_INFO << "SlaveServiceImpl::getFileContent - " << request->file_name()
              << " maxSize = " << request->max_size();
@@ -144,10 +70,9 @@ void SlaveServiceImpl::getFileContent(
     done(response);
 }
 
-void SlaveServiceImpl::getFileChecksum(
-    const ConstGetFileChecksumRequestPtr& request,
-    const GetFileChecksumResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::getFileChecksum(const ConstGetFileChecksumRequestPtr& request,
+                                       const GetFileChecksumResponsePtr& response,
+                                       const DoneCallback& done) {
 
     DLOG_DEBUG ;
 
@@ -173,10 +98,9 @@ void SlaveServiceImpl::getFileChecksum(
     }
 }
 
-void SlaveServiceImpl::getFileChecksumDone(
-    const ConstGetFileChecksumRequestPtr& request,
-    const google::protobuf::Message* message,
-    const DoneCallback& done) {
+void SlaveServiceImpl::getFileChecksumDone(const ConstGetFileChecksumRequestPtr& request,
+        const google::protobuf::Message* message,
+        const DoneCallback& done) {
 
     const RunCommandResponse* runCommandResp =
         google::protobuf::down_cast<const RunCommandResponse*>(message);
@@ -194,16 +118,15 @@ void SlaveServiceImpl::getFileChecksumDone(
     done(&response);
 }
 
-void SlaveServiceImpl::runCommand(
-    const ConstRunCommandRequestPtr& request,
-    const RunCommandResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::runCommand(const ConstRunCommandRequestPtr& request,
+                                  const RunCommandResponsePtr& response,
+                                  const DoneCallback& done) {
 
     LOG_INFO << "SlaveServiceImpl::runCommand - " << request->command();
 
-    ProcessPtr process(new Process(request, response, done, true, true, 
-        config_.slaveName,
-        config_.prefix));
+    ProcessPtr process(new Process(request, response, done, true, true,
+                                   config_.slaveName,
+                                   config_.prefix));
 
     int err = 12; // ENOMEM;
 
@@ -235,10 +158,9 @@ void SlaveServiceImpl::runCommand(
     }
 }
 
-void SlaveServiceImpl::runScript(
-    const ConstRunScriptRequestPtr& request,
-    const RunCommandResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::runScript(const ConstRunScriptRequestPtr& request,
+                                 const RunCommandResponsePtr& response,
+                                 const DoneCallback& done) {
 
     /*
     RunCommandRequestPtr runCommandReq(new RunCommandRequest);
@@ -259,47 +181,115 @@ void SlaveServiceImpl::runScript(
     */
 }
 
-void SlaveServiceImpl::listProcesses(
-    const ConstListProcessesRequestPtr& request,
-    const ListProcessesResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::listProcesses(const ConstListProcessesRequestPtr& request,
+                                     const ListProcessesResponsePtr& response,
+                                     const DoneCallback& done) {
 
 }
 
-void SlaveServiceImpl::addApplication(
-    const ConstAddApplicationRequestPtr& request,
-    const AddApplicationResponsePtr& response,
-    const DoneCallback& done) {
-
+void SlaveServiceImpl::addApplication(const ConstAddApplicationRequestPtr& request,
+                                      const AddApplicationResponsePtr& response,
+                                      const DoneCallback& done) {
     applicationManager_->add(request, response, done);
 }
 
-void SlaveServiceImpl::startApplications(
-    const ConstStartApplicationsRequestPtr& request,
-    const StartApplicationsResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::startApplications(const ConstStartApplicationsRequestPtr& request,
+        const StartApplicationsResponsePtr& response,
+        const DoneCallback& done) {
     applicationManager_->start(request, response, done);
 }
 
-void SlaveServiceImpl::stopApplications(
-    const ConstStopApplicationRequestPtr& request,
-    const StopApplicationResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::stopApplications(const ConstStopApplicationRequestPtr& request,
+                                        const StopApplicationResponsePtr& response,
+                                        const DoneCallback& done) {
     applicationManager_->stop(request, response, done);
 }
 
-void SlaveServiceImpl::listApplications(
-    const ConstListApplicationsRequestPtr& request,
-    const ListApplicationsResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::listApplications(const ConstListApplicationsRequestPtr& request,
+                                        const ListApplicationsResponsePtr& response,
+                                        const DoneCallback& done) {
     applicationManager_->list(request, response, done);
 }
 
-void SlaveServiceImpl::removeApplications(
-    const ConstRemoveApplicationsRequestPtr& request,
-    const RemoveApplicationsResponsePtr& response,
-    const DoneCallback& done) {
+void SlaveServiceImpl::removeApplications(const ConstRemoveApplicationsRequestPtr& request,
+        const RemoveApplicationsResponsePtr& response,
+        const DoneCallback& done) {
     applicationManager_->remove(request, response, done);
+}
+
+void SlaveServiceImpl::init() {
+    for (size_t i = 0; i < config_.applications.size(); ++i) {
+        SlaveServiceConfig::Application* application = config_.applications[i];
+        addApplicationFromConfig(application);
+
+        if (application->autoStart) {
+            startApplication(application->name);
+        }
+    }
+}
+
+void SlaveServiceImpl::addApplicationFromConfig(SlaveServiceConfig::Application* application) {
+    std::string name = application->name;
+    boost::scoped_ptr<AddApplicationRequest> request(new AddApplicationRequest);
+
+    request->set_name(name);
+    request->set_binary(application->binary);
+    request->set_cwd(application->cwd);
+
+    request->set_redirect_stdout(application->redirectStdout);
+    request->set_redirect_stderr(application->redirectStderr);
+    request->set_auto_recover(application->autoRecover);
+    request->set_log_file(application->logFile);
+
+    std::string args;
+
+    for (std::size_t j; j < application->args.size(); ++ j) {
+        request->add_args(application->args[j]);
+        args += application->args[j];
+        args += " ";
+    }
+
+    for (std::size_t j = 0; j < application->envs.size(); ++j) {
+        request->add_envs(application->envs.at(j));
+    }
+
+    boost::scoped_ptr<AddApplicationResponse> response(new AddApplicationResponse);
+    addApplication(request.get(),
+                   response.get(),
+                   DoneCallback());
+    LOG_INFO << "add application: " << name
+             << " bin: " << application->binary
+             << " cwd: " << application->cwd
+             << " args: " << args;
+}
+
+void SlaveServiceImpl::startApplication(const std::string& name) {
+    boost::scoped_ptr<StartApplicationsRequest> request(new StartApplicationsRequest);
+    boost::scoped_ptr<StartApplicationsResponse> response(new StartApplicationsResponse);
+
+    request->add_names()->assign(name);
+    startApplications(request.get(),
+                      response.get(),
+                      DoneCallback());
+
+    if (response->status(0).state() == kError) {
+        LOG_ERROR << "start application " << name << " failed";
+        removeApplication(name);
+    }
+    else {
+        LOG_INFO << "application [" << name << "] "
+                 << response->status(0).message();
+    }
+}
+
+void SlaveServiceImpl::removeApplication(const std::string& name) {
+    boost::scoped_ptr<RemoveApplicationsRequest> request(new RemoveApplicationsRequest);
+    boost::scoped_ptr<RemoveApplicationsResponse> response(new RemoveApplicationsResponse);
+    request->add_name(name);
+
+    removeApplications(request.get(),
+                       response.get(),
+                       DoneCallback());
 }
 
 }

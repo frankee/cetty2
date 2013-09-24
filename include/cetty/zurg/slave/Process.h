@@ -42,8 +42,7 @@ typedef boost::function1<void, const MessagePtr&> DoneCallback;
  *  We can start a new process by calling start, and
  *  get child process's run state.
  */
-class Process : public boost::enable_shared_from_this<Process>,
-        boost::noncopyable {
+class Process : public boost::enable_shared_from_this<Process>, boost::noncopyable {
 public:
     Process(const ConstRunCommandRequestPtr& request,
             const RunCommandResponsePtr& response,
@@ -115,7 +114,6 @@ private:
     std::string slavePrefix_;
 
     bool runCommand_;
-
 };
 
 }

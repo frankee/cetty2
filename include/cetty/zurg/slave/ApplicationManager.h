@@ -29,51 +29,50 @@ class ProcessManager;
 
 using namespace cetty::channel;
 
-struct Application {
-    AddApplicationRequest request;
-    ApplicationStatus status;
-};
-
-typedef boost::shared_ptr<Application> ApplicationPtr;
-
 class ApplicationManager : boost::noncopyable {
+private:
+    struct Application {
+        AddApplicationRequest request;
+        ApplicationStatus status;
+    };
+    typedef std::map<std::string, Application> Applications;
+
 public:
-    ApplicationManager(ProcessManager*);
+    ApplicationManager(ProcessManager&);
     ~ApplicationManager();
 
     void add(const ConstAddApplicationRequestPtr& request,
-        const AddApplicationResponsePtr& response,
-        const DoneCallback& done);
+             const AddApplicationResponsePtr& response,
+             const DoneCallback& done);
 
     void start(const ConstStartApplicationsRequestPtr& request,
-        const StartApplicationsResponsePtr& response,
-        const DoneCallback& done);
+               const StartApplicationsResponsePtr& response,
+               const DoneCallback& done);
 
     void stop(const ConstStopApplicationRequestPtr& request,
-        const StopApplicationResponsePtr& response,
-        const DoneCallback& done);
+              const StopApplicationResponsePtr& response,
+              const DoneCallback& done);
 
     void list(const ConstListApplicationsRequestPtr& request,
-        const ListApplicationsResponsePtr& response,
-        const DoneCallback& done);
+              const ListApplicationsResponsePtr& response,
+              const DoneCallback& done);
 
     void remove(const ConstRemoveApplicationsRequestPtr& request,
-        const RemoveApplicationsResponsePtr& response,
-        const DoneCallback& done);
+                const RemoveApplicationsResponsePtr& response,
+                const DoneCallback& done);
 
     // kill all applications started by #startApp() and self
     void stopAll();
 
 private:
     void startApp(const Application&, ApplicationStatus* out);
-    void onProcessExit(const ProcessPtr&, int status, const struct rusage&);
+    void onProcessExit(const ProcessPtr&,
+                       int status,
+                       const struct rusage&);
 
 private:
-    typedef std::map<std::string, Application> ApplicationMap;
-
-private:
-    ProcessManager* processManager;
-    ApplicationMap applications;
+    Applications applications_;
+    ProcessManager& processManager_;
 };
 
 }

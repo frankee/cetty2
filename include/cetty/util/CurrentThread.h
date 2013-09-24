@@ -44,6 +44,17 @@ public:
     /// Returns the native thread ID for the current thread.    
     static const ThreadId& id();
 
+//     static boost::posix_time::ptime now() {
+//         return boost::posix_time::microsec_clock::universal_time();
+//     }
+// 
+//     static boost::posix_time::time_duration nowStamp();
+// 
+//     static boost::posix_time::ptime nowUTC();
+
+private:
+    CurrentThread();
+    CurrentThread(const CurrentThread&);
 };
 
 }
