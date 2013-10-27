@@ -95,12 +95,13 @@ const ChannelPtr& ShuttleBackend::getChannel(const std::string& method) {
     else {
         //FIXME why the threadId in eventloop will be 0
         itr = backends_.find(0);
+
         if (itr != backends_.end()) {
             return itr->second->channel(method);
         }
         else {
             LOG_WARN << "failed to found the channel for " << method
-                << " in " << id;
+                     << " in " << id;
             return emptyChannel_;
         }
     }

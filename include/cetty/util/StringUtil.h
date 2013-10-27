@@ -52,6 +52,7 @@ public:
                 return false;
             }
         }
+
         return true;
     }
 
@@ -264,44 +265,28 @@ public:
     //    the first instance of "old" in the string with "new", if it
     //    exists.  RETURN a new string, regardless of whether the replacement
     //    happened or not.
+    // TODO if s is same with res
     // ----------------------------------------------------------------------
     static void replace(const std::string& s,
                         const std::string& oldsub,
                         const std::string& newsub,
                         bool replaceAll,
-                        std::string* res) {
-        if (oldsub.empty()) {
-            res->append(s);  // if empty, append the given string.
-            return;
-        }
-
-        std::string::size_type startPos = 0;
-        std::string::size_type pos;
-
-        do {
-            pos = s.find(oldsub, startPos);
-
-            if (pos == std::string::npos) {
-                break;
-            }
-
-            res->append(s, startPos, pos - startPos);
-            res->append(newsub);
-            startPos = pos + oldsub.size();  // start searching again after the "old"
-        }
-        while (replaceAll);
-
-        res->append(s, startPos, s.length() - startPos);
-    }
+                        std::string* res);
 
     static inline std::string replace(const std::string& s,
                                       const std::string& oldsub,
                                       const std::string& newsub,
-                                      bool replace_all) {
+                                      bool replaceAll) {
         std::string ret;
-        replace(s, oldsub, newsub, replace_all, &ret);
+        replace(s, oldsub, newsub, replaceAll, &ret);
         return ret;
     }
+
+    static void replace(const std::string& s,
+                        char oldChar,
+                        char newChar,
+                        bool replaceAll,
+                        std::string* res);
 
     // ----------------------------------------------------------------------
     // JoinStrings()

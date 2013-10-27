@@ -30,8 +30,8 @@ HttpTransferEncoding::HttpTransferEncoding(int value,
         bool single)
     : cetty::util::Enum<HttpTransferEncoding>(value, name),
       single_(single) {
-    if (needSetDefaultEnum()) {
-        setDefaultEnum(new HttpTransferEncoding(-1, "unknown", false));
+    if (markSetDefaultEnum()) {
+        setDefaultEnum(new HttpTransferEncoding(-1, "UNKNOWN", false));
     }
 }
 

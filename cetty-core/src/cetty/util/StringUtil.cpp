@@ -875,37 +875,37 @@ char* fastUInt64ToBufferLeft(uint64_t u64, char* buffer) {
     buffer = fastUInt64ToBufferLeft(top_11_digits, buffer);
     u = (uint32_t)(u64 - (top_11_digits * 1000000000));
 
-         digits = u / 10000000;  // 10,000,000
-         //GOOGLE_DCHECK_LT(digits, 100);
-         BOOST_ASSERT(digits < 100);
+    digits = u / 10000000;  // 10,000,000
+    //GOOGLE_DCHECK_LT(digits, 100);
+    BOOST_ASSERT(digits < 100);
 
-         ASCII_digits = two_ASCII_digits[digits];
-         buffer[0] = ASCII_digits[0];
-         buffer[1] = ASCII_digits[1];
-         buffer += 2;
-         u -= digits * 10000000;  // 10,000,000
-         digits = u / 100000;  // 100,000
-         ASCII_digits = two_ASCII_digits[digits];
-         buffer[0] = ASCII_digits[0];
-         buffer[1] = ASCII_digits[1];
-         buffer += 2;
-         u -= digits * 100000;  // 100,000
-         digits = u / 1000;  // 1,000
-         ASCII_digits = two_ASCII_digits[digits];
-         buffer[0] = ASCII_digits[0];
-         buffer[1] = ASCII_digits[1];
-         buffer += 2;
-         u -= digits * 1000;  // 1,000
-         digits = u / 10;
-         ASCII_digits = two_ASCII_digits[digits];
-         buffer[0] = ASCII_digits[0];
-         buffer[1] = ASCII_digits[1];
-         buffer += 2;
-         u -= digits * 10;
-         digits = u;
-         *buffer++ = '0' + digits;
-         *buffer = 0;
-         return buffer;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+    u -= digits * 10000000;  // 10,000,000
+    digits = u / 100000;  // 100,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+    u -= digits * 100000;  // 100,000
+    digits = u / 1000;  // 1,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+    u -= digits * 1000;  // 1,000
+    digits = u / 10;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+    u -= digits * 10;
+    digits = u;
+    *buffer++ = '0' + digits;
+    *buffer = 0;
+    return buffer;
 }
 
 inline char* fastInt32ToBufferLeft(int32_t i, char* buffer) {
@@ -1267,66 +1267,66 @@ std::string* StringUtil::hextostr(uint64_t hex, std::string* str) {
 }
 
 namespace detail {
-    typedef unsigned short ucs2_t;  /* Unicode character [D5] */
-    typedef unsigned int   ucs4_t;  /* Unicode scalar character [D28] */
-    typedef ucs4_t    ucs_t;
+typedef unsigned short ucs2_t;  /* Unicode character [D5] */
+typedef unsigned int   ucs4_t;  /* Unicode scalar character [D28] */
+typedef ucs4_t    ucs_t;
 
-    const static int UCS_CHAR_INVALID = 0xFFFE;
-    const static int UCS_CHAR_NONE = 0xFFFF;
+const static int UCS_CHAR_INVALID = 0xFFFE;
+const static int UCS_CHAR_NONE = 0xFFFF;
 
-    int convertToUcs(const unsigned char** inbuf, std::size_t* inbytesleft) {
-        const unsigned char* in = *inbuf;
-        unsigned char byte = *in++;
-        ucs_t res = byte;
+int convertToUcs(const unsigned char** inbuf, std::size_t* inbytesleft) {
+    const unsigned char* in = *inbuf;
+    unsigned char byte = *in++;
+    ucs_t res = byte;
 
-        if (byte >= 0xC0) {
-            if (byte < 0xE0) {
-                if (*inbytesleft < 2) {
-                    return UCS_CHAR_NONE;
-                }
-
-                res = (*in & 0xC0) == 0x80 ?
-                    ((byte & 0x1F) << 6) | (*in++ & 0x3F) : UCS_CHAR_INVALID;
+    if (byte >= 0xC0) {
+        if (byte < 0xE0) {
+            if (*inbytesleft < 2) {
+                return UCS_CHAR_NONE;
             }
-            else if (byte < 0xF0) {
-                if (*inbytesleft < 3) { return UCS_CHAR_NONE; }
 
-                if (((in[0] & 0xC0) == 0x80) && ((in[1] & 0xC0) == 0x80)) {
-                    res = ((byte & 0x0F) << 12) | ((in[0] & 0x3F) << 6)
-                        | (in[1] & 0x3F);
-                    in += 2;
-                }
-                else {
-                    res = UCS_CHAR_INVALID;
-                }
-            }
-            else if (byte <= 0xF4) {
-                if (*inbytesleft < 4) { return UCS_CHAR_NONE; }
+            res = (*in & 0xC0) == 0x80 ?
+                  ((byte & 0x1F) << 6) | (*in++ & 0x3F) : UCS_CHAR_INVALID;
+        }
+        else if (byte < 0xF0) {
+            if (*inbytesleft < 3) { return UCS_CHAR_NONE; }
 
-                if (((byte == 0xF4 && ((in[0] & 0xF0) == 0x80))
-                    || ((in[0] & 0xC0) == 0x80))
-                    && ((in[1] & 0xC0) == 0x80)
-                    && ((in[2] & 0xC0) == 0x80)) {
-                        res = ((byte & 0x7) << 18) | ((in[0] & 0x3F) << 12)
-                            | ((in[1] & 0x3F) << 6) | (in[2] & 0x3F);
-                        in += 3;
-                }
-                else {
-                    res = UCS_CHAR_INVALID;
-                }
+            if (((in[0] & 0xC0) == 0x80) && ((in[1] & 0xC0) == 0x80)) {
+                res = ((byte & 0x0F) << 12) | ((in[0] & 0x3F) << 6)
+                      | (in[1] & 0x3F);
+                in += 2;
             }
             else {
                 res = UCS_CHAR_INVALID;
             }
         }
-        else if (byte & 0x80) {
+        else if (byte <= 0xF4) {
+            if (*inbytesleft < 4) { return UCS_CHAR_NONE; }
+
+            if (((byte == 0xF4 && ((in[0] & 0xF0) == 0x80))
+                    || ((in[0] & 0xC0) == 0x80))
+                    && ((in[1] & 0xC0) == 0x80)
+                    && ((in[2] & 0xC0) == 0x80)) {
+                res = ((byte & 0x7) << 18) | ((in[0] & 0x3F) << 12)
+                      | ((in[1] & 0x3F) << 6) | (in[2] & 0x3F);
+                in += 3;
+            }
+            else {
+                res = UCS_CHAR_INVALID;
+            }
+        }
+        else {
             res = UCS_CHAR_INVALID;
         }
-
-        *inbytesleft -= (in - *inbuf);
-        *inbuf = in;
-        return res;
     }
+    else if (byte & 0x80) {
+        res = UCS_CHAR_INVALID;
+    }
+
+    *inbytesleft -= (in - *inbuf);
+    *inbuf = in;
+    return res;
+}
 }
 
 void StringUtil::utftoucs(const std::string& src, std::wstring* dest) {
@@ -1338,14 +1338,78 @@ void StringUtil::utftoucs(const std::string& src, std::wstring* dest) {
         int byte = detail::convertToUcs(&inBuf, &inSize);
 
         if (byte == detail::UCS_CHAR_INVALID) { return; }
+
         if (byte == detail::UCS_CHAR_NONE) { break; }
 
-        dest->push_back( static_cast<wchar_t>(byte));
+        dest->push_back(static_cast<wchar_t>(byte));
     }
 }
 
 void StringUtil::utftoucs(const std::string& src, std::vector<uint32_t>* dest) {
 
+}
+
+void StringUtil::replace(const std::string& s,
+                         const std::string& oldsub,
+                         const std::string& newsub,
+                         bool replaceAll,
+                         std::string* res) {
+    BOOST_ASSERT(res);
+
+    if (oldsub.empty()) {
+        res->append(s);  // if empty, append the given string.
+        return;
+    }
+
+    //std::string* output = (&s == res) ? new std::string : res;
+
+    std::string::size_type startPos = 0;
+    std::string::size_type pos;
+
+    do {
+        pos = s.find(oldsub, startPos);
+
+        if (pos == std::string::npos) {
+            break;
+        }
+
+        res->append(s, startPos, pos - startPos);
+        res->append(newsub);
+        startPos = pos + oldsub.size();  // start searching again after the "old"
+    }
+    while (replaceAll);
+
+    res->append(s, startPos, s.length() - startPos);
+}
+
+void StringUtil::replace(const std::string& s,
+                         char oldChar,
+                         char newChar,
+                         bool replaceAll,
+                         std::string* res) {
+    BOOST_ASSERT(res);
+
+    if (s.empty()) {
+        return;
+    }
+
+    if (&s != res) {
+        res->assign(s);
+    }
+
+    std::string::size_type startPos = 0;
+    std::string::size_type pos;
+
+    do {
+        pos = res->find(oldChar, startPos);
+
+        if (pos == std::string::npos) {
+            break;
+        }
+
+        (*res)[pos] = newChar;
+    }
+    while (replaceAll);
 }
 
 }

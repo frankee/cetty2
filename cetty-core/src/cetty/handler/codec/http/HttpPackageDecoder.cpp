@@ -42,7 +42,7 @@ using namespace cetty::handler::codec;
 
 const int HttpPackageDecoder::MAX_INITIAL_LINE_LENGTH = 4096;
 const int HttpPackageDecoder::MAX_HEADER_SIZE = 8192;
-const int HttpPackageDecoder::MAX_CHUNK_SIZE  = 8192;
+const int HttpPackageDecoder::MAX_CHUNK_SIZE  = 655350;
 
 HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType)
     : isDecodingRequest_(decodingType == REQUEST),
@@ -50,7 +50,8 @@ HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType)
       maxHeaderSize_(MAX_HEADER_SIZE),
       maxChunkSize_(MAX_CHUNK_SIZE),
       chunkSize_(0),
-      headerSize_(0) {
+      headerSize_(0),
+      contentRead_(0) {
 }
 
 HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType,
@@ -62,7 +63,8 @@ HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType,
       maxHeaderSize_(maxHeaderSize),
       maxChunkSize_(maxChunkSize),
       chunkSize_(0),
-      headerSize_(0) {
+      headerSize_(0),
+      contentRead_(0) {
     if (maxInitialLineLength <= 0) {
         maxInitialLineLength_ = MAX_INITIAL_LINE_LENGTH;
     }
@@ -472,6 +474,7 @@ HttpPackage HttpPackageDecoder::reset() {
     msg.setContent(content);
 
     content_.reset();
+    contentRead_ = 0;
     message_ = HttpPackage();
     
     checkPointInvoker_(SKIP_CONTROL_CHARS);
@@ -507,8 +510,18 @@ HttpPackage HttpPackageDecoder::readFixedLengthContent(const ReplayingDecoderBuf
     }
 
     contentRead_ += toRead;
-    //content.reset();
-    //content = buffer->readSlice(toRead);
+    content_.reset();
+    content_ = buffer->readSlice(toRead);
+
+    if (buffer->needMoreBytes()) {
+        contentRead_ -= toRead;
+        buffer->unwrap()->ensureWritableBytes(toRead);
+        return HttpPackage();
+    }
+    else {
+        return reset();
+    }
+
     BOOST_ASSERT(false && "NOT implement in HttpMessageDecoder readFixedLengthContent.");
 
     if (length < contentRead_) {
@@ -633,20 +646,20 @@ int HttpPackageDecoder::readHeaders(const ReplayingDecoderBufferPtr& buffer) {
         }
     }
 
-    //     if (isContentAlwaysEmpty(message_)) {
-    //         headers.setTransferEncoding(HttpTransferEncoding::SINGLE);
-    //         nextState = SKIP_CONTROL_CHARS;
-    //     }
-    //     else if (HttpCodecUtil::isTransferEncodingChunked(*message_)) {
-    //         headers.setTransferEncoding(HttpTransferEncoding::CHUNKED);
-    //         nextState = READ_CHUNK_SIZE;
-    //     }
-    //     else if (HttpHeaders::contentLength(*message_, -1) >= 0) {
-    //         nextState = READ_FIXED_LENGTH_CONTENT;
-    //     }
-    //     else {
-    //         nextState = READ_VARIABLE_LENGTH_CONTENT;
-    //     }
+    if (isContentAlwaysEmpty(message_)) {
+        headers->setTransferEncoding(HttpTransferEncoding::SINGLE);
+        nextState = SKIP_CONTROL_CHARS;
+    }
+//     else if (HttpCodecUtil::isTransferEncodingChunked(*message_)) {
+//         headers.setTransferEncoding(HttpTransferEncoding::CHUNKED);
+//         nextState = READ_CHUNK_SIZE;
+//     }
+    else if (message_.headers()->headerIntValue(HttpHeaders::Names::CONTENT_LENGTH, -1) >= 0) {
+        nextState = READ_FIXED_LENGTH_CONTENT;
+    }
+    else {
+        nextState = READ_VARIABLE_LENGTH_CONTENT;
+    }
 
     return nextState;
 }
@@ -774,14 +787,14 @@ StringPiece HttpPackageDecoder::readLine(const ReplayingDecoderBufferPtr& buffer
     int bytesCnt;
     const char* bytes = buffer->readableBytes(&bytesCnt);
 
-    if (bytesCnt >= maxLineLength) {
-        // TODO: Respond with Bad Request and discard the traffic
-        //    or close the connection.
-        //       No need to notify the upstream handlers - just log.
-        //       If decoding a response, just throw an exception.
-        throw TooLongFrameException(
-            StringUtil::printf("An HTTP line is larger than %d bytes.", maxLineLength));
-    }
+//     if (bytesCnt >= maxLineLength) {
+//         // TODO: Respond with Bad Request and discard the traffic
+//         //    or close the connection.
+//         //       No need to notify the upstream handlers - just log.
+//         //       If decoding a response, just throw an exception.
+//         throw TooLongFrameException(
+//             StringUtil::printf("An HTTP line is larger than %d bytes.", maxLineLength));
+//     }
 
     for (int i = 0, j = bytesCnt - 1; i < j; ++i) {
         if (bytes[i] == HttpCodecUtil::CR && bytes[i+1] == HttpCodecUtil::LF) {

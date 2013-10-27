@@ -31,8 +31,8 @@ const LogLevel LogLevel::TRACE(0, "TRACE");
 
 LogLevel::LogLevel(int v, const char* name)
     : cetty::util::Enum<LogLevel>(v, name) {
-    if (needSetDefaultEnum()) {
-        setDefaultEnum(new LogLevel(-1, "unknown"));
+    if (markSetDefaultEnum()) {
+        setDefaultEnum(new LogLevel(-1, "UNKNOWN"));
     }
 }
 

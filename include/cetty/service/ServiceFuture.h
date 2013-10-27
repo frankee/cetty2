@@ -19,6 +19,7 @@
 
 #include <deque>
 #include <boost/function.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <cetty/util/ReferenceCounter.h>
 
 namespace cetty {
@@ -39,6 +40,7 @@ public:
     typedef const T& ResponseConstRefType;
     typedef ServiceFuture<T> SelfType;
     typedef const ServiceFuture<T>& SelfConstRefType;
+    typedef boost::intrusive_ptr<SelfType> Ptr;
 
     typedef boost::function2<void, ServiceFuture<T> const&, T const&> CompletedCallback;
 	//typedef std::deque<CompletedCallback>::const_iterator ConstCallbacksIterator;

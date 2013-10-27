@@ -738,9 +738,6 @@
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpHeaders.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
-      <Filter>handler\codec\http</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMethod.h">
       <Filter>handler\codec\http</Filter>
     </ClInclude>
@@ -901,6 +898,15 @@
       <Filter>channel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\cetty\util\Uuid.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\JParser.h">
+      <Filter>util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\util\XmlParser.h">
       <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>

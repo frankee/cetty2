@@ -111,6 +111,7 @@ proto_gen.cmd</Command>
     <ClInclude Include="..\..\..\include\cetty\service\ClientServiceDispatcher.h" />
     <ClInclude Include="..\..\..\include\cetty\service\ClientService.h" />
     <ClInclude Include="..\..\..\include\cetty\service\Connection.h" />
+    <ClInclude Include="..\..\..\include\cetty\service\http\HttpClient.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\CachingConnectionPool.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\ConnectionPool.h" />
     <ClInclude Include="..\..\..\include\cetty\service\pool\WatermarkConnectionPool.h" />

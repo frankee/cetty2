@@ -81,6 +81,12 @@ public:
         return build(connections);
     }
 
+    ChannelPtr build(const Connection& connection) {
+        Connections connections;
+        connections.push_back(Connection(connection));
+        return build(connections);
+    }
+
     ChannelPtr build(const std::vector<std::string>& connections) {
         Connections conns;
         std::vector<std::string>::const_iterator itr;

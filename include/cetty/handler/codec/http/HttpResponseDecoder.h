@@ -109,6 +109,9 @@ public:
             VoidMessageContainer,
             VoidMessageContainer> Context;
 
+    typedef Context::Handler Handler;
+    typedef Context::HandlerPtr HandlerPtr;
+
 public:
     /**
      * Creates a new instance with the default
@@ -116,7 +119,7 @@ public:
      * <tt>maxChunkSize (8192)</tt>.
      */
     HttpResponseDecoder()
-        : responseDecoder_(HttpPackageDecoder::RESPONSE, 4096, 8192, 8192) {
+        : responseDecoder_(HttpPackageDecoder::RESPONSE, 4096, 8192, 1048576) {
         init();
     }
 
@@ -133,7 +136,7 @@ public:
         init();
     }
 
-    ~HttpResponseDecoder();
+    ~HttpResponseDecoder() {}
 
     void registerTo(Context& ctx);
 

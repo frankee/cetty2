@@ -27,13 +27,10 @@ class OutputStream {
 public:
     virtual ~OutputStream() {};
 
+    OutputStream& operator<<(int value);
+
     virtual int writeByte(int byte) = 0;
-
-    int write(const int8_t* bytes, int length) {
-        return write(bytes, 0, length);
-    }
-
-    virtual int write(const int8_t* bytes, int offset, int length);
+    virtual int write(const char* bytes, int length) = 0;
 
     virtual void flush() = 0;
     virtual void close() = 0;

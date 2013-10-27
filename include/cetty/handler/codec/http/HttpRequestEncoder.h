@@ -41,8 +41,6 @@ namespace http {
 
 class HttpRequestEncoder : private boost::noncopyable {
 public:
-    typedef boost::shared_ptr<HttpRequestEncoder> HandlerPtr;
-
     typedef ChannelMessageHandlerContext<HttpRequestEncoder,
         VoidMessage,
         VoidMessage,
@@ -52,6 +50,9 @@ public:
         VoidMessageContainer,
         ChannelMessageContainer<HttpPackage, MESSAGE_BLOCK>,
         ChannelBufferContainer> Context;
+
+    typedef Context::Handler Handler;
+    typedef Context::HandlerPtr HandlerPtr;
 
 public:
     /**

@@ -343,6 +343,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\Adler32.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Base64.h" />
     <ClInclude Include="..\..\..\include\cetty\util\CurrentThread.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\JParser.h" />
     <ClInclude Include="..\..\..\include\cetty\util\MetaProgramming.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NameValueCollection.h" />
     <ClInclude Include="..\..\..\include\cetty\util\NestedDiagnosticContext.h" />
@@ -354,6 +355,7 @@
     <ClInclude Include="..\..\..\include\cetty\util\StringUtil.h" />
     <ClInclude Include="..\..\..\include\cetty\util\TruncatableArray.h" />
     <ClInclude Include="..\..\..\include\cetty\util\Uuid.h" />
+    <ClInclude Include="..\..\..\include\cetty\util\XmlParser.h" />
     <ClInclude Include="..\..\..\include\cetty\Version.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ByteOrder.h" />
     <ClInclude Include="..\..\..\include\cetty\buffer\ChannelBuffer.h" />

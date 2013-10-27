@@ -81,8 +81,8 @@ ChannelOption::ChannelOption(int id,
                              const boost::static_visitor<bool>* checker)
     : cetty::util::Enum<ChannelOption>(id, name),
       checker_(checker) {
-    if (needSetDefaultEnum()) {
-        setDefaultEnum(new ChannelOption(-1, "unknown", NULL));
+    if (markSetDefaultEnum()) {
+        setDefaultEnum(new ChannelOption(-1, "UNKNOWN", NULL));
     }
 }
 

@@ -31,7 +31,7 @@ namespace service {
 
 using namespace cetty::channel;
 
-template<typename Request, typename Response>
+template<typename Request, typename Response = Request>
 class ClientService : public cetty::channel::Channel {
 public:
     typedef ClientService<Request, Response> Self;
@@ -62,6 +62,16 @@ public:
                                        &ClientService::onOpen,
                                        this,
                                        _1));
+    }
+
+    static void callMethod(const ChannelPtr& channel,
+                           const Request& request,
+                           const boost::intrusive_ptr<ServiceFuture<Response> >& future) {
+        if (channel) {
+            boost::intrusive_ptr<OutstandingCall<Request, Response> > outstanding(
+                new OutstandingCall<Request, Response>(request, future));
+            channel->writeMessage(outstanding);
+        }
     }
 
 private:

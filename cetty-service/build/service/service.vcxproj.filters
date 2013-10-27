@@ -89,6 +89,9 @@
     <ClInclude Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.cnf.h">
       <Filter>service\builder</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\cetty\service\http\HttpClient.h">
+      <Filter>service\http</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\cetty\service\builder\ServerBuilderConfig.proto">

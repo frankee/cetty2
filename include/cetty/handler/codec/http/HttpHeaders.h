@@ -517,7 +517,7 @@ public:
     int headerIntValue(const std::string& name, int defaultValue) {
         const std::string& value = headers_.get(name);
 
-        if (!value.empty() && StringUtil::isDigits(name)) {
+        if (!value.empty() && StringUtil::isDigits(value)) {
             return StringUtil::strto32(value);
         }
         else {

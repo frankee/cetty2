@@ -26,7 +26,7 @@ LogFileSink::RollingSchedule LogFileSink::RollingSchedule::ROLLING_MINUTELY(7, "
 
 LogFileSink::RollingSchedule::RollingSchedule(int value, const char* name)
     : cetty::util::Enum<RollingSchedule>(value, name) {
-    if (needSetDefaultEnum()) {
+    if (markSetDefaultEnum()) {
         setDefaultEnum(new RollingSchedule(-1, "UNKNOWN"));
     }
 }

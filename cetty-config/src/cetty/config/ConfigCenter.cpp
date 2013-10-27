@@ -73,11 +73,8 @@ bool ConfigCenter::load(int argc, char* argv[]) {
     if (option.empty()) {
         std::string path;
         std::string program = argv[0];
+        StringUtil::replace(program, '\\', '/', true, &program);
         std::string::size_type slashPos = program.find_last_of('/');
-
-        if (slashPos == program.npos) {
-            slashPos = program.find_last_of('\\');
-        }
 
         if (slashPos != program.npos) {
             path = program.substr(0, slashPos + 1);

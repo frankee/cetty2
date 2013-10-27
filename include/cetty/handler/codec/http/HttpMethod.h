@@ -28,6 +28,7 @@
 
 #if defined(BOOST_MSVC)
 #undef TRACE
+#undef DELETE
 #endif
 
 namespace cetty {

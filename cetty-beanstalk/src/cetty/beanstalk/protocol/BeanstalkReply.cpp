@@ -39,7 +39,7 @@ const BeanstalkReplyType BeanstalkReplyType::INVALID(-1, "INVALID");
 
 BeanstalkReplyType::BeanstalkReplyType(int value, const char* name)
     : Enum<BeanstalkReplyType>(value, name) {
-    if (needSetDefaultEnum()) {
+    if (markSetDefaultEnum()) {
         setDefaultEnum(new BeanstalkReplyType(-1, "INVALID"));
     }
 }

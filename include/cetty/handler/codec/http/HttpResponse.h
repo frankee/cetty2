@@ -173,9 +173,12 @@ public:
                 headers_.containsHeader(HttpHeaders::Names::SEC_WEBSOCKET_LOCATION)) {
                     return 16;
             }
+            else {
+                return defaultValue;
+            }
         }
 
-        return defaultValue;
+        return length;
     }
 
     void setContentLength(int length) {

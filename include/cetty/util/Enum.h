@@ -26,10 +26,6 @@
 namespace cetty {
 namespace util {
 
-// static const int ENUM_NO_PARSE = 0;
-// static const int ENUM_PARSE_CASE_SENSITIVE = 1;
-// static const int ENUM_PARSE_CASE_INSENSITIVE = 2;
-
 template<class SubT, int CaseSensitive = 0>
 class Enum {
 public:
@@ -51,7 +47,7 @@ public:
      * To enable this function, you should:
      * 1. using Enum(int i, const char* name)
      * 2. set default enum, which will be return when failed to parse.
-     *    if (!defaultEnum()) {
+     *    if (!markSetDefaultEnum()) {
      *        setDefaultEnum(new MyEnum(-1, "unkonwn"));
      *    }
      *
@@ -113,22 +109,27 @@ protected:
         }
     }
 
-    bool needSetDefaultEnum() {
-        if (hasSetDefaultEnum_) {
-            return false;
+    // return true if mark successfully when the default enum has not been to be set
+    bool markSetDefaultEnum() {
+        if (!isSetting_) {
+            isSetting_ = true;
+            return true;
         }
         else {
-            hasSetDefaultEnum_ = true;
-            return true;
+            return false;
         }
     }
 
-    void setDefaultEnum(const SubT* defaultEnum) {
+    const SubT* defaultEnum() const {
+        return defaultEnum_;
+    }
+
+    void setDefaultEnum(const SubT* e) {
         if (defaultEnum_) {
             delete defaultEnum_;
         }
 
-        defaultEnum_ = defaultEnum;
+        defaultEnum_ = e;
     }
 
 private:
@@ -162,7 +163,7 @@ private:
     typedef std::map<std::string, Self const*, LessThan> Enums;
 
     static Enums* enums_;
-    static bool hasSetDefaultEnum_;
+    static bool isSetting_;
     static const SubT* defaultEnum_;
 
 private:
@@ -174,7 +175,7 @@ template<class SubT, int CaseSensitive>
 typename Enum<SubT, CaseSensitive>::Enums* Enum<SubT, CaseSensitive>::enums_ = NULL;
 
 template<class SubT, int CaseSensitive>
-bool cetty::util::Enum<SubT, CaseSensitive>::hasSetDefaultEnum_ = false;
+bool cetty::util::Enum<SubT, CaseSensitive>::isSetting_ = false;
 
 template<class SubT, int CaseSensitive>
 const SubT* cetty::util::Enum<SubT, CaseSensitive>::defaultEnum_ = NULL;
