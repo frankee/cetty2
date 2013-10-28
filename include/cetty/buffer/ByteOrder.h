@@ -42,6 +42,12 @@ public:
      */
     static ByteOrder nativeOrder();
 
+    static int64_t swap(int64_t value);
+
+    static int32_t swap(int32_t value);
+
+    static int16_t swap(int16_t value);
+
 private:
     ByteOrder(int value, const char* name);
 };

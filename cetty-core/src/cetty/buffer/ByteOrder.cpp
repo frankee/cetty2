@@ -37,5 +37,32 @@ ByteOrder ByteOrder::nativeOrder() {
     }
 }
 
+int64_t ByteOrder::swap(int64_t value) {
+    const char* buffer = reinterpret_cast<const char*>(&value);
+    return ((static_cast<int64_t>(buffer[0]) & 0xff) << 56) |
+           ((static_cast<int64_t>(buffer[1]) & 0xff) << 48) |
+           ((static_cast<int64_t>(buffer[2]) & 0xff) << 40) |
+           ((static_cast<int64_t>(buffer[3]) & 0xff) << 32) |
+           ((static_cast<int64_t>(buffer[4]) & 0xff) << 24) |
+           ((static_cast<int64_t>(buffer[5]) & 0xff) << 16) |
+           ((static_cast<int64_t>(buffer[6]) & 0xff) <<  8) |
+           ((static_cast<int64_t>(buffer[7]) & 0xff) <<  0);
+
+}
+
+int32_t ByteOrder::swap(int32_t value) {
+    const char* buffer = reinterpret_cast<const char*>(&value);
+    return ((static_cast<int32_t>(buffer[0]) & 0xff) << 24) |
+           ((static_cast<int32_t>(buffer[1]) & 0xff) << 16) |
+           ((static_cast<int32_t>(buffer[2]) & 0xff) << 8) |
+           ((static_cast<int32_t>(buffer[3]) & 0xff) << 0);
+}
+
+int16_t ByteOrder::swap(int16_t value) {
+    const char* buffer = reinterpret_cast<const char*>(&value);
+    return ((static_cast<int16_t>(buffer[0]) & 0xff) <<  8) |
+           ((static_cast<int16_t>(buffer[1]) & 0xff) <<  0);
+}
+
 }
 }
