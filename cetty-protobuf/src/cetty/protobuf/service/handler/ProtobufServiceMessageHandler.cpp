@@ -86,7 +86,15 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         }
         else {
             // return error message
-            printf("has no such service or method.\n");
+            LOG_DEBUG << "has no such service or method.";
+            ProtobufServiceMessagePtr message(
+                new ProtobufServiceMessage(MSG_ERROR,
+                id,
+                rpc.service(),
+                rpc.method(),
+                MessagePtr()));
+
+            context_->outboundTransfer()->write(message, ctx.newVoidFuture());
         }
     }
     else if (rpc.type() == cetty::protobuf::service::MSG_ERROR) {
