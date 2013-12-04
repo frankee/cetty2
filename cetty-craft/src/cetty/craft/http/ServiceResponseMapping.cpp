@@ -231,7 +231,7 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
                 const Message& msg = reflection->GetMessage(message, field);
 
                 int size = msg.ByteSize();
-                content = Unpooled::buffer(size + RESERVED_MIN_SIZE * 4,
+                content = Unpooled::buffer(size * 8 + RESERVED_MIN_SIZE * 4,
                                            RESERVED_AHEAD_WRITE_SIZE);
 
                 formatter->format(msg, content);
