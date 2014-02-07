@@ -86,7 +86,7 @@ void ShuttleBackend::configure(const std::map<std::string, Backend*>& config) {
 
 const ChannelPtr& ShuttleBackend::getChannel(const std::string& method) {
 	if (backends_.size() == 1) {
-		return backends_.begin()->channel(method);
+		return backends_.begin()->second->channel(method);
 	}
 	
     ThreadId id = CurrentThread::id();
