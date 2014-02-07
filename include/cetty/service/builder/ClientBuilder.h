@@ -104,6 +104,12 @@ public:
         }
 
         channel->open();
+        channel->closeFuture()->addListener(boost::bind(
+            &Self::closeChannelBeforeDestruct,
+            this,
+            _1,
+            channel));
+
         return channel;
     }
 
@@ -137,6 +143,9 @@ private:
 
         clientChannels_.insert(std::make_pair(channel->id(), channel));
         return channel;
+    }
+
+    void closeChannelBeforeDestruct(ChannelFuture&, ChannelPtr ch) {
     }
 
 private:

@@ -86,6 +86,12 @@ ChannelFuturePtr ClientBootstrap::connect(const InetAddress& remote,
     ch->setInitializer(initializer());
     ch->open();
 
+    ch->closeFuture()->addListener(boost::bind(
+        &ClientBootstrap::closeChannelBeforeDestruct,
+        this,
+        _1,
+        ch));
+
     // Set the options.
     ch->config().setOptions(options());
 

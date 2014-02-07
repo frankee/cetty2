@@ -191,6 +191,11 @@ public:
 private:
     ChannelPtr newChannel();
 
+    void closeChannelBeforeDestruct(ChannelFuture&, ChannelPtr ch) {
+        // save the channel after this clientBootstrap destructed,
+        // and before this channel really closed.
+    }
+
 private:
     EventLoopPtr eventLoop_;
     InetAddress remoteAddress_;

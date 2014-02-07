@@ -56,10 +56,11 @@ Channel::Channel(int id,
 }
 
 Channel::~Channel() {
-    LOG_DEBUG << "Channel " << toString() << " dctr";
+    LOG_DEBUG << "Channel " << toString() << " dstr";
 
     if (isOpen()) {
-        close();
+        LOG_ERROR << "should close the channel before destruct";
+        //close();
     }
 
     if (pipeline_) {
