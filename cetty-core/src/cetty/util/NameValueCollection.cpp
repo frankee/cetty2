@@ -267,10 +267,12 @@ void NameValueCollection::erase(const std::string& name) {
 
 void NameValueCollection::erase(const std::string& name,
                                 const std::string& value) {
-    for (Iterator itr = _map.find(name); itr != _map.end(); ++itr) {
+    for (Iterator itr = _map.find(name); itr != _map.end();) {
         if (itr->second == value) {
             _map.erase(itr);
         }
+
+        itr = _map.find(name);
     }
 }
 

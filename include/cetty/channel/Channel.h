@@ -559,6 +559,8 @@ protected:
 
     void closeIfClosed();
 
+    void fireClosedCleanly();
+
     /**
      * (Internal use only) Set the Channel to active state.
      */
