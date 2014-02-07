@@ -244,9 +244,9 @@ int HeapChannelBuffer::getBytes(int index, char* dst, int length) const {
 }
 
 int HeapChannelBuffer::getBytes(int index, OutputStream* out, int length) const {
-    if (out) {
-        return out->write(reinterpret_cast<const int8_t*>(buf), index, length);
-    }
+    //if (out) {
+    //    return out->write(reinterpret_cast<const int8_t*>(buf), index, length);
+    //}
 
     return 0;
 }

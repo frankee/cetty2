@@ -17,7 +17,7 @@
 
 #include <cetty/logging/LogWin32DebugSink.h>
 
-#if defined(WIN32) && defined(DEBUG)
+#if defined(WIN32) && (defined(_DEBUG) || defined(DEBUG))
 #include <windows.h>
 #endif
 
@@ -25,11 +25,11 @@ namespace cetty {
 namespace logging {
 
 void LogWin32DebugSink::doSink(const LogMessage& msg) {
-#if defined(WIN32) && defined(DEBUG)
-    const char* buffer = message_.buffer();
+#if defined(WIN32) && (defined(_DEBUG) || defined(DEBUG))
+    const char* buffer = msg.buffer();
     std::wstring out;
     ::cetty::util::StringUtil::utftoucs(buffer, &out);
-    OutputDebugString(out.c_str());
+    ::OutputDebugString(out.c_str());
 #endif
 }
 

@@ -153,6 +153,9 @@ void AsioSocketChannel::handleRead(const boost::system::error_code& error,
         if (isOpen()) {
             close(newVoidFuture());
         }
+        else {
+            fireClosedCleanly();
+        }
     }
 }
 
@@ -198,6 +201,9 @@ void AsioSocketChannel::handleWrite(const boost::system::error_code& error,
 
         if (isOpen()) {
             close(newVoidFuture());
+        }
+        else {
+            fireClosedCleanly();
         }
     }
 }
@@ -422,13 +428,6 @@ bool AsioSocketChannel::doDisconnect() {
     return doClose();
 }
 
-class CallbackStatus {
-public:
-
-private:
-
-};
-
 bool AsioSocketChannel::doClose() {
     if (!isOpen()) {
         LOG_WARN << "channel " << toString()
@@ -457,6 +456,10 @@ bool AsioSocketChannel::doClose() {
         LOG_ERROR << "channel " << toString()
                   << " failed to close the tcp socket, code: "
                   << error.value() << " message: " << error.message();
+    }
+
+    if (!isReading_ && isWriting_) {
+        fireClosedCleanly();
     }
 
     return true;

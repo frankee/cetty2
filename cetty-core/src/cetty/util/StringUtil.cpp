@@ -25,6 +25,7 @@
 #include <cstring>
 #include <boost/crc.hpp>
 #include <boost/assert.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <cetty/util/StlUtil.h>
 #include <cetty/util/StringPiece.h>
 
@@ -1410,6 +1411,11 @@ void StringUtil::replace(const std::string& s,
         (*res)[pos] = newChar;
     }
     while (replaceAll);
+}
+
+std::string* StringUtil::trim(std::string* str) {
+    boost::trim(*str);
+    return str;
 }
 
 }

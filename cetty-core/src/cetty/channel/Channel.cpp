@@ -262,7 +262,7 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 }
 
                 future->setSuccess();
-                onClosedComplete();
+                //onClosedComplete();
             }
             else {
                 processFailure("close failed", future);
@@ -281,6 +281,15 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
     }
 
     state_ = CHANNEL_INACTIVED;
+}
+
+void Channel::fireClosedCleanly() {
+    if (state_ != CHANNEL_INACTIVED) { // called in the doClose()
+        eventLoop_->post(boost::bind(&Channel::fireClosedCleanly, this)); 
+    }
+    else {
+        closeFuture_->setSuccess();
+    }
 }
 
 void Channel::onClosedComplete() {
