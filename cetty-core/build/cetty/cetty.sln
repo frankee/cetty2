@@ -128,10 +128,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BeanstalkClient", "..\..\..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotobuf", "..\..\..\..\thirdparty\protobuf-2.4.1\vsprojects\libprotobuf.vcxproj", "{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shuttle", "..\..\..\cetty-shuttle\build\shuttle.vcxproj.vcxproj", "{34D9FC1C-6D55-44AB-BC1C-46C60ECF604E}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thrift", "..\..\..\cetty-thirft\build\thrift\thrift.vcxproj", "{C5D74594-6E85-4113-9FAE-FC426FE8631E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -298,14 +294,6 @@ Global
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.Build.0 = Debug|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.ActiveCfg = Release|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.Build.0 = Release|Win32
-		{34D9FC1C-6D55-44AB-BC1C-46C60ECF604E}.Debug|Win32.ActiveCfg = Debug|Win32
-		{34D9FC1C-6D55-44AB-BC1C-46C60ECF604E}.Debug|Win32.Build.0 = Debug|Win32
-		{34D9FC1C-6D55-44AB-BC1C-46C60ECF604E}.Release|Win32.ActiveCfg = Release|Win32
-		{34D9FC1C-6D55-44AB-BC1C-46C60ECF604E}.Release|Win32.Build.0 = Release|Win32
-		{C5D74594-6E85-4113-9FAE-FC426FE8631E}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C5D74594-6E85-4113-9FAE-FC426FE8631E}.Debug|Win32.Build.0 = Debug|Win32
-		{C5D74594-6E85-4113-9FAE-FC426FE8631E}.Release|Win32.ActiveCfg = Release|Win32
-		{C5D74594-6E85-4113-9FAE-FC426FE8631E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

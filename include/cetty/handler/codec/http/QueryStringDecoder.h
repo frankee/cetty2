@@ -76,6 +76,9 @@ public:
      */
     void getParameters(NameValueCollection* params) const;
 
+
+    static void decodeParams(const std::string& s, NameValueCollection& params);
+
 private:
     const URI& uri;
 };

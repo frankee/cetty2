@@ -410,6 +410,11 @@ const std::string HttpHeaders::Values::UPGRADE = "Upgrade";
  */
 const std::string HttpHeaders::Values::WEBSOCKET = "WebSocket";
 
+const std::string HttpHeaders::Values::X_PROTOBUFFER = "application/x-protobuffer";
+
+
+const std::string HttpHeaders::Values::X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+
 
 void HttpHeaders::setHeader(const std::string& name,
     const std::vector<int>& values) {

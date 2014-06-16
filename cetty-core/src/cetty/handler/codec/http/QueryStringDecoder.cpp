@@ -21,7 +21,7 @@ namespace handler {
 namespace codec {
 namespace http {
 
-static void decodeParams(const std::string& s, NameValueCollection& params) {
+void QueryStringDecoder::decodeParams(const std::string& s, NameValueCollection& params) {
     std::string name;
     std::string::size_type pos = 0; // Beginning of the unprocessed region
     std::string::size_type i;       // End of the unprocessed region
@@ -82,6 +82,7 @@ void QueryStringDecoder::getParameters(NameValueCollection* params) const {
         }
     }
 }
+
 
 }
 }

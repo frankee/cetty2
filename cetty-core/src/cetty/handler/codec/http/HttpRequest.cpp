@@ -51,8 +51,17 @@ HttpRequest::~HttpRequest() {
 
 const NameValueCollection& HttpRequest::queryParameters() const {
     if (queryParams_.empty()) {
-        QueryStringDecoder queryStringDecoder(uri_);
-        queryStringDecoder.getParameters(&queryParams_);
+        if (headers_.headerValue(HttpHeaders::Names::CONTENT_TYPE) == HttpHeaders::Values::X_WWW_FORM_URLENCODED) {
+            std::string contentStr;
+            content_->readBytes(&contentStr);
+            std::string decodedStr;
+            URI::decode(contentStr, decodedStr);
+            QueryStringDecoder::decodeParams(decodedStr, queryParams_);
+        }
+        else {
+            QueryStringDecoder queryStringDecoder(uri_);
+            queryStringDecoder.getParameters(&queryParams_);
+        }
     }
 
     return queryParams_;

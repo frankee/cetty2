@@ -449,6 +449,10 @@ public:
          * <tt>"WebSocket"</tt>
          */
         static const std::string WEBSOCKET;
+
+        static const std::string X_PROTOBUFFER;
+
+        static const std::string X_WWW_FORM_URLENCODED;
     };
 
 public:

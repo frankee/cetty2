@@ -87,6 +87,10 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }
+    else if (format.compare("pb") == 0) {
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, HttpHeaders::Values::X_PROTOBUFFER);
+        response->headers().addHeader("X-protobuf-id", StringUtil::numtostr(message->id()));
+    }
 
     // Decide whether to close the connection or not.
     bool keepAlive = req->keepAlive();
@@ -147,6 +151,19 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
         else {
 
         }
+    }
+
+    if (producer.compare("pb") == 0) {
+        int size = message.ByteSize();
+        content = Unpooled::buffer(RESERVED_MIN_SIZE * 2 + size, RESERVED_AHEAD_WRITE_SIZE);
+        char* data;
+        int dataSize;
+        data = content->writableBytes(&dataSize);
+
+        uint8_t* out = message.SerializeWithCachedSizesToArray((uint8_t*)data);
+        content->offsetReaderIndex(out - (uint8_t*)data);
+        response->setContent(content);
+        return;
     }
 
     ProtobufFormatter* formatter = NULL;

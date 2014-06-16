@@ -78,8 +78,15 @@ public:
         }
     }
 
+    bool acceptedPost(const HttpRequestPtr& request) {
+        const std::string& type = request->headers().headerValue(HttpHeaders::Names::CONTENT_TYPE);
+        return request->method() == HttpMethod::POST &&
+            (type == HttpHeaders::Values::X_PROTOBUFFER ||
+            type == HttpHeaders::Values::X_WWW_FORM_URLENCODED);
+    }
+
     bool match(const HttpRequestPtr& request) {
-        if (request->method() != httpMethod_) {
+        if (request->method() != httpMethod_ && !acceptedPost(request)) {
             return false;
         }
 
@@ -253,6 +260,10 @@ ProtobufServiceMessagePtr ServiceRequestMapping::toProtobufMessage(
                                                    method->methodName()));
                     message->setPayload(req);
 
+                    if (request->headers().hasHeader("X-protobuf-id")) {
+                        message->setId(StringUtil::strto64(request->headers().headerValue("X-protobuf-id")));
+                    }
+
                     StringPiece value = method->pathParamValue("format");
                     if (format && !value.empty()) {
                         format->assign(value.c_str(), value.size());
@@ -294,6 +305,18 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
     BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
 
     bool parsed = false;
+
+    if (request->headers().headerValue(HttpHeaders::Names::CONTENT_TYPE).compare(HttpHeaders::Values::X_PROTOBUFFER) == 0) {
+        const char* content = NULL;
+        int contentSize = 0;
+        content = request->content()->readableBytes(&contentSize);
+        if (content) {
+            return message->ParseFromArray(content, contentSize);
+        }
+        else {
+            return false;
+        }
+    }
 
     //std::string format = method.pathParamValue("format");
 
