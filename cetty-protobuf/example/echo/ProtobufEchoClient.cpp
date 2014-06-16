@@ -51,5 +51,19 @@ int main(int argc, char* argv[]) {
     EchoClient client(service);
     client.sendRequest();
 
-    service->closeFuture()->awaitUninterruptibly();
+
+    printf("To quit server, press 'q'.\n");
+
+    char input;
+    do {
+        input = getchar();
+
+        if (input == 'q') {
+            //builder.
+            break;
+        }
+    }
+    while (true);
+
+    //service->closeFuture()->awaitUninterruptibly();
 }

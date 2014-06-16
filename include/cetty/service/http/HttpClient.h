@@ -54,11 +54,18 @@ public:
 
     void get(const std::string& url, const ResponseCallback& callback) {
         HttpRequestPtr req = new HttpRequest;
+
         //req->headers().
         req->setMethod(HttpMethod::GET);
+        req->headers().setHeader(HttpHeaders::Names::CACHE_CONTROL,
+            "max-age=0");
+
         //req->setKeepAlive(false);
         req->setUri(url);
         req->setVersion(HttpVersion::HTTP_1_1);
+
+        req->headers().setHeader(HttpHeaders::Names::HOST,
+            req->uri().getHost());
 
         Connection conn(req->uri().getHost(), req->uri().getPort(), 1);
         ChannelPtr ch = builder_.build(conn);
