@@ -123,6 +123,10 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
         google::protobuf::Message* msg = NULL;
         
         switch (field->cpp_type()) {
+        case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
+            reflection->SetBool(message, field, node.as<bool>());
+            break;
+
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
             reflection->SetInt32(message, field, node.as<google::protobuf::int32>());
             break;
