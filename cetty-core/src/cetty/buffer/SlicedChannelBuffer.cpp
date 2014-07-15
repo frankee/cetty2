@@ -57,12 +57,12 @@ void SlicedChannelBuffer::capacity(int newCapacity) {
     throw UnsupportedOperationException("sliced buffer");
 }
 
-const char* SlicedChannelBuffer::readableBytes(int* length) {
-    const char* data = channelBuffer->readableBytes(length);
+const char* SlicedChannelBuffer::readableBytes(int* len) {
+    const char* data = channelBuffer->readableBytes(len);
 
     if (data) {
-        if (length) {
-            *length = *length - readerIdx;
+        if (len) {
+            *len = writerIdx - readerIdx;
         }
 
         return data + adjustment;

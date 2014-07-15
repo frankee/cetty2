@@ -81,7 +81,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
             response->content()->writeByte(')');
         }
 
-        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "text/javascript");
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/json");
     }
     else if (format.compare("png") == 0) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");

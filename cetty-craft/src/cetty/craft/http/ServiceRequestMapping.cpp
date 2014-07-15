@@ -535,6 +535,14 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
     else if (options.has_form_param()) {
 
     }
+    else if (options.has_mapping_content() && options.mapping_content()) {
+        if (request->content()->readable()) {
+            StringPiece content;
+            request->content()->readableBytes(&content);
+            values->push_back(content);
+            return true;
+        }
+    }
 
     return false;
 }

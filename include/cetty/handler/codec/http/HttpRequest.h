@@ -246,7 +246,12 @@ public:
             }
         }
 
-        return defaultValue;
+        if (length >= 0) {
+            return length;
+        }
+        else {
+            return defaultValue;
+        }
     }
 
     void setContentLength(int length) {

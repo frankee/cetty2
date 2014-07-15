@@ -464,7 +464,7 @@ int HttpHeaders::contentLength() const {
         return StringUtil::strto32(contentLength);
     }
 
-    return 0;
+    return -1;
 }
 
 void HttpHeaders::setContentLength(int length) {
