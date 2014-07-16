@@ -112,9 +112,9 @@ set(CRAFT_LIBRARYS cetty-craft cetty-protobuf cetty-protobuf-serialization cetty
 
 function(cxx_link_craft name)
   if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${CMAKE_THREAD_LIBS_INIT} ${PROTOBUF_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARY} z rt ${MEMPOOL_LIBRARY})
   elseif (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${YAMLCPP_LIBRARY} z ${MEMPOOL_LIBRARY})
+    target_link_libraries(${name} ${ARGN} ${CRAFT_LIBRARYS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${YAMLCPP_LIBRARY} z rt ${MEMPOOL_LIBRARY})
   endif()
 endfunction()
 
