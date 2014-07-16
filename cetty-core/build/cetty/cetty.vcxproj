@@ -185,6 +185,7 @@
     <ClCompile Include="..\..\src\cetty\util\Adler32.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Base64.cpp" />
     <ClCompile Include="..\..\src\cetty\util\CurrentThread.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\DateTimes.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Exception.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp" />
