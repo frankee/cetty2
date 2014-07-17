@@ -28,7 +28,6 @@
 # include <strstream>
 #endif
 
-#include <boost/thread.hpp>
 #include <boost/date_time.hpp>
 #include <cetty/logging/LogLevel.h>
 #include <cetty/util/Process.h>
