@@ -16,6 +16,7 @@
 
 #include <cetty/craft/http/ServiceRequestMapping.h>
 
+#include <boost/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <boost/assert.hpp>

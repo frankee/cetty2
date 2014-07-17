@@ -15,7 +15,7 @@
  */
 
 #include <cetty/protobuf/service/ProtobufUtil.h>
-
+#include <boost/bind.hpp>
 #include <cetty/util/Adler32.h>
 
 #include <google/protobuf/message.h>
