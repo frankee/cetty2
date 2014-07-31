@@ -61,7 +61,7 @@ void ProtobufServiceMessageHandler::messageUpdated(ChannelHandlerContext& ctx) {
 void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
         const ProtobufServiceMessagePtr& msg) {
     const ServiceMessage& rpc = msg->serviceMessage();
-
+    
     if (rpc.type() == cetty::protobuf::service::MSG_REQUEST) {
         const ProtobufServicePtr& service =
             ProtobufServiceRegister::instance().getService(rpc.service());
@@ -71,6 +71,8 @@ void ProtobufServiceMessageHandler::messageReceived(ChannelHandlerContext& ctx,
                     rpc.method());
 
         int64_t id = rpc.id();
+
+        LOG_INFO << "rpc request: " << rpc.service() << "." << rpc.method() << " " << id;        
 
         if (method) {
             service->CallMethod(method,
@@ -115,6 +117,8 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
                                    req->service(),
                                    req->method(),
                                    response));
+
+    LOG_INFO << "rpc response: " << req->service() << "." << req->method();
 
     context_->outboundTransfer()->write(message, ctx.newVoidFuture());
 }

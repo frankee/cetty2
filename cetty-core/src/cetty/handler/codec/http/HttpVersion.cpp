@@ -59,7 +59,8 @@ HttpVersion HttpVersion::valueOf(const StringPiece& text) {
         return HTTP_1_0;
     }
 
-    BOOST_ASSERT(false && "no such http version");
+    return HTTP_1_1;
+    //BOOST_ASSERT(false && "no such http version");
     //return HttpVersion(version, true);
 }
 

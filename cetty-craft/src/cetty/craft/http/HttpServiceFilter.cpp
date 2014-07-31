@@ -51,6 +51,9 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
     ChannelHandlerContext& ctx,
     const HttpPackage& req) {
     HttpRequestPtr request = req.httpRequest();
+
+    LOG_INFO << "http request: " << request->method().getName() << " " << request->getUriString();
+
     std::string format;
     ProtobufServiceMessagePtr msg =
         ServiceRequestMapping::instance().toProtobufMessage(request, &format);
@@ -92,6 +95,9 @@ HttpPackage HttpServiceFilter::filterResponse(ChannelHandlerContext& ctx,
         LOG_DEBUG << "not keep alive mode, close the channel after writer completed.";
         future->addListener(ChannelFutureListener::CLOSE);
     }
+
+
+    LOG_INFO << "http response: " << response->status().toString();
 
     formats_.pop_front();
     return response;

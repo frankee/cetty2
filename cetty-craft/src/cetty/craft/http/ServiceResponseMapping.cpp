@@ -87,6 +87,14 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }
+    else if (format.compare("vt") == 0) {
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/x-vtile");
+        response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
+
+        if (message->id() > 0) {
+            response->headers().addHeader("X-protobuf-id", StringUtil::numtostr(message->id()));
+        }
+    }
     else if (format.compare("pb") == 0) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, HttpHeaders::Values::X_PROTOBUFFER);
         response->headers().addHeader("X-protobuf-id", StringUtil::numtostr(message->id()));
