@@ -82,7 +82,8 @@ public:
     bool acceptedPost(const HttpRequestPtr& request) {
         const std::string& type = request->headers().headerValue(HttpHeaders::Names::CONTENT_TYPE);
         return request->method() == HttpMethod::POST &&
-            (type == HttpHeaders::Values::X_PROTOBUFFER ||
+            (httpMethod_ == HttpMethod::POST ||
+            type == HttpHeaders::Values::X_PROTOBUFFER ||
             type == HttpHeaders::Values::X_WWW_FORM_URLENCODED);
     }
 
@@ -415,7 +416,12 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
     std::vector<StringPiece> values;
 
     if (!getValues(request, method, options, &values)) {
-        return false;
+        if (field->is_required()) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     if (field->is_repeated()) {
@@ -423,6 +429,10 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
 
         for (itr = values.begin(); itr != values.end(); ++itr) {
             const StringPiece& value = *itr;
+
+            if (value.empty()) {
+                continue;
+            }
 
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
@@ -462,6 +472,15 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
     else {
         if (values.size() == 1) {
             const StringPiece& value = values.front();
+
+            if (value.empty()) {
+                if (field->is_required()) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
 
             switch (field->cpp_type()) {
             case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
