@@ -409,8 +409,19 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
         google::protobuf::Message* msg
             = field->is_repeated() ? reflection->AddMessage(message, field)
               : reflection->MutableMessage(message, field);
-
-        return parseMessage(request, method, msg);
+        if (options.mapping_content()) {
+            int size;
+            const char* bytes = request->content()->readableBytes(&size);
+            if (bytes && size > 0) {
+                return parseMessage(StringPiece(bytes, size), "json", msg);
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return parseMessage(request, method, msg);
+        }
     }
 
     std::vector<StringPiece> values;
