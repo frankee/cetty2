@@ -345,6 +345,16 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
                 }
             }
         }
+        else if (messageOptions.mapping_content()) {
+            int size;
+            const char* bytes = request->content()->readableBytes(&size);
+            if (bytes && size > 0) {
+                return parseMessage(StringPiece(bytes, size), "json", message);
+            }
+            else {
+                return false;
+            }
+        }
         else {
             StringPiece value = getValue(request, messageOptions);
             return parseMessage(value, consumer, message);
