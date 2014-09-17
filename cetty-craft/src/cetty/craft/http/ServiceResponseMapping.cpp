@@ -110,8 +110,13 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().setHeader(HttpHeaders::Names::CONNECTION,
                                       HttpHeaders::Values::KEEP_ALIVE);
 
-        response->headers().setHeader(HttpHeaders::Names::CONTENT_LENGTH,
-                                      response->content()->readableBytes());
+        if (response->content() && response->content()->readable()) {
+            response->headers().setHeader(HttpHeaders::Names::CONTENT_LENGTH,
+                                          response->content()->readableBytes());
+        }
+        else {
+            response->headers().setHeader(HttpHeaders::Names::CONTENT_LENGTH, 0);
+        }
     }
     else {
         response->headers().setHeader(HttpHeaders::Names::CONNECTION,
@@ -180,10 +185,12 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
         formatter = ProtobufFormatter::getFormatter(producer);
     }
     else {
+        //producer = "json";
         formatter = ProtobufFormatter::getFormatter("json");
     }
 
     if (!formatter) {
+        //formatter = ProtobufFormatter::getFormatter("json");
         LOG_ERROR << "CAN't found the formatter: " << producer;
         return;
         //
@@ -270,6 +277,16 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
                                    RESERVED_AHEAD_WRITE_SIZE);
 
         formatter->format(message, content);
+    }
+
+    {
+        const char* bytes = NULL;
+        int size = 0;
+        bytes = content->readableBytes(&size);
+
+        if (size == 0 || (size == 2 && strncmp(bytes, "{}", 2) == 0)) {
+            content->clear();
+        }
     }
 
     response->setContent(content);

@@ -181,7 +181,7 @@ private:
 
                 param = path_.substr(braceIndex + 1, i - braceIndex - 1);
 
-                regexStr.append("(.*)");
+                regexStr.append("([^/\\.]*)");
                 params_[param] = paramCount;
                 break;
 
@@ -354,6 +354,9 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
             else {
                 return false;
             }
+        }
+        else if (messageOptions.skip()) {
+            return true;
         }
         else {
             StringPiece value = getValue(request, messageOptions);

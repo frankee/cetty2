@@ -62,6 +62,8 @@ message CraftMessageOptions {
 	optional string      xml_root = 41;
 	
 	optional string     raw_field = 60;
+
+    optional bool            skip = 70;
 }
 
 message CraftMethodOptions {
