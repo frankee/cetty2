@@ -22,6 +22,10 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
+#if defined(_WIN32)
+#include <WinSock2.h>
+#include <Windows.h>
+#endif
 #include <mongo/client/dbclient.h>
 
 #include <cetty/logging/LoggerHelper.h>

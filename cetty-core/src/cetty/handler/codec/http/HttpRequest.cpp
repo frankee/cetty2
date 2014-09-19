@@ -51,7 +51,8 @@ HttpRequest::~HttpRequest() {
 
 const NameValueCollection& HttpRequest::queryParameters() const {
     if (queryParams_.empty()) {
-        if (headers_.headerValue(HttpHeaders::Names::CONTENT_TYPE) == HttpHeaders::Values::X_WWW_FORM_URLENCODED) {
+        const std::string& contentType = headers_.headerValue(HttpHeaders::Names::CONTENT_TYPE);
+        if (contentType.find(HttpHeaders::Values::X_WWW_FORM_URLENCODED) != std::string::npos) {
             std::string contentStr;
             content_->readBytes(&contentStr);
             std::string decodedStr;
