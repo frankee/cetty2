@@ -588,7 +588,13 @@ bool printField(const google::protobuf::Message& message,
     const google::protobuf::Reflection* reflection = message.GetReflection();
 
     //FIXME
-    if (field->is_repeated() || reflection->HasField(message, field)) {
+    if (field->is_repeated()) {
+        if (ProtobufFormatter::printEmptyArray()) {
+            printSingleField(message, field, printer);
+        }
+        return true;
+    }
+    else if (reflection->HasField(message, field)) {
         printSingleField(message, field, printer);
         return true;
     }

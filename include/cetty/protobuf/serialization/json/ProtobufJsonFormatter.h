@@ -69,6 +69,7 @@ public:
     virtual void format(const std::string& key,
                         const std::vector<const google::protobuf::Message*>& value,
                         const ChannelBufferPtr& buffer);
+
 private:
     bool style;
 };

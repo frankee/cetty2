@@ -107,6 +107,9 @@ public:
 public:
     static ProtobufFormatter* getFormatter(const std::string& name);
 
+    static bool printEmptyArray();
+    static void setPrintEmptyArray(bool print);
+
     static void registerFormatter(const std::string& name,
                                   ProtobufFormatter* formatter);
     static void unregisterFormatter(const std::string& name);
@@ -115,6 +118,8 @@ public:
 
 private:
     static std::map<std::string, ProtobufFormatter*>* formatters;
+
+    static bool printEmptyArray_;
 };
 
 }
