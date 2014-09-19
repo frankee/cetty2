@@ -23,6 +23,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
+#include <yaml-cpp/yaml.h>
 
 #include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
@@ -82,9 +83,9 @@ public:
     bool acceptedPost(const HttpRequestPtr& request) {
         const std::string& type = request->headers().headerValue(HttpHeaders::Names::CONTENT_TYPE);
         return request->method() == HttpMethod::POST &&
-            (httpMethod_ == HttpMethod::POST ||
-            type == HttpHeaders::Values::X_PROTOBUFFER ||
-            type == HttpHeaders::Values::X_WWW_FORM_URLENCODED);
+               (httpMethod_ == HttpMethod::POST ||
+                type == HttpHeaders::Values::X_PROTOBUFFER ||
+                type == HttpHeaders::Values::X_WWW_FORM_URLENCODED);
     }
 
     bool match(const HttpRequestPtr& request) {
@@ -267,6 +268,7 @@ ProtobufServiceMessagePtr ServiceRequestMapping::toProtobufMessage(
                     }
 
                     StringPiece value = method->pathParamValue("format");
+
                     if (format && !value.empty()) {
                         format->assign(value.c_str(), value.size());
                     }
@@ -312,6 +314,7 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
         const char* content = NULL;
         int contentSize = 0;
         content = request->content()->readableBytes(&contentSize);
+
         if (content) {
             return message->ParseFromArray(content, contentSize);
         }
@@ -348,6 +351,7 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
         else if (messageOptions.mapping_content()) {
             int size;
             const char* bytes = request->content()->readableBytes(&size);
+
             if (bytes && size > 0) {
                 return parseMessage(StringPiece(bytes, size), "json", message);
             }
@@ -422,9 +426,11 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
         google::protobuf::Message* msg
             = field->is_repeated() ? reflection->AddMessage(message, field)
               : reflection->MutableMessage(message, field);
+
         if (options.mapping_content()) {
             int size;
             const char* bytes = request->content()->readableBytes(&size);
+
             if (bytes && size > 0) {
                 return parseMessage(StringPiece(bytes, size), "json", msg);
             }
@@ -437,7 +443,7 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
         }
     }
 
-    std::vector<StringPiece> values;
+    std::vector<std::string> values;
 
     if (!getValues(request, method, options, &values)) {
         if (field->is_required()) {
@@ -449,10 +455,10 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
     }
 
     if (field->is_repeated()) {
-        std::vector<StringPiece>::const_iterator itr;
+        std::vector<std::string>::const_iterator itr;
 
         for (itr = values.begin(); itr != values.end(); ++itr) {
-            const StringPiece& value = *itr;
+            const std::string& value = *itr;
 
             if (value.empty()) {
                 continue;
@@ -554,15 +560,16 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
 bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
                                       const ServiceMethod& method,
                                       const CraftFieldOptions& options,
-                                      std::vector<StringPiece>* values) {
+                                      std::vector<std::string>* values) {
     if (NULL == values) {
         return false;
     }
 
     if (options.has_path_param()) {
         StringPiece value = method.pathParamValue(options.path_param());
+
         if (!value.empty()) {
-            values->push_back(value);
+            values->push_back(std::string(value.data(), value.size()));
             return true;
         }
     }
@@ -583,8 +590,31 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
         if (request->content()->readable()) {
             StringPiece content;
             request->content()->readableBytes(&content);
-            values->push_back(content);
+            values->push_back(std::string(content.data(), content.size()));
             return true;
+        }
+    }
+    else if (options.has_content_param()) {
+        if (request->content()->readable()) {
+            StringPiece content;
+            request->content()->readableBytes(&content);
+
+            if (!content.empty()) {
+                std::string str(content.data(), content.size());
+
+                try {
+                    YAML::Node root = YAML::Load(str);
+                    YAML::Node c = root[options.content_param()];
+                    
+                    if (c) {
+                        values->push_back(c.as<std::string>());
+                        return true;
+                    }
+                }
+                catch (...) {
+
+                }
+            }
         }
     }
 

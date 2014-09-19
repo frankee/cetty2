@@ -190,6 +190,7 @@
     <ClCompile Include="..\..\src\cetty\util\NameValueCollection.cpp" />
     <ClCompile Include="..\..\src\cetty\util\NestedDiagnosticContext.cpp" />
     <ClCompile Include="..\..\src\cetty\util\Process.cpp" />
+    <ClCompile Include="..\..\src\cetty\util\SecureRandom.cpp" />
     <ClCompile Include="..\..\src\cetty\util\SmallFile.cpp" />
     <ClCompile Include="..\..\src\cetty\util\StringUtil.cpp" />
     <ClCompile Include="..\..\src\cetty\util\URI.cpp" />

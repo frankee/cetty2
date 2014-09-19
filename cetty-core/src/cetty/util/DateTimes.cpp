@@ -21,6 +21,7 @@ namespace util {
 
 const Time DateTimes::kEpoch(boost::posix_time::from_iso_string("19700101T000000"));
 const TimeDuration DateTimes::kEmptyDuration = TimeDuration();
+const std::string DateTimes::kTimeZone("+08:00");
 
 }
 }

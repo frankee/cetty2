@@ -37,6 +37,7 @@ class DateTimes {
 public:
     static const Time kEpoch;
     static const TimeDuration kEmptyDuration;
+    static const std::string kTimeZone;
 
 public:
     static Time now() {
@@ -45,6 +46,20 @@ public:
 
     static TimeStamp nowStamp() {
         return now() - kEpoch;
+    }
+
+    static std::string nowStr() {
+        std::string str = boost::posix_time::to_iso_extended_string(
+                              boost::posix_time::second_clock::local_time());
+        str += kTimeZone;
+        return str;
+    }
+
+    static Time parseFrom(const std::string& t) {
+        std::size_t pos = t.find_last_of('+');
+        Time time = boost::posix_time::from_iso_string(t.substr(0, pos));
+        time -= boost::posix_time::hours(8);
+        return time;
     }
 
 private:

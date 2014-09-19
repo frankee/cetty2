@@ -82,7 +82,7 @@ private:
     bool getValues(const HttpRequestPtr& request,
                    const ServiceMethod& method,
                    const CraftFieldOptions& options,
-                   std::vector<StringPiece>* values);
+                   std::vector<std::string>* values);
 
     StringPiece getValue(const HttpRequestPtr& request,
                          const CraftMessageOptions& options);

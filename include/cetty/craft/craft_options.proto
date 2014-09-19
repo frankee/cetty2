@@ -15,6 +15,7 @@ message CraftFieldOptions {
 	optional string   form_param = 6;
 	
 	optional bool mapping_content = 10;
+    optional string content_param = 11;
 	
 	optional string     consumer = 20;
 	optional string     producer = 21;
@@ -51,6 +52,7 @@ message CraftMessageOptions {
 	optional string    form_param = 6;
 	
 	optional bool mapping_content = 10;
+    optional string content_param = 11;
 	
 	optional string      consumer = 20;
 	optional string      producer = 21;
