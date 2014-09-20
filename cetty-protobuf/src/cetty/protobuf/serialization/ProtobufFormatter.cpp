@@ -26,7 +26,7 @@ namespace serialization {
 using namespace cetty::util;
 
 std::map<std::string, ProtobufFormatter*>* ProtobufFormatter::formatters = NULL;
-bool ProtobufFormatter::printEmptyArray_ = false;
+bool ProtobufFormatter::printEmptyArray_ = true;
 
 struct ProtobufFormatterRegister {
     ProtobufFormatterRegister() {

@@ -31,6 +31,7 @@ namespace google {
 namespace protobuf {
 class Message;
 class FieldDescriptor;
+class Reflection;
 }
 }
 
