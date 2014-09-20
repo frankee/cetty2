@@ -408,6 +408,13 @@ bool ServiceRequestMapping::parseMessage(const StringPiece& value,
     return true;
 }
 
+bool ServiceRequestMapping::parseRepeatedMessage(const StringPiece& value,
+    const google::protobuf::Reflection* reflection,
+    const FieldDescriptor* field,
+    Message* message) {
+return false;
+}
+
 bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
                                        const ServiceMethod& method,
                                        const CraftFieldOptions& options,

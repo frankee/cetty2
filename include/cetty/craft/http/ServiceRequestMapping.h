@@ -73,6 +73,11 @@ private:
                       const std::string& consumer,
                       Message* message);
 
+    bool parseRepeatedMessage(const StringPiece& value,
+                              const google::protobuf::Reflection* reflection,
+                              const FieldDescriptor* field,
+                              Message* message);
+
     bool parseField(const HttpRequestPtr& request,
                     const ServiceMethod& method,
                     const CraftFieldOptions& options,

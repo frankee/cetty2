@@ -589,7 +589,8 @@ bool printField(const google::protobuf::Message& message,
 
     //FIXME
     if (field->is_repeated()) {
-        if (ProtobufFormatter::printEmptyArray()) {
+        if (ProtobufFormatter::printEmptyArray() ||
+            reflection->FieldSize(message, field) > 0) {
             printSingleField(message, field, printer);
         }
         return true;

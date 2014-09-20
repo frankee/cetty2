@@ -44,9 +44,9 @@ public:
     virtual ~ProtobufJsonParser() {}
 
     virtual int parse(const char* buffer, int bufferSize, google::protobuf::Message* message);
+    int parseMessage(const YAML::Node& node, google::protobuf::Message* message);
 
 private:
-    int parseMessage(const YAML::Node& node, google::protobuf::Message* message);
     int parseField(const YAML::Node& node,
                     const google::protobuf::FieldDescriptor* field,
                     google::protobuf::Message* message);

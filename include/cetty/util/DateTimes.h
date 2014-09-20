@@ -50,16 +50,28 @@ public:
 
     static std::string nowStr() {
         std::string str = boost::posix_time::to_iso_extended_string(
-                              boost::posix_time::second_clock::local_time());
+                              boost::posix_time::second_clock::universal_time());
+        str.append(1, 'z');
+        return str;
+    }
+
+    static std::string localNowStr() {
+        std::string str = boost::posix_time::to_iso_extended_string(
+            boost::posix_time::second_clock::local_time());
         str += kTimeZone;
         return str;
     }
 
     static Time parseFrom(const std::string& t) {
-        std::size_t pos = t.find_last_of('+');
-        Time time = boost::posix_time::from_iso_string(t.substr(0, pos));
-        time -= boost::posix_time::hours(8);
-        return time;
+        if (t.back() != 'z') {
+            std::size_t pos = t.find_last_of('+');
+            Time time = boost::posix_time::from_iso_string(t.substr(0, pos));
+            time -= boost::posix_time::hours(8);
+            return time;
+        }
+        else {
+            return boost::posix_time::from_iso_string(t);
+        }
     }
 
 private:
