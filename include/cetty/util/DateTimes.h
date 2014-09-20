@@ -18,6 +18,7 @@
  */
 
 #include <boost/date_time.hpp>
+#include <boost/assert.hpp>
 
 namespace cetty {
 namespace util {
@@ -63,7 +64,9 @@ public:
     }
 
     static Time parseFrom(const std::string& t) {
-        if (t.back() != 'z') {
+        BOOST_ASSERT(!t.empty());
+
+        if (t[t.size()-1] != 'z') {
             std::size_t pos = t.find_last_of('+');
             Time time = boost::posix_time::from_iso_string(t.substr(0, pos));
             time -= boost::posix_time::hours(8);
