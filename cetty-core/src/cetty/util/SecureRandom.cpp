@@ -29,19 +29,20 @@ int64_t nextInt64() {
 
 SecureRandom::SecureRandom()
     : stream_("/dev/urandom", std::ios::binary | std::ios::in) {
-    if (!stream_->is_open()) {
+    if (!stream_.is_open()) {
         //std::cerr << "can't open " << fn << " " << strerror(errno) << std::endl;
         abort();
     }
 }
+
 SecureRandom::~SecureRandom() {
 }
 
-int64_t nextInt64() {
+int64_t SecureRandom::nextInt64() {
     int64_t r;
     stream_.read(reinterpret_cast<char*>(&r), sizeof(r));
 
-    if (stream_->fail()) {
+    if (stream_.fail()) {
         abort();
     }
 
