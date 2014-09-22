@@ -111,8 +111,11 @@ bool ProtobufBsonParser::parseField(google::protobuf::Message* message, const go
         case FieldDescriptor::CPPTYPE_STRING: {
 
             for (size_t i = 0; i < count; ++i) {
-                std::string str = element.toString(false,true);
-                str = str.substr(1,str.length() - 2);
+                std::string str = elements[i].toString(false,false);
+                if (*str.begin() == '"' && *str.rbegin() == '"') {
+                    str = str.substr(1,str.length() - 2);
+                }
+                
                 reflection->AddString(message, field, str/*elements[i].String()*/);
             }
 
