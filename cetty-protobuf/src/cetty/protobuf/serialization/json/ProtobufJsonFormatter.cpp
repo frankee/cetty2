@@ -17,6 +17,7 @@
 #include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
 
 #include <google/protobuf/descriptor.h>
+#include <yaml-cpp/yaml.h>
 
 #include <cetty/Types.h>
 #include <cetty/buffer/ChannelBuffer.h>
@@ -443,12 +444,23 @@ private:
     int  objectLevel;
 };
 
+bool isJsonString(const std::string& str) {
+    try {
+        YAML::Node root = YAML::Load(str);
+        return root.IsDefined();
+    }
+    catch (...) {
+        return false;
+    }
+}
+
 template<typename T, int U> inline
 void printFieldValue(const google::protobuf::Message& message,
                      const google::protobuf::FieldDescriptor* field,
                      JsonPrinter<T, U>& printer) {
     const google::protobuf::Reflection* reflection = message.GetReflection();
 
+    std::string tmp;
     switch (field->cpp_type()) {
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
         printer << reflection->GetInt32(message, field);
@@ -479,7 +491,14 @@ void printFieldValue(const google::protobuf::Message& message,
         break;
 
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-        printer << reflection->GetString(message, field);
+        tmp = reflection->GetString(message, field);
+        if (*tmp.begin() == '{' && *tmp.rbegin() == '}' && isJsonString(tmp)) {
+            printer.printRawValue(tmp);
+        }
+        else {
+            printer << tmp;
+        }
+        
         break;
 
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:

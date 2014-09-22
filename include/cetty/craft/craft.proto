@@ -54,6 +54,10 @@ message Authority {
         (craft_options).query_param = "sign"
     ];
 
+    optional string access_token = 4 [
+        (craft_optional).header_param = "Authorzation"
+    ];
+
     optional string        ip =  8;
     optional string      host =  9; // non-ip
     optional string     agent = 10;
