@@ -13,24 +13,24 @@ message CraftFieldOptions {
 	optional string matrix_param = 4;
 	optional string cookie_param = 5;
 	optional string   form_param = 6;
-	
+
 	optional bool mapping_content = 10;
     optional string content_param = 11;
-	
+
 	optional string     consumer = 20;
 	optional string     producer = 21;
 	optional bool      invisible = 22;
-	
+
 	//xml序列化参数
 	optional bool xml_attribute = 40;
 	optional bool   xml_element = 41;
-	
+
 	//安全，参数校验
 	optional bool    ignore_sign = 50;
 	optional int32   decimal_min = 51;
 	optional int32   decimal_max = 52;
 	optional string      pattern = 53;
-	
+
 	optional string    raw_field = 60;
 }
 
@@ -50,19 +50,19 @@ message CraftMessageOptions {
 	optional string  matrix_param = 4;
 	optional string  cookie_param = 5;
 	optional string    form_param = 6;
-	
+
 	optional bool mapping_content = 10;
     optional string content_param = 11;
-	
+
 	optional string      consumer = 20;
 	optional string      producer = 21;
 	optional string  entity_field = 22;
-	
+
 	optional string  text_pattern = 30;
-	
+
 	optional string    xml_header = 40;
 	optional string      xml_root = 41;
-	
+
 	optional string     raw_field = 60;
 
     optional bool            skip = 70;
@@ -71,18 +71,18 @@ message CraftMessageOptions {
 message CraftMethodOptions {
 	optional string method = 1;
 	optional string   path = 2;
-	
+
 	optional string headers = 10;
-	
+
 	optional string default_consumer = 20;
 	optional string default_producer = 21;
-	
+
 	optional int32 timeout = 80;
 }
 
 message CraftServiceOptions {
 	optional string   path = 1;
-	
+
 	optional string default_consumer = 20;
 	optional string default_producer = 21;
 }

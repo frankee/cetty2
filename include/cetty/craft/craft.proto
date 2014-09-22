@@ -33,7 +33,7 @@ message Status {
     optional string      message = 3;
     optional string    more_info = 4;
 	optional string  send_report = 5;
-	
+
     repeated DetailError  errors = 9;
 }
 
@@ -55,19 +55,21 @@ message Authority {
     ];
 
     optional string access_token = 4 [
-        (craft_optional).header_param = "Authorzation"
+        (craft_options).header_param = "Authorzation"
     ];
 
     optional string        ip =  8;
     optional string      host =  9; // non-ip
-    optional string     agent = 10;
+    optional string     agent = 10 [
+        (craft_options).header_param = "User-Agent"
+    ];
 }
 
 message RequestHeader {
 	optional int32 api_version = 1 [
         (craft_options).path_param = "version"
     ];
-	
+
 	optional string    context = 2 [
 		(craft_options).path_param = "jsoncallback"
 	];
@@ -75,10 +77,10 @@ message RequestHeader {
 	optional string     locale = 3 [
 		(craft_options).query_param = "locale"
 	];
-	
+
 	optional Session  session = 10;
     optional string       key = 12; //as the appkey
-	
+
     optional string signature = 13 [
         (craft_options).query_param = "sign"
     ];
@@ -86,7 +88,7 @@ message RequestHeader {
     optional string        ip =  17;
     optional string      host =  18; // non-ip
     optional string     agent =  19;
-	
+
 	optional int32 		  start_index = 22; //Request & Response
 	optional int32 	   items_per_page = 23; //Request & Response
 	optional int32 		   page_index = 24; //Request & Response
@@ -96,13 +98,13 @@ message ResponseHeader {
 	optional int32 api_version = 1;
 	optional string    context = 2;
 	optional string     locale = 3;
-	
+
 	optional string         data_kind = 10; //Response
 	optional string              etag = 11;
-	
+
 	// date formatted RFC 3339
 	optional string      data_updated = 12; //Response
-	
+
 	optional int32 		   item_count = 20; //Response
 	optional int32 current_item_count = 21; //Response
 	optional int32 		  start_index = 22; //Request & Response
