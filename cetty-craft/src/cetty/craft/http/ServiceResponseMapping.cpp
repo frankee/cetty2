@@ -70,16 +70,18 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
     if (paylod) {
         const FieldDescriptor* field = paylod->GetDescriptor()->FindFieldByName("status");
         const Reflection* reflection = paylod->GetReflection();
-        Message* status = reflection->MutableMessage(const_cast<Message*>(paylod), field);
-        if (status) {
-            const FieldDescriptor* f = status->GetDescriptor()->FindFieldByName("http_status");
-            const Reflection* r = status->GetReflection();
-            int httpStatus = r->GetInt32(*status, f);
-            if (httpStatus != 200) {
-                response->setStatus(HttpResponseStatus::valueOf(httpStatus));
-            }
+        if (reflection->HasField(*paylod, field)) {
+            Message* status = reflection->MutableMessage(const_cast<Message*>(paylod), field);
+            if (status) {
+                const FieldDescriptor* f = status->GetDescriptor()->FindFieldByName("http_status");
+                const Reflection* r = status->GetReflection();
+                int httpStatus = r->GetInt32(*status, f);
+                if (httpStatus != 200) {
+                    response->setStatus(HttpResponseStatus::valueOf(httpStatus));
+                }
 
-            r->ClearField(status, f);
+                r->ClearField(status, f);
+            }
         }
 
         setHttpContent(*paylod, format, response);
