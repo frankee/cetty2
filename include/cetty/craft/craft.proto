@@ -25,16 +25,17 @@ message Status {
     message DetailError {
         optional string    code = 1;
         optional string message = 2;
-		optional string  domain = 3;
+		optional string  domain = 3; // equals to field, but bigger
     }
 
-    optional int32   http_status = 1 [default = 200];
-    optional int32          code = 2 [default = 0];
-    optional string      message = 3;
-    optional string    more_info = 4;
-	optional string  send_report = 5;
+    optional int32    http_status = 1 [default = 200];
+    optional int32           code = 2 [default = 0];
+    optional string       message = 3;
+    optional string   description = 4;
+    optional string  document_url = 5; //the api document url for this error
+	optional string   send_report = 6;
 
-    repeated DetailError  errors = 9;
+    repeated DetailError   errors = 20;
 }
 
 message Session {
