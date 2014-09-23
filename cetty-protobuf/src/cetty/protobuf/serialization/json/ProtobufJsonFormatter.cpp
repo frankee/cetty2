@@ -611,8 +611,8 @@ bool printField(const google::protobuf::Message& message,
         if (ProtobufFormatter::printEmptyArray() ||
             reflection->FieldSize(message, field) > 0) {
             printSingleField(message, field, printer);
+            return true;
         }
-        return true;
     }
     else if (reflection->HasField(message, field)) {
         printSingleField(message, field, printer);
