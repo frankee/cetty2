@@ -77,6 +77,12 @@ public:
         }
     }
 
+    static std::string toString(const Time& time) {
+        std::string str = boost::posix_time::to_iso_extended_string(time);
+        str + kTimeZone;
+        return str;
+    }
+
 private:
     DateTimes();
     ~DateTimes();

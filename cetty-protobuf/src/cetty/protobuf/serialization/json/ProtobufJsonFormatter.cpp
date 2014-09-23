@@ -492,7 +492,7 @@ void printFieldValue(const google::protobuf::Message& message,
 
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
         tmp = reflection->GetString(message, field);
-        if (*tmp.begin() == '{' && *tmp.rbegin() == '}' && isJsonString(tmp)) {
+        if (!tmp.empty() && *tmp.begin() == '{' && *tmp.rbegin() == '}' && isJsonString(tmp)) {
             printer.printRawValue(tmp);
         }
         else {
