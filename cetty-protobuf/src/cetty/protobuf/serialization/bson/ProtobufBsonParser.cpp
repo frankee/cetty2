@@ -112,10 +112,11 @@ bool ProtobufBsonParser::parseField(google::protobuf::Message* message, const go
 
             for (size_t i = 0; i < count; ++i) {
                 std::string str = elements[i].toString(false,false);
+
                 if (*str.begin() == '"' && *str.rbegin() == '"') {
                     str = str.substr(1,str.length() - 2);
                 }
-                
+
                 reflection->AddString(message, field, str/*elements[i].String()*/);
             }
 
@@ -149,6 +150,11 @@ bool ProtobufBsonParser::parseField(google::protobuf::Message* message, const go
     }
     else {
         switch (field->cpp_type()) {
+        case google::protobuf::FieldDescriptor::CPPTYPE_BOOL: {
+            reflection->SetBool(message, field, element.Bool());
+            break;
+        }
+
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
             reflection->SetInt32(message, field, element.Int());
             break;

@@ -80,7 +80,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
                     response->setStatus(HttpResponseStatus::valueOf(httpStatus));
                 }
 
-                r->ClearField(status, f);
+                //r->ClearField(status, f);
             }
         }
 

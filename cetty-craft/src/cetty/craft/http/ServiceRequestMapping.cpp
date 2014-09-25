@@ -85,7 +85,8 @@ public:
         return request->method() == HttpMethod::POST &&
                (httpMethod_ == HttpMethod::POST ||
                 type == HttpHeaders::Values::X_PROTOBUFFER ||
-                type == HttpHeaders::Values::X_WWW_FORM_URLENCODED);
+                (type == HttpHeaders::Values::X_WWW_FORM_URLENCODED &&
+                    (httpMethod_ == HttpMethod::GET || httpMethod_ == HttpMethod::POST)));
     }
 
     bool match(const HttpRequestPtr& request) {
@@ -588,7 +589,9 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
 
     }
     else if (options.has_header_param()) {
-
+        std::string value = request->headers().headerValue(options.header_param());
+        values->push_back(value);
+        return true;
     }
     else if (options.has_form_param()) {
 

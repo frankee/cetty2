@@ -56,7 +56,7 @@ message Authority {
     ];
 
     optional string access_token = 4 [
-        (craft_options).header_param = "Authorzation"
+        (craft_options).header_param = "Authorization"
     ];
 
     optional string        ip =  8;
