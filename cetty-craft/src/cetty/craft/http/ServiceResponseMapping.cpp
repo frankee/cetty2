@@ -73,10 +73,10 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         if (reflection->HasField(*paylod, field)) {
             Message* status = reflection->MutableMessage(const_cast<Message*>(paylod), field);
             if (status) {
-                const FieldDescriptor* f = status->GetDescriptor()->FindFieldByName("http_status");
+                const FieldDescriptor* f = status->GetDescriptor()->FindFieldByName("code");
                 const Reflection* r = status->GetReflection();
                 int httpStatus = r->GetInt32(*status, f);
-                if (httpStatus != 200) {
+                if (httpStatus >= 300 ) {
                     response->setStatus(HttpResponseStatus::valueOf(httpStatus));
                 }
 
