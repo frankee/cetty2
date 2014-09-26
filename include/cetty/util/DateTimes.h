@@ -56,6 +56,10 @@ public:
         return str;
     }
 
+    static Time localNow() {
+        return boost::posix_time::second_clock::local_time();
+    }
+
     static std::string localNowStr() {
         std::string str = boost::posix_time::to_iso_extended_string(
             boost::posix_time::second_clock::local_time());
