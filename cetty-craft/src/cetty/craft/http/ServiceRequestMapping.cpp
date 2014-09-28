@@ -20,6 +20,7 @@
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <boost/assert.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
@@ -86,7 +87,7 @@ public:
                (httpMethod_ == HttpMethod::POST ||
                 type == HttpHeaders::Values::X_PROTOBUFFER ||
                 (type == HttpHeaders::Values::X_WWW_FORM_URLENCODED &&
-                    (httpMethod_ == HttpMethod::GET || httpMethod_ == HttpMethod::POST)));
+                 (httpMethod_ == HttpMethod::GET || httpMethod_ == HttpMethod::POST)));
     }
 
     bool match(const HttpRequestPtr& request) {
@@ -386,6 +387,15 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
                 parsed = true;
             }
         }
+        else if (field->name().compare("authority") == 0) {
+            if (!parseMessage(request, method, reflection->MutableMessage(message, field))) {
+                LOG_ERROR << "parse authority filed error.";
+                return false;
+            }
+            else {
+                parsed = true;
+            }
+        }
     }
 
     return parsed;
@@ -410,9 +420,9 @@ bool ServiceRequestMapping::parseMessage(const StringPiece& value,
 }
 
 bool ServiceRequestMapping::parseRepeatedMessage(const StringPiece& value,
-    const google::protobuf::Reflection* reflection,
-    const FieldDescriptor* field,
-    Message* message) {
+        const google::protobuf::Reflection* reflection,
+        const FieldDescriptor* field,
+        Message* message) {
     return false;
 }
 
@@ -590,6 +600,13 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
     }
     else if (options.has_header_param()) {
         std::string value = request->headers().headerValue(options.header_param());
+
+        if (options.header_param().compare("Authorization") == 0 &&
+                value.find("Bearer ") == 0) {
+            value = value.substr(7);
+            boost::trim(value);
+        }
+
         values->push_back(value);
         return true;
     }
@@ -615,7 +632,7 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
                 try {
                     YAML::Node root = YAML::Load(str);
                     YAML::Node c = root[options.content_param()];
-                    
+
                     if (c) {
                         values->push_back(c.as<std::string>());
                         return true;
