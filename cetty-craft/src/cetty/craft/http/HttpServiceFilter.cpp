@@ -57,8 +57,10 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
     if (request->content()->readable()) {
         StringPiece content;
         request->content()->readableBytes(&content);
-        LOG_INFO << "request content: " << std::string(content.data(), content.size());
+        LOG_DEBUG << "request content: " << std::string(content.data(), content.size());
     }
+
+    LOG_DEBUG << "request content type: " << request->headers().headerValue(HttpHeaders::Names::CONTENT_TYPE);
 
     std::string format;
     ProtobufServiceMessagePtr msg =
