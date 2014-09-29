@@ -635,11 +635,15 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
 
                     if (c) {
                         values->push_back(c.as<std::string>());
+                        LOG_DEBUG << "parse the field: " << options.content_param() << " with: " << values->back();
                         return true;
+                    }
+                    else {
+                        LOG_DEBUG << "has not found the field: " << options.content_param();
                     }
                 }
                 catch (...) {
-
+                    LOG_WARN << "failed to parse the content:" << str;
                 }
             }
         }
