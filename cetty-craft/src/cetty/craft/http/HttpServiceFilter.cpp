@@ -54,6 +54,12 @@ ProtobufServiceMessagePtr HttpServiceFilter::filterRequest(
 
     LOG_INFO << "http request: " << request->method().getName() << " " << request->getUriString();
 
+    if (request->content()->readable()) {
+        StringPiece content;
+        request->content()->readableBytes(&content);
+        LOG_INFO << "request content: " << std::string(content.data(), content.size());
+    }
+
     std::string format;
     ProtobufServiceMessagePtr msg =
         ServiceRequestMapping::instance().toProtobufMessage(request, &format);
