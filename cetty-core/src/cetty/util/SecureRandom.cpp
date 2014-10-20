@@ -9,7 +9,7 @@ namespace util {
 SecureRandom::SecureRandom() {}
 SecureRandom::~SecureRandom() {}
 
-int64_t nextInt64() {
+int64_t SecureRandom::nextInt64() {
     uint32_t a, b;
 
     a = rand();

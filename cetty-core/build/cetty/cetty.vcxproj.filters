@@ -906,13 +906,10 @@
     <ClInclude Include="..\..\..\include\cetty\util\Uuid.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\JParser.h">
+    <ClInclude Include="..\..\..\include\cetty\util\ThreadLocalSingleton.h">
       <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\handler\codec\http\HttpMessagePtr.h">
-      <Filter>buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\cetty\util\XmlParser.h">
+    <ClInclude Include="..\..\..\include\cetty\util\SecureRandom.h">
       <Filter>util</Filter>
     </ClInclude>
   </ItemGroup>
