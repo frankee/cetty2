@@ -31,6 +31,7 @@
  */
 
 #include <time.h>
+#include <xutility>
 #include <boost/integer.hpp>
 
 namespace cetty {
@@ -144,7 +145,11 @@ public:
         if (NULL == bytes || size <= 0) { return; }
 
         for (int i = 0, len = size; i < len;) {
+#ifdef _WIN32
+            for (int rnd = nextInt(), n = min(len - i, (int)(sizeof(int)/sizeof(char)));
+#else
             for (int rnd = nextInt(), n = std::min(len - i, (int)(sizeof(int)/sizeof(char)));
+#endif
                     n-- > 0; rnd >>= sizeof(char)) {
                 bytes[i++] = (char)rnd;
             }

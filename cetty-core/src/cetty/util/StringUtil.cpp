@@ -109,7 +109,7 @@ std::string StringUtil::stripControlCharacters(const std::string& value) {
  * such flag characters as `s', `d', `o', `u', `x', `X', `c', `e', `E', `f', `g', `G', and `%'.
  * @param ap used according to the format string.
 */
-static void vstrprintf(std::string* dest, const char* format, va_list ap) {
+void vstrprintf(std::string* dest, const char* format, va_list ap) {
     BOOST_ASSERT(dest && format);
     static const size_t NUMBUFSIZ = 32;
 
