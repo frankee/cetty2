@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <stdarg.h>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <cstring>
@@ -87,6 +88,15 @@ public:
      * @return the result string.
      */
     static std::string printf(const char* format, ...);
+
+    /**
+    * Append a formatted string at the end of a string.
+    * @param dest the destination string.
+    * @param format the printf-like format string.  The conversion character `%' can be used with
+    * such flag characters as `s', `d', `o', `u', `x', `X', `c', `e', `E', `f', `g', `G', and `%'.
+    * @param ap used according to the format string.
+    */
+    static void vstrprintf(std::string* dest, const char* format, va_list ap);
 
     /**
      * Split a string with a delimiter.
