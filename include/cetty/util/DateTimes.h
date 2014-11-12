@@ -67,6 +67,10 @@ public:
         return str;
     }
 
+    static std::string localDateStr() {
+        return toDateString(boost::posix_time::second_clock::local_time());
+    }
+
     static Time parseFrom(const std::string& t) {
         BOOST_ASSERT(!t.empty());
 
@@ -86,6 +90,8 @@ public:
         str + kTimeZone;
         return str;
     }
+
+	static std::string toDateString(const Time& time);
 
 private:
     DateTimes();

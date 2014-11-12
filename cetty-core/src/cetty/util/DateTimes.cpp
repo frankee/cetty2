@@ -15,6 +15,7 @@
  */
 
 #include <cetty/util/DateTimes.h>
+#include <cetty/util/StringUtil.h>
 
 namespace cetty {
 namespace util {
@@ -22,6 +23,11 @@ namespace util {
 const Time DateTimes::kEpoch(boost::posix_time::from_iso_string("19700101T000000"));
 const TimeDuration DateTimes::kEmptyDuration = TimeDuration();
 const std::string DateTimes::kTimeZone("+08:00");
+
+
+std::string DateTimes::toDateString( const Time& time ) {
+	return StringUtil::printf("%d%02d%02d", time.date().year(), time.date().month(), time.date().day());
+}
 
 }
 }
