@@ -31,7 +31,7 @@
  */
 
 #include <time.h>
-#include <xutility>
+#include <algorithm>
 #include <boost/integer.hpp>
 
 namespace cetty {
