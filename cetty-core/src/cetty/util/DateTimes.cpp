@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
+#include <boost/date_time.hpp>
 #include <cetty/util/DateTimes.h>
 #include <cetty/util/StringUtil.h>
+
+using namespace boost;
 
 namespace cetty {
 namespace util {
@@ -26,7 +28,8 @@ const std::string DateTimes::kTimeZone("+08:00");
 
 
 std::string DateTimes::toDateString( const Time& time ) {
-	return StringUtil::printf("%d%02d%02d", time.date().year(), time.date().month(), time.date().day());
+    tm date = posix_time::to_tm(time);
+    return StringUtil::printf("%d%02d%02d", 1900+date.tm_year, 1+date.tm_mon, date.tm_mday);
 }
 
 }
