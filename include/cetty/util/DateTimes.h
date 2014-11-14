@@ -19,6 +19,7 @@
 
 #include <boost/date_time.hpp>
 #include <boost/assert.hpp>
+#include <sstream>
 
 namespace cetty {
 namespace util {
@@ -76,12 +77,12 @@ public:
 
         if (t[t.size()-1] != 'z') {
             std::size_t pos = t.find_last_of('+');
-            Time time = boost::posix_time::from_iso_string(t.substr(0, pos));
+            Time time = from_iso_extended_string(t.substr(0, pos));
             time -= boost::posix_time::hours(8);
             return time;
         }
         else {
-            return boost::posix_time::from_iso_string(t);
+            return from_iso_extended_string(t);
         }
     }
 
@@ -92,6 +93,26 @@ public:
     }
 
 	static std::string toDateString(const Time& time);
+
+private:
+	static boost::posix_time::ptime from_iso_extended_string(const std::string& inDateString) {
+		// If we get passed a zero length string, then return the "not a date" value. 
+		if (inDateString.empty())
+		{
+			return boost::posix_time::not_a_date_time;
+		}
+
+		// Use the ISO extended input facet to interpret the string. 
+		std::stringstream ss;
+		boost::posix_time::time_input_facet* input_facet = new boost::posix_time::time_input_facet();
+		input_facet->set_iso_extended_format();
+		ss.imbue(std::locale(ss.getloc(), input_facet));
+		ss.str(inDateString);
+		boost::posix_time::ptime timeFromString;
+		ss >> timeFromString;
+
+		return timeFromString;
+	}
 
 private:
     DateTimes();
