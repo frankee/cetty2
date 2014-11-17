@@ -105,6 +105,7 @@ void HeapChannelBuffer::capacity(int newCapacity) {
     int writerIdx = this->writerIdx;
 
     int oldCapacity = bufSize;
+    char* oldBuffer = this->buf;
 
     if (newCapacity > oldCapacity) {
         char* newArray = new char[newCapacity];
@@ -132,6 +133,8 @@ void HeapChannelBuffer::capacity(int newCapacity) {
         buf = newArray;
         bufSize = newCapacity;
     }
+
+    delete[] oldBuffer;
 }
 
 const char* HeapChannelBuffer::readableBytes(int* length) {
