@@ -263,7 +263,7 @@ void Channel::doClose(ChannelHandlerContext& ctx, const ChannelFuturePtr& future
                 }
 
                 future->setSuccess();
-                //onClosedComplete();
+                onClosedComplete();
             }
             else {
                 processFailure("close failed", future);
