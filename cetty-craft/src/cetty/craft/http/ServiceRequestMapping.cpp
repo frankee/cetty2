@@ -36,6 +36,7 @@
 #include <cetty/protobuf/service/ProtobufServiceRegister.h>
 
 #include <cetty/protobuf/serialization/ProtobufParser.h>
+#include <cetty/protobuf/serialization/json/ProtobufJsonParser.h>
 
 #include <cetty/craft/craft.pb.h>
 
@@ -440,22 +441,57 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
         // Groups must be serialized with their original capitalization.
     }
     else if (fieldType == google::protobuf::FieldDescriptor::TYPE_MESSAGE) {
-        google::protobuf::Message* msg
-            = field->is_repeated() ? reflection->AddMessage(message, field)
-              : reflection->MutableMessage(message, field);
-
         if (options.mapping_content()) {
             int size;
             const char* bytes = request->content()->readableBytes(&size);
 
             if (bytes && size > 0) {
-                return parseMessage(StringPiece(bytes, size), "json", msg);
+				if (*bytes != '[') {
+					google::protobuf::Message* msg
+						= field->is_repeated() ? reflection->AddMessage(message, field)
+						: reflection->MutableMessage(message, field);
+					return parseMessage(StringPiece(bytes, size), "json", msg);
+				}
+				else {
+					if (field->is_repeated()) {
+						std::string content(bytes, size);
+						try {
+							YAML::Node root = YAML::Load(content);
+							if (root && root.IsSequence()) {
+								YAML::Node::iterator itr = root.begin();
+								cetty::protobuf::serialization::json::ProtobufJsonParser parser;
+								for (; itr != root.end(); ++itr) {
+									google::protobuf::Message* msg = reflection->AddMessage(message, field);
+									if (parser.parseMessage(*itr, msg) != 0) {
+										return false;
+									}
+								}
+								return true;
+							}
+							else {
+								LOG_WARN << "field is array, but the content is not " << content;
+								return false;
+							}
+						}
+						catch (const std::exception& e) {
+							LOG_WARN << "parse the content exception: " << e.what() << " content: " << content;
+							return false;
+						}
+					}
+					else {
+						LOG_WARN << "content is array, but the field is not " << field->DebugString();
+						return false;
+					}
+				}
             }
             else {
                 return false;
             }
         }
         else {
+			google::protobuf::Message* msg
+				= field->is_repeated() ? reflection->AddMessage(message, field)
+				: reflection->MutableMessage(message, field);
             return parseMessage(request, method, msg);
         }
     }

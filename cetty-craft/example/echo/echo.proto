@@ -9,6 +9,11 @@ option java_generic_services = true;
 option java_package = "io.cetty.craft.echo";
 option java_outer_classname = "EchoProto";
 
+message Pair {
+	optional string key = 1;
+	optional string value = 2;
+}
+
 message EchoRequest {
   option (craft_message_options).query_param="req";
   
@@ -19,9 +24,23 @@ message EchoResponse {
   required string payload = 2;
 }
 
+message EchoPairRequest {
+	repeated Pair pairs = 1 [(craft_options).mapping_content=true];
+}
+
+message EchoPairResponse {
+	repeated Pair pairs = 1;
+}
+
 service EchoService {
   rpc echo (EchoRequest) returns (EchoResponse) {
 	option (craft_method_options).method="get";
-	option (craft_method_options).path="/api/echo.{format}";
+	option (craft_method_options).path="/api/echo.?{format}?";
   };
+
+  rpc echoPair(EchoPairRequest) returns (EchoPairResponse) {
+	option (craft_method_options).method="post";
+	option (craft_method_options).path="/api/echo.?{format}?";
+  }
+
 }

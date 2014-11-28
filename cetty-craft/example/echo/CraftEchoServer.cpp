@@ -31,6 +31,16 @@ public:
             done(rep);
         }
     }
+
+	virtual void echoPair(const ConstEchoPairRequestPtr& request,
+		const EchoPairResponsePtr& response,
+		const DoneCallback& done) {
+			response->mutable_pairs()->CopyFrom(request->pairs());
+			if (done) {
+				done(response);
+			}
+	}
+
 };
 
 }

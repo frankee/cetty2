@@ -70,7 +70,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
     if (paylod) {
         const FieldDescriptor* field = paylod->GetDescriptor()->FindFieldByName("status");
         const Reflection* reflection = paylod->GetReflection();
-        if (reflection->HasField(*paylod, field)) {
+        if (field && reflection->HasField(*paylod, field)) {
             Message* status = reflection->MutableMessage(const_cast<Message*>(paylod), field);
             if (status) {
                 const FieldDescriptor* f = status->GetDescriptor()->FindFieldByName("code");
