@@ -78,7 +78,7 @@ public:
 	void format(const ::google::protobuf::RepeatedPtrField<T>& messages, std::string* str) {
 		std::vector<const ::google::protobuf::Message*> msgs;
 		for (int i = 0; i < messages.size(); ++i) {
-			msgs.push_back(messages.Get(i));
+			msgs.push_back(&messages.Get(i));
 		}
 		format(msgs, str);
 	}

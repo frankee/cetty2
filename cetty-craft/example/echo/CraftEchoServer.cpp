@@ -2,6 +2,11 @@
 #include <cetty/craft/builder/CraftServerBuilder.h>
 #include "echo.pb.h"
 
+#include <cetty/protobuf/serialization/json/ProtobufJsonParser.h>
+#include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
+
+using namespace cetty::protobuf::serialization;
+
 using namespace cetty::config;
 using namespace cetty::craft::builder;
 
@@ -45,11 +50,21 @@ public:
 
 }
 
+using namespace echo;
+
 int main(int argc, char* argv[]) {
     if (!ConfigCenter::instance().load(argc, argv)) {
         return -1;
     }
+#if 0
+	EchoPairRequest req;
+	ProtobufJsonParser parser;
+	parser.parse(std::string("[{\"key\":\"k1\",\"value\":\"v1\"},{\"key\":\"k2\",\"value\":\"v2\"}]"), "pairs", &req);
 
+	ProtobufJsonFormatter formatter;
+	std::string out;
+	formatter.format(req.pairs(), &out);
+#endif
     CraftServerBuilder()
         .registerService(new echo::EchoServiceImpl)
         .buildAll()
