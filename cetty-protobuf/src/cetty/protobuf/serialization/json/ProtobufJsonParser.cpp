@@ -19,6 +19,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 #include <yaml-cpp/yaml.h>
+#include <cetty/logging/LoggerHelper.h>
 
 namespace cetty {
 namespace protobuf {
@@ -34,14 +35,63 @@ int ProtobufJsonParser::parse(const char* buffer,
         return -1;
     }
 
-    std::string str(buffer, bufferSize);
-    YAML::Node root = YAML::Load(str);
+	std::string str(buffer, bufferSize);
+	try {
+		YAML::Node root = YAML::Load(str);
 
-    if (root) {
-        return parseMessage(root, message);
-    }
+		if (root) {
+			return parseMessage(root, message);
+		}
+	}
+	catch (const std::exception& e) {
+		LOG_WARN << "failed to parse the content: " << str << ", error: " << e.what();  
+	}
 
     return -2;
+}
+
+bool ProtobufJsonParser::parse( const char* buffer,
+	int bufferSize,
+	const std::string& fieldName,
+	google::protobuf::Message* message )
+{
+	if (!buffer || bufferSize <= 0 || !message || fieldName.empty()) {
+		return false;
+	}
+
+	std::string str(buffer, bufferSize);
+	try {
+		YAML::Node root = YAML::Load(str);
+
+		if (root) {
+			return parse(root, fieldName, message);
+		}
+	}
+	catch (const std::exception& e) {
+		LOG_WARN << "failed to parse the content: " << str << ", error: " << e.what();
+	}
+	return false;
+}
+
+bool ProtobufJsonParser::parse( const YAML::Node& node,
+	const std::string& fieldName,
+	google::protobuf::Message* message )
+{
+	if (!node || !message || fieldName.empty()) {
+		return false;
+	}
+
+	const google::protobuf::Reflection* reflection = message->GetReflection();
+	const google::protobuf::Descriptor* descriptor = message->GetDescriptor();
+	BOOST_ASSERT(reflection && descriptor && "reflection or descriptor should not be NULL.");
+
+	const google::protobuf::FieldDescriptor* field = descriptor->FindFieldByName(fieldName);
+	if (field) {
+		return parseField(node, field, message) == 0;
+	}
+	else {
+		return false;
+	}
 }
 
 int ProtobufJsonParser::parseMessage(const YAML::Node& node,

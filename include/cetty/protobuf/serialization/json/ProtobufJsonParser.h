@@ -46,6 +46,24 @@ public:
     virtual int parse(const char* buffer, int bufferSize, google::protobuf::Message* message);
     int parseMessage(const YAML::Node& node, google::protobuf::Message* message);
 
+	bool parse(const std::string& buffer,
+		const std::string& fieldName,
+		google::protobuf::Message* message) {
+			return parse(buffer.c_str(),
+				static_cast<int>(buffer.size()),
+				fieldName,
+				message);
+	}
+
+	bool parse(const char* buffer,
+		int bufferSize,
+		const std::string& fieldName,
+		google::protobuf::Message* message);
+	
+	bool parse(const YAML::Node& node,
+		const std::string& fieldName,
+		google::protobuf::Message* message);
+
 private:
     int parseField(const YAML::Node& node,
                     const google::protobuf::FieldDescriptor* field,
@@ -54,6 +72,9 @@ private:
 
 
 }
+
+using json::ProtobufJsonParser;
+
 }
 }
 }
