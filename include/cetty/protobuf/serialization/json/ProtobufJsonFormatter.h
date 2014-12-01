@@ -25,6 +25,10 @@
 
 #define JSON_FORMATTER_PLUGIN 1
 
+namespace YAML {
+	class Node;
+}
+
 namespace cetty {
 namespace protobuf {
 namespace serialization {
@@ -82,6 +86,17 @@ public:
 		}
 		format(msgs, str);
 	}
+
+	void format(const ::google::protobuf::RepeatedPtrField<std::string>& messages, std::string* str) {
+		std::vector<const std::string*> msgs;
+		for (int i = 0; i < messages.size(); ++i) {
+			msgs.push_back(&messages.Get(i));
+		}
+		
+		format("", msgs, str);
+	}
+
+	static void toJson(const YAML::Node& node, std::string* out);
 
 private:
     bool style;

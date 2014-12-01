@@ -297,7 +297,7 @@ template<typename T, int Style>
 class JsonPrinter {
 public:
     JsonPrinter(const T& output)
-        : stream(output), inArray(false), indentLevel(0), objectLevel(0) {
+        : stream(output), inArray(false), isArray(false), indentLevel(0), objectLevel(0) {
         indent.reserve(INDENT_SIZE * 16);
     }
 
@@ -329,7 +329,7 @@ public:
             }
         }
 
-        if (0 == objectLevel) { // root object
+        if (0 == objectLevel && !isArray) { // root object
             stream.append("}");
         }
         else {
@@ -341,6 +341,9 @@ public:
 
     JsonPrinter& beginArray() {
         inArray = true;
+		if (0 == objectLevel) {
+			isArray = true;
+		}
 
         if (Style) {
             ++indentLevel;
@@ -437,6 +440,7 @@ private:
     OutputStream<T> stream;
 
     bool inArray;
+	bool isArray;
 
     std::string indent;
     int indentLevel;
@@ -492,7 +496,10 @@ void printFieldValue(const google::protobuf::Message& message,
 
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
         tmp = reflection->GetString(message, field);
-        if (!tmp.empty() && *tmp.begin() == '{' && *tmp.rbegin() == '}' && isJsonString(tmp)) {
+        if (!tmp.empty() && 
+			((*tmp.begin() == '{' && *tmp.rbegin() == '}') ||
+			(*tmp.begin() == '[' && *tmp.rbegin() == ']')) &&
+			 isJsonString(tmp)) {
             printer.printRawValue(tmp);
         }
         else {
@@ -884,9 +891,46 @@ void ProtobufJsonFormatter::format( const std::vector<const google::protobuf::Me
 	else {
 		doFormat<std::string*, 0>("", value, str);
 	}
-
 }
 
+
+static void doToJson(const YAML::Node& node, JsonPrinter<std::string*, 0>& printer) {
+	if (node.IsMap()) {
+		printer.beginObject();
+
+		YAML::Node::const_iterator itr = node.begin();
+		for (; itr != node.end(); ++itr) {
+			printer.printKey(itr->first.as<std::string>());
+			doToJson(itr->second, printer);
+		}
+		
+		printer.endObject(node.size() == 0);
+	}
+	else if (node.IsSequence()) {
+		printer.beginArray();
+		YAML::Node::const_iterator itr = node.begin();
+		for (; itr != node.end(); ++itr) {
+			doToJson(*itr, printer);
+		}
+		printer.endArray(node.size() == 0);
+	}
+	else if (node.IsScalar()) {
+		const std::string& scalar = node.Scalar();
+		if (scalar == "true" || scalar == "false" || StringUtil::isNumber(scalar)) {
+			printer.printRawValue(scalar);
+		}
+		else {
+			printer.printValue(scalar);
+		}
+	}
+}
+
+void ProtobufJsonFormatter::toJson( const YAML::Node& node, std::string* out ) {
+	if (out) {
+		JsonPrinter<std::string*, 0> printer(out);
+		doToJson(node, printer);
+	}
+}
 
 }
 }

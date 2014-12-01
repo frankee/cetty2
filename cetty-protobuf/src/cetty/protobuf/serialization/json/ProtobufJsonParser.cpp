@@ -15,6 +15,7 @@
  */
 
 #include <cetty/protobuf/serialization/json/ProtobufJsonParser.h>
+#include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
@@ -190,7 +191,15 @@ int ProtobufJsonParser::parseField(const YAML::Node& node,
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-            reflection->SetString(message, field, node.Scalar());
+			if (node.IsScalar()) {
+				reflection->SetString(message, field, node.Scalar());
+			}
+			else {
+				std::string out;
+				ProtobufJsonFormatter::toJson(node, &out);
+				reflection->SetString(message, field, out);
+			}
+            
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:

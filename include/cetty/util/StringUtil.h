@@ -57,6 +57,26 @@ public:
         return true;
     }
 
+	static inline bool isNumber(const std::string& str) {
+		if (str.empty()) {
+			return false;
+		}
+
+		for (std::size_t i = 0, j = str.size(); i < j; ++i) {
+			if (str[0] == '+' || str[0] == '-') {
+				continue;
+			}
+			if ((str[i] >= '0' && str[i] <= '9') || str[i] == '.') {
+				continue;
+			}
+			else {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
     static inline bool isHex(int ch) {
         return (ch >= '0' && ch <= '9')
                || (ch >= 'a' && ch <= 'f')

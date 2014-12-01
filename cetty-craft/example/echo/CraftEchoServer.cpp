@@ -2,6 +2,7 @@
 #include <cetty/craft/builder/CraftServerBuilder.h>
 #include "echo.pb.h"
 
+#include <yaml-cpp/yaml.h>
 #include <cetty/protobuf/serialization/json/ProtobufJsonParser.h>
 #include <cetty/protobuf/serialization/json/ProtobufJsonFormatter.h>
 
@@ -57,12 +58,16 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 #if 0
+	
+	std::string out;
+	YAML::Node node = YAML::Load("[{\"key\":\"k1\",\"value\":[12.333,-44.555,44444]},{\"key\":\"k2\",\"value\":25}]");
+	ProtobufJsonFormatter::toJson(node, &out);
+
 	EchoPairRequest req;
 	ProtobufJsonParser parser;
 	parser.parse(std::string("[{\"key\":\"k1\",\"value\":\"v1\"},{\"key\":\"k2\",\"value\":\"v2\"}]"), "pairs", &req);
 
 	ProtobufJsonFormatter formatter;
-	std::string out;
 	formatter.format(req.pairs(), &out);
 #endif
     CraftServerBuilder()
