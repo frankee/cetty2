@@ -71,17 +71,17 @@ public:
                         const std::vector<const google::protobuf::Message*>& value,
                         const ChannelBufferPtr& buffer);
 
-	void format(const std::vector<const google::protobuf::Message*>& value,
-		std::string* str);
+    void format(const std::vector<const google::protobuf::Message*>& value,
+        std::string* str);
 
-	template<typename T>
-	void format(const ::google::protobuf::RepeatedPtrField<T>& messages, std::string* str) {
-		std::vector<const ::google::protobuf::Message*> msgs;
-		for (int i = 0; i < messages.size(); ++i) {
-			msgs.push_back(&messages.Get(i));
-		}
-		format(msgs, str);
-	}
+    template<typename T>
+    void format(const ::google::protobuf::RepeatedPtrField<T>& messages, std::string* str) {
+        std::vector<const ::google::protobuf::Message*> msgs;
+        for (int i = 0; i < messages.size(); ++i) {
+            msgs.push_back(&messages.Get(i));
+        }
+        format(msgs, str);
+    }
 
 private:
     bool style;

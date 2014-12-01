@@ -877,13 +877,13 @@ void ProtobufJsonFormatter::format(const std::string& key,
 }
 
 void ProtobufJsonFormatter::format( const std::vector<const google::protobuf::Message*>& value,
-	std::string* str ) {
-	if (style) {
-		doFormat<std::string*, 1>("", value, str);
-	}
-	else {
-		doFormat<std::string*, 0>("", value, str);
-	}
+    std::string* str ) {
+    if (style) {
+        doFormat<std::string*, 1>("", value, str);
+    }
+    else {
+        doFormat<std::string*, 0>("", value, str);
+    }
 
 }
 
