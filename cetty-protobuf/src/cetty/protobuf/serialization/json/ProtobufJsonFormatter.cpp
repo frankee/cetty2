@@ -780,7 +780,8 @@ void doFormat(const std::string& key,
             const google::protobuf::Message* msg = value[i];
 
             if (msg) {
-                printMessage(*value[i], printer);
+				printer.beginObject();
+				printer.endObject(!printMessage(*value[i], printer));
             }
             else {
                 printer.printValue("null");

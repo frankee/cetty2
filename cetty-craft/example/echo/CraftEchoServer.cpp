@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
 	ProtobufJsonParser parser;
 	parser.parse(std::string("[{\"key\":\"k1\",\"value\":\"v1\"},{\"key\":\"k2\",\"value\":\"v2\"}]"), "pairs", &req);
 
+	out.clear();
 	ProtobufJsonFormatter formatter;
 	formatter.format(req.pairs(), &out);
 #endif
