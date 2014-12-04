@@ -697,6 +697,8 @@ void ServiceRequestMapping::onServiceRegistered(const ProtobufServicePtr& servic
     int methodCount = descriptor->method_count();
     std::string methodName;
 
+    std::vector<ServiceMethod*>& methods = orderedMethods_[descriptor->full_name()];
+    methods.clear();
     for (int i = 0; i < methodCount; ++i) {
         const MethodDescriptor* method = descriptor->method(i);
         methodName = method->full_name();
@@ -706,6 +708,7 @@ void ServiceRequestMapping::onServiceRegistered(const ProtobufServicePtr& servic
 
             if (serviceMethod->init(path, method)) {
                 serviceMethods_.insert(methodName, serviceMethod);
+                methods.push_back(serviceMethod);
             }
             else {
                 delete serviceMethod;
@@ -715,6 +718,16 @@ void ServiceRequestMapping::onServiceRegistered(const ProtobufServicePtr& servic
 }
 
 ServiceMethod* ServiceRequestMapping::route(const HttpRequestPtr& request) {
+    std::map<std::string, std::vector<ServiceMethod*> >::iterator itr = orderedMethods_.begin();
+    for (; itr != orderedMethods_.end(); ++itr) {
+        std::vector<ServiceMethod*>& methods = itr->second;
+        for (std::size_t i = 0; i < methods.size(); ++i) {
+            if (methods[i]->match(request)) {
+                return methods[i];
+            }
+        }
+    }
+#if 0
     ServiceMethods::iterator itr = serviceMethods_.begin();
 
     for (; itr != serviceMethods_.end(); ++itr) {
@@ -724,7 +737,7 @@ ServiceMethod* ServiceRequestMapping::route(const HttpRequestPtr& request) {
             return method;
         }
     }
-
+#endif
     return NULL;
 }
 

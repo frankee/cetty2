@@ -100,6 +100,7 @@ private:
 private:
     typedef boost::ptr_map<std::string, ServiceMethod> ServiceMethods;
     ServiceMethods serviceMethods_;
+    std::map<std::string, std::vector<ServiceMethod*> > orderedMethods_;
 
 private:
     static ServiceRequestMapping* mapping_;

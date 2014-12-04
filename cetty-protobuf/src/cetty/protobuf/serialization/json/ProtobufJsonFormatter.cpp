@@ -21,6 +21,7 @@
 
 #include <cetty/Types.h>
 #include <cetty/buffer/ChannelBuffer.h>
+#include <cetty/util/Exception.h>
 #include <cetty/util/StringUtil.h>
 #include <cetty/logging/LoggerHelper.h>
 
@@ -453,9 +454,13 @@ bool isJsonString(const std::string& str) {
         YAML::Node root = YAML::Load(str);
         return root.IsDefined();
     }
-    catch (...) {
+    catch (const std::exception& e) {
+		LOG_DEBUG << "parse the str error: " << e.what();
         return false;
     }
+	catch (...) {
+		return false;
+	}
 }
 
 template<typename T, int U> inline
