@@ -115,6 +115,9 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, HttpHeaders::Values::X_PROTOBUFFER);
         response->headers().addHeader("X-protobuf-id", StringUtil::numtostr(message->id()));
     }
+    else {
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/json");
+    }
 
     // Decide whether to close the connection or not.
     bool keepAlive = req->keepAlive();
