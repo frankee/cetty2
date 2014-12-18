@@ -25,11 +25,13 @@ message EchoResponse {
 }
 
 message EchoPairRequest {
-	repeated Pair pairs = 1 [(craft_options).mapping_content=true];
+    repeated string pairs = 1 [(craft_options).mapping_content=true];
+	//repeated Pair pairs = 1 [(craft_options).mapping_content=true];
 }
 
 message EchoPairResponse {
-	repeated Pair pairs = 1;
+    repeated string pairs = 1;
+	//repeated Pair pairs = 1;
 }
 
 service EchoService {

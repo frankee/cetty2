@@ -496,6 +496,45 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
         }
     }
 
+    if (fieldType == google::protobuf::FieldDescriptor::TYPE_STRING &&
+        field->is_repeated() &&
+        options.mapping_content()) {
+        int size;
+        const char* bytes = request->content()->readableBytes(&size);
+
+        if (bytes && size > 0) {
+            if (*bytes != '[') {
+                reflection->AddString(message, field, std::string(bytes, size));
+                return true;
+            }
+            else {
+                std::string content(bytes, size);
+                try {
+                    YAML::Node root = YAML::Load(content);
+                    if (root && root.IsSequence()) {
+                        YAML::Node::iterator itr = root.begin();
+                        for (; itr != root.end(); ++itr) {
+                            reflection->AddString(message, field, (*itr).Scalar());
+                        }
+                        return true;
+                    }
+                    else {
+                        LOG_WARN << "field is array, but the content is not " << content;
+                        return false;
+                    }
+                }
+                catch (const std::exception& e) {
+                    LOG_WARN << "parse the content exception: " << e.what() << " content: " << content;
+                    return false;
+                }
+            }
+        }
+        else {
+            LOG_DEBUG << "the field " << field->full_name() << " mapping to content is empty.";
+            return false;
+        }
+    }
+
     std::vector<std::string> values;
 
     if (!getValues(request, method, options, &values)) {
