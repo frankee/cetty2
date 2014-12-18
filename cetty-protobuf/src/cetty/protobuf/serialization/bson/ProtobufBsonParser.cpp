@@ -168,9 +168,15 @@ bool ProtobufBsonParser::parseField(google::protobuf::Message* message, const go
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING: {
-            std::string str = element.toString(false,true);
-            str = str.substr(1,str.length() - 2);
-            reflection->SetString(message, field, str);
+            if (element.type() == mongo::Object) {
+                std::string str = element.jsonString(mongo::Strict);
+                reflection->SetString(message, field, str);
+            }
+            else {
+                std::string str = element.toString(false,true);
+                str = str.substr(1,str.length() - 2);
+                reflection->SetString(message, field, str);
+            }
         }
         break;
 
