@@ -169,7 +169,7 @@ bool ProtobufBsonParser::parseField(google::protobuf::Message* message, const go
 
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING: {
             if (element.type() == mongo::Object) {
-                std::string str = element.jsonString(mongo::Strict);
+                std::string str = element.jsonString(mongo::Strict, false);
                 reflection->SetString(message, field, str);
             }
             else {
