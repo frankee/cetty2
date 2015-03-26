@@ -558,6 +558,7 @@ bool printFieldRepeatedValue(const google::protobuf::Message& message,
                              JsonPrinter<T, U>& printer) {
     const google::protobuf::Reflection* reflection = message.GetReflection();
     int fieldsize = reflection->FieldSize(message, field);
+    std::string tmp;
 
     for (int i = 0; i < fieldsize; ++i) {
         switch (field->cpp_type()) {
@@ -590,7 +591,16 @@ bool printFieldRepeatedValue(const google::protobuf::Message& message,
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-            printer << reflection->GetRepeatedString(message, field, i);
+            tmp = reflection->GetRepeatedString(message, field, i);
+            if (!tmp.empty() && 
+                ((*tmp.begin() == '{' && *tmp.rbegin() == '}') ||
+                (*tmp.begin() == '[' && *tmp.rbegin() == ']')) &&
+                isJsonString(tmp)) {
+                    printer.printRawValue(tmp);
+            }
+            else {
+                printer << tmp;
+            }
             break;
 
         case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
