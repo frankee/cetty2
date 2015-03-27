@@ -489,10 +489,21 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
             }
         }
         else {
-			google::protobuf::Message* msg
-				= field->is_repeated() ? reflection->AddMessage(message, field)
-				: reflection->MutableMessage(message, field);
-            return parseMessage(request, method, msg);
+            if (field->is_repeated()) {
+                std::vector<std::string> values;
+                if (getValues(request, method, options, &values) && values.size() > 0) {
+                    for (int i = 0; i < values.size(); ++i) {
+                        google::protobuf::Message* msg = reflection->AddMessage(message, field);
+                        parseMessage(values[i], "json", msg);
+                    }
+                }
+
+                return true;
+            }
+            else {
+                google::protobuf::Message* msg = reflection->MutableMessage(message, field);
+                return parseMessage(request, method, msg);
+            }
         }
     }
 

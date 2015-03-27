@@ -104,6 +104,10 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }
+    else if (format.compare("jpg") == 0) {
+        response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/jpg");
+        response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
+    }
     else if (format.compare("vt") == 0) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/x-vtile");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
