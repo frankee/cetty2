@@ -98,6 +98,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         }
 
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/json");
+        response->headers().addHeader("Access-Control-Allow-Origin", "*");
     }
     else if (format.compare("png") == 0) {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "image/png");
@@ -117,6 +118,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
     }
     else {
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/json");
+        response->headers().addHeader("Access-Control-Allow-Origin", "*");
     }
 
     // Decide whether to close the connection or not.
@@ -179,6 +181,15 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
                 response->setContent(content);
                 return;
             }
+        }
+        else if (field->type() == FieldDescriptor::TYPE_STRING) {
+            const std::string& fieldContent =
+                reflection->GetStringReference(message, field, NULL);
+            content = Unpooled::buffer(fieldContent.size(),
+                RESERVED_AHEAD_WRITE_SIZE);
+            content->writeBytes(fieldContent);
+            response->setContent(content);
+            return;
         }
         else {
 
