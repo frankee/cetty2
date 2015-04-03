@@ -120,7 +120,7 @@ void ProtobufServiceMessageHandler::doneCallback(const MessagePtr& response,
 
     LOG_INFO << "rpc response: " << req->service() << "." << req->method();
 
-    context_->outboundTransfer()->write(message, ctx.newVoidFuture());
+    context_->outboundTransfer()->write(message, ctx.newFuture());
 }
 
 }

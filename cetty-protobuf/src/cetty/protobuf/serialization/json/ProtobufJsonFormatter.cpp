@@ -450,6 +450,7 @@ private:
 };
 
 bool isJsonString(const std::string& str) {
+    return true;
     try {
         YAML::Node root = YAML::Load(str);
         return root.IsDefined();

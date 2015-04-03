@@ -492,9 +492,35 @@ bool ServiceRequestMapping::parseField(const HttpRequestPtr& request,
             if (field->is_repeated()) {
                 std::vector<std::string> values;
                 if (getValues(request, method, options, &values) && values.size() > 0) {
-                    for (int i = 0; i < values.size(); ++i) {
-                        google::protobuf::Message* msg = reflection->AddMessage(message, field);
-                        parseMessage(values[i], "json", msg);
+                    if (values.size() == 1 && !values[0].empty() && values[0].at(0) == '[') {
+                        try {
+                            YAML::Node root = YAML::Load(values[0]);
+                            if (root && root.IsSequence()) {
+                                YAML::Node::iterator itr = root.begin();
+                                cetty::protobuf::serialization::json::ProtobufJsonParser parser;
+                                for (; itr != root.end(); ++itr) {
+                                    google::protobuf::Message* msg = reflection->AddMessage(message, field);
+                                    if (parser.parseMessage(*itr, msg) != 0) {
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            }
+                            else {
+                                LOG_WARN << "field is array, but the content is not " << values[0];
+                                return false;
+                            }
+                        }
+                        catch (const std::exception& e) {
+                            LOG_WARN << "parse the content exception: " << e.what() << " content: " << values[0];
+                            return false;
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < values.size(); ++i) {
+                            google::protobuf::Message* msg = reflection->AddMessage(message, field);
+                            parseMessage(values[i], "json", msg);
+                        }
                     }
                 }
 
