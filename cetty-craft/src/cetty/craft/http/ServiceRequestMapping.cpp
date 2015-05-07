@@ -706,9 +706,6 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
         const NameValueCollection& nameValues = request->queryParameters();
         return nameValues.get(options.query_param(), values) > 0;
     }
-    else if (options.has_cookie_param()) {
-
-    }
     else if (options.has_header_param()) {
         std::string value = request->headers().headerValue(options.header_param());
 
