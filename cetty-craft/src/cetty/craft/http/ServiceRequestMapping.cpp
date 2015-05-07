@@ -352,6 +352,19 @@ bool ServiceRequestMapping::parseMessage(const HttpRequestPtr& request,
             }
         }
         else if (messageOptions.mapping_content()) {
+            //parse authority first
+            int fieldCnt = descriptor->field_count();
+            for (int i = 0; i < fieldCnt; ++i) {
+                const google::protobuf::FieldDescriptor* field = descriptor->field(i);
+                if (field->name().compare("authority") == 0) {
+                    Message* authority = reflection->MutableMessage(message, field);
+                    if (dynamic_cast<Authority*>(authority)) {
+                        parseMessage(request, method, authority);
+                    }
+                }
+            }
+
+            //parse the content
             int size;
             const char* bytes = request->content()->readableBytes(&size);
 
