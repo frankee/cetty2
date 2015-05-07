@@ -56,7 +56,8 @@ message Authority {
     ];
 
     optional string access_token = 4 [
-        (craft_options).header_param = "Authorization"
+        (craft_options).header_param = "Authorization",
+        (craft_options).cookie_param = "id"
     ];
 
     optional string        ip =  8;

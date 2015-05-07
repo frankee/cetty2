@@ -84,6 +84,15 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
             }
         }
 
+        field = paylod->GetDescriptor()->FindFieldByName("session");
+        if (field && reflection->HasField(*paylod, field)) {
+            const Message& session = reflection->GetMessage(*paylod, field);
+            const FieldDescriptor* f = session.GetDescriptor()->FindFieldByName("id");
+            const Reflection* r = session.GetReflection();
+            const std::string& id = r->GetStringReference(session, f, NULL);
+            response->headers().addHeader(HttpHeaders::Names::SET_COOKIE, id);
+        }
+
         setHttpContent(*paylod, format, response);
     }
 
@@ -109,6 +118,7 @@ HttpResponsePtr ServiceResponseMapping::toHttpResponse(
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
     }
     else if (format.compare("vt") == 0) {
+        // application/vnd.aimap.vtile
         response->headers().addHeader(HttpHeaders::Names::CONTENT_TYPE, "application/x-vtile");
         response->headers().addHeader(HttpHeaders::Names::CACHE_CONTROL, "max-age=2592000");
 
@@ -208,7 +218,7 @@ void ServiceResponseMapping::setHttpContent(const Message& message,
         data = content->writableBytes(&dataSize);
 
         uint8_t* out = message.SerializeWithCachedSizesToArray((uint8_t*)data);
-        content->offsetReaderIndex(out - (uint8_t*)data);
+        content->offsetWriterIndex(out - (uint8_t*)data);
         response->setContent(content);
         return;
     }

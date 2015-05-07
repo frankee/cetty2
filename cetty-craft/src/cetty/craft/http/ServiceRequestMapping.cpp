@@ -725,6 +725,10 @@ bool ServiceRequestMapping::getValues(const HttpRequestPtr& request,
     else if (options.has_form_param()) {
 
     }
+    else if (options.has_cookie_param()) {
+        std::string value = request->headers().headerValue(HttpHeaders::Names::COOKIE);
+        return false;
+    }
     else if (options.has_mapping_content() && options.mapping_content()) {
         if (request->content()->readable()) {
             StringPiece content;
