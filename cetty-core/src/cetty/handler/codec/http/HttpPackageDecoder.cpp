@@ -42,7 +42,7 @@ using namespace cetty::handler::codec;
 
 const int HttpPackageDecoder::MAX_INITIAL_LINE_LENGTH = 4096;
 const int HttpPackageDecoder::MAX_HEADER_SIZE = 8192;
-const int HttpPackageDecoder::MAX_CHUNK_SIZE  = 655350;
+const int HttpPackageDecoder::MAX_CHUNK_SIZE  = 4 * 1024 * 1024;
 
 HttpPackageDecoder::HttpPackageDecoder(DecodingType decodingType)
     : isDecodingRequest_(decodingType == REQUEST),

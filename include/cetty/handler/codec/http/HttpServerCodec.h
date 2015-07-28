@@ -67,7 +67,7 @@ public:
      * <tt>maxChunkSize (8192)</tt>).
      */
     HttpServerCodec()
-        :  requestDecoder_(HttpPackageDecoder::REQUEST, 4096, 8192, 8192) {
+        :  requestDecoder_(HttpPackageDecoder::REQUEST, 4096, 8192, 8 * 1024 * 1024) {
         init();
     }
 
